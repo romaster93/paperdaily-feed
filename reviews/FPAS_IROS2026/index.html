@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>FPAS: Frontier-Based Path Planning with Adaptive Sampling for Large-Scale Unknown Environments · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">IROS 2026 (채택)</div>
+    <h1>FPAS: Frontier-Based Path Planning with Adaptive Sampling for Large-Scale Unknown Environments</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2606.22838">arXiv:2606.22838</a></span>
+      <span>리뷰 2026-06-24</span>
+      <span>39분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>FPAS: 대규모 미지 환경을 위한 프론티어 기반 적응적 샘플링 경로 계획 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: FPAS: Frontier-Based Path Planning with Adaptive Sampling for Large-Scale Unknown Environments</li>
+<li><strong>저자 (Authors)</strong>: Jinwoo Choi, Yeonkyu Lee, Jung-Taak Kim, Jisung Bae, Seung-Woo Seo</li>
+<li><strong>소속 (Affiliation)</strong>: Seoul National University (저자 구성 및 연구 계열로 추정 — 논문 본문에 소속 명시 없음, 확인 불가)</li>
+<li><strong>발표처 (Published)</strong>: IROS 2026 (IEEE/RSJ International Conference on Intelligent Robots and Systems) — 채택(accepted)</li>
+<li><strong>DOI</strong>: 미확인 (IROS 2026 proceedings 발행 전)</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2606.22838">https://arxiv.org/abs/2606.22838</a></li>
+<li><strong>프로젝트 페이지</strong>: 없음 (확인 불가)</li>
+<li><strong>GitHub</strong>: ❌ 미공개 (논문 본문·헤더 어디에도 코드 저장소 링크 없음 — &quot;있다&quot;고 주장하지 않음)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>FPAS는 <strong>사전 지도가 전혀 없는 대규모 미지(unknown) 환경에서, 단일 목표점(goal)으로 효율적으로 도달</strong>하는 문제를 해결한다. 핵심 연구 질문은 다음과 같다:</p>
+<blockquote>
+<p>&quot;환경의 구조(개방된 평원 vs. 좁은 통로)가 사전에 알려져 있지 않을 때, 샘플링 기반 그래프의 <strong>노드 밀도를 어떻게 적응적으로 조절</strong>하여, 탐색 정보 이득과 계산 효율을 동시에 만족시킬 것인가?&quot;</p>
+</blockquote>
+<p>이 문제는 자율 탐사(autonomous exploration)와 목표 지향 내비게이션(goal-directed navigation)의 경계에 있는 도전 과제다. 기존의 샘플링 기반 계획기(RRT 계열)는 환경 구조와 무관하게 <strong>균일한 샘플링 밀도</strong>를 사용한다. 그 결과:</p>
+<pre><code>균일 샘플링의 딜레마:
+  • 밀도를 높이면  → 좁은 통로 통과는 잘 되지만, 넓은 개방 공간에서
+                     불필요하게 많은 노드가 쌓여 그래프 탐색 비용 폭증
+  • 밀도를 낮추면  → 개방 공간은 빠르지만, 좁은 통로·문턱에서 경로를
+                     찾지 못하거나 막다른 길(dead-end)에 빠짐
+</code></pre>
+<p>FPAS는 이를 <strong>프론티어(frontier)에서 유도된 &quot;개방도(openness)&quot; 지표</strong>로 해결한다. 로봇 주변의 국소 프론티어 개수를 세어 현재 위치가 얼마나 개방되어 있는지를 0~1 스칼라로 정량화하고, 이 값에 따라 그래프 노드 간 최소·최대 거리를 <strong>실시간으로 늘리거나 줄인다</strong>. 개방 공간에서는 노드를 성기게(sparse), 좁은 통로에서는 촘촘하게(dense) 배치하여, 정보 이득은 유지하면서 그래프 크기와 처리 시간을 줄인다.</p>
+<p>부가적 기여로, 막다른 길에 도달했을 때 <strong>누적된 전역 프론티어(global frontier)를 부분 목표(subgoal) 후보로 재활용</strong>하는 백트래킹(backtracking) 전략을 도입하여, 대규모 환경에서의 비효율적 재탐색을 방지한다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p>대규모 미지 환경에서의 목표 도달 계획은 다음 세 가지 난제가 동시에 작용한다.</p>
+<h4>A. 환경 구조의 사전 미지성 (Unknown Structure)</h4>
+<p>로봇은 지도를 들고 출발하지 않는다. 매 스텝 센서(LiDAR)가 도달하는 범위만 관측되고, 그 너머는 모두 미관측(unknown)이다. 따라서 &quot;어디가 개방 공간이고 어디가 좁은 통로인가&quot;를 <strong>사전에 알 수 없다</strong>. 계획기는 관측이 누적되는 동안 이 구조를 <strong>온라인으로 추정</strong>해야 한다.</p>
+<pre><code>관측의 시간적 구조:
+   t=0   ┌──────┐         로봇 주변 30m 원형 영역만 관측
+         │  ▣   │         그 바깥은 전부 unknown
+         └──────┘
+   t=k   ┌──────────────┐  이동하며 관측 영역이 확장되지만
+         │ ▣▣▣      ?   │  여전히 목표(g)는 미관측 영역 안에 있을 수 있음
+         │      ▣▣▣  g? │
+         └──────────────┘
+</code></pre>
+<h4>B. 계산 효율과 정보 이득의 트레이드오프</h4>
+<p>샘플링 기반 그래프는 노드가 많을수록 더 좋은 경로를 찾을 가능성이 높지만(정보 이득↑), 그래프 탐색(Dijkstra/RRT 확장) 비용은 노드 수에 대해 초선형(super-linear)으로 증가한다. 대규모 환경에서는 노드가 수천 개로 쌓여 <strong>매 스텝의 처리 시간이 실시간 한계를 초과</strong>할 수 있다. FAR Planner 같은 가시성 그래프(visibility-graph) 방법은 좁은 환경에서는 빠르지만, 개방 환경에서 가시성 노드가 폭증하면 느려진다(본 논문 Garage 실험에서 FAR가 23.46ms로 가장 느림).</p>
+<h4>C. 막다른 길과 비효율적 재탐색 (Dead-ends &amp; Redundant Re-search)</h4>
+<p>대규모 환경에는 막다른 통로, 갈림길, 폐쇄 구역이 많다. 순수 탐욕적(greedy) 목표 지향 계획기는 막다른 길에 빠지면 처음부터 다시 탐색하거나, 이미 지나온 영역을 비효율적으로 재방문한다. 누적된 전역 정보(어디에 미탐색 경계가 남아 있는가)를 활용하지 못하면 <strong>이동 거리가 불필요하게 늘어난다</strong>.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>FPAS는 세 난제를 다음 세 가지 메커니즘으로 정면 대응한다.</p>
+<pre><code>난제 A (구조 미지) ─→ 프론티어 기반 개방도(openness) 온라인 추정
+난제 B (효율-이득)  ─→ 개방도 비례 적응적 샘플링 (노드 밀도 동적 조절)
+난제 C (막다른 길)  ─→ 전역 프론티어를 subgoal로 재활용하는 백트래킹 재계획
+</code></pre>
+<p>핵심 통찰은 <strong>&quot;프론티어의 개수가 곧 공간 구조의 프록시(proxy)&quot;</strong> 라는 것이다. 좁은 통로에서는 자유-미지 경계(프론티어)가 짧고 적게 검출되고, 넓은 개방 공간에서는 경계가 길고 많이 검출된다. 따라서 국소 프론티어 개수를 세는 것만으로 별도의 무거운 인식 모듈 없이 환경 구조를 추정할 수 있다.</p>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 프론티어 검출 및 분류 (Frontier Detection &amp; Classification)</h3>
+<p>프론티어는 <strong>자유 공간(free space)과 미지 영역(unknown)의 경계</strong>로 정의된다. FPAS는 검출된 프론티어를 센서 범위 기준으로 두 종류로 분류한다.</p>
+<pre><code>프론티어 분류:
+  F^local  : 센서 도달 범위(30m) 안의 자유-미지 경계
+             → 즉각적인 국소 계획(reactive planning)의 단서
+  F^global : 센서 범위를 벗어난(누적된) 프론티어
+             → 막다른 길에서 재계획 시 subgoal 후보로 보존
+</code></pre>
+<p>이 이분법이 FPAS 설계의 골격이다. <strong>국소 프론티어는 &quot;지금 어디를 향해 나아갈까&quot;를, 전역 프론티어는 &quot;막혔을 때 어디로 되돌아가 다시 탐색할까&quot;를 결정</strong>한다.</p>
+<h3>3.2 개방도 지표 (Openness Metric)</h3>
+<p>FPAS의 가장 핵심적인 수식적 기여다. 현재 로봇 위치의 공간적 개방성을 국소 프론티어 개수로 정량화한다.</p>
+<pre><code>개방도 정의:
+
+    Open(N_local) = N_local / N_max
+
+  N_local : 현재 검출된 국소 프론티어의 개수
+  N_max   : 검출 가능한 국소 프론티어의 최대치(센서 해상도·범위로 결정되는 상한)
+  치역    : Open ∈ [0, 1]   (1에 가까울수록 개방 공간)
+</code></pre>
+<p><strong>해석</strong>:</p>
+<ul>
+<li>넓은 평원·홀 → 자유-미지 경계가 사방으로 길게 펼쳐짐 → <code>N_local</code> 큼 → <code>Open ≈ 1</code></li>
+<li>좁은 복도·문턱 → 경계가 통로 끝쪽 좁은 영역에만 존재 → <code>N_local</code> 작음 → <code>Open ≈ 0</code></li>
+</ul>
+<p>이 한 개의 스칼라가 이후 적응적 샘플링의 <strong>유일한 제어 신호</strong>가 된다. 별도의 의미론적 분할(semantic segmentation)이나 학습 모델 없이, 순수 기하학적 카운팅만으로 환경 구조를 요약한다는 점에서 계산적으로 매우 가볍다.</p>
+<pre><code>개방도 → 구조 매핑(직관):
+
+  Open=0.1 (좁음)         Open=0.9 (개방)
+   ┌──┐                   ┌────────────────┐
+   │▣ │  프론티어 적음    │   ▣            │  프론티어 많음
+   │  │  (통로 끝만)      │       (사방 경계)│
+   └──┘                   └────────────────┘
+   → 촘촘한 노드 필요      → 성긴 노드로 충분
+</code></pre>
+<h3>3.3 적응적 샘플링 (Adaptive Sampling)</h3>
+<p>개방도를 그래프 노드 밀도 제어에 직접 결합한다. 새 노드 <code>n_ij</code>를 전역 그래프에 추가하려면, 가장 가까운 기존 노드 <code>n_g</code>와의 거리가 다음 구간(window) 안에 들어야 한다.</p>
+<pre><code>노드 추가 조건 (adaptive distance window):
+
+    δ_min · (1 + Open(N_local)) &lt; dist(n_ij, n_g) &lt; δ_max · (1 + Open(N_local))
+
+  δ_min, δ_max : 기본 최소/최대 노드 간 거리 임계값(상수)
+  (1 + Open)   : 개방도 비례 스케일 팩터 ∈ [1, 2]
+</code></pre>
+<p><strong>메커니즘 분석</strong>:</p>
+<pre><code>개방 공간 (Open → 1):
+  스케일 팩터 (1+Open) → 2
+  → 최소 거리 δ_min·2 로 2배 확대
+  → 노드끼리 멀리 떨어져야만 추가됨 → 그래프가 성겨짐(sparse)
+  → 넓은 곳에 불필요한 노드가 쌓이지 않음
+
+좁은 통로 (Open → 0):
+  스케일 팩터 (1+Open) → 1
+  → 최소 거리 δ_min 그대로
+  → 노드가 촘촘히 추가됨(dense)
+  → 좁은 통로·문턱을 통과할 경로 해상도 확보
+</code></pre>
+<p>이 한 줄의 부등식이 FPAS 효율성의 핵심이다. 전통적 RRT가 모든 영역에 동일한 스텝 크기를 쓰는 것과 달리, FPAS는 <strong>공간마다 다른 해상도</strong>를 자동으로 부여한다. 본 논문 Garage 실험에서 이 메커니즘만으로 노드 수가 2633 → 1839로 <strong>30% 감소</strong>, 처리 시간이 7.01 → 5.16ms로 <strong>26% 단축</strong>되었다(§5.3 ablation).</p>
+<h3>3.4 경로 평가 목적 함수 (Path Objective Function)</h3>
+<p>반응형 국소 계획(reactive planning) 단계에서 동적 확장 RRT가 생성한 여러 후보 경로 중 최선을 고르는 점수 함수다.</p>
+<pre><code>경로 점수:
+
+    Obj(P_i) = I(P_i) · S( dist(n_0, g) )  −  GoalDist(P_i)
+
+  I(P_i)       = Σ_j Gain(n_ij)      경로상 노드들이 드러낼 미관측 voxel 총량(정보 이득)
+  S(x)         = sigmoid 스케일 함수  목표까지 거리에 따른 정보 이득 가중치
+  GoalDist(P_i)= PathLength(P_i) + dist(n_i, g)   경로 길이 + 종점에서 목표까지 잔여 거리
+</code></pre>
+<p><strong>설계 의도 — 거리 적응적 탐색-활용 균형</strong>:</p>
+<pre><code>목표가 멀 때 (dist(n_0,g) 큼):
+  S(·) → 큰 값  →  정보 이득 I 항이 강하게 가중
+  → &quot;아직 목표가 머니, 정보를 많이 얻는(미지를 드러내는) 경로를 선호&quot;
+  → 탐색(exploration) 모드
+
+목표가 가까울 때 (dist(n_0,g) 작음):
+  S(·) → 작은 값  →  I 항 약화, −GoalDist 항이 지배
+  → &quot;목표가 가까우니, 정보보다 최단 도달을 우선&quot;
+  → 활용(exploitation) 모드
+</code></pre>
+<p>이 sigmoid 게이팅이 FPAS를 단순 탐사기(explorer)가 아니라 <strong>목표 지향 탐색기(goal-directed explorer)</strong> 로 만든다. 즉, 탐사 자체가 목적이 아니라 &quot;목표 도달에 필요한 만큼만 탐색&quot;하도록 자연스럽게 유도한다.</p>
+<h3>3.5 백트래킹 / 재계획 (Backtracking &amp; Replanning)</h3>
+<p>반응형 계획이 막다른 길(dead-end)에 도달하면, FPAS는 처음부터 다시 탐색하지 않는다. 대신 그동안 <strong>누적해 둔 전역 프론티어 <code>F^global</code>을 subgoal 후보 풀</strong>로 활용한다.</p>
+<pre><code>Subgoal 선택:
+
+    F̂^global = argmin_{F_i ∈ F^global}  dist(F_i^global, g)
+
+  → 누적 전역 프론티어 중 &quot;목표 g에 가장 가까운&quot; 경계를 다음 부분 목표로 선택
+</code></pre>
+<p>선택된 subgoal까지는 전역 그래프 위에서 <strong>Dijkstra</strong>로 경로를 찾는다. 이때 적응적 샘플링으로 만들어진 성긴-촘촘 혼합 그래프를 그대로 재사용하므로, 백트래킹 경로 탐색 자체도 효율적이다.</p>
+<pre><code>백트래킹 직관:
+
+   막다른 길 도달 ✗
+        │
+        ▼
+   누적 F^global 중 목표에 가장 가까운 경계 선택 ───┐
+        │                                          │
+        ▼                                          │
+   전역 그래프 위 Dijkstra로 subgoal까지 이동 ◄─────┘
+        │
+        ▼
+   subgoal에서 반응형 계획 재개 → 미탐색 방향으로 전진
+</code></pre>
+<p>이 전략은 &quot;탐사로 얻은 전역 지식을 버리지 않고 목표 도달에 재투자&quot;한다는 점에서, 순수 그리디 계획기 대비 대규모 환경에서 이동 거리를 크게 절감한다.</p>
+<h3>3.6 세 알고리즘의 동작 재구성 (Algorithm Reconstruction)</h3>
+<p>논문은 세 개의 알고리즘(Stage Selector / Reactive Planning / Replanning)으로 파이프라인을 형식화한다. 아래는 <strong>논문 서술과 수식에 근거한 재구성 의사코드</strong>(논문에 의사코드 전문이 축약되어 있어, 동작 서술로부터 재구성한 것 — 변수명은 본 리뷰 표기를 따름)다.</p>
+<pre><code>Algorithm 1 — Stage Selector (단계 판정)
+─────────────────────────────────────────────
+입력 : 현재 위치 n_0, 목표 g, 국소 프론티어 F^local, 마진 β1, β2
+출력 : stage ∈ {REACTIVE, REPLAN}
+
+  1: if |F^local| &gt; 0 and ∃ 전진가능 방향 within β1 then
+  2:     return REACTIVE          # 국소 프론티어로 직접 전진 가능
+  3: else if dist(n_0, last_progress) &gt; β2 then
+  4:     return REPLAN            # 일정 거리 이상 진전 없음 → 막다른 길로 간주
+  5: else
+  6:     return REACTIVE          # 마진 내 진동 — 반응형 유지
+─────────────────────────────────────────────
+β1 : &quot;전진 가능&quot;으로 볼 최소 프론티어 근접 마진
+β2 : &quot;막다른 길&quot;로 전환할 무진전 누적 거리 마진
+</code></pre>
+<pre><code>Algorithm 2 — Reactive Planning (반응형 국소 계획)
+─────────────────────────────────────────────
+입력 : n_0, g, 국소 관측, 개방도 Open
+출력 : 실행 경로 P*
+
+  1: T ← {n_0}                       # 동적 확장 RRT 초기화(국소 트리)
+  2: while not 확장한도 도달 do
+  3:     n_rand ← 국소 자유공간 샘플
+  4:     n_near ← T 에서 n_rand 최근접 노드
+  5:     n_new  ← Steer(n_near, n_rand, step)
+  6:     if CollisionFree(n_near, n_new) then  T ← T ∪ {n_new}
+  7: 후보경로 집합 𝒫 ← T 의 리프까지 경로들
+  8: for each P_i ∈ 𝒫 do
+  9:     I(P_i)      ← Σ_j Gain(n_ij)                  # 미관측 voxel 이득
+ 10:     GoalDist    ← PathLength(P_i) + dist(end(P_i), g)
+ 11:     Obj(P_i)    ← I(P_i)·S(dist(n_0,g)) − GoalDist
+ 12: P* ← argmax_{P_i} Obj(P_i)
+ 13: return P*
+─────────────────────────────────────────────
+</code></pre>
+<pre><code>Algorithm 3 — Replanning (백트래킹 재계획)
+─────────────────────────────────────────────
+입력 : n_0, g, 전역 프론티어 F^global, 전역 그래프 G, 개방도 Open
+출력 : subgoal 경로 P_sub
+
+  1: F̂ ← argmin_{F_i ∈ F^global} dist(F_i, g)   # 목표 최근접 전역 프론티어
+  2: for each 신규 후보 노드 n_ij do            # 적응적 샘플링으로 G 갱신
+  3:     n_g ← G 에서 n_ij 최근접 노드
+  4:     if δ_min·(1+Open) &lt; dist(n_ij,n_g) &lt; δ_max·(1+Open) then
+  5:         G ← G ∪ {n_ij}                     # 조건 만족 시에만 추가
+  6: P_sub ← Dijkstra(G, n_0, F̂)               # subgoal까지 최단 경로
+  7: return P_sub
+─────────────────────────────────────────────
+</code></pre>
+<p>이 재구성에서 드러나는 설계상 핵심은 <strong>개방도 <code>Open</code>이 Algorithm 2의 경로 선택(간접)과 Algorithm 3의 노드 추가(직접) 양쪽에 영향<strong>을 준다는 점이다. 반응형 단계에서는 RRT 확장 자체에는 개방도가 직접 쓰이지 않으나(국소 트리는 step 고정), 재계획 단계의 전역 그래프 갱신에서 개방도가 노드 밀도를 직접 조절한다. 즉 </strong>무거운 전역 그래프에만 적응적 압축을 적용</strong>하여, 잦은 반응형 호출은 가볍게 유지하면서 드문 재계획의 그래프 폭증을 막는 비대칭 설계다.</p>
+<h3>3.7 sigmoid 게이트 S(·)의 수식적 거동</h3>
+<p>목적 함수의 핵심인 sigmoid 스케일 <code>S(dist(n_0, g))</code>는 다음과 같은 형태로 추정된다(상수 k1, k2 미기재):</p>
+<pre><code>    S(x) = 1 / (1 + exp(−k1·(x − k2)))
+
+  x  = dist(n_0, g)  현재 위치에서 목표까지 직선 거리
+  k1 = 기울기(전환 급격함)
+  k2 = 전환 중심점(목표까지 이 거리 부근에서 탐색↔활용 전환)
+</code></pre>
+<pre><code>거동:
+  x ≫ k2  →  S → 1   →  Obj ≈ I − GoalDist   (정보 이득 전면 반영 = 탐색)
+  x = k2  →  S = 0.5  →  정보 이득 절반 가중   (전환점)
+  x ≪ k2  →  S → 0   →  Obj ≈ −GoalDist       (최단 도달만 = 활용)
+</code></pre>
+<p>이 부드러운(미분 가능) 전환은 이산적 모드 스위칭(if-else로 탐색/활용 토글)에서 발생하는 <strong>경로 진동(chattering)을 방지</strong>한다. 목표 거리가 전환점 부근을 오갈 때 경로가 급변하지 않고 연속적으로 변하므로, 실제 주행 궤적이 매끄럽다. k2를 작게 잡으면 &quot;목표 근처까지 끝까지 탐색&quot;, 크게 잡으면 &quot;일찍부터 목표로 직진&quot;하는 보수성을 조절할 수 있다.</p>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<p>FPAS는 4개의 핵심 모듈로 구성된 단계 전환(stage-switching) 파이프라인이다.</p>
+<pre><code>                    ┌──────────────────────────────────┐
+   LiDAR 관측 ─────►│  ① Frontier Detector             │
+   (30m, 2 m/s)     │     - 자유/미지 경계 추출          │
+                    │     - F^local / F^global 분류      │
+                    │     - N_local 카운트 → Open 계산   │
+                    └───────────────┬──────────────────┘
+                                    │ Open(N_local)
+                                    ▼
+                    ┌──────────────────────────────────┐
+                    │  ② Stage Selector (Algorithm 1)   │
+                    │     β1, β2 마진으로 단계 판정       │
+                    │   진행 가능? ──Yes──┐  막다른길?─No─┘
+                    └─────────┬───────────┴───────┬──────┘
+                       Yes (반응형)          No (재계획)
+                              ▼                     ▼
+          ┌────────────────────────┐   ┌──────────────────────────┐
+          │ ③ Reactive Planning    │   │ ④ Replanning             │
+          │   (Algorithm 2)        │   │   (Algorithm 3)          │
+          │  - 동적 확장 RRT        │   │  - F^global → subgoal 선택│
+          │  - 후보 경로 생성        │   │  - 적응적 샘플링으로 전역  │
+          │  - Obj(P_i) 최대 경로 선택│  │    그래프 갱신            │
+          │                        │   │  - Dijkstra로 subgoal 경로│
+          └───────────┬────────────┘   └────────────┬─────────────┘
+                      │                              │
+                      └──────────────┬───────────────┘
+                                     ▼
+                          제어 명령 (속도/헤딩) → 로봇 이동
+                                     │
+                                     └──► 새 관측 → ①로 순환
+</code></pre>
+<p><strong>데이터 흐름 요약</strong>:</p>
+<ol>
+<li><strong>Frontier Detector</strong>가 매 스텝 관측에서 프론티어를 뽑고 개방도 <code>Open</code>을 계산한다.</li>
+<li><strong>Stage Selector</strong>(Algorithm 1)가 마진 상수 <code>β1, β2</code>를 이용해 &quot;전진 가능&quot;한지 &quot;막다른 길&quot;인지 판정하여 두 단계 중 하나로 분기한다.</li>
+<li><strong>Reactive Planning</strong>(Algorithm 2)은 동적 확장 RRT로 국소 후보 경로들을 만들고 <code>Obj(P_i)</code>가 최대인 경로를 실행한다.</li>
+<li><strong>Replanning</strong>(Algorithm 3)은 막다른 길에서 전역 프론티어 중 subgoal을 고르고, 적응적 샘플링으로 갱신한 전역 그래프 위 Dijkstra로 경로를 찾는다.</li>
+</ol>
+<p>이 구조의 우아함은 <strong>무거운 전역 재탐색을 &quot;필요할 때만&quot;(막다른 길에서만) 호출</strong>한다는 점이다. 대부분의 스텝은 가벼운 반응형 RRT로 처리되어 평균 처리 시간이 낮게 유지된다.</p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 / 시뮬레이터 (Datasets)</h3>
+<p>평가는 널리 쓰이는 <strong>Autonomous Exploration Development Environment</strong>의 세 가지 표준 환경에서 수행되었다.</p>
+<pre><code>환경 특성:
+  • Forest  : 산재한 장애물의 개방형 야외 — 개방도 높음(sparse 노드 이득 큼)
+  • Tunnel  : 길고 좁은 통로 연속 — 개방도 낮음(dense 노드 필요)
+  • Garage  : 기둥·벽이 많은 구조화 실내 — 개방-협소 혼재(적응성 시험대)
+</code></pre>
+<p>세 환경은 의도적으로 <strong>개방도 스펙트럼의 양 극단과 혼합형</strong>을 포괄하여, 적응적 샘플링의 효과를 구조별로 분리 측정할 수 있게 설계되었다.</p>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<pre><code>  • 평균 처리 시간 (Avg Processing Time) : 시뮬레이션 스텝당 계획 연산 시간 (ms)
+                                          → 실시간성 / 계산 효율 척도
+  • 총 이동 거리 (Total Travel Distance) : 출발→목표 도달까지 누적 경로 길이 (m)
+                                          → 경로 효율 / 최적성 척도
+</code></pre>
+<p><strong>실험 설정</strong>:</p>
+<pre><code>  LiDAR 최대 검출 범위 : 30 m
+  차량 속도           : 2 m/s
+  반복                : 환경별 독립 10회 실행 평균
+  하드웨어            : Intel Core i9 5.2GHz CPU
+</code></pre>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<h4>Forest (개방형)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Avg Processing Time (ms)</th>
+<th>Total Travel Distance (m)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DSVP-RRT</td>
+<td>5.53</td>
+<td>517.10</td>
+</tr>
+<tr>
+<td>FAR Planner</td>
+<td>73.23</td>
+<td><strong>382.12</strong></td>
+</tr>
+<tr>
+<td><strong>FPAS</strong></td>
+<td><strong>3.14</strong></td>
+<td>436.69</td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p>Forest에서 FPAS는 처리 시간 <strong>3.14ms로 압도적 1위</strong>(FAR 대비 약 23배 빠름). 이동 거리는 FAR가 가장 짧지만 FAR는 73.23ms로 실시간성이 매우 떨어진다. FPAS는 &quot;FAR 대비 약간 긴 경로(+14%)를 23배 빠른 연산으로&quot; 달성하는 효율 균형을 보인다.</p>
+</blockquote>
+<h4>Tunnel (협소형)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Avg Processing Time (ms)</th>
+<th>Total Travel Distance (m)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DSVP-RRT</td>
+<td>13.57</td>
+<td>1642.55</td>
+</tr>
+<tr>
+<td>FAR Planner</td>
+<td>10.26</td>
+<td><strong>1436.23</strong></td>
+</tr>
+<tr>
+<td><strong>FPAS</strong></td>
+<td>12.22</td>
+<td>1495.41</td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p>Tunnel은 FPAS의 상대적 약점 영역이다. 좁은 통로에서는 개방도가 낮아 적응적 샘플링의 노드 절감 효과가 작고(원래 dense가 필요), DSVP-RRT보다는 빠르지만 FAR보다는 처리 시간·거리 모두 근소하게 뒤진다. 그럼에도 세 지표가 모두 경쟁권에 있어 <strong>구조 무관 강건성</strong>은 확인된다.</p>
+</blockquote>
+<h4>Garage (혼합형) — 적응성의 핵심 시험대</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Avg Processing Time (ms)</th>
+<th>Total Travel Distance (m)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DSVP-RRT</td>
+<td>8.26</td>
+<td>645.65</td>
+</tr>
+<tr>
+<td>FAR Planner</td>
+<td>23.46</td>
+<td>988.95</td>
+</tr>
+<tr>
+<td><strong>FPAS</strong></td>
+<td><strong>5.16</strong></td>
+<td><strong>518.95</strong></td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p><strong>Garage에서 FPAS가 처리 시간·이동 거리 양쪽 모두 1위</strong>다. 개방-협소가 혼재된 환경에서 적응적 샘플링이 가장 빛난다: 개방 구역은 성기게, 기둥 사이 좁은 구역은 촘촘하게 처리하여 FAR 대비 처리 시간 <strong>4.5배 단축</strong>, 이동 거리 <strong>47% 단축</strong>을 달성했다. 이 결과가 논문의 핵심 주장(혼합 구조에서의 우월성)을 가장 강하게 뒷받침한다.</p>
+</blockquote>
+<h4>Ablation Study (Garage) — 적응적 샘플링의 독립 효과</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Variant</th>
+<th># Nodes</th>
+<th>Avg Time (ms)</th>
+<th>Travel Distance (m)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>W/o adaptive sampling</td>
+<td>2633</td>
+<td>7.01</td>
+<td><strong>496.39</strong></td>
+</tr>
+<tr>
+<td>Adaptive sampling</td>
+<td><strong>1839</strong></td>
+<td><strong>5.16</strong></td>
+<td>518.95</td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p>적응적 샘플링을 켜면 노드 수 <strong>−30%</strong>(2633→1839), 처리 시간 <strong>−26%</strong>(7.01→5.16ms). 단, 이동 거리는 <strong>+4.5%</strong>(496.39→518.95m) 소폭 증가한다. 이는 개방 구역 노드 희소화가 절대 최단 경로에서 미세한 편차를 유발하기 때문(저자도 §8에서 인정). <strong>계산 효율을 위해 경로 최적성을 약간 희생하는 명시적 트레이드오프</strong>가 정량적으로 드러난다.</p>
+</blockquote>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p><strong>없음.</strong> FPAS는 3개 가상 환경(Forest/Tunnel/Garage)에서의 시뮬레이션 평가만 수행했다. 실제 로봇(지상 차량/UAV) 하드웨어 검증은 포함되지 않았다. 이는 본 논문의 명확한 한계이며, 선별 기준상 &quot;리얼월드 실험&quot; 항목은 충족하지 못한다(코드 미공개와 함께 우선순위를 낮추는 요인).</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>프론티어 기반 개방도 지표(Openness Metric)</strong>: 국소 프론티어 개수만으로 환경 구조(개방 vs. 협소)를 0~1 스칼라로 정량화하는, 계산적으로 매우 가벼운 구조 추정 방법. 학습·의미론 모듈 없이 순수 기하 카운팅으로 동작한다.</p>
+</li>
+<li><p><strong>개방도 비례 적응적 샘플링(Adaptive Sampling)</strong>: <code>(1+Open)</code> 스케일로 노드 간 거리 창(window)을 동적 조절하여, 공간마다 다른 그래프 해상도를 자동 부여. Garage에서 노드 30%·처리시간 26% 절감을 실증.</p>
+</li>
+<li><p><strong>전역 프론티어 재활용 백트래킹</strong>: 막다른 길에서 누적 전역 프론티어를 subgoal로 재사용(<code>argmin dist(F,g)</code>)하여, 대규모 환경에서 비효율적 전체 재탐색을 회피.</p>
+</li>
+<li><p><strong>거리 적응적 탐색-활용 목적 함수</strong>: sigmoid 게이팅으로 목표가 멀면 정보 이득을, 가까우면 최단 도달을 우선하는 자연스러운 모드 전환. 단순 탐사기가 아닌 목표 지향 탐색기로 동작.</p>
+</li>
+<li><p><strong>혼합 구조 환경에서의 SOTA 효율</strong>: Garage(개방-협소 혼합)에서 FAR Planner 대비 처리시간 4.5배·이동거리 47% 개선, IROS 2026 채택으로 검증.</p>
+</li>
+</ol>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<pre><code>핵심 상수 / 하이퍼파라미터:
+  β1, β2        : Stage Selector(Algorithm 1)의 단계 전환 마진 거리
+                  (반응형 vs 재계획 판정 임계) — 구체 수치 논문 미기재
+  k1, k2        : 경로 점수 sigmoid S(·)의 스케일 상수 (Eq. 3) — 수치 미기재
+  δ_min, δ_max  : 적응적 샘플링 노드 간 최소/최대 거리 임계 — 수치 미기재
+  N_max         : 검출 가능 국소 프론티어 상한 (센서 해상도·범위 종속)
+
+  LiDAR 범위    : 30 m
+  주행 속도     : 2 m/s
+  반복 평가     : 환경별 10회 독립 실행
+  연산 플랫폼   : Intel Core i9 @ 5.2GHz (CPU 단독, GPU 불요)
+</code></pre>
+<p><strong>구현상 주목점</strong>:</p>
+<ul>
+<li>FPAS는 <strong>CPU만으로</strong> 밀리초 단위 계획을 달성한다. 학습 기반 계획기와 달리 GPU·신경망 추론이 전혀 없어 경량 임베디드 플랫폼 이식성이 좋다.</li>
+<li>그래프 탐색은 <strong>Dijkstra</strong>(재계획 단계)와 <strong>동적 확장 RRT</strong>(반응형 단계)의 하이브리드다.</li>
+<li>다만 <code>β1, β2, k1, k2, δ_min, δ_max</code> 등 핵심 상수의 구체 값이 논문에 명시되지 않아, <strong>코드 미공개와 결합되면 완전한 재현이 어렵다</strong>(재현성 한계).</li>
+</ul>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 한계점 (저자 명시)</h3>
+<pre><code>저자가 §결론에서 인정한 한계:
+  1. 경로 최적성    : 개방 구역의 의도적 그래프 희소화가 절대 최단 경로에서
+                     미세한 편차를 유발 (ablation에서 +4.5% 거리 증가로 정량 확인)
+  2. 환경 확장성    : 매우 대규모/복잡 환경에서의 스케일 한계
+  3. 차원 제약      : 2D/2.5D 표현에 의존 → 완전한 3D 환경(UAV 등)이나
+                     비홀로노믹(non-holonomic) 제약 차량에는 부적합
+</code></pre>
+<h3>8.2 향후 방향</h3>
+<ul>
+<li><strong>3D 확장</strong>: 현재 2D/2.5D 한계를 극복하여 UAV·드론에 적용하려면 개방도 지표를 3D 복셀 프론티어로 일반화해야 한다. 이 경우 <code>N_max</code>의 정의와 <code>(1+Open)</code> 스케일링을 3D 입체각 기반으로 재설계할 필요가 있다.</li>
+<li><strong>비홀로노믹 제약 통합</strong>: 차량의 운동학적 제약(최소 회전 반경 등)을 RRT 확장에 결합한 kinodynamic 버전.</li>
+<li><strong>실로봇 검증</strong>: 시뮬레이션-only의 결정적 약점. Unitree 지상 로봇 등에서 LiDAR 30m 설정을 재현한 리얼월드 실험이 다음 단계로 자연스럽다.</li>
+<li><strong>상수 자동 튜닝</strong>: <code>δ_min, δ_max, β, k</code>를 환경별로 수동 조정하는 대신, 개방도 분포로부터 자동 적응시키는 메타 계획.</li>
+</ul>
+<h3>8.3 확장성 분석</h3>
+<p>적응적 샘플링은 본질적으로 <strong>그래프 크기를 환경 개방도에 비례해 압축</strong>하는 메커니즘이므로, 환경이 커질수록(특히 개방 구역 비중이 큰 환경) 균일 샘플링 대비 상대적 이득이 커진다. 반대로 Tunnel처럼 거의 모든 영역이 협소하면 압축 여지가 작아 이득이 미미하다(실험에서 Tunnel 성능이 상대적으로 평범한 이유). 즉 FPAS의 효율 이득은 <strong>환경 개방도 분산(variance)에 비례</strong>한다고 해석할 수 있다 — 이는 Garage(혼합) &gt; Forest(개방) &gt; Tunnel(협소) 순의 상대 우위와 일치한다.</p>
+<h3>8.4 계산 복잡도 분석 (Complexity Analysis)</h3>
+<p>FPAS의 처리 시간 이득을 복잡도 관점에서 분해하면 다음과 같다.</p>
+<pre><code>재계획(Replanning) 단계 비용:
+  • 적응적 샘플링 노드 추가  : O(|N| · log|N|)   (최근접 노드 탐색에 k-d tree 가정)
+  • Dijkstra subgoal 경로    : O(|E| + |N| log|N|)   (|E|=그래프 간선 수)
+
+  여기서 |N| 이 적응적 샘플링으로 환경 개방도에 비례해 줄어듦:
+      |N_adaptive| ≈ |N_uniform| · (1 − ρ·E[Open])
+      ρ      : 개방 구역 비중
+      E[Open]: 평균 개방도
+</code></pre>
+<p>Garage 실험의 노드 수 2633 → 1839 감소는 약 <code>1 − 0.30 = 0.70</code>의 압축률에 해당한다. Dijkstra 비용이 <code>|N| log|N|</code>에 지배되므로, 노드 30% 감소는 처리 시간에서 약 <code>0.70 · log(0.70)</code> 보정을 거쳐 관측된 26% 단축으로 나타난다 — 이론적 기대치와 잘 부합한다.</p>
+<pre><code>반응형(Reactive) 단계 비용:
+  • 국소 RRT 확장   : O(m log m)   (m = 국소 트리 노드, 확장 한도로 상한)
+  • 후보 경로 평가  : O(|𝒫| · L)   (|𝒫|=후보 수, L=평균 경로 길이)
+</code></pre>
+<p>반응형 단계는 국소 트리에만 작동하므로 환경 전체 크기와 무관하게 <code>O(m log m)</code>으로 유지된다. 이것이 <strong>대규모 환경에서도 평균 처리 시간이 한 자릿수 ms로 유지되는 구조적 이유</strong>다: 비싼 전역 연산(<code>|N|</code>에 종속)은 막다른 길에서만 드물게 호출되고, 빈번한 스텝은 환경 크기에 무관한 국소 연산으로 처리된다. FAR Planner의 가시성 그래프가 개방 환경에서 노드 폭증으로 73ms까지 치솟는 것과 대조적으로, FPAS는 적응적 압축 + 비대칭 호출 구조로 이를 회피한다.</p>
+<h3>8.5 실패 모드(Failure Mode) 추정</h3>
+<p>논문에 명시되지 않았으나, 설계로부터 추론되는 잠재적 실패 양상:</p>
+<pre><code>  1. 개방도 오측정    : 센서 노이즈로 프론티어가 과/소 검출되면 Open이 흔들려
+                       부적절한 노드 밀도 → 좁은 통로를 성기게 샘플 → 통과 실패 가능
+  2. subgoal 고립     : argmin dist(F,g)로 고른 전역 프론티어가 실제로는
+                       도달 불가(벽 뒤)일 때, Dijkstra가 우회로를 못 찾으면 정체
+  3. 동적 장애물      : 정적 가정 위반 시 누적 그래프의 자유공간 가정이 깨짐
+                       (SANDO가 다루는 영역 — FPAS의 명시적 미해결 과제)
+</code></pre>
+<p>이들은 모두 리얼월드 실험에서 비로소 드러날 문제들로, 시뮬레이션-only 검증의 한계와 직결된다.</p>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<p>같은 Planner 트랙에서 <strong>샘플링 기반 + 프론티어/미지 환경</strong> 주제로 가장 인접한 선행 리뷰 세 편과 비교한다:</p>
+<ul>
+<li><strong>AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection</strong> (ICUAS 2026, ESDF-aware RRT* + 프론티어 기반 탐색)</li>
+<li><strong>SANDO: Safe Autonomous Trajectory Planning for Dynamic Unknown Environments</strong> (MIT, arXiv 2026, 동적 미지 환경 안전 궤적)</li>
+<li><strong>Enhanced Tube-RRT*: Trajectory Planning for 3-UAV Cascaded Rigid-Payload Transport</strong> (arXiv 2026, Tube-RRT* 궤적)</li>
+</ul>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>AgiPIX (ICUAS2026)</th>
+<th>SANDO (MIT)</th>
+<th>Tube-RRT*</th>
+<th><strong>FPAS (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 계획기</td>
+<td>ESDF-aware RRT*</td>
+<td>A*+STSFC 기반 MIQP</td>
+<td>Tube-RRT* + QP</td>
+<td>동적확장 RRT + Dijkstra</td>
+</tr>
+<tr>
+<td>환경 가정</td>
+<td>실내 미지(UAV)</td>
+<td>3D 동적 미지</td>
+<td>알려진 3D 공간</td>
+<td>대규모 정적 미지</td>
+</tr>
+<tr>
+<td>프론티어 활용</td>
+<td>탐색 유도(보조)</td>
+<td>없음</td>
+<td>없음</td>
+<td><strong>구조 추정의 핵심</strong>(개방도)</td>
+</tr>
+<tr>
+<td>적응적 밀도</td>
+<td>✗ (균일 RRT*)</td>
+<td>✗</td>
+<td>✗ (튜브 폭 고정)</td>
+<td><strong>✓ 개방도 비례 동적</strong></td>
+</tr>
+<tr>
+<td>안전 보장</td>
+<td>ESDF 마진</td>
+<td><strong>공식 충돌 증명</strong></td>
+<td>튜브 코리도</td>
+<td>충돌회피(공식 증명 없음)</td>
+</tr>
+<tr>
+<td>리얼월드</td>
+<td><strong>✓ ENRICH 핵발전소</strong></td>
+<td>시뮬+일부 실험</td>
+<td>시뮬</td>
+<td><strong>✗ 시뮬만</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>✅ 공개</td>
+<td>✅ 공개</td>
+<td>✅ 공개</td>
+<td><strong>❌ 미공개</strong></td>
+</tr>
+<tr>
+<td>검증 학회</td>
+<td>ICUAS2026(심사)</td>
+<td>arXiv</td>
+<td>arXiv</td>
+<td><strong>IROS 2026(채택)</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<pre><code>FPAS의 강점:
+  + 적응적 샘플링이라는 명확하고 독창적인 한 가지 아이디어 (개방도→노드밀도)
+  + 혼합 구조(Garage)에서 처리시간·거리 동시 SOTA
+  + CPU-only 경량 (GPU·학습 불요) → 임베디드 이식성
+  + IROS 2026 채택으로 동료 검증 통과
+
+FPAS의 약점:
+  − 리얼월드 실험 전무 (AgiPIX의 ENRICH 현장 검증과 대비됨)
+  − 코드 미공개 + 핵심 상수 미기재 → 재현성 취약
+  − 2D/2.5D 한정 (SANDO·Tube-RRT*의 3D 능력에 못 미침)
+  − 안전성에 대한 공식 보장 없음 (SANDO의 충돌 증명과 대비)
+  − Tunnel(협소) 환경에서 FAR 대비 열세 — 적응성 이득이 구조에 의존
+</code></pre>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>적용 적합 시나리오:
+  ✓ 대규모 개방-협소 혼재 실내(창고/주차장/공장) 지상 로봇의 목표 도달
+  ✓ CPU 자원만 있는 경량 플랫폼 (학습 모델 부담 없음)
+  ✓ 정적 환경에서의 효율적 1회성 목표 내비게이션
+
+적용 부적합 / 주의:
+  ✗ 동적 장애물 환경 (SANDO 권장 — FPAS는 정적 가정)
+  ✗ 3D/공중 (UAV) — 2D/2.5D 한계
+  ✗ 안전 인증이 필요한 임무 (공식 충돌 보장 부재)
+  ✗ 즉시 재현·배포 필요 시 (코드·상수 미공개로 재구현 비용 큼)
+</code></pre>
+<p>AgiPIX가 &quot;플랫폼·재현성·현장 검증&quot;으로 실용 배포에 강하다면, FPAS는 &quot;알고리즘적 효율&quot;에 강점이 있으나 <strong>코드·리얼월드 부재로 즉시 실용화 장벽이 높다</strong>. 실제 배포를 고려하는 연구자에게는 FPAS의 적응적 샘플링 아이디어를 AgiPIX 같은 공개 스택에 이식하는 조합이 현실적 경로다.</p>
+<h3>9.4 연구 방향성 평가</h3>
+<p>FPAS의 기술적 참신성은 <strong>&quot;프론티어 개수 = 공간 구조 프록시&quot;</strong> 라는 통찰을 적응적 샘플링 밀도 제어에 직결한 데 있다. 기존 적응적 RRT 변형들이 주로 비용 함수·휴리스틱 편향에 집중한 반면, FPAS는 <strong>샘플링 해상도 자체를 환경 구조에 동기화</strong>한다는 점에서 차별적이다. 다만 프론티어 기반 탐색(frontier-based exploration)은 Yamauchi(1997) 이래 성숙한 분야이고 AgiPIX도 프론티어를 쓰므로, &quot;프론티어 사용&quot; 자체가 새로운 것은 아니다. <strong>새로움은 프론티어를 &#39;탐색 방향&#39;이 아니라 &#39;샘플링 밀도 신호&#39;로 재해석한 각도</strong>에 있다. 이 재해석은 향후 3D·동적 환경으로 일반화될 여지가 크며, 학습 기반 밀도 예측과 결합하면 흥미로운 후속 연구가 가능하다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<p>본 리뷰에서 직접 인용·비교한 핵심 문헌 및 본 코퍼스 내 비교 대상:</p>
+<ol>
+<li>Choi, J., Lee, Y., Kim, J.-T., Bae, J., Seo, S.-W. <em>FPAS: Frontier-Based Path Planning with Adaptive Sampling for Large-Scale Unknown Environments.</em> IROS 2026. arXiv:2606.22838.</li>
+<li><strong>AgiPIX</strong> — <em>Bridging Simulation and Reality in Indoor Aerial Inspection.</em> ICUAS 2026 (심사). arXiv:2604.08009. (본 코퍼스: <code>Planner/review/AgiPIX_ICUAS2026/</code>)</li>
+<li><strong>SANDO</strong> — <em>Safe Autonomous Trajectory Planning for Dynamic Unknown Environments.</em> MIT, arXiv:2604.07599. (본 코퍼스: <code>Planner/review/SANDO_arxiv2026/</code>)</li>
+<li><strong>Enhanced Tube-RRT</strong>* — <em>Trajectory Planning for 3-UAV Cascaded Rigid-Payload Transport.</em> arXiv:2604.15074. (본 코퍼스: <code>Planner/review/TubeRRT_TAES2026/</code>)</li>
+<li>Yamauchi, B. <em>A Frontier-Based Approach for Autonomous Exploration.</em> CIRA 1997. (프론티어 탐색의 원전)</li>
+<li>DSVP / Autonomous Exploration Development Environment — 본 논문 베이스라인 및 시뮬레이션 환경 출처.</li>
+<li>Yang, F. et al. <em>FAR Planner: Fast, Attemptable Route Planner using Dynamic Visibility Update.</em> IROS 2022. (본 논문 주요 베이스라인)</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p>FPAS는 <strong>&quot;프론티어 개수로 공간 개방도를 측정하고, 그에 비례해 샘플링 그래프의 해상도를 동적으로 조절한다&quot;</strong> 는 단일하고 명료한 통찰을 중심으로 구성된 경로 계획기다. 이 한 가지 아이디어가 개방도 지표(§3.2), 적응적 샘플링(§3.3), 거리 적응적 목적 함수(§3.4), 전역 프론티어 재활용 백트래킹(§3.5)으로 일관되게 확장되며, 그 결과 개방-협소가 혼재된 Garage 환경에서 FAR Planner 대비 <strong>처리 시간 4.5배·이동 거리 47% 개선</strong>이라는 강한 정량적 성과를 보였다(IROS 2026 채택).</p>
+<p><strong>혁신성</strong>: 프론티어를 &quot;탐색 방향&quot;이 아니라 &quot;샘플링 밀도 제어 신호&quot;로 재해석한 관점이 핵심 신규성이다. 별도 학습·의미론 모듈 없이 순수 기하 카운팅만으로 환경 구조 적응을 달성한 점에서 계산적으로 매우 경제적이다.</p>
+<p><strong>실용적 의의</strong>: CPU-only 경량 동작과 혼합 구조에서의 효율 우위는 창고·주차장·공장 같은 대규모 실내 지상 로봇 내비게이션에 직접적 가치가 있다. 다만 <strong>리얼월드 실험 부재, 코드·핵심 상수 미공개, 2D/2.5D 차원 한계, 정적 환경 가정</strong>은 즉시 실용화의 분명한 장벽이다. AgiPIX(현장 검증·공개 스택)나 SANDO(동적·안전 보장)와 비교하면, FPAS는 &quot;알고리즘 아이디어&quot;는 신선하나 &quot;검증·재현·배포&quot;의 성숙도는 낮다.</p>
+<p><strong>향후 연구</strong>: 개방도 지표의 3D 입체각 일반화(UAV 적용), kinodynamic RRT 결합(비홀로노믹 차량), 그리고 무엇보다 코드 공개와 실로봇 검증이 FPAS를 실험적 아이디어에서 실용 도구로 전환시킬 핵심 다음 단계다. 적응적 샘플링이라는 핵심 메커니즘은 향후 다양한 샘플링 기반 계획기에 모듈로 이식될 잠재력이 충분하다.</p>
+<hr>
+<p><em>PhD 수준 상세 리뷰 — 자동 생성: 2026-06-24</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,1074 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>LeCropFollow: Latent Space Planning for Navigation in Unstructured Crop Fields · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 2026 — 학회 미확정</div>
+    <h1>LeCropFollow: Latent Space Planning for Navigation in Unstructured Crop Fields</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2606.31941">arXiv:2606.31941</a></span>
+      <span>리뷰 2026-07-02</span>
+      <span>52분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>LeCropFollow: Latent Space Planning for Navigation in Unstructured Crop Fields: 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: LeCropFollow: Latent Space Planning for Navigation in Unstructured Crop Fields</li>
+<li><strong>저자 (Authors)</strong>: Felipe Tommaselli, Francisco Affonso, Arthur Pompeu, Gianluca Capezzuto, Arun Narenthiran Sivakumar, Girish Chowdhary, Marcelo Becker</li>
+<li><strong>소속 (Affiliation)</strong>:<ul>
+<li>Mobile Robotics Group, Center for Robotics (CRob), São Carlos School of Engineering (EESC), University of São Paulo (USP), São Carlos, SP, Brazil — Tommaselli, Pompeu, Capezzuto, Becker</li>
+<li>DASLab, Department of Computer Science, University of Illinois Urbana-Champaign (UIUC), Champaign, IL, USA — Affonso, Sivakumar, Chowdhary</li>
+</ul>
+</li>
+<li><strong>발표처 (Published)</strong>: <strong>arXiv 2026 (학회/저널 미확정)</strong> — 저장소 README에는 IEEE Robotics and Automation Letters(RA-L) 2026 게재 정황(추천 에디터 Soon-Jo Chung, 심사·개정·채택 일자 기재)이 보이나, arXiv v1 메타데이터로는 정식 게재처가 확정 표기되지 않아 보수적으로 <code>arxiv2026</code>으로 분류한다.</li>
+<li><strong>DOI</strong>: (arXiv preprint) <a href="https://doi.org/10.48550/arXiv.2606.31941">https://doi.org/10.48550/arXiv.2606.31941</a></li>
+<li><strong>arXiv</strong>: 2606.31941 — <a href="https://arxiv.org/abs/2606.31941">https://arxiv.org/abs/2606.31941</a> (v1)</li>
+<li><strong>코드 (Code)</strong>: ✅ <strong>공개</strong> — <a href="https://github.com/Felipe-Tommaselli/lecropfollow">https://github.com/Felipe-Tommaselli/lecropfollow</a> (MIT License, ROS Noetic + Gazebo + TD-MPC2, <code>tdmpc2/</code>, <code>src/</code>(URDF·perception), <code>docker/</code>, <code>SKILLS/</code> 통합 문서 포함)</li>
+<li><strong>프로젝트 페이지 (Project Page)</strong>: <a href="https://felipe-tommaselli.github.io/lecropfollow">https://felipe-tommaselli.github.io/lecropfollow</a></li>
+<li><strong>제출/개정/채택</strong>: 제출 2026-02-18, 개정 2026-05-21, 채택 2026-06-11</li>
+<li><strong>리뷰 일자</strong>: 2026-07-02</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>LeCropFollow는 <strong>캐노피 아래(under-canopy) 농업 로봇이 옥수수 등 작물 열(crop row) 사이를 자율 주행</strong>하는 문제를 다룬다. 자연어 지시는 전혀 사용하지 않는 <strong>순수 시각(visual) 로컬 내비게이션</strong>이므로, 본 코퍼스에서는 <strong>학습 기반 로컬 플래너(Planner 트랙)</strong> 로 분류한다. 로봇은 자연어 목표가 아니라 &quot;현재 작물 열을 충돌 없이 계속 따라간다&quot;는 국소 항법(local following) 목표를 스스로 최적화한다.</p>
+<p>핵심 문제의식은 <strong>&quot;비정형 항법 특징(unstructured navigational features)&quot;</strong> — 불규칙한 파종, 결주(缺株, plantation gap), 열의 불연속(discontinuity) — 이 캐노피 아래 농업 로봇의 <strong>주된 실패 모드(primary failure mode)</strong> 라는 관찰이다. 논문은 이 실패의 근원을 다음과 같이 진단한다:</p>
+<pre><code>기존 기하(geometric) 접근의 근본 한계:
+  고차원 시각 데이터를 &quot;결정론적 공간 기준(deterministic spatial reference)&quot;으로 압축
+  → 예: 소실점(vanishing point) 좌표 하나, 좌/우 열 직선 파라미터
+  → 이 압축이 &quot;불확실성(uncertainty)&quot;과 &quot;의미론적 맥락(semantic context)&quot;을 버린다
+  → 애매한 지형(결주·불연속)에서 기준선을 잘못 잡고 붕괴
+</code></pre>
+<p>즉 CropFollow++ 같은 키포인트(keypoint) 기반 방법은 이미지를 소수의 기하 파라미터로 환원하는데, 이 환원 과정에서 <strong>&quot;이 픽셀이 열일 확률&quot;</strong> 같은 확률·의미 정보가 소실된다. 열이 끊긴 결주 구간에서는 기하 기준 자체가 존재하지 않으므로, 결정론적 기준선을 강제로 추출하는 순간 로봇은 헛것을 따라가 충돌한다.</p>
+<p>LeCropFollow의 해결책은 <strong>표현(representation)의 전환</strong>이다:</p>
+<ol>
+<li><strong>명시적 기하 모델링을 우회(bypass)</strong> 하고, 학습된 <strong>잠재 표현(latent representation)</strong> 안에서 궤적을 직접 최적화한다.</li>
+<li>인지 프론트엔드로 <strong>자기지도(self-supervised) 의미 히트맵 추출기</strong>를 두어, 이미지를 결정론적 좌표가 아니라 <strong>압축되지 않은 의미 히트맵(uncompressed semantic heatmap)</strong> 신호로 유지한다.</li>
+<li>이 히트맵을 <strong>TD-MPC2(Model-Based Reinforcement Learning, MBRL 플래너)</strong> 에 먹여, <strong>잠재 다양체(latent manifold)</strong> 안에서 미래를 상상하며 궤적을 계획한다.</li>
+</ol>
+<p>연구가 답하려는 질문:</p>
+<ul>
+<li>이미지를 기하 기준으로 압축하지 않고 <strong>의미 히트맵을 그대로 유지</strong>하면, 결주·불연속 같은 애매 지형에서 실패를 줄일 수 있는가?</li>
+<li><strong>단순화된 시뮬레이션(untextured 원기둥 장애물)</strong> 에서만 학습한 MBRL 정책이, <strong>파인튜닝 없이 제로샷(zero-shot)</strong> 으로 실제 옥수수밭에 전이되는가?</li>
+<li>정형 열(structured row)에서는 SOTA와 대등하고, <strong>결주(plantation gap)에서 유의미하게 능가</strong>하는가?</li>
+</ul>
+<p>논문의 핵심 정량 주장: 결주 구간에서 키포인트 기반 대비 <strong>의미 실패(semantic failure)를 2.4배 감소</strong>시킨다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) 결정론적 기하 압축의 정보 손실.</strong>
+CropFollow++ 계열은 RGB 이미지에서 소실점(VP)과 좌/우 열 직선을 키포인트로 뽑아 기하 컨트롤러를 구동한다. 이 파이프라인은 히트맵(픽셀별 확률 분포)을 <strong>argmax/회귀로 단일 좌표에 붕괴</strong>시킨다. 결과적으로:</p>
+<ul>
+<li>열이 명확할 때는 잘 동작하지만,</li>
+<li>열이 끊기거나(gap) 파종이 불규칙하면 <strong>기준선이 존재하지 않는데도 억지로 하나를 뽑아</strong> 엉뚱한 방향으로 조향한다.
+이것이 &quot;고차원 시각 → 결정론적 공간 기준으로의 압축이 불확실성·의미 맥락을 버린다&quot;는 논문 진단의 실체다.</li>
+</ul>
+<p><strong>(C2) 캐노피 아래의 심한 가림(occlusion)과 광학 변동.</strong>
+개화기(flowering, VT~R1) 옥수수는 하부 캐노피 잎이 무성해 카메라를 자주 가린다. 수확 후(harvested)에는 잔여 줄기·맨흙으로 광학 프로파일이 급변한다. 동일 열 구조라도 <strong>광도·질감 분포가 계절/생육 단계에 따라 크게 바뀌어</strong>, 특정 외관에 과적합된 인지기는 무너진다.</p>
+<p><strong>(C3) 시뮬레이션-실세계 격차(sim-to-real gap).</strong>
+농업 실환경 데이터를 대규모로 수집·라벨링하는 것은 비싸고 계절 의존적이다. 반면 단순화된 시뮬레이션(질감 없는 원기둥)은 실제 옥수수의 외관과 전혀 다르다. <strong>단순 시뮬에서 학습한 정책이 파인튜닝 없이 실제 밭으로 전이</strong>되려면, 표현이 특정 시각 질감이 아니라 <strong>의미 구조</strong>에 의존해야 한다.</p>
+<p><strong>(C4) 반응적 안정성과 실시간성.</strong>
+스키드-스티어(skid-steer) 로봇은 미끄러짐이 크고, 좁은 열 사이(0.75 m 간격)에서 급격한 조향은 곧 충돌이다. 20 Hz 제어 루프 안에서 <strong>부드럽고 안정적인 속도·각속도</strong>를 실시간으로 생성해야 한다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>LeCropFollow의 해법은 <strong>&quot;의미 히트맵 보존 + 잠재 세계모델 계획 + 제로샷 sim2real&quot;</strong> 의 삼중 결합이다:</p>
+<pre><code>              ┌───────────────────────────────────────────────────────┐
+  RGB I_t ──▶ │ (동결) RowFollowNet ResNet-18 → 의미 히트맵 M_t         │
+              │   3채널: VP(red) / Left(green) / Right(blue), 56×80×3   │
+              └───────────────────────────────────────────────────────┘
+                              │  M_t (압축 안 함) + 이전 행동 a_{t-1}
+                              ▼
+              ┌───────────────────────────────────────────────────────┐
+  관측 o_t ──▶│ TD-MPC2 인코더 h_θ → 잠재 z_t ∈ 𝒵                       │
+              │  세계모델 d_θ, 보상 r_θ, 가치 Q_θ, 정책 π_θ (5M MLP)     │
+              │  MPPI로 잠재 안에서 H스텝 궤적 최적화 → a_t=[v_t, ω_t]   │
+              └───────────────────────────────────────────────────────┘
+                              │  지수 평활 ã_t = 0.3 a_t + 0.7 ã_{t-1}
+                              ▼
+                     v ∈ [0.1,1.0] m/s, ω ∈ [−0.9,0.9] rad/s  (20 Hz)
+</code></pre>
+<ul>
+<li><strong>의미 히트맵 보존(C1 해결)</strong>: argmax로 좌표를 뽑지 않고 <strong>56×80×3 히트맵을 통째로</strong> MBRL 관측에 넣는다. &quot;기하 환원이 버리는 의미 맥락을 보존&quot;한다.</li>
+<li><strong>잠재 세계모델 계획(C1, C4 해결)</strong>: TD-MPC2가 잠재 다양체에서 미래를 상상(<code>z_{t+1}=d_θ(z_t,a_t)</code>)하며 H스텝 앞을 보상 최대화로 최적화 → 반응형 컨트롤러가 못 하는 <strong>미래 지향 계획</strong>.</li>
+<li><strong>제로샷 sim2real(C2, C3 해결)</strong>: 인지 백본은 실작물로 사전학습 후 <strong>동결</strong>, MBRL만 단순 시뮬에서 학습. 단순 시뮬의 확산적(diffuse) 히트맵을 <strong>&quot;더 어려운(harder) OOD 하한&quot;</strong> 으로 취급해, 실전에서 오히려 더 쉬운 분포를 만나게 설계.</li>
+<li><strong>안정성 보상·평활(C4)</strong>: 보상에 안정성 페널티(각속도·저크)를 넣고, 1차 지수 필터로 행동을 평활화.</li>
+</ul>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 자기지도 의미 히트맵 추출기 (Self-Supervised Semantic Heatmap Extractor)</h3>
+<p>LeCropFollow의 인지 프론트엔드는 새로 학습하지 않는다. <strong>CropFollow++(Sivakumar et al., 2024)의 RowFollowNet에서 가져온 ResNet-18 백본을 그대로 동결(frozen)</strong> 하여 사용한다. 이 백본은 단안(monocular) RGB 이미지를 입력받아 <strong>3채널 의미 히트맵</strong>을 출력한다:</p>
+<pre><code>입력:  I_t ∈ ℝ^(H×W×3)                단안 RGB
+출력:  M_t ∈ ℝ^(56×80×3)              공간 해상도 56×80, 3 의미 채널
+채널:  ch0 = Vanishing Point (red)     소실점 신뢰도 맵
+       ch1 = Left Row       (green)    좌측 열 신뢰도 맵
+       ch2 = Right Row      (blue)     우측 열 신뢰도 맵
+</code></pre>
+<p><strong>&quot;자기지도(self-supervised)&quot;의 의미</strong>: RowFollowNet은 원래 CropFollow++에서 실작물 데이터로 자기지도 학습되었고, LeCropFollow 저자들은 그 <strong>사전학습 가중치를 재사용</strong>한다. MBRL 학습 동안 이 인지 백본은 <strong>역전파를 받지 않는다(동결)</strong>. 즉 지각(perception)과 계획(planning)이 분리 학습되며, 계획 단계는 인지 출력을 &quot;주어진 신호&quot;로 소비한다.</p>
+<p><strong>핵심 설계 결정 — 히트맵을 압축하지 않는다.</strong> 기존 CropFollow++는 동일한 백본의 히트맵에서 <strong>argmax/회귀로 소실점·열 직선을 뽑아</strong> 기하 컨트롤러에 넘긴다. LeCropFollow는 이 압축 단계를 <strong>제거</strong>하고, <code>M_t</code>(56×80×3, 약 13,440차원의 조밀 텐서)를 <strong>그대로</strong> 다운스트림 인코더에 전달한다. 이 한 가지 차이가 논문 전체의 표현 철학이다:</p>
+<pre><code>CropFollow++ (기하):
+  M_t (56×80×3) ──argmax/fit──▶ (VP, left_line, right_line)  ← 3~6개 스칼라로 붕괴
+                                        │
+                                  기하 컨트롤러 (PID류)
+
+LeCropFollow (잠재):
+  M_t (56×80×3) ─────그대로─────▶ TD-MPC2 인코더 h_θ
+                                        │
+                                  잠재 z_t 안에서 계획
+</code></pre>
+<p><strong>왜 이것이 결주에서 강한가.</strong> 결주 구간에서는 &quot;좌측 열 직선&quot; 자체가 존재하지 않는다. CropFollow++는 없는 직선을 억지로 피팅해 잘못된 기준을 만든다. 반면 히트맵을 보존하면 <strong>좌측 채널의 활성이 &quot;확산적(diffuse)·저신뢰&quot;</strong> 로 나타나고, MBRL 인코더는 이 확산 패턴 자체를 &quot;지금은 좌측 기준이 불확실하다&quot;는 정보로 학습해, 우측 열·소실점 등 남은 단서에 더 의존하는 방향으로 계획할 수 있다. 불확실성이 <strong>버려지지 않고 표현에 남는 것</strong>이 핵심이다.</p>
+<h3>3.2 관측 구성과 잠재 인코더 (Observation Construction &amp; Latent Encoder)</h3>
+<p>TD-MPC2의 관측은 시각 히트맵과 이전 행동을 <strong>연접(concatenate)</strong> 하여 만든다:</p>
+<pre><code>관측:   o_t = [ M_t , a_{t-1} ] ∈ ℝ^(56×80×3 + 2)
+        여기서 a_{t-1} = [v_{t-1}, ω_{t-1}] (직전 선속도·각속도)
+
+인코더: z_t = h_θ(o_t)         잠재 상태 z_t ∈ 𝒵 (학습된 다양체)
+</code></pre>
+<p><strong>이전 행동을 관측에 넣는 이유.</strong> 스키드-스티어 로봇은 관성·미끄러짐이 있어, 같은 히트맵이라도 직전 명령에 따라 실제 다음 상태가 달라진다. <code>a_{t-1}</code>을 관측에 포함하면 인코더가 <strong>부분관측(POMDP) 하에서 로봇의 운동 상태를 암시적으로 복원</strong>할 수 있다. 이는 순수 이미지 반응형 정책이 못 하는 관성 인지의 핵심이다.</p>
+<p><strong>인코더·모델 규모.</strong> TD-MPC2 표준을 따라 <strong>MLP 폭 512, 깊이 3, Mish 활성화, 총 약 5M 파라미터</strong>의 컴팩트한 네트워크다. 잠재는 <strong>SimNorm(단순 정규화) 차원 8</strong> 로 정규화된다. SimNorm은 잠재를 여러 개의 소프트맥스 심플렉스로 나눠 표현을 안정화하는 TD-MPC2 고유의 정규화로, 세계모델의 발산을 억제한다.</p>
+<h3>3.3 TD-MPC2 모델 기반 RL 플래너 (Model-Based RL Planner)</h3>
+<p>LeCropFollow의 계획 엔진은 <strong>TD-MPC2</strong> — 잠재 공간 세계모델 위에서 MPPI(Model Predictive Path Integral) 계획과 시간차(TD) 가치 학습을 결합한 MBRL이다. 다섯 개의 학습 컴포넌트가 <strong>공동 학습</strong>된다:</p>
+<pre><code>h_θ : 인코더        o_t → z_t           (관측을 잠재로)
+d_θ : 세계모델      (z_t, a_t) → z_{t+1} (잠재 동역학, 다음 잠재 예측)
+r_θ : 보상모델      (z_t, a_t) → r_t     (잠재에서 보상 예측)
+Q_θ : 가치함수      (z_t, a_t) → Q       (5개 Q-앙상블)
+π_θ : 사전 정책     z_t → a_t            (MPPI 시드용 프라이어)
+</code></pre>
+<h4>계획 목표 (Planning Objective, Eq. 1)</h4>
+<p>매 스텝, TD-MPC2는 <strong>잠재 안에서 H스텝 궤적을 상상</strong>하며 할인 보상 합을 최대화하는 첫 행동을 고른다:</p>
+<pre><code>a_t = arg max_{a_{t:t+H}}  E[ Σ_{k=0}^{H-1} γ^k · r_θ(z_{t+k}, a_{t+k})  +  γ^H · V(z_{t+H}) ]
+
+  단,  z_{t+k+1} = d_θ(z_{t+k}, a_{t+k})       (잠재 롤아웃)
+       V(z) ≈ Q_θ(z, π_θ(z))                  (지평선 끝은 학습 가치로 부트스트랩)
+       γ = 0.99                                (할인 계수)
+</code></pre>
+<p>즉 실제 이미지를 여러 번 렌더링하는 대신, <strong>인코딩된 잠재 <code>z</code>를 세계모델 <code>d_θ</code>로 전방 전개</strong>하여 미래 보상을 추정한다. 이미지 공간이 아니라 잠재에서 상상하므로 계획이 빠르고, 히트맵의 의미 구조가 잠재에 인코딩돼 있어 결주 같은 애매 상황도 롤아웃에 반영된다.</p>
+<h4>MPPI 최적화 (샘플링 기반 계획)</h4>
+<p>목표(Eq.1)의 arg max는 닫힌 형태가 없으므로 <strong>MPPI</strong>로 근사한다. 매 제어 스텝:</p>
+<pre><code>1) 정책 프라이어 π_θ로 16개 궤적 시드 + 가우시안으로 N=256개 행동열 샘플
+2) 각 샘플을 세계모델로 H스텝 롤아웃 → 누적 보상(return) 계산
+3) 상위 K=48개 엘리트(elite)를 보상 기반 소프트맥스 가중(temperature=0.5)으로 결합
+4) 가중 평균으로 행동 분포(평균 μ, 표준편차 σ)를 갱신
+5) 3회 반복(MPPI iterations=3) 후 첫 행동 a_t 실행
+   (σ는 [σ_min=0.05, σ_max=2.0]로 클리핑)
+</code></pre>
+<pre><code>ASCII: 한 제어 스텝의 MPPI 계획
+   z_t = h_θ([M_t, a_{t-1}])
+        │
+        ├─ π_θ 프라이어 궤적 16개 ┐
+        └─ 가우시안 샘플 256개    ├─▶ 각 행동열을 d_θ로 H스텝 롤아웃
+                                  ┘        │
+                                  return = Σ γ^k r_θ + γ^H Q_θ
+                                           │
+                                  상위 K=48 엘리트 소프트맥스(τ=0.5) 결합
+                                           │  (3회 반복)
+                                  μ, σ 갱신 → a_t = μ_0 실행
+</code></pre>
+<p><strong>정책 프라이어의 역할.</strong> 순수 무작위 샘플링은 좁은 열 사이에서 유효 행동을 거의 못 뽑는다(BOWConnect의 무작위 조향 문제와 동일 구조). <code>π_θ</code>가 <strong>학습된 좋은 행동으로 샘플 분포를 시드</strong>하므로, MPPI가 처음부터 유망한 영역을 탐색한다. 프라이어 계수 0.20은 프라이어 궤적의 기여 비중을 조절한다.</p>
+<h4>보상 함수 (Reward Function, Eq. 4)</h4>
+<p>LeCropFollow의 보상은 <strong>작업 진행 · 안정성 · 충돌</strong>을 곱셈형 게이팅으로 결합한 시그모이드-유사 형태다:</p>
+<pre><code>r_t = exp(r_task) / ( 1 + exp(p_stability + p_collision) )
+
+  r_task      = −λ_c · (v_t − v*)²                     ← 목표 속도 v* 추종
+  p_stability = α_c · ω_t²  +  β_c · (|v_t−v_{t-1}| + |ω_t−ω_{t-1}|)   ← 급회전·저크 억제
+  p_collision = γ_c · 𝕀(c_t = True)                    ← 충돌 시 큰 페널티
+
+  하이퍼파라미터:  λ_c = 10,  α_c = 1.2,  β_c = 0.6,  γ_c = 30
+</code></pre>
+<p><strong>이 형태의 설계 직관.</strong></p>
+<ul>
+<li>분자 <code>exp(r_task)</code>: 목표 속도 <code>v*</code>(실전 0.9 m/s)에 가까울수록 보상 상승. <code>r_task</code>가 0(완벽 추종)이면 분자=1, 벗어나면 지수적으로 감쇠.</li>
+<li>분모 <code>1 + exp(p_stability + p_collision)</code>: 페널티가 커질수록 분모가 급증해 <strong>전체 보상을 곱셈으로 억제</strong>. 특히 충돌(<code>γ_c=30</code>)은 분모를 폭발시켜 보상을 사실상 0으로 만든다.</li>
+<li>이 <strong>곱셈형 게이팅</strong>은 BOWConnect의 <code>α(u)=[μ_r−κσ_r]·P_feas</code>와 철학이 같다 — &quot;진행 보상&quot;과 &quot;안전/안정 제약&quot;을 더하지 않고 곱해, 위험 행동을 자연히 배제한다. 다만 여기서는 GP가 아니라 <strong>학습 보상 모델 <code>r_θ</code>가 이 보상 표면을 잠재에서 근사</strong>한다는 점이 다르다.</li>
+</ul>
+<h4>행동 공간과 평활 (Action Space &amp; Smoothing)</h4>
+<pre><code>행동:   a_t = [v_t, ω_t]           선속도·각속도
+범위:   v_t ∈ [0.1, 1.0] m/s        (하한 0.1 → 항상 전진, 정지 회피)
+        ω_t ∈ [−0.9, 0.9] rad/s
+평활:   ã_t = 0.3 · a_t + 0.7 · ã_{t-1}    1차 지수 필터 (관성 큰 성분 0.7)
+</code></pre>
+<p><code>v</code> 하한 0.1 m/s는 로봇이 멈춰서 진동하는 것을 막고, 각속도 ±0.9 rad/s 한계와 지수 평활(직전 행동 가중 0.7)은 스키드-스티어의 급조향 충돌(C4)을 억제한다. <strong>보상 안의 안정성 페널티(계획 시점)와 출력단 평활(실행 시점)</strong> 이 이중으로 부드러움을 강제한다.</p>
+<h3>3.4 왜 &quot;잠재 계획&quot;이 반응형 컨트롤러를 이기는가 (심화)</h3>
+<p>기하 컨트롤러(CropFollow++)는 <strong>현재 프레임의 기준선만 보고 즉시 조향</strong>하는 반응형(reactive) 제어다. 미래를 보지 않으므로, 결주 진입 순간 잘못된 기준선을 잡으면 <strong>되돌릴 앞보기(lookahead)가 없다</strong>. LeCropFollow의 TD-MPC2는:</p>
+<pre><code>반응형(CropFollow++):        z_t(암묵) → 즉시 a_t          앞보기 0
+잠재 계획(LeCropFollow):     z_t → d_θ로 H스텝 상상 → a_t   앞보기 H
+</code></pre>
+<p>세계모델 <code>d_θ</code>가 &quot;지금 이렇게 조향하면 H스텝 뒤 히트맵/보상이 어떻게 될지&quot;를 <strong>잠재에서 시뮬레이션</strong>하므로, 결주 앞에서 미리 &quot;곧 좌측 열이 사라질 것&quot;을 상상하고 우측 열 중심으로 미리 정렬하는 식의 <strong>선제적(anticipatory) 계획</strong>이 가능하다. 이것이 5.3의 결주 실험에서 1-step 지평선(L2)이 붕괴하고 완전 정식화(L3)만 93.3%를 내는 이유의 핵심 — <strong>앞보기 H가 커야 잠재 계획의 가치가 발현</strong>된다.</p>
+<h3>3.5 코드 관점 (GitHub 재현 구조)</h3>
+<p>공개 저장소(<a href="https://github.com/Felipe-Tommaselli/lecropfollow">https://github.com/Felipe-Tommaselli/lecropfollow</a>, MIT)는 ROS Noetic 기반으로, 계획-지각-배포가 토픽 계약(topic contract)으로 분리돼 있다:</p>
+<pre><code>lecropfollow/
+├── tdmpc2/                 TD-MPC2 학습·추론 (config.yaml에 robot namespace·checkpoint)
+├── src/
+│   ├── (robot description) URDF (TerraSentia)
+│   └── terra_utils/scripts/perception_stub.py   지각 통합점(히트맵 발행)
+├── docker/                 컨테이너화
+├── SKILLS/integration.md   ROS↔RL 에이전트 토픽 계약 문서
+├── figures/
+└── README.md (MIT LICENSE)
+</code></pre>
+<p>README 요지: &quot;우리 시스템은 <strong>압축되지 않은 의미 히트맵 위의 잠재 세계모델 안에서 계획</strong>하여 작물 열 사이를 주행하는 법을 학습하고, <strong>파인튜닝 없이 시뮬에서 실 하드웨어로 전이</strong>한다.&quot; 실제 보상 함수·히트맵 처리·하이퍼파라미터의 상세 코드는 <code>tdmpc2/</code>와 perception stub에 위치하며(본문 Table I과 일치), <strong>개념·배포 재현이 완전히 가능한 오픈소스</strong>다. 코퍼스의 다수 Planner 논문이 코드 미공개/예정인 것과 대조적으로 재현성이 최상위다.</p>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<p>전체 파이프라인:</p>
+<pre><code>[실행 시(Deployment) — TerraSentia, Jetson Orin Nano, 20 Hz]
+
+ ZED 2i (단안 우측 스트림)
+        │  RGB I_t
+        ▼
+ ┌──────────────────────────────┐
+ │ (동결) RowFollowNet ResNet-18 │  자기지도 사전학습, 역전파 없음
+ └──────────────────────────────┘
+        │  의미 히트맵 M_t ∈ 56×80×3  (VP/Left/Right)
+        │  (argmax 안 함 — 그대로 전달)
+        ▼
+ o_t = [ M_t , a_{t-1} ]
+        ▼
+ ┌──────────────────────────────┐
+ │ TD-MPC2 인코더 h_θ → z_t      │
+ │ 세계모델 d_θ / 보상 r_θ /     │
+ │ 가치 Q_θ(5) / 정책 π_θ        │
+ │ MPPI(N=256, K=48, iter=3)로   │
+ │ 잠재 H스텝 롤아웃·보상최대화  │
+ └──────────────────────────────┘
+        │  a_t = [v_t, ω_t]
+        ▼
+ 지수 평활 ã_t = 0.3 a_t + 0.7 ã_{t-1}
+        ▼
+ 스키드-스티어 구동 (v∈[0.1,1.0], ω∈[−0.9,0.9])
+        │
+        └─ a_{t-1} 피드백 → 다음 관측 o_{t+1}
+</code></pre>
+<p><strong>학습 시(Training) 데이터 흐름</strong>:</p>
+<pre><code>[Gazebo 단순 시뮬 — untextured 원기둥, 열간격 0.75 m]
+  물리 충돌 검출(하드 충돌) → c_t
+  120 m 전진 or 500 스텝 → 에피소드 종료(episode length 500)
+  시작 ~10스텝 grace window(충돌 검사 면제)
+        │
+  경험 → 리플레이 버퍼(1e6) → 배치 512로 TD-MPC2 공동 학습
+        │  (인코더/세계모델/보상/가치/정책 동시)
+        ▼
+  120k 스텝, 11.4시간, RTX A2000  →  동결 backbone과 함께 배포
+</code></pre>
+<p><strong>설계 미학 — &quot;지각 동결 · 계획 학습&quot;의 분리.</strong> 인지 백본은 실작물로 사전학습 후 동결하고, MBRL은 단순 시뮬에서만 학습한다. 이 분리가 sim2real의 핵심 트릭이다(4장→5.4 연결): 시뮬의 확산적 히트맵이 실전보다 <strong>더 어려운 입력</strong>이므로, 시뮬에서 견딘 인코더는 실전에서 더 쉬운 분포를 만나 자연히 전이된다.</p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 / 환경 (Datasets &amp; Environments)</h3>
+<p><strong>시뮬레이션(학습용) — Gazebo 단순화 환경:</strong></p>
+<ul>
+<li>장애물: <strong>질감 없는(untextured) 원기둥</strong> (실제 작물 아님 — 의도적 단순화)</li>
+<li>열 간격: <strong>0.75 m</strong> (상용 옥수수밭·TerraSentia 규격 일치)</li>
+<li>시각 분포: 초록 80% / 빨강 10% / 파랑 10% 원기둥</li>
+<li>에피소드 종료: Gazebo 물리엔진의 하드 충돌 검출, 또는 전진 120 m, 또는 500 스텝</li>
+<li>Grace window: 에피소드 시작 ~10 스텝은 충돌 검사 면제</li>
+</ul>
+<p><strong>실세계(평가용) — 브라질 옥수수밭:</strong></p>
+<ul>
+<li>플랫폼: <strong>TerraSentia 스키드-스티어 로봇</strong> (EarthSense Inc.)</li>
+<li>센서: ZED 2i(단안 우측 스트림), 휠 엔코더, 6-DoF IMU, Livox Mid-360 LiDAR(<strong>베이스라인 CROW 지원용만</strong>)</li>
+<li>밭: Embrapa Instrumentation, São Carlos(브라질)의 <strong>후기(late-stage) 옥수수밭</strong></li>
+<li>생육 단계: <strong>개화기(Flowering, VT~R1 silking)</strong> 와 <strong>수확 후(Harvested)</strong></li>
+<li>결주(gap): <strong>8.7 m</strong> 불연속(6.1~14.8 m 구간), 좌측 열 열화 동반</li>
+<li>세 구역: 좌측 경계열 / 중앙열 / 우측 경계열, 런당 열 주행 74.6 m</li>
+<li>목표 속도 v = 0.9 m/s, 제어 20 Hz, 실패 시 열 중앙으로 수동 리셋 후 런 완료</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>충돌 수(Collisions per run)</strong>: 런당 물리 접촉 횟수 (↓)</li>
+<li><strong>무충돌 최대 거리(Max distance without collision, m)</strong>: 첫 실패까지 주행 거리 (↑)</li>
+<li><strong>실패 모드 분류</strong>: Perception Error / Occlusion / Actuation / Bad Start / Terrain</li>
+<li><strong>의미 vs 물리 실패</strong>: {Perception, Occlusion} = 의미 실패(semantic), {Actuation, Bad Start, Terrain} = 물리 실패(physical)</li>
+<li><strong>결주 통과 성공률(gap traversal success rate)</strong>: 8.7 m 결주 통과 여부(런 단위)</li>
+</ul>
+<p><strong>베이스라인:</strong></p>
+<ol>
+<li><strong>CropFollow++</strong> (Sivakumar et al., 2024) — 비전 키포인트 추출 + 기하 컨트롤러. <strong>동일한 동결 RowFollowNet 백본 사용</strong>(→ 표현 차이만 순수 비교되는 이상적 대조군).</li>
+<li><strong>CROW</strong> (Affonso et al., 2025) — LiDAR + DLIO 오도메트리 기반 자기지도 작물열 항법.
+두 베이스라인은 밭 조건에 맞춰 <strong>파인튜닝</strong>했고, LeCropFollow는 <strong>파인튜닝 없이 제로샷</strong>이다.</li>
+</ol>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>Table II — LeCropFollow 개화기 12런:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Run</th>
+<th>Collisions</th>
+<th>Max Dist. w/o Col. [m]</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>8</td>
+<td>18.1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>4</td>
+<td>38.9</td>
+</tr>
+<tr>
+<td>3</td>
+<td>7</td>
+<td>16.5</td>
+</tr>
+<tr>
+<td>4</td>
+<td>8</td>
+<td>21.3</td>
+</tr>
+<tr>
+<td>5</td>
+<td>4</td>
+<td>30.3</td>
+</tr>
+<tr>
+<td>6</td>
+<td>6</td>
+<td>24.2</td>
+</tr>
+<tr>
+<td>7</td>
+<td>4</td>
+<td>27.4</td>
+</tr>
+<tr>
+<td>8</td>
+<td>4</td>
+<td>26.4</td>
+</tr>
+<tr>
+<td>9</td>
+<td>3</td>
+<td>38.7</td>
+</tr>
+<tr>
+<td>10</td>
+<td>3</td>
+<td>35.3</td>
+</tr>
+<tr>
+<td>11</td>
+<td>4</td>
+<td>31.3</td>
+</tr>
+<tr>
+<td>12</td>
+<td>6</td>
+<td>26.9</td>
+</tr>
+<tr>
+<td><strong>평균</strong></td>
+<td><strong>5.1</strong></td>
+<td><strong>27.9</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>Table III — 개화기 비교(각 방법 12런):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>Collisions</th>
+<th>Max Dist. w/o Col. [m]</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CropFollow++</td>
+<td>5.3 ± 1.6</td>
+<td>38.9</td>
+</tr>
+<tr>
+<td>CROW</td>
+<td>6.5 ± 1.4</td>
+<td>37.9</td>
+</tr>
+<tr>
+<td><strong>LeCropFollow</strong></td>
+<td><strong>5.1 ± 1.8</strong></td>
+<td><strong>38.9</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>수확 후(Harvested, 12런):</strong> LeCropFollow 충돌 <strong>4.8 ± 1.5</strong>, 무충돌 최대거리 <strong>28.4 ± 5.7 m</strong>. Mann-Whitney U 검정 결과 개화기 분포와 <strong>유의차 없음</strong>(충돌 p=0.62, 거리 p=0.74) → <strong>생육 단계 변화(광학·질감 급변)에도 강건</strong>.</p>
+<p><strong>결주 통과(각 방법 15런, 8.7 m gap):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>구성</th>
+<th>성공률</th>
+<th>성공/총</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CropFollow++ (G1, 키포인트 기하)</td>
+<td><strong>6.7%</strong></td>
+<td>1/15</td>
+</tr>
+<tr>
+<td>Gaussian 샘플링 (G2)</td>
+<td>중간</td>
+<td>—</td>
+</tr>
+<tr>
+<td>CROW (G3, LiDAR)</td>
+<td><strong>53.3%</strong></td>
+<td>8/15</td>
+</tr>
+<tr>
+<td>LeCropFollow — 정책만(L1, no MPPI)</td>
+<td>최저</td>
+<td>—</td>
+</tr>
+<tr>
+<td>LeCropFollow — 1-step 지평선(L2)</td>
+<td><strong>~13.3%</strong></td>
+<td>2/15</td>
+</tr>
+<tr>
+<td><strong>LeCropFollow — 완전 정식화(L3)</strong></td>
+<td><strong>93.3%</strong></td>
+<td><strong>14/15</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>실패 모드 분석(Fig. 6):</strong> LeCropFollow의 <strong>의미 실패 총 29건</strong> vs 기하 베이스라인 합산 70건 → <strong>의미 실패 2.4배 감소</strong>. 논문 핵심 주장의 직접 증거.</p>
+<p><strong>핵심 관찰:</strong></p>
+<ul>
+<li><strong>정형 열에서는 대등</strong>: 개화기(Table III) 충돌 5.1 vs CropFollow++ 5.3 / CROW 6.5, 무충돌 거리 38.9 m로 <strong>SOTA와 동급</strong>. 즉 표현 전환이 정상 조건에서 성능을 희생하지 않는다.</li>
+<li><strong>결주에서 압도</strong>: L3 93.3% vs CropFollow++ 6.7% — <strong>의미 실패가 지배적인 애매 지형에서 14배 격차</strong>. 히트맵 보존의 가치가 가장 선명히 드러나는 지점.</li>
+<li><strong>어블레이션이 인과를 분해</strong>: L1(MPPI 없이 정책만)·L2(1-step)가 붕괴하고 L3(완전 MPPI 계획)만 성공 → <strong>성능은 히트맵 보존 단독이 아니라 &quot;히트맵 보존 × 다지평선 잠재 계획&quot;의 곱에서 나온다</strong>. 특히 L2가 키포인트 추종 수준으로 붕괴한다는 관찰은, <strong>앞보기 지평선 H가 결주 극복의 핵심 레버</strong>임을 실증한다.</li>
+<li><strong>CROW(LiDAR) 대비</strong>: CROW는 LiDAR로 결주에서 53.3%를 내지만, LeCropFollow는 <strong>단안 카메라만으로 93.3%</strong> — 더 값싼 센서로 더 높은 결주 강건성.</li>
+</ul>
+<h3>5.4 리얼월드 실험 (Real-world Experiments) — 옥수수밭, 제로샷 sim2real</h3>
+<p><strong>밭 레이아웃(Fig. 5):</strong> 후기 옥수수밭 3구역(좌/중/우 경계열) + 8.7 m 결주(6.1~14.8 m, 좌측 열 열화).</p>
+<p><strong>개화기(Flowering) 상세:</strong></p>
+<ul>
+<li>생육: 후기 영양생장(VT)~생식 실기(R1 silking)</li>
+<li>캐노피: 하부 잎 무성, <strong>잦은 센서 가림(occlusion)</strong></li>
+<li>런당 열 주행 74.6 m, 내부 열간격 0.75 m</li>
+<li>프로토콜: 밭 양 끝을 오가며 <strong>양방향 교대 주행</strong>으로 환경 변동성 완화</li>
+<li>복구: 실패 지점에서 열 중앙으로 수동 리셋 후 런 완료</li>
+</ul>
+<p><strong>수확 후(Harvested) 상세:</strong></p>
+<ul>
+<li>형태: 곡물 수확 후, 잔여 줄기·맨흙 노출, 광도 프로파일 대폭 변화</li>
+<li>동일 열 기하 구조 → <strong>비정형 인지의 일반화 테스트</strong>로 기능</li>
+<li>결과: 개화기와 통계적 유의차 없음(위 Mann-Whitney)</li>
+</ul>
+<p><strong>제로샷 sim2real 레시피:</strong></p>
+<pre><code>1) 인지 백본(RowFollowNet): 실작물로 사전학습 → MBRL 동안 동결
+2) MBRL 학습: 단순 Gazebo(untextured 원기둥)에서 120k 스텝
+3) 의도적 부정합: 단순 시뮬을 &quot;하한(OOD) 케이스&quot;로 취급
+   → 동결 백본이 시뮬에서 뿜는 확산적(diffuse) 히트맵 활성이
+     인코더 h_θ를 배포 때보다 더 어려운 지각 국면에 노출
+4) 배포: 온라인 파인튜닝 없이 실 옥수수밭에 제로샷 전이
+5) 결과: 밭 데이터 수집·재학습 없이 SOTA 대등(정형)·능가(결주) 달성
+</code></pre>
+<p><strong>리얼월드 결과의 함의.</strong> 단순 시뮬 100% 학습이, <strong>두 개의 이질적 생육 단계(개화기 가림 심함 / 수확 후 광학 급변)</strong> 로 파인튜닝 없이 전이됐고, 정형 열에서 파인튜닝된 SOTA와 대등했다. 이는 잠재 표현이 <strong>특정 시각 질감이 아니라 의미 구조(열의 상대 배치)에 의존</strong>함을 강하게 시사한다 — sim2real 성공의 표현적 근거.</p>
+<h3>5.5 결과의 심층 해석</h3>
+<p>세 방법의 실패 양상은 서로 다르다:</p>
+<ul>
+<li><strong>CropFollow++(기하 키포인트)</strong>: 정형 열에서는 준수하나 결주에서 <strong>6.7%로 붕괴</strong>. 없는 기준선을 억지로 피팅하는 결정론적 압축의 대가.</li>
+<li><strong>CROW(LiDAR)</strong>: 결주 53.3%로 카메라보다 낫지만, <strong>비싼 LiDAR·오도메트리 스택</strong>에 의존하고 개화기 충돌(6.5)은 가장 많다.</li>
+<li><strong>LeCropFollow(잠재)</strong>: 정형 대등 + 결주 93.3%. 단, <strong>완전 정식화(L3)에서만</strong> — 히트맵 보존이나 MBRL 어느 하나만으로는 안 된다.</li>
+</ul>
+<p>즉 LeCropFollow의 우위는 <strong>&quot;의미 히트맵 보존 × 다지평선 잠재 계획&quot;</strong> 의 곱이다(BOWConnect가 &quot;학습 조향 × 양방향 병렬&quot;의 곱인 것과 구조적으로 유사). L1·L2 어블레이션이 이 곱셈 구조를 정확히 분해한다.</p>
+<h3>5.6 실패 모드 스펙트럼 해석</h3>
+<p>결주에서 실패를 의미(semantic) vs 물리(physical)로 나눈 것이 이 논문의 평가 설계상 백미다:</p>
+<pre><code>의미 실패(Perception/Occlusion): &quot;무엇을 따라갈지&quot;를 잘못 판단
+물리 실패(Actuation/Bad Start/Terrain): 판단은 옳으나 몸이 못 따라감
+
+LeCropFollow 의미 실패 29건 ≪ 기하 베이스라인 합산 70건  (2.4배↓)
+</code></pre>
+<p>LeCropFollow가 <strong>의미 실패를 특히 줄인다</strong>는 것은, 개선의 원천이 &quot;더 좋은 컨트롤러&quot;가 아니라 <strong>&quot;더 좋은 지각-판단 표현&quot;</strong> 임을 지목한다. 남은 실패의 상당수는 물리(스키드-스티어 미끄러짐·거친 지형)로, 이는 표현이 아니라 <strong>저수준 제어·기구부</strong>의 몫이다. 이 분해는 향후 개선 방향(표현은 충분, 물리 제어 보강)을 명확히 가리킨다.</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>의미 히트맵 보존 표현.</strong>
+기하 환원(argmax/직선 피팅)을 제거하고 <strong>56×80×3 조밀 히트맵을 그대로</strong> MBRL 관측으로 사용, 결정론적 압축이 버리는 불확실성·의미 맥락을 보존. 동일 백본을 쓰는 CropFollow++와의 대조로 <strong>표현 차이 단독 효과</strong>를 분리 검증.</p>
+</li>
+<li><p><strong>잠재 세계모델 계획(TD-MPC2 통합).</strong>
+히트맵을 잠재로 인코딩하고 세계모델 <code>d_θ</code>로 H스텝 상상하며 MPPI로 궤적 최적화. 반응형 컨트롤러가 못 하는 <strong>선제적(anticipatory) 계획</strong>으로 결주를 미리 대비.</p>
+</li>
+<li><p><strong>제로샷 sim-to-real.</strong>
+단순 Gazebo(untextured 원기둥)에서만 MBRL 학습 → <strong>파인튜닝 없이</strong> 실 옥수수밭 전이. 시뮬을 &quot;더 어려운 하한&quot;으로 설계해 전이를 유도하는 레시피 제시.</p>
+</li>
+<li><p><strong>결주(plantation gap) 강건성 실증.</strong>
+의미 실패 지배 영역에서 키포인트 대비 <strong>의미 실패 2.4배 감소</strong>, 결주 통과 <strong>93.3%(vs CropFollow++ 6.7%)</strong>. 두 생육 단계(개화기·수확 후) 전이로 강건성 확인.</p>
+</li>
+<li><p><strong>완전 오픈소스.</strong>
+코드·모델·데이터 공개(MIT), ROS 토픽 계약 문서화 → 코퍼스 Planner 논문 중 재현성 최상위.</p>
+</li>
+</ol>
+<h3>추가 의의</h3>
+<ul>
+<li><strong>단안 카메라만으로 LiDAR 기반 CROW를 결주에서 능가</strong>(93.3% vs 53.3%) → 저비용 센서 실용성.</li>
+<li>Jetson Orin Nano에서 <strong>20 Hz 온보드 실시간 구동</strong> → 실전 임베디드 배포 가능.</li>
+</ul>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 TD-MPC2 모델·계획 하이퍼파라미터 (Table I)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MLP 폭 (Width)</td>
+<td>512</td>
+<td>Mish 활성화</td>
+</tr>
+<tr>
+<td>MLP 깊이 (Depth)</td>
+<td>3</td>
+<td></td>
+</tr>
+<tr>
+<td>총 파라미터</td>
+<td>~5M</td>
+<td>컴팩트 MLP</td>
+</tr>
+<tr>
+<td>SimNorm 차원</td>
+<td>8</td>
+<td>잠재 정규화</td>
+</tr>
+<tr>
+<td>배치 크기</td>
+<td>512</td>
+<td></td>
+</tr>
+<tr>
+<td>학습률</td>
+<td>3.75×10⁻⁴</td>
+<td></td>
+</tr>
+<tr>
+<td>리플레이 버퍼</td>
+<td>1×10⁶</td>
+<td></td>
+</tr>
+<tr>
+<td>에피소드 길이</td>
+<td>500</td>
+<td>또는 120 m 전진</td>
+</tr>
+<tr>
+<td>Seed steps</td>
+<td>5,500</td>
+<td>초기 랜덤 수집</td>
+</tr>
+<tr>
+<td>할인 γ</td>
+<td>0.99</td>
+<td></td>
+</tr>
+<tr>
+<td>정책 프라이어 계수</td>
+<td>0.20</td>
+<td>MPPI 시드 비중</td>
+</tr>
+<tr>
+<td>MPPI 반복</td>
+<td>3</td>
+<td></td>
+</tr>
+<tr>
+<td>샘플 수 N</td>
+<td>256</td>
+<td></td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>0.50</td>
+<td>엘리트 소프트맥스</td>
+</tr>
+<tr>
+<td>엘리트 수 K</td>
+<td>48</td>
+<td></td>
+</tr>
+<tr>
+<td>정책 궤적 수</td>
+<td>16</td>
+<td>π_θ 시드</td>
+</tr>
+<tr>
+<td>MPPI σ_min / σ_max</td>
+<td>0.05 / 2.0</td>
+<td>분산 클리핑</td>
+</tr>
+<tr>
+<td>Q-함수 수</td>
+<td>5</td>
+<td>앙상블</td>
+</tr>
+</tbody></table></div>
+<h3>7.2 보상·행동 상수</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>보상 λ_c (task)</td>
+<td>10</td>
+<td>속도 추종</td>
+</tr>
+<tr>
+<td>보상 α_c (각속도)</td>
+<td>1.2</td>
+<td>급회전 억제</td>
+</tr>
+<tr>
+<td>보상 β_c (저크)</td>
+<td>0.6</td>
+<td>속도·각속도 변화 억제</td>
+</tr>
+<tr>
+<td>보상 γ_c (충돌)</td>
+<td>30</td>
+<td>충돌 대형 페널티</td>
+</tr>
+<tr>
+<td>속도 v 범위</td>
+<td>[0.1, 1.0] m/s</td>
+<td>하한 0.1(정지 회피)</td>
+</tr>
+<tr>
+<td>각속도 ω 범위</td>
+<td>[−0.9, 0.9] rad/s</td>
+<td></td>
+</tr>
+<tr>
+<td>행동 평활</td>
+<td>ã=0.3a+0.7ã_{-1}</td>
+<td>1차 지수 필터</td>
+</tr>
+<tr>
+<td>목표 속도 v*(실전)</td>
+<td>0.9 m/s</td>
+<td></td>
+</tr>
+<tr>
+<td>제어 주파수</td>
+<td>20 Hz</td>
+<td></td>
+</tr>
+</tbody></table></div>
+<h3>7.3 학습·배포 환경</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>학습 스텝</td>
+<td>120k</td>
+</tr>
+<tr>
+<td>학습 시간</td>
+<td>11.4 시간</td>
+</tr>
+<tr>
+<td>학습 GPU</td>
+<td>NVIDIA RTX A2000</td>
+</tr>
+<tr>
+<td>배포 컴퓨트</td>
+<td>NVIDIA Jetson Orin Nano</td>
+</tr>
+<tr>
+<td>배포 제어율</td>
+<td>20 Hz</td>
+</tr>
+<tr>
+<td>히트맵 해상도</td>
+<td>56×80×3 (VP/Left/Right)</td>
+</tr>
+<tr>
+<td>인지 백본</td>
+<td>RowFollowNet ResNet-18 (동결)</td>
+</tr>
+<tr>
+<td>시뮬레이터</td>
+<td>Gazebo (ROS Noetic)</td>
+</tr>
+<tr>
+<td>실로봇</td>
+<td>TerraSentia skid-steer (EarthSense)</td>
+</tr>
+</tbody></table></div>
+<h3>7.4 구현상의 미묘함</h3>
+<ul>
+<li><strong>동결 백본의 이점과 부담</strong>: 인지를 동결하면 MBRL 학습이 안정되고(지각-계획 크레딧 분리) sim2real 트릭이 성립하지만, <strong>인지 백본 자체는 CropFollow++ 품질에 상한이 걸린다</strong> — 백본이 못 뽑는 신호는 잠재 계획도 복원 못 한다.</li>
+<li><strong>관측에 a_{t-1} 포함</strong>: POMDP 하 운동 상태를 암시 복원. 이 작은 설계가 스키드-스티어 관성 인지의 핵심.</li>
+<li><strong>곱셈형 보상 게이팅</strong>: <code>exp(r_task)/(1+exp(p_stab+p_col))</code>은 충돌(γ_c=30)을 분모로 폭발시켜 보상을 0으로 눌러, 안전을 소프트하면서도 강하게 강제.</li>
+<li><strong>Grace window ~10스텝</strong>: 에피소드 시작 스폰 순간의 우발 충돌을 학습 신호에서 배제해, 보상이 초기 노이즈에 오염되지 않게 함.</li>
+</ul>
+<h3>7.5 실배치 엔지니어링 고려</h3>
+<ul>
+<li><strong>단안 우측 스트림만 사용</strong>: ZED 2i의 스테레오 깊이를 계획에 직접 안 쓰고 단안 RGB→히트맵만 사용 → <strong>깊이 캘리브레이션 부담 없이</strong> 임베디드에서 가볍게 구동. LiDAR(Livox)는 CROW 베이스라인 지원용이지 LeCropFollow 파이프라인에는 불필요.</li>
+<li><strong>20 Hz on Jetson Orin Nano</strong>: 256샘플×3반복 MPPI를 잠재(이미지 아님)에서 굴리므로 저전력 임베디드에서도 실시간. 잠재 계획의 계산 이점이 실배치를 가능케 한다.</li>
+<li><strong>수동 리셋 프로토콜</strong>: 실패 시 열 중앙 복귀는 <strong>평가 편의</strong>이지 자율 복구가 아님 — 완전 자율 결주 복구는 미해결(8장 한계).</li>
+</ul>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<ul>
+<li><strong>작물 종·환경 확장</strong>: 현재 옥수수 0.75 m 열간격에 특화. 대두(soybean, 좁은 열)·과수원(넓은 캐노피) 등으로 확장하려면 히트맵 채널 의미(좌/우 열·VP)가 유지되는지, 열간격 변화에 세계모델이 재학습 필요한지 검증 필요. 다만 표현이 의미 구조 기반이므로 <strong>재학습 비용이 시뮬만으로 낮을 가능성</strong>.</li>
+<li><strong>계획 계산 확장</strong>: MPPI(N=256, iter=3)를 잠재에서 굴리므로 지평선 H·샘플 N을 늘려도 이미지 롤아웃 대비 저렴. GPU 배치로 다중 로봇 동시 계획도 자연 확장.</li>
+<li><strong>백본 상한</strong>: 인지를 동결했으므로 <strong>성능 천장이 RowFollowNet에 걸림</strong>. 더 강한 히트맵 추출기(예: 세그멘테이션 파운데이션 모델)로 교체 시 추가 이득 여지 — 표현 파이프라인이 모듈러라 교체가 쉽다.</li>
+</ul>
+<h3>8.2 한계점 (Limitations)</h3>
+<ul>
+<li><strong>(L1) 동결 백본 의존</strong>: 인지 백본이 못 잡는 극단 가림·야간·역광에서는 잠재 계획도 무력. 백본 재학습 없이는 새 시각 극단에 취약.</li>
+<li><strong>(L2) 자율 실패 복구 부재</strong>: 결주 실패 시 수동 리셋으로 런을 완료 — <strong>완전 자율 복구(길 잃음 후 재획득)</strong> 는 미해결. 실전 장시간 무인 운용엔 복구 정책 필요.</li>
+<li><strong>(L3) 물리 실패 잔존</strong>: 개선은 의미 실패에 집중(2.4배↓)되나, 스키드-스티어 미끄러짐·거친 지형의 물리 실패는 표현으로 해결 안 됨 — 저수준 제어·기구부 몫.</li>
+<li><strong>(L4) 단일 작물·단일 지역 검증</strong>: 브라질 옥수수밭 두 생육 단계만. 타 작물·타 지역·타 조명 조건 일반화는 미검증.</li>
+<li><strong>(L5) 세계모델 신뢰 구간 부재</strong>: TD-MPC2 롤아웃의 불확실성(모델 오차 누적)을 명시적으로 정량화·게이팅하지 않음 — 세계모델이 틀린 미래를 상상하면 계획이 오도될 위험.</li>
+<li><strong>(L6) 목표 속도 고정</strong>: v*=0.9 m/s 단일. 지형 난이도에 따른 적응 속도(느린 결주 진입 등)는 학습 보상에 암묵적일 뿐 명시 제어 안 됨.</li>
+</ul>
+<h3>8.3 향후 방향</h3>
+<ul>
+<li><strong>인지 백본 공동 미세조정 / 파운데이션 세그멘터 교체</strong>로 L1 극복.</li>
+<li><strong>자율 결주 복구 정책</strong>(길 재획득 서브폴리시)으로 L2 해결.</li>
+<li><strong>세계모델 불확실성 인지 계획</strong>(앙상블 disagreement로 롤아웃 신뢰 게이팅)으로 L5 완화 — BOWConnect의 GP <code>P_feas</code> 같은 불확실성 게이팅을 잠재 세계모델에 이식.</li>
+<li><strong>타 작물·타 지역 대규모 필드 스터디</strong>로 L4 검증, 적응형 속도 정책으로 L6 개선.</li>
+</ul>
+<h3>8.4 실패 모드 분석</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>실패 모드</th>
+<th>유형</th>
+<th>원인</th>
+<th>완화(현재/제안)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>결주 진입 오조향</td>
+<td>의미</td>
+<td>결주에서 기준 불확실</td>
+<td>히트맵 보존+H스텝 계획(현) / 불확실성 게이팅(제안)</td>
+</tr>
+<tr>
+<td>심한 가림</td>
+<td>의미</td>
+<td>백본 히트맵 열화</td>
+<td>동결 백본 상한(현) / 백본 교체(제안)</td>
+</tr>
+<tr>
+<td>미끄러짐·거친 지형</td>
+<td>물리</td>
+<td>스키드-스티어 동역학</td>
+<td>안정성 보상·평활(현) / 저수준 제어 보강(제안)</td>
+</tr>
+<tr>
+<td>길 잃음 후 미복구</td>
+<td>시스템</td>
+<td>자율 복구 없음</td>
+<td>수동 리셋(현) / 복구 서브폴리시(제안)</td>
+</tr>
+</tbody></table></div>
+<p>LeCropFollow의 실패는 <strong>의미 실패가 크게 줄고 물리 실패가 상대적으로 부각</strong>되는 구조로 이동한다 — 이는 개선의 초점이 표현에서 저수준 제어로 넘어가야 함을 시사하는 건강한 신호다.</p>
+<h3>8.5 재현성 평가</h3>
+<ul>
+<li><strong>코드·모델·데이터 ✅ 완전 공개</strong>(MIT, GitHub) + ROS 토픽 계약 문서(<code>SKILLS/</code>) → <strong>개념·배포 재현 가능</strong>. Table I 하이퍼파라미터가 <code>tdmpc2/config</code>와 일치.</li>
+<li><strong>동결 백본이 외부 사전학습(CropFollow++)에 의존</strong> → 정확 재현은 RowFollowNet 가중치 접근에 좌우. 다만 저장소가 이를 포함/참조하므로 실질 재현성 높음.</li>
+</ul>
+<h3>8.6 잠재 세계모델 계획의 더 넓은 지형</h3>
+<p>LeCropFollow를 넓은 맥락에 놓으면 <strong>&quot;학습된 세계모델 안에서 계획하는(planning-in-latent-world-model)&quot;</strong> 흐름(Dreamer, TD-MPC 계열)의 로봇 항법 인스턴스다. 코퍼스의 다른 학습 로컬 플래너와 비교하면:</p>
+<ul>
+<li><strong>디퓨전 정책 계열(NavDP)</strong>: 궤적 분포를 디퓨전으로 생성. LeCropFollow는 분포 생성이 아니라 <strong>세계모델 롤아웃+MPPI 최적화</strong>로, 명시적 미래 상상이 있다는 점이 다르다.</li>
+<li><strong>엔드투엔드 최적화 계열(NeuPAN)</strong>: 포인트클라우드→모션 직접 매핑에 물리 제약을 신경망에 박음. LeCropFollow는 기하 제약을 명시하지 않고 <strong>의미 히트맵을 잠재에 흡수</strong>한다.
+LeCropFollow의 고유점은 <strong>&quot;압축되지 않은 의미 신호 + 세계모델 상상&quot;</strong> 을 결합해, 기하가 무너지는 애매 지형(결주)을 표현 수준에서 정면 돌파한다는 것이다.</li>
+</ul>
+<h3>8.7 이론적 위치짓기</h3>
+<p>전통 작물열 항법은 <strong>기하 추출(직선 피팅)→반응 제어(PID)</strong> 의 결정론 파이프라인이다. LeCropFollow는 이를 <strong>확률적 의미 표현→세계모델 계획</strong>으로 옮긴다. 이는 로봇 항법의 무게중심을 &quot;기하 기준 설계 → 표현·세계모델 학습&quot;으로 이동시키는 흐름의 일부다. 동시에 sim2real 측면에서는 <strong>도메인 랜덤화 없이도 (동결 지각 + 단순 시뮬을 어려운 하한으로)</strong> 전이를 유도하는 대안 레시피를 제시한다 — 이는 값비싼 실작물 데이터 수집을 우회하는 실용적 기여다.</p>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>같은 코퍼스의 <strong>학습 기반 로컬 내비게이션 플래너</strong> 선행 리뷰 세 편과 비교한다:</p>
+<ul>
+<li><strong>NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning</strong> (Planner/review/NeuPAN_RAL) — 포인트클라우드→모션 직접 매핑, 물리 제약 신경망 통합, 실로봇 다플랫폼.</li>
+<li><strong>NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance</strong> (VLN/review/NavDP_ICRA2026) — 디퓨전 정책 로컬 플래너, 시뮬 학습·제로샷 sim2real.</li>
+<li><strong>LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry</strong> (VLN/review/LoGoPlanner_ICRA2026) — 로컬라이제이션 프리 점-목표 로컬 플래너(자연어 없는 실질 Planner).</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>NeuPAN</th>
+<th>NavDP</th>
+<th>LoGoPlanner</th>
+<th><strong>LeCropFollow (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 패러다임</td>
+<td>엔드투엔드 최적화(PAN)</td>
+<td>디퓨전 정책+크리틱</td>
+<td>메트릭 비주얼 지오메트리</td>
+<td><strong>잠재 세계모델 계획(TD-MPC2)</strong></td>
+</tr>
+<tr>
+<td>입력/표현</td>
+<td>포인트클라우드→거리특성</td>
+<td>RGB(-D) 궤적 분포</td>
+<td>RGB-D 암시 pose</td>
+<td><strong>압축 안 한 의미 히트맵 56×80×3</strong></td>
+</tr>
+<tr>
+<td>계획 방식</td>
+<td>반복 근접 최적화</td>
+<td>디퓨전 샘플링</td>
+<td>정책 직접 회귀</td>
+<td><strong>세계모델 H스텝 상상+MPPI</strong></td>
+</tr>
+<tr>
+<td>미래 상상(world model)</td>
+<td>❌</td>
+<td>❌(생성만)</td>
+<td>❌</td>
+<td>✅ <strong>잠재 롤아웃 d_θ</strong></td>
+</tr>
+<tr>
+<td>자연어 지시</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌ (순수 시각)</td>
+</tr>
+<tr>
+<td>sim2real</td>
+<td>실+시뮬</td>
+<td>✅ 제로샷(특권정보)</td>
+<td>✅ 제로샷</td>
+<td>✅ <strong>제로샷, 파인튜닝 없음</strong></td>
+</tr>
+<tr>
+<td>도메인</td>
+<td>실내·캠퍼스·주차</td>
+<td>실내·다임바디먼트</td>
+<td>실내 점목표</td>
+<td><strong>캐노피 아래 농업(옥수수밭)</strong></td>
+</tr>
+<tr>
+<td>애매지형 강건성</td>
+<td>좁은통로</td>
+<td>다중모드</td>
+<td>로컬라이제이션 프리</td>
+<td><strong>결주 93.3%(2.4배 의미실패↓)</strong></td>
+</tr>
+<tr>
+<td>실로봇</td>
+<td>✅ 다플랫폼</td>
+<td>✅ 바퀴/사족/휴머노이드</td>
+<td>✅</td>
+<td>✅ <strong>TerraSentia 실옥수수밭</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>(프로젝트)</td>
+<td>✅ 공개</td>
+<td>✅ 공개</td>
+<td>✅ <strong>공개(MIT)</strong></td>
+</tr>
+<tr>
+<td>게재</td>
+<td>RA-L/T-RO</td>
+<td>ICRA 2026</td>
+<td>ICRA 2026</td>
+<td>arXiv 2026(RA-L 정황)</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>LeCropFollow의 강점:</strong></p>
+<ol>
+<li><strong>명시적 세계모델 계획</strong> — NeuPAN·NavDP·LoGoPlanner 셋 다 세계모델로 미래를 상상하지 않는다(NeuPAN은 근접 최적화, NavDP는 디퓨전 생성, LoGoPlanner는 정책 회귀). LeCropFollow만 <code>d_θ</code>로 <strong>H스텝 잠재 롤아웃</strong>을 굴려 <strong>선제적 계획</strong>을 한다. 결주처럼 &quot;곧 기준이 사라질&quot; 상황을 미리 대비하는 능력은 이 세계모델에서 나온다(어블레이션 L2 붕괴가 증명).</li>
+<li><strong>의미 히트맵 보존이라는 표현 혁신</strong> — NeuPAN은 포인트클라우드를 거리특성으로, LoGoPlanner는 pose로 압축한다. LeCropFollow는 <strong>압축을 의도적으로 거부</strong>하고 히트맵을 그대로 잠재에 흡수해, 결정론적 환원이 버리는 불확실성을 계획에 반영한다. 동일 백본 CropFollow++ 대비로 이 효과를 순수 분리한 것이 방법론적으로 견고하다.</li>
+<li><strong>농업 캐노피-아래 도메인 + 결주 강건성</strong> — 세 비교 논문 모두 실내/도시/일반 환경이다. LeCropFollow는 <strong>가림·불연속이 지배적인 농업 실환경</strong>에서 결주 93.3%, 의미 실패 2.4배 감소로 고유 문제를 정조준한다. 특히 단안 카메라만으로 LiDAR 기반 CROW(53.3%)를 능가.</li>
+<li><strong>제로샷 sim2real의 저비용 레시피</strong> — NavDP는 시뮬 특권정보(ESDF)를, LoGoPlanner는 대규모 시뮬 데이터를 쓴다. LeCropFollow는 <strong>untextured 원기둥 단순 시뮬 + 동결 백본</strong>만으로 전이 → 실작물 데이터·특권정보 없이 전이하는 값싼 경로.</li>
+</ol>
+<p><strong>LeCropFollow의 약점:</strong></p>
+<ol>
+<li><strong>동결 백본 상한</strong> — NeuPAN·NavDP·LoGoPlanner는 인지-계획을 함께 학습하나, LeCropFollow는 인지를 동결해 <strong>성능 천장이 RowFollowNet에 걸린다</strong>. 극단 시각(야간·역광)에 취약.</li>
+<li><strong>최적성·안전 보장 부재</strong> — NeuPAN은 거리 제약을 신경망에 명시(안전 마진), LoGoPlanner는 메트릭 스케일을 명시 추정한다. LeCropFollow는 <strong>학습 보상·세계모델에 안전이 암묵적</strong>이라, 세계모델이 틀리면 오도 위험(L5). 형식적 충돌 회피 보장이 없다.</li>
+<li><strong>단일 작물·단일 지역</strong> — NeuPAN(다플랫폼·다환경)·NavDP(다임바디먼트) 대비 검증 폭이 좁다. 브라질 옥수수밭 두 단계만.</li>
+<li><strong>자율 복구 부재</strong> — 세 비교 논문과 마찬가지로, 결주 실패 후 수동 리셋에 의존(자율 재획득 없음).</li>
+</ol>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>LeCropFollow</strong>: 단안 카메라 + Jetson Orin Nano 20 Hz + 코드 공개 + 제로샷 sim2real → <strong>농업 로봇 실배치 후보로 매우 강함</strong>. 특히 결주·불규칙 파종이 흔한 실제 밭에서 키포인트 방식의 붕괴를 정면 해결. 단, 동결 백본 상한·자율 복구 부재로 <strong>완전 무인 장시간 운용엔 복구 정책 보강</strong> 필요.</li>
+<li><strong>NeuPAN</strong>: 실내·도시 다플랫폼 실시간(5.1ms)에 강하나, LiDAR·포인트클라우드 의존이라 농업 캐노피(먼지·가림)엔 재검증 필요.</li>
+<li><strong>NavDP</strong>: 다임바디먼트 제로샷에 강하나 실내 중심, 농업 특화 아님.</li>
+<li><strong>LoGoPlanner</strong>: 로컬라이제이션 프리 실내 점목표에 강점, 농업·결주는 비대상.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>LeCropFollow는 로봇 항법의 무게중심을 <strong>&quot;기하 기준 추출 → 압축되지 않은 의미 표현 위의 세계모델 계획&quot;</strong> 으로 옮긴다. 이는 NeuPAN(제약 명시 최적화), NavDP(디퓨전 생성), LoGoPlanner(메트릭 기하 추정)와 <strong>직교(orthogonal)</strong> 하는 축이다. 따라서 결합이 자연스럽다:</p>
+<ul>
+<li>NeuPAN의 <strong>명시적 안전 제약</strong>을 LeCropFollow의 세계모델 계획에 얹어 &quot;잠재 계획 + 하드 안전 보장&quot; 하이브리드.</li>
+<li>NavDP의 <strong>크리틱(안전 점수)</strong>·특권정보를 LeCropFollow의 보상 모델에 통합해 세계모델 롤아웃 신뢰 게이팅.</li>
+<li>LoGoPlanner의 <strong>메트릭 스케일 추정</strong>을 히트맵 채널에 추가해 결주 거리(8.7 m)를 명시 인지.</li>
+</ul>
+<h3>9.5 일반화 가능성</h3>
+<p>LeCropFollow의 &quot;<strong>압축되지 않은 의미 히트맵 + 세계모델 계획</strong>&quot; 레시피는 농업에 국한되지 않는다. <strong>기하 기준이 자주 사라지는 애매 환경</strong>(공사장 임시 통로, 재난 잔해, 표지 소실 도로) 어디에나 이식 가능한 일반 패턴이다. 핵심은 &quot;결정론적 기준을 뽑지 말고, 불확실성을 표현에 남긴 채 세계모델로 앞을 상상하라&quot;는 것 — 이는 LeCropFollow가 제시한 표현 철학의 도메인 불변적 핵심이다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li>LeCropFollow: Latent Space Planning for Navigation in Unstructured Crop Fields. arXiv:2606.31941 (2026). 코드/프로젝트: <a href="https://github.com/Felipe-Tommaselli/lecropfollow">https://github.com/Felipe-Tommaselli/lecropfollow</a> , <a href="https://felipe-tommaselli.github.io/lecropfollow">https://felipe-tommaselli.github.io/lecropfollow</a></li>
+<li>비교 대상 (본 코퍼스):<ul>
+<li>NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning (IEEE T-RO 2025, arXiv:2403.06828).</li>
+<li>NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance (ICRA 2026, arXiv:2505.08712).</li>
+<li>LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry (ICRA 2026, arXiv:2512.19629).</li>
+</ul>
+</li>
+<li>관련 기법·베이스라인:<ul>
+<li>CropFollow++ (Sivakumar et al., 2024) — 비전 키포인트 작물열 항법, RowFollowNet.</li>
+<li>CROW (Affonso et al., 2025) — LiDAR+DLIO 자기지도 작물열 항법.</li>
+<li>TD-MPC2 (Hansen et al., 2024) — 확장 가능한 잠재 세계모델 MBRL.</li>
+<li>MPPI (Williams et al., 2017) — Model Predictive Path Integral 제어.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>혁신성</h3>
+<p>LeCropFollow의 핵심 혁신은 <strong>캐노피 아래 작물열 항법의 표현을 &quot;결정론적 기하 기준&quot;에서 &quot;압축되지 않은 의미 히트맵 위의 잠재 세계모델 계획&quot;으로 전환</strong>한 것이다. 동일한 동결 RowFollowNet 백본을 CropFollow++와 공유하면서도, 히트맵을 argmax로 붕괴시키지 않고 그대로 TD-MPC2에 흡수해, 세계모델 <code>d_θ</code>로 H스텝 미래를 상상하며 MPPI로 궤적을 최적화한다. 이 표현 전환 하나로, 기하 기준 자체가 존재하지 않는 결주(plantation gap)에서 키포인트 방식이 6.7%로 붕괴하는 것을 <strong>93.3%로 끌어올리고 의미 실패를 2.4배 감소</strong>시킨다.</p>
+<h3>실용적 의의</h3>
+<p>단안 카메라만으로 LiDAR 기반 CROW(결주 53.3%)를 능가하고, <strong>단순 Gazebo(untextured 원기둥) 학습을 파인튜닝 없이 실 옥수수밭에 제로샷 전이</strong>하며, 개화기·수확 후 두 생육 단계에 통계적 유의차 없이 강건하다. <strong>Jetson Orin Nano에서 20 Hz 온보드 실시간 구동</strong>하고 <strong>코드·모델·데이터가 MIT로 완전 공개</strong>되어, 코퍼스 Planner 논문 중 재현성·실증성 균형이 가장 뛰어난 축에 속한다. 실제 밭의 불규칙 파종·결주가 키포인트 방식의 주된 실패 모드였다는 점에서, 즉시 실배치 가치가 높다.</p>
+<h3>향후 연구 방향</h3>
+<p>한계는 (i) 동결 백본에 걸린 성능 천장, (ii) 자율 결주 복구 부재(수동 리셋 의존), (iii) 세계모델 불확실성 미게이팅, (iv) 단일 작물·단일 지역 검증, (v) 명시적 안전 보장 부재에 있다. 따라서 <strong>인지 백본 공동 미세조정/파운데이션 세그멘터 교체</strong>, <strong>자율 복구 서브폴리시</strong>, <strong>세계모델 앙상블 불확실성 게이팅(NeuPAN·BOWConnect의 불확실성-인지 안전을 잠재 계획에 이식)</strong>, <strong>다작물·다지역 대규모 필드 스터디</strong>가 자연스러운 다음 단계다.</p>
+<h3>종합 평가</h3>
+<p>LeCropFollow는 &quot;비정형 항법 특징(결주·불연속)이 캐노피 아래 농업 로봇의 주된 실패 모드&quot;라는 정확한 문제 진단에서 출발해, 그 근원을 <strong>결정론적 기하 압축의 정보 손실</strong>로 지목하고, <strong>의미 히트맵 보존 × 잠재 세계모델 계획</strong>의 곱으로 정면 돌파한다. 어블레이션(L1 정책만·L2 1-step 붕괴 vs L3 완전 정식화 93.3%)이 이 곱셈 구조를 깔끔히 분해해, 개선이 히트맵 보존 단독이 아니라 <strong>다지평선 잠재 계획과의 시너지</strong>에서 나옴을 실증한 것이 방법론적 미덕이다. 평가 측면에서도 시뮬 성능에 그치지 않고 <strong>두 생육 단계 실옥수수밭 제로샷 전이</strong>, <strong>의미/물리 실패 분해 분석</strong>, <strong>완전 오픈소스</strong>를 동시에 충족한다. 다만 동결 백본에 걸린 인지 상한, 자율 복구 부재, 세계모델 불확실성 미게이팅, 단일 도메인 검증은 후속이 메워야 할 빈칸이다. 그럼에도 &quot;압축하지 말고 의미를 남긴 채 세계모델로 앞을 상상하라&quot;는 명료한 표현 철학과, 값싼 단순 시뮬로부터의 제로샷 전이 레시피는 본 논문을 2026년 농업·캐노피-아래 항법 흐름에서 주목할 가치가 높은 결과로 만든다.</p>
+<hr>
+<p><em>본 리뷰는 PhD 수준 상세 분석이며, 논문 본문(arXiv HTML 2606.31941)의 수식·실험표·실로봇 기술과 공개 코드(github.com/Felipe-Tommaselli/lecropfollow, MIT)에 기반한다.</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>SCAN-Planner: Surface-Following Collision-Aware Navigation for Quadruped Robots in 3D Unstructured Environments · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv preprint (RA-L letter 형식, 확정 미확인)</div>
+    <h1>SCAN-Planner: Surface-Following Collision-Aware Navigation for Quadruped Robots in 3D Unstructured Environments</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2606.19555">arXiv:2606.19555</a></span>
+      <span>리뷰 2026-06-20</span>
+      <span>42분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>SCAN-Planner: 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: SCAN-Planner: Surface-Following Collision-Aware Navigation for Quadruped Robots in 3D Unstructured Environments</li>
+<li><strong>저자 (Authors)</strong>: Han Zheng, Zhe Chen, Yiwen Fu, Ming Yang, Tong Qin</li>
+<li><strong>소속 (Affiliation)</strong>: Shanghai Jiao Tong University (상하이교통대학교), Global Institute of Future Technology / Department of Automation</li>
+<li><strong>발표처 (Published)</strong>: arXiv preprint (RA-L letter 형식으로 작성, 학회/저널 확정 미확인)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2606.19555">https://doi.org/10.48550/arXiv.2606.19555</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2606.19555">https://arxiv.org/abs/2606.19555</a></li>
+<li><strong>코드 (Code)</strong>: <a href="https://github.com/wuyi2121/SCAN-Planner">https://github.com/wuyi2121/SCAN-Planner</a> — <strong>예정 (Coming Soon)</strong>. 저장소는 존재하나 README에 &quot;Code will be updated soon!&quot;만 명시되어 있고, 실제 소스 코드는 미공개(에셋/GIF 데모만 포함, Apache 2.0, ~39 stars). 따라서 본 리뷰의 코드 분석은 논문 본문의 의사코드·수식·아키텍처 기술에 근거하며, 실제 구현 스니펫은 공개되지 않았음을 명시한다.</li>
+<li><strong>프로젝트 페이지 (Project Page)</strong>: 별도 확정 URL 미확인 (확인 불가).</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>본 연구는 <strong>사족보행 로봇(quadruped robot)이 평탄하지 않은 3D 비정형 환경(unstructured environment)</strong> — 계단, 경사로, 좁은 통로, 다층 구조, 옥외 캠퍼스 등 — 에서 <strong>지면을 따라 움직이면서도(surface-following) 충돌을 회피하는 실시간 로컬 플래닝(local planning)</strong> 문제를 다룬다.</p>
+<p>기존의 사족보행 로컬 플래너는 크게 두 부류로 나뉜다. (1) 로봇을 2D 평면 위의 점 또는 원판(disk)으로 단순화하여 빠르게 계획하지만, 계단·경사·턱(step)과 같은 z축 지형 변화를 무시하여 실제 다리가 닿는 영역의 충돌을 제대로 모델링하지 못한다. (2) 완전한 3D 점유 격자(occupancy grid)와 3D 형상을 사용하지만, 매 계획 주기마다 막대한 충돌 질의 비용이 발생하여 온보드 컴퓨팅(Jetson Orin NX 급)에서 실시간성을 확보하기 어렵다.</p>
+<p>SCAN-Planner의 핵심 목표는 이 둘 사이의 간극을 메우는 것이다. 즉,</p>
+<ol>
+<li>사족보행 로봇의 <strong>실제 점유 형상을 단 2개의 점 질의로 근사</strong>하는 <em>yaw-aware twin-cylinder footprint(요각 인지 쌍원기둥 풋프린트)</em> 충돌 모델을 도입하여 3D 충돌 인지를 저비용으로 달성하고,</li>
+<li><strong>지면을 따라가는 투영 A*(projected A*)</strong> 전단(front-end)으로 z축을 별도 차원으로 탐색하지 않으면서도 지형을 추종하는 초기 경로를 생성하며,</li>
+<li><strong>로봇 중심 슬라이딩 3D 점유 맵(robot-centric sliding occupancy map)</strong> 과 경계 폴백(boundary fallback) 메커니즘으로 제한된 메모리·시야 안에서 안정적인 재계획을 보장하고,</li>
+<li><strong>3차 B-스플라인(cubic B-spline) 기반 후단(back-end) 궤적 최적화</strong>로 충돌·평활성·동역학 실현가능성을 동시에 만족하는 매끄러운 궤적을 산출한다.</li>
+</ol>
+<p>최종적으로 시뮬레이션(MARSIM)과 <strong>실제 Unitree Go2 로봇</strong>(다층 건물 횡단, 옥외 캠퍼스 주행 포함)에서 EGO-Planner, CMU-Planner, ART-Planner 등 강력한 베이스라인을 능가하는 성공률·안전성·경로 효율을 입증하는 것을 목표로 한다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p>사족보행 로봇의 3D 비정형 환경 로컬 플래닝은 다음과 같은 본질적 난제를 갖는다.</p>
+<p><strong>(C1) 충돌 모델의 차원-비용 딜레마.</strong>
+로봇을 2D 점/원판으로 보면 충돌 질의는 빠르지만, 계단·턱·경사처럼 z축으로 형상이 변하는 곳에서 다리·몸체의 실제 점유를 표현하지 못한다. 반대로 완전한 3D 볼륨(다수의 복셀/구체)로 모델링하면 충돌 질의 수가 폭증하여 최적화 반복마다 수백~수천 회의 점유 조회가 필요해 실시간성이 붕괴된다.</p>
+<p><strong>(C2) z축 탐색의 조합 폭발.</strong>
+전단 경로 탐색에서 (x, y, z)를 모두 그래프 노드 차원으로 두면 탐색 공간이 급격히 커지고, 지면을 벗어난 비물리적 노드(공중 부양 경로)가 다수 생성된다. 사족보행 로봇은 본질적으로 지면 접촉 이동체이므로, z를 자유 차원으로 두는 것은 낭비이자 위험이다.</p>
+<p><strong>(C3) 제한된 시야와 메모리 안에서의 안정적 재계획.</strong>
+온보드 LiDAR(Livox Mid-360 등)는 유한한 범위만 관측한다. 로봇이 빠르게 이동하면 맵 경계 밖으로 목표가 사라지거나, 아직 관측되지 않은 영역으로 경로가 향한다. 고정 크기 맵을 매 주기 재구성하면 비용이 크고, 경계 처리(미관측 영역을 점유로 볼지 자유로 볼지)에 따라 플래너가 멈추거나 위험한 경로를 내는 진동이 발생한다.</p>
+<p><strong>(C4) 매끄러움·동역학 실현가능성·안전 여유의 동시 만족.</strong>
+이산 경로를 그대로 추종하면 급격한 가감속·요동이 생겨 사족보행 보행기(locomotion controller)의 추종 성능과 안정성을 해친다. 속도·가속도 한계를 지키면서, 장애물로부터 충분한 여유를 유지하고, 저크(jerk)를 억제한 매끄러운 궤적을 실시간으로 최적화해야 한다.</p>
+<p><strong>(C5) 요각(yaw)과 비대칭 형상.</strong>
+사족보행 로봇의 몸체는 전후로 긴 비대칭 형상이며, 진행 방향(yaw)에 따라 점유 영역이 회전한다. 충돌 모델이 yaw를 무시하면 좁은 통로에서 보수적(통과 실패)이거나 위험한(측면 충돌) 판단을 한다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>SCAN-Planner는 위 난제들을 다음과 같이 정조준하여 해결한다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>도전과제</th>
+<th>SCAN-Planner의 해결책</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>(C1) 차원-비용 딜레마</td>
+<td><strong>Twin-cylinder footprint</strong>: 몸체를 전·후 2개의 원기둥으로 근사 → 충돌 질의 = 단 2 점 질의</td>
+</tr>
+<tr>
+<td>(C2) z축 조합 폭발</td>
+<td><strong>Projected A*</strong>: (x,y) 2D 그래프 탐색 + 지면 보간으로 z를 종속변수로 산출</td>
+</tr>
+<tr>
+<td>(C3) 시야·메모리·재계획</td>
+<td><strong>Robot-centric sliding map</strong> (제로카피 중첩·순환버퍼) + <strong>boundary fallback</strong> (가상 자유층 → 경계 탈출 복셀을 폴백 목표로)</td>
+</tr>
+<tr>
+<td>(C4) 매끄러움·실현가능성·안전</td>
+<td><strong>Cubic B-spline back-end</strong>: rebound 충돌항 + jerk 평활항 + 속도/가속도 feasibility, L-BFGS</td>
+</tr>
+<tr>
+<td>(C5) 요각·비대칭</td>
+<td>B-스플라인 접선으로 유도한 <strong>induced yaw</strong>를 풋프린트 회전에 반영</td>
+</tr>
+</tbody></table></div>
+<p>전체적으로 <strong>&quot;3D 충돌 인지를 유지하되 비용은 2D 수준으로&quot;</strong> 를 관통하는 설계 철학을 따른다.</p>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 Yaw-Aware Twin-Cylinder Footprint (요각 인지 쌍원기둥 풋프린트)</h3>
+<p>SCAN-Planner의 가장 핵심적인 기여는 사족보행 로봇의 충돌 형상을 <strong>전·후 2개의 원기둥</strong>으로 근사하는 것이다. 이로써 한 위치에서의 충돌 검사는 <strong>단 2번의 점유 맵 질의</strong>로 환원된다.</p>
+<p><strong>(1) 몸체 좌표계에서의 두 원기둥 중심</strong></p>
+<p>로봇 몸체 좌표계(body frame)에서 두 원기둥의 중심을 전후 대칭으로 배치한다.</p>
+<pre><code>s_{b,1} = [ d_off, 0, 0 ]^T     # 전방 원기둥 중심
+s_{b,2} = [ -d_off, 0, 0 ]^T    # 후방 원기둥 중심
+</code></pre>
+<p>여기서 <code>d_off</code>는 몸체 중심에서 각 원기둥까지의 전후 오프셋이다. 몸체의 길쭉한 형상을 두 원기둥의 합집합(capsule 유사)으로 덮음으로써, 단일 원기둥보다 측면-전후 비대칭을 잘 표현하면서도 충돌 질의 비용은 2배에 그친다.</p>
+<p>각 원기둥은 다음 여유(clearance) 파라미터로 정의된다.</p>
+<pre><code>d_xy    : 수평(반경) 방향 여유   — 측면 충돌 마진
+d_up    : 상방 여유             — 머리 위 천장/턱 클리어런스
+d_down  : 하방 여유             — 다리가 닿는 지면 아래 허용 깊이
+        = nominal_height - d_step
+</code></pre>
+<p><code>d_down</code>을 <code>nominal_height - d_step</code>으로 정의한 점이 중요하다. 즉 로봇의 공칭 보행 높이(nominal_height)에서 한 스텝으로 오르내릴 수 있는 턱 높이(<code>d_step</code>)만큼을 뺀 값을 하방 허용으로 두어, <strong>계단/턱을 &quot;충돌&quot;이 아니라 &quot;넘을 수 있는 지형&quot;으로 분류</strong>한다. 이 한 줄의 정의가 surface-following의 본질을 충돌 모델 안에 내장한다.</p>
+<p><strong>(2) B-스플라인 접선으로부터의 유도 요각(induced yaw)</strong></p>
+<p>사족보행 로봇은 보통 진행 방향을 바라보므로, 별도의 yaw 자유도를 최적화하지 않고 <strong>궤적의 접선 방향에서 yaw를 유도</strong>한다. B-스플라인 제어점 <code>Q</code>에 대해 i번째 점의 yaw는 전후 제어점의 차분 벡터로부터 계산한다.</p>
+<pre><code>ψ_i = atan2( e_y^T (Q_{i+1} - Q_{i-1}),
+             e_x^T (Q_{i+1} - Q_{i-1}) )
+</code></pre>
+<p>여기서 <code>e_x, e_y</code>는 수평면의 단위 기저 벡터다. 이렇게 하면 yaw는 위치 제어점의 함수가 되어, 위치 최적화만으로도 풋프린트 회전이 자동 갱신된다.</p>
+<p><strong>(3) 세계 좌표계로의 변환과 충돌 지표</strong></p>
+<p>i(또는 k)번째 경로점에서 두 원기둥의 세계 좌표 중심은 yaw 회전 후 평행이동으로 얻는다.</p>
+<pre><code>s_{k,j} = R_z(ψ_k) · s_{b,j} + Q_k ,   j ∈ {1, 2}
+</code></pre>
+<p><code>R_z(ψ_k)</code>는 z축 회전행렬이다. 점유 맵 조회 함수 <code>χ(·)</code>(점이 점유면 1, 자유면 0에 해당하는 비용/지표)를 이용해, k번째 점의 충돌 지표는 두 원기둥 중 더 위험한 쪽으로 정의한다.</p>
+<pre><code>H_k(Q_k, ψ_k) = max_{ j ∈ {1,2} } χ( s_{k,j} )
+</code></pre>
+<p><code>H_k = 0</code>이면 충돌 없음(collision-free), <code>H_k &gt; 0</code>이면 충돌 위험이다. 핵심은 <strong>한 경로점당 점유 질의가 정확히 2회</strong>라는 점 — 이것이 전체 파이프라인이 온보드에서 실시간으로 도는 비결이다.</p>
+<pre><code>        진행방향 (yaw ψ)
+            ▲
+   ┌────────┼────────┐
+   │   ◯ 전방 원기둥   │  s_{k,1} = R_z(ψ)·[+d_off,0,0]^T + Q
+   │  (d_xy, d_up,   │
+   │       d_down)   │
+   │        ●  Q_k   │  ← 경로 제어점(몸체 중심)
+   │   ◯ 후방 원기둥   │  s_{k,2} = R_z(ψ)·[-d_off,0,0]^T + Q
+   └─────────────────┘
+   충돌검사 = max( χ(전방), χ(후방) )  →  단 2회 점유 질의
+</code></pre>
+<p>이 모델은 (C1) 차원-비용 딜레마와 (C5) 요각·비대칭을 동시에 해결한다. 완전 3D 볼륨 대비 질의 수를 수백 분의 일로 줄이면서도, yaw 회전과 상/하방 여유로 3D 지형(턱·천장)을 인지한다.</p>
+<h3>3.2 Projected A* (지면 추종 투영 A*)</h3>
+<p>전단 경로 탐색은 z를 자유 차원으로 두지 않고, <strong>(x, y) 2D 격자에서 A*를 수행하되 각 노드의 z를 관측된 지면으로 보간하여 종속적으로 결정</strong>한다. 이를 &quot;투영(projected) A*&quot;라 부른다.</p>
+<p><strong>(1) 지면 보간(ground interpolation)</strong></p>
+<p>수평 위치 <code>x_xy</code>에서의 지면 높이 <code>z(x_xy)</code>는, 관측된 진입점 <code>x_in</code>(높이 <code>z_in</code>)과 진출점 <code>x_out</code>(높이 <code>z_out</code>) 사이를 선형 보간한 비율 <code>β</code>로 구한다.</p>
+<pre><code>                 (x_xy - x_in)^T (x_out - x_in)
+β(x_xy) = Π_[0,1]( ----------------------------- )
+                      || x_out - x_in ||^2
+
+z(x_xy) = z_in + β · ( z_out - z_in )
+</code></pre>
+<p><code>Π_[0,1](·)</code>는 [0,1] 구간으로의 클리핑(projection)으로, 보간 비율이 선분을 벗어나지 않도록 한다. 이렇게 하면 각 2D 노드는 자동으로 그 지점의 추정 지면 높이를 부여받아, <strong>경로가 지면을 따라 흐르게(surface-following)</strong> 된다.</p>
+<p><strong>(2) 이웃 노드의 요각과 충돌 검사</strong></p>
+<p>A* 확장에서 현재 노드에서 이웃 노드로의 이동 방향이 곧 그 구간의 yaw가 된다.</p>
+<pre><code>ψ_Δ = atan2( Δy, Δx )      # 이웃으로의 진행 방향 = yaw
+</code></pre>
+<p>이 yaw로 §3.1의 twin-cylinder를 회전시켜 충돌 지표를 계산하고, <strong>충돌 지표가 0인 노드만 확장 후보로 수용</strong>한다.</p>
+<pre><code>노드 n 수용 조건:  H(Q_n, ψ_Δ) == 0   (collision-free)
+</code></pre>
+<p><strong>(3) z-그래디언트 억제(z-gradient suppression)</strong></p>
+<p>지면 보간만으로는 급경사·낭떠러지·점프가 필요한 비물리적 전이가 생길 수 있다. 이를 막기 위해 인접 노드 간 z 변화율(높이 그래디언트)이 사족보행 로봇이 안전하게 오르내릴 수 있는 한계를 넘으면 해당 전이의 비용을 크게 키우거나 금지한다(z-gradient suppression). 즉 <strong>턱은 넘되 절벽은 피하는</strong> 필터다.</p>
+<pre><code>if  |z(n&#39;) - z(n)| / ||xy(n&#39;) - xy(n)||  &gt;  γ_max :
+        해당 간선 비용 ↑↑  (사실상 차단)
+</code></pre>
+<pre><code>   투영 A* 개념도 (측면도)
+   z
+   │            ___                 ← 절벽/급경사: z-gradient suppression 으로 차단
+   │      _____/   \____
+   │   __/  ▲    ▲    ▲ \___        ← 노드의 z = 지면 보간값 (surface-following)
+   │  /     │    │    │      \
+   │_/      ●────●────●       \_    ← 2D (x,y) A* 경로를 지면에 투영
+   └──────────────────────────► x
+   각 노드: (x,y)는 그래프 차원, z는 보간 종속변수, 충돌검사는 twin-cylinder@ψ_Δ
+</code></pre>
+<p>이 설계는 (C2) z축 조합 폭발을 근본적으로 회피한다 — 탐색 차원은 2D이지만 결과 경로는 3D 지면을 추종한다.</p>
+<h3>3.3 Robot-Centric Sliding Occupancy Map (로봇 중심 슬라이딩 점유 맵)</h3>
+<p>실시간 재계획을 위해 SCAN-Planner는 <strong>고정 크기의 로봇 중심 3D 점유 격자</strong>를 유지하고, 로봇이 이동하면 맵을 전체 재할당하지 않고 <strong>제로카피 중첩(zero-copy overlap)</strong> 과 <strong>순환 버퍼(circular buffer)</strong> 로 갱신한다.</p>
+<p><strong>(1) 제로카피 중첩 갱신</strong></p>
+<p>로봇이 한 격자 이동하면, 이전 맵과 새 맵은 대부분 겹친다(영역 B). 겹치는 부분은 복사하지 않고 그대로 두고, 빠져나가는 영역(A)의 메모리를 새로 들어오는 영역(C)에 <strong>재사용(circular buffer reuse)</strong> 한다.</p>
+<pre><code>   이동 전:  [ A | ===== B ===== ]
+   이동 후:        [ ===== B ===== | C ]
+                    └ 그대로 유지 ┘  └ A의 메모리 재사용
+   → B는 복사 0회 (zero-copy), A 슬롯을 순환적으로 C로 인덱스 재매핑
+</code></pre>
+<p>이로써 매 주기 맵 갱신 비용이 O(맵 전체)에서 O(새로 들어온 얇은 층)으로 줄어든다.</p>
+<p><strong>(2) 로그-오즈(log-odds) 점유 융합과 클램핑</strong></p>
+<p>각 복셀은 로그-오즈 확률로 점유를 누적하며, 과도한 확신을 막기 위해 상·하한으로 클램핑한다.</p>
+<pre><code>L(v) ← clamp( L(v) + Δl_hit/miss ,  p_min ,  p_max )
+점유 판정:  occupied  if  L(v) &gt; L_thresh
+</code></pre>
+<p><strong>(3) 증분 인플레이션(incremental inflation)</strong></p>
+<p>장애물 주변에 안전 여유를 두기 위해 점유 복셀을 팽창(inflation)시키되, 매번 전체를 다시 팽창하지 않고 새로 점유/해제된 복셀 주변만 증분 갱신한다.</p>
+<p><strong>(4) 경계 폴백(boundary fallback)</strong></p>
+<p>목표가 맵 밖에 있거나, 경로가 미관측 영역(맵 경계)으로 향할 때 플래너가 멈추지 않도록 하는 메커니즘이다.</p>
+<ol>
+<li>맵 경계에 <strong>가상의 1-복셀 자유층(virtual one-voxel free layer)</strong> 을 부여하여, 가설 경로(hypothesis path)가 경계를 &quot;탈출&quot;할 수 있게 한다.</li>
+<li>그 가설 경로가 맵을 빠져나가는 <strong>경계 탈출 복셀(boundary exit voxel)</strong> 을 <strong>폴백 목표(fallback target)</strong> 로 설정한다.</li>
+<li>이 폴백 목표까지의 <strong>유계 복구 궤적(bounded recovery trajectory)</strong> 을 생성하여, 로봇이 관측 범위 안에서 안전하게 전진하다가 새 관측이 들어오면 다시 정상 목표로 재계획한다.</li>
+</ol>
+<pre><code>   ┌─────────── sliding map ───────────┐
+   │  ●로봇                              │
+   │     ╲                              │
+   │      ╲ 가설경로                     │
+   │       ╲                            ★ 진짜 목표 (맵 밖)
+   │        ◇ ← boundary exit voxel = fallback target
+   │ (virtual free layer) ░░░░░░░░░░░░░░│
+   └────────────────────────────────────┘
+   → 경계로 향하는 경로도 멈추지 않고 &quot;경계 탈출 복셀&quot;까지 유계 전진
+</code></pre>
+<p>이 설계는 (C3)을 해결한다 — 제한된 시야·메모리에서도 진동 없이 부드럽게 전진하며, 미관측 영역으로의 보수성과 진취성 사이 균형을 맞춘다.</p>
+<h3>3.4 Cubic B-Spline Back-End Trajectory Optimization (3차 B-스플라인 후단 최적화)</h3>
+<p>전단 투영 A*가 낸 이산 경로를 초기값으로 하여, 후단에서 <strong>균일 3차 B-스플라인(uniform cubic B-spline, 차수 p_b = 3)</strong> 궤적을 최적화한다.</p>
+<p><strong>(1) B-스플라인 파라미터화</strong></p>
+<pre><code>차수            p_b = 3 (cubic)
+제어점          Q_1, ..., Q_{N_c}
+노드 간격        Δt (uniform knot span)
+총 시간          T = (N_c - p_b) · Δt
+최적화 대상      내부 제어점 (양끝 p_b개씩 경계조건 고정) → N_c - 2·p_b 개
+</code></pre>
+<p>균일 3차 B-스플라인은 <strong>볼록 껍질 성질(convex hull property)</strong> 과 <strong>미분의 닫힌 형식(속도·가속도·저크가 제어점 차분으로 표현됨)</strong> 덕분에 충돌·동역학 제약을 제어점에 대한 비용으로 깔끔하게 쓸 수 있다.</p>
+<p><strong>(2) 목적 함수</strong></p>
+<pre><code>J = λ_c · J_c  +  λ_s · J_s  +  λ_f · J_f
+        충돌        평활성       실현가능성
+</code></pre>
+<p><strong>(3) 충돌 항 (rebound penalty)</strong></p>
+<p>EGO-Planner 계열의 <em>rebound</em>(되튕김) 아이디어를 사용한다. 충돌하는 제어점 <code>Q_i</code>에 대해, 장애물 표면 위의 기준점 <code>a_ij</code>와 그 지점에서 자유공간을 향하는 방향 벡터 <code>v_ij</code>를 정의하고, 침투 깊이를 페널티화한다.</p>
+<pre><code>d_ij = (Q_i - a_ij)^T v_ij          # v_ij 방향 부호거리(자유공간 향)
+c_ij = s_f - d_ij                    # s_f: 요구 안전여유, c_ij&gt;0 이면 위반
+
+J_c  = Σ_i Σ_j  ρ( c_ij )            # ρ: 위반에 대한 (구간별) 페널티
+∂J_c/∂Q_i = - Σ_j  ρ&#39;(c_ij) · v_ij  # 자유공간 방향으로 제어점을 밀어냄
+</code></pre>
+<p>기울기가 <code>v_ij</code> 방향(자유공간 쪽)을 향하므로, 최적화는 충돌 제어점을 장애물 밖으로 &quot;되튕겨&quot; 낸다. 여기서 충돌 검사 <code>d_ij</code> 평가는 §3.1 twin-cylinder를 통해 이루어져 점유 질의 비용이 낮게 유지된다.</p>
+<p><strong>(4) 평활성 항 (smoothness, jerk 최소화)</strong></p>
+<p>제어점 차분으로 표현된 저크(3계도함수) 대용량을 최소화한다.</p>
+<pre><code>J_s = Σ_k || J_k ||^2          # J_k: k 구간의 저크(또는 그 이산 근사)
+</code></pre>
+<p>균일 B-스플라인에서 저크는 연속한 4개 제어점의 선형결합으로 닫힌 형식으로 주어지므로, <code>∂J_s/∂Q</code>도 해석적으로 계산된다.</p>
+<p><strong>(5) 실현가능성 항 (feasibility, 속도·가속도 한계)</strong></p>
+<pre><code>F(c, c_m) = max( c - c_m , 0 )^2     # 한계 초과분만 이차 페널티
+
+J_f = Σ_k F( ||V_k|| , v_m )         # 속도 한계 v_m
+    + Σ_k F( ||A_k|| , a_m )         # 가속도 한계 a_m
+</code></pre>
+<p><code>V_k, A_k</code>는 제어점 차분으로 얻는 속도·가속도다. 한계 이내면 0, 초과 시에만 이차로 벌점을 부과해 매끄럽고 미분 가능한 제약을 만든다.</p>
+<p><strong>(6) 솔버</strong></p>
+<p>전체 목적 함수 <code>J</code>는 미분 가능하므로 <strong>L-BFGS</strong>(준-뉴턴, quasi-Newton) 무제약 최적화로 내부 제어점을 푼다. 해석적 그래디언트와 저비용 twin-cylinder 충돌 질의 덕분에 온보드에서 수 ms~수십 ms 수준의 재계획이 가능하다.</p>
+<pre><code>   후단 최적화 루프
+   ┌─────────────────────────────────────────────┐
+   │ 초기 제어점 ← 투영 A* 경로 적합               │
+   │ repeat (L-BFGS):                              │
+   │   J_c: twin-cylinder 충돌 → rebound 그래디언트 │
+   │   J_s: jerk 평활                               │
+   │   J_f: 속도/가속도 feasibility                  │
+   │   Q ← Q - α·∇J  (L-BFGS 갱신)                  │
+   │ until 수렴                                     │
+   └─────────────────────────────────────────────┘
+</code></pre>
+<p>이 항들의 조합이 (C4)를 해결한다 — 충돌 안전·매끄러움·동역학 실현가능성을 단일 미분가능 목적으로 통합한다.</p>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<p>SCAN-Planner의 전체 파이프라인은 <strong>(센서 → 슬라이딩 맵 → 투영 A* 전단 → B-스플라인 후단 → 보행 제어기)</strong> 의 흐름을 갖는다.</p>
+<pre><code>┌──────────────────────────────────────────────────────────────────────┐
+│                        SCAN-Planner 파이프라인                          │
+└──────────────────────────────────────────────────────────────────────┘
+
+  [LiDAR: Livox Mid-360]        [상태추정: FAST-LIO2]
+          │ 점군                        │ odom (pose, twist)
+          ▼                            ▼
+  ┌───────────────────────────────────────────────┐
+  │  Robot-Centric Sliding Occupancy Map (§3.3)    │
+  │  • zero-copy overlap / circular buffer         │
+  │  • log-odds 융합 + clamping                     │
+  │  • 증분 inflation                               │
+  │  • boundary fallback (가상 자유층/탈출 복셀)    │
+  └───────────────────────────────────────────────┘
+          │ 3D 점유 맵 χ(·)
+          ▼
+  ┌───────────────────────────────────────────────┐
+  │  Front-End: Projected A* (§3.2)                │
+  │  • (x,y) 2D 그래프 탐색                          │
+  │  • z = 지면 보간 (surface-following)            │
+  │  • ψ_Δ = atan2(Δy,Δx) 로 twin-cylinder 충돌검사 │
+  │  • z-gradient suppression                       │
+  └───────────────────────────────────────────────┘
+          │ 충돌없는 이산 지면추종 경로
+          ▼
+  ┌───────────────────────────────────────────────┐
+  │  Back-End: Cubic B-Spline Optimization (§3.4)  │
+  │  J = λ_c J_c(rebound) + λ_s J_s(jerk)          │
+  │      + λ_f J_f(vel/acc)                         │
+  │  • induced yaw ψ_i = atan2(...) (§3.1)          │
+  │  • twin-cylinder 2-점 충돌질의                   │
+  │  • L-BFGS                                        │
+  └───────────────────────────────────────────────┘
+          │ 매끄럽고 실현가능한 3D 궤적
+          ▼
+  [Quadruped Locomotion Controller (Unitree Go2)]
+          │ 관절/보행 명령
+          ▼
+  [실제 보행 — 계단/경사/좁은통로/다층/옥외]
+</code></pre>
+<p><strong>데이터 흐름 요약.</strong> LiDAR 점군과 FAST-LIO2의 상태 추정이 슬라이딩 맵을 갱신하면, 투영 A*가 지면을 따라가는 충돌 없는 초기 경로를 빠르게 찾고, B-스플라인 후단이 이를 매끄럽고 동역학적으로 실현 가능한 궤적으로 다듬는다. 모든 충돌 질의는 twin-cylinder의 2-점 조회로 통일되어, 전단·후단 양쪽에서 일관되고 저렴하게 평가된다. 목표가 시야 밖이면 boundary fallback이 유계 전진을 보장한다.</p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 / 시뮬레이션 환경 (Datasets / Simulation)</h3>
+<p><strong>시뮬레이터: MARSIM</strong> (LiDAR 기반 경량 시뮬레이터). 다음 시나리오에서 평가.</p>
+<ul>
+<li><strong>Forest (숲)</strong>: 40 m × 20 m 공간에 100<del>500개의 장애물(폭 0.2</del>0.5 m)을 밀도별로 배치 (Sparse / Medium / Dense).</li>
+<li><strong>Desk (책상 밑)</strong>: 낮은 천장·다리 구조의 3D 통과 시나리오 → twin-cylinder의 상/하방 여유 검증.</li>
+<li><strong>Stair (계단)</strong>: 연속 턱 지형 → surface-following과 z-gradient suppression 검증.</li>
+</ul>
+<p>각 시나리오에서 <strong>50회 시행(trials)</strong>, 시작/목표 무작위. 동역학 한계 <code>v_max = 1.5 m/s</code>, <code>a_max = 1.0 m/s²</code>, 시행 타임아웃 120 s. 시뮬레이션 컴퓨팅은 데스크톱(Intel i9-14900K)에서 수행.</p>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>SR (Success Rate)</strong>: 충돌·타임아웃 없이 목표 도달 비율.</li>
+<li><strong>Coll (Collision Rate)</strong>: 충돌로 실패한 비율.</li>
+<li><strong>SPL (Success weighted by Path Length)</strong>: 성공을 경로 효율로 가중 — 최단경로 대비 실제경로 길이 효율. 1.0에 가까울수록 짧고 효율적.</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>Dense Obstacles(고밀도 장애물) 시나리오 — 핵심 비교표:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>플래너</th>
+<th>SR ↑</th>
+<th>Coll ↓</th>
+<th>SPL ↑</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>SCAN-Planner (본 논문)</strong></td>
+<td><strong>1.00</strong></td>
+<td><strong>0.00</strong></td>
+<td><strong>0.95</strong></td>
+</tr>
+<tr>
+<td>EGO-Planner-2D</td>
+<td>0.96</td>
+<td>0.04</td>
+<td>0.88</td>
+</tr>
+<tr>
+<td>EGO-Planner-3D</td>
+<td>0.76</td>
+<td>0.24</td>
+<td>0.75</td>
+</tr>
+<tr>
+<td>CMU-Planner</td>
+<td>0.92</td>
+<td>0.08</td>
+<td>0.86</td>
+</tr>
+<tr>
+<td>ART-Planner</td>
+<td>0.44</td>
+<td>0.56</td>
+<td>0.31</td>
+</tr>
+</tbody></table></div>
+<p><strong>해석.</strong></p>
+<ul>
+<li>SCAN-Planner는 고밀도에서 <strong>SR 1.00 / 충돌 0.00</strong>으로 완전 무충돌 성공을 달성, SPL 0.95로 경로 효율도 최고.</li>
+<li>EGO-Planner-2D는 빠르지만(2D 단순화) 3D 지형에서 충돌이 발생(0.04). EGO-Planner-3D는 완전 3D 모델링의 비용·민감도로 오히려 SR이 0.76으로 떨어지고 충돌 0.24 — <strong>(C1) 차원-비용 딜레마를 그대로 드러내는 대조군</strong>이다.</li>
+<li>CMU-Planner는 견실하나(SR 0.92) SCAN에 미치지 못함.</li>
+<li>ART-Planner는 고밀도에서 SR 0.44 / Coll 0.56으로 크게 무너짐 — 밀집 3D 비정형에 취약.</li>
+</ul>
+<p>이 결과의 메시지는 명확하다: <strong>twin-cylinder(2-점 질의)는 2D의 속도와 3D의 안전성을 동시에 취한다.</strong> EGO-2D의 속도는 얻되 그 충돌(0.04)을 0.00으로, EGO-3D의 3D 인지는 얻되 그 SR 저하(0.76)를 1.00으로 뒤집었다.</p>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p><strong>플랫폼.</strong> Unitree <strong>Go2</strong> 사족보행 로봇 + <strong>Livox Mid-360</strong> LiDAR + <strong>FAST-LIO2</strong> 상태 추정 + <strong>NVIDIA Jetson Orin NX</strong> 온보드 컴퓨팅. 실제 주행 동역학 한계는 보수적으로 <code>v_m = 1.0 m/s</code>, <code>a_m = 0.25 m/s²</code>.</p>
+<p>실험 시나리오:</p>
+<ol>
+<li><strong>Cluttered room (어수선한 실내)</strong>: 의자·박스 등 밀집 장애물 회피.</li>
+<li><strong>S-bend (S자 좁은 통로)</strong>: yaw-aware twin-cylinder가 좁은 굴곡 통로를 비충돌 통과 — 요각 인지의 직접 검증.</li>
+<li><strong>3D unstructured (3D 비정형)</strong>: 높이 변화·턱·경사가 섞인 비정형 지형에서 surface-following 검증.</li>
+<li><strong>Dynamic human avoidance (동적 보행자 회피)</strong>: 움직이는 사람을 슬라이딩 맵 갱신 + 재계획으로 회피.</li>
+<li><strong>Cross-floor (다층 횡단)</strong>: 3층 건물을 계단으로 가로지름. 작업공간 약 <strong>[45 × 15 × 15] m³</strong>, 약 <strong>251 s 동안 149 m</strong> 주행 — 계단 지형에서 z-gradient suppression과 d_step 기반 d_down의 실효성 입증.</li>
+<li><strong>Campus outdoor (옥외 캠퍼스)</strong>: 대규모 옥외 환경 <strong>[278 × 48 × 5] m³</strong>, 약 <strong>367 m / 589 s</strong> 주행 — 장거리·옥외 일반화와 boundary fallback의 실효성 입증.</li>
+</ol>
+<p><strong>시사점.</strong> 실제 Go2에서 다층 건물 횡단과 수백 미터 옥외 주행을 온보드 컴퓨팅만으로 완수했다는 점은, 본 방법이 시뮬레이션 과적합이 아닌 <strong>실배치 가능한 로컬 플래너</strong>임을 강하게 뒷받침한다. 특히 cross-floor(계단 다층)와 dynamic human avoidance는 각각 surface-following과 실시간 재계획의 결정적 실증이다.</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>Yaw-aware twin-cylinder footprint (2-점 충돌 모델).</strong>
+사족보행 로봇의 비대칭 3D 형상을 전·후 2개의 원기둥으로 근사하여, 충돌 검사를 <strong>단 2회 점유 질의</strong>로 환원했다. <code>d_down = nominal_height - d_step</code> 정의로 &quot;넘을 수 있는 턱&quot;을 충돌 모델 내부에 내장하고, B-스플라인 접선 유도 yaw로 회전 비대칭을 반영한다. → <strong>3D 안전성 + 2D 비용</strong>.</p>
+</li>
+<li><p><strong>Projected A* 지면추종 전단.</strong>
+z를 그래프 차원에서 배제하고 (x,y) 2D 탐색 + 지면 선형보간으로 z를 종속 결정. z-gradient suppression으로 절벽/급경사를 차단하여, 탐색 비용을 2D로 유지하면서 3D 지면을 추종하는 충돌 없는 초기 경로를 생성.</p>
+</li>
+<li><p><strong>Robot-centric sliding occupancy map + boundary fallback.</strong>
+제로카피 중첩·순환버퍼로 맵 갱신 비용을 얇은 신규층 수준으로 절감, 로그-오즈 클램핑·증분 인플레이션으로 견실한 점유 추정. 가상 자유층/경계 탈출 복셀 기반 폴백으로 시야 밖 목표에서도 유계·무진동 전진 보장.</p>
+</li>
+<li><p><strong>Cubic B-spline 후단 통합 최적화.</strong>
+rebound 충돌항 + jerk 평활항 + 속도/가속도 feasibility를 단일 미분가능 목적으로 통합, 해석적 그래디언트 + L-BFGS로 온보드 실시간 최적화. 모든 충돌 질의가 twin-cylinder로 통일.</p>
+</li>
+<li><p><strong>광범위한 실증.</strong>
+MARSIM에서 EGO-2D/3D·CMU·ART를 능가(Dense: SR 1.00/Coll 0.00/SPL 0.95), 실제 Go2에서 다층 횡단(3층, 149 m)과 옥외 캠퍼스(367 m) 주행을 온보드로 완수.</p>
+</li>
+</ol>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<blockquote>
+<p>아래 값들은 논문 본문에 명시된 설정을 정리한 것이다. (코드 미공개 — 정확한 기본 하이퍼파라미터의 코드 검증은 향후 공개 시 가능.)</p>
+</blockquote>
+<p><strong>충돌 모델 (twin-cylinder)</strong></p>
+<pre><code>d_off    : 전후 원기둥 오프셋 (몸체 길이의 ~절반 수준)
+d_xy     : 수평 여유(반경 마진)
+d_up     : 상방(천장) 여유
+d_down   = nominal_height - d_step    # 턱 통과 허용
+</code></pre>
+<p><strong>전단 (Projected A*)</strong></p>
+<pre><code>탐색 차원 : (x, y) 2D 격자
+z         : 지면 선형보간 (β ∈ [0,1])
+yaw       : ψ_Δ = atan2(Δy, Δx)
+수용조건  : H(Q, ψ_Δ) == 0
+z-gradient: |Δz|/Δxy &gt; γ_max → 간선 차단
+</code></pre>
+<p><strong>후단 (Cubic B-spline)</strong></p>
+<pre><code>차수 p_b   = 3 (cubic, uniform knots)
+제어점     N_c (양끝 p_b개 경계 고정, 내부 N_c - 2·p_b 최적화)
+총시간 T   = (N_c - p_b)·Δt
+목적함수   J = λ_c·J_c + λ_s·J_s + λ_f·J_f
+충돌(rebound): c_ij = s_f - d_ij,  d_ij = (Q_i - a_ij)^T v_ij
+평활(jerk) : J_s = Σ_k ||J_k||^2
+feasibility: F(c,c_m) = max(c - c_m, 0)^2  (속도 v_m, 가속도 a_m)
+솔버       : L-BFGS (해석적 그래디언트)
+</code></pre>
+<p><strong>시뮬레이션 동역학</strong>: <code>v_max = 1.5 m/s</code>, <code>a_max = 1.0 m/s²</code>, 타임아웃 120 s, 50 trials, i9-14900K.
+<strong>실제 로봇 동역학</strong>: <code>v_m = 1.0 m/s</code>, <code>a_m = 0.25 m/s²</code>, Go2 + Livox Mid-360 + FAST-LIO2 + Jetson Orin NX.
+<strong>맵</strong>: 로봇 중심 고정 크기 3D 격자, log-odds (p_min/p_max 클램핑), 증분 inflation, zero-copy/circular buffer.</p>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<p>twin-cylinder의 2-점 질의는 제어점 수 <code>N_c</code>에 선형이므로, 더 긴 시계(horizon)나 고해상도 맵으로 확장해도 충돌 질의 비용 증가가 완만하다. 슬라이딩 맵의 제로카피 갱신은 고속 주행(맵이 빨리 이동)에서도 갱신 비용을 신규층에 한정해 확장성을 유지한다. 옥외 [278×48×5] m³ 주행이 이를 실증한다.</p>
+<h3>8.2 한계점 (Limitations)</h3>
+<ol>
+<li><strong>형상 근사의 보수성/과소표현.</strong> 두 원기둥은 캡슐 유사 형상을 잘 덮지만, 다리가 크게 벌어지는 자세나 매우 좁은 비정형 틈에서는 과소(측면 충돌) 또는 과대(통과 실패) 근사 가능. 자세 적응(posture-adaptive) 형상은 미고려 — 이는 HiPAN과의 대비점(§9).</li>
+<li><strong>지면 보간의 단순성.</strong> 진입/진출 두 점 선형보간은 복잡한 비단조 지형(다중 턱, 굴곡 경사)에서 실제 지면과 오차가 생길 수 있음. 더 풍부한 지면 표면 추정(평면 피팅/메시)이 향후 방향.</li>
+<li><strong>요각의 종속성.</strong> yaw를 궤적 접선에서 유도하므로, 제자리 회전·게걸음(crab walk)·후진 등 비전진 기동은 표현 못 함.</li>
+<li><strong>동적 장애물의 명시적 예측 부재.</strong> 동적 회피는 빠른 재계획에 의존하며 보행자 의도/속도의 명시적 예측 모델은 없음.</li>
+<li><strong>코드 미공개.</strong> 재현성 측면에서 현재 placeholder 상태(Coming Soon)로, 정량 재현은 공개 시점까지 제한됨.</li>
+</ol>
+<h3>8.3 향후 방향 (Future Directions)</h3>
+<ul>
+<li>자세 적응형 풋프린트(가변 d_off/원기둥 수)로 좁은 3D 틈 통과 강화.</li>
+<li>학습 기반 지면/통과가능성(traversability) 추정과의 결합.</li>
+<li>동적 장애물 예측을 후단 비용에 통합(시간 차원 B-스플라인).</li>
+<li>비전진 기동(회전/후진)을 위한 yaw 자유도 분리 최적화.</li>
+</ul>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<p>같은 <strong>Planner 트랙</strong>의 선행 리뷰 논문들과 비교한다. 토픽 근접도가 가장 높은 세 편을 선정했다: <strong>HiPAN</strong>(사족보행 3D 비정형 자세적응 항법, 학습 기반), <strong>FRGraph</strong>(Go2 사족보행 + UAV, 방향-인지 볼록 자유영역 기반 좁은 통로 항법, 기하 기반), <strong>FLAP</strong>(시야제약 능동지각 3D 항법, 최적화 기반 로컬 플래너).</p>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>HiPAN (RA-L 2026)</th>
+<th>FRGraph (arXiv 2026)</th>
+<th>FLAP (arXiv 2026)</th>
+<th><strong>SCAN-Planner (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>대상 플랫폼</td>
+<td>사족보행(quadruped)</td>
+<td>사족보행 Go2 + UAV</td>
+<td>UAV(3D 비행)</td>
+<td>사족보행 Go2</td>
+</tr>
+<tr>
+<td>핵심 접근</td>
+<td>계층적 RL (자세적응)</td>
+<td>방향-인지 볼록 자유영역(CFR) 생성</td>
+<td>시야(FOV) 제약 능동지각 + MINCO</td>
+<td>투영 A* + 3차 B-스플라인 최적화</td>
+</tr>
+<tr>
+<td>패러다임</td>
+<td>학습 기반 (RL)</td>
+<td>기하/최적화 기반</td>
+<td>최적화 기반 (능동지각)</td>
+<td>최적화 기반 (전단+후단)</td>
+</tr>
+<tr>
+<td>충돌 모델</td>
+<td>depth-only, 암묵적</td>
+<td>볼록 자유영역(통과 보장)</td>
+<td>FOV 내 안전회랑</td>
+<td><strong>yaw-aware twin-cylinder(2-점)</strong></td>
+</tr>
+<tr>
+<td>3D 지형 처리</td>
+<td>높이제약 통과 자세적응</td>
+<td>주로 수평 통로(통과)</td>
+<td>비행 3D(지면추종 아님)</td>
+<td><strong>지면추종(surface-following)</strong></td>
+</tr>
+<tr>
+<td>z 처리</td>
+<td>정책이 암묵 학습</td>
+<td>—</td>
+<td>3D 자유공간</td>
+<td><strong>2D탐색+지면보간(투영)</strong></td>
+</tr>
+<tr>
+<td>맵/시야</td>
+<td>depth 관측</td>
+<td>국소 자유영역</td>
+<td>FOV 능동확보</td>
+<td>로봇중심 슬라이딩 맵+경계폴백</td>
+</tr>
+<tr>
+<td>실로봇</td>
+<td>✅ 사족보행</td>
+<td>✅ Go2+UAV, 좁은복도/군중</td>
+<td>✅ UAV</td>
+<td>✅ Go2 다층횡단/옥외</td>
+</tr>
+<tr>
+<td>코드</td>
+<td>(해당 리뷰 참조)</td>
+<td>(해당 리뷰 참조)</td>
+<td>(해당 리뷰 참조)</td>
+<td>⏳ 예정(Coming Soon)</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>HiPAN 대비.</strong>
+HiPAN은 계층적 강화학습으로 <strong>자세 적응(posture-adaptive)</strong> 을 학습하여, 몸을 낮추거나 자세를 바꿔 높이가 제한된 3D 통로를 통과한다. SCAN-Planner는 자세를 바꾸지 않는 <strong>고정 형상(twin-cylinder) + 명시적 최적화</strong> 접근이다.</p>
+<ul>
+<li>SCAN 장점: 학습 불필요(training-free), 해석가능·튜닝가능한 명시적 비용, 시뮬-실세계 갭(sim-to-real) 부담이 작음, 새 환경 일반화가 정책 일반화에 의존하지 않음.</li>
+<li>SCAN 단점: 몸을 낮추는 등 능동적 자세 변형이 필요한 극단적 높이제약 통로는 HiPAN이 유리. SCAN의 <code>d_down/d_up</code>은 &quot;넘기/통과 여부&quot;를 판정할 뿐 자세를 바꾸지는 않음.</li>
+<li>종합: <strong>명시적·검증가능 안전(SCAN)</strong> vs <strong>유연한 자세적응(HiPAN)</strong> 의 트레이드오프. 산업 배치에서 안전 검증이 중요하면 SCAN, 극한 지형 민첩성이 중요하면 HiPAN.</li>
+</ul>
+<p><strong>FRGraph 대비.</strong>
+FRGraph는 방향-인지 <strong>볼록 자유영역(convex free-region)</strong> 을 생성해 좁은 복도·군중을 통과하며, Go2와 UAV 모두에서 실증한 점이 SCAN과 가장 가까운 실배치 사례다.</p>
+<ul>
+<li>공통점: 둘 다 Go2 실로봇, 좁은 통로(SCAN의 S-bend / FRGraph의 narrow corridor) 강조, 기하·최적화 기반.</li>
+<li>차이: FRGraph는 주로 <strong>수평 통과(자유영역의 통과 보장)</strong> 에 강점, 명시적 안전영역으로 통과가능성을 보증. SCAN은 <strong>수직(지면추종·계단·다층)</strong> 에 강점 — cross-floor 3층 횡단이 차별화 포인트. SCAN의 twin-cylinder는 통과 보증(certificate)은 없지만 충돌 질의가 극도로 저렴(2-점).</li>
+<li>종합: <strong>수평 좁은통로 통과보장(FRGraph)</strong> vs <strong>수직 지면추종·다층(SCAN)</strong>. 둘은 상호보완적이며, FRGraph의 자유영역 통과보장 + SCAN의 surface-following twin-cylinder를 결합하면 강력할 것.</li>
+</ul>
+<p><strong>FLAP 대비.</strong>
+FLAP은 시야(FOV) 제약 하 능동 지각으로 사전지도 없이 3D 비행 항법을 수행하는 <strong>UAV 최적화 플래너</strong>(MINCO 계열). 방법 패러다임(최적화 기반 로컬 플래닝)은 SCAN과 동류지만 플랫폼·차원 사용이 다르다.</p>
+<ul>
+<li>공통점: 둘 다 사전지도 없이 온보드 슬라이딩/국소 인지로 실시간 최적화. 매끄러운 미분가능 궤적 표현(FLAP=MINCO, SCAN=B-spline).</li>
+<li>차이: FLAP은 <strong>3D 자유 비행</strong>(지면 무관, 시야 확보가 핵심 과제)인 반면 SCAN은 <strong>지면 접촉 이동체</strong>라 z를 자유 차원에서 배제(투영 A*)하는 것이 오히려 강점이 된다. FLAP의 능동지각(어디를 볼지)은 SCAN에는 없는 축이며, 반대로 SCAN의 twin-cylinder 지면추종은 비행체엔 불필요.</li>
+<li>종합: 같은 &quot;최적화 기반&quot; 가문이지만 <strong>비행체의 능동지각(FLAP)</strong> vs <strong>지면체의 저비용 3D 충돌+지면추종(SCAN)</strong> 으로 문제 구조가 갈린다.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>온보드 실시간성</strong>: twin-cylinder 2-점 질의 + 제로카피 슬라이딩 맵 + L-BFGS는 Jetson Orin NX에서 실배치를 실증 → 산업/서비스 사족보행 로봇에 즉시 이식 가능성 높음.</li>
+<li><strong>다층·옥외 일반화</strong>: 3층 건물 횡단(149 m)·옥외 캠퍼스(367 m)는 순찰·점검·배송 등 실제 임무 시나리오에 부합.</li>
+<li><strong>재현성 리스크</strong>: 코드가 현재 placeholder(Coming Soon) → 즉시 재현·이식은 공개 시점까지 보류. 동급 선행(FRGraph/FLAP) 대비 이 점이 단기 약점.</li>
+<li><strong>검증가능 안전</strong>: 명시적 비용·여유 파라미터(d_xy/d_up/d_down/s_f)는 안전 인증·튜닝에 유리(학습 정책 대비 해석가능).</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>SCAN-Planner는 &quot;<strong>3D 인지를 2D 비용으로</strong>&quot;라는 명확한 한 줄 통찰을 footprint·전단·후단 전반에 일관되게 관철한 점에서 기술적 응집도가 높다. 향후 가치가 큰 방향:</p>
+<ol>
+<li><strong>FRGraph식 통과보장 + SCAN twin-cylinder 결합</strong> — 저비용 충돌질의에 자유영역 certificate를 더해 좁은통로 안전 보증.</li>
+<li><strong>HiPAN식 자세적응의 선택적 결합</strong> — 평시엔 SCAN(명시·저비용), 극한 높이제약에선 자세적응 모듈로 전환하는 하이브리드.</li>
+<li><strong>동적 환경의 시간축 B-스플라인</strong> — 보행자 예측을 후단 비용에 통합.</li>
+<li><strong>학습 기반 traversability와의 융합</strong> — z-gradient suppression의 휴리스틱 임계를 학습된 통과가능성으로 대체.</li>
+</ol>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li>SCAN-Planner: Surface-Following Collision-Aware Navigation for Quadruped Robots in 3D Unstructured Environments. Han Zheng, Zhe Chen, Yiwen Fu, Ming Yang, Tong Qin. arXiv:2606.19555.</li>
+<li>EGO-Planner / EGO-Planner-v2 (rebound 기반 B-스플라인 로컬 플래너) — 본 논문의 충돌항 및 주요 베이스라인.</li>
+<li>CMU-Planner (CMU autonomous exploration/local planning) — 베이스라인.</li>
+<li>ART-Planner — 베이스라인.</li>
+<li>FAST-LIO2 (LiDAR-관성 상태 추정) — 실로봇 odom.</li>
+<li>MARSIM (LiDAR 시뮬레이터) — 시뮬레이션 환경.</li>
+<li>L-BFGS (Liu &amp; Nocedal) — 후단 무제약 최적화 솔버.</li>
+<li>[선행 리뷰] HiPAN: Hierarchical Posture-Adaptive Navigation for Quadruped Robots in Unstructured 3D Environments (RA-L 2026).</li>
+<li>[선행 리뷰] Safe Navigation in Unknown and Cluttered Environments via Direction-Aware Convex Free-Region Generation (FRGraph, arXiv 2026).</li>
+<li>[선행 리뷰] FLAP: FOV-Constrained Active Perception Planning for Prior-Map-Free 3D Navigation (arXiv 2026).</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p><strong>혁신성.</strong> SCAN-Planner의 핵심 혁신은 사족보행 로봇의 3D 충돌 인지를 <strong>단 2개의 점 질의(yaw-aware twin-cylinder)</strong> 로 압축한 것이다. 이 한 가지 설계가 전단(투영 A*의 충돌 검사)·후단(B-스플라인 rebound 충돌항) 전반에 일관되게 흐르며, &quot;3D의 안전성과 2D의 비용&quot;이라는 오랜 딜레마(C1)를 정면으로 해소한다. 여기에 z를 종속변수로 두는 투영 A*(C2), 제로카피 슬라이딩 맵 + 경계 폴백(C3), 단일 미분가능 목적의 B-스플라인 최적화(C4)가 결합되어, 비정형 3D 환경을 위한 응집력 있는 로컬 플래닝 스택을 이룬다.</p>
+<p><strong>실용적 의의.</strong> MARSIM 고밀도에서 SR 1.00 / Coll 0.00 / SPL 0.95로 EGO-2D/3D·CMU·ART를 모두 능가했고, 무엇보다 실제 Go2에서 <strong>3층 건물 횡단(149 m)</strong> 과 <strong>옥외 캠퍼스(367 m)</strong> 주행을 Jetson Orin NX 온보드로 완수했다. 이는 본 방법이 시뮬레이션 결과에 머물지 않고 실제 사족보행 로봇 배치에 곧장 쓰일 수 있는 성숙도를 가졌음을 보여준다. 다만 현재 코드가 placeholder(Coming Soon) 상태라 즉시 재현성은 공개 시점까지 제한된다.</p>
+<p><strong>향후 연구 방향.</strong> FRGraph식 자유영역 통과보장과의 결합, HiPAN식 자세적응의 선택적 하이브리드, 동적 장애물 예측을 위한 시간축 B-스플라인, 학습 기반 traversability와의 융합이 유망하다. 종합적으로 SCAN-Planner는 사족보행 3D 비정형 로컬 플래닝에서 <strong>저비용·해석가능·실배치 가능</strong>이라는 세 마리 토끼를 균형 있게 잡은, 실용 지향의 견고한 기여다.</p>
+<hr>
+<p><em>본 리뷰는 arXiv 논문 본문·실험표·아키텍처 기술에 근거하여 작성되었으며, 코드는 공개 예정(Coming Soon) 상태로 실제 구현 스니펫은 검증되지 않았음을 명시한다.</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

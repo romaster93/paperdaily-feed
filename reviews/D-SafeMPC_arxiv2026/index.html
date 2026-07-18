@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>D-SafeMPC: Diffusion-Driven Safe Model Predictive Control with Discrete-Time Control Barrier Functions · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 프리프린트 (2026, cs.RO) — 학회 미확정</div>
+    <h1>D-SafeMPC: Diffusion-Driven Safe Model Predictive Control with Discrete-Time Control Barrier Functions</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2607.10842">arXiv:2607.10842</a></span>
+      <span>리뷰 2026-07-15</span>
+      <span>40분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>D-SafeMPC: Diffusion-Driven Safe Model Predictive Control with Discrete-Time Control Barrier Functions — 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: D-SafeMPC: Diffusion-Driven Safe Model Predictive Control with Discrete-Time Control Barrier Functions</li>
+<li><strong>저자 (Authors)</strong>: Erdi Sayar, Ersin Daş, Joel W. Burdick, Alois Knoll, Erdal Kayacan</li>
+<li><strong>소속 (Affiliation)</strong>: Technical University of Munich (TUM, Knoll 그룹) · California Institute of Technology (Caltech, Burdick/Daş) · Aarhus University 계열 (Kayacan) — 본문 명시 부분은 arXiv 페이지에 축약, 저자 소속은 로보틱스·제어 연구그룹으로 확인</li>
+<li><strong>발표처 (Published)</strong>: arXiv 프리프린트 (2026-07-12, cs.RO). 학회 확정 정보 미기재 → 코퍼스 표기 <code>arxiv2026</code></li>
+<li><strong>DOI</strong>: 10.48550/arXiv.2607.10842</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2607.10842">2607.10842</a></li>
+<li><strong>코드</strong>: ✅ 공개 — <a href="https://github.com/erdiphd/D-SafeMPC">https://github.com/erdiphd/D-SafeMPC</a> (Python 98.4%, <code>diffuser/</code>·<code>config/</code>·<code>d3il/</code>·<code>scripts/</code>·<code>trajectory_generator.py</code>·<code>video_generator.py</code>, CBF/CLF + MPC 실제 구현 확인)</li>
+<li><strong>프로젝트 페이지</strong>: ❌ (별도 프로젝트 페이지 없음, GitHub 저장소가 재현 자료 역할)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 논문은 <strong>확산 모델(diffusion model) 기반 궤적 플래너의 근본적 약점 — 안전·동역학 제약을 본질적으로 강제하지 못함 — 을 해결</strong>하는 것을 목표로 한다. 확산 플래너는 대규모 시연 데이터로부터 다봉(multimodal) 궤적 분포를 학습해 표현력이 뛰어나지만, 학습 분포에서 벗어난 상황(새 장애물 배치, 동적 장애물)에서 <strong>물리적으로 불가능하거나 충돌하는 궤적</strong>을 생성한다. 이를 보완하려는 기존 하이브리드 접근(확산 → MPC 후처리)은 <strong>확산이 준 나쁜 초기값이 MPC의 수렴을 방해</strong>해 불안정해지는 문제가 있다.</p>
+<p>D-SafeMPC의 핵심 아이디어는 확산과 제어를 <strong>분리된 두 단계가 아니라 상호작용하는 하나의 루프</strong>로 엮는 것이다. 구체적으로 (1) 이산시간 제어장벽함수(discrete-time CBF)와 제어리아푸노프함수(CLF)의 그래디언트로 <strong>역확산(reverse diffusion) 과정 자체를 안전·목표 방향으로 유도</strong>하고, (2) 각 디노이징 스텝에서 MPC가 궤적을 <strong>안전·동역학 가능 집합으로 투영(iterative projection)</strong>하여 다음 스텝의 신뢰할 수 있는 웜스타트를 제공한다. 이 결합으로 확산의 표현력과 MPC/CBF의 안전 보장을 모두 취한다.</p>
+<blockquote>
+<p><strong>트랙 판정 노트 (§1.2 플래그)</strong>: 실험 플랫폼은 Franka 매니퓰레이터이지만, 본 논문의 기여는 <strong>grasping/조작 스킬이 아니라 장애물 회피를 포함한 안전 모션 플래닝 알고리즘</strong>(diffusion+MPC+CBF)이다. 따라서 코퍼스의 &quot;매니퓰레이션 제외&quot; 규정에 걸리지 않으며, 선례 <em>VisualRRT_CVPR2026</em>(Panda/UR5e/Fetch 플랫폼이지만 path planning 기여로 in-scope) 및 <em>SobolevDiffusion</em>(쿼드로터·이중진자 TO)과 동일 논리로 <strong>Planner 트랙 in-scope</strong>로 등재한다.</p>
+</blockquote>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p>확산 기반 로봇 플래닝은 최근 급부상했으나, 실제 배치에는 세 가지 구조적 난점이 있다.</p>
+<ol>
+<li><p><strong>제약 미강제 (Constraint-agnostic generation)</strong>: 확산 모델은 데이터 우도를 근사하는 생성기다. 학습 데이터에 안전 궤적만 담겨 있어도, 샘플링 시 노이즈에서 출발한 역확산은 <strong>장애물 관통·관절 한계 위반·동역학 불가능</strong>한 궤적을 종종 만든다. 확산 목적함수에는 &quot;충돌 금지&quot;라는 하드 제약을 넣을 자리가 없다.</p>
+</li>
+<li><p><strong>하이브리드의 불안정성 (Warm-start pathology)</strong>: &quot;확산이 초기 궤적을 생성 → MPC가 안전하게 다듬는다&quot;는 자연스러운 파이프라인은 실제로 취약하다. 확산 초기값이 안전 집합에서 크게 벗어나면 MPC의 비볼록 최적화가 <strong>국소최소·수렴실패</strong>에 빠진다. 즉 나쁜 웜스타트가 나쁜 해를 부른다.</p>
+</li>
+<li><p><strong>동적 환경 (Dynamic obstacles)</strong>: 정적 장애물은 학습 시 반영할 수 있으나, 실행 중 움직이는 장애물은 <strong>온라인으로 안전을 재보장</strong>해야 한다. 후처리 한 번으로는 시간에 따라 변하는 안전 여유(safety margin)를 추종하기 어렵다.</p>
+</li>
+<li><p><strong>소프트 가이드의 근본 한계 (Guidance is not a guarantee)</strong>: 분류기-가이던스처럼 확산 평균에 그래디언트를 더하는 방식(예: CoBL)은 궤적을 안전 방향으로 &quot;넛지&quot;할 뿐 <strong>안전집합 소속을 보장하지 못한다</strong>. 가이드가 강하면 확산의 다봉성·자연스러움을 해치고, 약하면 안전을 놓친다. 즉 soft-only 접근은 안전-표현력 절충의 한쪽 끝에 갇힌다. 반대로 하드 제약(투영)만 쓰면 나쁜 초기값에서 최적화가 실패한다(도전과제 2). <strong>두 극단을 모두 피하는 결합</strong>이 필요하다.</p>
+</li>
+</ol>
+<h3>2.2 핵심 해결책</h3>
+<p>D-SafeMPC는 위 세 난점을 <strong>&quot;denoising-in-the-loop safety&quot;</strong> 하나의 메커니즘으로 통합한다.</p>
+<pre><code>[기존 하이브리드]                      [D-SafeMPC]
+noise ──► diffusion ──► trajectory     noise ──► diffusion step i
+              (unsafe)                       │  + CBF/CLF gradient guidance   (안전·목표 방향으로 μ 이동)
+              ▼                              │  + MPC projection (i ≤ N/2)    (안전·가능 집합으로 투영)
+           MPC (post-hoc)                    ▼
+              │  ← 나쁜 웜스타트로 수렴실패   diffusion step i-1  (신뢰 웜스타트)
+              ▼                              ⋮
+           trajectory                     trajectory (safe by construction)
+</code></pre>
+<ul>
+<li><strong>가이드된 역확산</strong>: 각 디노이징 스텝의 평균 <code>μθ</code>에 CBF 그래디언트(안전)와 CLF 그래디언트(목표수렴)를 더해 샘플링 분포를 안전·목표 영역으로 밀어낸다.</li>
+<li><strong>반복 투영 MPC</strong>: 노이즈가 충분히 줄어든 후반 스텝(<code>i ≤ N/2</code>)에서 MPC가 현재 궤적을 동역학·안전 제약을 만족하는 집합으로 투영하여, 다음 스텝에 신뢰할 수 있는 웜스타트를 되돌려준다.</li>
+<li>결과적으로 궤적은 <strong>생성 과정 내내(by construction) 안전</strong>해지며, 후처리 한 번에 의존하지 않으므로 동적 장애물에도 견고하다.</li>
+</ul>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 조건부 궤적 확산 모델 (Conditional Trajectory Diffusion)</h3>
+<p>D-SafeMPC의 생성 백본은 궤적 <code>τ = (x₀, x₁, …, x_H)</code>(상태 시퀀스, 또는 상태-제어 쌍)을 하나의 데이터 포인트로 보는 <strong>궤적 확산 모델(Diffuser 계열)</strong>이다. 순확산(forward)은 깨끗한 궤적 <code>τ⁰</code>에 가우시안 노이즈를 단계적으로 더하고, 역확산(reverse)은 노이즈 궤적 <code>τᴺ ~ 𝒩(0, I)</code>에서 시작해 조건 <code>y</code>(시작·목표·장애물 정보)에 맞는 궤적으로 되돌린다.</p>
+<p>역확산 한 스텝의 평균(mean)은 표준 DDPM 형태로 다음과 같이 계산된다.</p>
+<pre><code>μθ(τⁱ, i, y) = (1/√αᵢ) · ( τⁱ − (βᵢ / √(1−ᾱᵢ)) · εθ(τⁱ, i, y) )
+
+여기서
+  βᵢ     : i번째 스텝의 노이즈 분산 스케줄
+  αᵢ     = 1 − βᵢ
+  ᾱᵢ     = ∏_{k=1..i} αₖ            (누적곱)
+  εθ(·)  : 노이즈 예측 신경망(U-Net 계열, 조건 y로 컨디셔닝)
+</code></pre>
+<p>기본 역확산 갱신은 <code>τ^{i-1} ~ 𝒩(μθ, βᵢ I)</code>. 여기에 D-SafeMPC는 아래 3.2의 안전 가이드를 주입한다.</p>
+<blockquote>
+<p><strong>저장소 대응(코드 분석)</strong>: <code>diffuser/</code> 디렉토리가 이 확산 백본을 담고 있고, <code>trajectory_generator.py</code>가 샘플링 루프(역확산 + 가이드 + MPC 투영)를 오케스트레이션한다. <code>config/</code>에 노이즈 스케줄·스텝수(N=20) 등 하이퍼파라미터가 정의된다. <code>d3il/</code>은 시뮬레이션 환경(Franka) 연동 계층이다.</p>
+</blockquote>
+<p><strong>확산 궤적 표현의 세부</strong>: 궤적 <code>τ</code>는 플래닝 지평 <code>H</code>에 걸친 상태(또는 상태-제어 결합) 텐서로, U-Net <code>εθ</code>는 이 궤적을 <strong>시간축을 채널로 갖는 1D 신호</strong>로 취급해 시간적 컨볼루션으로 처리한다. 이는 Diffuser(Janner et al.)의 표준 설계로, 궤적 전체를 한 번에 디노이징하기 때문에 <strong>자기회귀(autoregressive) 누적오차가 없고 전역 일관성</strong>을 얻는다. 조건 <code>y</code>(시작·목표·장애물)는 (a) 궤적의 고정 인덱스에 상태를 하드클램프(inpainting)하는 방식과 (b) <code>εθ</code>에 임베딩으로 주입하는 방식을 병용한다. 순확산의 노이즈 스케줄 <code>{βᵢ}</code>는 코사인/선형 스케줄 계열로 <code>N=20</code>이라는 비교적 <strong>짧은 스텝수</strong>를 쓰는데, 이는 실시간 재계획을 위한 계산예산 절감과 직결된다(스텝이 많을수록 U-Net 순전파 호출이 늘어난다).</p>
+<p><strong>왜 N=20인가</strong>: 이미지 확산은 통상 수백~수천 스텝을 쓰지만, 궤적 확산은 (1) 데이터 차원이 낮고(H×state) (2) 실시간 로봇 제어라는 지연 제약이 있어 스텝수를 공격적으로 줄인다. D-SafeMPC는 여기에 더해 후반 절반(<code>i≤10</code>)에서 MPC 투영이 궤적을 안전집합으로 강제로 끌어당기므로, <strong>적은 디노이징 스텝의 근사오차를 MPC가 보정</strong>하는 효과도 있다. 즉 확산은 &quot;좋은 다봉 초기 모양&quot;을, MPC는 &quot;정확한 제약 만족&quot;을 분담한다.</p>
+<h3>3.2 CBF/CLF 가이드 주입 (Guidance Injection)</h3>
+<p>핵심 혁신은 <strong>분류기-가이던스(classifier guidance)와 유사한 방식으로, 제어이론적 안전·수렴 조건의 그래디언트를 역확산 평균에 더하는 것</strong>이다. 가이드된 평균 <code>μ̂</code>는 다음과 같다.</p>
+<pre><code>μ̂  ←  μθ  +  λ_c · ∇_u ψ_h  −  λ_l · ∇_u Φ_V
+
+  ψ_h : 이산시간 CBF 조건 (안전 — 값이 클수록 안전 여유가 큼 → +방향으로 상승)
+  Φ_V : CLF 조건        (목표 수렴 — 값이 작을수록 목표에 가까움 → −방향으로 하강)
+  λ_c : CBF 가이드 가중(적응적, adaptive)
+  λ_l : CLF 가이드 가중(고정, fixed)
+  ∇_u : 제어 입력 u에 대한 그래디언트
+</code></pre>
+<p>가이드된 역확산 분포는</p>
+<pre><code>p_θ( τ̃^{i-1} | τ̃^{i}, y ) = 𝒩( μ̂ , βᵢ I )
+</code></pre>
+<p>로 바뀐다. 직관적으로 CBF 항 <code>+λ_c ∇_u ψ_h</code>는 궤적을 <strong>안전 여유가 증가하는 방향</strong>으로, CLF 항 <code>−λ_l ∇_u Φ_V</code>는 <strong>리아푸노프 함수(목표까지의 &quot;에너지&quot;)가 감소하는 방향</strong>으로 각 디노이징 스텝마다 밀어낸다. 이는 후처리가 아니라 <strong>생성의 매 스텝에서 안전·목표성을 반영</strong>한다는 점에서 기존 하이브리드와 근본적으로 다르다.</p>
+<h3>3.3 이산시간 제어장벽함수 (Discrete-Time CBF)</h3>
+<p>연속시간 CBF <code>ḣ ≥ −α(h)</code>를 궤적 확산의 이산 스텝에 맞게 이산화한 조건이 사용된다.</p>
+<pre><code>ψ_h(x̄_k, u_k) = h( F̄(x̄_k, u_k) ) − h(x̄_k) + α( h(x̄_k) )  ≥  0
+
+  h(·)          : 안전집합 C = { x : h(x) ≥ 0 } 을 정의하는 장벽함수
+  F̄(x̄_k, u_k)  : 이산시간 동역학 (다음 상태)
+  α(·)          : class-𝒦 확장함수 (여기선 선형 α(h)=γh 형태로 취급)
+</code></pre>
+<p>즉 &quot;다음 스텝의 안전값 − 현재 안전값 ≥ −α(현재 안전값)&quot;을 만족하면 안전집합을 벗어나지 않는다. 여러 장애물이 있을 때는 개별 장벽 <code>h_j</code>를 <strong>로그-합-지수(log-sum-exp) 소프트 최소</strong>로 결합해 미분가능한 단일 장벽을 만든다.</p>
+<pre><code>h(x̄) = −(1/λ) · ln( Σ_j exp( −λ · h_j(x̄) ) )
+
+  h_j(x̄) : j번째 장애물에 대한 부호거리/여유 (h_j&gt;0 안전)
+  λ       : 소프트-최소의 날카로움(temperature). λ→∞ 이면 min_j h_j 에 수렴
+</code></pre>
+<p>이 소프트 결합 덕분에 <code>∇_u ψ_h</code>가 모든 장애물에 대해 매끄럽게 정의되어 3.2의 가이드 그래디언트로 쓸 수 있다.</p>
+<p><strong>하드-민 대비 소프트-민의 이점</strong>: <code>min_j h_j</code>는 가장 가까운 장애물만 고려하므로 그 인덱스가 바뀌는 순간 그래디언트가 불연속이 된다(비미분). 이는 확산 가이드처럼 <strong>매 스텝 그래디언트를 매끄럽게 흘려야 하는</strong> 상황에서 치명적이다. 로그-합-지수 소프트-민은 모든 장애물의 여유를 <strong>부드럽게 가중 평균</strong>하여 항상 미분가능한 단일 장벽을 준다. <code>λ</code>(온도)가 작으면 보수적(모든 장애물을 넓게 회피), 크면 공격적(최근접 장애물만 회피)으로 튜닝된다. 안전-여유가 작은 장애물이 지수항에서 지배적 가중을 받으므로, <strong>위험한 장애물에 자동으로 집중</strong>하는 효과가 있다.</p>
+<p><strong>적응적 λ_c의 역할</strong>: CBF 가이드 가중 <code>λ_c</code>가 적응적이라는 점은, 안전 여유 <code>h(x̄)</code>가 작을수록(장애물에 가까울수록) 가이드를 세게 걸어 궤적을 더 강하게 밀어낸다는 의미다. 여유가 충분할 때는 약하게 걸어 목표수렴(CLF)이나 확산의 자연 다봉성을 방해하지 않는다. 이 적응성이 &quot;필요할 때만 강하게 개입&quot;하는 안전-성능 절충을 만든다.</p>
+<h3>3.4 반복 투영 MPC (Iterative-Projection MPC)</h3>
+<p>가이드만으로는 안전을 &quot;하드하게&quot; 보장하지 못한다(그래디언트는 soft nudge). 그래서 노이즈가 충분히 감소한 후반 디노이징 스텝에서 <strong>MPC가 현재 궤적을 안전·동역학 가능 집합으로 투영</strong>한다. MPC는 &quot;가이드된 궤적에 최대한 가깝되, 동역학과 안전 하드제약을 만족하는&quot; 궤적을 푼다.</p>
+<pre><code>min_{τⁱ}   Σ_{t=0..H}  [ ½ (τⁱ)ᵀ Q (τⁱ)  −  (τ̃ⁱ)ᵀ Q (τⁱ) ]      (= ½‖τⁱ − τ̃ⁱ‖²_Q + const)
+
+s.t.   h(x̄_k)      ≥ 0                (안전: 모든 스텝 장벽 만족)
+       x̄_{k+1}     = F̄(x̄_k, u_k)     (동역학 일치)
+       τ₀^{i-1}    = τ̃^{i-1}          (경계/초기 조건 고정)
+</code></pre>
+<p>목적함수는 사실상 <strong>가이드된 확산 궤적 <code>τ̃ⁱ</code>으로의 가중 유클리드 투영</strong>(<code>½‖τⁱ−τ̃ⁱ‖²_Q</code>)이다. 즉 &quot;확산이 제안한 모양을 최대한 지키되 안전·동역학은 반드시 만족&quot;하도록 다듬는다. 이 투영 결과가 다음 디노이징 스텝의 웜스타트가 되어 <strong>확산↔MPC가 서로를 신뢰 초기값으로 부트스트랩</strong>한다.</p>
+<p><strong>왜 후반 스텝에서만 투영하는가 (i ≤ N/2)</strong>: 역확산 초반(<code>i &gt; N/2</code>)의 궤적 <code>τ̃ⁱ</code>는 여전히 노이즈에 크게 오염되어 있어, 그 위에 MPC를 돌려도 (a) 투영 대상 자체가 무의미한 노이즈라 계산낭비이고, (b) 강한 하드 제약이 확산의 <strong>다봉성(여러 우회 경로 후보)을 조기에 붕괴</strong>시켜 국소최적으로 몰아넣을 위험이 있다. 반면 후반(<code>i ≤ N/2</code>)은 궤적 형상이 이미 드러난 상태라 MPC 투영이 (a) 의미 있는 미세보정을 하고 (b) 계산비용은 절반으로 억제된다. 이 스케줄은 &quot;탐색(초반 가이드) → 정제(후반 투영)&quot;라는 확산 특유의 coarse-to-fine 성질과 정확히 맞물린다.</p>
+<p><strong>투영-웜스타트 되먹임의 안정화 효과</strong>: 기존 &quot;확산→MPC 후처리&quot;는 확산 최종 출력 <code>τ⁰</code>이 안전집합에서 멀면 MPC 한 번으로 못 당겨온다(국소최소). D-SafeMPC는 매 후반 스텝마다 조금씩 투영해 궤적을 <strong>점진적으로</strong> 안전집합 경계 안으로 끌어들이므로, 각 MPC 문제는 이미 안전에 가까운 웜스타트에서 출발한다. 이는 비볼록 최적화의 <strong>수렴 신뢰성과 속도</strong>를 동시에 개선하는 핵심 설계다.</p>
+<h3>3.5 전체 알고리즘 (Algorithm)</h3>
+<pre><code>Algorithm 1  D-SafeMPC with CBF/CLF Guidance
+────────────────────────────────────────────────────────────
+Input : 조건 y(시작·목표·장애물), 확산 스텝수 N, 게인 λ_c, λ_l, Q, α(·), λ
+Output: 안전 궤적 τ⁰
+
+1:  τᴺ ~ 𝒩(0, I)                                  # 순수 노이즈에서 시작
+2:  for i = N down to 1 do
+3:      μθ ← denoise(εθ, τⁱ, i, y)                 # 식 3.1
+4:      μ̂  ← μθ + λ_c ∇_u ψ_h − λ_l ∇_u Φ_V        # 식 3.2 (안전·목표 가이드)
+5:      τ̃^{i-1} ~ 𝒩(μ̂, βᵢ I)                       # 가이드된 역확산 샘플
+6:      if i ≤ N/2 then
+7:          τ^{i-1} ← MPC_project(τ̃^{i-1})         # 식 3.4 (하드 안전·동역학 투영)
+8:      else
+9:          τ^{i-1} ← τ̃^{i-1}                       # 초반은 가이드만 (노이즈 큼)
+10:     end if
+11: end for
+12: return τ⁰
+────────────────────────────────────────────────────────────
+</code></pre>
+<p><strong>설계 통찰</strong>: 초반 스텝(<code>i &gt; N/2</code>)은 궤적이 아직 노이즈에 지배되어 MPC 투영이 무의미하므로 <strong>가이드만</strong> 적용하고, 후반 스텝(<code>i ≤ N/2</code>, N=20이므로 마지막 10스텝)에서만 <strong>MPC 하드 투영</strong>을 켠다. 이 스케줄이 계산비용(느린 MPC 호출 횟수)과 안전 보장의 균형을 만든다.</p>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<pre><code>                         ┌──────────────────────────────────────────────┐
+   조건 y                │            D-SafeMPC 샘플링 루프               │
+ (start, goal,           │                                              │
+  obstacles) ──────────► │   ┌────────────┐   guidance   ┌───────────┐  │
+                         │   │ εθ  U-Net   │──► μθ ──────►│  μ̂ = μθ + │  │
+   τᴺ ~ 𝒩(0,I) ────────► │   │ (diffuser/)│              │ λ_c∇ψ_h   │  │
+                         │   └────────────┘              │ − λ_l∇Φ_V │  │
+                         │        ▲                      └─────┬─────┘  │
+                         │        │ warm start                 │        │
+                         │        │                    τ̃^{i-1} ~𝒩(μ̂,βI) │
+                         │   ┌────┴───────┐    i ≤ N/2         │        │
+                         │   │  MPC 투영  │◄───── yes ─────────┤        │
+                         │   │ (CBF hard, │    (Franky/         │        │
+                         │   │  dynamics) │     solver)  i &gt; N/2│ no     │
+                         │   └────────────┘◄───────────────────┘        │
+                         │        │                                     │
+                         │        ▼  반복 (i = N … 1)                    │
+                         └────────┼─────────────────────────────────────┘
+                                  ▼
+                          τ⁰ (safe trajectory) ──► Franka 실행 (sim / real)
+</code></pre>
+<p><strong>데이터 흐름</strong>:</p>
+<ol>
+<li>조건 <code>y</code>(시작·목표·장애물 위치/속도)와 노이즈 궤적 <code>τᴺ</code>이 입력된다.</li>
+<li>U-Net 노이즈 예측기 <code>εθ</code>가 스텝별 평균 <code>μθ</code>를 낸다.</li>
+<li>CBF/CLF 그래디언트가 <code>μθ</code>를 <code>μ̂</code>으로 보정한다(soft guidance).</li>
+<li>후반 스텝에서 MPC가 하드 투영으로 안전·동역학을 강제하고, 그 결과가 다음 스텝 웜스타트가 된다.</li>
+<li>최종 궤적 <code>τ⁰</code>이 Franka(시뮬 또는 실물)에서 실행된다. 동적 장애물은 매 재계획 주기에서 조건 <code>y</code>가 갱신되며 반영된다.</li>
+</ol>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 및 환경 (Datasets / Environments)</h3>
+<ul>
+<li><strong>플랫폼</strong>: Franka Emika Panda 7-DOF 매니퓰레이터 (엔드이펙터 궤적 플래닝, 장애물 회피 태스크)</li>
+<li><strong>시나리오 4종</strong>:<ul>
+<li><strong>Static</strong>: 정적 장애물 1개 환경</li>
+<li><strong>Dynamic 1/2/3</strong>: 동적 장애물 환경 3종 (장애물 개수·속도·배치 상이, 난이도 증가)</li>
+</ul>
+</li>
+<li><strong>평가 시행</strong>: 각 시나리오 다수 시행(성공률 표준편차로 보아 20~40회/셀 규모)</li>
+<li><strong>실물</strong>: 물리 Franka 로봇 sim-to-real (아래 5.4)</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>Safety-Compliant Success (안전준수 성공률)</strong>: 전 구간 충돌 없이(안전집합 유지) 완료한 비율</li>
+<li><strong>Goal Reached (목표도달률)</strong>: 목표에 도달한 비율(안전 여부 무관)</li>
+<li><strong>Computation Time</strong>: 궤적 생성/계획당 계산시간(안전-성공률 대비 오버헤드 균형)</li>
+</ul>
+<blockquote>
+<p>두 지표를 분리한 것이 중요하다. 목표만 도달하고 충돌하면 안 되고(안전준수), 안전하지만 목표를 못 가도 안 된다. D-SafeMPC의 핵심 주장은 <strong>두 지표를 동시에 높게</strong> 유지하는 것이다.</p>
+</blockquote>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>Table I — Safety-Compliant Success / Goal Reached (%, ± 표준편차)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>환경</th>
+<th>지표</th>
+<th align="center"><strong>D-SafeMPC</strong></th>
+<th align="center">DPCC-C</th>
+<th align="center">CoBL</th>
+<th align="center">Diffuser</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Static</td>
+<td>Safety-Compliant</td>
+<td align="center">80.0 ±0.332</td>
+<td align="center"><strong>90.0</strong> ±0.300</td>
+<td align="center">5.0 ±0.150</td>
+<td align="center">5.0 ±0.150</td>
+</tr>
+<tr>
+<td>Static</td>
+<td>Goal Reached</td>
+<td align="center">80.0 ±0.332</td>
+<td align="center">90.0 ±0.300</td>
+<td align="center"><strong>100.0</strong> ±0.000</td>
+<td align="center">65.0 ±0.450</td>
+</tr>
+<tr>
+<td>Dynamic 1</td>
+<td>Safety-Compliant</td>
+<td align="center"><strong>100.0</strong> ±0.000</td>
+<td align="center">75.0 ±0.335</td>
+<td align="center">10.0 ±0.300</td>
+<td align="center">20.0 ±0.332</td>
+</tr>
+<tr>
+<td>Dynamic 1</td>
+<td>Goal Reached</td>
+<td align="center"><strong>100.0</strong> ±0.000</td>
+<td align="center">85.0 ±0.229</td>
+<td align="center">85.0 ±0.320</td>
+<td align="center">40.0 ±0.436</td>
+</tr>
+<tr>
+<td>Dynamic 2</td>
+<td>Safety-Compliant</td>
+<td align="center"><strong>87.5</strong> ±0.268</td>
+<td align="center">45.0 ±0.415</td>
+<td align="center">77.5 ±0.370</td>
+<td align="center">17.5 ±0.327</td>
+</tr>
+<tr>
+<td>Dynamic 2</td>
+<td>Goal Reached</td>
+<td align="center">87.5 ±0.268</td>
+<td align="center">60.0 ±0.339</td>
+<td align="center"><strong>92.5</strong> ±0.238</td>
+<td align="center">32.5 ±0.426</td>
+</tr>
+<tr>
+<td>Dynamic 3</td>
+<td>Safety-Compliant</td>
+<td align="center"><strong>92.5</strong> ±0.179</td>
+<td align="center">42.5 ±0.327</td>
+<td align="center">80.0 ±0.332</td>
+<td align="center">32.5 ±0.426</td>
+</tr>
+<tr>
+<td>Dynamic 3</td>
+<td>Goal Reached</td>
+<td align="center"><strong>92.5</strong> ±0.179</td>
+<td align="center">42.5 ±0.327</td>
+<td align="center">85.0 ±0.320</td>
+<td align="center">45.0 ±0.415</td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 관찰</strong>:</p>
+<ol>
+<li><strong>동적 환경 지배력</strong>: Dynamic 1~3 전부에서 D-SafeMPC가 <strong>안전준수 성공률 최고</strong>(100/87.5/92.5%). 특히 Dynamic 1에서 완벽(100%)이며, 가장 어려운 Dynamic 3에서도 92.5%로 2위 CoBL(80%)·DPCC-C(42.5%)를 크게 앞선다.</li>
+<li><strong>안전-목표 동시성</strong>: D-SafeMPC는 모든 동적 환경에서 <strong>Safety-Compliant = Goal Reached</strong> (두 값이 동일). 즉 &quot;목표에 도달할 때는 항상 안전하게 도달&quot;한다. 반면 CoBL은 목표도달률은 높지만(85<del>92.5%) 안전준수가 그보다 낮아(10</del>80%) <strong>충돌하며 목표에 가는</strong> 경우가 많다. Diffuser는 두 지표 모두 낮다(안전 미강제의 전형적 실패).</li>
+<li><strong>정적 환경의 상대열세</strong>: Static에서는 DPCC-C(90%)가 D-SafeMPC(80%)보다 높다. 정적·단순 환경에서는 제약 예측제어 계열이 유리하나, <strong>동적·복잡 환경으로 갈수록 D-SafeMPC의 생성-투영 결합이 강건성</strong>을 보인다(논문의 핵심 주장 방향과 일치).</li>
+</ol>
+<p><strong>베이스라인 정리</strong>:</p>
+<ul>
+<li><strong>Diffuser</strong> (Janner et al. 계열): 안전 가이드 없는 순수 궤적 확산 플래너 → 동역학·충돌 미강제로 전 시나리오 최저.</li>
+<li><strong>CoBL</strong> (Control-Barrier/Lyapunov 확산 계열): 장벽·리아푸노프를 반영하나 MPC 투영 없이 soft만 사용 → 목표는 잘 가나 안전준수가 불안정.</li>
+<li><strong>DPCC-C</strong> (Diffusion Predictive Control with Constraints, conservative): 확산+제약예측제어 하이브리드 → 정적엔 강하나 동적에서 급락(웜스타트 병리 노출).</li>
+</ul>
+<p><strong>실패 모드 해부(왜 베이스라인이 무너지는가)</strong>:</p>
+<ul>
+<li><em>Diffuser의 붕괴</em>: Static에서 Safety 5%로 사실상 전멸이다. 안전 가이드가 전혀 없어 학습분포 밖 장애물 배치에서 궤적이 그대로 관통한다. Goal 65%는 &quot;충돌하든 말든 목표엔 간다&quot;는 확산 본연의 표현력이 남긴 잔여 성능일 뿐이다.</li>
+<li><em>CoBL의 안전-목표 괴리</em>: 동적환경에서 Goal(85<del>92.5%)은 높지만 Safety(10</del>80%)가 널뛴다. Soft 가이드만으로는 &quot;안전 여유가 급변하는 동적 장애물&quot;을 따라잡지 못해, 목표로 향하다가 충돌하는 궤적이 대량 발생한다. D-SafeMPC가 MPC 하드 투영으로 이 괴리를 닫는다(Safety=Goal).</li>
+<li><em>DPCC-C의 동적 급락</em>: Static 90%로 최강이나 Dynamic 2/3에서 45%/42.5%로 반토막 난다. 보수적 제약예측이 정적 최적화엔 유리하지만, 동적 장애물의 빠른 변화에서 <strong>한 번의 예측제어</strong>로는 재보장이 늦어 웜스타트 병리가 드러난다. D-SafeMPC의 denoising-in-the-loop 투영이 바로 이 지점을 겨냥한다.</li>
+</ul>
+<p><strong>표준편차 관점</strong>: D-SafeMPC는 Dynamic 3에서 ±0.179로 베이스라인(±0.327~0.415)보다 <strong>분산이 작다</strong>. 즉 성공률이 높을 뿐 아니라 <strong>시행 간 일관성</strong>도 우수하다. 안전이 생성에 내재화되어 &quot;운 좋게 성공/운 나빠 충돌&quot;의 변동이 줄어든 것으로 해석된다 — 실물 배치에서 신뢰성 측면의 실질적 이점이다.</p>
+<h3>5.4 계산 효율 (Computation Time)</h3>
+<p>논문은 정적 환경에서 D-SafeMPC가 <strong>높은 안전-성공률과 계산 오버헤드 사이의 유리한 균형</strong>을 달성하며, <strong>다른 MPC 기반 모델보다 계산적으로 더 효율적</strong>이라고 보고한다. 이는 3.5의 <strong>부분 MPC 스케줄(i ≤ N/2에서만 투영)</strong> 덕분으로, MPC를 매 디노이징 스텝이 아니라 후반 절반에서만 호출해 느린 비볼록 최적화 횟수를 절반으로 줄인 결과다.</p>
+<h3>5.5 리얼월드 실험 (Real-world Experiments)</h3>
+<ul>
+<li><strong>플랫폼</strong>: 물리 Franka Emika 로봇, <strong>시뮬레이션에서만 학습한 확산 모델을 그대로 실물에 전개(sim-to-real, zero fine-tune)</strong>.</li>
+<li><strong>제어 스택</strong>: <code>Franky</code> 라이브러리로 실시간 제어. <strong>relative dynamics factor = 0.05</strong>로 설정해 컨트롤러 오차를 최소화하고 정밀 위치제어를 확보(고속 동작 대신 안전·정밀 우선의 실물 튜닝).</li>
+<li><strong>비교</strong>: 정적 장애물 시나리오에서 <strong>DPCC 베이스라인 대비 실물 성능 검증</strong>. 시뮬에서의 우위가 실물 sim-to-real에서도 유지됨을 확인.</li>
+<li><strong>의의</strong>: 확산 플래너의 고질적 약점(분포외 물리 위반)을 CBF 하드 투영으로 눌러, <strong>재학습 없이 실물 안전 배치</strong>가 가능함을 실증.</li>
+</ul>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><strong>Denoising-in-the-loop 안전화</strong>: 안전(CBF)·수렴(CLF) 제약을 <strong>후처리가 아니라 역확산의 매 스텝에 그래디언트로 주입</strong>하여, 궤적이 생성 과정 내내 안전집합으로 유도되게 한 최초 계열의 결합 방식.</li>
+<li><strong>반복 투영에 의한 웜스타트 병리 해소</strong>: 확산과 MPC가 서로에게 신뢰 초기값을 되돌려주는 <strong>iterative-projection</strong>으로, 기존 &quot;확산→MPC 후처리&quot;의 수렴실패(나쁜 웜스타트 문제)를 구조적으로 제거.</li>
+<li><strong>이산시간 CBF의 미분가능 다장애물 결합</strong>: 로그-합-지수 소프트-최소로 다수 장애물을 하나의 매끄러운 장벽으로 합쳐, 가이드 그래디언트 <code>∇ψ_h</code>를 안정적으로 계산.</li>
+<li><strong>부분 MPC 스케줄로 효율-안전 균형</strong>: <code>i ≤ N/2</code>에서만 MPC를 켜 계산비용을 절반으로 줄이면서 안전을 유지 → MPC 기반 대비 계산 효율 우위.</li>
+<li><strong>동적 환경 SOTA + sim-to-real 실증</strong>: 3종 동적 장애물 환경 전부에서 안전준수 성공률 최고(100/87.5/92.5%), 물리 Franka에서 재학습 없이 검증, <strong>재현 가능한 오픈소스 코드 공개</strong>.</li>
+</ol>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<p><strong>핵심 하이퍼파라미터</strong></p>
+<pre><code>확산 스텝수         N          = 20
+MPC 투영 임계       i ≤ N/2    = 10  (마지막 10스텝만 하드 투영)
+CBF 가이드 가중     λ_c        = 적응적(adaptive) — 안전 여유에 따라 조절
+CLF 가이드 가중     λ_l        = 고정(fixed)
+소프트-최소 온도    λ          = 다장애물 log-sum-exp 날카로움
+투영 비용가중       Q          = 상태별 유클리드 투영 가중행렬
+실물 동역학 팩터    rel.dyn.   = 0.05  (Franka sim-to-real)
+</code></pre>
+<p><strong>코드 구조 (github.com/erdiphd/D-SafeMPC, Python 98.4%)</strong></p>
+<pre><code>D-SafeMPC/
+├── diffuser/                # 확산 백본(U-Net εθ, 노이즈 스케줄, 역확산 샘플러)
+├── d3il/                    # 시뮬레이션 환경(Franka) 연동 계층
+├── config/                  # 시나리오·하이퍼파라미터 설정(N, λ 게인, Q 등)
+├── scripts/                 # 학습·평가 스크립트
+├── figures/                 # 결과 시각화
+├── trajectory_generator.py  # 샘플링 루프: 역확산 + CBF/CLF 가이드 + MPC 투영
+├── video_generator.py       # 궤적 롤아웃 영상 생성
+└── requirements.txt         # 의존성 (PyTorch, 제어 솔버, Franky 등)
+</code></pre>
+<ul>
+<li>README는 방법을 명시적으로 기술: <em>&quot;The reverse diffusion process is steered using gradients from discrete-time Control Barrier Functions (CBFs) and Control Lyapunov Functions (CLFs)… At each denoising step, an MPC refines the trajectory by projecting it onto a safe and dynamically feasible set.&quot;</em> — 본문 §3의 알고리즘과 정확히 대응.</li>
+<li><code>trajectory_generator.py</code>가 Algorithm 1의 for-루프(가이드+조건부 MPC 투영)를 구현하는 진입점이다.</li>
+</ul>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<ul>
+<li><strong>장애물 수</strong>: 로그-합-지수 결합은 장애물 수에 선형 비용으로 확장되며 단일 미분가능 장벽을 유지 → 다장애물 동적 환경에 자연 확장.</li>
+<li><strong>자유도(DoF)</strong>: 7-DOF Franka에서 검증. 이동로봇(2~3 DoF)·다관절 시스템으로의 이식은 동역학 <code>F̄</code>와 장벽 <code>h_j</code>만 교체하면 원리상 가능(단, MPC 투영의 실시간성이 관건).</li>
+<li><strong>부분 MPC 스케줄</strong>은 계산비용을 상수배 절감하지만, MPC 자체가 비볼록이라 <strong>실시간 재계획 주파수</strong>는 여전히 병목이 될 수 있다.</li>
+</ul>
+<h3>8.2 한계점 (Limitations)</h3>
+<ol>
+<li><strong>정적·단순 환경 열세</strong>: Static에서 DPCC-C(90%)에 뒤진다(80%). 단순 환경에선 생성-투영 결합의 이점이 오히려 오버헤드로 작용.</li>
+<li><strong>MPC 실시간성</strong>: 비볼록 MPC를 후반 10스텝에서 반복 호출하므로, 고속 동적 장애물이나 고주파 재계획이 필요한 상황에서 지연이 문제될 수 있음. 실물에서 <code>rel.dyn.=0.05</code>로 <strong>느리게</strong> 움직인 것도 이 한계의 방증.</li>
+<li><strong>CBF 설계 의존</strong>: 장벽 <code>h_j</code>와 class-𝒦 <code>α(·)</code>, 게인 <code>λ_c/λ_l/λ</code>의 튜닝에 성능이 민감. 자동 튜닝은 미해결.</li>
+<li><strong>플랫폼 편중</strong>: Franka 매니퓰레이터 단일 플랫폼 검증. 이동·비행 로봇에서의 일반화는 후속 과제.</li>
+</ol>
+<h3>8.3 향후 방향 (Future Directions)</h3>
+<ul>
+<li>학습형 CBF(neural CBF)로 장벽 설계 자동화.</li>
+<li>MPC 투영을 미분가능 볼록 근사(예: 미분가능 QP)로 대체해 실시간성·엔드투엔드 학습성 확보.</li>
+<li>이동로봇/드론으로의 확장 및 관측 불확실성(부분관측) 하 안전 보장 결합.</li>
+</ul>
+<h3>8.4 이론적 안전 보장의 위상 (Where does the guarantee come from?)</h3>
+<p>D-SafeMPC의 안전은 <strong>두 층위</strong>에서 나온다. (1) <em>Soft 층</em>: CBF 그래디언트 가이드는 확산 궤적을 안전 방향으로 유도하지만 확률적 보장이다(집합 소속을 강제하지 않음). (2) <em>Hard 층</em>: 후반 MPC 투영은 이산 CBF 제약 <code>h(x̄_k) ≥ 0</code>을 최적화의 하드 제약으로 부과하므로, <strong>MPC가 실현가능해(feasible)를 반환하는 한</strong> 그 궤적은 안전집합 안에 있다. 따라서 실제 안전 보장의 근원은 hard 층이고, soft 층은 hard 층이 항상 실현가능하도록 좋은 초기값을 공급하는 역할이다. 다만 (a) MPC의 비볼록성 탓에 전역 실현가능성이 이론적으로 항상 보장되진 않고, (b) 이산 CBF는 샘플링 간격 사이(inter-sample)의 위반을 완전히 배제하지 못한다. 이 두 틈이 §8.2의 한계(실시간성·설계 민감도)와 연결되며, neural-CBF·미분가능 MPC 방향의 후속연구가 메우려는 지점이다.</p>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<p>같은 Planner 트랙의 <strong>확산·MPC·안전 계열 선행 리뷰</strong>와 비교한다. 비교 대상은 (1) <em>Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies</em>(SobolevDiffusion), (2) <em>Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation</em>(ReliaDiffNav), (3) <em>VOiLA: Vectorized Online Planning with Learned Diffusion Model for POMDP Agents</em>(VOiLA), (4) <em>Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control</em>(UGE-MPC).</p>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>SobolevDiffusion</th>
+<th>ReliaDiffNav</th>
+<th>VOiLA</th>
+<th>UGE-MPC</th>
+<th><strong>D-SafeMPC (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>생성 백본</td>
+<td>확산 정책(TO 워밍스타트)</td>
+<td>가이드 확산(UAV)</td>
+<td>확산 세계모델(POMDP)</td>
+<td>없음(MPPI 샘플링)</td>
+<td>조건부 궤적 확산</td>
+</tr>
+<tr>
+<td>안전 강제 방식</td>
+<td>없음(TO가 최적화)</td>
+<td>ESDF 스코어 가이드(soft)</td>
+<td>없음(불확실성 처리)</td>
+<td>없음(다양성 탐색)</td>
+<td><strong>CBF/CLF 가이드 + MPC 하드 투영</strong></td>
+</tr>
+<tr>
+<td>제어이론 결합</td>
+<td>피드백 게인(Sobolev)</td>
+<td>training-free 그래디언트</td>
+<td>InfoNCE 우도</td>
+<td>Hellinger 다양성</td>
+<td><strong>이산 CBF + CLF + MPC</strong></td>
+</tr>
+<tr>
+<td>확산-제어 상호작용</td>
+<td>워밍스타트(1회)</td>
+<td>후처리 가이드</td>
+<td>증류(distillation)</td>
+<td>해당없음</td>
+<td><strong>denoising-in-the-loop(반복 투영)</strong></td>
+</tr>
+<tr>
+<td>동적 장애물</td>
+<td>✕(정적 TO 중심)</td>
+<td>부분(가상 장애물)</td>
+<td>✕(POMDP 불확실성)</td>
+<td>부분(재계획)</td>
+<td><strong>✔ (핵심 강점, 3종 동적환경)</strong></td>
+</tr>
+<tr>
+<td>실물 검증</td>
+<td>✕(시뮬)</td>
+<td>✔ 쿼드로터</td>
+<td>✔ Unitree Go2</td>
+<td>✔ 1/5 트럭</td>
+<td>✔ <strong>Franka sim-to-real</strong></td>
+</tr>
+<tr>
+<td>코드 공개</td>
+<td>❌(예정)</td>
+<td>❌</td>
+<td>❌</td>
+<td>✔(예정, 프로젝트 페이지)</td>
+<td><strong>✔ (완전 공개)</strong></td>
+</tr>
+<tr>
+<td>학회</td>
+<td>arXiv2026</td>
+<td>arXiv2026</td>
+<td>ISRR2026(제출)</td>
+<td>ICRA2026</td>
+<td>arXiv2026</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<ul>
+<li><strong>vs SobolevDiffusion</strong>: SobolevDiffusion은 확산을 <strong>TO 솔버의 웜스타트</strong>로만 쓴다(확산 1회 → 최적화). 안전은 TO의 몫이고 CBF는 없다. D-SafeMPC는 확산과 MPC를 <strong>매 스텝 교차</strong>시켜 안전을 생성 과정에 내재화한다. SobolevDiffusion의 강점은 데이터 효율(3<del>50 궤적)과 TO 가속(2</del>20×)이고, D-SafeMPC의 강점은 <strong>동적 안전 보장</strong>이다. 상보적 — Sobolev의 게인-감독 학습을 D-SafeMPC의 확산 백본에 결합하면 데이터 효율↑ 가능.</li>
+<li><strong>vs ReliaDiffNav</strong>: 둘 다 &quot;가이드 확산&quot;이지만 가이드의 성격이 다르다. ReliaDiffNav는 <strong>지각 신뢰도 기반 ESDF 스코어 가이드</strong>(training-free soft)로 지각 실패 영역을 가상 장애물화한다. D-SafeMPC는 <strong>제어이론적 하드 안전(CBF)+MPC 투영</strong>으로, 소프트 넛지에 그치지 않고 안전집합 소속을 강제한다. ReliaDiffNav는 지각-신뢰성·UAV에, D-SafeMPC는 동역학-안전·매니퓰레이터에 강하다.</li>
+<li><strong>vs VOiLA</strong>: VOiLA는 확산을 <strong>세계모델(전이·관측 샘플러)</strong>로 쓰고 증류로 가속해 POMDP belief tree를 돌린다. 관심사가 <strong>불확실성 하 정보수집</strong>이다. D-SafeMPC는 확산을 <strong>궤적 플래너</strong>로 쓰고 관심사가 <strong>안전 제약 강제</strong>다. 축이 다르다(불확실성 vs 안전). 결합하면 &quot;부분관측 하 안전 플래닝&quot;이라는 미해결 영역이 열린다(§8.3과 연결).</li>
+<li><strong>vs UGE-MPC</strong>: UGE-MPC는 <strong>확산 없이</strong> 순수 샘플링 MPC(MPPI)의 국소최소를 Hellinger 다양성으로 탈출한다. D-SafeMPC는 <strong>확산 사전분포 + MPC 투영</strong>으로 좋은 초기 다봉성을 확산에서 얻는다. UGE-MPC의 다양성 탐색은 D-SafeMPC의 확산이 자연히 제공하는 다봉 궤적과 목적이 겹치되 수단이 다르다. 둘 다 MPC 계열이나 D-SafeMPC는 <strong>생성 사전분포를 활용</strong>하는 점이 신규.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>강점</strong>: 완전 공개 코드 + Franka sim-to-real 실증 → <strong>재현·이식 장벽이 낮다</strong>. 안전이 생성에 내재화되어 분포외 상황에서도 충돌을 구조적으로 억제 → 산업 매니퓰레이터의 동적 협업 환경(사람·물체가 움직이는 셀)에 유망.</li>
+<li><strong>약점</strong>: 비볼록 MPC의 실시간성(실물에서 rel.dyn.=0.05로 느리게 운용)이 고속 응용을 제약. 고주파 동적 장애물(빠른 사람 손)에는 추가 가속 필요.</li>
+<li><strong>종합</strong>: <strong>&quot;안전이 성능만큼 중요한 준정적~중속 동적 매니퓰레이션&quot;</strong>에 즉시 실용적. 고속·모바일 응용엔 MPC 가속(미분가능 QP)이 선결.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>D-SafeMPC는 확산 플래너 연구의 흐름을 <strong>&quot;표현력(Diffuser) → 가이드(ReliaDiffNav류 soft) → 하드 안전 보장(CBF+MPC)&quot;</strong>의 한 단계 성숙으로 밀어올린다. 특히 <strong>denoising-in-the-loop 투영</strong>은 후처리 하이브리드의 병리를 정면으로 해결한 구조적 기여로, 향후 neural-CBF·미분가능 MPC와 결합해 <strong>엔드투엔드 학습 가능한 안전 확산 플래너</strong>로 발전할 잠재력이 크다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li>Sayar, E., Daş, E., Burdick, J. W., Knoll, A., Kayacan, E. <em>D-SafeMPC: Diffusion-Driven Safe Model Predictive Control with Discrete-Time Control Barrier Functions</em>. arXiv:2607.10842, 2026. 코드: <a href="https://github.com/erdiphd/D-SafeMPC">https://github.com/erdiphd/D-SafeMPC</a></li>
+<li>Janner, M., et al. <em>Planning with Diffusion for Flexible Behavior Synthesis (Diffuser)</em>. ICML 2022. — 순수 궤적 확산 베이스라인.</li>
+<li>Ames, A. D., et al. <em>Control Barrier Functions: Theory and Applications</em>. ECC 2019. — CBF 이론 기반.</li>
+<li>(베이스라인) <em>CoBL-Diffusion</em> — 제어장벽·리아푸노프 확산 계열.</li>
+<li>(베이스라인) <em>DPCC: Diffusion Predictive Control with Constraints</em>. — 확산+제약 예측제어 하이브리드.</li>
+<li>Le Hellard, T., et al. <em>Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies</em>. arXiv:2604.19011, 2026. (코퍼스 SobolevDiffusion_arxiv2026)</li>
+<li>Valuev, I., et al. <em>Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation</em>. arXiv:2606.13883, 2026. (코퍼스 ReliaDiffNav_arxiv2026)</li>
+<li>Hoerger, M., et al. <em>VOiLA: Vectorized Online Planning with Learned Diffusion Model for POMDP Agents</em>. arXiv:2606.19729, 2026. (코퍼스 VOiLA_arxiv2026)</li>
+<li>Poyrazoglu, O. G., et al. <em>Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based MPC (UGE-MPC)</em>. ICRA 2026. (코퍼스 UGE-MPC_ICRA2026)</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p><strong>혁신성</strong>: D-SafeMPC는 확산 플래너의 근본 약점(안전 미강제)과 하이브리드의 병리(웜스타트 수렴실패)를 <strong>하나의 메커니즘 — denoising-in-the-loop CBF/CLF 가이드 + 반복 MPC 투영 — 으로 동시 해결</strong>한다. 안전을 후처리가 아니라 생성 과정에 내재화한 점, 확산과 MPC가 서로를 신뢰 웜스타트로 부트스트랩하는 반복 투영 구조가 핵심 신규성이다.</p>
+<p><strong>실용적 의의</strong>: 3종 동적 장애물 환경 전부에서 안전준수 성공률 최고(100/87.5/92.5%)를 달성하고 — 특히 &quot;목표에 도달할 때 항상 안전하게&quot; 도달(Safety=Goal) — 물리 Franka sim-to-real로 재학습 없이 검증했다. <strong>완전 공개된 오픈소스 코드</strong>(diffusion+CBF+MPC 구현)는 후속 연구·산업 이식의 장벽을 크게 낮춘다.</p>
+<p><strong>향후 연구 방향</strong>: (1) neural-CBF로 장벽 설계 자동화, (2) 미분가능 MPC(QP)로 실시간성·엔드투엔드 학습성 확보, (3) 이동로봇/드론 확장 및 부분관측(POMDP, VOiLA류) 불확실성과의 결합. 정적·단순 환경 열세와 MPC 실시간성이 남은 과제이나, <strong>&quot;안전이 성능만큼 중요한 동적 협업 매니퓰레이션&quot;</strong>에서 D-SafeMPC는 즉시 실용적이며 안전 확산 플래닝의 유력한 레퍼런스가 된다.</p>
+<hr>
+<p><em>자동 생성 리뷰: 2026-07-15 · 논문 arXiv:2607.10842 · 코드 <a href="https://github.com/erdiphd/D-SafeMPC">https://github.com/erdiphd/D-SafeMPC</a></em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

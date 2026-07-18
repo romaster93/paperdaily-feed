@@ -1,0 +1,1125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>LiDAR Teach, Radar Repeat: Robust Cross-Modal Navigation · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">IEEE Transactions on Robotics (T-RO) — Accepted 2026</div>
+    <h1>LiDAR Teach, Radar Repeat: Robust Cross-Modal Navigation in Degenerate and Varying Environments</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2605.02809">arXiv:2605.02809</a></span>
+      <span>리뷰 2026-05-06</span>
+      <span>44분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>LTR²: LiDAR Teach, Radar Repeat — 크로스-모달 교시-반복 내비게이션 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: LiDAR Teach, Radar Repeat: Robust Cross-Modal Navigation in Degenerate and Varying Environments</li>
+<li><strong>시스템 이름 (System Name)</strong>: LTR² (LiDAR-Teach-and-Radar-Repeat)</li>
+<li><strong>저자 (Authors)</strong>: Renxiang Xiao, Yichen Chen, Yuanfan Zhang, Qianyi Shao, Yushuai Chen, Yuxuan Han, Yunjiang Lou, Liang Hu</li>
+<li><strong>소속 (Affiliation)</strong>: 중국 대학 로보틱스 연구팀 (arXiv 본문에 상세 소속 미기재). 저자군은 4D 밀리미터파 레이더 인지·로봇 내비게이션 분야 연구진으로, 자체 수집 캠퍼스 데이터셋(6개월, 40+ km)을 운용.</li>
+<li><strong>발표처 (Published)</strong>: <strong>IEEE Transactions on Robotics (T-RO) — Accepted (채택 확정, 탑티어 저널)</strong></li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2605.02809">https://doi.org/10.48550/arXiv.2605.02809</a> (arXiv preprint); T-RO 정식 DOI는 게재 시 부여 예정</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2605.02809">https://arxiv.org/abs/2605.02809</a> (제출일 2026-05-04)</li>
+<li><strong>코드 (Code)</strong>: ❌ <strong>미공개</strong> — 논문 본문·abstract·HTML 어디에도 GitHub 저장소나 프로젝트 페이지 URL이 기재되어 있지 않음 (WebFetch로 abs/html 양쪽 검증, 코드 링크 부재 확인). 재현성 측면의 핵심 약점.</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>LTR²는 <strong>교시-반복(Teach-and-Repeat, T&amp;R) 내비게이션</strong>에서 세 가지 핵심 환경 열화·변화에 대한 강인성을 <em>동시에</em> 달성하는 것을 목표로 한다:</p>
+<ol>
+<li><strong>기상 열화 (Weather/Sensing Degradation)</strong>: 연기, 안개, 비, 분진 등 LiDAR 빔 산란을 유발하는 조건에서 LiDAR 기반 반복이 불가능해지는 문제(degenerate environments).</li>
+<li><strong>일시적 동적 변화 (Ephemeral Dynamics)</strong>: 보행자, 주차 차량 등 일시적 장애물로 인한 잘못된 맵 연관(spurious associations).</li>
+<li><strong>구조적 정적 변화 (Structural Static Changes)</strong>: 건설, 가구 재배치, 계절 변화 등 장기적 환경 변화로 인한 교시 맵 무효화(varying environments).</li>
+</ol>
+<p>핵심 아이디어는 <strong>교시(Teach) 단계에서는 고밀도·고정밀 LiDAR를 사용하고, 반복(Repeat) 단계에서는 날씨에 강인한 4D 밀리미터파 레이더를 사용</strong>하는 <em>이종 센서(heterogeneous) 크로스-모달</em> 접근이다. 교시와 반복에 같은 센서를 쓰던 전통 T&amp;R의 단일-모달 가정을 깨고, <strong>학습 기반 Cross-Modal Registration(CMR) 네트워크</strong>가 희소한 레이더 관찰을 밀집한 LiDAR 교시 노드와 직접 정렬한다.</p>
+<blockquote>
+<p><strong>이 논문의 핵심 통찰</strong>: LiDAR 강도(intensity)와 레이더 전력 밀도(power density)는 <em>각자의 물리 방정식(레이더 방정식 / LiDAR 강도 모델)으로 유도되는 결정론적 관계</em>를 갖는다. 이 관계를 의사-레이더 강도 변환 <code>P̃_radar = √(P_radar)·e^(-2αd)</code> 로 명시화하면, 두 센서의 강도 분포가 공간상에서 정렬(aligned)되어 이종-모달 강도 특징 매칭이 가능해진다. 이 물리 정렬 위에 Doppler 모션 사전과 Swin Transformer 기반 점진 정합을 얹어, <strong>3개 로봇 플랫폼·40+ km·6개월·연기 야간 환경</strong>의 장기 자율 내비게이션을 센티미터급 정밀도로 달성한다.</p>
+</blockquote>
+<p>핵심으로 답하는 질문:</p>
+<ul>
+<li>물리 법칙으로 유도된 강도-전력 정렬을 학습 네트워크에 내장하면, 데이터만으로 학습할 때보다 크로스-모달 정합이 견고해지는가? (→ ablation에서 강도 분기 제거 시 RTE +344% 열화로 입증)</li>
+<li>LiDAR 기반 SLAM·T&amp;R이 <em>전부 실패</em>하는 연기/야간 degenerate 환경에서 레이더-반복이 단독으로 100% 성공할 수 있는가? (→ 105.1m 연기 야간 구간에서 LTR²만 성공)</li>
+<li>그라운드 트루스 레이블 없이, 장기 정적 변화(건설)와 일시적 동적 변화(보행자)를 구별하여 자기지도로 맵을 적응시킬 수 있는가? (→ ATE 드리프트 통계 기반 선형 분류기로 음성 샘플 선택)</li>
+</ul>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>(C1) 기존 T&amp;R 시스템의 단일-모달 의존성</h4>
+<p>전통적 Teach-and-Repeat 내비게이션은 교시와 반복 모두 동일한 센서를 사용한다:</p>
+<pre><code>[기존 단일-모달 T&amp;R의 구조적 한계]
+
+LiDAR-T&amp;R:
+  교시: LiDAR 맵 생성 (정밀, 고밀도, 고비용)
+  반복: LiDAR 포인트 클라우드 매칭
+  ─ 문제: 연기/안개/강우 → 빔 산란 → 포인트 클라우드 붕괴
+          → 위치추정 실패 → 내비게이션 중단
+
+Radar-T&amp;R:
+  교시: 레이더 맵 생성 (악천후 강인)
+  반복: 레이더 매칭
+  ─ 문제: 레이더 해상도 낮음 + 고스트/다중경로 노이즈
+          → 교시 맵 품질 저하 → 반복 정밀도 붕괴
+
+핵심 딜레마: &quot;정밀한 교시(LiDAR)&quot;와 &quot;강인한 반복(Radar)&quot;이
+            단일-모달 가정 하에서는 양립 불가
+</code></pre>
+<h4>(C2) 이종 센서 크로스-모달 정합의 근본적 어려움</h4>
+<p>LiDAR와 4D 밀리미터파 레이더를 직접 정합하는 것은 다음 4가지 불일치 때문에 근본적으로 어렵다:</p>
+<pre><code>[크로스-모달 정합의 4대 불일치]
+
+                LiDAR(교시)              4D Radar(반복)
+시야각(FOV)     360° 전방향              120°×45° (제한적)
+밀도            고밀도(64ch/32ch)        희소(sparse)
+근거리 정밀도    우수                     중간
+날씨 강인성      취약(연기/안개/강우)     우수
+추가 채널        없음                     Doppler 속도
+노이즈 특성      산란 노이즈              고스트/다중경로 반사
+
+1. 밀도 불일치(density mismatch): 밀집 vs. 희소
+2. 시야각 불일치(FOV mismatch): 360° 맵에서 레이더 120° 영역 정렬
+3. 응답 불일치(response mismatch): LiDAR 반사율 ρ ≠ 레이더 RCS
+4. 노이즈 불일치(noise mismatch): 산란 vs. 고스트/다중경로
+</code></pre>
+<p>특히 (3) 응답 불일치는 단순한 기하 ICP/NDT가 강도 정보를 활용하지 못하게 만드는 핵심 장벽이다.</p>
+<h4>(C3) 장기 정적 변화에 대한 자기지도 적응</h4>
+<p>수개월에 걸친 환경 변화를 처리하려면 맵 업데이트가 필요하나:</p>
+<ul>
+<li>그라운드 트루스(GT) 포즈 레이블 획득은 비용이 매우 높고, 운용 중 실시간으로 얻을 수 없다.</li>
+<li>완전 재학습은 배포된 시스템에서 비현실적이다.</li>
+<li><strong>동적 변화(보행자: 순간적 ATE 상승 후 회복)와 정적 변화(건설: 지속적 ATE 드리프트)를 구별</strong>해야 하며, 정적 변화에만 맵을 적응시켜야 한다(동적 객체에 과적합 금지).</li>
+</ul>
+<h3>2.2 핵심 해결책</h3>
+<pre><code>[LTR² 4-Phase 파이프라인 개요]
+
+Phase 1 — 사전 학습(Pre-training):
+   동기화된 LiDAR-레이더 쌍으로 CMR 네트워크 학습
+   랜덤 포즈 섭동으로 데이터 증강
+
+Phase 2 — 교시(Teaching):
+   LiDAR로 교시 그래프 생성
+   2단계 노드 선택(초기 오류 기반 + 곡률 기반 정제)
+
+Phase 3 — 반복(Repeating):
+   레이더 → 원통 투영 → Doppler 초기 포즈 → CMR 정합
+   → 목표 노드 선택(δ=0.12m) → Pure-pursuit 추적 (16.11Hz)
+
+Phase 4 — 미세 조정(Fine-tuning):
+   슬라이딩 윈도우 ATE 통계 → 음성 샘플 선택(선형 분류기)
+   → 자기지도 CMR 업데이트(GT 불필요)
+</code></pre>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 Cross-Modal Registration (CMR) 네트워크</h3>
+<p>LTR²의 심장. n번째 교시 노드의 LiDAR 포인트 클라우드 <code>ℒ_n</code>, m번째 반복 시점의 레이더 포인트 클라우드 <code>ℛ_m</code>, 그리고 Doppler 유도 초기 포즈 <code>T&#39;^n_m</code>을 입력받아 정제된 상대 포즈를 출력한다:</p>
+<pre><code>[CMR 핵심 정합식 — Eq.(1)]
+  T^n_m = CMR(T&#39;^n_m, ℒ_n, ℛ_m)
+
+  T&#39;^n_m: Doppler 모션 사전으로 만든 초기 포즈(coarse)
+  T^n_m : 정제된 상대 변환(SE(3))
+</code></pre>
+<p><strong>아키텍처</strong>: 이중 분기(parallel dual-branch) Swin Transformer 구조 — 기하(geometry) 분기와 강도(intensity) 분기를 분리하여 각각 특징을 추출한 뒤 융합한다.</p>
+<pre><code>[CMR 네트워크 데이터 흐름]
+
+  ℒ_n(LiDAR), ℛ_m(Radar)
+        │
+        ▼ (전처리) 원통형 투영 → 2D 의사 이미지(H×W×3)
+        │   geometry image / intensity image 각각 생성
+        ▼
+  ┌──────────────┐   ┌──────────────┐
+  │ Geometry 분기 │   │ Intensity 분기│   ← 두 개의 Swin Transformer 인코더
+  │ (Swin Trans.) │   │ (Swin Trans.) │
+  └──────┬───────┘   └──────┬───────┘
+         └────── 융합 ───────┘
+                 │
+                 ▼ Doppler-guided association (T&#39;로 근접 이웃 연관)
+                 │
+                 ▼ Progressive optimization (4개 해상도 스케일)
+                 │
+                 ▼ Pose fusion block
+                 │
+                 ▼  쿼터니언 회전 q̂ + 이동 t̂  → T^n_m
+</code></pre>
+<p><strong>(a) 원통형 투영 (Cylindrical Projection)</strong> — 3D 포인트를 2D 의사 이미지로:</p>
+<pre><code>[원통 투영 — 픽셀 좌표]
+  u = arctan2(y, x) / Δθ        (방위각 → 픽셀 u)
+  v = arcsin(z / √(x²+y²+z²)) / Δφ   (앙각 → 픽셀 v)
+
+  결과: H×W×3 의사 이미지 (geometry / intensity 별도)
+  해상도: 64×768 (VoD LiDAR), 32×675 (자체 수집 레이더)
+</code></pre>
+<p>투영 시 3D 좌표 <code>[x,y,z]</code>를 픽셀 채널에 함께 보존(픽셀-채널 연결)하여, 2D 어텐션 처리 후에도 3D 기하 복원이 가능하다.</p>
+<p><strong>(b) Swin Transformer 처리</strong> — 윈도우 기반 다중 헤드 자기 어텐션(W-MSA/SW-MSA):</p>
+<pre><code>[Swin 블록]
+  f̂^l = W-MSA(LN(f^{l-1})) + f^{l-1}
+  f^l  = MLP(LN(f̂^l)) + f̂^l
+
+  Attn(Q,K,V) = softmax(QKᵀ / √D_k + B) V
+  (B: 상대 위치 바이어스 relative position bias)
+</code></pre>
+<p>윈도우 시프트(shifted window)로 윈도우 간 정보 교환을 확보하면서 전역 self-attention의 O(N²) 비용을 회피한다 — 희소 레이더-밀집 LiDAR 정합처럼 해상도 차가 큰 입력에 유리하다.</p>
+<p><strong>(c) Doppler-guided association</strong> — 초기 포즈 <code>T&#39;</code>로 레이더 포인트를 LiDAR 좌표계에 거칠게 투영한 뒤 고정 반경 내 최근접 이웃을 연관시켜, 큰 초기 오정렬 없이 세밀 정합으로 진입한다.</p>
+<p><strong>(d) Progressive optimization (4-scale)</strong> — 4개 해상도 스케일에서 점진적으로 회전·이동을 정제하며, 각 스케일에 다단계 감독(multi-scale supervision)을 건다. 최종 pose fusion block이 쿼터니언 회전 <code>q̂</code>과 이동 <code>t̂</code>을 출력한다.</p>
+<h3>3.2 물리 법칙 기반 강도-전력 정렬 (핵심 혁신)</h3>
+<p>LTR²를 단순 데이터 기반 정합기와 구별짓는 결정적 요소. 레이더 수신 전력과 LiDAR 수신 강도가 각자의 물리 모델에서 출발해 <em>공간상 정렬 가능한</em> 형태로 변환된다.</p>
+<pre><code>[레이더 전력 밀도 모델 — Eq.(20)]
+  P_radar = K&#39; · A² cos²θ / d⁴
+
+  K&#39;: 송신전력·안테나 이득 등을 묶은 상수
+  A : 반사 단면적(RCS) 관련 항 (√RCS, 물체 크기/형상 의존)
+  θ : 입사각
+  d : 거리   (거리 d⁴ 의존성: 레이더 방정식 특유)
+
+[LiDAR 강도 모델 — Eq.(21)]
+  P_LiDAR = K&#39;&#39; · ρ₀ cosθ / d² · e^(-2αd)
+
+  K&#39;&#39; : LiDAR 시스템 상수
+  ρ₀  : 표면 반사율(reflectivity)
+  α   : 대기 감쇠 계수 (α = 0.03 km⁻¹)
+  (거리 d² 의존성 + 왕복 대기 감쇠 e^(-2αd))
+
+[의사-레이더 강도 변환 — Eq.(22) ★핵심★]
+  P̃_radar = √(P_radar) · e^(-2αd)
+          = √K&#39; · A cosθ / d² · e^(-2αd)
+
+  → P̃_radar 의 거리/각도 의존 형태가 P_LiDAR 와 동형(d², cosθ, e^(-2αd))
+  → 두 양의 비율:
+       P̃_radar / P_LiDAR = (√K&#39; · A) / (K&#39;&#39; · ρ₀)
+       = 거리·각도에 독립인 상수 (물체 재질/크기 의존만 남음)
+
+  ∴ 같은 물체에 대해 LiDAR 강도 분포와 변환된 레이더 전력 분포가
+    공간상에서 정렬됨 → 강도 기반 크로스-모달 특징 매칭 성립
+    (논문은 이 정렬을 실험적으로 검증했다고 명시)
+</code></pre>
+<p>이 변환의 의의는, <strong>강도 분기가 &quot;LiDAR 강도 ↔ 변환된 레이더 전력&quot;을 동일 척도로 비교</strong>할 수 있게 한다는 점이다. 순수 기하만으로는 희소-밀집 정합이 다중 해(ambiguity)를 가지지만, 물리 정렬된 강도 채널이 이 모호성을 깬다.</p>
+<blockquote>
+<p><strong>Ablation 핵심</strong>: 강도 분기를 제거(w/o Intensity)하면 VoD Seq.01에서 RTE가 0.0918m → 0.4080m로 <strong>약 344% 열화</strong>되며, 폐쇄루프 궤적 E·G에서는 아예 <strong>실패(Failed)</strong>한다. 즉 물리 강도 정렬은 부가 기능이 아니라 시스템 성립 조건이다.</p>
+</blockquote>
+<h3>3.3 Doppler 기반 모션 사전 (Motion Prior)</h3>
+<p>레이더의 Doppler 채널로 자아 속도를 추정해 CMR 초기 포즈 <code>T&#39;</code>를 제공한다 — 학습 정합기를 좋은 초기점에서 출발시키는 역할.</p>
+<pre><code>[Doppler 자아 속도 추정 — Eq.(8)]
+  v_r = (Hᵀ H)⁻¹ Hᵀ v_Doppler
+
+  H : 각 레이더 포인트의 정규화 방향 벡터를 쌓은 행렬
+  v_Doppler : 측정된 레이디얼 Doppler 속도 벡터
+  → 최소제곱으로 3D 자아 속도 v_r 복원
+
+[초기 모션 사전 변환 — Eq.(9)]
+  D^{m+2}_{m+1} = v_r / f
+  f = 레이더 주파수 (14 Hz)
+  → 프레임 간 변위(translation prior) 산출
+
+이상치 처리:
+  Doppler 잔차 인라이어 임계 γ = 0.10 m/s
+  RANSAC 120회 반복 → 고스트/다중경로 포인트 제거 후 LSQ
+</code></pre>
+<p>이 모션 사전 덕분에 CMR은 큰 초기 오정렬 없이 수렴하며, 순수 기하 ICP/NDT 대비 수렴성·정밀도가 향상된다. (단, §5에서 보듯 30° 이상 초기 오정렬에서는 한계.)</p>
+<h3>3.4 교시 그래프 생성 (2단계 노드 선택)</h3>
+<p>교시 단계는 LiDAR로 경로를 따라 그래프 <code>G_teach</code>를 만든다. 노드를 너무 촘촘히 두면 저장·정합 비용이 폭증하고, 너무 성기게 두면 정합 실패가 난다 — 이를 2단계로 균형 잡는다.</p>
+<pre><code>[단계 1: 오류 기반 초기 노드 — Eq.(3~5)]
+  위치 오류  : e_pos(t_i) = ‖s(t_i) − p_orig(t_i)‖
+  회전 오류  : e_rot(t_i) = ‖log(Rᵀ_intp(t_i) R_orig(t_i))^∨‖   (Lie 대수)
+  결합 오류  : E(t_i) = w_pos·e_pos(t_i) + w_rot·e_rot(t_i)
+
+  → 보간 포즈가 원본 궤적에서 임계 이상 벗어나는 지점에 새 노드 삽입
+
+[단계 2: 곡률 기반 반복 정제 — Eq.(6)]
+  c_i = ‖(p_i − p_{i-1}) × (p_{i+1} − p_i)‖
+        / (‖p_i − p_{i-1}‖ · ‖p_{i+1} − p_i‖ · ‖p_{i+1} − p_{i-1}‖)
+
+  → 입방 에르미트 보간(Cubic Hermite)으로 곡선 경로 근사
+  → 곡률 c_i 높은 구간(급커브)에 노드 추가 삽입
+  → 직선 구간은 성기게, 커브 구간은 촘촘히 (적응적 밀도)
+
+저장 효율: ~6 MB/km (선택된 LiDAR 프레임만 저장)
+</code></pre>
+<h3>3.5 자기지도 적응형 미세 조정 (Adaptive Fine-tuning)</h3>
+<p>장기 정적 변화에 GT 없이 적응하는 모듈. 슬라이딩 윈도우별 ATE 통계로 &quot;정적 변화로 인한 지속적 드리프트&quot;를 검출한다.</p>
+<pre><code>[음성 샘플 선택 — Eq.(14)]
+  ℐ_neg = { (L,R) ∈ w_i | a·σ_i − μ_i − b &gt; 0 }
+
+  σ_i : 슬라이딩 윈도우 w_i의 ATE 표준편차
+  μ_i : 윈도우 w_i의 ATE 평균
+  a,b : 선형 분류기 파라미터 (a=0.3, b=0.245)
+
+  직관: 평균(μ)은 낮은데 분산(σ)만 큰 구간 = 순간적 동적 변화(보행자) → 제외
+        평균(μ)이 지속적으로 높은 구간 = 구조적 정적 변화(건설)   → 음성 샘플 채택
+
+[미세 조정 트리거]
+  조건1: max_{i∈ℐ_neg} μ_i &gt; τ_μ            (τ_μ = 0.25 m)
+  조건2: Σ_{i∈ℐ_neg} ℓ_i &gt; L_min            (L_min = 400 m, 누적 음성 구간 길이)
+  둘 중 하나 충족 시 미세 조정 발동
+
+[자기지도 손실 — Eq.(16,17)]
+  기하 일관성: ℒ_geo = (1/N) Σ_{i=1}^N ‖T^1_i·r^1_i − T^2_i·r^2_i‖²₂
+              (동일 레이더 포인트 쌍 r¹,r²의 두 변환 간 일관성, 동차좌표)
+  결합 손실  : ℒ_ft = λ·ℒ_SSIM + (1−λ)·ℒ_geo
+              (ℒ_SSIM: 의사 이미지 구조적 유사성, GT 포즈 불필요)
+
+  양성:음성 = 3:1 비율로 미니배치 구성
+  미세 조정: 30 epochs, lr = 0.0001
+</code></pre>
+<h3>3.6 학습 손실 (사전 학습)</h3>
+<pre><code>[포즈 손실 — 회전/이동 분리 + 학습 가능 불확실성 스케일 — Eq.(31)]
+  ℒ = ‖q̂/‖q̂‖ − q‖ · exp(−s_q) + s_q
+    + ‖t̂ − t‖     · exp(−s_t) + s_t
+
+  q,t   : 쿼터니언 회전·이동 GT
+  s_q,s_t : 학습 가능한 로그 분산(불확실성 가중) — 회전/이동 스케일 자동 균형
+
+[4-스케일 다단계 감독 — Eq.(32)]
+  ℒ = Σ_{l=1}^4 λ^l L^l   (각 해상도 스케일의 점진 정제 손실 가중합)
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인 (4-Phase)</h3>
+<pre><code>┌───────────────────────────────────────────────────────────────────┐
+│                     LTR² 4-Phase 파이프라인                        │
+├───────────────────────────────────────────────────────────────────┤
+│  Phase 1: 사전 학습(Pre-training)                                  │
+│  ┌─────────────────────────────────────────────────────────────┐  │
+│  │ 동기화 LiDAR-Radar 쌍 수집 (VoD + 자체 수집)                 │  │
+│  │   ↓ 랜덤 포즈 섭동(데이터 증강)                              │  │
+│  │ CMR 학습: 4× A6000, PyTorch 2.0.1, Adam, lr 0.002→1e-5,     │  │
+│  │           batch 16, 4-scale supervision, Eq.(31,32)         │  │
+│  └─────────────────────────────────────────────────────────────┘  │
+│                                                                     │
+│  Phase 2: 교시(Teaching)                                           │
+│  ┌─────────────────────────────────────────────────────────────┐  │
+│  │ LiDAR 수집(360°, 고밀도)                                     │  │
+│  │   ↓ 2단계 노드 선택                                          │  │
+│  │   - 오류 기반 초기 노드 (Eq.3~5)                             │  │
+│  │   - 곡률 기반 정제 노드 (Eq.6)                               │  │
+│  │   ↓                                                         │  │
+│  │ 교시 그래프 G_teach (노드=LiDAR 프레임, 엣지=경로 세그먼트)  │  │
+│  │ 저장 ~6 MB/km                                                │  │
+│  └─────────────────────────────────────────────────────────────┘  │
+│                                                                     │
+│  Phase 3: 반복(Repeating)  — 16.11 Hz 실시간                       │
+│  ┌─────────────────────────────────────────────────────────────┐  │
+│  │ 레이더 스캔(120°×45° FOV)                                    │  │
+│  │   ↓ 원통 투영 → 2D 의사 이미지                               │  │
+│  │   ↓ Doppler(LSQ+RANSAC) → 초기 포즈 T&#39;^n_m  (Eq.8,9)         │  │
+│  │   ↓ CMR(T&#39;^n_m, ℒ_n, ℛ_m) → 정제 포즈 T^n_m  (Eq.1)         │  │
+│  │   ↓ 목표 노드 선택(전환 임계 δ=0.12m)                        │  │
+│  │   ↓ Pure-pursuit 궤적 추적 (목표속도 1.2 m/s)               │  │
+│  └─────────────────────────────────────────────────────────────┘  │
+│                                                                     │
+│  Phase 4: 미세 조정(Fine-tuning)                                   │
+│  ┌─────────────────────────────────────────────────────────────┐  │
+│  │ 슬라이딩 윈도우 ATE 통계 (σ_i, μ_i)                          │  │
+│  │   ↓ 음성 샘플 선택 ℐ_neg = {aσ_i−μ_i−b&gt;0}  (Eq.14)          │  │
+│  │   ↓ 트리거(τ_μ=0.25m OR ΣL&gt;400m) 충족 시                    │  │
+│  │ CMR 자기지도 업데이트 (양성:음성=3:1, GT 불필요)            │  │
+│  │   손실 ℒ_ft = λℒ_SSIM + (1−λ)ℒ_geo  (Eq.16,17)             │  │
+│  └─────────────────────────────────────────────────────────────┘  │
+└───────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 데이터 전처리 파이프라인</h3>
+<pre><code>[이종 센서 정합 전처리]
+
+LiDAR (360°, RS-Helios 32ch / VoD 64ch):
+  1. FOV 크롭: 레이더 120° FOV에 초기 포즈 불확실성 마진을 더해
+                방위각 마스크 135°로 확장 크롭
+  2. 원통 투영: u = arctan2(y,x)/Δθ,  v = arcsin(z/√(x²+y²+z²))/Δφ
+                → 64×768 의사 이미지(VoD)
+  3. 강도: P_LiDAR (Eq.21) 계산 → 물리 모델 정렬 기준
+
+Radar (OCULII EAGLE 4D, 120°×45°):
+  1. 원통 투영 → 32×675 의사 이미지(자체 수집)
+  2. 전력: P̃_radar = √(P_radar)·e^(-2αd) 변환 (Eq.22)
+  3. Doppler 채널: v_r 추정(Eq.8) → 자아 속도 / 동적 포인트 식별
+  4. RANSAC 120회 + 잔차 인라이어 γ=0.10 m/s: 고스트/다중경로 제거
+
+대기 감쇠: α = 0.03 km⁻¹ (표준 대기 가정, 왕복 e^(-2αd))
+</code></pre>
+<h3>4.3 정적 vs 동적 변화 판별 메커니즘</h3>
+<pre><code>[ATE 통계 기반 변화 분류 (핵심 직관)]
+
+시간축 ATE 신호:
+                동적(보행자)              정적(건설)
+  ATE          ┌─┐                       ┌──────────
+              ─┘ └─(순간 spike 후 회복)  ─┘ (지속 상승, 미회복)
+
+  → 동적: μ 낮음, σ 큼  → 분류기에서 제외(노이즈로 간주)
+  → 정적: μ 지속적 높음 → 음성 샘플(ℐ_neg) 채택
+
+선형 분류기 a·σ_i − μ_i − b &gt; 0 (a=0.3, b=0.245)가
+이 둘을 분리 → 정적 변화에만 자기지도 적응을 가함.
+세그먼트 오류 임계 ε_seg=0.04m, 글로벌 오류 임계 ε=0.16m 와 함께 운용.
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>데이터셋</th>
+<th>구성</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>VoD (View of Delft)</strong></td>
+<td>공개 LiDAR-카메라-4D레이더 동기 데이터셋, 8,600 동기 프레임, 64ch LiDAR, 도심 교통</td>
+<td>오픈-루프 정합 정밀도 평가 (시퀀스 01/02/03/04/14/19)</td>
+</tr>
+<tr>
+<td><strong>자체 수집 캠퍼스</strong></td>
+<td>6개월간 7개 메인 궤적(A~G) + 시나리오 궤적, 32ch LiDAR + OCULII EAGLE</td>
+<td>폐쇄-루프 실로봇 내비게이션</td>
+</tr>
+</tbody></table></div>
+<p><strong>자체 수집 궤적 상세</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>궤적</th>
+<th>거리(m)</th>
+<th>특징</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A</td>
+<td>1,325.8</td>
+<td>장거리 기준 궤적</td>
+</tr>
+<tr>
+<td>B</td>
+<td>516.7</td>
+<td>주차 차량(정적 장애물)</td>
+</tr>
+<tr>
+<td>C</td>
+<td>293.4</td>
+<td>보행자(동적 장애물)</td>
+</tr>
+<tr>
+<td>D</td>
+<td>353.7</td>
+<td>강변(riverbank)</td>
+</tr>
+<tr>
+<td>E</td>
+<td>439.2</td>
+<td>좁은 통로(narrow pathway)</td>
+</tr>
+<tr>
+<td>F</td>
+<td>643.3</td>
+<td>긴 복도(long corridor)</td>
+</tr>
+<tr>
+<td>G</td>
+<td>711.8</td>
+<td>30° 급경사·피치 진동</td>
+</tr>
+<tr>
+<td>Smoke</td>
+<td>105.1</td>
+<td><strong>야간 연기(nighttime smoke)</strong> — 핵심 실험</td>
+</tr>
+<tr>
+<td>Finetune1/2</td>
+<td>—</td>
+<td>장면 변화(scene change) 미세 조정 검증</td>
+</tr>
+<tr>
+<td>Large-scale</td>
+<td><strong>4,627 (누적)</strong></td>
+<td>대규모 누적 배포</td>
+</tr>
+</tbody></table></div>
+<p><strong>총 배포 규모</strong>: 3개 로봇 플랫폼, 40+ km, 6개월.</p>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>RTE</strong> (Relative Translation Error, m): 오픈-루프 상대 이동 오류</li>
+<li><strong>RYE</strong> (Relative Yaw Error, °): 오픈-루프 상대 요 오류</li>
+<li><strong>ATE</strong> (Absolute Translation Error, m): 폐쇄-루프 절대 궤적 오류</li>
+<li><strong>YAE</strong> (Yaw Absolute Error, °): 폐쇄-루프 절대 요 오류</li>
+<li><strong>Success Rate</strong>: 궤적 반복 완주 횟수 (예: 3/3)</li>
+<li><strong>Frequency (Hz)</strong>: 정합 업데이트 주파수(실시간성)</li>
+</ul>
+<h3>5.3 정량적 결과 — 오픈-루프 (VoD)</h3>
+<p><strong>Table III — RTE(m) (낮을수록 좋음)</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>Seq.01</th>
+<th>Seq.02</th>
+<th>Seq.03</th>
+<th>Seq.04</th>
+<th>Seq.14</th>
+<th>Seq.19</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>LTR² (Ours)</strong></td>
+<td><strong>0.092</strong></td>
+<td><strong>0.106</strong></td>
+<td><strong>0.100</strong></td>
+<td><strong>0.066</strong></td>
+<td><strong>0.116</strong></td>
+<td><strong>0.121</strong></td>
+</tr>
+<tr>
+<td>w/o Intensity</td>
+<td>0.408</td>
+<td>0.400</td>
+<td>0.409</td>
+<td>0.387</td>
+<td>0.598</td>
+<td>0.397</td>
+</tr>
+<tr>
+<td>NDT</td>
+<td>0.306</td>
+<td>0.304</td>
+<td>0.371</td>
+<td>0.333</td>
+<td>0.325</td>
+<td>0.376</td>
+</tr>
+<tr>
+<td>RegFormer</td>
+<td>0.819</td>
+<td>0.431</td>
+<td>0.398</td>
+<td>0.554</td>
+<td>0.619</td>
+<td>0.817</td>
+</tr>
+</tbody></table></div>
+<p><strong>Table IV — RYE(°) (낮을수록 좋음)</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>Seq.01</th>
+<th>Seq.02</th>
+<th>Seq.03</th>
+<th>Seq.04</th>
+<th>Seq.14</th>
+<th>Seq.19</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>LTR² (Ours)</strong></td>
+<td><strong>0.219</strong></td>
+<td><strong>0.221</strong></td>
+<td><strong>0.217</strong></td>
+<td><strong>0.232</strong></td>
+<td><strong>0.160</strong></td>
+<td><strong>0.191</strong></td>
+</tr>
+<tr>
+<td>w/o Intensity</td>
+<td>0.726</td>
+<td>0.660</td>
+<td>0.708</td>
+<td>0.728</td>
+<td>0.768</td>
+<td>0.798</td>
+</tr>
+<tr>
+<td>NDT</td>
+<td>0.398</td>
+<td>0.454</td>
+<td>0.436</td>
+<td>0.459</td>
+<td>0.376</td>
+<td>0.812</td>
+</tr>
+</tbody></table></div>
+<p>LTR²는 전통 포인트 클라우드 정합(NDT)과 학습 기반 정합(RegFormer) 모두를 모든 시퀀스에서 일관되게 상회한다. 특히 w/o Intensity 대비 RTE가 4~5배 낮아, 물리 강도 정렬의 기여가 결정적임을 정량 확인한다.</p>
+<p><strong>Ablation — 강도 분기</strong>: Seq.01에서 RTE 0.0918m → 0.4080m (<strong>+344%</strong>), RYE 0.219° → 0.726°. 폐쇄루프에서는 E·G 궤적 실패.</p>
+<p><strong>포즈 섭동 강인성</strong>: 가우시안 초기 노이즈 σ=5°까지 RTE &lt; 0.15m 유지, <strong>20° 초과 시 급격 열화</strong>(30° 부근 사실상 실패 경계). → 실배포에서 Doppler 초기화 정확도가 중요.</p>
+<h3>5.4 정량적 결과 — 폐쇄-루프 실로봇 내비게이션</h3>
+<p><strong>Table VI — 궤적 A (1,325.8m)</strong> (성공률 / ATE / YAE / 주파수):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>성공률</th>
+<th>ATE(m)</th>
+<th>YAE(°)</th>
+<th>주파수(Hz)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>LTR² (Ours, CMR)</strong></td>
+<td><strong>3/3</strong></td>
+<td><strong>0.073</strong></td>
+<td><strong>1.481</strong></td>
+<td><strong>16.11</strong></td>
+</tr>
+<tr>
+<td>Ours (w/o Intensity)</td>
+<td>3/3</td>
+<td>0.126</td>
+<td>2.922</td>
+<td>17.92</td>
+</tr>
+<tr>
+<td>LIO-SAM (LiDAR SLAM)</td>
+<td>3/3</td>
+<td>0.071</td>
+<td>1.180</td>
+<td>23.16</td>
+</tr>
+<tr>
+<td>LiDAR T&amp;R (GICP)</td>
+<td>3/3</td>
+<td>0.083</td>
+<td>2.158</td>
+<td>20.15</td>
+</tr>
+<tr>
+<td>RegFormer</td>
+<td>3/3</td>
+<td>0.116</td>
+<td>2.835</td>
+<td>18.83</td>
+</tr>
+<tr>
+<td>Radar GICP</td>
+<td><strong>0/3</strong></td>
+<td>실패</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>CT-ICP (Cross-modal)</td>
+<td><strong>0/3</strong></td>
+<td>실패</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p>핵심: <strong>레이더 단독 정합(Radar GICP)과 단순 크로스-모달 ICP(CT-ICP)는 모두 0/3 실패</strong>한다. LTR²만이 레이더-반복으로 LiDAR SLAM(0.071m)에 필적하는 0.073m ATE를 달성 — CMR 학습 정합기가 크로스-모달 정합에 <em>필수</em>임을 보인다. 처리 주파수는 16.11Hz로 SLAM(23.16Hz)·LiDAR T&amp;R(20.15Hz)보다 낮지만 실시간 추적에 충분.</p>
+<p><strong>Table VII–VIII — 궤적 B~G (ATE(m) / YAE(°))</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>B(516.7m)</th>
+<th>C(293.4m)</th>
+<th>D(353.7m)</th>
+<th>E(439.2m)</th>
+<th>F(643.3m)</th>
+<th>G(711.8m)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Ours</strong></td>
+<td><strong>0.071 / 2.657</strong></td>
+<td><strong>0.080 / 2.468</strong></td>
+<td><strong>0.067 / 2.326</strong></td>
+<td><strong>0.067 / 2.151</strong></td>
+<td><strong>0.069 / 1.982</strong></td>
+<td><strong>0.077 / 2.949</strong></td>
+</tr>
+<tr>
+<td>w/o Intensity</td>
+<td>0.078 / 3.456</td>
+<td>0.106 / 4.433</td>
+<td>0.082 / 3.515</td>
+<td><strong>Failed</strong></td>
+<td>0.105 / 3.537</td>
+<td><strong>Failed</strong></td>
+</tr>
+<tr>
+<td>LiDAR GICP</td>
+<td>0.073 / 2.262</td>
+<td>0.089 / 3.503</td>
+<td>0.068 / 2.600</td>
+<td><strong>Failed</strong></td>
+<td>0.085 / 3.213</td>
+<td>0.080 / 2.792</td>
+</tr>
+</tbody></table></div>
+<p>좁은 통로(E)와 급경사(G)에서 w/o Intensity와 LiDAR GICP가 실패하는 반면, 강도 정렬을 갖춘 LTR²는 전 궤적 성공한다. 동적 장애물(C, 보행자)·정적 장애물(B, 주차차)·강변(D)·긴 복도(F) 전반에서 센티미터급 ATE(0.067~0.080m)를 유지한다.</p>
+<h3>5.5 실세계 실험 (Real-world Experiments) ★</h3>
+<p><strong>(a) 악천후 — 야간 연기 (105.1m)</strong> — 이 논문의 시그니처 결과:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>105.1m 야간 연기 구간</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LiDAR SLAM (LIO-SAM)</td>
+<td>❌ 실패</td>
+</tr>
+<tr>
+<td>LiDAR T&amp;R (GICP)</td>
+<td>❌ 실패</td>
+</tr>
+<tr>
+<td><strong>LTR² (CMR, Radar repeat)</strong></td>
+<td><strong>✅ 성공</strong></td>
+</tr>
+</tbody></table></div>
+<p>연기로 LiDAR 빔이 산란되는 degenerate 환경에서 LiDAR 기반 방법은 전부 실패한다. 레이더는 밀리미터파 특성상 연기·먼지를 투과하므로 LTR²만 반복에 성공 — <strong>악천후 자율 내비게이션의 실증</strong>이다.</p>
+<p><strong>(b) 자기지도 미세 조정 검증 (Finetune1/2 — 장면 변화 궤적)</strong>:</p>
+<ul>
+<li>구조적 변화(건설·재배치) 발생 후, 슬라이딩 윈도우 ATE 드리프트가 트리거 조건(τ_μ=0.25m / L_min=400m)을 충족 → 자동 미세 조정 발동.</li>
+<li>GT 레이블·재학습 없이 ℒ_ft(SSIM+geo)로 CMR 업데이트, 변화 후에도 정밀도 회복.</li>
+</ul>
+<p><strong>(c) 장기·대규모 배포</strong>: 누적 4,627m 대규모 궤적 + 6개월 운용, 3개 로봇 플랫폼에서 동일 학습 CMR 작동. 계절·환경 변화를 자기지도 적응으로 흡수.</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>6.1 최초의 학습 기반 크로스-모달 LiDAR-교시 / 레이더-반복 시스템</h3>
+<p>교시의 정밀도(LiDAR)와 반복의 악천후 강인성(레이더)을 <em>센서 분리</em>로 결합한 최초의 학습 기반 T&amp;R. 단일-모달 T&amp;R의 근본 딜레마를 해소.</p>
+<h3>6.2 물리 법칙 기반 강도-전력 정렬</h3>
+<p>레이더 방정식(Eq.20)과 LiDAR 강도 모델(Eq.21)을 의사-레이더 강도 변환 <code>P̃_radar=√(P_radar)·e^(-2αd)</code>(Eq.22)로 연결, 이종 센서 강도를 동일 물리 공간에서 비교 가능하게 함. Ablation(+344%)이 그 결정성을 입증.</p>
+<h3>6.3 Doppler 기반 모션 사전</h3>
+<p>레이더 Doppler에서 자아 속도(Eq.8)를 추정해 CMR 초기화에 활용, 큰 초기 오정렬 없이 학습 정합기를 수렴시킴.</p>
+<h3>6.4 GT 없는 자기지도 적응형 미세 조정</h3>
+<p>ATE 드리프트 통계(σ,μ) 기반 선형 분류기(Eq.14)로 정적 변화와 동적 변화를 구별, 정적 변화에만 자기지도(ℒ_SSIM+ℒ_geo) 업데이트.</p>
+<h3>6.5 T-RO 수준의 종합 실세계 검증</h3>
+<p>3개 로봇 플랫폼·40+ km·6개월·7개 메인 궤적·야간 연기·누적 4,627m. T&amp;R 문헌에서 보기 드문 장기·대규모 실증.</p>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 하드웨어 설정</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>사양</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>로봇 플랫폼</td>
+<td>AgileX SCOUT 2.0 (4륜 차동 구동 UGV)</td>
+</tr>
+<tr>
+<td>LiDAR</td>
+<td>RoboSense RS-Helios 32채널, 10 Hz</td>
+</tr>
+<tr>
+<td>4D 레이더</td>
+<td>OCULII EAGLE, 14 Hz, <strong>120°×45° FOV</strong></td>
+</tr>
+<tr>
+<td>GNSS</td>
+<td>(검증용, 내비게이션 미사용)</td>
+</tr>
+<tr>
+<td>온보드 컴퓨팅</td>
+<td>Intel i9-13900H, NVIDIA RTX 4060, 16GB RAM</td>
+</tr>
+</tbody></table></div>
+<h3>7.2 학습 설정</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>학습 GPU</td>
+<td>4× NVIDIA A6000</td>
+</tr>
+<tr>
+<td>프레임워크</td>
+<td>PyTorch 2.0.1</td>
+</tr>
+<tr>
+<td>옵티마이저</td>
+<td>Adam (β₁=0.9, β₂=0.999)</td>
+</tr>
+<tr>
+<td>학습률</td>
+<td>0.002 → 0.00001 (decay)</td>
+</tr>
+<tr>
+<td>배치 크기</td>
+<td>16</td>
+</tr>
+<tr>
+<td>입력 해상도</td>
+<td>64×768 (VoD), 32×675 (자체 수집)</td>
+</tr>
+<tr>
+<td>미세 조정</td>
+<td>30 epochs, lr=0.0001</td>
+</tr>
+</tbody></table></div>
+<h3>7.3 핵심 시스템 파라미터 (Table II)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>값</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>방위각 FOV 마스크</td>
+<td>135°</td>
+<td>레이더 120° + 불확실성 마진</td>
+</tr>
+<tr>
+<td>예상 속도</td>
+<td>1.2 m/s</td>
+<td>반복 단계 목표 속도</td>
+</tr>
+<tr>
+<td>대기 감쇠 α</td>
+<td>0.03 km⁻¹</td>
+<td>표준 대기 가정</td>
+</tr>
+<tr>
+<td>노드 전환 임계 δ</td>
+<td>0.12 m</td>
+<td>다음 교시 노드 전환 기준</td>
+</tr>
+<tr>
+<td>음성 샘플 임계 τ</td>
+<td>0.25 m</td>
+<td>미세 조정 트리거(τ_μ)</td>
+</tr>
+<tr>
+<td>세그먼트 오류 임계 ε_seg</td>
+<td>0.04 m</td>
+<td>구간 오류 판단</td>
+</tr>
+<tr>
+<td>글로벌 오류 임계 ε</td>
+<td>0.16 m</td>
+<td>전체 궤적 오류 판단</td>
+</tr>
+<tr>
+<td>Doppler 잔차 인라이어 γ</td>
+<td>0.10 m/s</td>
+<td>RANSAC 인라이어</td>
+</tr>
+<tr>
+<td>선형 분류기 a / b</td>
+<td>0.3 / 0.245</td>
+<td>정적/동적 변화 분리</td>
+</tr>
+<tr>
+<td>최소 미세조정 길이 L_min</td>
+<td>400 m</td>
+<td>누적 음성 구간 트리거</td>
+</tr>
+<tr>
+<td>양성:음성 비율</td>
+<td>3:1</td>
+<td>자기지도 미니배치 구성</td>
+</tr>
+<tr>
+<td>RANSAC 반복</td>
+<td>120</td>
+<td>고스트/다중경로 제거</td>
+</tr>
+<tr>
+<td>지도 저장 효율</td>
+<td>~6 MB/km</td>
+<td>선택 LiDAR 프레임</td>
+</tr>
+<tr>
+<td>처리 주파수</td>
+<td>16.11 Hz</td>
+<td>실시간 반복</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 크로스-모달 T&amp;R의 이론적 의의</h3>
+<pre><code>[단일-모달 T&amp;R vs LTR²]
+
+LiDAR-T&amp;R:   교시 LiDAR(정밀)  / 반복 LiDAR  → 악천후 실패
+Radar-T&amp;R:   교시 Radar       / 반복 Radar  → 교시 맵 저품질 → 반복 부정확
+LTR²:        교시 LiDAR(정밀)  / 반복 Radar(강인)
+             ─ &quot;정밀한 교시&quot;와 &quot;강인한 반복&quot;을 동시에 확보
+             ─ 가능 조건: (i) 물리 강도 정렬 (ii) Doppler 모션 사전
+</code></pre>
+<p>이 분리는 단순한 엔지니어링 트릭이 아니라, 두 센서의 <em>물리적 응답 법칙이 정렬 가능한 형태로 연결된다</em>는 통찰에 기반한다. 데이터-only 학습 정합기가 가지는 일반화·해석성 한계를, 물리 사전(physics prior)을 모델에 주입함으로써 완화한 사례다.</p>
+<h3>8.2 확장성과 한계</h3>
+<p><strong>한계</strong>:</p>
+<ol>
+<li><strong>코드 미공개</strong>: T-RO 급 검증에도 불구하고 GitHub/프로젝트 페이지 부재 → 재현성 검증과 커뮤니티 확장이 제약된다. (abs/html 양쪽에서 코드 링크 부재 확인.)</li>
+<li><strong>초기화 민감성(20~30°)</strong>: 20° 초과 초기 오정렬에서 CMR이 급격히 열화, 30° 부근 실패. Doppler 모션 사전의 초기 추정 품질에 시스템이 종속된다.</li>
+<li><strong>고급 4D 레이더 의존</strong>: OCULII EAGLE급 4D 레이더(Doppler+앙각) 필요. 저가 2D/3D 레이더에서는 Doppler/앙각 채널 부재로 본 파이프라인이 그대로 동작하지 않을 가능성.</li>
+<li><strong>교시 단계 LiDAR 필요</strong>: 새 경로마다 LiDAR 장착 로봇으로 교시해야 함 — 대규모 환경에서 교시 오버헤드 누적.</li>
+<li><strong>처리 주파수 16.11Hz</strong>: SLAM(23Hz)·LiDAR T&amp;R(20Hz)보다 낮아, 고속 주행이나 빠른 동적 장애물 반응에 제약. (목표 속도 1.2 m/s로 보수적 설정.)</li>
+<li><strong>능동 회피 부재</strong>: T&amp;R은 교시 경로 추종이 본질이라, 교시 시 없던 돌발 장애물에 대한 능동적 로컬 회피(local planning)는 통합되어 있지 않다.</li>
+</ol>
+<h3>8.3 악천후 내비게이션의 응용적 의의</h3>
+<pre><code>[degenerate 환경 자율 내비게이션 응용]
+  재난 대응 : 화재 현장 연기, 붕괴 건물 분진
+  광업/터널 : 먼지·분진·가스, 제한 시야 지하
+  농업      : 새벽 안개, 수확 후 먼지
+  물류/창고 : 분진 환경 고정 경로 반복 주행
+</code></pre>
+<p>LTR²의 105.1m 야간 연기 성공은 이들 응용에서 LiDAR/카메라 기반 시스템이 무력화되는 구간을 레이더-반복으로 메울 수 있음을 실증한다.</p>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<p>본 절은 5단계 바운드 읽기 프로토콜에 따라, 코퍼스 내 토픽이 가장 가까운 Planner 트랙 선행 리뷰를 추려 비교한다. LTR²는 &quot;교시-반복 + 학습 정합 + 실로봇 장기 배포&quot; 축에 위치하므로, (i) 학습 기반 정합·플래닝 + 실로봇 검증을 갖춘 <strong>BOWConnect</strong>(IROS2026), (ii) 동일 T&amp;R 패러다임의 항법/추종 계열, (iii) 동적·정적 변화에 적응하는 내비게이션 계열과 대비한다.</p>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>BOWConnect (IROS2026)</th>
+<th>단일-모달 T&amp;R 계열</th>
+<th>LTR² (본 논문)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 접근</td>
+<td>GP 베이지안 최적화 조향 + 양방향 병렬 kinodynamic 플래닝</td>
+<td>교시-반복(동일 센서)</td>
+<td>LiDAR-교시 + Radar-반복 크로스모달 정합</td>
+</tr>
+<tr>
+<td>센서</td>
+<td>비용맵/상태공간(시뮬+실UGV/UAV)</td>
+<td>LiDAR 또는 Radar 단일</td>
+<td>LiDAR(교시) + 4D Radar(반복)</td>
+</tr>
+<tr>
+<td>물리 사전 활용</td>
+<td>❌ (순수 학습/탐색)</td>
+<td>❌</td>
+<td><strong>✅ 레이더방정식·LiDAR강도 정렬</strong></td>
+</tr>
+<tr>
+<td>악천후 강인성</td>
+<td>미평가</td>
+<td>LiDAR=낮음 / Radar=중간</td>
+<td><strong>최고 (연기 야간 성공)</strong></td>
+</tr>
+<tr>
+<td>장기 적응</td>
+<td>❌</td>
+<td>❌</td>
+<td><strong>✅ 자기지도(GT 불필요)</strong></td>
+</tr>
+<tr>
+<td>실세계 규모</td>
+<td>실UGV+쿼드로터, 단발 시연</td>
+<td>수백 m~km</td>
+<td><strong>40+ km, 6개월, 4,627m 누적</strong></td>
+</tr>
+<tr>
+<td>학회/저널</td>
+<td>IROS2026</td>
+<td>다양</td>
+<td><strong>T-RO (저널 탑티어)</strong></td>
+</tr>
+<tr>
+<td>코드 공개</td>
+<td>✅ bow-connect.github.io</td>
+<td>다양</td>
+<td>❌</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>장점</strong>:</p>
+<ol>
+<li><strong>악천후 강인성의 결정적 차별성</strong>: 같은 Planner 코퍼스에서 비교 대상인 <strong>BOWConnect</strong>(kinodynamic 모션 플래닝)는 좁은 통로·동역학 제약을 정조준하지만 <em>센싱 열화(연기/안개)는 다루지 않는다</em>. LTR²는 연기·야간에서 LiDAR 기반이 전부 실패하는 구간을 레이더-반복으로 통과하는 유일 시스템으로, <strong>센싱 강인성 축에서 독보적</strong>이다.</li>
+<li><strong>장기·대규모 실증의 압도적 규모</strong>: BOWConnect가 실UGV·쿼드로터의 단발 시연으로 알고리즘 전이를 입증한 데 비해, LTR²는 40+ km·6개월·누적 4,627m로 <strong>배포 지속성(long-term deployment)</strong> 차원에서 코퍼스 내 최강의 실세계 결과를 보인다.</li>
+<li><strong>물리 사전 내장</strong>: BOWConnect의 GP·획득함수가 <em>데이터 기반 대리모델</em>이라면, LTR²는 *물리 법칙(레이더 방정식)*을 정합기에 명시 주입한다. 해석성·일반화 측면에서 상보적이며, ablation +344%가 그 효과를 정량 입증한다.</li>
+<li><strong>GT 없는 자기지도 장기 적응</strong>: 비교 대상 다수가 정적 환경을 가정하는 데 반해, LTR²는 정적/동적 변화를 통계로 구별해 자동 적응한다 — 실배포 유지보수 비용을 크게 낮춘다.</li>
+</ol>
+<p><strong>단점</strong>:</p>
+<ol>
+<li><strong>코드 미공개</strong>: BOWConnect는 프로젝트 페이지·오픈소스(bow-connect.github.io)를 공개해 재현성·확장성이 높은 반면, LTR²는 코드 부재로 커뮤니티 활용이 제한된다. 동일 T-RO 급 검증임에도 재현성 관점에서 명백한 약점.</li>
+<li><strong>능동 플래닝 부재</strong>: BOWConnect는 <em>궤적을 생성</em>하는 모션 플래너인 데 비해, LTR²는 <em>교시된 경로를 추종</em>하는 데 초점이 있어 돌발 장애물 능동 회피(local planning)는 미통합. 두 연구는 &quot;경로 생성 vs. 경로 강인 추종&quot;으로 상보적 위치.</li>
+<li><strong>특수 하드웨어 요구</strong>: OCULII EAGLE 4D 레이더는 고가이며, 저가 레이더 일반화는 미검증.</li>
+<li><strong>초기화 민감성</strong>: 20~30° 초기 오정렬에서 실패 — BOWConnect의 무작위-탐색 기반 접근이 가지는 광역 탐색성과 달리, LTR²는 Doppler 초기점 품질에 민감.</li>
+</ol>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>[적용 가능성 매트릭스]
+
+매우 높음(Very High):
+  - 물류/창고 고정 경로 반복(분진 환경)
+  - 광산/터널 순찰(먼지·가스·제한 시야)
+  - 재난 대응(화재 연기 속 탐색)
+  - 정밀 농업(새벽 안개·수확 먼지)
+    → 모두 &quot;사전 교시된 고정 경로 + 악천후 반복&quot;에 부합
+
+중간(Medium):
+  - 실외 배달·캠퍼스 순찰
+    (계절/날씨 강인하나, 새 경로마다 교시 필요)
+
+낮음(Low):
+  - 완전 미지 환경 탐색 (교시 경로 없으면 동작 불가)
+  - 고속 동적 환경 (16.11Hz + 능동 회피 부재)
+</code></pre>
+<p>T&amp;R 패러다임 특성상 <em>반복 경로가 사전에 정의된</em> 산업·인프라 응용에서 가치가 가장 높다. 특히 &quot;악천후 + 고정 경로 + 장기 운용&quot;의 교집합(광업·창고·재난)이 킬러 도메인이다.</p>
+<h3>9.4 연구 방향성 평가</h3>
+<p>LTR²는 T&amp;R 내비게이션의 <em>실용적 장기 배포 가능성</em>을 크게 끌어올린 연구로, 두 가지 연구 축의 긴장을 드러낸다:</p>
+<ol>
+<li><strong>추종(T&amp;R) vs. 생성(motion planning)</strong>: LTR²(추종 강인성)와 BOWConnect(궤적 생성)는 상호보완적이다. 미래 시스템은 LTR²의 강인 크로스-모달 위치추정 위에 BOWConnect류의 능동 로컬 플래너를 얹어 &quot;강인 추종 + 돌발 회피&quot;를 결합할 수 있다.</li>
+<li><strong>이종 센서의 경제성</strong>: 4D 레이더 단가가 하락(Arbe, OCULII 등)하면서, &quot;LiDAR로 한 번 교시한 맵을 레이더만 단 소형 로봇이 반복 활용&quot;하는 비대칭 센서 배포가 점점 현실적이 된다. 물리 사전 기반 정렬은 이런 비대칭 배포의 이론적 토대가 된다.</li>
+</ol>
+<p>종합하면, LTR²는 코퍼스 내 Planner 논문 중 <strong>악천후 강인성과 장기 배포 검증에서 가장 강력한 실세계 결과</strong>를 보유한다. 코드 미공개가 아쉽지만, 물리 사전을 학습 정합에 주입한 접근과 T-RO 게재·40+ km 실증은 크로스-모달 내비게이션의 중요한 기준점이다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li><strong>LTR² (본 논문)</strong>: R. Xiao et al., &quot;LiDAR Teach, Radar Repeat: Robust Cross-Modal Navigation in Degenerate and Varying Environments,&quot; <em>IEEE Transactions on Robotics (Accepted)</em>, arXiv:2605.02809, 2026.</li>
+<li><strong>LIO-SAM</strong>: LiDAR-IMU 결합 SLAM (폐쇄루프 정밀도 기준선).</li>
+<li><strong>GICP</strong>: Generalized ICP, 전통 포인트 클라우드 정합.</li>
+<li><strong>NDT</strong>: Normal Distributions Transform, 분포 기반 정합.</li>
+<li><strong>CT-ICP</strong>: Continuous-Time ICP (크로스-모달 베이스라인, 본 실험에서 0/3 실패).</li>
+<li><strong>RegFormer</strong>: 학습 기반 포인트 클라우드 등록 네트워크.</li>
+<li><strong>Swin Transformer</strong>: Shifted Window Multi-Head Self-Attention 백본.</li>
+<li><strong>VoD (View of Delft)</strong>: 공개 LiDAR-카메라-4D레이더 동기 데이터셋.</li>
+<li><strong>OCULII EAGLE</strong>: 4D 밀리미터파 레이더 (14Hz, 120°×45° FOV, Doppler).</li>
+<li><strong>RoboSense RS-Helios</strong>: 32채널 LiDAR.</li>
+<li><strong>AgileX SCOUT 2.0</strong>: 4륜 차동 구동 지상 로봇 플랫폼.</li>
+<li><strong>Pure-pursuit</strong>: 고전 경로 추적 제어 알고리즘.</li>
+<li>(비교) <strong>BOWConnect</strong>: Bayesian Optimization over Windows kinodynamic motion planner, IROS 2026 (동일 코퍼스 Planner 트랙 선행 리뷰).</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>11.1 혁신성</h3>
+<p>LTR²의 핵심 혁신은 <strong>이종 센서를 의도적으로 분리하여 각 센서의 강점만 취하는 크로스-모달 T&amp;R</strong>이다. 교시는 LiDAR의 고정밀도를, 반복은 레이더의 악천후 강인성을 사용한다. 이 분리를 <em>가능하게 하는 이론적 다리</em>가 (i) 레이더 방정식·LiDAR 강도 모델을 연결하는 물리 강도-전력 정렬(Eq.22)과 (ii) Doppler 모션 사전(Eq.8,9)이다. 두 물리 사전을 Swin Transformer 기반 4-스케일 점진 정합에 주입함으로써, 데이터-only 학습 정합기가 갖는 모호성·일반화 한계를 넘어선다.</p>
+<h3>11.2 실용적 의의</h3>
+<ul>
+<li><strong>악천후 자율 내비게이션의 실증</strong>: 기존 LiDAR/카메라 기반 시스템의 가장 큰 취약점(연기·안개·분진)을 레이더-반복으로 메운다. 105.1m 야간 연기 단독 성공이 이를 입증한다.</li>
+<li><strong>장기 배포의 새 기준</strong>: 40+ km·6개월·3개 플랫폼·누적 4,627m는 T&amp;R 문헌에서 드문 규모로, 실험실을 넘어선 실배포 가치를 보인다.</li>
+<li><strong>GT 없는 자기지도 적응</strong>: 정적/동적 변화를 통계로 구별해 자동 미세 조정함으로써 유지보수 비용을 낮춘다.</li>
+</ul>
+<h3>11.3 향후 연구 방향</h3>
+<ol>
+<li><strong>코드·데이터 공개</strong>: 재현성과 커뮤니티 확장을 위한 오픈소스화 (현재 부재).</li>
+<li><strong>저비용 레이더 일반화</strong>: 고가 4D 레이더 의존을 완화하는 경량 레이더 파이프라인.</li>
+<li><strong>능동 회피 통합</strong>: 강인 크로스-모달 위치추정 위에 로컬 모션 플래너(예: BOWConnect류)를 얹어 돌발 장애물 능동 회피.</li>
+<li><strong>초기화 강건화</strong>: 20~30° 초기 오정렬 실패를 줄이는 광역 정합/재초기화 전략.</li>
+<li><strong>맵-프리 T&amp;R 적응</strong>: 새 경로에서 사전 교시 없이 도메인 적응하는 방향.</li>
+<li><strong>동적 센서 전환</strong>: 날씨·조건에 따라 LiDAR/레이더를 동적으로 선택하는 하이브리드 반복.</li>
+</ol>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

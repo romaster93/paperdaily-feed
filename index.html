@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>PaperDaily · 리뷰 아카이브</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+
+.list { padding: 10px 0 30px; }
+.row {
+  display: block; background: var(--surface); border: 1px solid var(--card-border);
+  border-radius: 16px; padding: 15px 18px; margin: 12px 0;
+  box-shadow: 0 1px 2px rgba(40,30,20,.03), 0 14px 26px -20px rgba(40,30,20,.28);
+}
+.row .top {
+  display: flex; justify-content: space-between; gap: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 11.5px;
+  color: var(--accent-deep); margin-bottom: 6px;
+}
+.row .top .date { color: var(--label); }
+.row .title {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; font-size: 17px; line-height: 1.35; color: var(--ink); letter-spacing: -0.01em;
+}
+.row:hover { text-decoration: none; border-color: var(--accent-soft-border); }
+.row:hover .title { color: var(--accent-deep); }
+.row .sub { margin-top: 5px; font-size: 12.5px; color: var(--muted);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">2026. 7. 18  토요일</div>
+    <h1>PaperDaily 리뷰 아카이브</h1>
+    <div class="meta-row"><span>VLN·Planner 논문 리뷰 92편 · 자동 생성</span></div>
+  </header>
+  <div class="list">
+    <a class="row" href="reviews/D-SafeMPC_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-07-15</span></div>
+      <div class="title">D-SafeMPC: Diffusion-Driven Safe Model Predictive Control with Discrete-Time Control Barrier Functions</div>
+      <div class="sub">확산 궤적 플래너의 안전 미강제 문제를, 이산시간 CBF/CLF 그래디언트로 역확산을 유도(denoising-in-the-loop)하고 후반 스텝에서 MPC가 안전·동역학 가능 집합으로 반복 투영하는 결합으로 해결 — 3종 동적 장애물 환경 전부에서 안전준수 성공률 최고(100/87.5/92.5%), Franka…</div>
+    </a>
+    <a class="row" href="reviews/HindsightGateVLN_IJCAIWS2026/index.html">
+      <div class="top"><span>IJCAI 2026 WS · VLN</span><span class="date">2026-07-11</span></div>
+      <div class="title">Early to Share, Late to Save: Synchronisation-Driven Communication Gating in Bandwidth-Constrained Cooperative VLN</div>
+      <div class="sub">대역폭 제약(에피소드당 전송 B회) 하의 2-에이전트 협력 VLN에서 &quot;언제 통신할까&quot;를 사후(hindsight) 지도학습 게이트로 학습하고, 통신이 초반 3스텝(82.6%)에 확신할 때 몰린다는 반직관적 &quot;Early to Share, Late to Save&quot; 현상을 순환 은닉상태 정렬로 규명한 분석 논문.</div>
+    </a>
+    <a class="row" href="reviews/STEMbot_IROS2026/index.html">
+      <div class="top"><span>IROS 2026 · Planner</span><span class="date">2026-07-11</span></div>
+      <div class="title">STEMbot: A Compliant Robot for Under-Canopy Plant Navigation</div>
+      <div class="sub">식물 줄기 표면(곡면 매니폴드)을 상태 s={p,n,b}(위치·법선·가지방향)로 인코딩하고 매니폴드 제약 A* 탐색 + 의미 OcTree(PIN-SLAM+SAM/CLIP) + 수신지평선 재계획으로 under-canopy를 항해하는 67g 초경량 순응형 등반 로봇, 실 식물 4종에서 7–33mm 줄기 자율 등반·검사 실증.</div>
+    </a>
+    <a class="row" href="reviews/STGCS_IROS2025/index.html">
+      <div class="top"><span>IROS 2025 · Planner</span><span class="date">2026-07-03</span></div>
+      <div class="title">Search-Based Spatiotemporal and Multi-Robot Motion Planning on Graphs of Space-Time Convex Sets</div>
+      <div class="sub">동적 장애물이 있는 연속 공간의 시공간(space-time) 모션플래닝을, 볼록집합의 그래프(Graphs of Convex Sets, GCS) 를 시공간으로 확장한 ST-GCS 로 정식화하여, 충돌회피 가능 영역을 시공간 볼록집합으로 표현하고 시간최적 궤적을 그래프 탐색 + 집합 내부 연속 최적화 로 푼다. 단일로봇을…</div>
+    </a>
+    <a class="row" href="reviews/LeCropFollow_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-07-02</span></div>
+      <div class="title">LeCropFollow: Latent Space Planning for Navigation in Unstructured Crop Fields</div>
+      <div class="sub">언더캐노피(under-canopy) 농업 로봇의 작물 열(crop-row) 추종 항법에서, 고차원 시각을 결정론적 기하 참조로 압축하지 않고 학습된 잠재 표현(latent representation)으로 직접 계획한다. 자기지도 시맨틱 히트맵 추출기 + TD-MPC2(Model-Based RL) 잠재공간 플래너(MPPI…</div>
+    </a>
+    <a class="row" href="reviews/DAAAM_CVPR2026/index.html">
+      <div class="top"><span>CVPR 2026 · VLN</span><span class="date">2026-06-29</span></div>
+      <div class="title">Describe Anything, Anywhere, at Any Moment (DAAAM)</div>
+      <div class="sub">DAAAM은 대규모·실시간 4D 장면 이해(4D scene understanding)를 위한 시공간 메모리 프레임워크(spatio-temporal memory framework)다. 증강현실(AR)부터 대규모 환경에서의 로봇 자율성까지, 많은 컴퓨터비전·로봇 응용은 (a) 정확한 언어…</div>
+    </a>
+    <a class="row" href="reviews/DreamFlow_ICRA2026/index.html">
+      <div class="top"><span>ICRA 2026 · Planner</span><span class="date">2026-06-29</span></div>
+      <div class="title">DreamFlow: Local Navigation Beyond Observation via Conditional Flow Matching in the Latent Space</div>
+      <div class="sub">DreamFlow는 밀집 장애물 환경에서의 로컬 내비게이션이 겪는 로컬 미니마(local minima) 문제를 정조준한다. 자율 이동 로봇(특히 사족보행 로봇)이 목표 지점으로 이동할 때, 로컬 플래너는 온보드 센서의 즉각적 지각 범위(field of view) 내 정보만으로 행동을 결정한다. 이 근시안적 지각 때문에…</div>
+    </a>
+    <a class="row" href="reviews/GRATE_IROS2025/index.html">
+      <div class="top"><span>IROS 2025 · Planner</span><span class="date">2026-06-29</span></div>
+      <div class="title">GRATE: a Graph transformer-based deep Reinforcement learning Approach for Time-efficient autonomous robot Exploration</div>
+      <div class="sub">GRATE는 자율 로봇 탐색(Autonomous Robot Exploration, ARE) 문제, 즉 사전 지도가 없는 미지 환경을 로봇이 스스로 주행하며 완전한 지도를 만드는 과제를 다룬다. 핵심 목표는 단순히 &quot;주행 거리&quot;를 줄이는 것이 아니라 탐색을 완료하는 데 걸리는 실제 시간(time-efficiency) 을…</div>
+    </a>
+    <a class="row" href="reviews/HEIGHT_TASE2025/index.html">
+      <div class="top"><span>T-ASE 2025 · Planner</span><span class="date">2026-06-29</span></div>
+      <div class="title">HEIGHT: Heterogeneous Interaction Graph Transformer for Robot Navigation in Crowded and Constrained Environments</div>
+      <div class="sub">HEIGHT는 밀집된 동적 군중(crowd)과 복도·가구 같은 정적 제약(constraint)이 공존하는 실내 환경에서, 로봇이 충돌 없이 안전하고 효율적으로 목표점까지 이동하는 군중 내비게이션(crowd navigation) 문제를 다룬다. 이는 자연어 지시가 없는 점-목표(point-goal) 내비게이션이며, 본…</div>
+    </a>
+    <a class="row" href="reviews/LaViRA_ICRA2026/index.html">
+      <div class="top"><span>ICRA 2026 · VLN</span><span class="date">2026-06-29</span></div>
+      <div class="title">LaViRA: Language-Vision-Robot Actions Translation for Zero-Shot VLN</div>
+      <div class="sub">계층적 행동 분해(언어 행동→시각 행동→로봇 행동)를 통해 다양한 규모 MLLM의 강점을 활용하는 zero-shot VLN 프레임워크로, VLN-CE 벤치마크에서 SOTA 달성 및 우수한 일반화 능력 입증.</div>
+    </a>
+    <a class="row" href="reviews/LoGoPlanner_ICRA2026/index.html">
+      <div class="top"><span>ICRA 2026 · VLN</span><span class="date">2026-06-29</span></div>
+      <div class="title">LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry</div>
+      <div class="sub">메트릭 인식 시각 기하학을 통해 로컬리제이션된 네비게이션 정책으로 구조화되지 않은 환경에서 로봇의 궤적 계획 문제를 해결</div>
+    </a>
+    <a class="row" href="reviews/MiniVLANav_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-06-29</span></div>
+      <div class="title">MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation</div>
+      <div class="sub">언어 조건부 객체 접근(LCOA), 연속 행동 레이블, 5분할 OOD 평가, 4개 실내 씬, 1174 에피소드, HuggingFace 공개</div>
+    </a>
+    <a class="row" href="reviews/NavDP_ICRA2026/index.html">
+      <div class="top"><span>ICRA 2026 · VLN</span><span class="date">2026-06-29</span></div>
+      <div class="title">NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance</div>
+      <div class="sub">Diffusion 기반 궤적 생성과 critic 함수를 결합한 E2E 네비게이션 정책으로 시뮬레이션에서 학습하여 다양한 로봇 플랫폼으로 zero-shot 전이 가능</div>
+    </a>
+    <a class="row" href="reviews/NaVILA_RSS2025/index.html">
+      <div class="top"><span>RSS 2025 · VLN</span><span class="date">2026-06-29</span></div>
+      <div class="title">NaVILA: Legged Robot Vision-Language-Action Model for Navigation</div>
+      <div class="sub">NaVILA는 Vision-and-Language Navigation(VLN)을 사족·이족 보행 로봇(legged robot)으로 확장하는 연구다. 기존 VLN 연구는 대부분 바퀴형(wheeled) 로봇 또는 이상화된 포인트 에이전트를 가정하여, 자연언어 지시를 &quot;forward / turn / stop&quot;의 이산 행동으로…</div>
+    </a>
+    <a class="row" href="reviews/ReasonNav_CoRL2025/index.html">
+      <div class="top"><span>CoRL 2025 · VLN</span><span class="date">2026-06-29</span></div>
+      <div class="title">ReasonNav: Human-like Navigation in a World Built for Humans</div>
+      <div class="sub">VLM의 추론 능력을 활용하여 표지 읽기와 길 묻기 등 인간적 네비게이션 행동을 수행하며, 네비게이션 랜드마크 기반 컴팩트 I/O 추상화로 대규모 환경 효율적 탐색 실현.</div>
+    </a>
+    <a class="row" href="reviews/StreamVLN_ICRA2026/index.html">
+      <div class="top"><span>ICRA 2026 · VLN</span><span class="date">2026-06-29</span></div>
+      <div class="title">StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling</div>
+      <div class="sub">Vision-Language Navigation 에이전트가 연속 비디오 입력에서 온라인 방식으로 동작하도록 설계된 스트리밍 기반 VLM 네비게이션 프레임워크</div>
+    </a>
+    <a class="row" href="reviews/TRG-Planner_RAL2025/index.html">
+      <div class="top"><span>RA-L 2025 · Planner</span><span class="date">2026-06-29</span></div>
+      <div class="title">TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation</div>
+      <div class="sub">TRG-planner는 산악·동굴·재난 현장 같은 비정형 지형(unstructured terrain)에서 지상 로봇(특히 사족보행 로봇)이 안전하면서도 거리 효율적인 전역 경로를 실시간으로 계획하는 문제를 다룬다. 핵심 통찰은 &quot;지형의 횡단성(traversability)을 그래프의 노드 유효성과 방향성 엣지…</div>
+    </a>
+    <a class="row" href="reviews/VR-Robo_RAL2025/index.html">
+      <div class="top"><span>RA-L 2025 · VLN</span><span class="date">2026-06-29</span></div>
+      <div class="title">VR-Robo: Real-to-Sim-to-Real Framework for Visual Robot Navigation</div>
+      <div class="sub">3D Gaussian Splatting 기반 장면 재구성으로 포토리얼리스틱 디지털 트윈 시뮬레이션을 생성하고, 에고센트릭 시각 인식을 지원하는 RL 정책 학습으로 RGB만 사용한 sim-to-real 정책 전이 실현.</div>
+    </a>
+    <a class="row" href="reviews/WMNav_IROS2025/index.html">
+      <div class="top"><span>IROS 2025 · VLN</span><span class="date">2026-06-29</span></div>
+      <div class="title">WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation</div>
+      <div class="sub">VLM을 기반으로 세계 모델을 구축하여 객체 탐색 네비게이션을 수행하는 프레임워크로, 할루시네이션을 줄이고 탐색 효율성을 높임.</div>
+    </a>
+    <a class="row" href="reviews/VisualRRT_CVPR2026/index.html">
+      <div class="top"><span>CVPR 2026 · Planner</span><span class="date">2026-06-28</span></div>
+      <div class="title">Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering</div>
+      <div class="sub">목표를 명시적 구성(q_goal)이 아니라 이미지(I_goal) 로 주는 새로운 모션 플래닝 문제를 정의·해결. 로봇을 미분 가능 3D Gaussian Splatting으로 렌더링해 렌더링 손실 `‖I(q)−I_goal‖`의 구성공간 그래디언트(활용)와 RRT 무작위 스티어링(탐색)을 한 트리에서 융합. 프론티어 절단…</div>
+    </a>
+    <a class="row" href="reviews/BOWConnect_IROS2026/index.html">
+      <div class="top"><span>IROS 2026 · Planner</span><span class="date">2026-06-27</span></div>
+      <div class="title">BOWConnect: Parallel Bayesian Optimization over Windows with Learned Local Cost Maps for Sample-Efficient Kinodynamic Motion Planning</div>
+      <div class="sub">kinodynamic 모션 플래닝의 트리 조향을 무작위 샘플링 대신 제약 베이지안 최적화(BOW)로 대체. 보상·제약을 분리된 두 GP로 학습하고 `α(u)=[μ_r−κσ_r]·P_feas` 곱셈 게이팅으로 안전을 능동 반영. 4차 RK 전파 + 양방향 병렬(N/2 forward + N/2 backward 워커, 각자…</div>
+    </a>
+    <a class="row" href="reviews/FLISP_TFR2026/index.html">
+      <div class="top"><span>TFR 2026 · Planner</span><span class="date">2026-06-26</span></div>
+      <div class="title">FLISP: Large-Scale Tunnel Air–Ground Collaboration With Fast LiDAR-IMU Synchronized Path Planner</div>
+      <div class="sub">GPS·사전지도가 없고 기하적으로 퇴화된 수력발전 방류 터널에서, 단일 UGV-탑재 LiDAR-IMU 센서 스위트만으로 공중(UAV)·지상(UGV) 이종 팀의 경로를 동기 생성하는 mapless 협력 계획기. UGV는 동적 비닝+다항 적합 코리도어에 개선 반딧불 알고리즘(단면 1D 횡방향 회피)을, UAV는 통신반경…</div>
+    </a>
+    <a class="row" href="reviews/iCrowdNav_RAL2026/index.html">
+      <div class="top"><span>RA-L 2026 · Planner</span><span class="date">2026-06-26</span></div>
+      <div class="title">iCrowdNav: Intention-Aware Scene Representations for Visual Crowd Navigation</div>
+      <div class="sub">밀집 군중에서 RGB-D만으로 목표 내비게이션하는 시각 기반 DRL 정책. 보행자를 점이 아니라 17관절 3D 골격으로 표현하여 의도(이동 방향)를 인코딩(I2Former: IntentFormer 자기-어텐션 + InteractFormer 로봇-중심 교차-어텐션)하고, 시간정렬 BEV 점유로 정적·동적 환경을 통합…</div>
+    </a>
+    <a class="row" href="reviews/NavWM_ECCV2026/index.html">
+      <div class="top"><span>ECCV 2026 · VLN</span><span class="date">2026-06-25</span></div>
+      <div class="title">NavWM: A Unified Navigation World Model for Foresight-Driven Planning</div>
+      <div class="sub">세계 모델을 미래 예측기가 아닌 폐루프 플래너로 작동시켜, 앵커 기반 멀티모달 궤적(K≈7, APD 1.49)을 생성하고 Flow Matching CDiT로 각 후보의 미래를 합성·평가해 목표 정렬 경로를 선별하는 통합 image-goal 내비게이션 세계 모델. 잠재 세계 추론(깊이/의미)·행동 예측·시각 생성을 단일…</div>
+    </a>
+    <a class="row" href="reviews/ObsGraph_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-06-25</span></div>
+      <div class="title">ObsGraph: Hierarchical Observation Representation for Embodied Reasoning and Exploration</div>
+      <div class="sub">3D 재구성 없이 관찰(뷰)·물체 크롭을 room–view–object 계층 그래프로 조직하고, 층당 최대 k=5 노드만 고르는 coarse-to-fine 예산 한정 LLM 검색을 수행한 뒤, 검색된 표현 수준이 곧 탐색 옵션(room 탐색/view 정제/frontier)을 활성화하는 증거 주도 다중 스케일 능동 탐색…</div>
+    </a>
+    <a class="row" href="reviews/FPAS_IROS2026/index.html">
+      <div class="top"><span>IROS 2026 · Planner</span><span class="date">2026-06-24</span></div>
+      <div class="title">FPAS: Frontier-Based Path Planning with Adaptive Sampling for Large-Scale Unknown Environments</div>
+      <div class="sub">프론티어 개수로 공간 &quot;개방도(openness)&quot;를 측정하고, 그에 비례해 샘플링 그래프 노드 밀도를 동적으로 조절(개방=성김/협소=촘촘)하는 대규모 미지 환경 목표 도달 계획기. Garage(혼합 구조)에서 FAR Planner 대비 처리시간 4.5배·이동거리 47% 개선.</div>
+    </a>
+    <a class="row" href="reviews/LP-NavOA_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-06-24</span></div>
+      <div class="title">LP-NavOA: Integrated Local Navigation and Obstacle Avoidance for Humanoid Robots under Limited Perception</div>
+      <div class="sub">전역 지도·외부 플래너·장거리 LiDAR 없이 단거리(4m) 레이캐스트만으로 휴머노이드(Unitree G1)가 장애물을 우회하며 목표에 도달하는 2단계 학습(PPO 보행 백본 + GRU 증류 조향 플래너) 통합 로컬 내비게이터. 추론 시 완전 planner-free.</div>
+    </a>
+    <a class="row" href="reviews/GroundControl_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-06-21</span></div>
+      <div class="title">GroundControl: Anticipating Navigation Failures in Vision-Language Agents via Trajectory-Consistent Uncertainty Estimates</div>
+      <div class="sub">VLM 기반 VLN 에이전트의 조용한 실패를, 목표까지 거리를 등속 Kalman filter로 모델링한 정규화 innovation(NIS~χ²(1)) + 4개 궤적 특징(진행 부족·비단조·경로 비효율·행동 진동)의 고정 선형 융합으로 사전 신호화하고, 새 평가 프로토콜 SRCN(AURC/E-AURC)으로 학습 없이…</div>
+    </a>
+    <a class="row" href="reviews/VOiLA_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-06-21</span></div>
+      <div class="title">VOiLA: Vectorized Online Planning with Learned Diffusion Model for POMDP Agents</div>
+      <div class="sub">불확실성 하 POMDP 온라인 플래닝에서 &quot;정확하지만 느린 diffusion 세계모델&quot;과 &quot;실시간 belief tree&quot;의 충돌을, conditional diffusion(전이·관측 샘플러) → feedforward distillation(최대 283× 가속) → GPU 벡터화 플래너 VOPP(Progressive…</div>
+    </a>
+    <a class="row" href="reviews/SCAN-Planner_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-06-20</span></div>
+      <div class="title">SCAN-Planner: Surface-Following Collision-Aware Navigation for Quadruped Robots in 3D Unstructured Environments</div>
+      <div class="sub">사족보행 로봇이 3D 비정형 환경(계단·경사·좁은통로·다층)에서 지면을 따라가며 충돌을 회피하는 로컬 플래너로, 충돌검사를 단 2점 질의로 압축하는 yaw-aware twin-cylinder 풋프린트 + 지면추종 투영 A* + 슬라이딩 맵 + 3차 B-스플라인 최적화로 Go2 실로봇 다층 횡단·옥외 주행을 온보드로 실증.</div>
+    </a>
+    <a class="row" href="reviews/SlowBrainFastPlanner_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-06-20</span></div>
+      <div class="title">Slow Brain, Fast Planner: Latency-Resilient VLM-Augmented Urban Navigation</div>
+      <div class="sub">도시 보도 로봇 로컬 플래닝의 &quot;궤적 채점 격차&quot;를 VLM으로 메우되, VLM의 1~3초 지연을 학습 불필요·지연 탄력적 궤적 수준 융합(기하 유사도 + 시간 지수 감쇠)으로 빠른 제어 루프에 안전하게 주입하여, 실세계 ~2000 시나리오 ADE 30% 감소·시뮬 5초 지연 SR 80%+·실 캠퍼스 보도 로봇 실증.</div>
+    </a>
+    <a class="row" href="reviews/FLAP_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-06-18</span></div>
+      <div class="title">FLAP: FOV-Constrained Active Perception Planning for Prior-Map-Free 3D Navigation</div>
+      <div class="sub">능동 지각(active perception)을 별도 모듈이 아닌 MINCO 궤적 최적화의 미분가능 페널티로 내재화하여, 제한된 FOV·센싱 거리의 온보드 센서만으로 사전 지도 없이 복잡한 3D 환경을 안전·고속 비행하는 UAV 항법 프레임워크. FOV 기하를 센서 프레임 제약으로, 속도-트리거 활성화로, 파라메트릭…</div>
+    </a>
+    <a class="row" href="reviews/Qwen-RobotNav_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-06-18</span></div>
+      <div class="title">Qwen-RobotNav: A Navigation Foundation Model Unifying Vision-Language Navigation across Task Families</div>
+      <div class="sub">Qwen3-VL(2B/4B/8B) 범용 VLM을 백본으로, VLN·PointNav·ObjectNav·Tracking·Driving 5개 태스크 패밀리를 단일 가중치로 통합한 내비게이션 파운데이션 모델. 파라미터화된 태스크 인터페이스(분기 없음) + 8 웨이포인트(2D+heading) 궤적 예측(4층 MLP) + 추론-시…</div>
+    </a>
+    <a class="row" href="reviews/BinTrack_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-06-17</span></div>
+      <div class="title">Binary Tracking for Spatial QA and Navigation with Open Vision-Language Models</div>
+      <div class="sub">자연어 공간 질의에서 시간순 두 앵커를 뽑아 그 사이 주행 궤적 구간을 좌/우 절반씩 비교(VLM 4-뷰 앙상블)하며 O(log n) 이진 탐색으로 목표 지점을 찾고, LiDAR-SLAM 정합으로 미터 좌표(=항법 목표)를 반환하는 완전 오픈 VLM(Qwen2.5) 파이프라인…</div>
+    </a>
+    <a class="row" href="reviews/PolyMerge_RAL2026/index.html">
+      <div class="top"><span>RA-L 2026 · Planner</span><span class="date">2026-06-17</span></div>
+      <div class="title">PolyMerge: Compressing 3D Gaussian Splats with Polytope Coverings for Provably Safe Resource-Constrained Navigation</div>
+      <div class="sub">무거운 3D Gaussian Splatting 장면을, 그 합집합이 원본 장애물을 증명 가능하게 과대근사하는 소수의 볼록 다면체로 압축하고(가중 집합 덮개 + 병합 이력 재생), 다면체 폐형 CBF로 충돌-없음을 형식 보장하여, 메모리 최대 10×·시뮬 ~100× 절감과 함께 실제 Crazyflie 마이크로 드론에서…</div>
+    </a>
+    <a class="row" href="reviews/FloVerse_CVPR2026/index.html">
+      <div class="top"><span>CVPR 2026 · VLN</span><span class="date">2026-06-16</span></div>
+      <div class="title">FloVerse: Floor Plan-Guided Multi-Modal Navigation</div>
+      <div class="sub">평면도(floor plan)를 조건으로 PointNav·ObjectNav·ImageNav를 단일 가중치로 통합하는 2단계 디퓨전 정책 ThreeDiff(Planner+Refiner)와, 메시에서 평면도·궤적을 자동 합성한 대규모 데이터셋 FloVerse-1.6K(1,627 평면도·240K 궤적·12M RGBD)를 제안…</div>
+    </a>
+    <a class="row" href="reviews/ReliaDiffNav_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-06-16</span></div>
+      <div class="title">Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation</div>
+      <div class="sub">지각이 실패하는 영역(유리·거울·과노출)을 VLM(AnyTraverse)에서 경량 MiT-B0로 증류한 신뢰도 히트맵으로 포착하고, 이를 디퓨전 궤적 플래너의 조건 + training-free 2단계 ESDF 가이드(물리·가상 장애물 동등 취급)에 주입하여, 실제 쿼드로터에서 장애물 위반율 40.3→9.6%·주행 신뢰도…</div>
+    </a>
+    <a class="row" href="reviews/NavWAM_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-06-15</span></div>
+      <div class="title">NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation</div>
+      <div class="sub">미래 관찰 예측·목표 진행도 가치·행동 청크를 9-프레임 latent canvas에서 공동 디퓨전 생성하는 통합 세계-행동 모델로, Cosmos Predict2 2B 백본 위에서 외부 CEM 플래너 없이 image-goal navigation을 수행하여 실제 로봇 79.2%(NWM 16.7%·OmniVLA 58.3%…</div>
+    </a>
+    <a class="row" href="reviews/HigherOrderReasoning_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-05-24</span></div>
+      <div class="title">Higher Order Reasoning for Collaborative Communicationless Mobile Robot Operations</div>
+      <div class="sub">Dynamic Epistemic Logic 기반 고차 믿음 입자(1~3차)와 Temporally Aware MPPI를 결합하여 통신 완전 차단 환경에서 이동 로봇 팀의 암묵적 조율(implicit coordination)을 달성, 임무 완료 시간 20.8%(시뮬) / 57.8%(실험) 단축.</div>
+    </a>
+    <a class="row" href="reviews/MIF_RSS2026/index.html">
+      <div class="top"><span>RSS 2026 · VLN</span><span class="date">2026-05-24</span></div>
+      <div class="title">MIF: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments</div>
+      <div class="sub">이족보행 인간형 로봇(Unitree G1)의 보행 유도 시각 왜곡과 동적 환경 변화를 삼중 필드(Appearance/Spatial/Geometry Field)로 처리하여 자연어 지시 기반 안전 내비게이션을 달성.</div>
+    </a>
+    <a class="row" href="reviews/AwareVLN_CVPR2026/index.html">
+      <div class="top"><span>CVPR 2026 · VLN</span><span class="date">2026-05-23</span></div>
+      <div class="title">AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation</div>
+      <div class="sub">VLN 에이전트가 Key Node(방 전환, 경로 이탈, 정지 오류)에서만 선택적으로 씬-진행도-계획 삼중 구조 추론을 수행하는 자기인식 프레임워크로, 단안 RGB만으로 R2R SR 65.4%, RxR SR 67.6% SOTA 달성.</div>
+    </a>
+    <a class="row" href="reviews/ScoutAssistedPlanning_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-05-23</span></div>
+      <div class="title">Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments</div>
+      <div class="sub">POMDP 기반 UAV+UGV 이종 팀 경로 계획, CTP 확장, IAP 정보 이득 행동 가지치기, GATv2 LIAP(96-218초→0.24-0.75초), 이동거리 31.9-49.9% 절감, arXiv 2026</div>
+    </a>
+    <a class="row" href="reviews/HOV-SG_RSS2024/index.html">
+      <div class="top"><span>RSS 2024 · VLN</span><span class="date">2026-05-22</span></div>
+      <div class="title">Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation</div>
+      <div class="sub">문제의식: 기존 open-vocabulary robot mapping 방법들은 RGB-D 데이터로부터 CLIP과 같은 vision-language feature를 결합해 dense geometric map을 생성하지만, 다음 두 가지 근본적인 한계가 있다:</div>
+    </a>
+    <a class="row" href="reviews/GATP_ICRA2026/index.html">
+      <div class="top"><span>ICRA 2026 · Planner</span><span class="date">2026-05-20</span></div>
+      <div class="title">Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning (GATP)</div>
+      <div class="sub">다중 쿼드로터, 라벨없는 모션 계획, GATP(GAT+f1), NMPC+ECBF 하드 안전 보장, 50대 확장 시뮬, 4대 실세계, D≤200ms 지연 강건, ICRA 2026</div>
+    </a>
+    <a class="row" href="reviews/TravExplorer_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-05-20</span></div>
+      <div class="title">TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning</div>
+      <div class="sub">크로스 플로어 ZSON, 3D 통과 가능성 매핑, 이중 모드(기하+시맨틱), FOV 능동 지각, Open-ATSP 계층 계획, HM3D 70.0% SR, Unitree Go2 실세계 64.0% SR</div>
+    </a>
+    <a class="row" href="reviews/REACT_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-05-19</span></div>
+      <div class="title">REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots</div>
+      <div class="sub">다중 로봇 대형 항법, TCF-R2T (MCMF 시간-확장), JSTP (공간-시간 동시 최적화), MINCO 5차, 7-WMR 실세계, 97.4% 실행시간 단축, 75% 대형 오차 감소, Tsinghua/NUS</div>
+    </a>
+    <a class="row" href="reviews/RoboCortex_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-05-19</span></div>
+      <div class="title">Robo-Cortex: A Self-Evolving Embodied Agent via Dual-Grain Cognitive Memory and Autonomous Knowledge Induction</div>
+      <div class="sub">자기진화 에이전트, 경험 기억상실, AKI, 이중 입도 메모리, 세계 모델 상상, IGNav/AR/AEQA, +15.30% SPL, HM3D/MP3D</div>
+    </a>
+    <a class="row" href="reviews/TinySDP_RSS2026/index.html">
+      <div class="top"><span>RSS 2026 · Planner</span><span class="date">2026-05-16</span></div>
+      <div class="title">TinySDP: Real Time Semidefinite Optimization for Certifiable and Agile Edge Robotics</div>
+      <div class="sub">임베디드 마이크로컨트롤러(STM32F405 @ 168MHz, 192KB SRAM)에서 비볼록 장애물 회피 MPC를 25Hz 실시간으로 실현하는 최초의 반정치 프로그래밍(SDP) 솔버로, RPCBF 대비 경로 73% 단축, 목표 도달 정밀도 15배 향상을 달성하고 Crazyflie 쿼드로터에서 실증함.</div>
+    </a>
+    <a class="row" href="reviews/VLMNavBottleneck_ICRAWS2026/index.html">
+      <div class="top"><span>ICRA 2026 WS · VLN</span><span class="date">2026-05-16</span></div>
+      <div class="title">Exploring Bottlenecks in VLM-LLM Navigation: How 3D Scene Understanding Capability Impacts Zero-Shot VLN</div>
+      <div class="sub">VLM-LLM 제로샷 VLN 시스템에서 3D 인식 품질이 내비게이션 성공률에 미치는 영향을 체계적으로 분석하여, 인식 포화 현상(Perception Saturation)을 최초로 발견하고 내비게이션 핵심 어휘 20개로 충분함을 증명한 분석 논문.</div>
+    </a>
+    <a class="row" href="reviews/HCSG_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-05-14</span></div>
+      <div class="title">HCSG: Human-Centric Semantic-Geometric Reasoning for Vision-Language Navigation</div>
+      <div class="sub">인간 중심 VLN, LSTM 자세+궤적 예측, Qwen3-VL-2B 행동 이해, 사회적 거리 손실, HA-VLNCE SOTA (CR 0.36/-34.5%, SR 0.24/+14.3%), NXROBO Leo 실세계 82% SR</div>
+    </a>
+    <a class="row" href="reviews/StereoNav_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-05-14</span></div>
+      <div class="title">What Limits Vision-and-Language Navigation? (StereoNav)</div>
+      <div class="sub">Sim-to-Real VLN, Target-Location Priors, 스테레오 통합 이해, InternViT+DINOv2+FoundationStereo, R2R-CE SOTA (81.1% SR/68.3% SPL), RxR-CE SOTA (67.5% SR), Unitree G1 실세계 60.6% SR</div>
+    </a>
+    <a class="row" href="reviews/ASIP-Planner_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-05-13</span></div>
+      <div class="title">ASIP-Planner: Adaptive Planning for UAV Surface Inspection in Partially Known Indoor Environments</div>
+      <div class="sub">부분 공지 환경 UAV 점검, 세그먼트 기반 커버리지, 코사인 가중 뷰앵글 적응, 경로 35-40% 단축, ΔYaw 65-72% 감소, CMU, 후쿠시마 터널 실증</div>
+    </a>
+    <a class="row" href="reviews/NavOL_ICML2026/index.html">
+      <div class="top"><span>ICML 2026 · VLN</span><span class="date">2026-05-13</span></div>
+      <div class="title">NavOL: Navigation Policy with Online Imitation Learning</div>
+      <div class="sub">DAgger-Diffusion 온라인 모방 학습, 확산 정책, ICML 2026, NavDP 대비 +26.8% SR (OOD), Unitree Go2 실세계, 크로스-임체형 전이</div>
+    </a>
+    <a class="row" href="reviews/Muninn_RSS2026/index.html">
+      <div class="top"><span>RSS 2026 · Planner</span><span class="date">2026-05-12</span></div>
+      <div class="title">Muninn — Your Trajectory Diffusion Model But Faster</div>
+      <div class="sub">훈련-프리 확산 궤적 가속, 탐침 캐싱, 공형 편차 보증, 4.6× 가속, RSS 2026, 3개 실세계 플랫폼</div>
+    </a>
+    <a class="row" href="reviews/SAGE_ICML2026/index.html">
+      <div class="top"><span>ICML 2026 · VLN</span><span class="date">2026-05-12</span></div>
+      <div class="title">SAGE — Plan in Sandbox, Navigate in Open Worlds</div>
+      <div class="sub">물리 기반 의미론적 샌드박스, AAC RL, 검색 증강 내비게이션, ICML 2026, A-EQA SOTA (60.2% SR†), 실세계 배포</div>
+    </a>
+    <a class="row" href="reviews/LTR2_TRO2026/index.html">
+      <div class="top"><span>T-RO 2026 · Planner</span><span class="date">2026-05-06</span></div>
+      <div class="title">LiDAR Teach, Radar Repeat: Robust Cross-Modal Navigation</div>
+      <div class="sub">LiDAR로 경로를 교시하고 4D 밀리미터파 레이더로 반복 주행하는 최초 학습 기반 크로스-모달 Teach-and-Repeat 시스템으로, 연기·야간 등 LiDAR 실패 환경에서 40+ km, 6개월 장기 자율 내비게이션 달성.</div>
+    </a>
+    <a class="row" href="reviews/SemanticAutonomyStack_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-05-06</span></div>
+      <div class="title">A Semantic Autonomy Framework for VLM-Integrated Indoor Mobile Robots</div>
+      <div class="sub">7단계 결정론적 리졸버로 88%의 자연어 내비게이션 지시를 0.1ms 내에 처리하고, VLM 학습 지식을 다른 로봇으로 전이하는 크로스-로봇 시맨틱 메모리 프레임워크.</div>
+    </a>
+    <a class="row" href="reviews/HiPAN_RAL2026/index.html">
+      <div class="top"><span>RA-L 2026 · Planner</span><span class="date">2026-05-04</span></div>
+      <div class="title">HiPAN: Hierarchical Posture-Adaptive Navigation for Quadruped Robots in Unstructured 3D Environments</div>
+      <div class="sub">계층적 정책(고수준 내비게이션 + 저수준 자세 적응 제어기)과 경로 유도 커리큘럼 학습(PGCL)으로 사족보행 로봇이 깊이 이미지만으로 높이 제약 통로·국소 최소값·굴곡 지형을 포함한 비구조적 3D 환경을 지도 없이 탐색하는 RL 프레임워크.</div>
+    </a>
+    <a class="row" href="reviews/SafeNavNeRF_ICMCR2026/index.html">
+      <div class="top"><span>ICMCR 2026 · Planner</span><span class="date">2026-05-04</span></div>
+      <div class="title">Safe Navigation using Neural Radiance Fields via Reachable Sets</div>
+      <div class="sub">Neural Radiance Fields(NeRF)로 장애물 형상을 연속 밀도 함수로 표현하고, 도달 가능 집합(Reachable Set)을 이용한 안전 제약과 민코프스키 합(Minkowski Sum) 구성 공간 장애물을 결합하여 선형 행렬 부등식(LMI) 기반 예측 지평 최적 제어를 통해 복잡한 클러터 환경에서 충돌…</div>
+    </a>
+    <a class="row" href="reviews/TaskCondUncertaintyCostmap_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-05-04</span></div>
+      <div class="title">Task-Conditioned Uncertainty Costmaps for Legged Locomotion</div>
+      <div class="sub">태스크 조건부 인식적 불확실성, 앙상블+MC 드롭아웃, 사족보행 경로 계획, 가우시안 블롭 코스트맵, Unitree Go1 실세계 실험</div>
+    </a>
+    <a class="row" href="reviews/STARFilter_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-05-03</span></div>
+      <div class="title">STAR-Filter: Efficient Convex Free-Space Approximation via Starshaped Set Filtering in Noisy Environments</div>
+      <div class="sub">별모양(starshaped) 집합의 구면 뒤집기(sphere-flipping) 변환으로 장애물 포인트클라우드의 능동 지지점(active supporting constraints)만 추출·필터링하여, 기존 반복 팽창 방식 대비 최저 계산 시간을 달성하면서 FIRI 수준의 폴리토프 품질을 유지하는 볼록 자유공간 근사 가속…</div>
+    </a>
+    <a class="row" href="reviews/WalkWithMe_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-05-03</span></div>
+      <div class="title">Walk With Me: Long-Horizon Social Navigation for Human-Centric Outdoor Assistance</div>
+      <div class="sub">GPS + 공공 지도 API의 경량 POI 정보로 추상적 자연어 지시를 구체적 목적지로 그라운딩하고, 고수준 VLM의 안전 판단과 저수준 VLA의 사회적 국소 내비게이션을 계층적으로 결합하여 HD 지도 없이 장거리 실외 소셜 내비게이션을 실현하는 맵-프리 프레임워크.</div>
+    </a>
+    <a class="row" href="reviews/RAYTOLD_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-05-01</span></div>
+      <div class="title">RAY-TOLD: Ray-Based Latent Dynamics for Dense Dynamic Obstacle Avoidance with TDMPC</div>
+      <div class="sub">동적 장애물 회피, MPPI, 잠재 동역학, TDMPC2, 정책 혼합 샘플링, LiDAR</div>
+    </a>
+    <a class="row" href="reviews/ThreeStepNav_AISTATS2026/index.html">
+      <div class="top"><span>AISTATS 2026 · VLN</span><span class="date">2026-05-01</span></div>
+      <div class="title">Three-Step Nav: A Hierarchical Global-Local Planner for Zero-Shot Vision-and-Language Navigation</div>
+      <div class="sub">Zero-Shot VLN, 삼중 시점 계층 계획, MLLM 프롬프팅, 궤적 감사, AISTATS 2026</div>
+    </a>
+    <a class="row" href="reviews/FreqCache_ICCAD2026/index.html">
+      <div class="top"><span>ICCAD 2026 · VLN</span><span class="date">2026-04-29</span></div>
+      <div class="title">FreqCache: Accelerating Embodied VLN Models with Adaptive Frequency-Guided Token Caching</div>
+      <div class="sub">주파수 도메인(FFT/DCT)의 이동 불변성, 엣지 에너지, 스펙트럼 엔트로피를 활용한 세 모듈 VLN 토큰 캐싱 프레임워크로 InternVLA-N1에서 1.59× 추론 가속 달성.</div>
+    </a>
+    <a class="row" href="reviews/FRGraph_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-04-29</span></div>
+      <div class="title">FRGraph: Safe Navigation in Unknown and Cluttered Environments via Direction-Aware Convex Free-Region Generation</div>
+      <div class="sub">방향 인식 편향 행렬(Q=ee^T+λ(I-ee^T))과 립시츠 연속 안전 인증으로 혼잡 환경 협소 통로를 100% 충돌 없이 통과하는 볼록 자유 영역 기반 내비게이션. Unitree Go2 사족 + UAV 실세계 검증.</div>
+    </a>
+    <a class="row" href="reviews/AmelPred_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-04-26</span></div>
+      <div class="title">Self-Predictive Representation for Autonomous UAV Object-Goal Navigation (AmelPred)</div>
+      <div class="sub">SPR, KL 발산, InfoNCE, Crazyflie, T-RO, 실세계 제로샷 전이</div>
+    </a>
+    <a class="row" href="reviews/LexSTL_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-04-26</span></div>
+      <div class="title">Lexicographic Minimum-Violation Motion Planning using Signal Temporal Logic (LexSTL)</div>
+      <div class="sub">STL, 어휘 최소 위반, MPPI, 비트 시프팅, 우선순위 명세, IEEE OJ-ITS</div>
+    </a>
+    <a class="row" href="reviews/BTIT_star_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-04-25</span></div>
+      <div class="title">BTIT*: Optimal Kinodynamic Motion Planning Through Anytime Bidirectional Heuristic Search with Tight Termination Condition</div>
+      <div class="sub">키노다이나믹, 배치 샘플링, 양방향 탐색, MM-최적성</div>
+    </a>
+    <a class="row" href="reviews/DeCoNav_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-04-25</span></div>
+      <div class="title">DeCoNav: Dialog enhanced Long-Horizon Collaborative Vision-Language Navigation</div>
+      <div class="sub">협력 VLN, 멀티로봇, 이벤트 기반 대화, 장거리 릴레이</div>
+    </a>
+    <a class="row" href="reviews/GNPFkCT_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-04-25</span></div>
+      <div class="title">POMDP-based Object Search with Growing State Space and Hybrid Action Domain</div>
+      <div class="sub">POMDP, MCTS, 성장 상태 공간, 객체 탐색, 실세계</div>
+    </a>
+    <a class="row" href="reviews/HiCoNav_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-04-25</span></div>
+      <div class="title">HiCo-Nav: A Deployable Embodied Vision-Language Navigation System with Hierarchical Cognition and Context-Aware Exploration</div>
+      <div class="sub">인지 메모리 그래프(CMG)와 계층적 비동기 3계층 아키텍처로 고수준 추론과 실시간 성능을 동시에 달성한 배포 가능한 VLN 시스템.</div>
+    </a>
+    <a class="row" href="reviews/HoughGPMap_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-04-25</span></div>
+      <div class="title">HoughGPMap: A Hough Transform Approach to Safety-Aware Scalar Field Mapping Using Gaussian Processes</div>
+      <div class="sub">GP 베이지안 매핑, 허프 변환, 최대 분산 샘플링, RRT* 안전 경로, 실세계 검증</div>
+    </a>
+    <a class="row" href="reviews/IRRL_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-04-25</span></div>
+      <div class="title">IRRL: Incremental Residual Reinforcement Learning Toward Real-World Learning for Social Navigation</div>
+      <div class="sub">Social Force Model 기반 정책에 GATv2 잔차 정책을 결합해, 리플레이 버퍼 없이 단일 스텝 온라인 업데이트만으로 실세계에서 소셜 내비게이션을 학습하는 증분 잔차 강화학습(IRRL) 프레임워크. 페널티메이트 정규화와 온라인 분산 기반 TD 오차 정규화로 학습을 안정화해 시뮬레이션에서 98.8%…</div>
+    </a>
+    <a class="row" href="reviews/LiveVLN_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-04-25</span></div>
+      <div class="title">LiveVLN: Breaking the Stop-and-Go Loop in Vision-Language Navigation</div>
+      <div class="sub">VLN 런타임 최적화, 비동기 실행, Training-Free, 배포 연속성</div>
+    </a>
+    <a class="row" href="reviews/NEATNC_GECCO2026/index.html">
+      <div class="top"><span>GECCO 2026 · Planner</span><span class="date">2026-04-25</span></div>
+      <div class="title">NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning</div>
+      <div class="sub">뇨로진화, NEAT, 생물 영감, 경로 계획, GECCO2026</div>
+    </a>
+    <a class="row" href="reviews/OLAhGP_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-04-25</span></div>
+      <div class="title">Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP)</div>
+      <div class="sub">GP 정보 경로 계획, BCM 근사, 환경 모니터링, 해양 ASV, 실세계 실험</div>
+    </a>
+    <a class="row" href="reviews/PRoID_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-04-25</span></div>
+      <div class="title">PRoID: Predicted Rate of Information Delivery in Multi-Robot Exploration and Relaying</div>
+      <div class="sub">다중 로봇 탐색, 릴레이 결정, 맵 예측, 고장 내성</div>
+    </a>
+    <a class="row" href="reviews/SANDO_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-04-25</span></div>
+      <div class="title">SANDO: Safe Autonomous Trajectory Planning for Dynamic Unknown Environments</div>
+      <div class="sub">시공간 안전 비행 코리도(STSFC), 열지도 기반 A* 전역 계획기, 변수 제거로 7.4배 가속한 MIQP 궤적 최적화를 결합해 동적 미지 환경에서 충돌 없음을 공식적으로 보장하는 안전 궤적 계획 프레임워크. 적응형 EKF로 동적 장애물을 추적하며, UAV 하드웨어 실험(정적 6회·동적 10회)에서 완전 온보드로 제약…</div>
+    </a>
+    <a class="row" href="reviews/SobolevDiffusion_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-04-25</span></div>
+      <div class="title">Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies</div>
+      <div class="sub">Sobolev 학습, 확산 정책, 궤적 최적화 워밍스타트, 피드백 게인, 2-20× 가속</div>
+    </a>
+    <a class="row" href="reviews/TSMC_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-04-25</span></div>
+      <div class="title">TSMC: Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics</div>
+      <div class="sub">담금질 SMC, HMC 재생, 볼츠만 목표 분포, 미분 가능 동역학, 제어-추론</div>
+    </a>
+    <a class="row" href="reviews/UGE-MPC_ICRA2026/index.html">
+      <div class="top"><span>ICRA 2026 · Planner</span><span class="date">2026-04-25</span></div>
+      <div class="title">Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control</div>
+      <div class="sub">샘플링 MPC, Hellinger 다양성, 궤적 최적화, ICRA2026</div>
+    </a>
+    <a class="row" href="reviews/ViLiNT_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-04-25</span></div>
+      <div class="title">ViLiNT: Multimodal Embodiment-Aware Navigation Transformer</div>
+      <div class="sub">멀티모달 로컬 플래닝, RGB+LiDAR 융합, 구현 인식, Diffusion Policy, 충돌 회피</div>
+    </a>
+    <a class="row" href="reviews/WayPlan_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-04-25</span></div>
+      <div class="title">WayPlan: Navigating the Clutter — Waypoint-Based Bi-Level Planning for Multi-Robot Systems</div>
+      <div class="sub">다중로봇 TAMP, 2계층 LLM, RLVR, 웨이포인트, BoxNet3D-OBS</div>
+    </a>
+    <a class="row" href="reviews/FineCogNav_CVPR2026/index.html">
+      <div class="top"><span>CVPR 2026 · VLN</span><span class="date">2026-04-21</span></div>
+      <div class="title">FineCog-Nav: Fine-Grained Cognitive Navigation Framework for Aerial VLN</div>
+      <div class="sub">항공 VLN, 인지 모듈, LLM 기반, AerialVLN-Fine, CVPR2026</div>
+    </a>
+    <a class="row" href="reviews/TubeRRT_TAES2026/index.html">
+      <div class="top"><span>TAES 2026 · Planner</span><span class="date">2026-04-21</span></div>
+      <div class="title">Enhanced Tube-RRT*: Trajectory Planning for 3-UAV Cascaded Rigid-Payload Transport</div>
+      <div class="sub">UAV, 페이로드 운반, Tube-RRT*, Bayesian 샘플링, IEEE TAES</div>
+    </a>
+    <a class="row" href="reviews/AgiPIX_ICUAS2026/index.html">
+      <div class="top"><span>ICUAS 2026 · Planner</span><span class="date">2026-04-14</span></div>
+      <div class="title">AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection</div>
+      <div class="sub">완전 오픈소스 실내 UAV 플랫폼(AgiREAL+AgiSIM+AgiSTACK)으로 ENRICH 2025 핵발전소 현장에서 제로샷 시뮬-현실 전이 검증 완료.</div>
+    </a>
+    <a class="row" href="reviews/HTNav_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-04-14</span></div>
+      <div class="title">HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial Vision-and-Language Navigation</div>
+      <div class="sub">도심 항공 VLN에서 하이브리드 IL-RL 훈련 + MacroPlanner/MicroActor 계층 구조 + SCConv 맵 인코더로 CityNav 벤치마크 SOTA 달성.</div>
+    </a>
+    <a class="row" href="reviews/WorldMAP_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · VLN</span><span class="date">2026-04-12</span></div>
+      <div class="title">WorldMAP: Bootstrapping Vision-Language Navigation Trajectory Prediction with Generative World Models</div>
+      <div class="sub">생성적 월드 모델의 미래 비디오를 3D 재구성 → 의미론적 그라운딩 → FMM 계획으로 변환하여 VLN 궤적 학습의 지도 신호로 활용하는 Teacher-Student 프레임워크.</div>
+    </a>
+    <a class="row" href="reviews/GPU-SLS_arxiv2026/index.html">
+      <div class="top"><span>arXiv 2026 · Planner</span><span class="date">2026-04-11</span></div>
+      <div class="title">GPU-SLS: Safe Large-Scale Robust Nonlinear MPC in Milliseconds via Reachability-Constrained System Level Synthesis on the GPU</div>
+      <div class="sub">GPU 병렬 결합 스캔과 ADMM 기반 QP 솔버로 System Level Synthesis 강건 MPC를 밀리초 단위에 푸는 프레임워크. 공식적 도달 가능 집합 제약으로 안전을 보장하면서 CPU OSQP 대비 340배(N=3000), FastSLS 대비 237배 가속을 달성했고, Unitree Go2 61차원 실제…</div>
+    </a>
+    <a class="row" href="reviews/CityWalker_CVPR2025/index.html">
+      <div class="top"><span>CVPR 2025 · VLN</span><span class="date">2026-04-02</span></div>
+      <div class="title">CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos</div>
+      <div class="sub">2000시간 이상의 웹 규모 도시 보행/운전 비디오로 학습한 구체화된 에이전트로, 비용 많은 주석 없이 대규모 모방학습으로 도시 네비게이션 정책을 학습.</div>
+    </a>
+    <a class="row" href="reviews/NeuPAN_RAL/index.html">
+      <div class="top"><span>RA-L · Planner</span><span class="date">2026-03-29</span></div>
+      <div class="title">NeuPAN: Direct Point Robot Navigation with E2E Model-based Learning</div>
+      <div class="sub">포인트 클라우드를 직접 거리 특성 공간으로 매핑하는 해석가능 신경망(PAN)을 통해 인지→계획→제어 파이프라인의 오차 전파를 제거한, 지도 없는(map-free) 실시간 엔드-투-엔드 모델 기반 로봇 모션 플래닝 프레임워크.</div>
+    </a>
+  </div>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

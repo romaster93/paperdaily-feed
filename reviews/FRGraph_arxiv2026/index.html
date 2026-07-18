@@ -1,0 +1,1325 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>FRGraph: Safe Navigation in Unknown and Cluttered Environments via Direction-Aware Convex Free-Region Generation · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 프리프린트 (2026년 4월 26일, 저널 심사 중)</div>
+    <h1>Safe Navigation in Unknown and Cluttered Environments via Direction-Aware Convex Free-Region Generation</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2604.23648">arXiv:2604.23648</a></span>
+      <span>리뷰 2026-04-29</span>
+      <span>44분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>FRGraph: 방향 인식 볼록 자유 영역 생성을 통한 미지의 혼잡 환경에서의 안전 내비게이션 — 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Safe Navigation in Unknown and Cluttered Environments via Direction-Aware Convex Free-Region Generation</li>
+<li><strong>저자 (Authors)</strong>: Zhicheng Song, Yongjian Li, Kai Chen, Yulin Li, Fan Shi, Jun Ma</li>
+<li><strong>소속 (Affiliation)</strong>:<ul>
+<li>Zhicheng Song, Yongjian Li, Kai Chen, Jun Ma: Robotics and Autonomous Systems Thrust, HKUST (Guangzhou), Guangdong, China</li>
+<li>Yulin Li, Fan Shi: Department of Electrical and Computer Engineering, National University of Singapore, Singapore</li>
+</ul>
+</li>
+<li><strong>발표처 (Published)</strong>: arXiv 프리프린트 (2026년 4월 26일, cs.RO); 저널/학회 제출 심사 중 (BibTeX에 &quot;To be updated&quot;)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2604.23648">https://doi.org/10.48550/arXiv.2604.23648</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.23648v1">https://arxiv.org/abs/2604.23648v1</a></li>
+<li><strong>GitHub</strong>: <a href="https://github.com/ZhichengSong6/FRGraph">https://github.com/ZhichengSong6/FRGraph</a> (C++/ROS, 공개, 88 커밋, 2025년 9월 생성)</li>
+<li><strong>프로젝트 페이지</strong>: 없음</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>실세계 혼잡 환경에서 이동 로봇의 <strong>연속적으로 충돌 없는(continuously collision-free) 내비게이션</strong>을 달성하는 것이 핵심 목표다. 기존 볼록 자유 영역(convex free-region) 기반 방법들이 갖는 두 가지 근본 한계를 해결한다:</p>
+<ol>
+<li><strong>방향 무관성(Direction-Agnosticism)</strong>: 기존 방법들은 장애물 형상만으로 영역을 확장하여, 좁은 통로에서 이동 가능한 방향을 보존하는 영역을 생성하지 못한다.</li>
+<li><strong>이산적 안전 검증(Discrete Safety Verification)</strong>: 이산 샘플 지점에서만 안전성을 확인하므로, 샘플 사이에서 충돌이 발생할 수 있다.</li>
+</ol>
+<p>FRGraph는 이 두 문제를 각각 <strong>방향 인식 QP 기반 영역 생성</strong>과 <strong>립시츠 연속 안전 인증(Lipschitz-based continuous safety certification)</strong>으로 해결하고, 이를 <strong>영역 기반 내비게이션 그래프(region-based navigation graph)</strong>로 통합하여 점진적 계획을 가능하게 한다.</p>
+<p>핵심 혁신: 볼록 자유 영역을 생성할 때 원하는 이동 방향 벡터 <strong>e</strong>를 편향 행렬 <strong>Q = ee^T + λ(I - ee^T)</strong>로 인코딩하여, 이동 방향으로 더 넓고 통과 가능한 영역을 생성한다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 볼록 자유 영역 기반 내비게이션의 기본 원리</h4>
+<p>볼록 자유 영역(Convex Free Region, CFR)은 로봇의 충돌 없는 공간을 볼록 다면체로 표현한다:</p>
+<pre><code>볼록 자유 영역 P:
+P = {p ∈ R^d | Ap ≤ b}
+
+여기서:
+- 각 행 a_i^T·p ≤ b_i 는 하나의 분리 초평면
+- 볼록 다면체는 최적화(MPC, QP)에서 효율적으로 처리 가능
+- 로봇이 P 내에 있으면 장애물과 충돌하지 않음
+
+장점:
+- 최적화 친화적: LP/QP 제약으로 직접 사용
+- 볼록 궤적 계획: 볼록 집합 내 베지어 곡선 생성
+- 수학적 보장: 볼록성으로 인한 전역 최솟값 보장
+</code></pre>
+<h4>B. 도전 1: 방향 무관 영역 생성의 협소 통로 문제</h4>
+<p>기존 방법(RILS, FRTree, FIRI)은 현재 위치 주변의 장애물 기하학적 형상만으로 CFR을 구성한다:</p>
+<pre><code>기존 방향 무관 방법의 실패 시나리오:
+
+환경 (협소 통로):
+    ████████████████████████
+    ██ (벽)     ██ (벽)  ██
+    ██          ██       ██
+    ██   로봇→  ████     ██
+    ██          ██  출구 ██
+    ██          ████     ██
+    ██          ██       ██
+    ████████████████████████
+
+문제:
+기존 CFR 생성: 로봇 중심에서 등방성으로 확장
+→ 상하 방향으로 벽에 막혀 생성된 영역이 얇은 수평 띠 형태
+→ 로봇 크기를 수용하면서 전방 통과 경로를 포함하는 영역 생성 실패
+→ 내비게이션 불가능 판단 (실제로는 통과 가능)
+
+FRGraph의 방향 인식 생성:
+이동 방향 e = (1, 0) (전방)로 QP 편향
+→ 전방 방향으로 최대화된 영역 생성
+→ 통로를 포함하는 충분한 폭의 영역 확보
+→ 성공적 내비게이션
+</code></pre>
+<p>정량적 영향 (Table IV 소거 실험):</p>
+<ul>
+<li>장애물 밀도 1.0/m²: 방향 무관 시 완주율 80%, FRGraph 100%</li>
+<li>장애물 밀도 1.2/m²: 방향 무관 시 완주율 75%, FRGraph 100%</li>
+</ul>
+<h4>C. 도전 2: 이산 샘플 안전성의 충돌 간격 문제</h4>
+<p>연속 궤적의 안전성을 유한 샘플로만 확인하면 반드시 간격이 존재한다:</p>
+<pre><code>이산 안전 검증의 충돌 간격 문제:
+
+궤적 p(t), t ∈ [0,1]:
+이산 검증 시:  p(0), p(0.1), p(0.2), ..., p(1.0) 에서만 안전성 확인
+
+실제 문제:
+                    p(0.15)  ← 이 지점에서 충돌!
+                  /
+ p(0.1) ── 장애물 ── p(0.2)
+   (안전)   (통과)    (안전)
+
+이산 샘플 p(0.1), p(0.2) 모두 안전하지만
+샘플 사이 p(0.15)에서 로봇이 장애물과 교차
+
+중요성:
+- 고속 이동 시 더 심각 (샘플 간격이 더 큼)
+- 비볼록 형상의 로봇 바디에서 더 자주 발생
+- 볼록 자유 영역 내에서도 발생: 영역 경계 근처 궤적에서 양 끝점은 안전하나 중간 경로가 경계를 살짝 벗어날 수 있음
+</code></pre>
+<p>정량적 영향: 연속 안전 검증 없이는 장애물 밀도 1.2/m²에서 완주율 70%, 충돌 없는 완주율 85%. FRGraph 전체는 100%/100%.</p>
+<h3>2.2 핵심 해결책</h3>
+<pre><code>FRGraph의 3층 해결책:
+
+Layer 1: 방향 추출 (Gap Extractor)
+  LiDAR → 구형 범위 맵 → 갭 감지 → 이동 방향 벡터 {e_k}
+
+Layer 2: 방향 인식 CFR 생성 (DACFRG)
+  방향 e + 장애물 기하학 → 편향 QP → 볼록 다면체 P
+  로봇 포함 조건 명시 + 방향성 보존
+
+Layer 3: 연속 안전 궤적 생성 (CSTG)
+  P 내 목표 포즈 선택 → 5차 베지어 곡선 초기화
+  립시츠 분기한정법 연속 검증 → PIQP 국소 수정
+  확인된 안전 궤적 출력
+
+통합: 영역 기반 내비게이션 그래프 (FRGraph)
+  생성된 영역과 궤적을 그래프 노드/엣지로 관리
+  목표 지향 탐색 + 막힌 길 회복
+</code></pre>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 내비게이션 방향 추출 (Gap Extractor)</h3>
+<h4>LiDAR 기반 구형 범위 맵</h4>
+<pre><code>LiDAR 포인트 클라우드 처리:
+1. 크롭: 3m 반경 구 내부 포인트만 사용
+2. odom 좌표계로 변환
+3. 구형 투영: (az, el) 각도 쌍으로 매핑
+
+2D 설정:
+  범위 맵 크기: 1600 × 1 픽셀
+  방위각(azimuth): 전체 360° 표현
+
+3D 설정:
+  범위 맵 크기: 1600 × 32 픽셀
+  방위각 × 고도각 격자
+</code></pre>
+<h4>갭 감지 및 방향 추출</h4>
+<pre><code>갭(Gap) 유형 정의:
+
+개방 갭 (Open Gap):
+- 2D: 최소 10픽셀 폭, 방위각 범위 ≥ 45°
+- 3D: 최소 20픽셀 폭, 방위각 ≥ 45°, 고도각 ≥ 30°
+- 특성: 확실히 통과 가능한 넓은 개구부
+
+제한 갭 (Limited Gap):
+- 2D: 최소 2픽셀, 방위각 ≥ 30°
+- 3D: 최소 48픽셀, 방위각 ≥ 30°, 고도각 ≥ 30°
+- 보정: 방위각 ±10°, 고도각 ±10° 편향 적용
+- 특성: 좁은 통로, 조심스럽게 탐색 필요
+
+방향 벡터 추출:
+e_k = d_k / ||d_k||  (갭 중심 방향의 단위 벡터)
+</code></pre>
+<hr>
+<h3>3.2 방향 인식 볼록 자유 영역 생성 (Direction-Aware CFRG)</h3>
+<h4>핵심 수학: 방향 편향 행렬</h4>
+<pre><code>이동 방향 e에 의한 편향 행렬:
+Q = ee^T + λ(I - ee^T)
+
+기하학적 해석:
+- ee^T: e 방향 투영 행렬 (e 방향에 단위 가중치)
+- I - ee^T: e에 수직인 방향 투영 행렬 (e에 수직 방향에 λ 가중치, 0 &lt; λ &lt; 1)
+
+결과:
+- e 방향: Q에 의해 가중치 1 (최대 중요도)
+- e 수직 방향: Q에 의해 가중치 λ &lt; 1 (감소된 중요도)
+
+물리적 의미:
+QP가 n^T·Q·n을 최소화 → n이 e 방향에 직교하는 초평면 법선 선호
+→ 초평면이 e 방향에 수직 → 영역이 e 방향으로 넓게 확장
+</code></pre>
+<p>λ 파라미터 역할:</p>
+<pre><code>λ → 0: 완전 방향 편향 (e 방향으로 최대 확장, 수직 방향 거의 무시)
+λ → 1: 방향 무관 (등방성 확장, Q = I)
+λ = 0.3 (실험적 최적값): 방향성과 수직 보호의 균형
+</code></pre>
+<h4>QP 기반 분리 초평면 생성</h4>
+<p>개별 초평면을 하나의 장애물 포인트 o_i에 대해 QP로 최적화:</p>
+<pre><code>최적화 문제 (식 1):
+minimize    n^T · Q · n
+
+subject to:
+  (v_j - o_i)^T · n ≤ -ε         ∀ 로봇 꼭짓점 v_j  (로봇이 안전 측에 있음)
+  (p_1 - o_i)^T · n = -1          (정규화 / 스케일링)
+
+변수: 초평면 법선 n ∈ R^d
+
+여기서:
+  v_j: 로봇 바디의 꼭짓점 (2D: 4개, 3D: 8개)
+  o_i: 선택된 장애물 포인트
+  p_1: 로봇 중심 (영역 내부에 있어야 함)
+  ε &gt; 0: 안전 마진
+</code></pre>
+<p>이 QP의 해 n*는 로봇이 o_i와 확실히 분리되는 초평면의 법선이며, 동시에 이동 방향 e와 수직에 가깝도록 최적화된다.</p>
+<h4>반복적 영역 구성 알고리즘</h4>
+<pre><code>알고리즘: 방향 인식 CFR 생성
+
+입력: 장애물 포인트 집합 O, 로봇 꼭짓점 V, 이동 방향 e, 현재 포즈 p_1
+
+초기화:
+  active_obstacles = O
+
+반복 (active_obstacles가 빌 때까지):
+  1. 장애물 포인트 선택 전략:
+     우선: active_obstacles 중 방향 e 전방 반공간에서 방향 레이에 가장 가까운 포인트
+     대체: 전방 후보 없으면 로봇 중심에서 가장 가까운 포인트 선택
+  
+  2. QP 풀기:
+     선택된 o_i에 대해 분리 초평면 법선 n 계산
+     (위 QP 공식 사용)
+  
+  3. 영역 업데이트:
+     새 반공간 추가: {p | n^T·p ≤ n^T·o_i - ε}
+     새 제약에 의해 제거되는 포인트를 active_obstacles에서 삭제
+  
+출력: 볼록 다면체 P = {p | Ap ≤ b}
+      (모든 반공간의 교집합)
+</code></pre>
+<p><strong>기존 방법 비교 (Table I)</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>방향 인식</th>
+<th>로봇 형상 포함</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RILS (2017)</td>
+<td>✗</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>FRTree (2025)</td>
+<td>✗</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>FIRI (2025)</td>
+<td>✗</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><strong>FRGraph (본 논문)</strong></td>
+<td><strong>✓</strong></td>
+<td><strong>✓</strong></td>
+</tr>
+</tbody></table></div>
+<p>FRGraph가 두 조건 모두 만족하는 유일한 방법.</p>
+<hr>
+<h3>3.3 연속 안전 궤적 생성 (Continuous-Safe Trajectory Generation)</h3>
+<h4>3.3.1 목표 포즈 선택</h4>
+<p>볼록 자유 영역 P 내에서 최대 전진 진행 방향의 도달 가능한 목표 포즈를 선택:</p>
+<pre><code>포즈 샘플링:
+- 2D: 18개 요(yaw) 방향 샘플 (0°, 20°, 40°, ..., 340°)
+- 3D: 18(yaw) × 5(roll) × 5(pitch) = 450개 방향 조합
+  - 롤/피치 범위: ±30° (0.5236 라디안)
+
+각 방향 R에 대해 LP로 최대 전진 거리 계산:
+maximize    e^T · p       (이동 방향으로 최대 전진)
+subject to  Ap ≤ b        (볼록 자유 영역 P 내)
+            R(p - p_start) ∈ robot_footprint  (로봇 형상 포함)
+
+상위 K=3 요 방향 선택 후 ±20°(요), ±10°(롤/피치) 범위 세밀 탐색
+→ 최종 목표 포즈 p_target 선택
+</code></pre>
+<h4>3.3.2 5차 베지어 궤적 파라미터화</h4>
+<pre><code>5차 베지어 곡선 (Degree-5 Bézier):
+p(t) = Σ_{i=0}^{5} B_i^5(t) · P_i,    t ∈ [0,1]
+
+B_i^5(t) = C(5,i) · t^i · (1-t)^{5-i}  (번스타인 기저 함수)
+
+제어점:
+P[0] = p_start (시작 포즈, 고정)
+P[1..4] = 자유 변수 (내부 제어점)
+P[5] = p_target (목표 포즈, 고정)
+
+방향(각도) 커브:
+theta(t) = Σ_{i=0}^{5} B_i^5(t) · Theta_i
+
+2D (BezierSE2): Theta_i = [yaw_i] ∈ R
+3D (BezierSE3): Theta_i = [roll_i, pitch_i, yaw_i] ∈ R³
+
+초기화: 제어점을 시작-끝 직선 보간 (최단 각도 보간)
+</code></pre>
+<p>5차 베지어 곡선을 선택한 이유:</p>
+<ul>
+<li>낮은 차수(1,2,3차): 복잡한 장애물 회피에 유연성 부족</li>
+<li>매우 높은 차수: 진동(Runge 현상) 위험, 최적화 복잡도 증가</li>
+<li>5차: 6개 제어점으로 충분한 자유도, 안정적 최적화</li>
+</ul>
+<h4>3.3.3 립시츠 연속 안전 인증 (Lipschitz-Based Continuous Safety Certification)</h4>
+<p>이것이 FRGraph의 핵심 기여 중 하나다. 각 분리 초평면 a^T·x ≤ b에 대해 로봇의 연속적 안전 함수를 정의:</p>
+<pre><code>연속 안전 함수:
+g(t) = a^T·p(t) + max_j [a^T · (R(t) · v_j)] - b
+
+여기서:
+- a^T·p(t): 로봇 중심의 초평면 값
+- max_j [a^T · (R(t) · v_j)]: 현재 방향에서의 로봇 최대 돌출
+- b: 초평면 경계값
+
+안전 조건: g(t) ≤ 0,    ∀ t ∈ [0,1]
+(궤적 전 구간에서 로봇 모든 꼭짓점이 초평면 안쪽)
+</code></pre>
+<p>g(t)의 립시츠 상수 L 계산 (2D):</p>
+<pre><code>g(t)의 시간 미분 상한:
+|g&#39;(t)| ≤ ||a||₂ · (||p&#39;(t)||₂ + r_max · |θ&#39;(t)|)
+
+여기서:
+- r_max: 로봇 최대 반경 (중심에서 꼭짓점까지 최대 거리)
+- p&#39;(t): 위치 속도 (4차 베지어 미분으로 계산)
+- θ&#39;(t): 각속도
+
+5차 베지어 미분 (4차 베지어):
+Qi = 5 · (P[i+1] - P[i]),  i = 0,...,4
+
+립시츠 상수 (2D):
+L = a_max · (dp_max_norm + r_max · dth_max_abs)
+
+where:
+a_max = max(||a||₂)       (초평면 법선 최대 노름)
+dp_max_norm = max_{t} ||p&#39;(t)||₂
+dth_max_abs = max_{t} |θ&#39;(t)|
+</code></pre>
+<p>3D 설정에서의 각속도 처리:</p>
+<pre><code>3D 각속도 상한:
+omega_max = sqrt(3) · drpy_max_norm  (롤-피치-요 합성)
+
+립시츠 상수 (3D):
+L = a_max · (dp_max_norm + r_max · omega_max)
+</code></pre>
+<h4>3.3.4 적응형 구간 세분화 (립시츠 분기한정법)</h4>
+<p>립시츠 상수를 이용한 연속 안전성의 효율적 검증:</p>
+<pre><code>구간 [t_L, t_R]에서 g의 상한 U:
+U(t_L, t_R) = g(t_c) + L · (t_R - t_L) / 2
+where t_c = (t_L + t_R) / 2  (구간 중점)
+
+알고리즘: 분기한정법 (Branch-and-Bound)
+
+우선순위 큐 (최대 힙, U 기준 정렬):
+  초기: [0, 1] 구간 하나
+
+반복:
+  1. 가장 높은 U를 가진 구간 추출
+  2. U ≤ 0이면: 이 구간 전체 안전 보장 → 폐기
+  3. U &gt; 0이면: 충돌 위험 → 구간을 [t_L, t_c], [t_c, t_R]로 분할
+  4. 최소 구간 크기 min_dt=1e-4 도달: 실제 충돌로 판정
+  5. 최대 노드 수 max_nodes=5000 도달: 타임아웃
+
+출력: 안전 (모든 구간이 U≤0로 폐기) 또는 불안전 (충돌 위치 t* 포함)
+</code></pre>
+<p>립시츠 분기한정법의 핵심 장점:</p>
+<ul>
+<li>이산 샘플 검증 대비 <strong>수학적 보장</strong>: U ≤ 0이면 구간 전체 안전 증명</li>
+<li><strong>적응형 집중</strong>: 위험한 구간에만 재귀적으로 세분화</li>
+<li>단순 균일 샘플링보다 훨씬 효율적: 대부분 구간에서 빠른 종료</li>
+</ul>
+<h4>3.3.5 국소 QP 수정 (Local Trajectory Refinement)</h4>
+<p>충돌이 발견된 경우(g(t*) &gt; 0), 위반된 초평면에 대해 제어점을 국소 수정:</p>
+<pre><code>QP 수정 문제 (식 2):
+minimize    ||δx_p||²_{W_p} + ||δx_θ||²_{W_θ} + w_s · s²
+
+subject to:
+  ∇g_ℓ(t*)^T · δx - s ≤ -g_ℓ(t*) - m    (위반 초평면 ℓ에 대해)
+  δx ∈ B                                   (신뢰 영역 박스)
+  s ≥ 0                                    (슬랙 변수)
+
+여기서:
+  δx = [δP_x, δP_y, δYaw, ...]  (자유 제어점 변위)
+  δx_p = 위치 변위 성분
+  δx_θ = 방향 변위 성분
+  W_p, W_θ = 가중치 행렬
+  w_s = 슬랙 페널티
+  m = 안전 마진
+
+솔버: PIQP (Proximal Interior Point QP)
+영향 제어점 선택: t*에서 번스타인 가중치 최대인 제어점 (최대 K_cp=4개)
+라인 서치: α=0.8에서 시작, 조건 불만족 시 절반으로 축소, 최대 6회
+수정 루프: 최대 30회 반복
+</code></pre>
+<p>안전 수정이 성공하면 립시츠 검증 재시도. 30회 후에도 실패하면 해당 방향 불가 판정.</p>
+<hr>
+<h3>3.4 영역 기반 내비게이션 그래프 (Region-Based Navigation Graph, FRGraph)</h3>
+<h4>그래프 자료구조</h4>
+<pre><code>GraphNode (노드):
+  state_pos_: Eigen::Vector3d  (위치)
+  polys_: Polyhedron3D          (3D 볼록 자유 영역)
+  polys_2d_: Polyhedron2D       (2D 투영)
+  parent_id_: NodeId
+  edge_ids_: vector&lt;EdgeId&gt;
+  deadend_: bool                (막힌 길 플래그)
+
+GraphEdge (엣지):
+  from_, to_: NodeId            (시작, 종료 노드)
+  goal_: Direction3D            (목표 방향)
+  trajectory: BezierTrajectory  (검증된 안전 궤적)
+  valid_: bool                  (유효 플래그)
+</code></pre>
+<h4>그래프 탐색 전략</h4>
+<pre><code>FRGraph 내비게이션 알고리즘:
+
+1. 초기화:
+   루트 노드 = 시작 위치
+   
+2. 현재 노드에서 계획 (Plan from Current Node):
+   a. LiDAR에서 갭 방향 추출: {e_1, ..., e_k}
+   b. 각 방향 e_i에 대해:
+      - 방향 인식 CFR 생성 → P_i
+      - 목표 포즈 선택 → p_target_i
+      - 5차 베지어 궤적 생성 + 립시츠 검증 → τ_i
+      - 성공하면 그래프에 엣지 추가
+   
+3. 목표 지향 엣지 선택:
+   현재 전역 목표 g에 가장 가까운 p_target_i를 가진 엣지 선택
+   
+4. 궤적 실행:
+   선택된 τ_i 실행 (트래킹 컨트롤러에 전달)
+   실행 중 연속 안전 모니터링
+   
+5. 도착 후:
+   upsertNode(새 위치): 기존 노드와 merge_radius_ 내이면 합병
+   그래프에 새 노드 추가
+   
+6. 실패 처리:
+   궤적 안전 실패 → 해당 엣지 invalid 처리
+   다음 최선 엣지 선택 시도
+   모든 엣지 소진 → deadend_ = true, 백트래킹
+   
+7. 막힌 길 복구 (Backtracking):
+   부모 노드 방향으로 역행
+   유효 엣지 있는 이전 노드로 복귀
+   새로운 방향 탐색
+</code></pre>
+<h4>점진적 탐색의 장점</h4>
+<pre><code>비교: 반응형(Reactive) vs FRGraph 점진적 계획
+
+반응형 (매 스텝 재계획):
+  단점: 이전 탐색 경험 폐기
+        같은 막힌 길을 반복 탐색
+        그래프 지식 없는 비효율 순환
+
+FRGraph 점진적:
+  장점: 탐색한 영역의 그래프 누적 유지
+        막힌 길을 명시적으로 기록 (deadend 플래그)
+        백트래킹으로 이전 분기점 재방문 가능
+        동일 영역 재방문 최소화 (upsertNode 병합)
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인</h3>
+<pre><code>입력: LiDAR (/scan 또는 /velodyne_points), 오도메트리 (/odom)
+출력: 안전 궤적 → 트래킹 컨트롤러
+
+┌─────────────────────────────────────────────────────────────────┐
+│                     FRGraph 시스템 파이프라인                     │
+│                                                                 │
+│  LiDAR 포인트 클라우드                                           │
+│       │                                                         │
+│       ▼ 크롭 (3m 반경), odom 좌표계 변환                         │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │                    갭 추출기 (Gap Extractor)                │ │
+│  │  구형 범위 맵 투영 (2D: 1600×1, 3D: 1600×32)               │ │
+│  │  깊이 불연속 감지 → 개방/제한 갭 분류                        │ │
+│  │  출력: 방향 벡터 집합 {e_1, ..., e_k}                       │ │
+│  └─────────────────────────────┬──────────────────────────────┘ │
+│                                │                                │
+│               각 방향 e_i 에 대해                               │
+│                                ▼                                │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │         방향 인식 볼록 자유 영역 생성기 (DACFRG)          │   │
+│  │  편향 행렬: Q = ee^T + λ(I-ee^T)                         │   │
+│  │  장애물 선택 전략 (전방 우선, 거리 차선)                   │   │
+│  │  반복 QP: min n^T·Q·n s.t. 로봇 꼭짓점 분리              │   │
+│  │  출력: 볼록 다면체 P_i = {Ap ≤ b}                         │   │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                │                                │
+│                                ▼                                │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │              목표 포즈 선택기 (Target Pose Selector)       │   │
+│  │  방향 샘플: 18(yaw) / 18×5×5(yaw×roll×pitch)             │   │
+│  │  LP: 각 방향에서 P_i 내 최대 전진 거리 계산               │   │
+│  │  상위 K=3 요 방향 → 세밀 탐색 ±20°(요), ±10°(롤/피치)     │   │
+│  │  출력: 최적 목표 포즈 p_target_i                          │   │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                │                                │
+│                                ▼                                │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │        5차 베지어 궤적 생성기 + 연속 안전 인증기           │   │
+│  │                                                         │   │
+│  │  초기화: 직선 보간 제어점 (N=5, 6개 CP)                  │   │
+│  │                                                         │   │
+│  │  립시츠 분기한정법:                                       │   │
+│  │    g(t) = a^T·p(t) + max_j[a^T·R(t)·v_j] - b           │   │
+│  │    U = g(t_c) + L·(t_R-t_L)/2                          │   │
+│  │    우선순위 큐로 위험 구간 집중 세분화                    │   │
+│  │                                                         │   │
+│  │  PIQP 국소 수정 (위반 시):                               │   │
+│  │    QP: δCP 계산 → 라인 서치 → 안전 개선                   │   │
+│  │    최대 30회 반복                                         │   │
+│  │                                                         │   │
+│  │  출력: 검증된 안전 궤적 τ_i 또는 실패                    │   │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                │                                │
+│                                ▼                                │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │              영역 기반 내비게이션 그래프 (FRGraph)         │   │
+│  │  노드: (위치, 볼록 자유 영역, 부모, 엣지들, 막힌 길 플래그) │   │
+│  │  엣지: (시작, 종료, 방향, 검증된 궤적)                    │   │
+│  │  upsertNode: merge_radius_ 내 노드 병합                   │   │
+│  │  목표 지향 엣지 선택 → 실행 → 도착 → 새 노드              │   │
+│  │  실패 → invalid → 다음 엣지 또는 backtrack                │   │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                │                                │
+│                                ▼                                │
+│                    트래킹 컨트롤러에 궤적 전달                   │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 ROS 통합</h3>
+<pre><code>ROS 토픽 인터페이스:
+  구독:
+    /scan             (sensor_msgs/LaserScan)    — 2D LiDAR
+    /velodyne_points  (sensor_msgs/PointCloud2)  — 3D LiDAR
+    /odom             (nav_msgs/Odometry)        — 로봇 오도메트리
+    /goal             (geometry_msgs/PoseStamped) — 목표 포즈
+  
+  발행:
+    /traj_vis         (visualization_msgs/Marker) — 궤적 시각화
+    /polyhedra_vis    (visualization_msgs/MarkerArray) — 볼록 영역 시각화
+    /cmd_traj         (custom trajectory msg)    — 트래킹 컨트롤러용
+
+의존성:
+  Eigen3         — 행렬 연산
+  PIQP           — QP 솔버 (Proximal Interior Point QP)
+  catkin_simple  — ROS 빌드
+  DecompROS      — 볼록 분해 시각화 (수정판)
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 및 환경 (Experimental Setup)</h3>
+<p><strong>2D 시뮬레이션 환경</strong>:</p>
+<ul>
+<li>공간: 5m × 5m 작업 공간</li>
+<li>장애물: 원통형 (반경 r=0.3m)</li>
+<li>장애물 밀도: 0.6, 0.8, 1.0, 1.2 개/m²</li>
+<li>각 조건: 5가지 시나리오 × 4회 = 20회 실험</li>
+</ul>
+<p><strong>비교 대상 방법</strong>:</p>
+<ul>
+<li>DDR-OPT: 2-원판 로봇 모델 기반 직접 최적화</li>
+<li>FASTER: 암묵적 장애물 안전 기반 빠른 궤적 계획기</li>
+<li>FRTree: 겹치는 팽창으로 볼록 자유 영역을 생성하되 이산 안전 검증</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>경로 길이 스케일</strong>: 실제 경로 길이 / 직선 거리 (1에 가까울수록 효율적)</li>
+<li><strong>완주율 (Complete Rate)</strong>: 목표 도달 성공 비율 [0,1]</li>
+<li><strong>충돌 없는 완주율 (Collision-Free Rate)</strong>: 충돌 없이 목표 도달 비율 [0,1]</li>
+<li><strong>모듈별 실행 시간</strong>: 각 처리 단계 평균 시간 [ms]</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>Table III: 2D 내비게이션 시뮬레이션 비교 (주요 결과)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>밀도 (obs/m²)</th>
+<th>방법</th>
+<th>경로 스케일</th>
+<th>완주율</th>
+<th>충돌 없는 완주율</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0.6</td>
+<td>DDR-OPT</td>
+<td>1.02</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td>0.6</td>
+<td>FASTER</td>
+<td>1.03</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td>0.6</td>
+<td>FRTree</td>
+<td>1.29</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td><strong>0.6</strong></td>
+<td><strong>FRGraph</strong></td>
+<td><strong>1.03</strong></td>
+<td><strong>1.00</strong></td>
+<td><strong>1.00</strong></td>
+</tr>
+<tr>
+<td>0.8</td>
+<td>DDR-OPT</td>
+<td>1.09</td>
+<td>1.00</td>
+<td>0.55</td>
+</tr>
+<tr>
+<td>0.8</td>
+<td>FASTER</td>
+<td>1.10</td>
+<td>0.90</td>
+<td>0.20</td>
+</tr>
+<tr>
+<td>0.8</td>
+<td>FRTree</td>
+<td>1.22</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td><strong>0.8</strong></td>
+<td><strong>FRGraph</strong></td>
+<td><strong>1.12</strong></td>
+<td><strong>1.00</strong></td>
+<td><strong>1.00</strong></td>
+</tr>
+<tr>
+<td>1.0</td>
+<td>DDR-OPT</td>
+<td>1.14</td>
+<td>0.90</td>
+<td>0.45</td>
+</tr>
+<tr>
+<td>1.0</td>
+<td>FASTER</td>
+<td>1.08</td>
+<td>0.25</td>
+<td>0.15</td>
+</tr>
+<tr>
+<td>1.0</td>
+<td>FRTree</td>
+<td>1.22</td>
+<td>1.00</td>
+<td>0.60</td>
+</tr>
+<tr>
+<td><strong>1.0</strong></td>
+<td><strong>FRGraph</strong></td>
+<td><strong>1.27</strong></td>
+<td><strong>1.00</strong></td>
+<td><strong>1.00</strong></td>
+</tr>
+<tr>
+<td>1.2</td>
+<td>DDR-OPT</td>
+<td>1.13</td>
+<td>0.45</td>
+<td>0.35</td>
+</tr>
+<tr>
+<td>1.2</td>
+<td>FASTER</td>
+<td>N/A</td>
+<td>0.00</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>1.2</td>
+<td>FRTree</td>
+<td>1.21</td>
+<td>0.90</td>
+<td>0.40</td>
+</tr>
+<tr>
+<td><strong>1.2</strong></td>
+<td><strong>FRGraph</strong></td>
+<td><strong>1.10</strong></td>
+<td><strong>1.00</strong></td>
+<td><strong>1.00</strong></td>
+</tr>
+</tbody></table></div>
+<p>주목할 결과 분석:</p>
+<pre><code>장애물 밀도별 성능 변화 추이:
+
+밀도 증가에 따른 완주율:
+DDR-OPT: 1.00 → 1.00 → 0.90 → 0.45  (밀도 증가에 취약)
+FASTER:  1.00 → 0.90 → 0.25 → 0.00  (밀도 증가에 매우 취약)
+FRTree:  1.00 → 1.00 → 1.00 → 0.90  (연속 안전 보장 없어 충돌 증가)
+FRGraph: 1.00 → 1.00 → 1.00 → 1.00  (모든 밀도에서 100%)
+
+충돌 없는 완주율의 차이:
+FRTree (밀도 1.0): 완주율 1.00, 충돌 없는 완주율 0.60
+→ 목표에는 도달하지만 40%는 도중 충돌 발생
+FRGraph (밀도 1.0): 완주율 1.00, 충돌 없는 완주율 1.00
+→ 100% 충돌 없는 완전한 안전 보장
+</code></pre>
+<p>이 결과는 연속 안전 인증의 중요성을 명확히 보여준다. FRTree도 볼록 자유 영역을 사용하지만 이산 검증만 사용하여 충돌이 발생한다.</p>
+<p><strong>Table II: 모듈별 실행 시간 (Runtime Performance)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>모듈</th>
+<th>2D 평균 [ms]</th>
+<th>3D 평균 [ms]</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>자유 영역 생성 (DACFRG)</td>
+<td>1.488</td>
+<td>2.057</td>
+</tr>
+<tr>
+<td>목표 포즈 선택</td>
+<td>1.328</td>
+<td>16.816</td>
+</tr>
+<tr>
+<td>안전 궤적 생성 (CSTG)</td>
+<td>1.628</td>
+<td>3.473</td>
+</tr>
+<tr>
+<td><strong>총 계획 시간</strong></td>
+<td><strong>~4.4 ms</strong></td>
+<td><strong>~22.3 ms</strong></td>
+</tr>
+</tbody></table></div>
+<p>실시간성 평가:</p>
+<ul>
+<li>2D: ~4.4ms → 220Hz 이상의 계획 주파수 가능 (대부분 로봇 컨트롤러 요구 수준 초과)</li>
+<li>3D: ~22.3ms → ~45Hz (충분히 실시간)</li>
+<li>3D에서 목표 포즈 선택이 지배적 (450개 포즈 × LP 최적화)</li>
+</ul>
+<p><strong>Table IV: 모듈 소거 실험 (Ablation Study)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>설정</th>
+<th>밀도</th>
+<th>경로 스케일</th>
+<th>완주율</th>
+<th>충돌 없는 완주율</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>방향 무관 (Q=I)</td>
+<td>1.0</td>
+<td>1.61</td>
+<td>0.80</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td>연속 안전 없음</td>
+<td>1.0</td>
+<td>1.58</td>
+<td>0.95</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td><strong>전체 FRGraph</strong></td>
+<td><strong>1.0</strong></td>
+<td><strong>1.27</strong></td>
+<td><strong>1.00</strong></td>
+<td><strong>1.00</strong></td>
+</tr>
+<tr>
+<td>방향 무관 (Q=I)</td>
+<td>1.2</td>
+<td>1.20</td>
+<td>0.75</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td>연속 안전 없음</td>
+<td>1.2</td>
+<td>1.19</td>
+<td>0.70</td>
+<td>0.85</td>
+</tr>
+<tr>
+<td><strong>전체 FRGraph</strong></td>
+<td><strong>1.2</strong></td>
+<td><strong>1.10</strong></td>
+<td><strong>1.00</strong></td>
+<td><strong>1.00</strong></td>
+</tr>
+</tbody></table></div>
+<p>소거 실험 해석:</p>
+<pre><code>방향 무관 (Q=I) 제거 영향:
+- 완주율: 1.00 → 0.80 (밀도 1.0), 1.00 → 0.75 (밀도 1.2)
+- 경로 스케일: 1.27 → 1.61 (더 우회하는 비효율 경로)
+- 충돌 없는 완주율: 그대로 1.00 (안전은 유지되나 도달 불가)
+→ 방향 인식이 완주 가능성에 직접 영향: 협소 통로를 포함하는 영역 생성 실패로 도달 불가
+
+연속 안전 없음 영향:
+- 완주율: 1.00 → 0.95 / 1.00 → 0.70 (예상외로 완주율도 하락)
+- 충돌 없는 완주율: 1.00 → 0.95 / 1.00 → 0.85 (충돌 발생)
+→ 이산 검증만으로는 고밀도 환경에서 안전 보장 불충분
+</code></pre>
+<h3>5.4 리얼월드 실험 (Real-World Experiments)</h3>
+<p><strong>실험 1: 2D — Unitree Go2 사족보행 로봇</strong></p>
+<pre><code>실험 설정:
+  플랫폼: Unitree Go2 사족보행 로봇
+  센서: MID360 LiDAR
+  환경: 6m × 4m 실내 혼잡 공간
+  장애물: 다양한 크기의 여러 물체 무작위 배치
+
+결과:
+  ✅ 목표 위치 100% 도달
+  ✅ 전 구간 충돌 없음
+  ✅ 협소 통로 성공적 통과
+  계획 주기: 실시간 (4-5ms)
+</code></pre>
+<p><strong>실험 2: 3D — 무인 항공기 (UAV)</strong></p>
+<pre><code>실험 설정:
+  플랫폼: 커스텀 쿼드로터 UAV
+  센서: Velodyne 3D LiDAR
+  환경: 6m × 4m × 2.5m 실내 3D 장애물 공간
+           (높이가 서로 다른 장애물들 — 일부는 통과 가능한 높이)
+
+결과:
+  ✅ 3D 공간에서 목표 도달
+  ✅ 전 구간 3D 충돌 없음
+  ✅ 높이 변화 장애물 회피 성공
+  계획 주기: 실시간 (~22ms, 약 45Hz)
+</code></pre>
+<p>두 실험은 FRGraph가 2D 지상 로봇과 3D 공중 로봇 모두에서 실세계 동작을 검증했음을 보여준다.</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>기여 1: 방향 인식 볼록 자유 영역 생성 (Direction-Aware CFRG)</h3>
+<p><strong>문제</strong>: 기존 방법(RILS, FRTree, FIRI)은 모두 방향 무관으로 협소 통로에서 실패.</p>
+<p><strong>해결</strong>: 편향 행렬 Q = ee^T + λ(I - ee^T)를 QP 목적함수에 통합하여 이동 방향을 인식하는 볼록 자유 영역 생성. 로봇 형상(꼭짓점 포함 조건)을 QP 제약에 명시적으로 통합.</p>
+<p><strong>효과</strong>: 모든 기존 방법 대비 협소 통로에서 더 높은 완주율 달성. 특히 고밀도 환경(1.2/m²)에서 75-90%인 기존 방법 대비 100% 완주율.</p>
+<h3>기여 2: 립시츠 연속 안전 인증 (Lipschitz Continuous Safety Certification)</h3>
+<p><strong>문제</strong>: FRTree를 포함한 기존 방법들은 이산 샘플에서만 안전 확인, 샘플 간 충돌 발생.</p>
+<p><strong>해결</strong>: 5차 베지어 궤적의 립시츠 상수를 해석적으로 계산하고, 분기한정법으로 모든 t ∈ [0,1]에서 안전성을 수학적으로 인증. PIQP 기반 국소 수정으로 위반 시 궤적 복구.</p>
+<p><strong>효과</strong>: FRTree 대비 충돌 없는 완주율 0.40 → 1.00 (밀도 1.2). 이산 검증 대비 수학적 보장 제공.</p>
+<h3>기여 3: 영역 기반 점진적 내비게이션 그래프 (FRGraph)</h3>
+<p><strong>문제</strong>: 반응형 재계획은 이전 탐색 경험을 버려 막힌 길 재탐색, 비효율.</p>
+<p><strong>해결</strong>: 탐색한 모든 볼록 자유 영역과 검증 궤적을 그래프로 유지. 목표 지향 탐색 + 막힌 길 백트래킹으로 효율적 내비게이션.</p>
+<p><strong>효과</strong>: 단순 반응형 대비 반복 탐색 감소, 막힌 길에서의 빠른 회복.</p>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 핵심 하이퍼파라미터</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>2D 값</th>
+<th>3D 값</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LiDAR 크롭 반경</td>
+<td>3m</td>
+<td>3m</td>
+<td>처리 영역 제한</td>
+</tr>
+<tr>
+<td>범위 맵 크기</td>
+<td>1600×1</td>
+<td>1600×32</td>
+<td>갭 감지 해상도</td>
+</tr>
+<tr>
+<td>개방 갭 최소 폭</td>
+<td>10 픽셀</td>
+<td>20 픽셀</td>
+<td>탐색 방향 필터</td>
+</tr>
+<tr>
+<td>제한 갭 최소 폭</td>
+<td>2 픽셀</td>
+<td>48 픽셀</td>
+<td>좁은 통로 탐색</td>
+</tr>
+<tr>
+<td>요 샘플 수</td>
+<td>18</td>
+<td>18</td>
+<td>목표 포즈 탐색</td>
+</tr>
+<tr>
+<td>롤/피치 샘플 수</td>
+<td>N/A</td>
+<td>5 각</td>
+<td>3D 포즈 탐색</td>
+</tr>
+<tr>
+<td>상위 요 방향 수 K</td>
+<td>3</td>
+<td>3</td>
+<td>세밀 탐색 후보</td>
+</tr>
+<tr>
+<td>세밀 탐색 요 범위</td>
+<td>±20°</td>
+<td>±20°</td>
+<td>국소 최적화</td>
+</tr>
+<tr>
+<td>베지어 차수</td>
+<td>5</td>
+<td>5</td>
+<td>궤적 복잡도</td>
+</tr>
+<tr>
+<td>제어점 수</td>
+<td>6</td>
+<td>6</td>
+<td>자유도</td>
+</tr>
+<tr>
+<td>립시츠 안전 마진 ε</td>
+<td>1e-6</td>
+<td>1e-6</td>
+<td>수치 안전</td>
+</tr>
+<tr>
+<td>최소 구간 크기 min_dt</td>
+<td>1e-4</td>
+<td>1e-4</td>
+<td>분기한정 종료</td>
+</tr>
+<tr>
+<td>최대 노드 수 max_nodes</td>
+<td>5000</td>
+<td>5000</td>
+<td>계산 제한</td>
+</tr>
+<tr>
+<td>QP 최대 반복 횟수</td>
+<td>30</td>
+<td>30</td>
+<td>수정 루프</td>
+</tr>
+<tr>
+<td>라인 서치 시작 α</td>
+<td>0.8</td>
+<td>0.8</td>
+<td>수정 스텝 크기</td>
+</tr>
+<tr>
+<td>노드 병합 반경 merge_radius_</td>
+<td>0.5m</td>
+<td>0.5m</td>
+<td>그래프 압축</td>
+</tr>
+</tbody></table></div>
+<h3>7.2 로봇 형상 정의</h3>
+<pre><code>2D 로봇 (직사각형):
+  꼭짓점: {(±0.2, ±0.1)} — 4개
+  0.4m × 0.2m 풋프린트
+
+3D 로봇 (직육면체):
+  꼭짓점: {(±0.2, ±0.1, 0)} 상단 + {(±0.2, ±0.1, -0.4)} 하단 — 8개
+  IMU 아래 0.1m 오프셋 포함
+  0.4m × 0.2m × 0.4m 바운딩 박스
+</code></pre>
+<h3>7.3 QP 솔버 설정</h3>
+<p>PIQP (Proximal Interior Point QP):</p>
+<pre><code>piqp::CPPSolver 설정:
+  verbose: false
+  compute_timings: false
+  
+PIQP 선택 이유:
+  - 오픈 소스
+  - 헤더 온리 C++ 라이브러리 (의존성 최소)
+  - 소규모 밀집 QP에서 매우 빠름 (수 μs 내 수렴)
+  - 강건한 수치 안정성
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 이론적 완전성과 현실적 한계</h3>
+<p><strong>완전성의 조건부 보장</strong>:</p>
+<p>FRGraph는 수학적 완전성(completeness)을 직접 보장하지 않는다. 구체적 한계:</p>
+<pre><code>완전성 실패 시나리오:
+
+시나리오 1: 극도로 좁은 통로
+  로봇 크기 포함 조건으로 인해 생성 가능한 볼록 영역이 없음
+  → CFR 생성 실패
+  → FRGraph가 통과 불가로 판단
+  → 실제로는 통과 가능할 수 있음 (ε 마진이 너무 큼)
+  완화: λ 값 또는 ε 감소로 더 공격적인 영역 생성 시도
+
+시나리오 2: 5차 베지어 표현력 한계
+  극단적으로 구불구불한 협소 경로는 5차 베지어로 표현 불가
+  → 안전 인증 30회 실패
+  → 해당 방향 불가로 판단
+  완화: 제어점 수 증가 (계산 비용 증가)
+
+시나리오 3: LiDAR 인식 한계
+  센서 노이즈, 반사, 투명 장애물 등으로 갭 감지 실패
+  → 존재하는 통로를 인식하지 못함
+</code></pre>
+<h3>8.2 동적 장애물 처리</h3>
+<p>현재 FRGraph는 <strong>정적 미지 환경</strong>을 가정한다. 동적 장애물(이동하는 사람, 다른 로봇)은 처리하지 않는다. SANDO와 같이 시공간 안전 비행 경로 코리도(Spatiotemporal SFC)를 결합하면 이 한계를 극복할 수 있다.</p>
+<h3>8.3 확장성</h3>
+<p><strong>더 큰 환경</strong>:</p>
+<ul>
+<li>현재 3m 반경 내 LiDAR만 처리 → 큰 실내/야외 환경에서는 전역 경로 계획기 필요</li>
+<li>FRGraph를 로컬 플래너로, A* 또는 Dijkstra를 전역 플래너로 결합하는 계층적 아키텍처 자연스럽게 확장 가능</li>
+</ul>
+<p><strong>다른 로봇 플랫폼</strong>:</p>
+<ul>
+<li>로봇 형상만 변경(꼭짓점 정의)하면 다른 로봇 형태에 즉시 적용</li>
+<li>선박(보트 풋프린트), 지게차(직사각형 + 포크), 인형 로봇(다각형) 등</li>
+</ul>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>SANDO (arxiv2026)</th>
+<th>ViLiNT (arxiv2026)</th>
+<th>TRG-Planner (RAL2025)</th>
+<th>BTIT* (arxiv2026)</th>
+<th><strong>FRGraph (arxiv2026)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>핵심 문제</strong></td>
+<td>동적 미지 환경 UAV</td>
+<td>멀티모달 로컬 내비</td>
+<td>비정형 지형 경로계획</td>
+<td>최적 키노다이나믹</td>
+<td>혼잡 정적 환경 안전 내비</td>
+</tr>
+<tr>
+<td><strong>안전 보장</strong></td>
+<td>STSFC 공식 보장</td>
+<td>충돌 예측 헤드</td>
+<td>위험도 그래프</td>
+<td>점근적 최적성</td>
+<td>립시츠 연속 안전 보장</td>
+</tr>
+<tr>
+<td><strong>동적 장애물</strong></td>
+<td>✅ 처리 가능</td>
+<td>❌ 정적 가정</td>
+<td>❌ 정적 지형</td>
+<td>❌ 정적 가정</td>
+<td>❌ 정적 가정</td>
+</tr>
+<tr>
+<td><strong>협소 통로</strong></td>
+<td>❌ 미특화</td>
+<td>❌ 미특화</td>
+<td>❌ 미특화</td>
+<td>❌ 미특화</td>
+<td>✅ 핵심 기여</td>
+</tr>
+<tr>
+<td><strong>로봇 형상 처리</strong></td>
+<td>암묵적</td>
+<td>ViT 기반 인식</td>
+<td>암묵적</td>
+<td>공식 포함</td>
+<td>✅ QP 제약 명시</td>
+</tr>
+<tr>
+<td><strong>실세계 실험</strong></td>
+<td>✅ UAV 실험</td>
+<td>✅ 모바일 로봇</td>
+<td>✅ 사족 로봇</td>
+<td>❌ 시뮬레이션</td>
+<td>✅ 사족 + UAV</td>
+</tr>
+<tr>
+<td><strong>코드 공개</strong></td>
+<td>✅ GitHub</td>
+<td>✅ GitHub</td>
+<td>✅ 프로젝트</td>
+<td>✅ 부분 공개</td>
+<td>✅ GitHub</td>
+</tr>
+<tr>
+<td><strong>플랫폼</strong></td>
+<td>UAV</td>
+<td>지상 로봇</td>
+<td>사족 로봇</td>
+<td>일반적</td>
+<td>지상 + UAV</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>FRGraph의 장점</strong>:</p>
+<ol>
+<li><p><strong>협소 통로에서의 방향 인식</strong>: 편향 행렬 Q를 통한 방향 인식 영역 생성은 기존 모든 방법에서 처리하지 않은 새로운 기여. SANDO의 STSFC조차 장애물 형상 기반이므로 협소 통로에서 유사한 한계 가능성.</p>
+</li>
+<li><p><strong>수학적 연속 안전 보장</strong>: 립시츠 분기한정법은 유한 샘플 기반 검증 대비 엄격한 수학적 보장. FRTree처럼 이산 검증만 하는 방법들과 명확히 차별화.</p>
+</li>
+<li><p><strong>이기종 플랫폼</strong>: 2D 지상 로봇 + 3D UAV 모두 동일 프레임워크로 지원. 이는 ViLiNT(지상만), TRG-Planner(지상 비정형)와 대비.</p>
+</li>
+<li><p><strong>실시간 성능</strong>: 2D 4.4ms, 3D 22.3ms는 실세계 로봇에서 즉시 활용 가능한 수준.</p>
+</li>
+<li><p><strong>공개 코드</strong>: GitHub에서 공개, ROS 통합 완료로 즉시 재현 및 확장 가능.</p>
+</li>
+</ol>
+<p><strong>FRGraph의 단점</strong>:</p>
+<ol>
+<li><p><strong>동적 장애물 처리 미흡</strong>: SANDO는 동적 장애물을 명시적으로 처리하지만 FRGraph는 정적 환경만 가정. 실제 인간 공존 환경(창고, 병원 복도)에서 한계.</p>
+</li>
+<li><p><strong>전역 경로 계획 없음</strong>: 지역 플래너만 존재. 복잡한 대형 환경에서는 FRGraph가 미로에 빠질 수 있음. SANDO, TRG-Planner는 전역 계획기를 포함.</p>
+</li>
+<li><p><strong>모달 센서 단일</strong>: LiDAR만 사용. ViLiNT처럼 RGB+LiDAR 융합으로 의미론적 장애물 회피(사람 인식 등) 불가.</p>
+</li>
+<li><p><strong>학습 없는 방법의 적응성</strong>: 환경 지식을 학습하지 않으므로 구조적 패턴(복도 배치, 문 위치 등) 활용 불가. ViLiNT나 TRG-Planner(지형 위험 학습)는 이를 활용.</p>
+</li>
+</ol>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>시나리오별 적용 적합성:
+
+시나리오 1: 창고 자동화 로봇 (정적, 혼잡, 협소 통로)
+  FRGraph: ★★★★★ 최적 적용처
+  이유: 협소 통로 특화, 정적 장애물, 실시간 2D
+
+시나리오 2: 인간 공존 실내 (동적 장애물)
+  FRGraph: ★★☆☆☆ 미흡
+  이유: 동적 장애물 처리 없음
+  권장: SANDO 또는 IRRL 결합
+
+시나리오 3: 3D 드론 내부 검사 (구조물 점검)
+  FRGraph: ★★★★☆ 적합
+  이유: 3D 지원, 빠른 계획, 실시간 UAV 검증
+
+시나리오 4: 비정형 야외 지형 탐색
+  FRGraph: ★★☆☆☆ 미흡
+  이유: LiDAR 기반 기하학 처리만, 지형 속성(기울기, 위험도) 미고려
+  권장: TRG-Planner
+</code></pre>
+<h3>9.4 연구 방향성 평가</h3>
+<p>FRGraph는 볼록 자유 영역 기반 경로 계획의 두 가지 핵심 한계—방향 무관성과 이산 안전 검증—를 각각 독립적이고 체계적인 방법으로 해결했다는 점에서 연구 방향성이 타당하다.</p>
+<p>특히 방향 인식 편향 행렬 아이디어는 간단하지만 효과적이며, 기존 볼록 자유 영역 문헌에서 간과된 실용적 문제를 해결한다. 립시츠 연속 안전 인증도 다른 궤적 최적화 문제에 일반화할 수 있는 잠재력이 있다.</p>
+<p>동적 장애물 처리와 전역 계획기 통합이 향후 자연스러운 확장 방향이다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li><strong>RILS</strong> (Liu et al. 2017): Safe flight corridors for UAVs — 방향 무관, 로봇 포함 없음</li>
+<li><strong>FRTree</strong> (Li et al. 2025): 겹치는 팽창 기반 볼록 자유 영역 트리 — 이산 안전만</li>
+<li><strong>FIRI</strong> (Wang et al. 2025): 반복 영역 팽창 — 로봇 포함 있지만 방향 무관</li>
+<li><strong>DDR-OPT</strong>: 2-원판 로봇 모델 기반 직접 최적화 베이스라인</li>
+<li><strong>FASTER</strong> (Tordesillas et al. 2019): 전방-후방 분리 빠른 궤적 계획기</li>
+<li><strong>MADER</strong>: 다중 에이전트 동적 환경 계획기</li>
+<li><strong>Deits &amp; Tedrake (2015)</strong>: SDP 기반 볼록 장애물 없는 집합 분해</li>
+<li><strong>Bernstein 기저 / 베지어 곡선</strong>: 구간 최적화 제어 이론</li>
+<li><strong>PIQP</strong> (Schiele et al. 2023): Proximal Interior Point QP 솔버</li>
+<li><strong>SANDO</strong> (Kondo et al. 2026): STSFC 기반 동적 환경 UAV 안전 계획</li>
+<li><strong>ViLiNT</strong> (Dezons et al. 2026): RGB+LiDAR 멀티모달 내비게이션 트랜스포머</li>
+<li><strong>TRG-Planner</strong> (Lee et al. 2025): 횡단 위험 그래프 기반 비정형 지형 계획</li>
+<li><strong>BTIT</strong>* (Wang et al. 2026): 양방향 긴밀 종료 조건 키노다이나믹 계획</li>
+<li><strong>DecompROS</strong>: ROS 볼록 분해 시각화 라이브러리</li>
+<li><strong>Unitree Go2</strong>: 사족보행 실험 플랫폼</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>혁신성 평가</h3>
+<p>FRGraph는 볼록 자유 영역 기반 내비게이션이라는 잘 정립된 분야에서 <strong>두 가지 명확하고 실용적인 한계</strong>를 체계적으로 해결했다는 점에서 혁신적이다.</p>
+<p>특히 방향 인식 편향 행렬 Q = ee^T + λ(I - ee^T)는 아이디어는 단순하지만:</p>
+<ul>
+<li>기존 방법 어디에서도 제안되지 않은 접근</li>
+<li>수학적으로 QP 목적함수에 우아하게 통합</li>
+<li>협소 통로라는 실용적으로 중요한 시나리오에서 극적 성능 향상 달성</li>
+</ul>
+<p>립시츠 연속 안전 인증은:</p>
+<ul>
+<li>수학적으로 엄격한 연속 충돌 없음 보장</li>
+<li>이산 샘플 검증 대비 이론적으로 명확한 우위</li>
+<li>분기한정법으로 계산 효율 확보</li>
+</ul>
+<h3>실용적 의의</h3>
+<ol>
+<li><strong>창고 자동화, 좁은 복도 환경</strong>: 가장 즉각적인 적용처. 물류 로봇이 좁은 통로를 안전하게 통과하는 핵심 문제 해결.</li>
+<li><strong>실세계 검증의 신뢰성</strong>: Unitree Go2(사족 로봇)와 UAV 모두에서 검증, 시뮬레이션에만 의존하지 않음.</li>
+<li><strong>공개 코드</strong>: GitHub의 C++/ROS 구현으로 즉각적인 재사용 가능성.</li>
+</ol>
+<h3>향후 연구 방향</h3>
+<ol>
+<li><strong>동적 장애물 통합</strong>: SANDO의 STSFC 아이디어를 FRGraph의 방향 인식 영역 생성에 통합하여 이동하는 사람/로봇 처리</li>
+<li><strong>전역-지역 계획기 결합</strong>: Topo-metric 맵과 결합하여 대형 미지 환경 탐색</li>
+<li><strong>의미론적 갭 탐지</strong>: RGB-D 또는 멀티모달 센서로 갭의 종류(문, 복도 출구, 기계 사이 간격) 분류하여 의미 인식 내비게이션 확장</li>
+<li><strong>학습 기반 λ 적응</strong>: 환경 유형에 따라 λ를 동적으로 조정하는 메타러닝 접근</li>
+<li><strong>다중 로봇 확장</strong>: FRGraph를 공유하여 다중 로봇 협력 내비게이션에 적용</li>
+</ol>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

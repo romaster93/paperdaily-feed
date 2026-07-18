@@ -1,0 +1,1576 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Walk With Me: Long-Horizon Social Navigation for Human-Centric Outdoor Assistance · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 프리프린트</div>
+    <h1>Walk With Me: Long-Horizon Social Navigation for Human-Centric Outdoor Assistance</h1>
+    <div class="meta-row">
+      <span class="chip">VLN</span>
+      <span><a href="https://arxiv.org/abs/2604.26839">arXiv:2604.26839</a></span>
+      <span>리뷰 2026-05-03</span>
+      <span>79분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>Walk With Me: 장거리 소셜 내비게이션 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Walk With Me: Long-Horizon Social Navigation for Human-Centric Outdoor Assistance</li>
+<li><strong>저자 (Authors)</strong>: Lingfeng Zhang, Xiaoshuai Hao, Xizhou Bu, Yingbo Tang, Hongsheng Li, Jinghui Lu, Xiu-shen Wei, Jiayi Ma, Yu Liu, Jing Zhang, Hangjun Ye, Xiaojun Liang, Long Chen, Wenbo Ding</li>
+<li><strong>소속 (Affiliation)</strong>: Tsinghua University, Pengcheng Laboratory, Xiaomi EV, Fudan University, Institute of Automation (CAS), Southeast University, Wuhan University, Hefei University of Technology</li>
+<li><strong>발표처 (Published)</strong>: arXiv 프리프린트 (2026년 4월 29일)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2604.26839">https://doi.org/10.48550/arXiv.2604.26839</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.26839">https://arxiv.org/abs/2604.26839</a></li>
+<li><strong>프로젝트 페이지</strong>: <a href="https://linglingxiansen.github.io/Walk-with-Me/">https://linglingxiansen.github.io/Walk-with-Me/</a></li>
+<li><strong>GitHub</strong>: 미공개 (코드 릴리즈 없음)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>&quot;Walk With Me&quot;는 <strong>인간 중심 실외 보조(Human-Centric Outdoor Assistance)</strong> 시나리오에서 로봇이 고수준 자연어 지시를 이해하고 장거리 소셜 내비게이션을 수행하는 새로운 문제를 정의하고 해결한다.</p>
+<p>기존 VLN 시스템의 대부분은 두 가지 근본적인 한계를 가진다:</p>
+<ol>
+<li><strong>HD 맵 의존성</strong>: 고정밀 사전 지도(HD Map)를 필요로 하기 때문에 사전 매핑 비용이 발생하고, 새로운 환경에서 일반화가 불가능하다.</li>
+<li><strong>실내/단거리 특화</strong>: Habitat 시뮬레이터 기반의 R2R, R4R 등 벤치마크는 실내 환경 또는 단거리 내비게이션에 초점을 맞추어, 실외 장거리 시나리오로의 전이가 어렵다.</li>
+</ol>
+<p>이 논문이 해결하려는 핵심 문제는 다음과 같다:</p>
+<blockquote>
+<p><strong>&quot;지도 없이, 고수준 지시(예: &#39;저기 밀크티 사다줘&#39;, &#39;산책하러 가자&#39;)만으로 실외 야외 환경에서 수백 미터 거리의 목적지까지 안전하게 이동하고 사회적 행동 규범을 준수하는 자율 로봇 내비게이션&quot;</strong></p>
+</blockquote>
+<p>이를 위해 논문은 <strong>공개 지도 API + GPS + VLM/VLA 계층 구조</strong>를 결합한 맵-프리(map-free) 계층적 프레임워크를 제안하며, 실세계 Athena 2.0 Pro AGV 플랫폼에서 20회의 실험을 통해 60% 평균 성공률을 달성한다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 실외 장거리 소셜 내비게이션의 고유 복잡성</h4>
+<p>실외 환경에서의 인간 중심 내비게이션은 다음과 같은 복합적 도전을 동시에 요구한다:</p>
+<pre><code>[실외 장거리 소셜 내비게이션의 다층 도전]
+
+공간적 도전:
+├── 수백 미터에 달하는 장거리 이동 필요
+├── GPS 드리프트 및 SLAM 누적 오류
+├── 사전 HD 맵 없이 미지의 환경 탐색
+└── 동적으로 변화하는 실외 환경 (날씨, 조도)
+
+의미론적 도전:
+├── &quot;밀크티를 사다줘&quot; → 목적지 추론 필요
+├── &quot;산책하러 가자&quot; → 경로 의도 추론 필요
+├── POI (Point of Interest) 식별 및 지역화
+└── 공개 지도에서 목적지 추론
+
+사회적 도전:
+├── 보행자 회피 (Social Force 기반)
+├── Stop-and-Wait 의사결정 (안전 확보)
+├── 혼잡 구간 통과 전략
+└── 인간 이동 패턴 예측
+
+시스템 도전:
+├── 실시간 VLM 추론 지연 (네트워크 의존)
+├── 저수준 VLA 궤적 예측 신뢰성
+├── 배터리 및 연산 자원 제약
+└── API 할당량 (Rate Limit) 관리
+</code></pre>
+<h4>B. 기존 방법의 한계: HD 맵 의존 접근법의 문제</h4>
+<p>HD 맵 기반 방법론들은 다음과 같은 구조적 한계를 가진다:</p>
+<pre><code>HD 맵 기반 방법 (예: AutoNav, TartanNav 계열):
+┌────────────────────────────────────────────────────┐
+│  단계 1: 사전 매핑                                   │
+│    - LiDAR/RGB-D로 전체 환경 스캔                    │
+│    - 포인트 클라우드 구성 (시간: 수 시간 ~ 수 일)       │
+│    - 의미론적 레이블 부여 (반자동)                     │
+│                                                    │
+│  단계 2: 내비게이션                                  │
+│    - 사전 맵에서 경로 계획                             │
+│    - 실시간 위치 추정 (Map Localization)              │
+│    - 장애물 감지 및 회피                              │
+│                                                    │
+│  한계:                                             │
+│    - 새로운 환경 = 재매핑 필요                         │
+│    - 동적 변화 (공사, 계절) 반영 불가                   │
+│    - 구축/유지 비용 막대                               │
+│    - 의미론적 이해 약함 (POI 레벨 부재)                 │
+└────────────────────────────────────────────────────┘
+</code></pre>
+<h4>C. 기존 VLN의 실외/장거리 전이 한계</h4>
+<pre><code>기존 VLN 벤치마크 → 실외 장거리 갭:
+────────────────────────────────────────────
+
+R2R (Room-to-Room):
+  - 환경: Matterport3D 실내 시뮬레이션
+  - 이동 거리: 평균 10m 이하
+  - 지시: 상세한 단계별 (&quot;복도 끝에서 오른쪽으로...&quot;)
+  - 실세계 갭: 크다 (실외 불가)
+
+TOUCHDOWN (야외 VLN):
+  - 환경: Google Street View (2D 파노라마)
+  - 이동 거리: 중간
+  - 한계: 실제 로봇 미적용, 정적 환경 가정
+
+ScanQA / EQA:
+  - 환경: 실내 QA
+  - 한계: 행동 필요 없음
+
+Walk With Me가 정의하는 새 범주:
+  - 환경: 실외 실제 캠퍼스/도심
+  - 이동 거리: 수백 미터
+  - 지시: 고수준 의도 (목적지 + 활동)
+  - 실세계: 실제 AGV 로봇 플랫폼 사용
+</code></pre>
+<h4>D. 소셜 내비게이션과 배달/산책 복합 태스크의 복잡성</h4>
+<pre><code>태스크 복잡도 분석:
+┌─────────────────────────────────────────────┐
+│  배달 태스크 (Delivery):                      │
+│    - 목적지 명확 (&quot;B동으로 패키지 배달&quot;)        │
+│    - 경로: 최단/최적 경로                       │
+│    - 사회적 요구: 보행자 회피, 경로 준수         │
+│    - 성공 기준: 목적지 도달                     │
+│                                             │
+│  산책/쇼핑 태스크 (Leisure):                  │
+│    - 목적지 불확실 (&quot;산책하러 가자&quot;, &quot;쇼핑하자&quot;) │
+│    - 경로: 선호 경로 (공원, 상업 구역 등)        │
+│    - 사회적 요구: 동반자 행동 모방, 편안한 속도   │
+│    - 성공 기준: 적절한 목적지 도달 + 자연스러운   │
+│               동행 동작                       │
+│                                             │
+│  복합 도전:                                  │
+│    - 목적지 추론 (시맨틱 플래닝 필요)            │
+│    - 경로 선택 (사용자 의도 반영)               │
+│    - 사회적 행동 (인간과의 자연스러운 상호작용)   │
+└─────────────────────────────────────────────┘
+</code></pre>
+<h3>2.2 핵심 해결책</h3>
+<p>Walk With Me는 세 단계의 계층적 맵-프리 프레임워크를 제안한다:</p>
+<pre><code>핵심 해결책 구조:
+
+[고수준 의미론적 계획]
+  - VLM + GPS + 공개 지도 API (Baidu/Google Maps)
+  - POI 인식 목적지 Grounding
+  - 보행 경로 웨이포인트 시퀀스 생성
+         ↓
+
+[적응형 이중 정책 내비게이션]
+  - VLM: 상황 판단 (routine vs. complex, proceed vs. stop)
+  - VLA: 저수준 궤적 예측 (SocialNav 기반)
+  - 신뢰도 기반 안전 메커니즘
+         ↓
+
+[폐쇄 루프 실행]
+  - SLAM 피드백 (위치 추정)
+  - Yaw 정렬 전처리
+  - 하드 이터레이션 예산 (안전 폴백)
+</code></pre>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 고수준 의미론적 계획 (High-Level Semantic Planning)</h3>
+<h4>3.1.1 POI 인식 목적지 Grounding (POI-Aware Destination Grounding)</h4>
+<p>고수준 자연어 지시 <code>L</code>이 주어질 때, 시스템은 공개 지도 API를 통해 주변 POI 후보 집합을 수집하고, VLM을 통해 최적 목적지를 선택한다.</p>
+<p><strong>공식적 정의:</strong></p>
+<pre><code>[POI-Aware Destination Grounding]
+
+입력:
+  L          : 자연어 지시 (예: &quot;밀크티를 사줘&quot;)
+  P_gps      : 현재 GPS 좌표 (위도, 경도)
+  r          : 검색 반경 (예: 500m)
+
+후보 집합 생성:
+  C = Map_API(P_gps, r, categories)
+     = {c_1, c_2, ..., c_n}
+  여기서 c_i = {name_i, coord_i, type_i, description_i}
+
+VLM 선택 (핵심 단계):
+  c* = argmax_{c_i ∈ C} P_VLM(c_i | L, C, P_gps)
+     = VLM_ground(L, C, P_gps) → (c*, rationale)
+
+출력:
+  c*        : 선택된 목적지 POI
+  rationale : 선택 근거 (설명 가능성)
+</code></pre>
+<p><strong>VLM 프롬프트 구조:</strong></p>
+<pre><code>시스템 프롬프트:
+  &quot;당신은 야외 내비게이션 로봇의 고수준 계획 시스템입니다.
+   주어진 사용자 지시와 주변 POI 후보를 분석하여,
+   가장 적합한 목적지를 선택하고 이유를 설명하세요.&quot;
+
+사용자 프롬프트:
+  &quot;현재 위치: {latitude}, {longitude}
+   사용자 지시: {L}
+   주변 POI 후보:
+   {i}. {name_i} ({type_i}): {description_i}
+       좌표: {coord_i}, 거리: {dist_i}m
+   
+   위 후보 중 사용자 지시에 가장 적합한 목적지를 선택하고,
+   JSON 형식으로 응답하세요:
+   {
+     &#39;destination&#39;: &lt;POI 이름&gt;,
+     &#39;index&#39;: &lt;POI 인덱스&gt;,
+     &#39;reason&#39;: &lt;선택 근거&gt;
+   }&quot;
+</code></pre>
+<p>이 방식의 핵심 혁신은 VLM이 단순히 지시를 파싱하는 것을 넘어, <strong>지시-POI 의미론적 매칭(Semantic Matching)</strong>을 수행한다는 점이다. 예를 들어:</p>
+<pre><code>지시: &quot;밀크티를 사줘&quot;
+  → VLM이 &quot;밀크티&quot;를 음료 카테고리로 인식
+  → 후보 중 카페/음료 매장 선택
+  → 이유: &quot;사용자가 밀크티를 원하므로 근처 음료 가게 선택&quot;
+
+지시: &quot;산책하러 가자&quot;
+  → VLM이 &quot;산책&quot;을 레저/야외 활동으로 인식
+  → 후보 중 공원/산책로 선택
+  → 이유: &quot;편안한 산책을 위한 공원 환경 적합&quot;
+</code></pre>
+<h4>3.1.2 경로 검색 (Route Retrieval)</h4>
+<p>목적지 <code>c*</code>가 결정되면, 공개 보행 경로 API를 통해 중간 웨이포인트 시퀀스를 획득한다:</p>
+<pre><code>[경로 검색 파이프라인]
+
+입력:
+  P_start  : 출발 GPS 좌표
+  c*       : 목적지 POI GPS 좌표
+
+경로 API 호출:
+  W = Route_API(P_start, c*, mode=&#39;walking&#39;)
+    = {w_1, w_2, ..., w_M}
+  여기서 w_i = {lat_i, lon_i} (경로 웨이포인트)
+
+전처리:
+  - GPS 좌표 → 로컬 좌표계 변환 (ENU: East-North-Up)
+  - 웨이포인트 간격 필터링 (최소 d_min 이상)
+  - 고수준 랜드마크 정규화
+
+출력:
+  W_local = {w_1^local, ..., w_M^local}  (로컬 좌표 웨이포인트 시퀀스)
+</code></pre>
+<p>공개 지도 API의 보행 경로는 실제 인간이 걷는 경로를 기반으로 하므로, HD 맵 없이도 <strong>보도, 횡단보도, 보행자 구역</strong>을 자연스럽게 따르는 경로가 생성된다. 이는 이 연구의 핵심 통찰 중 하나다:</p>
+<blockquote>
+<p><strong>&quot;HD 맵을 직접 구축하는 대신, 이미 전 세계적으로 구축된 공개 지도 API를 고수준 경로 가이드로 활용하라.&quot;</strong></p>
+</blockquote>
+<h3>3.2 적응형 이중 정책 내비게이션 (Adaptive Dual-Policy Navigation)</h3>
+<p>적응형 이중 정책은 Walk With Me의 핵심 혁신이다. 단일 정책이 아닌, <strong>고수준 VLM 라우팅 정책</strong>과 <strong>저수준 VLA 궤적 정책</strong>을 적응적으로 결합한다.</p>
+<h4>3.2.1 관측 공간 (Observation Space)</h4>
+<p>각 타임스텝 <code>t</code>에서의 관측:</p>
+<pre><code>[관측 벡터 정의]
+
+o_t = (I_t, s_t, H_t, w_t^goal)
+
+I_t      : RGB 이미지 (Intel RealSense D455, H×W×3)
+           → 현재 전방 시각 관측
+
+s_t      : 로컬 포즈 (x_t, y_t, θ_t)
+           → SLAM 기반 위치 추정 결과
+
+H_t      : 궤적 히스토리
+           = {(x_τ, y_τ) | τ = t-T, ..., t}
+           → 이전 T 스텝의 위치 시퀀스
+
+w_t^goal : 룩어헤드 웨이포인트 (Lookahead Waypoint)
+           = w_k^local 에서 로봇 기준 상대 좌표
+           = (Δx_{goal}, Δy_{goal})
+           → 현재 목표 방향 정보
+</code></pre>
+<p><strong>룩어헤드 웨이포인트 선택 전략:</strong></p>
+<pre><code>룩어헤드 웨이포인트 선택:
+
+W_remaining = {w_k, w_{k+1}, ..., w_M}  (남은 웨이포인트)
+
+선택 기준:
+  w_t^goal = argmin_{w_j ∈ W_remaining} dist(s_t, w_j)
+             subject to dist(s_t, w_j) ≥ d_lookahead
+
+  여기서 d_lookahead : 룩어헤드 거리 (예: 5m)
+
+직관:
+  - 너무 가까운 웨이포인트 = VLM 단기 판단 오류
+  - 너무 먼 웨이포인트 = 중간 장애물 무시
+  - d_lookahead 는 실험적으로 결정
+</code></pre>
+<h4>3.2.2 공동 라우팅 및 안전 의사결정 (Joint Routing and Safety Decision)</h4>
+<p>VLM은 매 타임스텝에서 두 가지 결정을 동시에 수행한다:</p>
+<pre><code>[VLM 이중 출력 정의]
+
+입력:
+  I_t      : 현재 RGB 이미지
+  l_t      : 자연어 상황 설명 (GPS, 히스토리 요약)
+  w_t^goal : 목표 웨이포인트 상대 좌표
+
+VLM 호출:
+  (r_t, d_t, conf_t, reason_t) = VLM_route(I_t, l_t, w_t^goal)
+
+출력 변수:
+  r_t ∈ {routine, complex}
+      routine: 일반적인 보도 이동 (VLA로 처리)
+      complex: 복잡한 상황 (횡단보도, 혼잡, 장애물)
+
+  d_t ∈ {proceed, stop-and-wait}
+      proceed:     이동 가능 (안전 확인)
+      stop-and-wait: 대기 필요 (위험 상황)
+
+  conf_t ∈ [0, 1]
+      VLM의 현재 의사결정 신뢰도
+
+  reason_t : 자연어 설명 (로깅/디버깅용)
+</code></pre>
+<p><strong>VLM 라우팅 프롬프트 구조:</strong></p>
+<pre><code>시스템 프롬프트:
+  &quot;당신은 야외 이동 로봇의 실시간 의사결정 시스템입니다.
+   현재 이미지와 상황을 분석하여 두 가지를 결정하세요:
+   1. 상황 유형: &#39;routine&#39; (일반 보행) 또는 &#39;complex&#39; (복잡 상황)
+   2. 행동 결정: &#39;proceed&#39; (이동) 또는 &#39;stop-and-wait&#39; (대기)
+   3. 신뢰도: 0.0-1.0
+   4. 이유: 간단한 설명&quot;
+
+사용자 프롬프트:
+  &quot;현재 상황:
+   - 목표 방향: {w_t^goal 각도}도 (오른쪽/왼쪽/전방)
+   - 목표까지 거리: {w_t^goal 거리}m
+   - 현재 위치 설명: {l_t}
+   
+   현재 이미지를 보고 판단하세요.
+   
+   응답 형식:
+   {
+     &#39;route_type&#39;: &#39;routine&#39; 또는 &#39;complex&#39;,
+     &#39;decision&#39;: &#39;proceed&#39; 또는 &#39;stop-and-wait&#39;,
+     &#39;confidence&#39;: 0.0-1.0,
+     &#39;reason&#39;: &#39;간단한 이유&#39;
+   }&quot;
+</code></pre>
+<p><strong>결정 흐름:</strong></p>
+<pre><code>VLM 결정 트리:
+                    ┌──────────────────┐
+                    │  VLM 분석 실행    │
+                    └────────┬─────────┘
+                             │
+              ┌──────────────┴──────────────┐
+              │                             │
+         d_t = stop               d_t = proceed
+              │                             │
+    ┌─────────▼──────────┐    ┌────────────▼────────────┐
+    │  정지 및 대기        │    │  conf_t ≥ α 확인         │
+    │  (보행자 통과 대기)   │    └─────────────────────────┘
+    └────────────────────┘              │
+                              ┌─────────┴──────────┐
+                              │                    │
+                        conf_t ≥ α           conf_t &lt; α
+                              │                    │
+                    ┌─────────▼──────────┐  ┌──────▼──────────┐
+                    │  r_t 확인           │  │  대기 또는       │
+                    └─────────────────────┘  │  재분석         │
+                              │              └─────────────────┘
+             ┌────────────────┴──────────────┐
+             │                               │
+       r_t = routine               r_t = complex
+             │                               │
+    ┌────────▼─────────┐        ┌───────────▼────────────┐
+    │  VLA 저수준 정책   │        │  VLM 직접 제어 또는     │
+    │  궤적 예측        │        │  특별 처리 루틴         │
+    └──────────────────┘        └────────────────────────┘
+</code></pre>
+<h4>3.2.3 저수준 VLA 궤적 예측 (Low-Level VLA Trajectory Prediction)</h4>
+<p>VLM이 <code>proceed</code>를 결정하고 <code>r_t = routine</code>인 경우, 저수준 VLA(Vision-Language-Action) 모델이 구체적인 보행 궤적을 예측한다:</p>
+<pre><code>[VLA 궤적 예측 정의]
+
+VLA 입력:
+  I_t      : 현재 RGB 이미지
+  s_t      : 현재 포즈
+  H_t      : 궤적 히스토리
+  w_t^goal : 목표 웨이포인트
+
+VLA 출력 (미래 H 스텝 궤적):
+  Ŵ_t^body = VLA(I_t, s_t, H_t, w_t^goal)
+            = {ŵ_{t,1}^body, ŵ_{t,2}^body, ..., ŵ_{t,H}^body}
+
+각 ŵ_{t,h}^body = (Δx_h, Δy_h):
+  - 로봇 바디 프레임 기준 상대 위치
+  - H = 예측 호라이즌 (예: 5 스텝)
+
+실행:
+  ŵ_{t,1}^body → 로봇 속도 명령으로 변환
+               → 실행
+  다음 타임스텝에서 재예측 (closed-loop)
+</code></pre>
+<p><strong>VLA 백본 선택 (어블레이션 기반):</strong></p>
+<p>논문은 다섯 가지 VLA 백본을 비교 실험한다:</p>
+<pre><code>VLA 백본 비교 (배달 시나리오, 10회 실험):
+┌──────────────┬────────────┬───────────────────────────────┐
+│  VLA 모델    │  성공률    │  특징                          │
+├──────────────┼────────────┼───────────────────────────────┤
+│  GNM         │  2/10 (20%)│  일반 목표 지향 내비게이션      │
+│  ViNT        │  2/10 (20%)│  Visual Navigation Transformer │
+│  NoMaD       │  3/10 (30%)│  Diffusion 기반                │
+│  CityWalker  │  5/10 (50%)│  웹 비디오 학습 도시 내비게이션 │
+│  SocialNav   │  6/10 (60%)│  소셜 내비게이션 특화 (최고)   │
+└──────────────┴────────────┴───────────────────────────────┘
+
+→ SocialNav: 소셜 내비게이션 시나리오에 특화된 학습 데이터로
+  인해 보행자 밀집 환경에서 가장 우수한 성능
+→ CityWalker: 도시 환경 일반화에서 강점
+→ GNM/ViNT: 실외 소셜 시나리오에서 한계 명확
+</code></pre>
+<p><strong>SocialNav 선택 근거:</strong></p>
+<pre><code>SocialNav의 학습 데이터 특성:
+  - 다양한 보행자 밀도 환경의 소셜 내비게이션 시연 포함
+  - Stop-and-Wait 행동 패턴 학습
+  - 인간 보행 규범 (sidewalk 이용, 거리 유지) 내재화
+  - VLM의 stop-and-wait 신호와 시너지 효과
+</code></pre>
+<h3>3.3 안전 인식 실행 루프 (Safety-Aware Execution Loop)</h3>
+<h4>3.3.1 신뢰도 기반 안전 메커니즘 (Confidence-Based Safety Gate)</h4>
+<pre><code>[안전 게이트 공식]
+
+이동 실행 조건:
+  Execute(ŵ_{t,1}^body) iff:
+    d_t = proceed  AND  conf_t ≥ α
+
+  여기서 α : 신뢰도 임계값 (하이퍼파라미터)
+
+직관:
+  - VLM이 proceed를 결정하더라도 확신이 낮으면 실행하지 않음
+  - 불확실한 상황에서 보수적 행동 보장
+  - α는 안전성/효율성 트레이드오프 파라미터
+
+α의 영향:
+  α ↑ → 안전성 ↑, 효율성 ↓ (자주 멈춤)
+  α ↓ → 효율성 ↑, 안전성 ↓ (위험 상황에서도 이동)
+</code></pre>
+<h4>3.3.2 SLAM 피드백 및 Yaw 정렬 (SLAM Feedback &amp; Yaw Alignment)</h4>
+<pre><code>[Yaw 정렬 메커니즘]
+
+매 이동 전처리:
+  Step 1: 현재 포즈 추정
+    (x_t, y_t, θ_t) = SLAM.get_pose()
+
+  Step 2: 목표 방향 계산
+    θ_goal = atan2(Δy_goal, Δx_goal)
+           = atan2(w_t^goal.y - y_t, w_t^goal.x - x_t)
+
+  Step 3: 각도 오차 계산
+    Δθ = θ_goal - θ_t
+       = 목표 방향과 현재 방향의 차이
+
+  Step 4: Yaw 정렬 실행
+    if |Δθ| &gt; θ_threshold:
+        robot.rotate(Δθ)   # 제자리 회전 실행
+    else:
+        proceed to VLA execution
+
+  목적:
+    - VLA 궤적 예측의 전제 조건 (전방 정렬)
+    - 급격한 방향 전환 방지 (안전)
+    - GPS 경로 추종의 정밀도 향상
+</code></pre>
+<h4>3.3.3 하드 이터레이션 예산 (Hard Iteration Budget)</h4>
+<pre><code>[안전 폴백 메커니즘]
+
+각 웨이포인트 w_k에 대해:
+  budget_k = max_iterations  (하이퍼파라미터)
+  count_k  = 0
+
+실행 루프:
+  while count_k &lt; budget_k:
+    if waypoint_reached(s_t, w_k, threshold):
+        k += 1  # 다음 웨이포인트로
+        break
+    
+    execute_one_step(o_t)
+    count_k += 1
+
+  if count_k ≥ budget_k:
+    # 폴백: 다음 웨이포인트로 강제 진행
+    k += 1
+    count_k = 0
+    log_warning(&quot;Waypoint budget exceeded&quot;)
+
+목적:
+  - 무한 루프 방지
+  - 로컬 장애물로 인한 교착 상태(deadlock) 탈출
+  - 안전한 태스크 완료 보장
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인 다이어그램</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────────────────┐
+│                     Walk With Me: 전체 시스템 파이프라인                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+사용자 입력
+    │
+    ▼
+┌───────────────────────────────────────────────────────────┐
+│          Stage 1: 고수준 의미론적 계획                       │
+│                                                           │
+│  자연어 지시 L                                              │
+│      │                                                    │
+│      ├─→ [공개 지도 API] → POI 후보 집합 C                  │
+│      │        Baidu Maps / Google Maps                    │
+│      │                                                    │
+│      └─→ [VLM] ←── C, GPS P_gps                          │
+│              │                                            │
+│              ▼                                            │
+│         목적지 c* + 근거 rationale                          │
+│              │                                            │
+│              ▼                                            │
+│         [보행 경로 API] → 웨이포인트 W = {w_1, ..., w_M}    │
+└───────────────────────────────────────────────────────────┘
+                          │
+                          ▼ W (웨이포인트 시퀀스)
+┌───────────────────────────────────────────────────────────┐
+│          Stage 2: 적응형 이중 정책 내비게이션                 │
+│                                                           │
+│  타임스텝 t:                                               │
+│                                                           │
+│  관측 o_t = (I_t, s_t, H_t, w_t^goal)                     │
+│      │                                                    │
+│      ▼                                                    │
+│  ┌─────────────────────────────────────────────────────┐  │
+│  │  [VLM 라우팅 모듈] VLM_route(I_t, l_t, w_t^goal)   │  │
+│  │                                                     │  │
+│  │  출력: r_t ∈ {routine, complex}                     │  │
+│  │        d_t ∈ {proceed, stop-and-wait}               │  │
+│  │        conf_t ∈ [0, 1]                              │  │
+│  └──────────────────────┬──────────────────────────────┘  │
+│                         │                                 │
+│              ┌──────────┴──────────┐                      │
+│              │                     │                      │
+│         d_t=proceed           d_t=stop                    │
+│         conf_t ≥ α                 │                      │
+│              │              [정지 및 대기]                  │
+│              │                                            │
+│    ┌─────────┴──────────┐                                 │
+│    │                    │                                 │
+│ r_t=routine       r_t=complex                            │
+│    │                    │                                 │
+│    ▼                    ▼                                 │
+│ [VLA 모듈]         [특별 처리]                              │
+│ SocialNav         (VLM 직접                               │
+│ 궤적 예측          제어 루틴)                               │
+│    │                    │                                 │
+│    └────────────────────┘                                 │
+│                         │                                 │
+│              Ŵ_t^body (예측 궤적)                          │
+└───────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌───────────────────────────────────────────────────────────┐
+│          Stage 3: 폐쇄 루프 실행                            │
+│                                                           │
+│  ┌────────────────┐    ┌──────────────────┐              │
+│  │  SLAM 피드백   │    │  Yaw 정렬 전처리  │              │
+│  │  위치 추정      │→──→│  θ 정렬 후 이동   │              │
+│  │  (x,y,θ) 갱신  │    └────────┬─────────┘              │
+│  └────────────────┘             │                        │
+│                                 ▼                        │
+│                     [실제 로봇 명령 실행]                   │
+│                     속도/조향 제어                          │
+│                                 │                        │
+│                    ┌────────────▼────────────┐           │
+│                    │  웨이포인트 도달 확인      │           │
+│                    │  or                      │           │
+│                    │  예산 초과 (폴백)         │           │
+│                    └─────────────────────────┘           │
+└───────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+                    태스크 완료 / 목적지 도달
+</code></pre>
+<h3>4.2 하드웨어 플랫폼 아키텍처</h3>
+<pre><code>┌─────────────────────────────────────────────────────────┐
+│              Walk With Me 하드웨어 구성                    │
+├──────────────────────────┬──────────────────────────────┤
+│       로봇 플랫폼          │        원격 추론 서버          │
+│   Athena 2.0 Pro AGV     │    NVIDIA H20 GPU 서버        │
+│                          │                              │
+│  ┌─────────────────────┐ │  ┌────────────────────────┐  │
+│  │  센서 레이어          │ │  │  VLM 추론 엔진          │  │
+│  │  - Intel RealSense   │ │  │  (MiMo-Embodied 등)    │  │
+│  │    D455 RGB-D        │ │  ├────────────────────────┤  │
+│  │  - GPS 수신기        │ │  │  VLA 추론 엔진          │  │
+│  │  - IMU              │ │  │  (SocialNav)            │  │
+│  └──────────┬──────────┘ │  └────────────────────────┘  │
+│             │            │           ▲  │               │
+│  ┌──────────▼──────────┐ │  WiFi/LAN │  │               │
+│  │  온보드 처리           │ │  (저지연   │  │               │
+│  │  - SLAM 실행         │◄├─ 네트워크) │  │               │
+│  │  - 로컬 제어          │ │           │  ▼               │
+│  │  - 센서 퓨전          │ │  ┌────────┴───────────────┐  │
+│  └──────────┬──────────┘ │  │  API 게이트웨이            │  │
+│             │            │  │  - Baidu/Google Maps     │  │
+│  ┌──────────▼──────────┐ │  │  - VLM API 호출          │  │
+│  │  실행 레이어          │ │  └────────────────────────┘  │
+│  │  - 바퀴 모터 제어     │ │                              │
+│  │  - 속도/조향 명령     │ │                              │
+│  └─────────────────────┘ │                              │
+└──────────────────────────┴──────────────────────────────┘
+</code></pre>
+<h3>4.3 데이터 흐름 분석</h3>
+<pre><code>데이터 흐름 상세:
+
+[센서 → SLAM]
+  RGB-D 이미지 스트림 (30fps) ─→ SLAM 알고리즘
+  GPS 좌표 (1Hz)              ─→ 글로벌 위치 보정
+  IMU 데이터 (100Hz)          ─→ 오도메트리 보정
+                               → 출력: (x, y, θ) 포즈 추정
+
+[SLAM → VLM/VLA 결정]
+  현재 포즈 (x_t, y_t, θ_t)   ─→ 웨이포인트 상대 좌표 계산
+  RGB 이미지 (최신 프레임)      ─→ VLM 시각 입력
+  궤적 히스토리 H_t            ─→ VLM 상황 컨텍스트
+
+[VLM 결정 → 실행]
+  (r_t, d_t, conf_t) 출력      ─→ 정책 선택
+  VLA 궤적 Ŵ_t^body           ─→ 속도 명령 변환
+  stop-and-wait 신호           ─→ 즉시 정지 명령
+
+[GPS → 경로 계획]
+  GPS 좌표                     ─→ Maps API 쿼리
+  웨이포인트 W 수신             ─→ ENU 좌표 변환
+  웨이포인트 도달 판정           ─→ 다음 목표 갱신
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 실험 설정 및 로봇 플랫폼</h3>
+<p><strong>로봇 플랫폼:</strong></p>
+<pre><code>Athena 2.0 Pro AGV 사양:
+┌─────────────────────────────────────────────────────┐
+│  플랫폼 유형: 휠드(Wheeled) AGV (자율 이동 로봇)       │
+│                                                     │
+│  센서:                                              │
+│    - Intel RealSense D455 RGB-D 카메라              │
+│      (해상도: 1280×720, 깊이 범위: 0.6-6m)           │
+│    - GPS 수신기 (위도/경도 제공)                      │
+│    - SLAM (온보드 위치 추정)                          │
+│                                                     │
+│  컴퓨팅:                                            │
+│    - 온보드: 로컬 제어 + SLAM 실행                    │
+│    - 원격: NVIDIA H20 GPU 서버 (VLM/VLA 추론)        │
+│             → WiFi 네트워크 통신                      │
+│                                                     │
+│  이동 방식: 4-휠드 전기 구동                          │
+└─────────────────────────────────────────────────────┘
+</code></pre>
+<p><strong>실험 환경:</strong></p>
+<pre><code>실험 환경 설명:
+  - 장소: 실외 캠퍼스/도심 환경
+  - 조건: 실제 보행자, 동적 장애물, 자연 조도
+  - 거리: 수십~수백 미터 (장거리 내비게이션)
+  - 계절/날씨: 논문에서 미명시 (다양한 환경 가정)
+</code></pre>
+<h3>5.2 평가 지표 및 태스크 설계</h3>
+<p><strong>태스크 범주:</strong></p>
+<pre><code>태스크 설계 (2×2 구조):
+┌─────────────────┬─────────────────────────────────────┐
+│  태스크 유형     │         시나리오                      │
+├─────────────────┼─────────────────────────────────────┤
+│  배달            │ 시나리오 1: 밀크티 → B동으로 배달      │
+│  (Delivery)     │ 시나리오 2: 패키지 → A동으로 배달      │
+├─────────────────┼─────────────────────────────────────┤
+│  산책/레저       │ 시나리오 3: 산책하러 가자              │
+│  (Leisure)      │ 시나리오 4: 쇼핑하러 가자              │
+└─────────────────┴─────────────────────────────────────┘
+각 시나리오당 5회 반복 실험 → 총 20회
+</code></pre>
+<p><strong>평가 지표:</strong></p>
+<pre><code>성공률 (Success Rate, SR):
+  SR = 성공 횟수 / 총 시도 횟수 × 100%
+
+성공 기준:
+  - 목적지 POI 도달 (GPS 임계 거리 이내)
+  - 충돌 없이 이동 완료
+  - 정해진 시간 내 완료
+
+실패 기준:
+  - 목적지 도달 실패
+  - 충돌 발생
+  - 시간 초과
+  - 시스템 오류
+</code></pre>
+<h3>5.3 정량적 결과 (실세계 20회 실험)</h3>
+<p><strong>메인 결과 테이블:</strong></p>
+<pre><code>Walk With Me 실세계 실험 결과:
+┌──────────────────────────────────────────────────────────────────────┐
+│  태스크 유형    │  시나리오          │  시도  │  성공  │  성공률  │
+├──────────────────────────────────────────────────────────────────────┤
+│  배달          │  밀크티 → B동      │   5    │   4    │  80%     │
+│  (Delivery)   │  패키지 → A동      │   5    │   3    │  60%     │
+├──────────────────────────────────────────────────────────────────────┤
+│  산책/레저      │  산책하러 가자     │   5    │   3    │  60%     │
+│  (Leisure)    │  쇼핑하러 가자     │   5    │   2    │  40%     │
+├──────────────────────────────────────────────────────────────────────┤
+│  전체 평균     │                   │  20    │  12    │  60%     │
+└──────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<p><strong>결과 분석:</strong></p>
+<pre><code>성능 패턴 분석:
+┌───────────────────────────────────────────────────────────────┐
+│  배달 태스크 우수 (평균 70%):                                   │
+│    - 목적지가 명확 (건물, POI)                                  │
+│    - GPS 경로 + VLM 목적지 Grounding이 잘 작동                  │
+│    - 성공 기준이 명확 (건물 도달 = 성공)                          │
+│                                                               │
+│  산책/쇼핑 태스크 열위 (평균 50%):                              │
+│    - 목적지 불명확 → VLM 추론 불확실성 ↑                         │
+│    - &quot;산책&quot;의 성공 기준 모호 (어느 공원? 얼마나?)                  │
+│    - &quot;쇼핑&quot;은 특정 매장 도달 필요 → 추론 난이도 ↑                  │
+│                                                               │
+│  실패 원인 (추정):                                             │
+│    - GPS 오차로 인한 웨이포인트 미도달                            │
+│    - VLM의 잘못된 목적지 선택 (쇼핑 시나리오)                     │
+│    - 동적 장애물에 의한 경로 차단                                 │
+│    - 네트워크 지연으로 인한 VLM 응답 지연                         │
+└───────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>5.4 어블레이션: VLM/VLA 백본 비교</h3>
+<p><strong>실험 설정:</strong></p>
+<pre><code>어블레이션 스터디 설정:
+  - 태스크: 배달 시나리오 (목적지 명확)
+  - 시도 횟수: 각 설정 10회
+  - 비교 대상: 고수준 VLM 5종, 저수준 VLA 5종
+  - 고정 변수: 나머지 모든 컴포넌트
+</code></pre>
+<p><strong>고수준 VLM 비교 (어블레이션):</strong></p>
+<pre><code>VLM 백본 비교 결과 (10회 실험):
+┌─────────────────────────────────────────────────────────────────┐
+│  VLM 모델       │  성공  │  성공률  │  특징                      │
+├─────────────────────────────────────────────────────────────────┤
+│  Claude-Sonnet  │  5/10  │   50%   │  Anthropic; 강력한 추론     │
+│  Gemini-3-Flash │  4/10  │   40%   │  Google; 빠른 응답          │
+│  GPT-5          │  5/10  │   50%   │  OpenAI; 고성능 범용        │
+│  Qwen3-VL-8B    │  3/10  │   30%   │  Alibaba; 소형 효율 모델    │
+│  RoboBrain 2.0  │  5/10  │   50%   │  로보틱스 특화              │
+│  MiMo-Embodied  │  6/10  │   60%   │  구현화 특화; 최고 성능(★)  │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre>
+<p><strong>VLM 비교 분석:</strong></p>
+<pre><code>VLM 선택 기준 분석:
+
+MiMo-Embodied 우수 원인:
+  ├── Embodied AI 특화 파인튜닝으로 로봇 내비게이션 상황 이해 ↑
+  ├── 실외 환경에서의 장애물/보행자 판단 능력 우수
+  └── Stop-and-wait 결정의 정밀도 향상
+
+Qwen3-VL-8B 열위 원인:
+  ├── 모델 크기 제약 → 복잡한 실외 상황 추론 한계
+  ├── 소형 모델의 이미지 이해 정밀도 부족
+  └── 자연어 지시와 시각 정보의 복합 추론 약점
+
+범용 대형 VLM (GPT-5, Claude) 중간 성능:
+  ├── 범용 능력은 우수하나 로봇/실외 도메인 특화 부족
+  ├── API 지연(latency) 문제 (실시간 판단에 불리)
+  └── 로봇 제어 특유의 출력 형식 이해 한계
+</code></pre>
+<p><strong>저수준 VLA 비교 (어블레이션):</strong></p>
+<pre><code>VLA 백본 비교 결과 (10회 실험):
+┌──────────────────────────────────────────────────────────────────────┐
+│  VLA 모델    │  성공  │  성공률  │  특징                              │
+├──────────────────────────────────────────────────────────────────────┤
+│  GNM         │  2/10  │   20%   │  목표 지향 일반 내비게이션           │
+│  ViNT        │  2/10  │   20%   │  Visual Navigation Transformer    │
+│  NoMaD       │  3/10  │   30%   │  Diffusion 기반 탐색 내비게이션     │
+│  CityWalker  │  5/10  │   50%   │  웹 비디오 학습 도시 내비게이션      │
+│  SocialNav   │  6/10  │   60%   │  소셜 내비게이션 특화 (★)           │
+└──────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<p><strong>VLA 비교 분석:</strong></p>
+<pre><code>VLA 성능 차이 분석:
+
+GNM/ViNT 낮은 성능 (20%):
+  ├── 목표 조건부 내비게이션 설계 → 소셜 상황 처리 제한
+  ├── 보행자 밀집 실외 환경에 대한 학습 데이터 부족
+  └── 정적 장애물 위주 학습 → 동적 보행자 회피 실패
+
+NoMaD 중간 성능 (30%):
+  ├── Diffusion 기반으로 다양한 경로 생성 가능
+  ├── 탐색(exploration) 특화 설계 → 배달 시나리오에서 효율 저하
+  └── 보행자 상호작용 고려 부족
+
+CityWalker 우수 (50%):
+  ├── 2000시간 도시 보행 비디오로 학습된 도시 환경 일반화
+  ├── 횡단보도, 군중 등 Critical Scenario 처리 개선
+  └── 실외 도시 환경 특화로 Walk With Me 시나리오와 잘 맞음
+
+SocialNav 최고 (60%):
+  ├── 소셜 내비게이션 특화 학습 데이터 (보행자 상호작용 중심)
+  ├── VLM의 stop-and-wait 결정과 시너지 최고
+  └── 사람과의 자연스러운 동행 행동 패턴 내재화
+</code></pre>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>기여 1: 맵-프리 실외 장거리 내비게이션 프레임워크</h3>
+<pre><code>혁신성 분석:
+
+기존 접근:
+  HD 맵 구축 → 경로 계획 → 내비게이션
+  (높은 구축 비용, 낮은 일반화)
+
+Walk With Me 접근:
+  자연어 지시 → [VLM + 공개 지도 API] → 목적지 추론 → 내비게이션
+  (구축 비용 0, 전 세계 환경 일반화)
+
+핵심 통찰:
+  &quot;공개 지도 API(Baidu/Google Maps)는 이미 전 세계적으로 구축된
+   HD 맵의 상위 호환 대안이다. 세밀한 기하학 대신 의미론적
+   POI 정보 + 보행 경로로 장거리 내비게이션이 가능하다.&quot;
+
+실용적 의의:
+  - 어떤 새로운 환경에서도 즉시 사용 가능
+  - 맵 유지보수 비용 없음
+  - 의미론적 목적지 이해 가능 (&quot;밀크티 가게&quot; = 특정 POI)
+</code></pre>
+<h3>기여 2: 계층적 VLM/VLA 이중 정책 아키텍처</h3>
+<pre><code>아키텍처 혁신:
+
+단순 VLM 직접 제어 한계:
+  - VLM 추론 지연 (1-5초) → 실시간 불가
+  - 픽셀 수준 경로 계획 어려움
+  - API 비용 과다
+
+단순 VLA 한계:
+  - 장거리 계획 능력 없음
+  - 고수준 지시 이해 불가
+  - 소셜 판단 (stop-and-wait) 어려움
+
+Walk With Me의 계층 분리:
+  VLM: 스텝당 한 번, 고수준 판단 (라우팅 + 안전)
+  VLA: 프레임 단위 저수준 궤적 예측 (실시간)
+
+시너지 효과:
+  - VLM의 소셜 판단 + VLA의 부드러운 궤적 = 자연스러운 이동
+  - 계층 분리로 각 컴포넌트 독립 개선 가능
+  - 최적 VLM/VLA 조합 선택 유연성 (플러그인 구조)
+</code></pre>
+<h3>기여 3: 공동 라우팅 + 안전 의사결정 메커니즘</h3>
+<pre><code>혁신성 분석:
+
+기존: 경로 추종 + 장애물 회피 분리
+      (경로 추종은 별도, 안전은 반응적 회피)
+
+Walk With Me: 매 스텝 VLM이 두 가지를 동시 결정
+  - 라우팅: routine vs. complex
+  - 안전: proceed vs. stop-and-wait
+
+이중 결정의 이점:
+  1. 상황 인식 기반 라우팅 (맹목적 경로 추종 탈피)
+  2. 예방적 안전 판단 (반응적이 아닌 예측적)
+  3. 소셜 행동 통합 (stop-and-wait는 사회적 행동 규범)
+  4. VLM의 언어 이해 + 이미지 이해 통합 활용
+
+신뢰도 게이트 (conf ≥ α):
+  불확실한 상황에서 보수적 행동 → 안전성 향상
+</code></pre>
+<h3>기여 4: 인간 중심 실외 보조 평가 프레임워크</h3>
+<pre><code>평가 혁신:
+
+기존 VLN 평가:
+  - 시뮬레이션 환경 (Habitat, MP3D)
+  - 단거리 실내 내비게이션
+  - SR, SPL 등 단순 지표
+
+Walk With Me 평가:
+  - 실세계 AGV 플랫폼
+  - 장거리 실외 환경
+  - 2개 태스크 유형 × 2개 시나리오 × 5회 반복
+  - VLM/VLA 백본 어블레이션 포함
+
+새로운 평가 차원:
+  - 배달 vs. 레저 태스크 구분 (인간 중심)
+  - VLM/VLA 조합 영향 분석
+  - 실세계 실패 원인 분류
+</code></pre>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 핵심 하이퍼파라미터</h3>
+<pre><code>Walk With Me 핵심 설정값:
+
+신뢰도 임계값:
+  α        : 0.5~0.7 (논문 미명시, 실험 결정)
+             - 너무 낮으면 잦은 정지
+             - 너무 높으면 위험 상황 무시
+
+Yaw 정렬:
+  θ_threshold : ~15도 (추정값)
+                → 이 이상 방향 오차 시 먼저 회전
+
+룩어헤드 거리:
+  d_lookahead : ~5m (추정, GPS 정밀도 기반 설정)
+
+웨이포인트 도달 임계:
+  d_arrival   : ~2-3m (GPS 오차 고려)
+
+하드 이터레이션 예산:
+  budget_k    : 논문 미명시 (수십~수백 스텝 추정)
+
+VLA 예측 호라이즌:
+  H           : 5 스텝 (SocialNav 기본값 따름)
+</code></pre>
+<h3>7.2 VLM API 선택</h3>
+<pre><code>최적 VLM 조합:
+  고수준 VLM: MiMo-Embodied (60% SR)
+  저수준 VLA: SocialNav (60% SR)
+
+API 지연 고려:
+  VLM 응답: 1-5초 (클라우드 API 특성)
+  VLA 응답: &lt;100ms (경량 모델 또는 온보드)
+
+API 호출 빈도:
+  VLM_route: 매 이동 스텝 (수 초 간격)
+  VLA: 매 프레임 또는 수십 ms 간격
+
+비용 관리:
+  VLM_route: 고비용 클라우드 API
+  VLA: 로컬 또는 경량 API
+</code></pre>
+<h3>7.3 SLAM 및 GPS 통합</h3>
+<pre><code>위치 추정 파이프라인:
+
+SLAM (주요 위치 추정):
+  - 알고리즘: 논문 미명시 (추정: RTAB-Map 또는 유사)
+  - 센서: Intel RealSense D455 RGB-D
+  - 출력: 로컬 좌표계 (x, y, θ)
+  - 정밀도: ~0.1-0.3m (실내 기준), 실외에서는 감소
+
+GPS (글로벌 위치 보정):
+  - 정밀도: ~3-10m (민간 GPS 오차)
+  - 용도: 웨이포인트 글로벌 위치, 목적지 좌표
+  - 한계: 도심 다중 경로 오차 (Multipath)
+
+융합 전략:
+  GPS → 공개 지도 API 쿼리 + 글로벌 웨이포인트 생성
+  SLAM → 로컬 경로 추종 + 세밀한 이동 제어
+
+좌표 변환:
+  GPS(위도,경도) → ENU(East, North, Up) 로컬 좌표
+  → 로봇 바디 프레임 → VLA 예측 좌표
+</code></pre>
+<h3>7.4 네트워크 통신 아키텍처</h3>
+<pre><code>원격 추론 통신:
+
+로봇 ←──WiFi──→ H20 GPU 서버
+         │
+         ├── VLM 요청: 이미지(~300KB) + 텍스트 프롬프트
+         │   응답: JSON (r_t, d_t, conf_t, reason_t)
+         │   지연: 1-5초 (네트워크 + 추론)
+         │
+         └── VLA 요청: 이미지(~300KB) + 포즈 벡터
+             응답: 궤적 Ŵ_t^body (5×2 float)
+             지연: &lt;500ms (경량 모델)
+
+통신 실패 처리:
+  - 타임아웃 설정 (1-3초)
+  - 실패 시 이전 명령 유지 또는 정지
+  - 재연결 시도 로직
+
+대역폭 요구:
+  - 이미지 업로드: ~10 Mbps
+  - 명령 수신: &lt;1 Kbps
+  - WiFi 최소 요구: 10 Mbps (안정적)
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 소셜 내비게이션의 이론적 배경</h3>
+<pre><code>소셜 내비게이션 이론:
+
+Social Force Model (Helbing &amp; Molnár, 1995):
+  F_total = F_goal + F_social + F_obstacle
+
+  F_goal   : 목표 방향 인력
+  F_social : 보행자 간 반발력 (개인 공간 유지)
+  F_obstacle: 장애물 반발력
+
+Walk With Me의 암묵적 소셜 모델링:
+  - VLM_route의 stop-and-wait = F_social 포화 상태 처리
+  - SocialNav VLA의 학습 데이터 = F_social 내재화
+  - 직접적 수식 최적화 없이 데이터 기반 학습
+
+장점: 데이터에서 자동 추출, 복잡한 수식 불필요
+단점: 블랙박스 특성, 안전 보장 어려움
+</code></pre>
+<h3>8.2 VLM을 이용한 의사결정의 한계</h3>
+<pre><code>VLM 기반 실시간 의사결정의 한계:
+
+1. 결정론적 보장 불가:
+   - VLM은 확률적 출력 → 동일 상황 반복 호출 시 다른 결정
+   - 안전 임계 상황에서 신뢰성 문제
+   - 예: 빨간 신호등 앞에서 일관성 있게 stop을 판단하는가?
+
+2. 추론 지연 (Latency):
+   - 클라우드 VLM: 1-5초
+   - 고속 보행(~1m/s) 시 3-5m 이동 후 판단
+   - 시간 임계 상황에서 부적절
+
+3. 환각(Hallucination):
+   - VLM이 없는 장애물/보행자를 &quot;보았다&quot; 주장
+   - 지나치게 conservative → 효율 저하
+   - 위험 상황 미감지 → 안전 위험
+
+4. 도메인 분포 이탈:
+   - 학습 데이터에 없는 특이 상황 (공사 현장, 재난)에서 급격한 성능 하락
+   - 실외 야간/악천후 시나리오에서 검증 부족
+</code></pre>
+<h3>8.3 장거리 내비게이션에서의 오차 누적</h3>
+<pre><code>오차 누적 분석:
+
+GPS 오차:
+  - 초기 위치 오차: 3-10m
+  - 누적 효과: 경로상 각 웨이포인트에서 발생
+  - 도심 건물 사이: 다중 경로로 최대 50m 오차 가능
+
+SLAM 오차:
+  - 로컬 상대 오차: ~0.1-0.3m/10m
+  - 장거리 누적: loop closure 없으면 무한 증가
+  - 실외 SLAM: 피처 매칭 어려움 (하늘, 도로 등)
+
+오차 제어 전략:
+  ├── GPS로 글로벌 위치 주기적 보정
+  ├── 웨이포인트 도달 임계 확대 (GPS 오차 수용)
+  ├── 랜드마크 기반 상대 위치 확인 (VLM 활용)
+  └── 하드 이터레이션 예산으로 폴백 처리
+</code></pre>
+<h3>8.4 확장 가능성 및 향후 방향</h3>
+<pre><code>확장 방향:
+
+1. 다중 로봇 소셜 내비게이션:
+   - 여러 로봇이 같은 공간을 공유 시 충돌 회피
+   - 분산 VLM 추론 (비용 효율화)
+
+2. 멀티모달 센서 융합:
+   - LiDAR 추가로 SLAM 정밀도 향상
+   - 음향 센서로 사각지대 보행자 감지
+
+3. 지속 학습 (Continual Learning):
+   - 실패 케이스에서 자동 학습
+   - 환경 특화 미세 조정
+
+4. 사용자 선호도 모델링:
+   - &quot;선호 경로&quot; 학습 (공원, 조용한 거리 등)
+   - 개인화된 산책/쇼핑 경로 추천
+
+5. 온보드 VLM 경량화:
+   - 현재: 원격 H20 서버 의존
+   - 향후: Qwen3-VL-8B 온보드 배포로 자립화
+
+6. 자연어 피드백 루프:
+   - 실패 시 사용자에게 상황 설명
+   - 대화형 경로 재계획
+</code></pre>
+<h3>8.5 안전성 분석</h3>
+<pre><code>안전 관련 한계 분석:
+
+확인된 실패 시나리오:
+  - 쇼핑 태스크: 40% SR → 빈번한 실패
+  - 실패 원인 분류 미제공 (논문 한계)
+
+보수적 설계 요소 (장점):
+  - stop-and-wait 메커니즘
+  - 신뢰도 게이트 (conf ≥ α)
+  - 하드 이터레이션 예산
+
+안전 보장의 한계:
+  - VLM 환각으로 인한 잘못된 proceed
+  - 네트워크 지연 중 실물 이동
+  - 미지의 상황에서 VLM 예측 불가
+
+권고사항:
+  - 현재 수준: 인간 감독 하 보조 도구
+  - 완전 자율: 추가 안전 레이어 필요 (하드웨어 비상정지 등)
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>아래 비교는 본 리뷰 세션에서 분석한 세 편의 논문: <strong>CityWalker</strong> (CVPR 2025), <strong>HiCo-Nav</strong> (arXiv 2026), <strong>Three-Step Nav</strong> (AISTATS 2026)과 Walk With Me를 체계적으로 비교한다.</p>
+<pre><code>기본 특성 비교:
+┌────────────────────┬────────────────┬────────────────┬────────────────┬────────────────┐
+│  특성               │  CityWalker    │  HiCo-Nav      │  Three-Step Nav│  Walk With Me  │
+│                    │  (CVPR 2025)   │  (arXiv 2026)  │  (AISTATS 2026)│  (arXiv 2026) │
+├────────────────────┼────────────────┼────────────────┼────────────────┼────────────────┤
+│  환경               │  실외 도시      │  실내           │  실내 시뮬레이션│  실외 캠퍼스    │
+│  이동 거리           │  중장거리       │  단거리         │  단거리(R2R)   │  장거리(수백m) │
+│  지시 유형           │  웨이포인트     │  자연어(실내)   │  단계별 자연어  │  고수준 의도   │
+│  맵 의존성           │  없음(맵-프리)  │  점진적 매핑    │  없음(제로샷)  │  없음(맵-프리) │
+│  VLM 활용           │  없음(순수 VLA) │  있음(고수준)   │  있음(핵심)    │  있음(이중역할)│
+│  VLA 활용           │  있음(핵심)    │  없음           │  없음          │  있음(저수준) │
+│  코드 공개           │  미공개        │  공개(GitHub)  │  공개(GitHub)  │  미공개        │
+│  실세계 실험         │  있음(사족보행) │  있음(사족보행) │  없음          │  있음(AGV)    │
+│  성공률(최고)        │  ~+30%p(상대) │  56.8% (SR)    │  48% (SR)      │  60%~80%       │
+└────────────────────┴────────────────┴────────────────┴────────────────┴────────────────┘
+</code></pre>
+<p><strong>심화 방법론 비교:</strong></p>
+<pre><code>핵심 방법론 비교:
+┌────────────────────┬────────────────┬────────────────┬────────────────┬────────────────┐
+│  방법론 요소        │  CityWalker    │  HiCo-Nav      │  Three-Step Nav│  Walk With Me  │
+├────────────────────┼────────────────┼────────────────┼────────────────┼────────────────┤
+│  경로 계획          │  학습 기반      │  프론티어+WTRP │  글로벌 랜드마크│  공개 지도 API │
+│  (Path Planning)   │  implicit      │  최적화        │  VLM 추출      │  GPS 웨이포인트│
+├────────────────────┼────────────────┼────────────────┼────────────────┼────────────────┤
+│  목적지 이해        │  웨이포인트     │  자연어 지시   │  자연어 지시   │  의도 → POI    │
+│  (Dest. Grounding)│  (GPS/좌표)    │  (실내 객체)   │  (실내 랜드마크)│  VLM 추론      │
+├────────────────────┼────────────────┼────────────────┼────────────────┼────────────────┤
+│  장애물 회피        │  암묵적        │  A* 경로계획   │  암묵적        │  stop-and-wait │
+│  (Obstacle)        │  (학습된 행동) │  (LiDAR)       │  (MLLM 재계획) │  VLM 판단      │
+├────────────────────┼────────────────┼────────────────┼────────────────┼────────────────┤
+│  소셜 행동          │  있음(데이터)   │  없음          │  없음          │  있음(VLM+VLA) │
+│  (Social Norms)    │  (학습된)      │              │                │  (명시적 설계) │
+├────────────────────┼────────────────┼────────────────┼────────────────┼────────────────┤
+│  메모리             │  없음(reactive)│  CMG(그래프)   │  없음(stateless│  GPS 경로      │
+│  (Memory)          │              │              │  per-step)     │  히스토리      │
+├────────────────────┼────────────────┼────────────────┼────────────────┼────────────────┤
+│  확장 용이성        │  새 데이터 필요│  하드웨어 의존  │  프롬프트 수정  │  VLM/VLA 교체  │
+│  (Scalability)     │              │              │              │  용이           │
+└────────────────────┴────────────────┴────────────────┴────────────────┴────────────────┘
+</code></pre>
+<h3>9.2 각 논문과의 상세 비교</h3>
+<h4>Walk With Me vs. CityWalker (CVPR 2025)</h4>
+<p>CityWalker는 2000시간의 웹 도시 보행 비디오로 학습된 VLA 정책으로, 실외 도시 내비게이션에서 탁월한 성능을 보인다. Walk With Me는 VLA 어블레이션에서 CityWalker를 백본 중 하나로 평가했으며(50% SR), SocialNav에 의해 능가당했다.</p>
+<pre><code>비교 분석: Walk With Me vs. CityWalker
+
+공통점:
+  ├── 실외 환경에서의 맵-프리 내비게이션
+  ├── 실세계 로봇 플랫폼 검증
+  └── 웨이포인트 기반 목표 설정
+
+차별점 (Walk With Me의 우위):
+  ├── 고수준 자연어 의도 처리
+  │     CityWalker: GPS 웨이포인트만 처리
+  │     Walk With Me: &quot;밀크티 사줘&quot; 수준의 의도 추론
+  │
+  ├── 소셜 판단 메커니즘
+  │     CityWalker: 암묵적 학습 (데이터 의존)
+  │     Walk With Me: VLM 명시적 stop-and-wait 판단
+  │
+  ├── 장거리 목적지 계획
+  │     CityWalker: 단기 웨이포인트 추종
+  │     Walk With Me: 수백 미터 POI 목적지 계획
+  │
+  └── 공개 지도 통합
+        CityWalker: 없음
+        Walk With Me: Baidu/Google Maps API 통합
+
+차별점 (CityWalker의 우위):
+  ├── 학술 평가 벤치마크 (Critical Scenario 정의)
+  ├── 대규모 데이터 기반 강건성
+  ├── 더 세밀한 주행 행동 (Turn, Crossing 등)
+  └── 단거리 정밀 내비게이션 성능
+</code></pre>
+<h4>Walk With Me vs. HiCo-Nav (arXiv 2026)</h4>
+<p>HiCo-Nav는 실내 환경에서 계층적 비동기 아키텍처를 통해 VLM 추론과 실시간 로봇 제어를 동시에 달성하는 시스템이다.</p>
+<pre><code>비교 분석: Walk With Me vs. HiCo-Nav
+
+공통점:
+  ├── 계층적 아키텍처 (고수준 + 저수준)
+  ├── VLM 활용 고수준 추론
+  └── 실세계 로봇 플랫폼 검증 (공통)
+
+차별점 (Walk With Me의 우위):
+  ├── 환경 범위
+  │     HiCo-Nav: 실내 제한적 환경
+  │     Walk With Me: 실외 장거리 환경
+  │
+  ├── 목적지 이해
+  │     HiCo-Nav: 객체 기반 (TV, 침대 등 실내 객체)
+  │     Walk With Me: POI 기반 의도 추론
+  │
+  └── 맵 의존성
+        HiCo-Nav: 실시간 CMG 그래프 구축 (점진적 매핑)
+        Walk With Me: 완전 맵-프리 (공개 지도만 사용)
+
+차별점 (HiCo-Nav의 우위):
+  ├── 완전 비동기 아키텍처 (10Hz + 1Hz + 0.1Hz)
+  │     Walk With Me: 동기적 스텝 기반 처리
+  │
+  ├── 명시적 메모리 표현 (CMG 이분 그래프)
+  │     Walk With Me: GPS 히스토리만 유지
+  │
+  ├── 수학적 최적화 (WTRP, ILP)
+  │     Walk With Me: 휴리스틱 기반 의사결정
+  │
+  ├── 코드 공개 (reproducibility)
+  │     Walk With Me: 미공개
+  │
+  └── LiDAR 기반 정밀 SLAM
+        Walk With Me: 카메라 기반 SLAM (정밀도 열위)
+
+핵심 차별화:
+  두 시스템은 실질적으로 다른 문제를 해결한다.
+  HiCo-Nav: 구조화된 실내 환경에서 특정 객체 탐색
+  Walk With Me: 비구조화된 실외 환경에서 고수준 임무 수행
+</code></pre>
+<h4>Walk With Me vs. Three-Step Nav (AISTATS 2026)</h4>
+<p>Three-Step Nav는 MLLM을 활용한 제로샷 VLN 시스템으로, 전방/현재/후방 세 시점의 계층적 프롬프팅을 통해 R2R-CE 벤치마크에서 SOTA를 달성했다.</p>
+<pre><code>비교 분석: Walk With Me vs. Three-Step Nav
+
+공통점:
+  ├── VLM/MLLM 기반 고수준 추론
+  ├── 맵-프리 접근법
+  └── 계층적 의사결정 구조
+
+차별점 (Walk With Me의 우위):
+  ├── 실세계 배포
+  │     Three-Step Nav: 시뮬레이션(Habitat) 전용
+  │     Walk With Me: 실제 AGV 플랫폼 배포
+  │
+  ├── 소셜 내비게이션
+  │     Three-Step Nav: 보행자 없는 시뮬레이션
+  │     Walk With Me: 실제 보행자와의 상호작용
+  │
+  ├── 고수준 의도 처리
+  │     Three-Step Nav: 단계별 상세 지시 처리
+  │     Walk With Me: 목적 의도(&quot;산책하러 가자&quot;) 추론
+  │
+  └── 장거리 내비게이션
+        Three-Step Nav: 실내 단거리 (R2R 기준)
+        Walk With Me: 실외 수백 미터 장거리
+
+차별점 (Three-Step Nav의 우위):
+  ├── 명확한 벤치마크 성능 (R2R-CE SOTA)
+  │     Walk With Me: 소규모 자체 실험(20회)
+  │
+  ├── 코드 공개 (GitHub, MIT License)
+  │     Walk With Me: 미공개
+  │
+  ├── 전방/후방 시점 활용
+  │     Walk With Me: 현재 시점만 활용
+  │
+  └── 궤적 감사(Audit) 메커니즘
+        Walk With Me: 실시간 보정만 (후향적 감사 없음)
+</code></pre>
+<h3>9.3 장단점 분석</h3>
+<pre><code>Walk With Me 종합 장단점:
+
+▶ 강점 (Strengths):
+┌─────────────────────────────────────────────────────────────────┐
+│  1. 진정한 의미의 고수준 지시 이해                                  │
+│     - &quot;밀크티 사줘&quot; → POI 특정 → 경로 계획의 완전한 파이프라인        │
+│     - 기존 VLN의 단계별 지시 의존 탈피                              │
+│                                                                 │
+│  2. 맵-프리 + 전세계 스케일 가능성                                  │
+│     - 공개 지도 API 기반 → HD 맵 구축 비용 없음                     │
+│     - 어떤 도시에서도 즉시 배포 가능                                 │
+│                                                                 │
+│  3. 이중 정책의 유연성                                             │
+│     - VLM/VLA 백본 독립 교체 가능                                  │
+│     - 새로운 VLM/VLA 등장 시 성능 자동 업그레이드                   │
+│                                                                 │
+│  4. 소셜 내비게이션 명시적 설계                                      │
+│     - stop-and-wait의 명시적 의사결정 체계                          │
+│     - 단순 회피를 넘어 사회적 행동 규범 준수                          │
+│                                                                 │
+│  5. 실세계 검증 (20회 실험)                                        │
+│     - 실제 AGV + 실외 환경에서 검증된 시스템                         │
+│     - 시뮬레이션과의 현실 격차 없음                                  │
+└─────────────────────────────────────────────────────────────────┘
+
+▶ 약점 (Weaknesses):
+┌─────────────────────────────────────────────────────────────────┐
+│  1. 소규모 실험 (20회)                                           │
+│     - 5회/시나리오는 통계적 유의성 확보 어려움                       │
+│     - 신뢰구간, 표준편차 미제공                                     │
+│                                                                 │
+│  2. 코드 미공개                                                   │
+│     - 재현 불가, 커뮤니티 검증 어려움                               │
+│     - HiCo-Nav, Three-Step Nav 대비 불리                         │
+│                                                                 │
+│  3. 원격 추론 의존성                                               │
+│     - NVIDIA H20 GPU 서버 필요                                    │
+│     - WiFi 환경 의존 → 통신 두절 시 실패                            │
+│     - 엣지 배포 불가                                               │
+│                                                                 │
+│  4. 실패 원인 분석 부족                                             │
+│     - 40% 실패의 구체적 원인 분류 없음                              │
+│     - 개선 방향 도출 어려움                                         │
+│                                                                 │
+│  5. 비동기 처리 미구현                                             │
+│     - HiCo-Nav 대비 VLM 지연 처리 방식 열위                        │
+│     - VLM 추론 중 로봇 정지 가능성                                  │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>9.4 실적용 가능성 평가</h3>
+<pre><code>실적용 가능성 평가 (5점 척도):
+┌──────────────────────────────────────────────────────────────────────┐
+│  평가 항목           │ CityWalker │ HiCo-Nav │Three-Step│Walk With Me│
+├──────────────────────────────────────────────────────────────────────┤
+│  설치 용이성          │    ★★★☆☆  │  ★★☆☆☆  │  ★★★★☆  │  ★★★☆☆   │
+│  (코드 공개 여부 포함) │  (미공개) │  (공개)  │  (공개)  │  (미공개) │
+├──────────────────────────────────────────────────────────────────────┤
+│  지시 이해 자연성      │  ★★☆☆☆   │  ★★★☆☆  │  ★★★☆☆  │  ★★★★★   │
+│  (고수준 의도 처리)    │  (좌표만) │  (실내)  │  (단계별)│  (의도)   │
+├──────────────────────────────────────────────────────────────────────┤
+│  실외 장거리 적용성    │  ★★★★☆   │  ★☆☆☆☆  │  ★☆☆☆☆  │  ★★★★★   │
+│                      │  (도시VLA) │  (실내만)│  (시뮬)  │  (실외장거리│
+├──────────────────────────────────────────────────────────────────────┤
+│  인프라 의존성         │  ★★★★☆   │  ★★★☆☆  │  ★★★☆☆  │  ★★★☆☆   │
+│  (낮을수록 좋음)       │  (온보드)  │  (API)  │  (API)   │  (원격서버)│
+├──────────────────────────────────────────────────────────────────────┤
+│  안전성               │  ★★★☆☆   │  ★★★★☆  │  ★★★☆☆  │  ★★★★☆   │
+│                      │  (학습기반)│  (명시적)│  (없음)  │  (stop-wait│
+├──────────────────────────────────────────────────────────────────────┤
+│  확장성               │  ★★☆☆☆   │  ★★★☆☆  │  ★★★★☆  │  ★★★★★   │
+│  (새 환경/태스크)      │  (재학습) │  (실내→?) │  (프롬프트)│  (API교체)│
+└──────────────────────────────────────────────────────────────────────┘
+
+총평:
+  Walk With Me는 고수준 자연어 의도 처리와 실외 장거리 내비게이션에서
+  기존 논문들 대비 가장 우수한 실적용 가능성을 보인다. 단, 원격 서버
+  의존성 및 코드 미공개가 즉시 배포의 장벽이다.
+</code></pre>
+<h3>9.5 연구 방향성 평가</h3>
+<pre><code>연구 방향성 평가:
+
+VLN 분야의 진화 흐름:
+  ─────────────────────────────────────────────────────────
+
+  1세대: 시뮬레이션 벤치마크 (R2R, RxR)
+    → 단계별 지시 추종, 실내 환경, 지도 없음
+
+  2세대: 실세계 실내 (HiCo-Nav)
+    → 실제 로봇 배포, 고수준 추론, 실내 한정
+
+  3세대: 실세계 실외, 단거리 (CityWalker)
+    → 도시 환경, VLA 학습, 소셜 상황
+
+  4세대 (Walk With Me의 위치):
+    → 실세계 실외, 장거리, 고수준 의도, 소셜 통합
+
+  ─────────────────────────────────────────────────────────
+
+Walk With Me가 열어가는 방향:
+
+  A. 인간 중심 서비스 로봇 내비게이션
+     - &quot;음식 배달&quot; &quot;산책 동반&quot; &quot;쇼핑 보조&quot; 등
+     - 로봇이 인간의 복잡한 생활 패턴을 이해하고 지원
+
+  B. LLM 에이전트 + 로봇 행동의 완전한 통합
+     - 텍스트 기반 계획 (LLM/VLM)
+     - 물리적 실행 (VLA/로봇)의 심리스 연결
+
+  C. 공개 지도 인프라 활용 로봇학
+     - 인터넷 지도 = 로봇의 세계 지식
+     - HD 맵 없는 전세계 스케일 배포
+
+  D. 소셜 AI 로봇 연구
+     - 장애물 회피를 넘어 사회적 행동 규범 준수
+     - 인간-로봇 공생 환경에서의 자연스러운 내비게이션
+
+  방향성 평가: ★★★★★
+    Walk With Me가 제안하는 연구 방향은 기존 VLN의 한계를
+    정면으로 돌파하는 중요한 방향이며, 실용적 로봇 배포를
+    위한 필수 과제를 다루고 있다.
+</code></pre>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<pre><code>[1] Zhang, L., et al. &quot;Walk With Me: Long-Horizon Social Navigation for
+    Human-Centric Outdoor Assistance.&quot; arXiv:2604.26839 (2026).
+    https://doi.org/10.48550/arXiv.2604.26839
+
+[2] Liu, X., et al. &quot;CityWalker: Learning Embodied Urban Navigation from
+    Web-Scale Videos.&quot; CVPR 2025. arXiv:2411.17820.
+
+[3] Xu, K., et al. &quot;A Deployable Embodied Vision-Language Navigation System
+    with Hierarchical Cognition and Context-Aware Exploration (HiCo-Nav).&quot;
+    arXiv:2604.21363 (2026).
+
+[4] Zheng, W., et al. &quot;Three-Step Nav: A Hierarchical Global-Local Planner
+    for Zero-Shot Vision-and-Language Navigation.&quot; AISTATS 2026.
+    arXiv:2604.26946.
+
+[5] Anderson, P., et al. &quot;Vision-and-Language Navigation: Interpreting
+    visually-grounded navigation instructions in real environments.&quot;
+    CVPR 2018.
+
+[6] Shah, D., et al. &quot;GNM: A General Navigation Model to Drive Any Robot.&quot;
+    ICRA 2023.
+
+[7] Shah, D., et al. &quot;ViNT: A Foundation Model for Visual Navigation.&quot;
+    CoRL 2023.
+
+[8] Sridhar, A., et al. &quot;NoMaD: Goal Masking Diffusion Policies for
+    Navigation and Exploration.&quot; ICRA 2024.
+
+[9] Helbing, D., and Molnár, P. &quot;Social Force Model for Pedestrian
+    Dynamics.&quot; Physical Review E 51.5 (1995): 4282.
+
+[10] Chen, H., et al. &quot;Touchdown: Natural Language Navigation and Spatial
+     Reasoning in Visual Street Environments.&quot; CVPR 2019.
+
+[11] Gu, J., et al. &quot;Vision-and-Language Navigation: A Survey of Tasks,
+     Methods, and Future Directions.&quot; ACL 2022.
+
+[12] OpenAI. &quot;GPT-5 Technical Report.&quot; OpenAI (2025).
+
+[13] Anthropic. &quot;Claude Sonnet: Technical Overview.&quot; Anthropic (2025).
+
+[14] Google DeepMind. &quot;Gemini 3 Flash: Efficient Multimodal Reasoning.&quot;
+     Google DeepMind (2025).
+
+[15] Qwen Team. &quot;Qwen3-VL: Advanced Vision-Language Model.&quot; Alibaba Cloud (2025).
+
+[16] MiMo Team. &quot;MiMo-Embodied: Embodied AI Foundation Model.&quot; (2025).
+
+[17] RoboBrain Team. &quot;RoboBrain 2.0: General-Purpose Embodied AI.&quot; (2025).
+
+[18] Krantz, J., et al. &quot;Beyond the Nav-Graph: Vision-and-Language
+     Navigation in Continuous Environments.&quot; ECCV 2020.
+
+[19] Savva, M., et al. &quot;Habitat: A Platform for Embodied AI Research.&quot;
+     ICCV 2019.
+
+[20] Chang, A., et al. &quot;Matterport3D: Learning from RGB-D Data in Indoor
+     Environments.&quot; 3DV 2017.
+</code></pre>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>11.1 연구의 혁신성 평가</h3>
+<p>&quot;Walk With Me&quot;는 VLN(Vision-Language Navigation) 분야에서 기존 연구들이 공통적으로 가지는 두 가지 근본 한계—HD 맵 의존성과 실내/단거리 특화—를 동시에 극복하는 시도로서 중요한 의미를 갖는다.</p>
+<p><strong>가장 혁신적인 기여</strong>는 공개 지도 API와 VLM의 결합을 통한 <strong>고수준 의도의 물리적 목적지 변환</strong>이다. &quot;밀크티를 사줘&quot;라는 인간적 언어가 특정 좌표 목적지로 변환되고, GPS 기반 경로가 생성되며, 이중 정책 내비게이션을 통해 실제 이동이 완성되는 완전한 파이프라인은 기존 어떤 VLN 시스템도 제공하지 않았던 엔드-투-엔드 인간 중심 내비게이션 능력이다.</p>
+<p>또한 <strong>적응형 이중 정책 아키텍처</strong>는 VLM과 VLA의 상호 보완적 역할을 명확히 정의하여, 각 컴포넌트가 최대 효율을 발휘하도록 설계된 점이 우수하다. VLM이 소셜 판단과 경로 결정을 담당하고, VLA가 저수준 운동 궤적을 생성하는 계층 분리는 향후 각 컴포넌트의 독립적 발전이 시스템 성능 향상으로 직결되는 구조다.</p>
+<h3>11.2 실용적 의의</h3>
+<p>Walk With Me가 제시하는 프레임워크는 실제 서비스 로봇 응용 분야에서 즉각적인 실용적 가치를 가진다. 캠퍼스 배달 로봇, 병원 이송 로봇, 노인/장애인 보조 로봇, 관광 가이드 로봇 등 다양한 <strong>인간 중심 실외 서비스 로봇</strong> 시나리오에 적용 가능하며, HD 맵 없이도 공개 지도를 활용하여 전 세계 어디에서나 즉시 배포 가능한 장점이 있다.</p>
+<p>실세계 Athena 2.0 Pro AGV에서 수행한 20회 실험과 60% 평균 성공률은 연구 수준의 데모에서 실용 단계로의 진입 가능성을 보여주는 의미 있는 증거다.</p>
+<h3>11.3 향후 연구 방향</h3>
+<p>Walk With Me의 한계를 극복하기 위한 향후 연구 방향을 제시한다:</p>
+<pre><code>우선순위 향후 연구 과제:
+
+단기 (1년 내):
+  ├── 코드 공개 → 커뮤니티 검증 및 발전
+  ├── 대규모 실험 (100회+) → 통계적 유의성 확보
+  ├── 실패 원인 체계적 분류 및 개선 방향 도출
+  └── 온보드 경량 VLM 통합 (원격 서버 의존 탈피)
+
+중기 (1-3년):
+  ├── 다양한 로봇 플랫폼 (사족, 인간형) 전이 검증
+  ├── 야간/악천후 실험 → 강건성 향상
+  ├── 사용자 선호도 학습 (개인화 경로)
+  └── 다국어 지시 처리
+
+장기 (3년+):
+  ├── 완전 자율화 (안전 보장 포함)
+  ├── 다중 로봇 협력 소셜 내비게이션
+  ├── 실시간 지도 업데이트와의 통합
+  └── 국제 표준 벤치마크 제안 (실외 소셜 VLN)
+</code></pre>
+<h3>11.4 최종 평가</h3>
+<p>Walk With Me는 VLN 연구의 다음 단계를 명확히 제시한다. 단순 경로 추종을 넘어, 인간의 일상적 언어로 표현된 복잡한 의도를 이해하고 실외 세계에서 안전하게 실현하는 자율 로봇 내비게이션의 비전은 향후 10년간 로봇 공학이 집중해야 할 핵심 방향 중 하나다.</p>
+<p>현재의 60% 성공률은 개선이 필요한 수준이지만, 이 연구가 개척한 프레임워크—고수준 의도 이해 + 공개 지도 API + VLM/VLA 이중 정책 + 소셜 판단—는 향후 연구의 강력한 기반이 될 것이다. 특히 VLM/VLA의 빠른 발전 속도를 고려하면, 동일한 아키텍처에서 더 강력한 VLM과 VLA를 플러그인하는 것만으로도 성공률이 크게 향상될 수 있다는 구조적 장점은 이 연구의 장기적 가치를 높이 평가하게 한다.</p>
+<blockquote>
+<p><strong>종합 평가</strong>: 기술적 완성도 ★★★☆☆ | 혁신성 ★★★★★ | 실용성 ★★★★☆ | 재현성 ★★☆☆☆</p>
+<p>VLN 분야에서 새로운 패러다임(인간 중심 실외 보조 내비게이션)을 제시한 선구적 연구.
+코드 공개와 대규모 실험이 보완된다면 이 분야의 레퍼런스 논문이 될 잠재력을 가진다.</p>
+</blockquote>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

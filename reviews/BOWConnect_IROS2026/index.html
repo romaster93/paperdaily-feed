@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>BOWConnect: Parallel Bayesian Optimization over Windows with Learned Local Cost Maps for Sample-Efficient Kinodynamic Motion Planning · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">IEEE/RSJ IROS 2026 — 채택 확정(탑티어)</div>
+    <h1>BOWConnect: Parallel Bayesian Optimization over Windows with Learned Local Cost Maps for Sample-Efficient Kinodynamic Motion Planning</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2606.27292">arXiv:2606.27292</a></span>
+      <span>리뷰 2026-06-27</span>
+      <span>38분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>BOWConnect: 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: BOWConnect: Parallel Bayesian Optimization over Windows with Learned Local Cost Maps for Sample-Efficient Kinodynamic Motion Planning</li>
+<li><strong>저자 (Authors)</strong>: Sourav Raxit, Abdullah Al Redwan Newaz, Jose Fuentes, Leonardo Bobadilla</li>
+<li><strong>소속 (Affiliation)</strong>: (arXiv 메타 기준) University of New Orleans / Florida International University 계열 로보틱스 연구진</li>
+<li><strong>발표처 (Published)</strong>: <strong>IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) 2026 — 채택 확정(탑티어)</strong></li>
+<li><strong>DOI</strong>: (IROS 2026 게재 예정)</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2606.27292">2606.27292</a></li>
+<li><strong>코드</strong>: ✅ <strong>공개</strong> — 프로젝트 페이지 및 오픈소스 코드 <a href="https://bow-connect.github.io/">https://bow-connect.github.io/</a> (실/시뮬 실험 영상·고해상도 그림·소스 포함)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>BOWConnect는 <strong>운동학적·동역학적 제약(kinodynamic constraints)을 동시에 만족하면서 연속 상태·제어 공간에서 충돌 없는 궤적을 빠르게 생성하는 모션 플래닝</strong> 문제를 다룬다. 논문은 기존 샘플링 기반 플래너(RRT, SST, EST, KPIECE 등)가 가진 <strong>세 가지 근본 한계</strong>를 정조준한다:</p>
+<ol>
+<li><strong>고차원 상태공간에서의 샘플 비효율(sample inefficiency)</strong> — 무작위 제어 샘플링은 차원이 커질수록 유효 궤적을 찾는 확률이 급감한다.</li>
+<li><strong>동역학 제약 하에서 신뢰할 수 없는 비용 휴리스틱(unreliable cost heuristics)</strong> — 기하적 유클리드 거리 휴리스틱은 비홀로노믹(nonholonomic) 차량의 실제 도달 비용을 반영하지 못한다.</li>
+<li><strong>좁은 통로(narrow passage)에서의 성능 저하</strong> — 협소·비볼록 공간에서 기존 방법은 실패하거나 급격히 느려진다.</li>
+</ol>
+<p>핵심 통찰은 <strong>&quot;무작위 제어 샘플링과 기하 거리 휴리스틱을, 학습 기반 조향 함수(steering function)로 대체한다&quot;</strong> 는 것이다. 구체적으로 <strong>윈도우 상의 베이지안 최적화(Bayesian Optimization over Windows, BOW)</strong> 를 가우시안 프로세스(GP) 대리모델로 구현하여, 각 로컬 단계에서 (i) 보상(목표 접근)과 (ii) 제약(충돌 회피)을 각각 GP로 학습하고, 획득함수(acquisition function)로 다음 제어를 지능적으로 선택한다. 여기에 <strong>양방향 병렬 트리 탐색(bidirectional parallel tree exploration)</strong> 을 결합하여 전역 연결성과 로컬 궤적 품질을 동시에 확보한다.</p>
+<p>연구가 답하려는 질문:</p>
+<ul>
+<li>무작위 샘플링 대신 <strong>GP 기반 베이지안 최적화</strong>를 조향에 쓰면 kinodynamic 플래닝의 샘플 효율이 실제로 향상되는가?</li>
+<li><strong>양방향 병렬 워커</strong>가 좁은 통로에서 단방향 대비 성공률·속도를 개선하는가?</li>
+<li>시뮬레이션 성능이 <strong>실제 지상차(UGV)·쿼드로터(UAV)</strong> 로 전이되는가?</li>
+</ul>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) Kinodynamic 제약 하의 연속 제어 탐색.</strong>
+시스템 동역학 <code>ẋ = f(x, u)</code> 에서 상태 <code>x = (q, q̇) ∈ X</code>는 위치/자세 <code>q</code>와 속도 <code>q̇</code>를 결합한 <code>2n</code>차원이다. 제어 <code>u ∈ U ⊂ ℝ^m</code>를 무작위로 뽑아 전방 적분하는 전통적 방식은, 비홀로노믹 차량(자전거 모델 등)에서 <strong>대부분의 무작위 제어가 목표 방향으로 유효하지 않아</strong> 막대한 낭비를 낳는다.</p>
+<p><strong>(C2) 기하 휴리스틱과 실제 도달 비용의 괴리.</strong>
+RRT*류가 쓰는 유클리드 거리 <code>‖x_a − x_b‖</code>는 직선 이동을 가정하지만, 자전거 모델 차량은 최소 회전반경 때문에 가까운 두 점도 큰 우회가 필요할 수 있다. 이 <strong>메트릭 불일치(metric mismatch)</strong> 가 트리 확장을 잘못된 방향으로 이끈다.</p>
+<p><strong>(C3) 좁은 통로/비볼록 공간.</strong>
+Bugtrap, Narrow Passage, 비볼록 경계 같은 환경에서 무작위 샘플링은 통로를 통과하는 제어를 거의 못 뽑아 성공률이 0–40%로 붕괴한다. 논문은 바로 이 영역에서 기존 SOTA가 &quot;실패하거나 크게 저하된다&quot;고 지적한다.</p>
+<p><strong>(C4) 실시간성과 실로봇 전이.</strong>
+모션 플래너가 실로봇 재계획 루프에 들어가려면 수십 ms~수백 ms 내에 끝나야 한다. 시뮬에서 빠른 알고리즘도 실제 차량/드론의 동역학·지연 하에서 충돌 없이 동작해야 가치가 있다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>BOWConnect의 해법은 <strong>&quot;학습 조향 + 양방향 병렬 + 공간 해싱&quot;</strong> 의 삼중 결합이다:</p>
+<pre><code>                    ┌──────────────────────────────────────────────┐
+ 시작 영역 ─▶ N/2 forward 워커 (각자 MotionTree + BOW 인스턴스) ──┐  │
+                    │   BOW: GP_r(보상) + GP_c(제약) → 획득함수 α(u) │  │
+                    └──────────────────────────────────────────────┘  │
+                                                                        ├─▶ 공간해싱 h(x)로
+                    ┌──────────────────────────────────────────────┐  │   연결 감지 → BVP 해결
+ 목표 영역 ─▶ N/2 backward 워커 (각자 MotionTree + BOW 인스턴스) ──┘  │   → 트리 병합 → 궤적
+                    └──────────────────────────────────────────────┘
+</code></pre>
+<ul>
+<li><strong>BOW 조향(C1, C2 해결)</strong>: 무작위 샘플링 대신, 로컬 윈도우에서 GP 대리모델로 보상·제약을 학습하고 획득함수로 다음 제어를 선택 → 샘플 효율 향상 + 동역학을 반영한 비용.</li>
+<li><strong>양방향 병렬(C3 해결)</strong>: <code>N/2</code> forward + <code>N/2</code> backward 워커가 동시에 트리를 키워 좁은 통로를 양쪽에서 공략 → 포트폴리오 성공확률 <code>P_success = 1 − (1 − p_single)^(N_f × N_b)</code> 로 개별 워커 실패를 상쇄.</li>
+<li><strong>공간 해싱(C4 해결)</strong>: <code>O(1)</code> 평균 이웃 조회로 연결 감지를 가볍게 만들어 실시간(&lt;0.15s) 달성.</li>
+<li><strong>실로봇 검증(C4)</strong>: iRobot Create 3(차량), Parrot Bebop 2(드론)에서 충돌 0회.</li>
+</ul>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 BOW: 윈도우 상의 베이지안 최적화 조향 함수</h3>
+<p>BOWConnect의 심장은 로컬 플래닝을 <strong>제약 베이지안 최적화 문제</strong>로 정식화한 것이다. 연속 제어공간 <code>u ∈ U ⊂ ℝ^m</code>에 대해:</p>
+<h4>전방 전파 (Forward Propagation)</h4>
+<p>유한 수평선 <code>T</code> 동안 4차 Runge-Kutta로 궤적을 적분:</p>
+<pre><code>τ(u) = Φ(x, u) = { x(t) : t ∈ [0, T] }
+</code></pre>
+<h4>보상 함수 (Reward)</h4>
+<p>각 제어 후보가 목표에 얼마나 가까워지는가:</p>
+<pre><code>r(u) = −‖p(T) − p_target‖      (충돌 없을 때)
+     = −∞                        (충돌 시)
+</code></pre>
+<h4>제약 함수 (Constraint)</h4>
+<pre><code>c(u) = 1 − 𝕀_collision(τ(u))
+</code></pre>
+<h4>이중 GP 대리모델 (Dual Gaussian Process Surrogates)</h4>
+<p>BOW의 핵심 설계는 <strong>보상과 제약을 분리된 두 GP로 모델링</strong>하는 것이다:</p>
+<ul>
+<li><code>GP_r</code>: 보상 예측 → 평균 <code>μ_r</code>, 불확실성 <code>σ²_r</code></li>
+<li><code>GP_c</code>: 제약(충돌 가능성) 예측 → 평균 <code>μ_c</code>, 불확실성 <code>σ²_c</code></li>
+</ul>
+<p>이 분리가 중요한 이유: &quot;목표로 가는 보상&quot;과 &quot;충돌 안전&quot;은 서로 다른 표면(landscape)을 가진다. 하나의 GP로 둘을 섞으면 안전한 영역과 진행 영역의 트레이드오프를 제대로 표현하지 못한다. 둘을 분리하면 획득함수에서 <strong>안전을 게이팅(gating)</strong> 으로 깔끔하게 결합할 수 있다.</p>
+<h4>획득함수 (Acquisition Function)</h4>
+<p>실현가능성(feasibility) 확률을 표준정규 CDF <code>Φ</code>로 정의:</p>
+<pre><code>P_feas(u) = Φ( μ_c(u) / σ_c(u) )
+</code></pre>
+<p>다음 제어는 보상의 낙관적 추정(LCB 형태)에 실현가능성을 곱한 값을 최대화:</p>
+<pre><code>α(u) = [ μ_r(u) − κ·σ_r(u) ] × P_feas(u)
+</code></pre>
+<ul>
+<li><code>κ</code>: 탐색-활용(exploration-exploitation) 균형 계수</li>
+<li><code>[μ_r − κσ_r]</code>: 보상의 보수적(비관적) 추정으로 과신 회피</li>
+<li><code>× P_feas(u)</code>: <strong>충돌 가능성이 높은 영역을 곱셈으로 억제</strong> — &quot;보상 함수가 로봇을 대체로 실현 불가능한 영역으로 끌면 제약 위반이 <code>P_feas</code> 페널티를 부풀린다&quot;</li>
+</ul>
+<p>이 곱셈형 게이팅은 제약을 소프트하게 다루면서도, 명백히 충돌하는 제어를 자연히 배제한다. 무작위 샘플링이 &quot;운 좋게 안전한 제어를 뽑길 기대&quot;하는 것과 대조적으로, BOW는 <strong>학습된 안전 표면을 보고 안전한 방향으로 능동 탐색</strong>한다.</p>
+<pre><code>ASCII: BOW 한 스텝
+  관측된 제어-결과 데이터 D = {(u_i, r_i, c_i)}
+        │ GP_r 적합            │ GP_c 적합
+        ▼                       ▼
+   μ_r, σ_r                μ_c, σ_c
+        └────────┬──────────────┘
+                 ▼
+   P_feas = Φ(μ_c/σ_c)
+                 ▼
+   α(u) = [μ_r − κσ_r] · P_feas
+                 ▼
+   u* = argmax_u α(u)   → 4차 RK 전파 → τ(u*) → 충돌검사 → 트리에 추가
+                 ▼
+   D ← D ∪ {(u*, r(u*), c(u*))}   (GP 갱신, 다음 스텝)
+</code></pre>
+<h3>3.2 양방향 병렬 트리 탐색 (Bidirectional Parallel Exploration)</h3>
+<p>BOWConnect는 <code>N/2</code> forward 워커와 <code>N/2</code> backward 워커를 띄우고, <strong>각 워커가 독립적인 MotionTree와 자체 BOW 인스턴스</strong>를 유지한다:</p>
+<pre><code>초기 샘플링:
+  시작 상태집합 S = {x_1, ..., x_N}  (시작 중심 반경 r_goal 내 균일 샘플, 헤딩 θ∈[−π,π])
+  목표 상태집합 G = {x&#39;_1, ..., x&#39;_N}  (목표 중심 반경 r_goal 내)
+
+각 워커 루프:
+  x_rand 샘플 → 공간해싱으로 최근접 x_near 조회 → BOW로 충돌없는 궤적 생성
+  τ = [x_near, x_1, ..., x_m] → 모든 상태를 트리에 순차 추가
+</code></pre>
+<p><strong>왜 양방향인가?</strong> 좁은 통로는 한쪽에서만 뚫기 어렵다. 양쪽에서 동시에 트리를 키우면 통로 중간에서 만날 확률이 높아진다. 포트폴리오 성공확률:</p>
+<pre><code>P_success = 1 − (1 − p_single)^(N_f × N_b)
+</code></pre>
+<p><code>N_f</code> forward × <code>N_b</code> backward 워커 쌍의 곱이 지수로 들어가므로, 개별 워커 성공확률 <code>p_single</code>이 낮아도 <strong>워커 수를 늘리면 전체 성공확률이 1에 빠르게 수렴</strong>한다. 이것이 좁은 통로 100% 성공의 수학적 근거다.</p>
+<h3>3.3 공간 해싱과 연결 감지 (Spatial Hashing &amp; Connection)</h3>
+<h4>해시 함수</h4>
+<p><code>O(1)</code> 평균 이웃 조회를 가능케 하는 비트-패킹 해시:</p>
+<pre><code>h(x) = ⌊(x−x₀)/Δ⌋ ⊕ ⌊(y−y₀)/Δ⌋ ⊕ ⌊(z−z₀)/Δ⌋
+</code></pre>
+<ul>
+<li><code>Δ</code>: 격자 해상도, <code>⊕</code>: 비트 패킹</li>
+<li>forward 트리와 backward 트리의 노드가 같은(또는 인접) 해시 버킷에 들어오면 연결 후보로 감지</li>
+</ul>
+<h4>연결 검증 (다단계 실현가능성)</h4>
+<p>먼저 운동학적 실현가능성을 확인:</p>
+<pre><code>|θ_req − θ_f| &lt; θ_max    그리고    ‖p_b − p_f‖ / v_max &lt; T_max
+여기서  θ_req = arctan2(y_b − y_f, x_b − x_f)
+</code></pre>
+<p>즉 두 노드를 잇는 데 필요한 헤딩 변화가 차량의 최대 조향 내에 있고, 거리/속도로 산출한 소요 시간이 한계 내일 때만 연결을 시도한다. 이 게이팅이 <strong>불가능한 연결에 BVP 솔버를 낭비하지 않게</strong> 한다.</p>
+<h3>3.4 경계값 문제(BVP) 해결</h3>
+<p>연결 후보가 감지되면, 두 트리를 잇는 궤적을 BVP로 생성한다. 제어 <code>u_c : [0, t_c] → U</code>가:</p>
+<pre><code>x(t_c) = x_b ,    τ(u_c) ⊂ X_free
+</code></pre>
+<p>를 만족하도록 구한다. 솔버는 <strong>비례 제어(proportional control)</strong> 를 반복 적용:</p>
+<pre><code>헤딩 오차 Δθ = θ_desired − θ_current
+요 레이트 ω = clamp( k_p · Δθ / Δt, −ω_max, ω_max )
+</code></pre>
+<p>이 비례 제어 브리지는 단순하지만, 두 트리가 운동학적으로 정렬된 상태에서만 호출되므로(3.3의 게이팅) 대부분 성공한다. 다만 논문도 인정하듯 <strong>극도로 제약된 기하에서는 비례 제어가 실패</strong>할 수 있다(8장 한계).</p>
+<h3>3.5 알고리즘 복잡도 직관</h3>
+<ul>
+<li><strong>GP 추론</strong>: 관측 <code>n</code>개에 대해 GP는 <code>O(n³)</code> 학습/<code>O(n²)</code> 추론이 표준이나, BOW는 <strong>로컬 윈도우</strong>로 관측 수를 작게 유지하여 실용 비용을 억제한다. (이것이 &quot;over Windows&quot;의 의미 — 전역 GP가 아니라 작은 윈도우별 GP)</li>
+<li><strong>공간 해싱</strong>: 이웃 조회 <code>O(1)</code> 평균.</li>
+<li><strong>병렬화</strong>: <code>N</code> 워커가 멀티스레드로 동시 실행 → 벽시계 시간은 워커 수에 반비례(연결 체크 오버헤드 전까지).</li>
+<li><strong>병목</strong>: 논문 명시 — &quot;연결 체크 오버헤드와 순차적 BVP 해결이 실질 속도향상을 제한&quot;.</li>
+</ul>
+<h3>3.6 가우시안 프로세스 대리모델의 작동 원리 (심화)</h3>
+<p>BOW가 무작위 샘플링을 이기는 근본 이유는 <strong>GP가 관측되지 않은 제어의 결과를 불확실성과 함께 예측</strong>하기 때문이다. 무작위 샘플러는 제어 <code>u</code>를 뽑기 전엔 그 결과를 전혀 모르지만, GP는 이미 시도한 제어들 <code>D={(u_i, r_i)}</code>로부터 새 제어 <code>u*</code>의 보상을 다음과 같이 추정한다:</p>
+<pre><code>사후 평균(예측)  μ_r(u*) = k(u*, U)ᵀ [K(U,U) + σ²_n I]⁻¹ r
+사후 분산(불확실) σ²_r(u*) = k(u*,u*) − k(u*,U)ᵀ [K(U,U)+σ²_n I]⁻¹ k(U,u*)
+</code></pre>
+<ul>
+<li><code>k(·,·)</code>: 커널(유사도) — 가까운 제어는 유사한 보상을 낸다는 평활성 가정을 인코딩</li>
+<li><code>K(U,U)</code>: 관측 제어들 간 그람 행렬, <code>σ²_n</code>: 관측 노이즈</li>
+<li>직관: <strong>이미 본 제어 근처는 <code>μ_r</code>로 자신 있게 예측(σ 작음)</strong>, 안 본 영역은 <code>σ</code> 큼 → 획득함수가 이 σ를 탐색 보너스로 활용</li>
+</ul>
+<p>획득함수 <code>α(u)=[μ_r−κσ_r]·P_feas</code>에서 <code>−κσ_r</code> 항을 다시 보면, 이는 <strong>불확실한 영역을 보상 추정에서 깎는 보수적(pessimistic, LCB-유사) 전략</strong>이다. 보상을 최소화(<code>r=−거리</code>)하는 문제이므로, 낙관적 과신 대신 &quot;확실히 좋은&quot; 제어를 우선한다. 동시에 <code>P_feas</code>가 안전 게이팅을 하므로, 전체적으로 <strong>&quot;확실히 목표에 가까우면서 충돌 확률이 낮은 제어&quot;</strong> 를 선택한다. 이것이 좁은 통로에서 무작위 샘플러 대비 수십 배 적은 시도로 통과 제어를 찾는 메커니즘이다.</p>
+<h4>왜 &quot;윈도우&quot;가 GP를 실시간으로 만드는가</h4>
+<p>GP의 비용은 관측 수 <code>n</code>에 대해 행렬 역연산 <code>O(n³)</code>이 지배한다. 전역 GP로 플래닝 전체 이력을 담으면 <code>n</code>이 수천으로 커져 실시간 불가다. BOW는 <strong>로컬 윈도우(수평선 T=3~5s)</strong> 안에서만 GP를 운용하여 <code>n</code>을 수십 규모로 묶는다. <code>O(n³)</code>에서 <code>n</code>이 작으면 역연산이 사실상 상수 시간 → 매 트리 확장마다 GP 추론·갱신을 실시간으로 반복할 수 있다. <strong>&quot;over Windows&quot;는 단순 명칭이 아니라 GP를 플래닝에 쓸 수 있게 한 핵심 계산 트릭</strong>이다.</p>
+<h3>3.7 워크드 예시: 좁은 통로에서의 한 사이클</h3>
+<p>Narrow Passage-2(Bicycle, BOWConnect 100%@0.048s vs SST 20%@30s)를 예로 BOW의 우위를 추적하면:</p>
+<pre><code>1) forward 워커가 통로 입구 근처 x_near에서 출발
+2) 무작위 샘플러라면: 조향각을 [−θmax, θmax]에서 균일 추출
+   → 대부분 벽에 충돌(c(u)=0), 통로 정렬 제어는 극소 확률
+3) BOW: 과거 시도에서 &quot;벽 쪽 제어는 P_feas 낮음&quot;을 GP_c가 학습
+   → 획득함수가 충돌 영역을 곱셈으로 억제, 통로 중심 방향 제어에 가중
+4) 동시에 backward 워커가 통로 출구에서 같은 방식으로 진입
+5) 두 트리가 통로 중간 해시 버킷에서 만남 → 운동학 게이팅 통과 → BVP 브리지
+6) 0.048s에 양방향 연결 완료
+</code></pre>
+<p>SST가 30s를 쓰고도 20%인 이유는 3)이 없기 때문 — 매번 무작위로 뽑아 통로 정렬 제어를 &quot;운&quot;으로 기다린다. BOW는 실패 경험을 GP에 누적해 <strong>다음 시도를 점점 통로 쪽으로 편향</strong>시킨다. 이 &quot;실패로부터의 학습&quot;이 샘플 효율의 본질이다.</p>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<p>전체 파이프라인(Algorithm 1):</p>
+<pre><code>[1] 시작/목표 영역 주변에 N개 초기 상태 샘플
+        │
+[2] N/2 forward + N/2 backward 워커 스레드 기동
+        │
+[3] 각 워커: BOW 유도 트리 성장 (병렬)
+        │   x_rand → 해싱 최근접 → BOW 조향(α(u) 최대화) → RK 전파 → 트리 추가
+        │
+[4] 메인 스레드: 주기적으로 공간 해시 검사 → 연결 기회 탐지
+        │
+[5] 탐지 시: 운동학 실현가능성 검증 → BVP 해결 → 트리 병합
+        │
+[6] 종료: 양방향 연결 성공 또는 단방향 목표 도달
+        │
+[7] 양 트리 궤적 + 브리지 연결 추출·이어붙임 → 최종 궤적
+</code></pre>
+<p><strong>MotionTree 자료구조</strong>: 상태·부모관계·공간해시 버킷을 저장하여 효율적 이웃 질의 지원.</p>
+<p><strong>설계 미학 — &quot;탐색(워커)과 연결(메인)의 분리&quot;</strong>: 각 워커는 자기 BOW로 로컬 품질을 책임지고, 메인 스레드는 전역 연결성을 책임진다. 이 <strong>로컬-전역 책임 분리</strong>가 &quot;로컬 궤적 품질을 보존하면서 전역 연결성을 강화&quot;하는 두 번째 기여의 구조적 본질이다.</p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 벤치마크 환경 (10종)</h3>
+<p><strong>UGV(지상차) 6종</strong>: Bugtrap(좁은 통로), Narrow Passage-1·2(협소 회랑), Forest(밀집 장애물), Nonconvex(비볼록 경계), Intel(대규모·최난이도).
+<strong>UAV(공중) 4종</strong>: Quad-1~4(3D 장애물 다양 복잡도).</p>
+<p><strong>운동 모델</strong>: UGV는 Unicycle/Bicycle(더 엄격한 비홀로노믹), UAV는 8차원 상태 Quadrotor.</p>
+<h3>5.2 평가 지표 / 베이스라인</h3>
+<ul>
+<li>지표: 성공률(%), 계획시간(s), 궤적길이(m), 평균속도(m/s), 평균 jerk(평활성).</li>
+<li>베이스라인(OMPL 구현): <strong>RRT, SST, EST, KPIECE, BOW(단방향 참조)</strong>.</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>환경 (모델)</th>
+<th>BOWConnect</th>
+<th>최강 베이스라인</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Bugtrap (Unicycle)</td>
+<td><strong>0.035±0.014s, 100%</strong>, 22.091m</td>
+<td>RRT 0.815±0.734s, 100%, 22.648m</td>
+</tr>
+<tr>
+<td>Narrow Passage-1 (Bicycle)</td>
+<td><strong>0.034±0.008s, 100%</strong></td>
+<td>RRT 25.989±4.714s, <strong>80%</strong></td>
+</tr>
+<tr>
+<td>Narrow Passage-2 (Bicycle)</td>
+<td><strong>0.048±0.011s, 100%</strong></td>
+<td>SST 30.003s, <strong>20%</strong></td>
+</tr>
+<tr>
+<td>Intel (Unicycle, 최난)</td>
+<td><strong>0.397±0.039s, 100%</strong>, 83.803m</td>
+<td>SST/EST ~30s 타임아웃, <strong>40–60%</strong></td>
+</tr>
+<tr>
+<td>Quad-1 (Quadrotor)</td>
+<td><strong>0.117±0.092s, 100%</strong>, 6.562m</td>
+<td>RRT 7.815±5.281s, 100%, 7.558m</td>
+</tr>
+</tbody></table></div>
+<p>핵심 관찰:</p>
+<ul>
+<li><strong>좁은 통로에서 압도적 격차</strong>: Narrow Passage-2에서 BOWConnect 100%(0.048s) vs SST 20%(30s) — <strong>성공률 5배·속도 600배</strong>. 이것이 논문의 핵심 주장(좁은 통로에서 SOTA가 무너진다)의 직접 증거.</li>
+<li><strong>Bicycle 모델에서 베이스라인 붕괴</strong>: &quot;EST와 KPIECE는 Bicycle 모델 하 모든 환경에서 완전 실패(0%)&quot;. 엄격한 비홀로노믹 제약에서 무작위 샘플링이 유효 제어를 거의 못 뽑는다는 것 — BOW 조향의 가치가 가장 선명히 드러나는 지점.</li>
+<li><strong>속도 우위 일반화</strong>: 모든 환경에서 0.019–2.133s vs 베이스라인 6.8–42s — <strong>수십~수백 배 빠름</strong>.</li>
+<li><strong>궤적 품질도 동등 이상</strong>: Quad-1에서 6.562m vs RRT 7.558m — 더 짧은 경로. 빠를 뿐 아니라 품질도 우수.</li>
+</ul>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p><strong>지상차(UGV)</strong>:</p>
+<ul>
+<li>플랫폼: iRobot Create 3 차동구동, 반경 0.17m</li>
+<li>상태 <code>x=(x,y,θ,v,ω)</code>, 제어 <code>u=(v_c, ω_c)</code></li>
+<li>작업공간 6.5×5.5m 실내, VICON 모캡 120Hz 측위</li>
+<li>제약: <code>v_max=1.0m/s</code>, <code>ω_max=1.5rad/s</code>, <code>Δt=0.05s</code></li>
+<li><strong>성능: 평균 계획시간 0.12s, 최대 0.15s, 5회 독립 시행 모두 충돌·추종 불안정 0회</strong></li>
+</ul>
+<p><strong>공중(UAV)</strong>:</p>
+<ul>
+<li>플랫폼: Parrot Bebop 2 쿼드로터</li>
+<li>상태 8차원 <code>x=(x,y,z,θ,ẋ,ẏ,ż,θ̇)</code>, 제어 4차원</li>
+<li>작업공간 6.5×5.5×2.5m, 박스 장애물 3개</li>
+<li><strong>성능: 다중 시작-목표 구성에서 일관되게 0.1s 미만에 충돌없는 궤적 계산, 계획(녹색)-실행(청록) 경로 밀착(sim-to-real 일관성)</strong></li>
+</ul>
+<p>리얼월드 결과의 함의: 시뮬 100% 성능이 <strong>두 가지 이질적 플랫폼(차동구동 지상차 + 8차원 쿼드로터)</strong> 으로 모두 전이됐다. 단일 로봇이 아니라 동역학이 다른 두 시스템에서 실시간(&lt;0.15s) 충돌 0을 보였다는 것은 BOW 조향이 특정 동역학에 과적합되지 않았음을 시사한다.</p>
+<h3>5.5 결과의 심층 해석</h3>
+<p>세 베이스라인 군의 실패 양상은 서로 다르다:</p>
+<ul>
+<li><strong>RRT</strong>: 성공은 하나 느리다(타임아웃 직전). 무작위 확장이 결국 통로를 뚫지만 막대한 시도 필요.</li>
+<li><strong>SST/EST/KPIECE</strong>: 좁은 통로·Bicycle에서 아예 실패(0–40%). 동역학 제약이 강할수록 무작위 제어의 유효율이 0에 수렴.</li>
+<li><strong>단방향 BOW(참조)</strong>: 학습 조향은 있으나 양방향이 없어, 좁은 통로 통과 확률이 BOWConnect보다 낮음 — 양방향 병렬의 기여를 분리.</li>
+</ul>
+<p>즉 BOWConnect의 우위는 <strong>&quot;학습 조향(샘플 효율) × 양방향 병렬(연결성)&quot;</strong> 의 곱으로 나온다. 둘 중 하나만으로는 이 격차가 나지 않는다.</p>
+<h3>5.6 환경 난이도별 성능 곡선 해석</h3>
+<p>벤치마크 6종 UGV 환경을 난이도순으로 배열하면 BOWConnect의 강건성 패턴이 드러난다:</p>
+<pre><code>난이도:  Bugtrap &lt; Forest &lt; Nonconvex &lt; NarrowP-1 &lt; NarrowP-2 &lt; Intel(최난)
+BOWConnect 계획시간:  0.035 → ... → 0.397s   (모두 100% 성공)
+베이스라인 성공률:     100% → ... → 20~60%    (난이도↑ 따라 급락)
+</code></pre>
+<p>핵심은 <strong>BOWConnect의 계획시간은 난이도에 따라 완만히 증가(0.035→0.397s, ~11배)하지만 성공률은 100%로 평탄</strong>한 반면, 베이스라인은 <strong>성공률 자체가 무너진다(100%→20%)</strong>. 이 비대칭은 두 접근의 본질 차이를 보여준다:</p>
+<ul>
+<li>무작위 샘플러: 난이도가 오르면 유효 제어 확률 <code>p</code>가 지수적으로 감소 → 고정 시간예산 내 성공률 붕괴.</li>
+<li>BOWConnect: GP가 실패를 학습해 <code>p</code>를 능동 개선 + 양방향 <code>1−(1−p)^(N_f·N_b)</code>로 낮은 <code>p</code>도 보상 → 시간만 더 쓰고 성공은 유지.</li>
+</ul>
+<p>특히 <strong>Intel(최난, 83.8m 대규모)에서 0.397s·100%</strong> 는, 대규모 환경에서도 로컬 윈도우 GP가 전역 복잡도에 둔감함을 시사한다 — BOW는 항상 로컬만 보므로 전역 환경이 커져도 단계 비용이 일정하다.</p>
+<h4>평활성(jerk)·궤적 품질의 부수 효과</h4>
+<p>BOWConnect는 속도뿐 아니라 궤적 길이(Quad-1 6.562m vs RRT 7.558m)도 우수했다. 이는 GP 조향이 <strong>목표 지향 보상 <code>r=−‖p(T)−p_target‖</code><strong> 을 직접 최적화하기 때문 — 무작위 확장이 만드는 지그재그와 달리, 매 스텝 목표로 향하는 제어를 선택해 자연히 짧고 매끄러운 경로가 나온다. RRT*가 rewire로 사후 최적화하는 것과 달리 BOWConnect는 </strong>생성 시점에 이미 품질이 높다</strong>(다만 점근적 최적성은 미보장 — 9.2 참조).</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>연속 상태·제어 공간 직접 학습 조향.</strong>
+무작위 샘플링·기하 휴리스틱을 GP 기반 BOW로 대체하여, kinodynamic 제약 하에서 충돌 없는 궤적을 샘플 효율적으로 생성. 보상/제약 이중 GP + 곱셈형 실현가능성 게이팅이 핵심.</p>
+</li>
+<li><p><strong>양방향 병렬 플래닝 아키텍처.</strong>
+<code>N/2</code> forward + <code>N/2</code> backward 워커가 독립 트리·BOW로 동시 탐색, 포트폴리오 성공확률 <code>1−(1−p)^(N_f·N_b)</code>로 좁은 통로 100% 달성. 전역 연결성 강화 + 로컬 궤적 품질 보존.</p>
+</li>
+<li><p><strong>MotionTree 내 공간 해싱 다단계 검증.</strong>
+<code>O(1)</code> 이웃 조회 해시 + 운동학 실현가능성 게이팅으로 연결 감지를 경량화, 실시간(&lt;0.15s) 달성.</p>
+</li>
+<li><p><strong>이종 플랫폼 실험 검증.</strong>
+Unicycle·Bicycle 지상차 + Quadrotor 공중차, 시뮬 10환경 + 실로봇(Create 3, Bebop 2)에서 충돌 0.</p>
+</li>
+</ol>
+<h3>추가 의의</h3>
+<ul>
+<li><strong>코드·영상·그림 완전 공개</strong>(bow-connect.github.io) — 재현성 최상위. 코퍼스 다수 Planner 논문이 코드 미공개/예정인 것과 대조적으로 즉시 재현 가능.</li>
+</ul>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 핵심 하이퍼파라미터</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>시간 이산화</td>
+<td>0.1 s</td>
+<td>RK 전파 스텝</td>
+</tr>
+<tr>
+<td>로컬 계획 수평선 T</td>
+<td>3.0–5.0 s</td>
+<td>BOW 윈도우</td>
+</tr>
+<tr>
+<td>해시 해상도 Δ</td>
+<td>환경 의존</td>
+<td>공간 해싱</td>
+</tr>
+<tr>
+<td>솔버 타임아웃</td>
+<td>5–30 s</td>
+<td>환경별</td>
+</tr>
+<tr>
+<td>최대 속도</td>
+<td>1.0 m/s (UGV)</td>
+<td>가변(UAV)</td>
+</tr>
+<tr>
+<td>최대 요 레이트</td>
+<td>0.6981 rad/s</td>
+<td>≈40°/s</td>
+</tr>
+<tr>
+<td>최대 요 가속도</td>
+<td>2.0472 rad/s²</td>
+<td></td>
+</tr>
+<tr>
+<td>최대 가속도</td>
+<td>0.5 m/s²</td>
+<td></td>
+</tr>
+<tr>
+<td>실로봇 UGV</td>
+<td>Create 3, 반경 0.17m, Δt=0.05s</td>
+<td>VICON 120Hz</td>
+</tr>
+<tr>
+<td>실로봇 UAV</td>
+<td>Bebop 2, 8차원 상태</td>
+<td>&lt;0.1s 계획</td>
+</tr>
+<tr>
+<td>GP 커널 / κ / k_p</td>
+<td>명시 안 됨</td>
+<td>(한계 — 8장)</td>
+</tr>
+</tbody></table></div>
+<h3>7.2 구현상의 미묘함</h3>
+<ul>
+<li><strong>&quot;over Windows&quot;의 의미</strong>: 전역 GP가 아니라 <strong>로컬 윈도우별 GP</strong>. 관측 수를 작게 유지해 GP의 <code>O(n³)</code> 부담을 회피하면서, 로컬에서만 정밀한 비용맵을 학습. 이 설계가 GP를 실시간 플래닝에 쓸 수 있게 만든 결정적 트릭.</li>
+<li><strong>이중 GP 분리</strong>: 보상/제약을 한 GP로 합치지 않고 분리 → 안전 게이팅을 곱셈으로 깔끔히 표현. 안전과 진행의 서로 다른 표면을 독립 모델링.</li>
+<li><strong>운동학 게이팅 우선</strong>: BVP 솔버(비싼 연산) 전에 헤딩/시간 부등식으로 1차 필터 → 불가능한 연결에 솔버 낭비 방지.</li>
+</ul>
+<h3>7.3 실배치 엔지니어링 고려사항</h3>
+<p>실로봇 설정에서 드러나는 실무적 선택들:</p>
+<ul>
+<li><strong>VICON 모캡 120Hz 측위</strong>: 실험실 측위를 외부 모캡에 의존 → 정밀하나 <strong>실외/모캡 없는 환경 일반화는 미검증</strong>. 실배치 시 온보드 SLAM(LiDAR/VIO)로 대체해야 하며, 이때 측위 노이즈가 GP 입력에 들어와 성능에 영향 가능.</li>
+<li><strong>제어 timestep Δt=0.05s(UGV)</strong>: 20Hz 제어 루프. 계획시간 0.12s(평균)는 약 2~3 제어 주기에 해당 → 재계획이 제어보다 느리므로 <strong>계획은 간헐적, 추종은 연속</strong> 구조. 동적 환경에선 이 간극이 충돌 위험(8.2 L2).</li>
+<li><strong>차동구동 vs 자전거 모델</strong>: 실로봇 Create 3는 차동구동(제자리 회전 가능)이라 Bicycle 모델보다 쉬운 케이스. <strong>시뮬에서 가장 어려웠던 Bicycle 강제약의 실로봇 검증은 빠져 있다</strong> — 실험의 약한 고리. UAV는 8차원으로 충분히 도전적이나, 지상차 실험이 Bicycle이었다면 더 강한 주장이 됐을 것.</li>
+</ul>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<p>워커 수 <code>N</code>에 대해 성공확률은 지수적으로(<code>1−(1−p)^(N_f·N_b)</code>) 향상되지만, <strong>벽시계 속도향상은 연결 체크·순차 BVP 오버헤드에 의해 제한</strong>된다(논문 명시). 즉 워커를 무한정 늘려도 메인 스레드의 연결 검사가 직렬 병목이 된다. 또한 현재 멀티스레드 CPU 기반으로, <strong>GPU 병렬 RRT 변종과 달리 GPU 가속을 탐구하지 않았다</strong> — 이는 향후 큰 확장 여지다.</p>
+<h3>8.2 한계점 (Limitations)</h3>
+<ul>
+<li><strong>(L1) 하이퍼파라미터 민감도 미분석</strong>: GP 커널 선택, 탐색계수 <code>κ</code>, 비례이득 <code>k_p</code>가 명시되지 않고 민감도 분석 부재. 새 환경 이식 시 튜닝 부담.</li>
+<li><strong>(L2) 정적 환경 가정</strong>: 동적 장애물은 향후 과제. 현재는 정적 점유격자 충돌검사.</li>
+<li><strong>(L3) BVP 솔버 강건성</strong>: 비례 제어 브리지가 극도로 제약된 기하에서 실패 가능, 폴백 메커니즘이 깊이 분석되지 않음.</li>
+<li><strong>(L4) 비교 범위</strong>: OMPL 고전 플래너와만 비교, <strong>다른 학습 기반 kinodynamic 플래너(신경망 조향 등)와의 비교 제한</strong>.</li>
+<li><strong>(L5) GPU 미활용</strong>: CPU 멀티스레드 한정 — 대규모 병렬 잠재력 미실현.</li>
+</ul>
+<h3>8.3 향후 방향</h3>
+<ul>
+<li>동적 환경 대응(이동 장애물 예측 + 재계획), GPU 배치 병렬화(BOW를 GPU에서 다수 윈도우 동시 평가), 학습 조향의 다른 학습 플래너 대비 벤치마크, GP 커널·κ 자동 튜닝.</li>
+</ul>
+<h3>8.4 실패 모드 분석</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>실패 모드</th>
+<th>원인</th>
+<th>완화책(현재/제안)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>극협소 통로 BVP 실패</td>
+<td>비례제어가 정렬 한계 초과</td>
+<td>운동학 게이팅(현)/ 정밀 BVP 솔버(제안)</td>
+</tr>
+<tr>
+<td>연결 병목</td>
+<td>순차 BVP·연결검사</td>
+<td>병렬 BVP(제안)</td>
+</tr>
+<tr>
+<td>동적 장애물 충돌</td>
+<td>정적 가정</td>
+<td>미지원(향후)</td>
+</tr>
+<tr>
+<td>새 환경 저성능</td>
+<td>κ/커널 미튜닝</td>
+<td>자동 튜닝(제안)</td>
+</tr>
+</tbody></table></div>
+<p>BOWConnect의 실패는 주로 <strong>연결 단계(메인 스레드)</strong> 에 집중된다 — 탐색(워커+BOW)은 강건하나, 양 트리를 잇는 BVP·연결검사가 병목이자 취약점. 따라서 차기 레버리지는 조향이 아니라 <strong>연결 병렬화</strong>에 있다.</p>
+<h3>8.5 재현성 평가</h3>
+<ul>
+<li><strong>코드 ✅ 공개</strong>(bow-connect.github.io): 소스·영상·고해상 그림 제공 → <strong>완전 재현 가능</strong>. 코퍼스 Planner 다수가 코드 미공개인 가운데 모범 사례.</li>
+<li><strong>다만 일부 하이퍼파라미터(GP 커널/κ/k_p)는 논문 본문 미명시</strong> — 코드에서 확인 필요. 개념 재현은 명확, 정확 재현은 코드 의존.</li>
+</ul>
+<h3>8.6 포트폴리오 성공확률의 정량적 함의</h3>
+<p><code>P_success = 1 − (1 − p_single)^(N_f × N_b)</code> 를 수치로 풀면 양방향 병렬의 위력이 분명해진다. 좁은 통로에서 단일 워커 성공확률 <code>p_single</code>이 매우 낮다고 하자(예: 0.1):</p>
+<pre><code>N_f=N_b=1  → 1−(1−0.1)^1   = 0.10   (단방향 BOW 수준)
+N_f=N_b=2  → 1−(1−0.1)^4   = 0.344
+N_f=N_b=4  → 1−(1−0.1)^16  = 0.815
+N_f=N_b=8  → 1−(1−0.1)^64  ≈ 0.999
+</code></pre>
+<p>즉 개별 워커가 10%만 성공해도 8+8 워커면 99.9%에 도달한다. 이 지수 스케일링이 &quot;좁은 통로 100% 성공&quot;의 수학적 정체다. 단, 이는 워커 독립성을 가정한 상한이며, 실제로는 워커들이 같은 통로를 공유해 완전 독립이 아니다(상관 존재 → 실제 성공확률은 다소 낮음). 그럼에도 <strong>워커 수를 늘리는 것이 성공률을 끌어올리는 가장 직접적 레버</strong>라는 설계 원리는 유효하다. 비용은 8.1의 연결 병목과 트레이드오프 — 워커가 많을수록 메인 스레드의 연결 검사 부하가 커진다.</p>
+<h3>8.7 BO-기반 플래닝의 더 넓은 지형</h3>
+<p>BOWConnect를 더 넓은 맥락에 놓으면, <strong>&quot;플래닝을 블랙박스 최적화로 보는&quot;</strong> 흐름의 일부다. 전통 플래닝은 그래프 탐색(A*, Dijkstra)이나 무작위 확장(RRT)으로 구성공간을 다루지만, 동역학이 복잡해 비용/충돌을 닫힌 형태로 못 쓸 때 <strong>대리모델(surrogate)이 비용 표면을 학습</strong>하는 접근이 부상했다. BOWConnect는 이를 <strong>로컬 조향</strong>에 적용한 인스턴스다. 대안 접근으로는 (i) 신경망 비용맵(학습된 휴리스틱을 A*에 주입), (ii) 디퓨전 기반 궤적 생성(코퍼스의 SobolevDiffusion·G2DP 계열), (iii) RL 정책 조향 등이 있다. BOWConnect의 차별점은 <strong>GP의 명시적 불확실성</strong>을 안전 게이팅에 직접 쓴다는 것 — 신경망/디퓨전은 불확실성 정량화가 어렵지만, GP는 <code>σ_c</code>로 충돌 위험을 자연히 확률화해 <code>P_feas</code>에 넣는다. 이 <strong>불확실성-인지 안전(uncertainty-aware safety)</strong> 이 BO 조향의 고유 강점이다.</p>
+<h3>8.8 이론적 위치짓기</h3>
+<p>BOWConnect는 <strong>샘플링 기반 모션 플래닝에 베이지안 최적화를 조향 함수로 이식</strong>한 계열에 속한다. 전통 RRT/SST는 &quot;무작위로 뽑고 가까운 것을 연결&quot;하는 <em>수동적</em> 탐색인 반면, BOWConnect는 &quot;학습된 비용/안전 표면을 보고 다음 제어를 <em>능동적으로 결정</em>&quot;한다. 이는 모션 플래닝의 무게중심을 <strong>샘플 분포 설계 → 조향 함수 학습</strong>으로 옮기는 흐름의 일부다. 동시에 양방향(bidirectional) 탐색은 RRT-Connect 계보를, GP 대리모델은 BO 계보를 잇는 <strong>하이브리드</strong>다.</p>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>같은 Planner 트랙의 선행 리뷰 중 <strong>샘플링 기반/kinodynamic 모션 플래닝</strong>과 가장 가까운 세 편과 비교한다:</p>
+<ul>
+<li><strong>BTIT*: Optimal Kinodynamic Motion Planning Through Anytime Bidirectional Heuristic Search with Tight Termination Condition</strong> (Planner/review/BTIT_star_arxiv2026) — <strong>kinodynamic + 양방향 + 샘플링 + 점근적 최적성</strong>. BOWConnect와 문제 클래스가 가장 정확히 일치하는 직접 비교 대상.</li>
+<li><strong>FPAS: Frontier-Based Path Planning with Adaptive Sampling for Large-Scale Unknown Environments</strong> (Planner/review/FPAS_IROS2026) — <strong>IROS 2026 동일 게재처</strong>, 적응적 샘플링, 대규모 미지 환경.</li>
+<li><strong>Enhanced Tube-RRT*: Trajectory Planning for 3-UAV Cascaded Rigid-Payload Transportation</strong> (Planner/review/TubeRRT_TAES2026) — RRT* 기반 kinodynamic UAV 궤적 계획.</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>BTIT*</th>
+<th>FPAS</th>
+<th>TubeRRT*</th>
+<th><strong>BOWConnect (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 패러다임</td>
+<td>양방향 휴리스틱 탐색</td>
+<td>프론티어 적응 샘플링</td>
+<td>RRT* 변종(튜브)</td>
+<td><strong>BO 조향 + 양방향 병렬</strong></td>
+</tr>
+<tr>
+<td>조향/확장</td>
+<td>휴리스틱 안내</td>
+<td>개방도 비례 밀도</td>
+<td>무작위+rewire</td>
+<td><strong>GP 획득함수 α(u)</strong></td>
+</tr>
+<tr>
+<td>최적성</td>
+<td>점근적 최적</td>
+<td>휴리스틱(비최적)</td>
+<td>점근적 최적</td>
+<td><strong>비최적(빠른 실현가능 우선)</strong></td>
+</tr>
+<tr>
+<td>양방향</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅ (병렬 N/2+N/2)</td>
+</tr>
+<tr>
+<td>좁은통로 강점</td>
+<td>양방향 종료조건</td>
+<td>적응밀도</td>
+<td>제한적</td>
+<td><strong>100%(통로 SOTA 붕괴 영역)</strong></td>
+</tr>
+<tr>
+<td>실로봇</td>
+<td>(확인)</td>
+<td>❌ 시뮬만</td>
+<td>UAV 페이로드</td>
+<td><strong>차량+드론 충돌0</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>(확인)</td>
+<td>❌ 미공개</td>
+<td>(확인)</td>
+<td>✅ <strong>공개</strong></td>
+</tr>
+<tr>
+<td>게재</td>
+<td>arXiv 2026</td>
+<td>IROS 2026</td>
+<td>T-AES 2026</td>
+<td><strong>IROS 2026</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>BOWConnect의 강점:</strong></p>
+<ol>
+<li><strong>학습 조향으로 비홀로노믹 강제약에서 압도적</strong> — BTIT*도 양방향 kinodynamic이지만 휴리스틱 탐색이고, BOWConnect는 <strong>GP로 비용/안전을 학습</strong>해 Bicycle 모델에서 베이스라인 0% 대비 100%. FPAS의 기하 개방도 휴리스틱은 학습이 없어 동역학 강제약을 직접 다루지 못한다.</li>
+<li><strong>실로봇 이종 검증</strong> — FPAS는 시뮬만, TubeRRT는 페이로드 UAV 한정. BOWConnect는 차동구동 지상차 + 8차원 쿼드로터 양쪽 실증.</li>
+<li><strong>코드 공개</strong> — 셋 중 재현성 최상.</li>
+</ol>
+<p><strong>BOWConnect의 약점:</strong></p>
+<ol>
+<li><strong>최적성 미보장</strong> — BTIT*·TubeRRT*는 점근적 최적성을 보장하나, BOWConnect는 &quot;빠른 실현가능 궤적&quot; 우선이라 <strong>최적 경로를 보장하지 않는다</strong>. 경로 길이 최소화가 critical한 응용에선 BTIT*가 유리.</li>
+<li><strong>하이퍼파라미터 민감도</strong> — FPAS는 CPU-only 경량에 파라미터가 명확(δ_min/δ_max). BOWConnect는 GP 커널/κ 미명시로 이식성 불확실.</li>
+<li><strong>정적 환경 한정</strong> — 세 비교 논문 모두 동적 환경은 약하나, BOWConnect도 동일 한계.</li>
+</ol>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>BOWConnect</strong>: 실시간(&lt;0.15s) + 이종 실로봇 + 코드 공개 → <strong>즉시 실배치 후보로 매우 강함</strong>. 특히 좁은 실내(창고 통로, 실험실)·소형 드론에 적합. 단 최적성 미보장으로 에너지/거리 최적이 critical한 장거리 주행엔 보완 필요.</li>
+<li><strong>BTIT</strong>*: 최적성·점근적 보장이 필요한 정밀 응용(매니퓰레이터 경로 등)에 우위, 그러나 anytime 수렴 시간 필요.</li>
+<li><strong>FPAS</strong>: 대규모 미지 환경 탐사(실외 광역)에 강점, kinodynamic 강제약·실로봇은 비대상.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>BOWConnect는 모션 플래닝의 무게중심을 <strong>&quot;샘플 분포/휴리스틱 설계 → 조향 함수의 베이지안 학습&quot;</strong> 으로 옮긴다. 이는 BTIT*(탐색 알고리즘 측 최적화), FPAS(샘플 밀도 측 적응)와 <strong>직교</strong>하는 축이다. 따라서 결합이 자연스럽다 — 예: BOWConnect의 BOW 조향을 BTIT*의 양방향 anytime 프레임에 얹어 <strong>&quot;학습 조향 + 점근 최적성&quot;</strong> 하이브리드를 만들거나, FPAS의 개방도 적응을 BOWConnect 워커 분배에 도입해 환경 구조별 워커 수를 조절하는 식.</p>
+<h3>9.5 일반화 가능성</h3>
+<p>BOW의 &quot;이중 GP(보상/제약) + 곱셈 게이팅 획득함수&quot;는 모션 플래닝에 국한되지 않는다. <strong>제약 있는 연속 의사결정</strong>(로봇 파지 자세 최적화, 비행 제어 파라미터 탐색, 안전 강화학습의 안전 게이팅) 어디에나 이식 가능한 일반 레시피다. 즉 BOWConnect는 &quot;제약 베이지안 최적화를 트리 탐색 조향으로 쓰는&quot; 일반 패턴의 kinodynamic 인스턴스다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li>BOWConnect, <em>IROS 2026</em> (채택). arXiv:2606.27292. 프로젝트/코드: <a href="https://bow-connect.github.io/">https://bow-connect.github.io/</a></li>
+<li>비교 대상 (본 코퍼스):<ul>
+<li>BTIT*: Optimal Kinodynamic Motion Planning Through Anytime Bidirectional Heuristic Search with Tight Termination Condition (arXiv 2604.11587).</li>
+<li>FPAS: Frontier-Based Path Planning with Adaptive Sampling for Large-Scale Unknown Environments (IROS 2026, arXiv 2606.22838).</li>
+<li>Enhanced Tube-RRT*: Trajectory Planning for 3-UAV Cascaded Rigid-Payload Transportation Systems (IEEE T-AES, arXiv 2604.15074).</li>
+</ul>
+</li>
+<li>관련 기법: RRT/RRT-Connect (LaValle &amp; Kuffner), SST (Li et al.), Bayesian Optimization (Shahriari et al., 2016), Gaussian Processes (Rasmussen &amp; Williams, 2006), OMPL (Şucan et al., 2012).</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>혁신성</h3>
+<p>BOWConnect의 핵심 혁신은 <strong>kinodynamic 모션 플래닝의 조향을 &quot;무작위 샘플링&quot;에서 &quot;제약 베이지안 최적화&quot;로 전환</strong>한 것이다. 보상·제약을 분리된 두 GP로 학습하고 <code>α(u)=[μ_r−κσ_r]·P_feas</code> 곱셈 게이팅으로 안전을 능동 반영하며, 여기에 양방향 병렬(<code>1−(1−p)^(N_f·N_b)</code>)과 공간 해싱을 결합해, 기존 SOTA가 무너지는 좁은 통로·Bicycle 강제약에서 <strong>100% 성공·수백 배 빠른 속도</strong>를 달성한다.</p>
+<h3>실용적 의의</h3>
+<p>실시간(&lt;0.15s) 성능이 차동구동 지상차(Create 3)와 8차원 쿼드로터(Bebop 2) <strong>양쪽 실로봇으로 충돌 0</strong> 전이됐고, <strong>코드·영상이 완전 공개</strong>되어 재현성이 코퍼스 최상위다. 좁은 실내·소형 로봇의 실시간 재계획에 즉시 투입 가능한 강한 후보다.</p>
+<h3>향후 연구 방향</h3>
+<p>한계는 (i) 최적성 미보장(BTIT* 대비), (ii) GP 커널/κ 민감도 미분석, (iii) 정적 환경 가정, (iv) GPU 미활용, (v) 연결 단계 직렬 병목에 있다. 따라서 <strong>학습 조향 + 점근 최적성 하이브리드</strong>, <strong>GPU 배치 BO</strong>, <strong>동적 장애물 대응</strong>, <strong>연결 병렬화</strong>가 자연스러운 다음 단계다. 더 근본적으로, BOWConnect가 제시한 &quot;제약 베이지안 최적화를 트리 조향으로&quot; 레시피는 모션 플래닝을 넘어 제약 있는 연속 의사결정 전반으로 확장될 잠재력을 지닌다.</p>
+<h3>종합 평가</h3>
+<p>BOWConnect는 &quot;샘플 효율&quot;이라는 kinodynamic 플래닝의 오랜 약점을, GP가 제공하는 <strong>불확실성 정량화</strong>를 조향에 직접 끌어들여 정면 돌파한다. 무작위 추출이 좁은 통로에서 거의 0에 수렴하는 유효 샘플 확률을, 보상·제약 GP의 능동 탐색으로 끌어올린 점이 본질적 기여다. 평가 측면에서도 시뮬레이션 10개 환경 100% 성공에 그치지 않고 <strong>이종 플랫폼(지상 차동구동 + 공중 8차원) 양쪽 실로봇 전이</strong>와 <strong>완전 코드 공개</strong>를 동시에 충족해, 코퍼스 내 Planner 논문 중 재현성·실증성 균형이 가장 뛰어난 축에 속한다. 다만 좁은 통로 성능의 상당 부분이 <strong>양방향 병렬과 학습 비용맵의 시너지</strong>에서 나오는지, 아니면 BO 조향 단독 기여인지에 대한 절제(ablation)가 충분히 분해되지 않은 점, 그리고 가장 어려운 Bicycle 강제약이 실로봇이 아닌 시뮬레이션에서만 검증된 점은 후속 연구가 메워야 할 빈칸이다. 그럼에도 &quot;제약 BO를 트리 조향으로&quot;라는 명료한 레시피와 즉시 재현 가능한 오픈소스는 본 논문을 2026년 상반기 kinodynamic 플래닝 흐름에서 주목할 가치가 높은 결과로 만든다.</p>
+<hr>
+<p><em>본 리뷰는 PhD 수준 상세 분석이며, 코드 공개(bow-connect.github.io)·논문 본문(arXiv HTML)의 수식·실험표·실로봇 기술에 기반한다.</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

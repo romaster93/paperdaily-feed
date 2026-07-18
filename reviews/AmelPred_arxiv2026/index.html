@@ -1,0 +1,1174 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Self-Predictive Representation for Autonomous UAV Object-Goal Navigation (AmelPred) · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 2026</div>
+    <h1>Self-Predictive Representation for Autonomous UAV Object-Goal Navigation (AmelPred)</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2604.21130">arXiv:2604.21130</a></span>
+      <span>리뷰 2026-04-26</span>
+      <span>45분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>AmelPred: UAV 객체 목표 탐색을 위한 자기 예측 표현 학습 — 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Self-Predictive Representation for Autonomous UAV Object-Goal Navigation</li>
+<li><strong>저자 (Authors)</strong>: Angel Ayala, Donling Sui, Francisco Cruz, Mitchell Torok, Mohammad Deghat</li>
+<li><strong>소속 (Affiliation)</strong>:<ul>
+<li>Angel Ayala: Escola Politécnica de Pernambuco, Universidade de Pernambuco, Recife, Brasil</li>
+<li>Francisco Cruz: School of Computer Science and Engineering, UNSW Sydney, Australia; Universidad Central de Chile</li>
+<li>Donling Sui, Mitchell Torok, Mohammad Deghat: School of Mechanical and Manufacturing Engineering, UNSW Sydney, Australia</li>
+</ul>
+</li>
+<li><strong>발표처 (Published)</strong>: IEEE Transactions on Robotics (T-RO), 심사 중 (arXiv 2026년 4월 22일)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2604.21130">https://doi.org/10.48550/arXiv.2604.21130</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.21130">https://arxiv.org/abs/2604.21130</a></li>
+<li><strong>GitHub</strong>: <a href="https://github.com/angel-ayala/gym-webots-drone">https://github.com/angel-ayala/gym-webots-drone</a> (시뮬레이션 환경)</li>
+<li><strong>프로젝트 페이지</strong>: 없음</li>
+<li><strong>라이선스</strong>: 미표기 (T-RO 심사 중)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 논문은 <strong>자율 UAV(무인 항공기)가 사전 좌표 없이 목표 객체를 탐색(Object-Goal Navigation, OGN)하는 문제</strong>를 강화 학습(RL)과 자기 예측 표현 학습(Self-Predictive Representation Learning, SRL)의 결합으로 해결한다.</p>
+<p><strong>핵심 연구 질문</strong>: 강화학습 기반 UAV 탐색에서 샘플 효율성과 실세계 전이 능력을 동시에 향상시키는 표현 학습 방법은 무엇인가?</p>
+<p>기존 방법론의 한계:</p>
+<ol>
+<li><strong>샘플 비효율성</strong>: 모델-프리 RL은 좋은 정책을 학습하기까지 수백만 번의 상호작용이 필요</li>
+<li><strong>목표 좌표 의존성</strong>: 대부분의 OGN 방법은 목표 위치를 명시적으로 제공받아야 함</li>
+<li><strong>이미지 기반 SPR의 벡터 관찰 미지원</strong>: 기존 자기 예측 표현(SPR)은 이미지 입력 전제</li>
+<li><strong>시뮬레이션-현실 전이 어려움</strong>: 시뮬레이터에서 학습한 정책이 실제 드론에서 성능 저하</li>
+</ol>
+<p><strong>AmelPred의 핵심 아이디어</strong>:</p>
+<pre><code>기존 SPR (이미지 기반):
+  인코더(CNN) → 잠재 표현 z_t → 전이 모델 → z^{t+k} 예측
+  손실: InfoNCE (이미지 패치 간 대조 학습)
+
+AmelPred (벡터 상태 기반):
+  인코더(MLP) → 잠재 표현 z_t → 전이 모델 → z_{t+1} 예측
+  손실: InfoNCE (결정론적) 또는 KL Divergence (확률론적)
+  특이점: 상태 벡터에서 확률 분포 학습 → UAV 관찰 불확실성 포착
+</code></pre>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 3D 공간에서의 UAV 객체 목표 탐색</h4>
+<p>UAV가 3D 공간을 자유롭게 비행하면서 목표 객체를 찾아가는 문제는 다음과 같은 독특한 어려움을 가진다:</p>
+<pre><code>UAV OGN의 특수성:
+
+지상 로봇 탐색:
+  - 2D 평면 이동 (일반적)
+  - 휠 마찰로 인한 자연적 안정성
+  - 중력에 의한 자세 제한
+
+UAV 탐색:
+  - 6-DOF 3D 자유 운동
+  - 기체 역학: φ(롤), θ(피치), ψ(요) 동시 제어
+  - 항공 역학적 불안정성
+  - 실시간 자세 제어 + 탐색 정책 동시 요구
+
+관찰 공간:
+  - 위치: [x, y, z] (3차원)
+  - 속도: [ẋ, ẏ, ż] (3차원)
+  - 자세: [φ, θ, ψ] (오일러 각 3개)
+  - 각속도: [φ̇, θ̇, ψ̇] (3차원)
+  - (선택) 목표 좌표: [T_x, T_y, T_z, η] (4차원)
+  - (선택) 가상 근접 센서: 6차원
+  총: 12~22차원 연속 벡터
+</code></pre>
+<h4>B. 강화학습의 샘플 비효율성</h4>
+<p>강화학습에서 좋은 정책을 학습하려면 환경과의 많은 상호작용이 필요하다:</p>
+<pre><code>샘플 효율성 문제:
+
+기본 TD3 학습 곡선 (450K 스텝):
+  Episode 0-10:   탐색, 보상 매우 낮음 (IQM ≈ 0.1)
+  Episode 10-30:  점진적 향상 (IQM ≈ 0.3-0.5)
+  Episode 30-50:  수렴 (IQM ≈ 0.5)
+  → 의미있는 성능(IQM &gt; 0.6) 달성까지 약 300K+ 스텝
+
+AmelPredSto + TD3:
+  Episode 0-10:   빠른 초기 학습 (IQM ≈ 0.7)
+  Episode 10+:    안정적 유지 (IQM ≈ 0.8)
+  → 200K 스텝 이내에 IQM 0.8 달성
+
+이유: 표현 학습이 상태 공간의 유용한 구조를 미리 파악하여
+     RL 에이전트의 학습 방향 제공
+</code></pre>
+<h4>C. 벡터 관찰에서의 자기 예측 학습</h4>
+<p>원래 SPR(Self-Predictive Representations, Schwarzer et al. 2021)은 이미지 기반 Atari 게임을 위해 설계되었다:</p>
+<pre><code>이미지 기반 SPR의 특징:
+  - CNN 인코더: 이미지 → 잠재 표현
+  - 시간적 예측: 현재 z_t + 행동 a_t → 미래 z_{t+1} 예측
+  - InfoNCE 손실로 대조적 자기 지도 학습
+
+벡터 기반 적용의 도전:
+  - CNN 대신 MLP 인코더 필요 (구조 완전 재설계)
+  - 이미지 패치 간 대조학습 → 상태 벡터 간 비교로 전환
+  - 연속 상태 공간에서의 분포 모델링 필요
+  - UAV의 동역학적 불확실성: IMU 노이즈, 공기역학적 교란
+
+이 논문의 기여:
+  - AmelPredDet: InfoNCE 손실로 결정론적 매핑
+  - AmelPredSto: KL 발산으로 확률론적 분포 매핑
+  → UAV 동역학의 내재적 불확실성을 확률 분포로 포착
+</code></pre>
+<h4>D. 시뮬레이션-현실 전이 (Sim-to-Real Transfer)</h4>
+<p>UAV 제어에서 시뮬레이션과 현실의 차이는 특히 크다:</p>
+<pre><code>Sim-to-Real 갭 주요 원인:
+
+물리적 차이:
+  - 공기저항: 시뮬레이터는 근사, 현실은 복잡한 공기역학
+  - 모터 반응: 이상적 vs 실제 모터 지연/비선형성
+  - 질량/관성: 모델 오차
+
+센서 차이:
+  - IMU 노이즈: 시뮬레이션의 가우시안 노이즈 vs 실제 교란
+  - 위치 추정: OptiTrack vs GPS/SLAM
+
+통신 차이:
+  - 제어 루프 지연: 시뮬레이터 동기 vs 실제 비동기 통신
+  - 명령 주파수: 시뮬레이션과 실제 Crazyflie 펌웨어 차이
+</code></pre>
+<h3>2.2 핵심 해결책</h3>
+<pre><code>AmelPred 시스템 전체 흐름:
+
+관찰 o_t (12~22차원 벡터)
+       │
+       ▼
+┌────────────────┐
+│  인코더 f_enc  │  MLP(3층) + LeakyReLU + LayerNorm + Tanh
+│  (공유 파라미터)│  출력: z_t ∈ [-1, 1]^d
+└────────────────┘
+       │
+   ┌───┴───┐
+   │       │
+   ▼       ▼
+┌─────┐  ┌──────────────────┐
+│ RL  │  │  표현 학습 경로  │
+│알고리즘│  │  AmelPredDet/Sto │
+└─────┘  └──────────────────┘
+   │             │
+   │      ┌──────┘
+   │      ▼
+   │  전이 모델 g(z_t, a_t) → ẑ_{t+1}
+   │      │
+   │      ▼
+   │  타겟 인코더 f̄_enc(o_{t+1}) → z_{t+1}
+   │      │
+   │      ▼
+   │  손실 L_SPR (InfoNCE 또는 KL Div)
+   │      │
+   └──────┤ 역전파 방향
+          │ 파란색: RL 손실 → 인코더 + Q모델
+          │ 초록색: 표현 손실 → 인코더 + 전이 + 투영
+          ▼
+      합산 최적화: L = L_RL + L_SPR
+</code></pre>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 MDP 공식화 (Problem Formalization)</h3>
+<p>UAV OGN을 마르코프 결정 과정(MDP)으로 형식화한다:</p>
+<p><strong>상태 공간 S</strong>:</p>
+<p>관찰 공간 O는 두 가지 변형:</p>
+<pre><code>O_TC (목표 좌표 포함):
+  o = [x, y, z,          ← UAV 3D 위치
+       ẋ, ẏ, ż,          ← 선속도
+       φ, θ, ψ,          ← 오일러 각 (롤, 피치, 요)
+       φ̇, θ̇, ψ̇,         ← 각속도
+       T_x, T_y, T_z,    ← 목표 객체 좌표
+       η]                 ← 북 기준 방향
+  차원: 16
+
+O_TS (가상 근접 센서):
+  o = [x, y, z, ẋ, ẏ, ż, φ, θ, ψ, φ̇, θ̇, ψ̇]  ← 기본 12차원
+    + [s_1, ..., s_6]      ← 6개 가상 센서 (목표 방향 감지)
+  차원: 18
+
+가상 센서 s_i 정의:
+  s_i = {1, if 목표가 i번째 방향 섹터에 위치
+         0, otherwise}
+  6개 섹터: 전방, 후방, 좌, 우, 위, 아래
+</code></pre>
+<p><strong>행동 공간 A</strong> (연속):</p>
+<pre><code>a = [ẋ_cmd, ẏ_cmd, ż_cmd, ψ̇_cmd]
+
+ẋ, ẏ, ż ∈ [-0.5, 0.5] m/s   ← 속도 명령
+ψ̇ ∈ [-72, 72] deg/s          ← 요 회전 속도
+</code></pre>
+<p><strong>보상 함수 R</strong> (다요소 보상):</p>
+<pre><code>거리 보상 (r_dist):
+  r_dist = -(1 - D_T_t / D_g)^2 * sign(D_T_t - D_g)
+
+  여기서:
+  D_T_t = 현재 UAV와 목표 사이 거리
+  D_g = 목표 반경 = D_risk + D_thr/2
+
+방향 보상 (r_ori):
+  r_ori = -|UAV_heading - T_direction| / π
+  → 목표를 정면으로 향할수록 높은 보상
+
+고도 보상 (r_elev):
+  r_elev = -|arctan(Δx,y, Δz)| / (π/2)
+  → 목표와 동일 고도에 있을수록 높은 보상
+
+자세 결합 보상:
+  r_pose = r_dist + r_ori + r_elev
+
+속도 보상 (r_vel):
+  r_vel = (d_t - d_{t+1}) / Δt
+  → 목표를 향해 접근 속도가 빠를수록 보상
+
+패널티:
+  r_penalty = -2, if (경계 초과 OR 장애물 충돌)
+            = -1, if (장애물 근접)
+            = 0, otherwise
+
+성공 보너스:
+  r_success = 10, if (1 + r_dist)(1 + r_ori)(1 + r_elev) &gt; 0.95
+  → 목표에 모든 조건이 충족될 때만 달성
+
+총 보상:
+  r_total = r_vel + 0.1 × r_pose + r_penalty + r_success
+</code></pre>
+<p>감가율 γ = 0.99 (장기 보상 중시)</p>
+<h3>3.2 AmelPred: 자기 예측 표현 학습</h3>
+<p><strong>자기 예측 표현(Self-Predictive Representation, SPR)의 기본 원리</strong>:</p>
+<pre><code>핵심 아이디어: 미래 상태를 정확히 예측할 수 있는 표현은
+              환경의 동역학을 잘 포착한다.
+
+시간적 예측 구조:
+  현재: o_t → z_t = f_enc(o_t)
+  행동: a_t
+  미래 예측: ẑ_{t+1} = g(z_t, a_t)
+  실제 미래: z_{t+1} = f̄_enc(o_{t+1})
+
+목표: ẑ_{t+1} ≈ z_{t+1}
+</code></pre>
+<p><strong>인코더 구조</strong> (MLP 기반):</p>
+<pre><code class="language-python">class Encoder(nn.Module):
+    def __init__(self, obs_dim, hidden_dim=256, latent_dim=128):
+        # 결정론적 버전 (AmelPredDet)
+        self.net = nn.Sequential(
+            nn.Linear(obs_dim, hidden_dim),
+            nn.LeakyReLU(0.2),
+            nn.LayerNorm(hidden_dim),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.LeakyReLU(0.2),
+            nn.LayerNorm(hidden_dim),
+            nn.Linear(hidden_dim, latent_dim),
+            nn.Tanh()  # 출력 범위: [-1, 1]
+        )
+    
+    def forward(self, obs):
+        return self.net(obs)
+
+class StochasticEncoder(nn.Module):
+    def __init__(self, obs_dim, hidden_dim=256, latent_dim=128):
+        # 확률론적 버전 (AmelPredSto)
+        self.backbone = ...  # 위와 동일
+        self.mu_head = nn.Linear(hidden_dim, latent_dim)
+        self.log_sigma_head = nn.Linear(hidden_dim, latent_dim)
+    
+    def forward(self, obs):
+        h = self.backbone(obs)
+        mu = self.mu_head(h)
+        log_sigma = self.log_sigma_head(h)
+        sigma = F.softplus(log_sigma)  # 양수 보장
+        return mu, sigma  # 다변량 정규분포 파라미터
+</code></pre>
+<p><strong>전이 모델 (Transition Model)</strong>:</p>
+<pre><code class="language-python">class TransitionModel(nn.Module):
+    def __init__(self, latent_dim, action_dim, hidden_dim=256):
+        self.net = nn.Sequential(
+            nn.Linear(latent_dim + action_dim, hidden_dim),
+            nn.LayerNorm(hidden_dim),
+            nn.Tanh(),
+            nn.Linear(hidden_dim, latent_dim),
+            nn.Tanh()  # 잠재 공간 [-1, 1] 유지
+        )
+    
+    def forward(self, z_t, a_t):
+        x = torch.cat([z_t, a_t], dim=-1)
+        return self.net(x)  # ẑ_{t+1}
+</code></pre>
+<p><strong>투영 헤드 (Projection Head)</strong>:</p>
+<pre><code class="language-python">class ProjectionHead(nn.Module):
+    # z_{t+1} → 투영 공간으로 변환 (비교를 위한 공간)
+    def __init__(self, latent_dim, proj_dim=64):
+        self.net = nn.Sequential(
+            nn.Linear(latent_dim, latent_dim // 2),
+            nn.Tanh(),
+            nn.Linear(latent_dim // 2, proj_dim),
+            nn.Tanh()  # AmelPredDet만 사용
+        )
+</code></pre>
+<h3>3.3 AmelPredDet: 결정론적 표현 손실 (InfoNCE)</h3>
+<p><strong>InfoNCE(Noise Contrastive Estimation) 손실</strong>:</p>
+<pre><code>목적: 같은 궤적에서 연속된 (z_t, z_{t+1}) 쌍을 가깝게,
+     다른 궤적의 z는 멀게 학습
+
+수식:
+  L_InfoNCE = -E[log( f_k(z_{t+1}, c_t) / Σ_{j∈Batch} f_k(z_j, c_t) )]
+
+  여기서:
+  c_t = 컨텍스트 표현 = h(ẑ_{t+1})  (투영 헤드 통과 후)
+  z_{t+1} = 타겟 인코더가 생성한 실제 다음 상태 표현
+  f_k(x, c) = exp(x · c / τ)        (온도 조절 내적)
+  τ = 온도 파라미터 (기본 0.1)
+
+직관적 해석:
+  배치 내의 N개 샘플 중 실제 다음 상태를 맞추는 분류 문제
+  → 미래를 잘 예측하는 표현 구조 학습
+</code></pre>
+<p><strong>타겟 인코더 (Target Encoder) - Polyak 평균화</strong>:</p>
+<pre><code>타겟 인코더의 파라미터 θ̄는 학습 인코더 θ의 지수 이동 평균:
+
+θ̄ ← τ_ema · θ̄ + (1 - τ_ema) · θ
+
+τ_ema = 0.999  (느린 이동)
+→ 타겟은 안정적으로 유지되어 학습을 안정화
+</code></pre>
+<h3>3.4 AmelPredSto: 확률론적 표현 손실 (KL Divergence)</h3>
+<p><strong>KL 발산 손실</strong>:</p>
+<pre><code>확률론적 버전은 인코더가 가우시안 분포를 출력:
+  f_enc(o_t) → (μ_t, σ_t)
+  z_t ~ N(μ_t, diag(σ_t²))
+
+예측 분포와 실제 분포 간의 KL 발산:
+  L_KL = D_KL( P(z_{t+1}) || Q(ẑ_{t+1}) )
+       = Σ_x P(x) log(P(x) / Q(x))
+
+  여기서:
+  P = 타겟 인코더로부터의 실제 z_{t+1} 분포
+  Q = 전이 모델로부터의 예측 ẑ_{t+1} 분포
+
+두 가우시안 분포 간의 분석적 KL:
+  D_KL( N(μ_1, Σ_1) || N(μ_2, Σ_2) )
+  = 0.5 × [tr(Σ_2⁻¹ Σ_1) + (μ_2-μ_1)^T Σ_2⁻¹ (μ_2-μ_1) - d + log(|Σ_2|/|Σ_1|)]
+
+장점:
+  불확실성 정보가 분포로 인코딩됨
+  → UAV 동역학의 공기역학적 노이즈를 모델링 가능
+</code></pre>
+<h3>3.5 통합 학습 목표</h3>
+<pre><code>최종 학습 목표 (AmelPredSto + TD3 예시):
+
+총 손실:
+  L_total = L_RL + α · L_SPR
+
+L_RL = TD3 Actor-Critic 손실:
+  Critic: L_critic = MSE(Q(s,a), y)
+    y = r + γ × min(Q₁&#39;(s&#39;,ã&#39;), Q₂&#39;(s&#39;,ã&#39;))  (클리핑)
+    ã&#39; ~ π(s&#39;) + ε, ε ~ clip(N(0,σ), -c, c)  (정책 노이즈)
+  Actor: L_actor = -E[Q(s, π(s))]
+  
+L_SPR = α_SPR × (L_KL 또는 L_InfoNCE)
+
+역전파 경로:
+  파란색 (RL 경로): L_RL → 인코더 + Q네트워크
+  초록색 (표현 경로): L_SPR → 인코더 + 전이 모델 + 투영 헤드
+
+중요: 타겟 인코더는 역전파에서 제외 (stop-gradient)
+     → 이는 Polyak 평균화로만 업데이트됨
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                     AmelPred 시스템 전체 구조                     │
+└─────────────────────────────────────────────────────────────────┘
+
+환경 (Webots 시뮬레이터 / 실제 Crazyflie)
+   │ 관찰 o_t (12~18차원)
+   ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                         인코더 모듈                              │
+│  ┌──────────────────────────────────────┐                       │
+│  │  MLP 3층 (LeakyReLU + LayerNorm)    │                       │
+│  │  Input: o_t ∈ R^{12~18}            │                       │
+│  │  Output: z_t ∈ [-1,1]^{128}        │                       │
+│  │  또는 (μ_t, σ_t) [확률론적]         │                       │
+│  └──────────────────────────────────────┘                       │
+└─────────────────────┬───────────────────────────────────────────┘
+                      │ z_t
+          ┌───────────┴────────────┐
+          │                        │
+          ▼                        ▼
+┌──────────────────┐    ┌────────────────────────────────┐
+│   RL 정책 모듈   │    │       표현 학습 모듈            │
+│                  │    │                                │
+│  Actor π(z_t)   │    │  전이 모델 g(z_t, a_t)        │
+│  → 행동 a_t     │    │  → ẑ_{t+1} ∈ [-1,1]^{128}    │
+│                  │    │                                │
+│  Critic Q(z_t,a)│    │  투영 헤드 h(ẑ_{t+1})         │
+│  → Q값          │    │  → 투영 공간의 예측값           │
+└──────────────────┘    │                                │
+          │              │  타겟 인코더 f̄_enc(o_{t+1})   │
+          │              │  → z_{t+1} (정답)              │
+          │              │                                │
+          │              │  손실 계산:                    │
+          │              │  L_InfoNCE 또는 L_KL           │
+          │              └───────────────────┬────────────┘
+          │                                  │
+          └──────────────┬───────────────────┘
+                         │ 역전파
+                         ▼
+                  파라미터 업데이트
+                  (인코더 공유 최적화)
+                         │
+                         ▼
+                  Polyak 평균화로
+                  타겟 인코더 업데이트
+                  τ_ema = 0.999
+</code></pre>
+<h3>4.2 리플레이 버퍼 및 학습 흐름</h3>
+<pre><code>학습 흐름:
+                                          
+환경 ──(관찰,행동,보상)──▶ 리플레이 버퍼
+                          (용량: 2^16 = 65,536 전환)
+                                │
+                           미니배치 샘플링
+                           (배치 크기: 256)
+                                │
+                          ┌─────▼──────┐
+                          │  학습 루프 │
+                          │ 1. RL 손실  │
+                          │ 2. SPR 손실 │
+                          │ 3. 합산 역전파│
+                          └─────┬──────┘
+                                │
+                          파라미터 업데이트
+                          (매 스텝)
+                                │
+                         타겟 네트워크 업데이트
+                         (DQN: 매 10K 스텝 하드 업데이트
+                          TD3/SAC: Polyak τ=5e-3)
+
+초기화 페이즈:
+  2^11 = 2,048 스텝 동안 무작위 정책으로 버퍼 채우기
+  → 이후 학습 시작
+
+총 학습: 450,000 스텝 (약 9,000 에피소드 × 50 스텝)
+</code></pre>
+<h3>4.3 시뮬레이션 환경 (gym-webots-drone)</h3>
+<pre><code>Webots 기반 드론 시뮬레이션 환경:
+
+물리적 설정:
+  비행 공간: 2.3 × 2.3 × 2.0 미터 (3×3×3 격자)
+  
+목표 위치: 24개
+  수평 격자: 8개 위치 (3×3 격자 내부)
+  고도 레벨: 3개 (0.5m, 1.025m, 1.55m)
+  
+드론 모델: Crazyflie 2.0 쿼드콥터
+  PID 펌웨어 기반 저수준 제어
+  질량: 27g, 크기: 92mm
+  
+목표 객체: 빨간색 원통형 배럴
+
+에피소드 구성:
+  최대 스텝 수: 50 (관찰 간격 [5,7] 랜덤)
+  성공 조건: 목표 반경 내 도달
+  실패 조건: 경계 초과 또는 장애물 충돌
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Simulation Environment)</h3>
+<ul>
+<li><strong>시뮬레이터</strong>: Webots 오픈소스 로보틱스 시뮬레이터</li>
+<li><strong>드론 모델</strong>: Crazyflie 쿼드콥터 (실제 드론과 동일한 모델)</li>
+<li><strong>환경</strong>: 2.3×2.3×2.0m 비행 공간, 목표 위치 24개</li>
+<li><strong>학습 스텝</strong>: 450,000 스텝</li>
+<li><strong>평가 주기</strong>: 9,000 스텝마다 체크포인트, 240회 평가 반복</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<pre><code>1. IQM (Interquartile Mean) 보상:
+   - 상위/하위 25% 제외한 중간값 평균
+   - 이상값에 강인한 성능 측정
+
+2. SPL (Success weighted Path Length):
+   SPL = (1/N) Σᵢ Sᵢ × (L*ᵢ / max(p_i, L*ᵢ))
+   - Sᵢ: i번째 에피소드 성공 여부 (0/1)
+   - L*ᵢ: 최적 경로 길이
+   - p_i: 실제 이동 경로 길이
+   → 성공률과 경로 효율성 동시 평가
+
+3. DTS (Distance to Success):
+   DTS = 마지막 관찰 시점에서 목표까지의 거리
+   → 성공하지 못했을 때 얼마나 가까이 갔는지
+
+4. FLOPs:
+   평가 시 1 스텝당 부동소수점 연산 횟수
+</code></pre>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>시뮬레이션 결과 (에피소드 50 기준, IQM 보상)</strong>:</p>
+<pre><code>┌─────────────────────┬──────────┬──────┬───────┐
+│ 방법                 │ IQM 보상 │ SPL  │  DTS  │
+├─────────────────────┼──────────┼──────┼───────┤
+│ TD3-AmelPredSto     │  0.80*   │  91% │ 0.05m │
+│ SAC-AmelPredSto     │  0.70    │  90% │ 0.06m │
+│ TD3-AmelPredDet     │  0.65    │  99% │ 0.03m │
+│ TD3 (기본)          │  0.55    │  90% │ 0.10m │
+│ SAC (기본)          │  0.40    │  ~85%│ 0.12m │
+│ TD3-SPR (원본)      │  0.45    │  ~87%│ 0.11m │
+│ TD3-Ni              │  0.20    │  ~60%│ 0.20m │
+│ DQN (기본)          │  ~0.15   │  &lt;20%│ &gt;0.3m │
+└─────────────────────┴──────────┴──────┴───────┘
+* 최고 성능
+</code></pre>
+<p><strong>중요 발견</strong>:</p>
+<ul>
+<li><strong>AmelPredSto + actor-critic (TD3, SAC)</strong>의 조합이 가장 효과적</li>
+<li><strong>DQN + AmelPredDet</strong>는 오히려 성능이 저하됨 → DQN과 확률론적 표현의 미스매치</li>
+<li><strong>SPL 99%를 보이는 AmelPredDet + TD3</strong>: 경로 효율이 매우 좋지만 IQM은 낮음 → 안전하게 도착하지만 전체 성공률이 낮음</li>
+</ul>
+<p><strong>수렴 속도 분석</strong>:</p>
+<pre><code>에피소드 10에서의 IQM (빠른 학습 지표):
+
+TD3-AmelPredSto:  0.70  (매우 빠른 수렴)
+SAC-AmelPredSto:  0.55  (빠른 수렴)
+TD3 (기본):       0.30  (느린 수렴)
+TD3-SPR:          0.35  (원본 SPR보다 느림)
+
+→ AmelPredSto는 초기 10 에피소드에서 이미 기본 TD3의 최종 성능 달성
+</code></pre>
+<h3>5.4 계산 비용 분석</h3>
+<pre><code>평가 시 FLOPs 비교 (효율성):
+
+┌─────────────────────┬───────────┬───────────┐
+│ 방법                 │ FLOPs     │ 파라미터수 │
+├─────────────────────┼───────────┼───────────┤
+│ DQN                 │  5,824    │  5,961    │
+│ DQN-AmelPredDet     │  33,472   │  ~34K     │ ← 5.7× 증가
+│ TD3                 │  ~250K    │  ~24K     │
+│ TD3-AmelPredSto     │  177,664  │  0.69× TD3│ ← 30% 절감!
+│ SAC                 │  ~175K    │  ~30K     │
+│ SAC-AmelPredSto     │  178,688  │  1.2× SAC │ ← 소폭 증가
+└─────────────────────┴───────────┴───────────┘
+
+주목: TD3-AmelPredSto는 기본 TD3보다 FLOPs가 30% 적으면서 성능이 높음
+이유: 더 간결한 잠재 표현이 더 효율적인 Q함수 평가를 가능하게 함
+</code></pre>
+<h3>5.5 실세계 실험 (Real-World Experiments)</h3>
+<p><strong>실험 설정</strong>:</p>
+<pre><code>하드웨어:
+  드론: Crazyflie 2.0 (nano-drone, 27g)
+  위치 추적: OptiTrack 모션 캡처 시스템
+  비행 공간: 6×6m 방 내 2×2m 운용 구역
+  고도 제한: 0.5~2.0m
+
+소프트웨어:
+  모션 캡처: Motive 소프트웨어 (위치/방향)
+  자세 데이터: Crazyflie 온보드 IMU
+  비동기 센서 전달 (시뮬레이션과의 차이)
+
+전이 방식: 제로샷 (Zero-Shot Sim-to-Real)
+  → 시뮬레이션에서 학습된 TD3-AmelPredSto 정책을
+    그대로 실제 드론에 적용 (추가 파인튜닝 없음)
+</code></pre>
+<p><strong>실세계 성능</strong>:</p>
+<pre><code>TD3-AmelPredSto 실세계 결과:
+
+성공률 (Success Rate): 66.66%  (24번 시도 중 16번 성공)
+성공 경로 길이 (SPL):  65.90%
+목표까지 거리 (DTS):   0.10m
+
+시뮬레이션 vs 실세계 비교:
+  시뮬레이션 SPL:  91%
+  실세계 SPL:      65.9%
+  저하율:          ~28%
+  
+이는 드론 내비게이션에서의 전형적인 Sim-to-Real 갭
+(비교: AgiPIX는 유사 환경에서 ~70% 성공률 달성)
+</code></pre>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<p><strong>기여 1: 벡터 상태 기반 자기 예측 표현 학습</strong></p>
+<p>기존 SPR은 이미지 기반으로 설계되었으나, 이 논문은 UAV의 상태 벡터(위치, 속도, 자세)에 적합한 새로운 자기 예측 표현을 제안한다.</p>
+<pre><code>이미지 SPR → AmelPred 변환:
+
+이미지 SPR:                  AmelPred:
+  CNN 인코더                 MLP 인코더 (3층)
+  픽셀 레벨 예측             상태 벡터 예측
+  InfoNCE only              Det: InfoNCE / Sto: KL Div
+  분포 없음                  확률론적 분포 (AmelPredSto)
+  Atari 게임                 UAV 3D 탐색
+</code></pre>
+<p><strong>기여 2: 확률론적 상태 표현으로 UAV 동역학 불확실성 모델링</strong></p>
+<p>AmelPredSto는 인코더가 가우시안 분포를 출력하여 UAV 동역학의 내재적 불확실성(공기역학, IMU 노이즈)을 자연스럽게 포착한다.</p>
+<p><strong>기여 3: RL 알고리즘 전반에 걸친 체계적 분석</strong></p>
+<p>세 가지 RL 알고리즘(DQN, TD3, SAC)과 두 가지 AmelPred 변형의 조합을 체계적으로 실험하여 최적 조합을 식별했다.</p>
+<p><strong>기여 4: 제로샷 Sim-to-Real 전이 검증</strong></p>
+<p>별도의 도메인 적응 없이 시뮬레이션 학습 정책을 실제 Crazyflie에 직접 적용하여 66.66% 성공률을 달성했다.</p>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<pre><code>하이퍼파라미터 전체 목록:
+
+─────────────────────────────────────────────────────────────
+학습 설정:
+  총 학습 스텝:          450,000
+  초기화 페이즈:         2^11 = 2,048 스텝
+  에피소드 최대 스텝:    50
+  관찰 간격:             Uniform[5, 7] 스텝
+
+배치 및 버퍼:
+  리플레이 버퍼 용량:    2^16 = 65,536
+  미니배치 크기:         256
+
+학습률:
+  DQN:                   1×10⁻⁴
+  TD3:                   1×10⁻³ (actor &amp; critic)
+  SAC:                   3×10⁻³
+  표현 학습 (L_SPR):     1×10⁻³ (Adam optimizer)
+
+타겟 네트워크:
+  Polyak τ:              5×10⁻³ (SAC, TD3)
+  하드 업데이트:         10,000 스텝마다 (DQN)
+
+AmelPred 특화:
+  잠재 차원 (latent_dim): 128
+  온도 파라미터 (τ_spr):  0.1 (InfoNCE)
+  타겟 인코더 EMA τ:      0.999
+
+TD3 특화:
+  정책 업데이트 지연:     2 크리틱 업데이트마다 1번
+  정책 노이즈 σ:          0.2
+  클리핑 c:               0.5
+
+SAC 특화:
+  엔트로피 온도 α:        자동 튜닝
+
+─────────────────────────────────────────────────────────────
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 정보 병목 관점에서의 분석</h3>
+<pre><code>AmelPredSto의 KL 발산 손실은 정보 병목(Information Bottleneck) 원리와 연결된다:
+
+전통적 정보 병목:
+  min I(Z; X) s.t. I(Z; Y) ≥ I_Y
+  → 입력 X에 대한 정보를 최소화하면서 타겟 Y에 대한 정보 유지
+
+AmelPredSto의 암묵적 병목:
+  L_KL = D_KL(P_target || Q_predicted)
+  → 현재 상태만 알고 미래를 예측 → 불필요한 정보 압축
+  → 상태 전환에 관련된 정보만 잠재 공간에 보존
+
+효과: 
+  불필요한 관찰 변동성(센서 노이즈)은 압축
+  동역학적으로 중요한 패턴은 보존
+  → 더 일반화 가능한 정책 학습
+</code></pre>
+<h3>8.2 Sim-to-Real 전이 분석</h3>
+<pre><code>전이 성능 저하 분석 (91% → 65.9% SPL):
+
+주요 원인:
+1. 비동기 통신 지연 (8~10ms)
+   시뮬레이션: 동기적, 일정한 간격
+   실세계: 비동기 패킷, 지연 편차 있음
+
+2. 공기역학 차이
+   시뮬레이션: 간단한 로터 추력 모델
+   실세계: 지면 효과, 기류 변동, 배터리 전압 강하
+
+3. 위치 추정 노이즈
+   시뮬레이션: 완벽한 상태 정보
+   실세계: OptiTrack → 소량의 지연 및 노이즈
+
+개선 방향:
+  도메인 무작위화 (Domain Randomization)
+  시뮬레이터 동적 파라미터 노이즈 추가
+  실세계 데이터로 표현 파인튜닝
+  시스템 식별(System Identification) 통합
+</code></pre>
+<h3>8.3 한계점 (Limitations)</h3>
+<pre><code>현재 한계:
+
+1. 목표 좌표 의존성
+   O_TC 변형: 목표 좌표(T_x, T_y, T_z) 명시적 제공 필요
+   실제 운용: 목표 탐지/위치 추정 시스템 별도 필요
+
+2. 소규모 환경
+   비행 공간: 2.3×2.3×2.0m (실내, 소형)
+   대규모 또는 외부 환경으로의 확장 미검증
+
+3. 단일 장애물 없는 환경
+   현재 벤치마크에는 동적 장애물 없음
+   실제 환경의 복잡한 장애물 처리 미검증
+
+4. 단일 목표 객체
+   여러 유사 객체 중 특정 하나를 찾는 문제 미다룸
+   시각적 인식 모듈 통합 필요
+
+5. 실세계 성능 격차
+   66.66% 성공률은 실용적 응용에 아직 부족
+   더 높은 신뢰성 요구
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>AgiPIX (ICUAS2026)</th>
+<th>SANDO (arxiv2026)</th>
+<th>ViLiNT (arxiv2026)</th>
+<th>AmelPred (본 논문)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>방법론</strong></td>
+<td>ESDF+모션계획</td>
+<td>STSFC+MIQP</td>
+<td>RGB+LiDAR+Diffusion</td>
+<td>RL+자기예측표현</td>
+</tr>
+<tr>
+<td><strong>UAV 유형</strong></td>
+<td>내부 검사 UAV</td>
+<td>일반 UAV</td>
+<td>지상 로봇 (LiDAR)</td>
+<td>Crazyflie nano-UAV</td>
+</tr>
+<tr>
+<td><strong>학습 방식</strong></td>
+<td>Sim-to-Real</td>
+<td>최적화 기반</td>
+<td>지도 학습</td>
+<td>모델-프리 RL</td>
+</tr>
+<tr>
+<td><strong>코드 공개</strong></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (환경)</td>
+</tr>
+<tr>
+<td><strong>실세계 실험</strong></td>
+<td>✅ ENRICH2025</td>
+<td>✅</td>
+<td>✅ 프로토타입</td>
+<td>✅ Crazyflie</td>
+</tr>
+<tr>
+<td><strong>안전 보장</strong></td>
+<td>ESDF 거리장</td>
+<td>수학적 보장</td>
+<td>충돌 예측 헤드</td>
+<td>패널티 기반 (약함)</td>
+</tr>
+<tr>
+<td><strong>목표 설정</strong></td>
+<td>검사 포인트</td>
+<td>웨이포인트</td>
+<td>목표 이미지</td>
+<td>객체 좌표/센서</td>
+</tr>
+<tr>
+<td><strong>확장성</strong></td>
+<td>중형+ UAV</td>
+<td>범용</td>
+<td>지상 로봇</td>
+<td>소형 드론</td>
+</tr>
+<tr>
+<td><strong>실세계 성공률</strong></td>
+<td>~70%</td>
+<td>85%+</td>
+<td>~80%</td>
+<td>66.66%</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>AmelPred의 장점</strong>:</p>
+<pre><code>1. 샘플 효율성
+   → 표준 RL보다 2배 빠른 수렴
+   → 제한된 환경 상호작용으로도 좋은 성능
+
+2. 경량성
+   → TD3-AmelPredSto: 기본 TD3보다 FLOPs 30% 절감
+   → nano-UAV (Crazyflie, 27g)에서 실행 가능
+
+3. 온보드 실행 가능성
+   → SANDO의 MIQP 최적화 대비 훨씬 낮은 계산량
+   → 엣지 디바이스에서 실시간 추론 가능
+
+4. Sim-to-Real 전이
+   → 제로샷으로 66.66% 달성
+   → 도메인 무작위화 없이도 상당한 전이 능력
+</code></pre>
+<p><strong>AmelPred의 단점</strong>:</p>
+<pre><code>1. 안전 보장 부재
+   → SANDO와 달리 수학적 충돌 회피 보장 없음
+   → RL 보상 패널티에만 의존
+
+2. 목표 인식 미통합
+   → AgiPIX처럼 완전한 검사 파이프라인 없음
+   → 목표 좌표 또는 방향 정보 명시적 제공 필요
+
+3. 제한된 환경 복잡성
+   → 소규모 장애물 없는 환경에서만 검증
+   → ViLiNT처럼 복잡한 실내 환경 미검증
+
+4. 실세계 신뢰도
+   → 66.66% 성공률은 안전-비판적 응용에 부족
+   → SANDO의 안전 보장 수준에 못 미침
+</code></pre>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>AmelPred 실적용 시나리오:
+
+✅ 적합한 응용:
+   - 제어된 실내 환경에서의 소형 드론 탐색
+   - 물건 탐색 및 전달 (도서관, 창고 소형 드론)
+   - 교육/연구용 드론 내비게이션 플랫폼
+   - OptiTrack 기반 실험 환경
+
+⚠️ 개선 필요:
+   - 야외 또는 대규모 실내 환경 (확장성 미검증)
+   - 다중 장애물 환경 (안전 보장 부재)
+   - GPS 없는 자율 위치 추정 통합 필요
+
+❌ 현재 적합하지 않음:
+   - 안전-비판적 환경 (의료, 산업 점검)
+   - 다중 에이전트 시나리오
+   - 시각적 목표 인식 없이는 완전 자율화 불가
+</code></pre>
+<h3>9.4 연구 방향성 평가</h3>
+<pre><code>기존 방법 대비 기여:
+
+SANDO (최적화 기반 안전 계획) 대비:
+  - 학습 기반의 적응적 정책 vs 계획 기반의 안전 보장
+  - AmelPred: 불확실성 있는 목표 탐색에 강점
+  - SANDO: 명확한 웨이포인트와 안전 보장이 필요한 경우 우월
+
+AgiPIX (전통적 계획 + 오픈소스) 대비:
+  - RL로 학습된 적응적 행동 vs ESDF 기반 반응적 계획
+  - AmelPred: 다양한 목표에 유연하게 대응
+  - AgiPIX: 구조화된 검사 임무에 더 적합
+
+기술적 트렌드:
+  학습 기반 표현 + 모델-프리 RL의 결합은 현재 로봇 내비게이션의 핵심 트렌드
+  자기 예측 표현의 벡터 상태 적용은 드론 분야에서의 새로운 기여
+  확률론적 표현은 불확실한 환경에서의 강인성 향상 가능성 시사
+</code></pre>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li>Schwarzer, M. et al. (2021). Data-Efficient Reinforcement Learning with Self-Predictive Representations. ICLR 2021.</li>
+<li>Haarnoja, T. et al. (2018). Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor. ICML 2018.</li>
+<li>Fujimoto, S. et al. (2018). Addressing Function Approximation Error in Actor-Critic Methods (TD3). ICML 2018.</li>
+<li>Mnih, V. et al. (2015). Human-level control through deep reinforcement learning (DQN). Nature 2015.</li>
+<li>Anderson, P. et al. (2018). On Evaluation of Embodied Navigation Agents. arXiv:1807.06757.</li>
+<li>Preiss, J.A. et al. (2017). Crazyswarm: A large nano-quadcopter swarm. ICRA 2017.</li>
+<li>Michel, O. (2004). Cyberbotics Ltd. Webots™: Professional Mobile Robot Simulation. Int. J. of Advanced Robotic Systems.</li>
+<li>Ayala, A. et al. (2023). Sim2Real Transfer for Reinforcement Learning without Dynamics Randomization. IROS 2023.</li>
+<li>Kondo, K., Tordesillas, J., How, J.P. (2026). SANDO: Safe Autonomous Trajectory Planning for Dynamic Unknown Environments. arXiv:2604.07599.</li>
+<li>Kuruppu Arachchige, S. et al. (2026). AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection. ICUAS 2026.</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>11.1 혁신성 평가</h3>
+<p>AmelPred는 <strong>자기 예측 표현 학습을 처음으로 UAV의 연속 상태 벡터에 체계적으로 적용</strong>한 논문이다. 특히 확률론적 변형인 AmelPredSto는 UAV 동역학의 내재적 불확실성을 분포로 포착함으로써 기존 결정론적 표현보다 더 풍부한 잠재 공간을 형성한다.</p>
+<pre><code>혁신성 측면:
+  기존: 이미지 기반 SPR → 게임 AI 한정
+  이 논문: 벡터 기반 AmelPred → UAV 물리 환경으로 확장
+  
+  기존: 결정론적 잠재 표현
+  이 논문: 확률론적 잠재 표현으로 불확실성 모델링
+  
+  기존: 표현 학습 + RL은 이미지 도메인에서만 효과적
+  이 논문: 연속 상태 벡터에서도 유효함을 실증
+</code></pre>
+<h3>11.2 실용적 의의</h3>
+<ul>
+<li><strong>nano-UAV에서의 작동 가능성</strong>: 27g Crazyflie에서 제로샷 전이로 66.66% 성공률은 실용적 가능성을 보여줌</li>
+<li><strong>FLOPs 절감</strong>: TD3-AmelPredSto가 기본 TD3보다 30% 계산량 절감 → 온보드 처리에 유리</li>
+<li><strong>오픈소스 환경</strong>: gym-webots-drone 공개로 재현성 및 후속 연구 용이</li>
+</ul>
+<h3>11.3 향후 연구 방향</h3>
+<pre><code>단기 개선:
+  1. 비주얼 목표 인식 통합 (객체 탐지 → 좌표 자동 추정)
+  2. 장애물 회피 강화 (안전 제약 추가)
+  3. 도메인 무작위화로 Sim-to-Real 갭 감소
+
+중기 확장:
+  1. 더 복잡한 환경 (창고, 건물 내부) 적용
+  2. 다중 UAV 협력 탐색
+  3. 외부 환경 + GPS 대체 위치 추정 통합
+
+장기 비전:
+  1. 완전 자율 드론 배송 (제로샷 목표 탐색)
+  2. 재난 현장 수색/구조 (목표: 생존자 탐색)
+  3. 대규모 환경 매핑과 탐색의 통합
+</code></pre>
+<p><strong>종합 평가</strong>:
+AmelPred는 표현 학습과 RL의 결합을 통해 샘플 효율적이고 경량인 UAV 탐색 정책을 학습한다. 기존 계획 기반 방법(SANDO, AgiPIX)보다 적응적이며, 제로샷 Sim-to-Real 전이 능력을 실증했다. 그러나 안전 보장의 부재와 66.66%의 실세계 성공률은 추가 개선이 필요함을 시사한다. T-RO에 게재될 경우, 학습 기반 UAV 탐색의 새로운 기준선으로 자리잡을 가능성이 있다.</p>
+<hr>
+<h2>부록: 관련 방법론 심화 분석</h2>
+<h3>A. 자기 예측 표현 학습 계보</h3>
+<p>AmelPred가 속하는 자기 예측 표현 학습의 발전 계보:</p>
+<pre><code>표현 학습 방법론 계보:
+
+1. 자동 인코더 (Autoencoder, 2006):
+   인코더 f(x) → z, 디코더 g(z) → x̂
+   손실: ||x - x̂||²
+   한계: 재구성 중심, 정책 학습에 간접적
+
+2. 변분 자동 인코더 (VAE, 2013):
+   인코더 → (μ, σ), 잠재 변수 z ~ N(μ, σ²)
+   손실: 재구성 + KL 발산
+   RL 적용: 드림러너(Dreamer), World Models 등
+
+3. 대조 학습 (Contrastive Learning, 2018-2020):
+   SimCLR, MoCo: 유사 샘플 가깝게, 비유사 멀게
+   CURL (2020): RL에 대조 학습 적용 (이미지 기반)
+   강점: 재구성 없이 구조적 표현 학습
+
+4. 자기 예측 표현 (SPR, Schwarzer et al. 2021):
+   이미지 Atari: CNN + 미래 상태 예측
+   InfoNCE 손실로 time-contrastive 학습
+   샘플 효율성 크게 향상
+
+5. AmelPred (본 논문, 2026):
+   벡터 상태로 SPR 적용
+   확률론적 변형 (KL Div) 추가
+   UAV 3D 내비게이션 도메인 검증
+</code></pre>
+<h3>B. Crazyflie 드론의 기술적 특성</h3>
+<pre><code>Crazyflie 2.0 플랫폼 상세:
+
+하드웨어:
+  무게: 27g
+  크기: 92×92mm (모터 중심 기준)
+  배터리: 240mAh LiPo (약 7분 비행)
+  통신: Crazyradio PA USB 동글 (2.4GHz)
+
+모터:
+  6mm × 15mm 소형 코어리스 DC 모터
+  7mm polypropylene 프로펠러
+  최대 추력: 60mN/모터 (4개 = 240mN)
+
+센서:
+  MPU-9250 IMU (가속도계 + 자이로 + 자력계)
+  LPS22H 기압 센서 (고도 보조)
+  PMW3901 광학 유동 센서 (선택)
+
+제어 아키텍처:
+  온보드 PID 제어기 (펌웨어 기반)
+  외부 위치 명령 수신 → PID로 추적
+  통신 지연: 약 5~10ms
+
+실험적 한계:
+  비행 지속 시간 짧음 (배터리 제약)
+  작은 페이로드 (추가 센서 제한적)
+  빠른 동역학 (소형 드론 특성 - 불안정)
+</code></pre>
+<h3>C. 강화학습 알고리즘 상세 비교</h3>
+<pre><code>DQN vs TD3 vs SAC 핵심 차이:
+
+DQN (Deep Q-Network):
+  액션 공간: 이산 (연속 불가)
+  정책: ε-탐욕 (탐색-활용 균형)
+  주요 기법: 리플레이 버퍼, 타겟 네트워크
+  → 이산 제어(4방향)에 적합
+  → 연속 제어에 직접 적용 어렵 (이산화 필요)
+
+TD3 (Twin Delayed Deep Deterministic):
+  액션 공간: 연속
+  정책: 결정론적 (DDPG 계열)
+  주요 기법: 이중 Q, 정책 지연, 노이즈 정책
+  → 연속 제어에 직접 적합
+  → AmelPredSto와 조합 시 최고 성능
+
+SAC (Soft Actor-Critic):
+  액션 공간: 연속
+  정책: 확률론적 (엔트로피 최대화)
+  주요 기법: 이중 Q, 자동 온도 조정
+  → 엔트로피 보너스로 탐색 장려
+  → AmelPredSto와 조합 시 TD3 다음 성능
+
+AmelPredSto와의 궁합:
+  확률론적 표현 + 확률론적 정책(SAC):
+    → 두 층의 불확실성이 서로 보완적
+  확률론적 표현 + 결정론적 정책(TD3):
+    → 표현의 불확실성이 탐색에 암묵적 기여
+    → 가장 좋은 성능 달성
+  결정론적 표현 + 가치 기반(DQN):
+    → 상당한 FLOPs 증가 (5.7×) 대비 성능 향상 없음
+    → 이산 Q값과 연속 잠재 표현의 미스매치
+</code></pre>
+<h3>D. 객체 목표 탐색(OGN)과 비전-언어 탐색(VLN)의 관계</h3>
+<pre><code>OGN vs VLN 비교:
+
+객체 목표 탐색 (Object-Goal Navigation):
+  목표: 특정 객체 카테고리 탐색
+  입력: 목표 카테고리 이름 또는 좌표
+  평가: 성공률, SPL, DTS
+  AmelPred: 목표 좌표 또는 방향 센서 사용
+
+비전-언어 탐색 (Vision-Language Navigation):
+  목표: 자연어 지시 따르기
+  입력: &quot;빨간 소파 오른쪽으로 가서 문을 통과하시오&quot;
+  평가: SR, SPL, NE (Navigation Error)
+  차이: 훨씬 복잡한 의미적 이해 필요
+
+AmelPred의 위치:
+  OGN의 일종이지만 언어 지시 없음
+  &quot;빨간 배럴 찾기&quot;라는 단순화된 목표
+  VLN의 기반 능력(탐색 효율)을 강화할 수 있는 표현 학습
+  향후 언어 인코더와 통합 시 VLN으로 확장 가능
+
+학습 커리큘럼:
+  단계 1: AmelPred로 기본 탐색 정책 사전 학습
+  단계 2: 언어 인코더 추가 파인튜닝
+  → VLN 성능 향상 가능성 (미검증)
+</code></pre>
+<h3>E. 성능 비교표 확장</h3>
+<pre><code>UAV 탐색 관련 방법론 종합 비교:
+
+┌──────────────┬─────────┬──────────┬──────────┬──────┬──────────┐
+│ 방법          │ 플랫폼   │ 학습방식  │ 실세계SR │코드  │ 특장점   │
+├──────────────┼─────────┼──────────┼──────────┼──────┼──────────┤
+│ AmelPred     │Crazyflie│ RL+SRL   │  66.7%   │  ✅  │샘플효율  │
+│ AgiPIX       │Holybro  │ESDF+계획 │  ~70%    │  ✅  │오픈소스  │
+│ SANDO        │일반 UAV │최적화    │  85%+    │  ✅  │수학적안전│
+│ TubeRRT      │3×UAV    │샘플링기반│  N/A     │  ❌  │페이로드  │
+│ IRRL         │지상로봇 │점진RL    │실세계RL  │  ❌  │소셜내비  │
+│ ViLiNT       │지상로봇 │지도학습  │  ~80%    │  ✅  │멀티모달  │
+└──────────────┴─────────┴──────────┴──────────┴──────┴──────────┘
+
+AmelPred의 차별성:
+  - 가장 가벼운 플랫폼 (27g nano-drone)
+  - 유일하게 RL + 자기 예측 표현 학습 결합
+  - 제로샷 Sim-to-Real 전이 강조
+  - FLOPs 절감으로 온보드 처리에 최적화
+</code></pre>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

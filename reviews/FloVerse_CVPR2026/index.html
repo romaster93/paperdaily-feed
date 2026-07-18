@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>FloVerse: Floor Plan-Guided Multi-Modal Navigation · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">CVPR 2026 (accepted)</div>
+    <h1>FloVerse: Floor Plan-Guided Multi-Modal Navigation</h1>
+    <div class="meta-row">
+      <span class="chip">VLN</span>
+      <span><a href="https://arxiv.org/abs/2606.14267">arXiv:2606.14267</a></span>
+      <span>리뷰 2026-06-16</span>
+      <span>41분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>FloVerse: Floor Plan-Guided Multi-Modal Navigation: 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: FloVerse: Floor Plan-Guided Multi-Modal Navigation</li>
+<li><strong>저자 (Authors)</strong>: Weiqi Huang, Shuangyi Dong, Jiaxin Li, Yifei Guo, Zan Wang, Wei Liang (교신저자)</li>
+<li><strong>소속 (Affiliation)</strong>: School of Computer Science &amp; Technology, Beijing Institute of Technology (베이징이공대학, BIT)</li>
+<li><strong>발표처 (Published)</strong>: CVPR 2026 (accepted)</li>
+<li><strong>DOI</strong>: 10.48550/arXiv.2606.14267</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2606.14267">2606.14267</a></li>
+<li><strong>코드 (Code)</strong>: 미공개 (프로젝트 페이지만 운영, GitHub 미확인 — 2026-06-16 기준 코드 링크 없음)</li>
+<li><strong>프로젝트 페이지 (Project Page)</strong>: <a href="https://wikiahuang.github.io/floverse/">https://wikiahuang.github.io/floverse/</a></li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 논문은 <strong>평면도(floor plan)라는 값싸고 압축적인 공간 사전정보(spatial prior)를 활용해, 서로 다른 목표 양식(goal modality)의 내비게이션을 하나의 통일된 프레임워크로 풀 수 있는가</strong>라는 질문에 답한다.</p>
+<p>기존 embodied navigation 연구는 목표를 어떻게 지정하느냐에 따라 세 갈래로 분화되어 있다.</p>
+<ul>
+<li><strong>PointNav</strong>: 목표가 상대 좌표 <code>(Δx, Δy)</code>로 주어진다.</li>
+<li><strong>ObjectNav</strong>: 목표가 객체 카테고리(&quot;냉장고 찾아가&quot;)로 주어진다.</li>
+<li><strong>ImageNav</strong>: 목표가 목적지에서 찍은 RGB 이미지로 주어진다.</li>
+</ul>
+<p>각 과제는 그동안 거의 독립된 모델·벤치마크·학습 파이프라인으로 다뤄져 왔고, 평면도를 사용하는 선행 연구조차 대부분 <strong>PointNav + 제한된 환경</strong>에만 머물렀다. 저자들은 이 분절을 두 축에서 동시에 해소하려 한다.</p>
+<ol>
+<li><strong>과제 통합(task unification)</strong>: 세 양식을 하나의 정책으로 처리하는 <em>FloVerse</em> 과제와, 이를 학습/평가할 수 있는 대규모 데이터셋 <em>FloVerse-1.6K</em>를 구축한다.</li>
+<li><strong>방법 통합(method unification)</strong>: 평면도 사전정보를 조건으로 받아, 양식을 가린 채(masked-modality) 학습하는 디퓨전 정책 <em>ThreeDiff</em>를 제안한다.</li>
+</ol>
+<p>핵심 주장은 두 가지다. (1) 평면도 사전정보는 <strong>세 양식 전부에서</strong> 내비게이션 성능을 끌어올린다. (2) ThreeDiff는 평면도로부터 공간 정보를 <strong>암묵적으로(implicitly)</strong> 학습한다 — 즉 명시적 메트릭 정합 없이도 디퓨전 정책이 평면도의 위상(topology)을 흡수한다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p>저자들이 명시적·암묵적으로 공격하는 한계는 다음과 같다.</p>
+<p><strong>C1. 목표 양식별 모델 분절 (modality fragmentation).</strong>
+PointNav/ObjectNav/ImageNav는 입력 목표 표현이 근본적으로 다르다(좌표 vs 텍스트 vs 이미지). 그래서 각각 별도의 인코더·정책·학습 루프로 구현되는 것이 관행이다. 이는 (a) 모델 수·유지비용 증가, (b) 양식 간 지식 전이 단절, (c) 한 로봇이 여러 양식의 지시를 받으면 여러 모델을 스위칭해야 하는 비효율을 낳는다.</p>
+<p><strong>C2. 평면도 사전정보의 저활용 (under-use of floor-plan priors).</strong>
+평면도는 실내 공간의 벽·문·방 배치라는 <strong>전역 위상</strong>을 매우 압축적으로 담는다. 인간이 낯선 건물에서 안내도를 한 번 보고 길을 잡듯, 에이전트도 평면도가 있으면 미탐색 영역을 효율적으로 추론할 수 있다. 그러나 선행 평면도 기반 연구는 PointNav·소규모 환경에 국한되어, &quot;평면도가 ObjectNav·ImageNav에도 보편적으로 이득인가&quot;는 미해결이었다.</p>
+<p><strong>C3. 평면도 데이터의 부재 (data scarcity).</strong>
+3D 스캔 장면(HM3D, Gibson)에는 평면도가 기본 제공되지 않는다. 사람이 일일이 그리면 확장 불가능하다. 따라서 <strong>메시로부터 평면도를 자동 생성</strong>하고, 세 양식의 전문가 궤적을 대규모로 합성하는 파이프라인이 필요하다.</p>
+<p><strong>C4. 안전한 실행 (safe execution).</strong>
+디퓨전 정책이 생성하는 거친(coarse) 궤적은 전역적으로는 그럴듯하나, 근거리 장애물과 충돌하는 점열(waypoint)을 만들 수 있다. 전역 추론과 국소 충돌 회피를 한 네트워크에 욱여넣으면 둘 다 어중간해진다.</p>
+<p><strong>C5. 양식 불균형 학습 (modality imbalance).</strong>
+세 양식을 한 모델로 합치면, 학습이 쉬운 양식(PointNav)이 그래디언트를 지배해 어려운 양식(ImageNav/ObjectNav)이 묻힐 위험이 있다. 단순 멀티태스크 학습으로는 &quot;양식 불문(modality-agnostic)&quot; 표현이 잘 형성되지 않는다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>저자들의 해법은 <strong>&quot;통합 과제 + 자동 데이터 + 2단계 디퓨전 정책&quot;</strong> 삼위일체다.</p>
+<ul>
+<li><strong>C1·C5 →</strong> 세 양식을 동일한 조건 슬롯에 넣되, 매 학습 iteration에서 <strong>하나의 양식만 남기고 나머지를 마스킹(masked-modality modeling)</strong>. 양식 불문 추론을 강제하면서 양식 간 상보적 보완을 가능케 한다.</li>
+<li><strong>C2 →</strong> 평면도를 EfficientNet으로 인코딩해 디퓨전의 조건으로 주입. 모든 양식에서 성능 향상을 실험적으로 입증.</li>
+<li><strong>C3 →</strong> 메시를 1.25 m 높이에서 수평 슬라이싱 + 형태학적 연산으로 평면도 1,627장을 자동 생성하고, A* 전문가 궤적 240K개·RGBD-pose 12M쌍을 합성(<em>FloVerse-1.6K</em>).</li>
+<li><strong>C4 →</strong> 정책을 <strong>Planner(전역 거친 궤적) + Refiner(깊이 기반 충돌 회피 정제)</strong>의 2단계로 분리.</li>
+</ul>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<p>ThreeDiff는 이름 그대로 <strong>세 가지(three) 디퓨전 요소</strong> — 다중 양식 목표 추론, 평면도 조건화, 깊이 기반 정제 — 를 결합한 <strong>2-스테이지 모방학습(imitation learning) 디퓨전 정책</strong>이다. 정책은 현재 관찰과 목표·평면도를 받아 미래 16개 waypoint로 구성된 궤적을 생성한다.</p>
+<pre><code>표기 (Notation)
+  o_t      : 시점 t의 RGBD 관찰
+  g        : 목표 (양식에 따라 g_point / g_object / g_image)
+  F        : 평면도 (floor plan) 이미지
+  ā_t      : 16-waypoint 거친(coarse) 궤적   (Planner 출력)
+  ǎ_t      : 정제된(refined) 충돌-회피 궤적   (Refiner 출력)
+  C_O,C_g,C_F : 관찰/목표/평면도 조건 임베딩
+  k        : 디퓨전 타임스텝, ε_k : 가우시안 노이즈
+</code></pre>
+<h3>3.1 다중 양식 목표 인코딩과 마스킹 모델링 (Masked-Modality Modeling)</h3>
+<p>ThreeDiff의 첫 번째 핵심은 <strong>세 양식의 목표를 동일한 조건 벡터 슬롯으로 사상한 뒤, 학습 중 양식을 무작위로 가리는</strong> 것이다.</p>
+<p><strong>양식별 인코더.</strong></p>
+<pre><code>g_point  ∈ ℝ²            →  MLP                         →  c_g^point
+g_object ∈ ℒ(텍스트 라벨)  →  frozen CLIP-ViT-B/32 + MLP   →  c_g^object
+g_image  ∈ ℝ^(H×W×3)     →  EfficientNet(현재+목표 RGB)   →  concat → MLP → c_g^image
+</code></pre>
+<ul>
+<li>PointNav 목표는 2D 상대 좌표를 MLP로 임베딩.</li>
+<li>ObjectNav 목표는 객체 라벨과 현재 이미지를 <strong>고정(frozen)된 CLIP-ViT-B/32</strong>로 인코딩 후 MLP 융합 — open-vocabulary 의미 정렬을 공짜로 얻는다.</li>
+<li>ImageNav 목표는 현재 RGB와 목표 RGB를 각각 EfficientNet으로 인코딩해 concat 후 MLP — 두 뷰의 시각적 차이로부터 방향을 회귀.</li>
+</ul>
+<p><strong>마스킹 모델링.</strong></p>
+<blockquote>
+<p>&quot;At each iteration, the model receives only one of the three goal modalities, while the other two are masked.&quot;</p>
+</blockquote>
+<p>즉 매 스텝 세 슬롯 <code>(c_g^point, c_g^object, c_g^image)</code> 중 <strong>단 하나만 활성</strong>, 나머지 둘은 0/마스크 토큰으로 대체된다. 이 단순한 정규화가 두 효과를 낸다.</p>
+<ol>
+<li><strong>양식 불문 표현 강제</strong>: 정책은 어느 슬롯이 켜질지 모르므로, 특정 양식에 과적합하지 않고 &quot;목표 조건 → 궤적&quot;이라는 공통 함수를 학습한다(C5 해소).</li>
+<li><strong>단일 가중치 다중 양식</strong>: 추론 시 들어온 양식만 켜면 되므로, <strong>하나의 모델이 세 과제를 모두 수행</strong>한다(C1 해소).</li>
+</ol>
+<pre><code>        ┌─────────── 무작위 마스크 (1개만 ON) ───────────┐
+ g_point ─MLP──▶ c_g^point  ──┐
+ g_object─CLIP─▶ c_g^object ──┼─▶ [활성 슬롯만 통과]─▶ C_g
+ g_image ─EffN─▶ c_g^image  ──┘
+</code></pre>
+<h3>3.2 평면도 조건화 (Floor-Plan Conditioning)</h3>
+<p>두 번째 요소는 <strong>전역 평면도를 디퓨전의 조건으로 주입</strong>하는 것이다.</p>
+<ul>
+<li>평면도 <code>F</code>는 <strong>EfficientNet-B0</strong>로 인코딩되어 평면도 특징 <code>C_F</code>가 된다.</li>
+<li><code>C_F</code>는 관찰 조건 <code>C_O</code>, 목표 조건 <code>C_g</code>와 <strong>concat</strong>되어 디퓨전 U-Net의 조건으로 들어간다.</li>
+</ul>
+<pre><code>C_O (관찰) ─┐
+C_g (목표) ─┼─ concat ─▶  conditioning vector  ─▶  U-Net(ε_θ)
+C_F (평면도)┘
+</code></pre>
+<p>여기서 중요한 설계 철학은 <strong>평면도와 현재 위치를 명시적으로 정합(register)하지 않는다</strong>는 점이다. 정책은 평면도 이미지 전체를 조건으로 받을 뿐, &quot;나는 평면도의 어느 픽셀에 있다&quot;는 좌표 변환을 받지 않는다. 그럼에도 실험(§5)에서 평면도 제거 시 성능이 크게 떨어지는 것은, 디퓨전 정책이 <strong>평면도의 위상 정보를 암묵적으로 흡수</strong>했음을 시사한다(논문의 두 번째 주장).</p>
+<h3>3.3 Stage 1 — Planner: 디퓨전 기반 거친 궤적 생성</h3>
+<p>Planner는 <strong>조건부 디퓨전(conditional DDPM)</strong> 으로 16-waypoint 거친 궤적 <code>ā_t</code>를 생성한다.</p>
+<ul>
+<li><strong>백본</strong>: conditional U-Net + DDPM 스케줄러.</li>
+<li><strong>조건</strong>: <code>[C_O, C_g, C_F]</code> (관찰·마스킹된 목표·평면도).</li>
+<li><strong>출력</strong>: 16개 waypoint의 거친 궤적.</li>
+<li><strong>학습 목표 (denoising MSE)</strong>:</li>
+</ul>
+<pre><code>ℒ₁ = MSE( ε_k ,  ε_θ( ā_t + ε_k , k ) )
+</code></pre>
+<p>표준 DDPM처럼, 깨끗한 궤적 <code>ā_t</code>에 타임스텝 <code>k</code>의 가우시안 노이즈 <code>ε_k</code>를 더한 뒤, 네트워크 <code>ε_θ</code>가 그 노이즈를 예측하도록 회귀한다. 디퓨전을 쓰는 이유는 내비게이션 궤적의 <strong>다봉성(multimodality)</strong> — 같은 목표라도 좌/우 우회 등 복수의 정답 경로가 존재 — 을 자연스럽게 모델링하기 위함이다(이는 NavDP·NavWAM과 공유하는 동기다, §9 참조).</p>
+<h3>3.4 Stage 2 — Refiner: 깊이 기반 충돌-회피 정제</h3>
+<p>Planner의 거친 궤적은 전역적으로는 타당하나 근거리 장애물을 뚫을 수 있다. Refiner는 <strong>두 번째 디퓨전 모델</strong>로 이를 충돌-회피 궤적으로 다듬는다.</p>
+<ul>
+<li><strong>입력</strong>: 거친 궤적 <code>ā_t</code> + 깊이로부터 만든 <strong>국소 부호거리장(local SDF)</strong> <code>f_SDF</code>.</li>
+<li><strong>점유 표현</strong>: 깊이를 <strong>20×50 BEV 점유 격자(0.1 m 해상도)</strong> 로 투영해 국소 장애물 맵을 구성.</li>
+<li><strong>학습 목표 (denoising + 충돌 패널티)</strong>:</li>
+</ul>
+<pre><code>ℒ₂ = MSE( ε_k , ε_φ( ā_t + ε_k , k ) )  +  α · ℒ_collision
+        └──── 디퓨전 재구성 ────┘        └ 장애물 침범 패널티 ┘
+   (α = 0.1)
+</code></pre>
+<p><code>ℒ_collision</code>은 정제된 waypoint가 SDF 상 장애물 영역(부호거리 &lt; 0)에 들어가면 벌점을 준다. 이렇게 <strong>전역 추론(Planner)과 국소 안전(Refiner)을 두 디퓨전으로 분리</strong>함으로써, 단일 네트워크가 두 목표를 절충하며 망가지는 것을 피한다(C4 해소). Refiner의 기여는 ablation에서 명확하다 — 제거 시 SR 42.0%→34.3%로 7.7%p 하락(§5.5).</p>
+<h3>3.5 추론 절차 (Inference Pipeline)</h3>
+<pre><code>[관찰 o_t]──EfficientNet──▶ C_O ─┐
+[목표 g]───양식별 인코더──▶ C_g ─┼─▶ Planner(DDPM) ─▶ ā_t (거친 16-wp)
+[평면도 F]─EfficientNet──▶ C_F ─┘                          │
+                                                           ▼
+[깊이]──BEV 20×50 점유격자(0.1m)──▶ f_SDF ─▶ Refiner(DDPM) ─▶ ǎ_t (충돌회피 궤적)
+                                                           │
+                                                           ▼
+                                              로봇 실행(receding-horizon)
+</code></pre>
+<ul>
+<li>추론 속도: <strong>0.18 s/step</strong> (디퓨전 1 스텝 기준), <strong>30개 궤적 앙상블 평균</strong>으로 안정화.</li>
+<li>30개 샘플을 평균내는 것은 디퓨전의 분산을 줄여 일관된 궤적을 얻기 위한 표준 기법.</li>
+</ul>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인</h3>
+<pre><code>                          FloVerse / ThreeDiff 전체 구조
+┌──────────────────────────────────────────────────────────────────────────┐
+│  데이터 생성 (오프라인)                                                     │
+│  HM3D/Gibson4+ 메시 ─1.25m 수평슬라이스─▶ 이진 마스크 ─dilation→erosion─▶   │
+│       평면도 1,627장 (HM3D 1,488 + Gibson 139)                              │
+│  A* 최단경로(시작-목표 ≥5m, 10cm 간격) ─▶ 240K 궤적 / 12M RGBD-pose         │
+│  SpatialLM 장면이해 ─▶ 바운딩박스 ─수동검수─▶ 325 객체카테고리 / 299 장면   │
+└──────────────────────────────────────────────────────────────────────────┘
+                                    │  (학습 데이터)
+                                    ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ThreeDiff 정책 (온라인)                                                    │
+│                                                                            │
+│   o_t(RGBD) ─EffNet─▶ C_O ┐                                                │
+│                            │                                                │
+│   g ─[ point:MLP /         │   ┌── Stage 1: Planner ──┐                     │
+│        object:CLIP-ViT /   ├──▶│ concat[C_O,C_g,C_F]   │                     │
+│        image:EffNet ]      │   │ → U-Net(ε_θ) DDPM     │─▶ ā_t (거친 궤적)   │
+│   ─무작위 마스크(1개 ON)─▶ C_g │   │ ℒ₁=MSE(ε,ε_θ)        │       │            │
+│                            │   └──────────────────────┘       │            │
+│   F ─EffNet-B0──────────▶ C_F ┘                                ▼            │
+│                                ┌── Stage 2: Refiner ──┐                     │
+│   depth ─BEV 20×50@0.1m─▶ f_SDF│ U-Net(ε_φ) DDPM       │─▶ ǎ_t (충돌회피)    │
+│                                │ ℒ₂=MSE+α·ℒ_collision  │                     │
+│                                └──────────────────────┘                     │
+└──────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 데이터 흐름 요약</h3>
+<ol>
+<li><strong>오프라인</strong>: 메시 → 평면도 자동 생성, A* 전문가 궤적·RGBD 합성, SpatialLM 객체 주석.</li>
+<li><strong>학습</strong>: 매 iteration 한 양식만 활성화(마스킹), Planner와 Refiner를 각각 디퓨전 손실로 학습.</li>
+<li><strong>추론</strong>: 관찰·목표·평면도 → Planner 거친 궤적 → 깊이 SDF로 Refiner 정제 → receding-horizon 실행.</li>
+</ol>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<ul>
+<li><strong>FloVerse-1.6K (제안)</strong>: HM3D + Gibson 4+ 기반. 평면도 1,627장(HM3D 1,488 / Gibson 139), 약 <strong>240K 전문가 궤적</strong>, <strong>12M RGBD-pose 쌍</strong>, ImageNav/ObjectNav 에피소드 74K, <strong>325 객체 카테고리 / 299 장면</strong>.</li>
+<li>평면도 생성: 메시 정점을 높이(1.25 m 임계)·법선 방향으로 필터링 → 형태학적 dilation→erosion 디노이징.</li>
+<li>전문가 궤적: A* 최단경로(시작-목표 최소 5 m 분리), 10 cm 간격 waypoint 이산화.</li>
+<li>객체 주석: <strong>SpatialLM</strong>으로 장면 이해·바운딩박스 추출 후 수동 검수.</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>SR (Success Rate)</strong>: 목표 도달 성공률.</li>
+<li><strong>SPL (Success weighted by Path Length)</strong>: 경로 효율을 가중한 성공률(최단경로 대비).</li>
+<li>세 양식(PointNav/ObjectNav/ImageNav) 각각에 대해 측정.</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>(1) 평면도 사전정보의 효과 (Table 2) — &quot;모든 양식에서 향상&quot;.</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>과제</th>
+<th>지표</th>
+<th>평면도 사용</th>
+<th>평면도 제거</th>
+<th>향상폭</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PointNav</td>
+<td>SR</td>
+<td><strong>42.0%</strong></td>
+<td>25.8%</td>
+<td><strong>+16.2%p</strong></td>
+</tr>
+<tr>
+<td>PointNav</td>
+<td>SPL</td>
+<td><strong>36.6</strong></td>
+<td>25.6</td>
+<td>+11.0</td>
+</tr>
+<tr>
+<td>ImageNav</td>
+<td>SR</td>
+<td><strong>28.9%</strong></td>
+<td>22.6%</td>
+<td>+6.3%p</td>
+</tr>
+<tr>
+<td>ImageNav</td>
+<td>SPL</td>
+<td><strong>22.4</strong></td>
+<td>18.4</td>
+<td>+4.0</td>
+</tr>
+<tr>
+<td>ObjectNav</td>
+<td>SR</td>
+<td><strong>28.6%</strong></td>
+<td>20.9%</td>
+<td>+7.7%p</td>
+</tr>
+<tr>
+<td>ObjectNav</td>
+<td>SPL</td>
+<td><strong>22.3</strong></td>
+<td>16.5</td>
+<td>+5.8</td>
+</tr>
+</tbody></table></div>
+<p>평면도 제거 시 <strong>세 양식 전부</strong> 성능이 하락 — 특히 좌표 기반 PointNav에서 효과가 가장 크다(+16.2%p). 이는 평면도가 전역 위상 추론에 직접 기여함을 보인다(논문 주장 1 입증).</p>
+<p><strong>(2) PointNav (Gibson 4+, Table 4).</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>SR</th>
+<th>SPL</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DD-PPO</td>
+<td>18.3%</td>
+<td>10.5</td>
+</tr>
+<tr>
+<td>FloDiff (finetuned)</td>
+<td>38.8%</td>
+<td>29.6</td>
+</tr>
+<tr>
+<td><strong>ThreeDiff (본 논문)</strong></td>
+<td><strong>54.4%</strong></td>
+<td><strong>50.0</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>(3) ImageNav (Table 5).</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>SR</th>
+<th>SPL</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NoMaD (finetuned)</td>
+<td>22.8%</td>
+<td>17.0</td>
+</tr>
+<tr>
+<td><strong>ThreeDiff</strong></td>
+<td><strong>28.9%</strong></td>
+<td><strong>22.4</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>(4) ObjectNav (Table 5).</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>SR</th>
+<th>SPL</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ZSON</td>
+<td>7.2%</td>
+<td>1.1</td>
+</tr>
+<tr>
+<td><strong>ThreeDiff</strong></td>
+<td><strong>28.6%</strong></td>
+<td><strong>22.3</strong></td>
+</tr>
+</tbody></table></div>
+<p>세 양식 모두에서 강력한 베이스라인(FloDiff, NoMaD, ZSON, DD-PPO)을 큰 폭으로 능가한다. 특히 ObjectNav에서 ZSON 대비 SR 4배, SPL 20배 차이는 디퓨전 정책 + 평면도 + 전문가 궤적 학습의 시너지를 보여준다.</p>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p>본 논문은 <strong>시뮬레이션(HM3D/Gibson) 기반</strong>으로, 물리 로봇 실험은 보고하지 않는다. 평가는 Habitat 계열 시뮬레이터 상의 세 양식 벤치마크에 한정된다. 이는 실세계 검증을 강조하는 본 코퍼스의 가치 기준에서 한계로 기록한다(§8.2, §9.3 참조).</p>
+<h3>5.5 어블레이션 및 분석 (Ablations &amp; Analysis)</h3>
+<ul>
+<li><strong>Refiner 제거 (Table 7)</strong>: SR 42.0%→<strong>34.3%</strong>(−7.7%p), SPL 36.4→<strong>29.2</strong>(−7.2). 깊이 기반 정제 단계가 충돌 회피·경로 효율 모두에 필수임을 입증(C4 해소 근거).</li>
+<li><strong>평면도 제거 (Table 2)</strong>: §5.3 (1) 표 — 모든 양식 하락.</li>
+<li><strong>암묵적 공간 학습</strong>: 명시적 위치-평면도 정합 없이도 평면도가 일관된 이득을 주는 점에서, ThreeDiff가 평면도 위상을 암묵적으로 인코딩한다고 해석(논문 주장 2).</li>
+</ul>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><strong>통합 과제 정의 (FloVerse)</strong>: PointNav·ObjectNav·ImageNav를 <strong>평면도 가이드 하의 단일 embodied navigation 과제</strong>로 통합. 양식별로 분절된 기존 연구 지형을 하나로 묶었다.</li>
+<li><strong>대규모 자동 데이터셋 (FloVerse-1.6K)</strong>: 메시→평면도 자동 생성 파이프라인으로 1,627 평면도, 240K 전문가 궤적, 12M RGBD-pose, 325 객체 카테고리를 합성. 수작업 주석 없이 확장 가능.</li>
+<li><strong>ThreeDiff 2-스테이지 디퓨전 정책</strong>: (a) 마스킹 모델링으로 단일 가중치 다중 양식 추론, (b) 평면도 조건화, (c) Planner(전역)+Refiner(국소 안전) 분리.</li>
+<li><strong>평면도 사전정보의 보편적 유효성 실증</strong>: 세 양식 전부에서 평면도가 성능을 향상시킴을 정량적으로 입증(+6~16%p SR).</li>
+<li><strong>암묵적 공간 학습 발견</strong>: 명시적 메트릭 정합 없이도 디퓨전 정책이 평면도 위상을 흡수함을 어블레이션으로 시사.</li>
+</ol>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>옵티마이저</td>
+<td>AdamW</td>
+</tr>
+<tr>
+<td>학습률 스케줄러</td>
+<td>CosineAnnealingLR (PyTorch)</td>
+</tr>
+<tr>
+<td>최대 학습률</td>
+<td>1e-4</td>
+</tr>
+<tr>
+<td>학습 epoch</td>
+<td>최대 20</td>
+</tr>
+<tr>
+<td>배치 크기</td>
+<td>32 / GPU</td>
+</tr>
+<tr>
+<td>GPU</td>
+<td>4 × NVIDIA A6000</td>
+</tr>
+<tr>
+<td>충돌 손실 가중</td>
+<td>α = 0.1, λ = 1</td>
+</tr>
+<tr>
+<td>Refiner 점유 표현</td>
+<td>20×50 BEV 격자, 0.1 m 해상도</td>
+</tr>
+<tr>
+<td>Planner 출력</td>
+<td>16 waypoint 거친 궤적</td>
+</tr>
+<tr>
+<td>디퓨전 스케줄러</td>
+<td>DDPM</td>
+</tr>
+<tr>
+<td>추론 속도</td>
+<td>0.18 s/step</td>
+</tr>
+<tr>
+<td>추론 앙상블</td>
+<td>30개 궤적 평균</td>
+</tr>
+<tr>
+<td>목표 인코더</td>
+<td>PointNav: MLP / ObjectNav: frozen CLIP-ViT-B/32+MLP / ImageNav: EfficientNet+MLP</td>
+</tr>
+<tr>
+<td>평면도 인코더</td>
+<td>EfficientNet-B0</td>
+</tr>
+<tr>
+<td>평면도 생성 높이</td>
+<td>바닥 위 1.25 m 수평 슬라이스</td>
+</tr>
+<tr>
+<td>전문가 경로</td>
+<td>A* 최단경로, 시작-목표 ≥5 m, 10 cm waypoint</td>
+</tr>
+<tr>
+<td>데이터 규모</td>
+<td>1,627 평면도 / 240K 궤적 / 12M RGBD-pose / 325 객체 / 299 장면</td>
+</tr>
+</tbody></table></div>
+<p><strong>설계 시 핵심 상수의 의미.</strong></p>
+<ul>
+<li><strong>1.25 m 슬라이스 높이</strong>: 가구(테이블/의자) 위, 문틀 아래의 &quot;사람 허리~가슴&quot; 높이로, 방-복도 위상을 가장 잘 드러내면서 잡다한 가구 노이즈를 피하는 절충점.</li>
+<li><strong>α = 0.1 (충돌 패널티)</strong>: 디퓨전 재구성 손실 대비 충돌 패널티를 0.1로 두어, 궤적 형상 학습을 해치지 않으면서 장애물 침범만 억제.</li>
+<li><strong>30개 앙상블</strong>: 디퓨전의 확률적 샘플링 분산을 평균으로 흡수해 실행 안정성 확보.</li>
+</ul>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<ul>
+<li><strong>데이터 파이프라인의 자동화</strong>가 최대 강점이다. 평면도·궤적·객체 주석이 모두 메시로부터 자동 생성되므로, 새로운 3D 스캔 데이터셋(예: ScanNet++, 신규 HM3D 버전)으로 손쉽게 확장 가능하다.</li>
+<li>마스킹 모델링 덕에 양식을 추가(예: 언어-지시 VLN)할 때도 슬롯 하나를 늘리는 방식으로 확장 여지가 있다.</li>
+</ul>
+<h3>8.2 한계점 (Limitations)</h3>
+<ol>
+<li><strong>실세계 미검증</strong>: 시뮬레이션 전용. 깊이 BEV·평면도 정렬이 실제 센서 노이즈·동적 장애물에서 어떻게 견딜지는 미지수.</li>
+<li><strong>평면도 가용성 가정</strong>: 추론 시 평면도가 주어진다고 가정. 평면도가 없는 임의 환경에는 부분 적용만 가능.</li>
+<li><strong>절대 성능의 여지</strong>: PointNav 54.4% SR(Gibson 4+)는 베이스라인 대비 크게 앞서지만, 실제 배치를 위한 신뢰 수준에는 아직 도달하지 못했다(특히 ImageNav/ObjectNav ~28%).</li>
+<li><strong>코드 미공개</strong>: 2026-06-16 기준 프로젝트 페이지만 운영, 코드·데이터 릴리스 미확인 — 재현성 평가 보류.</li>
+<li><strong>명시적 정합 부재의 양날</strong>: 평면도-위치 미정합은 단순하지만, 정밀 메트릭 내비게이션에서는 정합을 명시화한 방법 대비 상한이 낮을 수 있다.</li>
+</ol>
+<h3>8.3 향후 방향 (Future Directions)</h3>
+<ul>
+<li>실로봇 sim-to-real 전이(예: NavDP식 특권정보 가이드 결합).</li>
+<li>언어-지시 VLN 양식 추가로 진정한 &quot;다중 양식 통합 내비게이터&quot;.</li>
+<li>평면도가 없을 때 온라인으로 평면도를 추정·갱신하는 self-mapping 결합.</li>
+</ul>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<p>같은 VLN 트랙의 디퓨전·세계모델 계열 선행 리뷰 3편과 비교한다: <strong>NavDP</strong> (ICRA 2026, 디퓨전 정책+critic, sim-to-real), <strong>NavWAM</strong> (arXiv 2026, image-goal 디퓨전 세계-행동 모델), <strong>WMNav</strong> (IROS 2025, VLM 세계모델 zero-shot ObjectNav).</p>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>NavDP (ICRA2026)</th>
+<th>NavWAM (arXiv2026)</th>
+<th>WMNav (IROS2025)</th>
+<th><strong>FloVerse/ThreeDiff (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 아이디어</td>
+<td>디퓨전 궤적 생성+critic, 특권정보 가이드</td>
+<td>미래관찰+가치+행동 공동 디퓨전(latent canvas)</td>
+<td>VLM 세계모델+Curiosity Value Map</td>
+<td>평면도 조건 2단계 디퓨전, 다중 양식 마스킹</td>
+</tr>
+<tr>
+<td>목표 양식</td>
+<td>무목표/포인트(맵리스)</td>
+<td>image-goal</td>
+<td>object-goal</td>
+<td><strong>Point+Object+Image 통합</strong></td>
+</tr>
+<tr>
+<td>사전정보</td>
+<td>시뮬 특권정보</td>
+<td>Cosmos 비디오 prior</td>
+<td>VLM 상식</td>
+<td><strong>평면도(floor plan)</strong></td>
+</tr>
+<tr>
+<td>생성 방식</td>
+<td>Diffusion Policy</td>
+<td>Diffusion (world+action)</td>
+<td>VLM 추론(생성X)</td>
+<td>Diffusion (planner+refiner)</td>
+</tr>
+<tr>
+<td>충돌 회피</td>
+<td>critic 평가</td>
+<td>가치 추정</td>
+<td>충돌맵</td>
+<td><strong>Refiner SDF 디퓨전</strong></td>
+</tr>
+<tr>
+<td>실세계 실험</td>
+<td>부분(수치 부족)</td>
+<td>✅ 79.2% (실로봇)</td>
+<td>시뮬 중심</td>
+<td>❌ (시뮬 전용)</td>
+</tr>
+<tr>
+<td>학회</td>
+<td>ICRA 2026</td>
+<td>arXiv 2026</td>
+<td>IROS 2025 (Oral)</td>
+<td><strong>CVPR 2026</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>✅ 프로젝트+GitHub</td>
+<td>예정</td>
+<td>공개</td>
+<td>미공개(프로젝트만)</td>
+</tr>
+<tr>
+<td>데이터 기여</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td><strong>FloVerse-1.6K (대규모 자동 합성)</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>FloVerse의 강점.</strong></p>
+<ul>
+<li><strong>유일한 진짜 다중 양식 통합</strong>: NavDP(맵리스 포인트), NavWAM(image-goal), WMNav(object-goal)는 각기 한 양식에 특화. FloVerse는 <strong>세 양식을 단일 가중치로</strong> 처리 — 마스킹 모델링이라는 단순·우아한 장치로 달성.</li>
+<li><strong>평면도라는 새 사전정보 축</strong>: NavDP의 특권정보, NavWAM의 비디오 prior, WMNav의 VLM 상식과 직교하는 <strong>전역 위상 사전정보</strong>를 도입하고, 그 보편적 유효성을 정량 입증.</li>
+<li><strong>데이터셋 기여</strong>: 세 비교 논문 중 어느 것도 이만한 규모의 멀티-양식+평면도 데이터셋을 내놓지 않았다. FloVerse-1.6K 자체가 후속 연구 인프라.</li>
+<li><strong>탑티어 검증</strong>: CVPR 2026 accept — 비교군 중 가장 권위 있는 학회 통과.</li>
+</ul>
+<p><strong>FloVerse의 약점.</strong></p>
+<ul>
+<li><strong>실세계 부재</strong>: NavWAM(실로봇 79.2%)·NavDP(sim-to-real)와 달리 시뮬 전용. 본 코퍼스가 1순위로 보는 &quot;리얼월드 실험&quot; 기준에서 약점.</li>
+<li><strong>충돌 회피의 구조적 단순성</strong>: NavDP는 critic으로, NavWAM은 가치 헤드로 행동 품질을 평가하지만, FloVerse Refiner는 SDF 패널티 기반 정제로 상대적으로 휴리스틱.</li>
+<li><strong>코드 미공개</strong>: WMNav·NavDP가 코드를 공개한 반면, FloVerse는 프로젝트 페이지뿐.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>단기 적용성</strong>은 NavDP·NavWAM이 앞선다(실로봇 검증/전이 입증). FloVerse는 시뮬 단계.</li>
+<li>다만 FloVerse의 <strong>데이터·과제 프레임</strong>은 실내 서비스 로봇(평면도가 흔히 존재하는 건물)에서 매우 현실적인 가정을 깔고 있어, sim-to-real만 보강되면 실용 잠재력이 크다.</li>
+<li>평면도가 사실상 항상 존재하는 <strong>건물 관리·배송·안내 로봇</strong> 시나리오에 특히 부합.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<ul>
+<li>FloVerse는 &quot;양식 통합 + 값싼 전역 사전정보&quot;라는 방향을 제시 — 이는 NavWAM·NavDP의 &quot;강한 생성 prior&quot; 방향과 <strong>상보적</strong>이다. 두 흐름의 결합(평면도 조건 + 비디오/특권 prior + 실로봇 전이)이 자연스러운 다음 단계.</li>
+<li>기술적 참신성: 마스킹 모델링을 멀티-양식 내비게이션에 적용한 점, 평면도의 보편 유효성 실증, 2단계 디퓨전(전역/국소 분리)은 <strong>중복 아이디어가 아닌 새 조합</strong>으로 평가된다.</li>
+</ul>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li>Huang, W., Dong, S., Li, J., Guo, Y., Wang, Z., Liang, W. <em>FloVerse: Floor Plan-Guided Multi-Modal Navigation.</em> CVPR 2026. arXiv:2606.14267.</li>
+<li>Ho, J., Jain, A., Abbeel, P. <em>Denoising Diffusion Probabilistic Models (DDPM).</em> NeurIPS 2020.</li>
+<li>Radford, A. et al. <em>Learning Transferable Visual Models From Natural Language Supervision (CLIP).</em> ICML 2021.</li>
+<li>Tan, M., Le, Q. <em>EfficientNet.</em> ICML 2019.</li>
+<li>Ramakrishnan, S. et al. <em>Habitat-Matterport 3D Dataset (HM3D).</em> NeurIPS 2021.</li>
+<li>Xia, F. et al. <em>Gibson Env.</em> CVPR 2018.</li>
+<li>Wijmans, E. et al. <em>DD-PPO.</em> ICLR 2020.</li>
+<li>Sridhar, A. et al. <em>NoMaD: Goal Masked Diffusion Policies for Navigation.</em> ICRA 2024.</li>
+<li>Majumdar, A. et al. <em>ZSON: Zero-Shot Object-Goal Navigation.</em> NeurIPS 2022.</li>
+<li>Cai, W. et al. <em>NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance.</em> ICRA 2026. (본 코퍼스 리뷰)</li>
+<li>Azuma, D. et al. <em>NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation.</em> arXiv 2026. (본 코퍼스 리뷰)</li>
+<li><em>WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation.</em> IROS 2025 (Oral). (본 코퍼스 리뷰)</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p><strong>FloVerse</strong>는 &quot;평면도라는 값싼 전역 사전정보를 통해 PointNav·ObjectNav·ImageNav를 하나의 디퓨전 정책으로 통합한다&quot;는 명료한 한 문장으로 요약된다. 그 안에 세 가지 단단한 기여가 있다 — (1) 분절된 내비게이션 과제를 묶은 <strong>통합 과제·대규모 자동 데이터셋(FloVerse-1.6K)</strong>, (2) <strong>마스킹 모델링</strong>으로 단일 가중치 다중 양식을 달성한 ThreeDiff, (3) <strong>평면도 사전정보의 보편적 유효성</strong>(세 양식 +6~16%p SR)과 <strong>암묵적 공간 학습</strong>의 실증.</p>
+<p><strong>혁신성</strong> 측면에서, 마스킹 모델링을 멀티-양식 내비게이션에 도입하고 전역(Planner)/국소(Refiner) 디퓨전을 분리한 설계는 기존 디퓨전 내비게이션(NavDP·NavWAM·NoMaD)과 차별화된 새 조합이다. <strong>실용적 의의</strong>는 평면도가 흔히 존재하는 실내 서비스 로봇 도메인에 직접 닿아 있다. 다만 <strong>실세계 검증의 부재와 코드 미공개</strong>는 본 코퍼스의 1순위 기준(코드+리얼월드)에서 분명한 한계이며, 후속 sim-to-real 작업과 릴리스가 이 논문의 실제 영향력을 좌우할 것이다.</p>
+<p>종합하면 FloVerse는 <strong>&quot;강한 생성 prior&quot;가 주류였던 디퓨전 내비게이션 흐름에 &quot;값싼 전역 사전정보 + 양식 통합&quot;이라는 직교 축을 더한</strong> 의미 있는 CVPR 2026 기여로 평가된다. NavWAM·NavDP의 실로봇 전이 역량과 결합된다면, 실내 다중-양식 내비게이션의 실용적 표준이 될 잠재력이 있다.</p>
+<hr>
+<p><em>리뷰 작성: 2026-06-16 | 분석 대상: arXiv:2606.14267 (CVPR 2026)</em></p>
+<hr>
+<h2>부록 A. 심화 분석 (In-depth Analysis)</h2>
+<h3>A.1 마스킹 모델링은 왜 작동하는가 — 정규화·앙상블·전이의 삼중 효과</h3>
+<p>마스킹 모델링(masked-modality modeling)은 표면적으로는 &quot;한 양식만 켜고 학습&quot;이라는 단순한 절차지만, 세 가지 학습 이론적 효과가 중첩되어 다중 양식 통합을 가능케 한다.</p>
+<p><strong>(1) 드롭아웃-유사 정규화 (dropout-like regularization).</strong>
+세 목표 슬롯 중 둘을 무작위로 0/마스크 토큰으로 만드는 것은, 조건 입력 차원에 대한 구조적 드롭아웃과 동형이다. 정책 <code>ε_θ</code>는 어떤 슬롯이 살아남을지 사전에 알 수 없으므로, 특정 양식의 통계에 과도하게 의존하는 경로를 학습할 수 없다. 결과적으로 &quot;목표 조건 → 궤적&quot;이라는 <strong>공통 사상(shared mapping)</strong> 으로 표현이 수렴한다.</p>
+<p><strong>(2) 암묵적 멀티태스크 앙상블.</strong>
+단일 가중치가 세 양식을 모두 처리하므로, 각 양식의 학습 신호가 공유 파라미터에 누적된다. PointNav의 풍부한 기하 신호가 ObjectNav/ImageNav의 표현을 떠받치는 <strong>양(陽)의 전이(positive transfer)</strong> 가 발생한다. 이는 §5.3에서 단일-양식 베이스라인(ZSON 7.2%, NoMaD 22.8%) 대비 ThreeDiff(28.6%, 28.9%)가 크게 앞서는 한 원인으로 해석할 수 있다.</p>
+<p><strong>(3) 추론 시 양식 선택의 자유.</strong>
+학습이 양식 불문으로 이뤄졌으므로, 배치 시점에 사용 가능한 양식만 켜면 된다. 이는 실내 로봇이 상황에 따라 &quot;좌표를 알 때는 PointNav, 사진만 있을 때는 ImageNav, 말로 지시받을 때는 ObjectNav&quot;로 <strong>매끄럽게 전환</strong>할 수 있게 한다 — 별도 모델 스위칭 비용 0.</p>
+<blockquote>
+<p><strong>비판적 시각.</strong> 다만 마스킹은 &quot;양식 간 동시 융합&quot;은 학습하지 않는다(항상 1개만 ON). 즉 좌표+사진이 동시에 주어지는 상황의 시너지는 본 설계가 직접 다루지 않는다. 이는 향후 &quot;부분 마스킹(2개 ON)&quot; 커리큘럼으로 확장할 여지로 남는다.</p>
+</blockquote>
+<h3>A.2 평면도 조건화의 정보이론적 위치</h3>
+<p>평면도가 주는 정보는 <strong>전역 위상(global topology)</strong> — 방·복도·문의 연결 구조 — 이다. 이는 현재 관찰(국소 1인칭 RGBD)이 본질적으로 결여한 정보다. 디퓨전 정책 관점에서 평면도 조건 <code>C_F</code>의 역할은 <strong>사후분포의 모드(mode)를 줄이는 것</strong>으로 해석된다.</p>
+<pre><code>평면도 없음:  p(궤적 | 관찰, 목표)        → 다수의 그럴듯한 전역 경로(모드 폭발)
+평면도 있음:  p(궤적 | 관찰, 목표, 평면도) → 위상적으로 가능한 경로로 모드 축소
+</code></pre>
+<p>즉 평면도는 디퓨전 샘플링이 탐색해야 할 궤적 공간을 <strong>위상적으로 타당한 부분공간</strong>으로 좁힌다. PointNav에서 향상폭이 가장 큰(+16.2%p) 이유도 이로 설명된다 — 좌표 목표는 의미 단서가 빈약해 전역 위상 사전정보의 한계이득이 가장 크기 때문이다. 반대로 ObjectNav/ImageNav는 목표 자체에 이미 풍부한 의미·시각 단서가 있어 평면도의 한계이득(+6~8%p)이 상대적으로 작다. 이 <strong>체감 곡선의 차등</strong>은 평면도가 &quot;의미가 빈약한 목표일수록 더 크게 돕는다&quot;는 직관과 정합한다.</p>
+<h3>A.3 2단계 디퓨전의 책임 분리 (separation of concerns)</h3>
+<p>ThreeDiff가 Planner와 Refiner를 <strong>두 개의 독립 디퓨전</strong>으로 나눈 것은 단순한 후처리가 아니라 학습 신호의 분리다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Planner (Stage 1)</th>
+<th>Refiner (Stage 2)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>책임</td>
+<td>전역 도달성(목표까지의 거시 경로)</td>
+<td>국소 안전(근거리 충돌 회피)</td>
+</tr>
+<tr>
+<td>조건</td>
+<td>관찰+목표+평면도</td>
+<td>거친 궤적 + 깊이 SDF</td>
+</tr>
+<tr>
+<td>손실</td>
+<td><code>ℒ₁</code> = 디퓨전 MSE</td>
+<td><code>ℒ₂</code> = 디퓨전 MSE + α·충돌</td>
+</tr>
+<tr>
+<td>시야</td>
+<td>전역(평면도 스케일)</td>
+<td>국소(20×50 BEV, 2m×5m 수준)</td>
+</tr>
+</tbody></table></div>
+<p>단일 네트워크에 전역 추론과 국소 회피를 동시에 요구하면, 두 손실이 그래디언트 상에서 경쟁(gradient conflict)해 어느 쪽도 최적이 되지 못한다. 분리 설계는 각 디퓨전이 자기 책임에만 집중하게 하여, ablation에서 7.7%p의 SR 차이로 그 효용이 검증되었다. 이 철학은 고전 내비게이션의 <strong>global planner + local controller</strong> 2계층 구조를 디퓨전으로 재현한 것으로도 볼 수 있다.</p>
+<h3>A.4 성능 수치의 맥락화</h3>
+<p>ThreeDiff의 절대 성능을 냉정하게 읽으면 다음과 같다.</p>
+<ul>
+<li><strong>PointNav 54.4% SR (Gibson 4+)</strong>: FloDiff(38.8%)·DD-PPO(18.3%) 대비 압도적이나, 잘 정비된 PointNav SOTA가 90%+를 내는 점을 고려하면, FloVerse-1.6K 벤치마크 자체가 더 어렵게(긴 거리·복잡 위상) 설계되었음을 시사한다.</li>
+<li><strong>ImageNav 28.9% / ObjectNav 28.6% SR</strong>: 멀티-양식 통합 모델로서 단일-양식 베이스라인을 크게 앞서는 것이 핵심 메시지지, 절대 SOTA 경신이 목적이 아니다. 즉 본 논문의 기여는 <strong>&quot;하나의 모델로 세 양식을 모두, 평면도로 일관되게 향상&quot;</strong> 이라는 통합성에 있다.</li>
+<li><strong>Refiner의 +7.7%p</strong>: 단일 모듈 추가로 얻는 향상치고는 큰 편이며, 충돌 회피가 SR에 직접 기여함(충돌=실패)을 방증한다.</li>
+</ul>
+<h3>A.5 재현성·실용성 체크리스트</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>상태</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>코드 공개</td>
+<td>❌</td>
+<td>프로젝트 페이지만(2026-06-16)</td>
+</tr>
+<tr>
+<td>데이터셋 공개</td>
+<td>⏳ 미확인</td>
+<td>FloVerse-1.6K 릴리스 여부 불명</td>
+</tr>
+<tr>
+<td>실로봇 검증</td>
+<td>❌</td>
+<td>시뮬(HM3D/Gibson) 전용</td>
+</tr>
+<tr>
+<td>학회 검증</td>
+<td>✅</td>
+<td>CVPR 2026 accept</td>
+</tr>
+<tr>
+<td>하이퍼파라미터 명시</td>
+<td>✅</td>
+<td>옵티마이저·lr·배치·α 등 보고</td>
+</tr>
+<tr>
+<td>평면도 가정</td>
+<td>⚠️</td>
+<td>추론 시 평면도 필요</td>
+</tr>
+</tbody></table></div>
+<p>실용 관점의 결론: <strong>연구 자산(데이터·과제·아이디어)으로서의 가치는 높으나, 즉시 배치 가능한 시스템은 아니다.</strong> sim-to-real 전이와 코드/데이터 릴리스가 후속으로 채워져야 본 코퍼스의 1·2순위 기준(코드·리얼월드)을 충족한다.</p>
+<p><em>심화 분석 작성: 2026-06-16</em></p>
+<hr>
+<h2>부록 B. 디퓨전 학습·샘플링 메커니즘 상세</h2>
+<h3>B.1 학습 단계 의사코드</h3>
+<p>ThreeDiff의 2단계 디퓨전 학습을 의사코드로 정리하면 다음과 같다(논문 표기 종합).</p>
+<pre><code># ---------- Stage 1: Planner 학습 ----------
+for batch in FloVerse-1.6K:
+    o_t, g_point, g_object, g_image, F, a_gt = batch
+    C_O = EffNet(o_t)
+    # 양식 무작위 선택(마스킹): 셋 중 하나만 ON
+    m = sample_uniform({point, object, image})
+    C_g = encode_goal(g, modality=m)          # 나머지 둘은 0/mask
+    C_F = EffNetB0(F)
+    cond = concat(C_O, C_g, C_F)
+    k    = sample_timestep()
+    eps  = N(0, I)
+    a_noisy = a_gt + eps                        # (스케줄에 따른) 노이즈 주입
+    loss1 = MSE(eps, eps_theta(a_noisy, k, cond))
+    backprop(loss1)
+
+# ---------- Stage 2: Refiner 학습 ----------
+for batch in FloVerse-1.6K:
+    a_coarse = Planner.sample(...)             # 또는 GT 거친 궤적
+    f_SDF    = depth_to_SDF(depth, grid=20x50@0.1m)
+    k        = sample_timestep()
+    eps      = N(0, I)
+    a_noisy  = a_coarse + eps
+    rec      = MSE(eps, eps_phi(a_noisy, k, [a_coarse, f_SDF]))
+    coll     = collision_penalty(refined_waypoints, f_SDF)  # SDF&lt;0 침범 벌점
+    loss2    = rec + 0.1 * coll
+    backprop(loss2)
+</code></pre>
+<h3>B.2 샘플링(추론) 단계</h3>
+<pre><code># 추론: receding-horizon
+loop every control step:
+    C_O = EffNet(o_t); C_g = encode_goal(g, modality=given); C_F = EffNetB0(F)
+    cond = concat(C_O, C_g, C_F)
+    # 30개 샘플 앙상블
+    coarse_set = [ Planner.ddpm_sample(cond) for _ in range(30) ]
+    a_coarse   = mean(coarse_set)              # 분산 축소
+    f_SDF      = depth_to_SDF(depth)
+    a_refined  = Refiner.ddpm_sample([a_coarse, f_SDF])
+    execute(a_refined[:H])                     # 앞 H개 waypoint만 실행 후 재계획
+</code></pre>
+<p>핵심은 <strong>(a) 30개 앙상블 평균으로 디퓨전 분산을 흡수</strong>하고, <strong>(b) receding-horizon으로 앞부분만 실행 후 재계획</strong>하여 누적 오차를 억제하는 것이다. 0.18 s/step의 추론 속도는 실시간 제어 루프에 들어갈 수 있는 수준이나, 30-샘플 앙상블·2단계 디퓨전의 총 지연은 실로봇 배치 시 면밀히 측정되어야 할 부분이다(실로봇 미검증, §8.2).</p>
+<h3>B.3 FloVerse를 선행 평면도 내비게이션과 구분 짓는 지점</h3>
+<p>평면도 기반 내비게이션은 새로운 아이디어가 아니다. 그러나 선행 연구 대비 FloVerse의 차별점은 명확하다.</p>
+<ol>
+<li><strong>양식 범위</strong>: 선행은 대부분 PointNav 단일. FloVerse는 Point+Object+Image 통합.</li>
+<li><strong>정합 방식</strong>: 다수 선행은 평면도-관찰을 명시적으로 메트릭 정합(예: 위치추정 후 평면도 좌표 변환). FloVerse는 <strong>암묵적</strong>(평면도 이미지 통째 조건화) — 단순하지만 정합 오류에 강건.</li>
+<li><strong>데이터 규모</strong>: 선행은 소규모/특정 환경. FloVerse-1.6K는 1,627 평면도·240K 궤적의 대규모 자동 합성.</li>
+<li><strong>정책 클래스</strong>: 선행은 RL/모듈러가 흔함. FloVerse는 디퓨전 모방학습 + 2단계 정제.</li>
+</ol>
+<p>이 네 축의 결합이 CVPR 2026 채택의 근거로 읽힌다 — 개별 요소(평면도, 디퓨전, 마스킹)는 알려졌으나, <strong>&quot;평면도 조건 디퓨전으로 세 양식을 통합하고 대규모 데이터로 보편 유효성을 입증&quot;</strong> 한 조합은 새롭다.</p>
+<h3>B.4 본 코퍼스 관점의 종합 평점</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>평가축</th>
+<th>점수(정성)</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>카테고리 적합성(VLN)</td>
+<td>상</td>
+<td>embodied navigation(Point/Object/Image), 완전 in-scope</td>
+</tr>
+<tr>
+<td>기술 참신성</td>
+<td>상</td>
+<td>마스킹×평면도×2단계 디퓨전의 새 조합</td>
+</tr>
+<tr>
+<td>학회 권위</td>
+<td>최상</td>
+<td>CVPR 2026</td>
+</tr>
+<tr>
+<td>코드/프로젝트</td>
+<td>중하</td>
+<td>프로젝트 페이지 ○ / 코드 ✕</td>
+</tr>
+<tr>
+<td>리얼월드</td>
+<td>하</td>
+<td>시뮬 전용</td>
+</tr>
+<tr>
+<td>데이터 기여</td>
+<td>최상</td>
+<td>FloVerse-1.6K 대규모 자동 합성</td>
+</tr>
+</tbody></table></div>
+<p><strong>총평</strong>: 본 코퍼스의 1순위(코드+리얼월드)에서는 감점이 있으나, 2~4순위(차별성·학회·아이디어 참신성)에서 강하다. 디퓨전 내비게이션 흐름(NavDP·NavWAM)에 &quot;평면도+양식통합&quot;이라는 직교 기여를 더한, 인용 가치가 높은 CVPR 2026 논문으로 판단해 리뷰 대상으로 선별하였다.</p>
+<p><em>부록 B 작성: 2026-06-16</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

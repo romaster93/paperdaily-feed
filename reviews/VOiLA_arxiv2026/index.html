@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>VOiLA: Vectorized Online Planning with Learned Diffusion Model for POMDP Agents · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">2026 ISRR 제출(submitted, 확정 미확인) — arXiv preprint (cs.RO), 2026-06-18</div>
+    <h1>VOiLA: Vectorized Online Planning with Learned Diffusion Model for POMDP Agents</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2606.19729">arXiv:2606.19729</a></span>
+      <span>리뷰 2026-06-21</span>
+      <span>41분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>VOiLA: Vectorized Online Planning with Learned Diffusion Model for POMDP Agents — 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: VOiLA: Vectorized Online Planning with Learned Diffusion Model for POMDP Agents</li>
+<li><strong>저자 (Authors)</strong>: Marcus Hoerger, Rishikesh Joshi, Rahul Shome, Ian Manchester, Hanna Kurniawati</li>
+<li><strong>소속 (Affiliation)</strong>: Australian National University (ANU, Canberra) · The University of Sydney (Sydney, NSW, Australia)</li>
+<li><strong>발표처 (Published)</strong>: 2026 International Symposium of Robotics Research (ISRR) <strong>제출(submitted)</strong> — 채택 확정은 미확인. arXiv preprint (cs.RO), 2026-06-18 제출.</li>
+<li><strong>DOI</strong>: 미부여 (preprint)</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2606.19729">2606.19729</a></li>
+<li><strong>코드</strong>: ❌ 미공개 (abstract·본문에 저장소/프로젝트 페이지 링크 미확인 — 추후 공개 여부 불명)</li>
+<li><strong>프로젝트 페이지</strong>: ❌ 확인 불가</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 논문은 <strong>부분 관측 마르코프 결정 과정(POMDP, Partially Observable Markov Decision Process)</strong> 하에서의 온라인 플래닝을 다룬다. 로봇이 자신의 위치·환경 구성·목표 위치를 정확히 모른 채(불확실성 하에서) 노이즈가 섞인 관측만으로 행동을 결정해야 하는 문제 — 즉 <strong>불확실성 하의 경로/행동 계획(planning under uncertainty)</strong> — 이 핵심 대상이다.</p>
+<p>POMDP 온라인 플래너(예: POMCP, DESPOT, ABT, POMCPOW)는 매 시간 스텝마다 현재 신뢰 상태(belief)에서 수만 번의 시뮬레이션 롤아웃을 돌려 belief tree를 구축하고 최적 행동을 찾는다. 이 롤아웃에는 <strong>생성 모델(generative model)</strong> 두 가지가 반드시 필요하다:</p>
+<pre><code>전이 모델(transition):   s&#39; ~ T(s&#39; | s, a)      — 행동 후 상태가 어떻게 바뀌는가
+관측 모델(observation):  o ~ Z(o | s&#39;, a)        — 새 상태에서 어떤 센서값이 나오는가
+</code></pre>
+<p>문제는, 실제 로봇의 센싱(RGB 카메라, lidar)은 고차원·고비선형이라 이 두 모델을 <strong>손으로 설계(hand-craft)하기가 사실상 불가능</strong>하다는 점이다. 그렇다고 고충실도 생성 모델(예: diffusion model)로 학습하면, <strong>추론 속도가 너무 느려</strong> 온라인 플래닝에 필요한 &quot;스텝당 수만 회 샘플링&quot;을 감당할 수 없다. 정확도(고충실도 학습 모델)와 속도(온라인 플래닝 실시간성)가 정면충돌하는 것이다.</p>
+<p>VOiLA의 목표는 이 충돌을 해소하는 것이다:</p>
+<blockquote>
+<p><strong>태스크 비종속(task-agnostic)으로 전이·관측 생성 모델을 conditional diffusion으로 학습하되, 이를 compact feedforward 생성기로 distillation하여 샘플링 비용을 약 3자릿수(최대 283×) 줄이고, GPU 벡터화 온라인 POMDP 플래너(VOPP)에 결합하여 실시간 불확실성 하 플래닝을 달성한다.</strong></p>
+</blockquote>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) 생성 모델 수작업의 한계.</strong>
+고전적 POMDP 플래너는 전이·관측 모델을 분석적으로 주어진 것으로 가정한다. 그러나 다리형 로봇(legged robot)이 거친 지형을 밟고 넘어지며 만드는 상태 전이, RGB 카메라가 벽 구성을 보는 관측, lidar가 움직이는 상자에 반사되는 관측 — 이런 것을 수식으로 적는 것은 비현실적이다.</p>
+<p><strong>(C2) 학습 생성 모델의 추론 지연.</strong>
+Diffusion model은 분포를 매우 정확하게 학습하지만, 추론 시 ODE/SDE를 수십<del>수백 스텝 적분해야 샘플 하나를 만든다. POMDP 온라인 플래너는 한 결정 스텝에서 belief tree를 키우며 <strong>수만 개의 (s, a) → s&#39; → o</strong> 시뮬레이션을 돌린다. diffusion을 그대로 호출하면 한 스텝 결정에 수 분</del>수십 분이 걸려 실시간이 불가능하다.</p>
+<p><strong>(C3) 연속 관측 공간.</strong>
+RGB/lidar 관측은 연속·고차원이다. 표준 belief tree는 이산 관측 분기를 가정하므로, 같은 관측이 두 번 나오지 않는 연속 공간에서는 트리가 폭발하거나 분기가 무의미해진다.</p>
+<p><strong>(C4) 관측 우도(likelihood) 추정.</strong>
+파티클 필터로 belief를 갱신하려면 관측 우도 <code>Z(o|s&#39;,a)</code>로 파티클 가중치를 계산해야 한다. 그러나 생성 모델은 보통 &quot;샘플은 만들지만 밀도(density)는 못 주는&quot; 암묵적 모델이다. 정규화된 우도가 없으면 가중치를 못 매긴다.</p>
+<p><strong>(C5) Sim-to-real 전이.</strong>
+학습 모델 기반 플래너의 실용성은 결국 시뮬레이션에서만 학습한 모델이 실제 로봇에서 동작하느냐로 판가름난다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>VOiLA는 다섯 도전과제에 다음을 대응시킨다:</p>
+<pre><code>(C1) 수작업 한계      → conditional diffusion으로 전이/관측 샘플러를 데이터에서 학습 (task-agnostic)
+(C2) 추론 지연        → ODE diffusion 샘플러를 compact feedforward 생성기로 distillation (최대 283× 가속)
+(C3) 연속 관측        → VOPP에 Progressive Widening 적용 (연속 관측 분기 제어)
+(C4) 우도 부재        → InfoNCE 대조학습으로 비정규 관측 밀도(우도) 모델 별도 학습 → 파티클 가중
+(C5) sim-to-real      → 시뮬만으로 학습한 모델을 실제 Unitree Go2에 zero-shot 전개, 10/10 성공
+</code></pre>
+<p>전체를 한 문장으로: <strong>&quot;느리지만 정확한 diffusion 교사 → 빠른 feedforward 학생으로 증류 → GPU 벡터화 온라인 플래너에 꽂아 실시간화&quot;</strong>.</p>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<p>VOiLA는 (A) diffusion 기반 전이·관측 샘플러 학습, (B) feedforward distillation, (C) InfoNCE 우도 모델, (D) VOPP — GPU 벡터화 온라인 POMDP 플래너 — 네 부품으로 구성된다.</p>
+<h3>3.1 학습 가능한 생성 POMDP 모델 — Conditional Diffusion 샘플러</h3>
+<p>POMDP를 <code>(S, A, O, T, Z, R, γ, b0)</code>로 둔다. VOiLA는 <code>T</code>, <code>Z</code>를 분석식이 아니라 <strong>샘플러(sampler)</strong> 형태의 학습 함수로 둔다.</p>
+<pre><code>전이 샘플러:        s&#39; = f_T(s, a, ω_T),     ω_T ~ N(0, I)
+관측 샘플러(잠재):  z  = f_Z(s&#39;, a, ω_Z),    ω_Z ~ N(0, I)
+</code></pre>
+<ul>
+<li><code>f_T</code>: 현재 상태 <code>s</code>와 행동 <code>a</code>를 조건으로, 표준정규 노이즈 <code>ω_T</code>를 입력받아 다음 상태 <code>s&#39;</code>를 출력. 즉 <code>T(s&#39;|s,a)</code>에서 한 표본을 뽑는 것과 동치.</li>
+<li><code>f_Z</code>: 다음 상태 <code>s&#39;</code>와 행동 <code>a</code>를 조건으로, 관측을 (고차원 raw 관측 대신) <strong>잠재 표현 <code>z</code></strong> 공간에서 생성. RGB/lidar 같은 고차원 관측은 인코더로 잠재 <code>z</code>에 사상한 뒤 그 분포를 학습하는 것이 효율적이기 때문이다.</li>
+</ul>
+<p><strong>학습 목표 — v-prediction.</strong>
+두 샘플러는 conditional diffusion model로 학습한다. 표준 diffusion은 노이즈 <code>ε</code>를 예측(ε-prediction)하지만, VOiLA는 안정성과 저-노이즈/고-노이즈 양 끝에서의 균형이 좋은 <strong>v-prediction</strong> 목적을 사용한다. 잡음 스케줄 <code>α_t, σ_t</code> (with <code>α_t² + σ_t² = 1</code>)에서:</p>
+<pre><code># 노이즈 주입 (forward process)
+x_t = α_t · x_0 + σ_t · ε,          ε ~ N(0, I)
+
+# v-target 정의
+v   = α_t · ε − σ_t · x_0
+
+# 학습 손실 (조건 c = (s,a) 또는 (s&#39;,a))
+L_diff = E_{x_0, ε, t} [ || v_θ(x_t, t, c) − v ||² ]
+</code></pre>
+<p>여기서 <code>x_0</code>는 전이 샘플러면 <code>s&#39;</code>, 관측 샘플러면 <code>z</code>이다. 데이터는 오프라인으로 수집한 <code>(s, a, s&#39;, o)</code> 튜플(시뮬레이터 롤아웃)에서 만든다 — <strong>태스크의 보상/목표와 무관</strong>하게 환경 동역학·센싱만 학습하므로 task-agnostic이고, 같은 모델을 여러 목표/태스크에 재사용할 수 있다.</p>
+<pre><code>   ┌──────────── 오프라인 데이터 수집 ────────────┐
+   │  시뮬레이터에서 무작위 정책으로 롤아웃        │
+   │  → 튜플 D = { (s, a, s&#39;, o) }                │
+   └──────────────────────────────────────────────┘
+                    │
+        ┌───────────┴────────────┐
+        ▼                         ▼
+ 전이 diffusion             관측 diffusion
+ v_θT(x_t,t,(s,a))          v_θZ(x_t,t,(s&#39;,a))
+ 학습: s&#39;=x_0               학습: z=enc(o)=x_0
+</code></pre>
+<h3>3.2 모델 증류 (Distillation) — 3자릿수 가속의 핵심</h3>
+<p>학습된 diffusion 샘플러는 정확하지만 ODE를 여러 스텝 풀어야 해서 느리다. VOiLA의 결정적 기여는 <strong>ODE 기반 diffusion 샘플러를 compact feedforward 생성기로 distillation</strong>하는 것이다.</p>
+<p>핵심 아이디어: diffusion 샘플러는 입력 노이즈 <code>ω</code>를 출력 표본 <code>x_0</code>로 보내는 <strong>결정론적 사상(ODE 흐름)</strong>으로 볼 수 있다(probability-flow ODE). 이 사상을 한 번에 흉내내는 작은 피드포워드 네트워크 <code>g_φ</code>를 모방학습(imitation)으로 훈련한다:</p>
+<pre><code># 1) 교사(diffusion)로 (노이즈 → 표본) 쌍 다량 생성
+for many (s,a):
+    ω ~ N(0,I)
+    x0_teacher = ODE_solve(v_θ, ω, c=(s,a))     # 느린 다단계 적분
+
+# 2) 학생(feedforward)이 이를 한 방에 모사
+L_distill = E[ || g_φ(ω, c) − x0_teacher ||² ]
+
+# 추론(온라인 플래닝 시):  s&#39; = g_φ(ω_T, (s,a))   ← 단일 forward, ODE 적분 없음
+</code></pre>
+<p><strong>효과(LeggedNavigation 측정)</strong>: 증류된 샘플러는 약 <code>5.9×10⁴ samples/s</code>로, diffusion model의 <code>2.1×10² samples/s</code> 대비 <strong>약 283× 처리량 향상</strong>. 이 가속이 &quot;수만 회 시뮬레이션/스텝&quot;을 실시간 예산 안에 넣어 온라인 POMDP 플래닝을 가능케 하는 가교다.</p>
+<pre><code>            정확도              속도
+ diffusion  ★★★★★ (정확)   ✗ 2.1×10² /s   ← 그대로는 온라인 불가
+ distilled  ★★★★  (근사)   ✓ 5.9×10⁴ /s   ← 283× ↑, 온라인 가능
+            └────────── distillation ──────────┘
+</code></pre>
+<p>즉 VOiLA의 설계 철학은 &quot;<strong>학습은 느리고 정확한 diffusion으로, 배치(deployment)는 빠른 feedforward로</strong>&quot; — 학습/추론의 비대칭을 명시적으로 활용한다.</p>
+<h3>3.3 관측 우도 모델 — InfoNCE 대조 학습</h3>
+<p>파티클 필터로 belief를 갱신하려면 관측 우도 <code>Z(o|s&#39;,a)</code>가 필요하다. 그러나 관측 샘플러 <code>f_Z</code>는 표본만 줄 뿐 밀도를 주지 않는다(암묵 모델). VOiLA는 <strong>별도의 우도 모델</strong>을 InfoNCE 대조 손실로 학습하여 <strong>비정규(unnormalized) 관측 밀도</strong>를 얻는다.</p>
+<pre><code># (s&#39;, a)와 실제 관측 z가 &quot;맞는 쌍&quot;, 다른 z들이 &quot;틀린 쌍(negatives)&quot;
+# 에너지/유사도 함수 e_ψ(z, s&#39;, a) 학습
+
+L_InfoNCE = − E[ log ( exp(e_ψ(z⁺, s&#39;,a)) /
+                       ( exp(e_ψ(z⁺,s&#39;,a)) + Σ_j exp(e_ψ(z⁻_j, s&#39;,a)) ) ) ]
+
+# 파티클 가중치(비정규):  w_i ∝ exp( e_ψ(z_obs, s&#39;_i, a) )
+</code></pre>
+<p>InfoNCE로 학습된 <code>exp(e_ψ)</code>는 정규화 상수만 다를 뿐 우도에 비례하므로, 파티클 가중치는 정규화로 상쇄되어 <strong>정확한 belief 갱신이 가능</strong>하다. 이는 &quot;샘플은 diffusion이, 가중은 대조모델이&quot;라는 역할 분담으로 (C4)를 푼다.</p>
+<h3>3.4 VOPP — Vectorized Online POMDP Planner</h3>
+<p>증류된 샘플러와 우도 모델을 <strong>GPU-native 온라인 플래너 VOPP</strong>에 결합한다. VOPP는 belief tree를 <strong>fully vectorized forward search</strong>로 키운다 — 수만 개의 병렬 시뮬레이션을 텐서 연산으로 동시에 진행한다.</p>
+<pre><code>VOPP 한 결정 스텝 (개념):
+┌─────────────────────────────────────────────────────────────┐
+│  현재 belief b (파티클 집합 {s_i})                            │
+│                                                               │
+│  반복(여러 iteration):                                        │
+│   1) [Vectorized Forward Search]                              │
+│       수만 개 시뮬레이션을 텐서로 동시 전개:                  │
+│         s&#39;_i = g_φ(ω, (s_i, a))        ← 증류 전이 (배치)     │
+│         z_i  = g_φ^Z(ω, (s&#39;_i, a))     ← 증류 관측 (배치)     │
+│       Progressive Widening으로 연속 관측 분기 수 제어         │
+│   2) [Preference Backup]                                      │
+│       자식 노드의 가치를 부모로 역전파(선호 기반 백업)        │
+└─────────────────────────────────────────────────────────────┘
+                    │
+        최적 행동 a* 선택 → 실행 → 새 관측 → belief 갱신(파티클 + InfoNCE 가중)
+</code></pre>
+<ul>
+<li><strong>Vectorized Forward Search</strong>: 트리 확장을 노드 단위 루프가 아니라 텐서 배치로 수행 → GPU에서 &quot;tens of thousands of parallel simulations&quot;를 한 번에.</li>
+<li><strong>Progressive Widening (PW)</strong>: 연속 관측 공간(C3) 대응. 방문 횟수에 따라 자식(관측 분기) 수를 <code>k·N^α</code> 식으로 점진 허용하여 트리 폭발을 막으면서 충분한 탐색을 보장.</li>
+<li><strong>Preference Backup</strong>: 단순 평균 백업이 아닌 선호(preference) 기반 가치 역전파로, 유망한 가지에 탐색을 집중.</li>
+</ul>
+<h3>3.5 전체 학습·배치 파이프라인 한눈에</h3>
+<pre><code>[오프라인 — 1회]                          [온라인 — 매 결정 스텝]
+ 시뮬 롤아웃 D={(s,a,s&#39;,o)}                현재 belief b
+        │                                       │
+   ┌────┴─────┐                            VOPP forward search
+   ▼          ▼                                 │  (증류 샘플러 g_φ, g_φ^Z 호출)
+ 전이/관측    InfoNCE                            ▼
+ diffusion    우도 e_ψ                      belief tree 확장 (PW)
+   │ (느림)                                      │
+   ▼ distillation                          preference backup
+ feedforward g_φ, g_φ^Z (283× 빠름) ──────▶ 최적 행동 a*
+                                                 │
+                                            실행→관측→파티클 갱신(e_ψ 가중)
+</code></pre>
+<h3>3.6 설계 대안과 VOiLA의 선택 (왜 이 구조인가)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>결정 지점</th>
+<th>가능한 대안</th>
+<th>VOiLA의 선택</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>모델 학습 방식</td>
+<td>결정론적 회귀 / VAE / GAN / diffusion</td>
+<td><strong>conditional diffusion (v-pred)</strong></td>
+<td>멀티모달 전이·관측 분포를 고충실도로 포착, 학습 안정</td>
+</tr>
+<tr>
+<td>추론 가속</td>
+<td>적은 ODE 스텝 / consistency model / <strong>distillation to feedforward</strong></td>
+<td><strong>feedforward distillation</strong></td>
+<td>단일 forward로 최대 283×, 플래너 내부 수만 회 호출에 최적</td>
+</tr>
+<tr>
+<td>관측 표현</td>
+<td>raw 관측 직접 / <strong>잠재 z</strong></td>
+<td><strong>잠재 z</strong></td>
+<td>고차원 RGB/lidar를 저차원에서 모델링, 효율↑</td>
+</tr>
+<tr>
+<td>우도 추정</td>
+<td>명시 밀도(정규화 흐름) / <strong>InfoNCE 대조</strong></td>
+<td><strong>InfoNCE</strong></td>
+<td>비정규 밀도만으로 파티클 가중 충분, 학습 간단</td>
+</tr>
+<tr>
+<td>연속 관측 트리</td>
+<td>이산화 / <strong>Progressive Widening</strong></td>
+<td><strong>PW</strong></td>
+<td>트리 폭발 억제 + 탐색 보장</td>
+</tr>
+<tr>
+<td>플래너 실행</td>
+<td>CPU 직렬 트리 / <strong>GPU 벡터화</strong></td>
+<td><strong>VOPP (GPU)</strong></td>
+<td>수만 병렬 시뮬, 실시간 belief tree</td>
+</tr>
+</tbody></table></div>
+<p>이 표가 보여주듯 VOiLA의 신규성은 단일 부품이 아니라 <strong>&quot;고충실도 학습(diffusion) ↔ 실시간 추론(distillation+GPU)&quot;의 비대칭을 POMDP 플래닝 루프에 정합</strong>시킨 시스템 설계에 있다.</p>
+<h3>3.7 POMDP belief 갱신과 파티클 필터 — 수식 상세</h3>
+<p>VOiLA의 온라인 루프 한복판에는 belief 갱신이 있다. POMDP에서 belief <code>b(s)</code>는 현재 상태에 대한 확률분포이며, 행동 <code>a</code>와 관측 <code>o</code>를 받으면 Bayes 규칙으로 갱신된다:</p>
+<pre><code># 정확한 belief 갱신 (Bayes filter)
+b&#39;(s&#39;) = η · Z(o | s&#39;, a) · ∫_S T(s&#39; | s, a) · b(s) ds
+         └─ 관측 우도 ─┘   └──── 전이 적분(예측) ────┘
+   η : 정규화 상수 (Σ_{s&#39;} 항 = 1)
+</code></pre>
+<p>연속·고차원 상태에선 이 적분이 닫힌형으로 안 풀리므로 <strong>파티클 필터</strong>로 근사한다. VOiLA는 적분의 두 항을 각각 학습 모델로 대체한다:</p>
+<pre><code># 파티클 집합 {s_i}_{i=1..N}, 가중치 {w_i}
+# 1) 예측(predict) — 증류 전이 샘플러로 각 파티클 전진
+   s&#39;_i = g_φ(ω_i, (s_i, a)),         ω_i ~ N(0, I)     ← T(s&#39;|s,a) 표본
+
+# 2) 보정(update) — InfoNCE 우도로 재가중
+   w_i ∝ exp( e_ψ(z_obs, s&#39;_i, a) )                     ← Z(o|s&#39;,a) 비례
+
+# 3) 정규화 + 재표집(resample)
+   w_i ← w_i / Σ_j w_j
+   {s&#39;_i} ~ Multinomial({w_i})   (유효표본수 N_eff 낮으면 재표집)
+</code></pre>
+<p>즉 &quot;전이 적분&quot;은 증류 샘플러 <code>g_φ</code>가, &quot;관측 우도&quot;는 대조모델 <code>e_ψ</code>가 담당한다. 두 학습 부품이 정확히 Bayes filter의 두 항에 일대일 대응한다는 것이 VOiLA 설계의 명료함이다. <code>N_eff = 1 / Σ_i w_i²</code>로 파티클 붕괴를 감시하고 임계 이하에서 재표집한다.</p>
+<h3>3.8 한 VOPP 결정 스텝의 워크스루 (Worked Example)</h3>
+<p><code>LeggedNavigation</code>(ANYmal-C, 벽 구성 미지)을 예로, 한 결정 스텝을 의사 수치로 따라가 본다(수치는 설명용 예시이며 논문 공개값이 아님).</p>
+<pre><code>입력:  현재 belief b = {s_1..s_N}  (N=2048 파티클, 벽 구성 후보 혼재)
+목표:  최적 행동 a* 선택
+
+[iter 0..K]  belief tree 확장:
+  for 각 후보 행동 a in A(루트):
+     # (1) 벡터화 전이: 2048 파티클 × 후보행동을 한 텐서로
+     S&#39; = g_φ(Ω, (S, a))            # 단일 GPU forward, ~수십 µs
+     # (2) 벡터화 관측 생성
+     Z&#39; = g_φ^Z(Ω&#39;, (S&#39;, a))
+     # (3) Progressive Widening: 방문수 n(h,a)에 따라
+     if  child_count(h,a) ≤ k · n(h,a)^α :   # 예: k=2, α=0.3
+            새 관측 분기 o ~ Z&#39; 추가
+     else:  기존 분기 재사용
+     # (4) 자식 노드 롤아웃 가치 추정 → preference backup
+     Q(h,a) ← preference_backup(children)
+
+  a* = argmax_a Q(root, a)
+
+출력:  a* 실행 → 실제 관측 o_real → §3.7로 belief 갱신
+</code></pre>
+<p>핵심은 (1)(2)가 <strong>루프가 아니라 배치 텐서 연산</strong>이라는 점이다. 만약 diffusion을 직접 썼다면 각 forward가 ODE 다단계라 <code>2.1×10²/s</code> → 2048 파티클 × 다수 행동 × K iteration이 수 분으로 폭발한다. 증류로 <code>5.9×10⁴/s</code>가 되면 같은 트리를 실시간 예산(수십 ms~수백 ms) 안에 키울 수 있다. 이 단순한 처리량 차이가 &quot;온라인 가능/불가능&quot;의 경계를 가른다.</p>
+<p><strong>Progressive Widening의 직관</strong>: 연속 관측에선 같은 <code>o</code>가 두 번 안 나오므로 모든 관측마다 자식을 만들면 트리가 한 단계만에 폭발한다. PW는 노드 방문수 <code>n</code>이 늘 때만 자식 수를 <code>k·n^α</code>로 천천히 늘려, 적게 방문한 노드는 소수 분기로 깊이 탐색하고 많이 방문한 노드만 폭을 넓힌다 — 탐색/활용 균형을 연속 공간에서 유지하는 표준 장치다.</p>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<pre><code>                         ┌──────────────────────────────────────┐
+                         │           오프라인 학습 단계           │
+                         │                                        │
+   시뮬레이터 ──롤아웃──▶ │  D = {(s,a,s&#39;,o)}                      │
+                         │     │            │                     │
+                         │     ▼            ▼                     │
+                         │  전이 diffusion  관측 diffusion        │
+                         │  v_θT            v_θZ (z=enc(o))        │
+                         │     │            │           InfoNCE   │
+                         │     │ distill    │ distill   우도 e_ψ  │
+                         │     ▼            ▼              │       │
+                         │  g_φ (전이)    g_φ^Z (관측)     │       │
+                         └─────┼────────────┼─────────────┼───────┘
+                               │            │             │
+   ════════════════════════════╪════════════╪═════════════╪════════════
+                               ▼            ▼             ▼
+                         ┌──────────────────────────────────────┐
+                         │          온라인 플래닝 (VOPP)         │
+                         │                                        │
+   현재 belief b ───────▶│  벡터화 forward search (GPU)           │
+                         │   s&#39;=g_φ(ω,(s,a)),  z=g_φ^Z(ω,(s&#39;,a)) │
+                         │   Progressive Widening (연속 관측)     │
+                         │   Preference Backup                    │
+                         │            │                           │
+                         │            ▼                           │
+                         │        최적 행동 a*                    │
+                         └────────────┼──────────────────────────┘
+                                      ▼
+                              로봇 실행 → 실제 관측 o
+                                      │
+                          파티클 필터 belief 갱신
+                          (전이 g_φ로 전진, e_ψ로 가중)
+                                      │
+                                      └────────▶ (다음 스텝)
+</code></pre>
+<p><strong>데이터 흐름 요약</strong>: 오프라인에서 환경 동역학·센싱을 diffusion으로 정확히 학습 → 빠른 feedforward로 증류 → 온라인에서 VOPP가 이 증류 샘플러를 GPU 배치로 수만 번 호출하며 belief tree를 키워 행동을 결정 → 실행·관측 후 belief 갱신. 학습은 task-agnostic이므로 목표가 바뀌어도(같은 환경류) 모델 재학습 불필요.</p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 / 벤치마크 도메인 (Datasets)</h3>
+<p>세 가지 불확실성 하 내비게이션·탐색 벤치마크에서 평가한다. 셋 모두 <strong>부분 관측·노이즈 관측 하의 경로/탐색 문제</strong>로, Planner 트랙(불확실성 하 path planning)에 부합한다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>벤치마크</th>
+<th>로봇/환경</th>
+<th>과제 성격</th>
+<th>불확실성 원천</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>FloorPositioning</strong></td>
+<td>2.0×1.0m 직사각형, 내부 벽으로 상/하층 분할</td>
+<td>노이즈 거리 관측으로 자기위치 추정 후 목표 영역 도달</td>
+<td>자기 위치(localization)</td>
+</tr>
+<tr>
+<td><strong>LeggedNavigation</strong></td>
+<td>ANYmal-C 사족로봇, 20×20m 어수선·거친 지형</td>
+<td>장애물 회피 path planning, 벽 구성 추정</td>
+<td>벽 구성(환경 구조) + RGB 관측</td>
+</tr>
+<tr>
+<td><strong>TargetFinding</strong></td>
+<td>Unitree Go2, 4.9×3.6m 실내</td>
+<td>숨은 목표 탐색, 정적 장애물 + 불확실 이동 상자 회피</td>
+<td>목표 위치 + 가동 장애물</td>
+</tr>
+</tbody></table></div>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>성공률(Success Rate, SR)</strong>: 목표 도달/탐색 성공 비율.</li>
+<li><strong>샘플 효율(transitions to learn)</strong>: 동등 성능 도달에 필요한 학습 전이 수.</li>
+<li><strong>샘플링 처리량(samples/s)</strong>: 증류 전후 생성 속도.</li>
+<li><strong>미관측 환경 일반화</strong>: 학습에 없던 환경 구성에서의 SR.</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>FloorPositioning — 극적인 샘플 효율.</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>성공률</th>
+<th>필요 전이 수</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>VOiLA</strong></td>
+<td><strong>100%</strong></td>
+<td><strong>50K</strong></td>
+</tr>
+<tr>
+<td>Recurrent SAC</td>
+<td>(열위)</td>
+<td>2.6M</td>
+</tr>
+<tr>
+<td>VTS (Visual Tree Search)</td>
+<td>(열위)</td>
+<td>32M</td>
+</tr>
+</tbody></table></div>
+<p>VOiLA는 Recurrent SAC 대비 <strong>약 52×</strong>, VTS 대비 <strong>약 640×</strong> 적은 전이로 100% 성공에 도달. 모델 기반(belief planning) 접근이 모델프리 RL/기존 트리탐색 대비 압도적 샘플 효율을 보임.</p>
+<p><strong>LeggedNavigation — 일반화 + 증류 가속.</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>미관측 환경 성공률</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>VOiLA</strong></td>
+<td><strong>72–80%</strong></td>
+</tr>
+<tr>
+<td>Recurrent SAC</td>
+<td>10–12%</td>
+</tr>
+</tbody></table></div>
+<pre><code>증류 효과:  distilled  ≈ 5.9×10⁴ samples/s
+            diffusion  ≈ 2.1×10²  samples/s
+            → 약 283× 처리량 향상 (온라인 플래닝 실현의 핵심)
+</code></pre>
+<p>모델프리 RL(Recurrent SAC)이 미관측 환경에서 10–12%로 붕괴하는 반면, VOiLA는 72–80%를 유지 — 학습된 생성 모델 + belief planning이 <strong>일반화에 강함</strong>을 시사.</p>
+<p><strong>TargetFinding — 실로봇.</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>실로봇 성공률</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>VOiLA (Unitree Go2)</strong></td>
+<td><strong>10/10 (100%)</strong></td>
+</tr>
+</tbody></table></div>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<ul>
+<li><strong>로봇</strong>: Unitree Go2 사족보행 로봇.</li>
+<li><strong>과제</strong>: TargetFinding — 실내 방(4.9×3.6m)에서 lidar 관측으로 숨은 목표를 찾되, 정적 장애물과 <strong>불확실한 이동 상자</strong>를 회피.</li>
+<li><strong>Sim-to-real</strong>: 모델을 <strong>시뮬레이션 데이터만으로 학습</strong>, 추가 실세계 학습 없이 zero-shot 전개.</li>
+<li><strong>결과</strong>: <strong>10회 시행 전부 성공(10/10)</strong>. 시뮬 학습 생성 모델 + 증류 + VOPP 파이프라인이 실제 하드웨어·실제 센서 노이즈 하에서도 동작함을 입증.</li>
+</ul>
+<p>이 실로봇 검증은 본 리뷰의 선별 기준 2순위(real-world)를 강하게 충족하며, 코드 미공개라는 약점을 부분적으로 상쇄한다(어제 배치의 Slow Brain·SCAN-Planner와 동일 판단 근거).</p>
+<h3>5.5 베이스라인 및 어블레이션 관점</h3>
+<ul>
+<li><strong>베이스라인</strong>: Recurrent SAC(메모리 부착 모델프리 RL), VTS(Visual Tree Search, 모델기반 탐색).</li>
+<li><strong>핵심 어블레이션 축</strong>: (a) 증류 유무 — diffusion 직접 사용 시 처리량 2.1×10²/s로 온라인 불가, 증류 시 5.9×10⁴/s로 가능(283×). (b) 모델기반 vs 모델프리 — 미관측 환경에서 VOiLA 72–80% vs Recurrent SAC 10–12%로 일반화 격차. (c) 샘플 효율 — VOiLA 50K vs VTS 32M로 640× 격차.</li>
+</ul>
+<h3>5.6 수치의 해석 — 무엇이 진짜 기여인가</h3>
+<p>세 벤치마크 수치를 한 단계 깊이 해석하면 VOiLA의 기여 구조가 분리된다.</p>
+<p><strong>(가) 샘플 효율 50K vs 2.6M(SAC) vs 32M(VTS) — &quot;모델 기반&quot;의 승리.</strong>
+이 격차의 본질은 VOiLA가 환경 동역학·센싱을 <em>명시적 생성 모델</em>로 학습해 belief planning에 재사용하기 때문이다. 모델프리 RL(SAC)은 보상 신호로부터 정책을 직접 짜내야 하므로 같은 정보를 얻는 데 훨씬 많은 상호작용이 필요하다. VTS도 모델 기반이지만 트리 탐색 효율/모델 충실도에서 VOiLA에 밀린다. 즉 50K는 &quot;diffusion 세계모델 + belief planning&quot; 조합의 정보 효율을 보여준다.</p>
+<p><strong>(나) 미관측 72–80% vs 10–12%(SAC) — &quot;일반화&quot;의 분리.</strong>
+모델프리 정책은 학습 분포 밖 환경 구성에서 급격히 붕괴(10–12%)한다. 반면 VOiLA는 <em>환경을 모델로 이해</em>하므로 새 벽 구성에서도 belief를 굴려 추론한다. 이 60%p 이상의 격차는 belief planning이 분포 이동(distribution shift)에 견고함을 시사한다 — 자율 로봇 실배치에서 가장 중요한 속성 중 하나다.</p>
+<p><strong>(다) 283× 처리량 — &quot;증류&quot;가 가능케 한 모든 것.</strong>
+앞의 (가)(나)는 belief planning의 이점이지만, 그 belief planning을 <em>실시간으로</em> 돌리게 한 것은 오로지 증류다. diffusion 직접 사용 시 <code>2.1×10²/s</code>로는 위 belief tree를 키우는 데 수 분이 걸려 &quot;온라인&quot;이 성립하지 않는다. 따라서 283×는 단순 속도 개선이 아니라 <strong>방법론 자체의 성립 조건</strong>이다. 이 점이 VOiLA를 &quot;또 하나의 diffusion planner&quot;가 아니라 &quot;diffusion을 온라인 POMDP에 처음으로 실용화한 시스템&quot;으로 만든다.</p>
+<p><strong>(라) 실로봇 10/10 — 사슬의 마지막 고리.</strong>
+시뮬-only 학습 모델이 실제 Go2에서 전부 성공했다는 것은, 위 (가)~(다)가 실험실 수치에 그치지 않고 실세계 센서 노이즈·동역학 불일치를 통과했음을 뜻한다. 표본 수(10)는 통계적으로 작지만, 코드 미공개 상황에서 방법의 실효성을 보이는 결정적 증거다.</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><strong>Task-agnostic 학습 생성 POMDP 모델</strong>: 전이·관측 모델을 conditional diffusion(v-prediction)으로, 보상·목표와 무관하게 환경 동역학·센싱만 학습 → 다목표 재사용.</li>
+<li><strong>Distillation을 통한 3자릿수 가속</strong>: ODE diffusion 샘플러를 feedforward 생성기로 증류, 약 283× 처리량 향상으로 &quot;정확하지만 느린&quot; 생성 모델을 온라인 플래닝에 투입 가능케 함. <strong>이것이 논문의 가장 결정적 기여.</strong></li>
+<li><strong>InfoNCE 우도 모델</strong>: 암묵 생성 모델의 밀도 부재 문제를, 대조학습 비정규 밀도로 우회하여 파티클 필터 belief 갱신을 가능케 함.</li>
+<li><strong>VOPP — GPU 벡터화 온라인 POMDP 플래너</strong>: 수만 병렬 시뮬을 텐서화하고 연속 관측에 Progressive Widening을 적용, preference backup으로 belief tree를 실시간 확장.</li>
+<li><strong>강력한 실험 증거</strong>: 샘플 효율(52–640×), 미관측 일반화(72–80% vs 10–12%), 그리고 <strong>시뮬-only 학습의 실로봇 zero-shot 10/10</strong>.</li>
+</ol>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<ul>
+<li><strong>Diffusion 목적</strong>: v-prediction (<code>v = α_t·ε − σ_t·x_0</code>), 잡음 스케줄 <code>α_t² + σ_t² = 1</code>.</li>
+<li><strong>관측 모델링</strong>: raw 관측을 잠재 <code>z</code>로 인코딩 후 그 분포를 학습(고차원 RGB/lidar 효율화).</li>
+<li><strong>증류</strong>: ODE 기반 diffusion 샘플러 → compact feedforward <code>g_φ</code>, 모방학습(노이즈→표본 쌍 회귀). 측정 처리량 distilled ≈ 5.9×10⁴/s, diffusion ≈ 2.1×10²/s.</li>
+<li><strong>우도</strong>: InfoNCE 대조 손실, 비정규 밀도 <code>exp(e_ψ(z,s&#39;,a))</code>를 파티클 가중치로.</li>
+<li><strong>플래너(VOPP)</strong>: fully vectorized forward search + Progressive Widening(연속 관측) + preference backup. &quot;tens of thousands of parallel simulations&quot; 텐서 동시 실행(GPU-native).</li>
+<li><strong>데이터</strong>: 시뮬레이터 오프라인 롤아웃 <code>(s,a,s&#39;,o)</code> 튜플.</li>
+<li><strong>하드웨어(실로봇)</strong>: Unitree Go2 + lidar. 학습은 시뮬 only.</li>
+</ul>
+<blockquote>
+<p>코드가 미공개이므로 위 하이퍼파라미터(diffusion 스텝 수, 증류 네트워크 폭/깊이, PW 상수 <code>k,α</code>, 파티클 수, belief tree iteration 수 등)의 정확한 수치는 본문 공개 범위로 한정된다. 본 리뷰는 <strong>공개된 사실만</strong> 기재하며, 미공개 수치를 추정·날조하지 않는다.</p>
+</blockquote>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<p>GPU 벡터화와 증류 가속 덕에 belief tree 폭을 키워도(더 많은 병렬 시뮬) 실시간성을 유지하기 쉽다. PW로 연속 관측 분기를 제어하므로 고차원 관측에서도 트리가 통제 가능. 다만 GPU 메모리가 belief tree 폭의 상한을 결정한다.</p>
+<h3>8.2 한계점 (Limitations)</h3>
+<ul>
+<li><strong>코드·재현성</strong>: 저장소 미공개로 재현·확장이 즉시 어렵다.</li>
+<li><strong>증류 근사 오차</strong>: feedforward 증류는 ODE 흐름의 근사이므로, 극단적 멀티모달·희소 사건(rare event) 분포에서 교사 대비 충실도 손실 가능. 이 오차가 belief 추정 편향으로 전파될 수 있다.</li>
+<li><strong>잠재 관측 의존</strong>: 관측을 잠재 <code>z</code>로 모델링하므로 인코더 품질·도메인 갭에 민감. sim-to-real에서 인코더가 실세계 센서 통계를 못 따라가면 우도가 왜곡될 수 있다(본 실험에선 10/10로 견뎠으나 일반성은 미지수).</li>
+<li><strong>보상/태스크 비종속의 양면성</strong>: 모델은 재사용되나, 보상은 여전히 플래너 측에 정의 필요 — 새 태스크의 보상 설계 부담은 남는다.</li>
+<li><strong>이론 보증</strong>: 증류·근사 우도 하의 belief 추정 일관성/플래닝 최적성에 대한 형식적 보증은 제한적(경험적 검증 위주).</li>
+</ul>
+<h3>8.3 향후 방향 (Future Directions)</h3>
+<ul>
+<li>Consistency/few-step 증류와의 비교로 충실도-속도 트레이드오프 정밀화.</li>
+<li>온라인 모델 적응(실세계 데이터로 증류 모델 미세조정)으로 도메인 갭 축소.</li>
+<li>동적·다중 에이전트 환경으로 확장(이동 장애물 모델링 강화).</li>
+<li>형식적 안전/최적성 보증과의 결합.</li>
+</ul>
+<h3>8.4 POMDP 플래닝 관점에서의 위치</h3>
+<p>VOiLA는 &quot;<strong>learned generative model + online belief planning</strong>&quot; 계열에서, 생성 모델 충실도와 온라인 실시간성을 동시에 잡으려는 시도다. 고전 POMCPOW/PFT-DPW가 분석 모델을 가정하던 자리에 <strong>학습+증류 모델</strong>을 끼워, 손으로 못 적는 센싱(RGB/lidar)까지 belief planning의 사정권에 넣었다는 점이 개념적 진전이다.</p>
+<h3>8.5 증류 충실도와 안전성의 트레이드오프</h3>
+<p>feedforward 증류는 ODE 흐름의 1-step 근사이므로, 분포의 꼬리(rare but critical event — 예: 드물게 발생하는 충돌 직전 전이)에서 교사 대비 확률 질량을 과소/과대 추정할 수 있다. belief planning에서 이런 꼬리 왜곡은 위험 회피 결정에 직접 영향을 준다(과소추정 시 위험 행동 선택). 본 논문은 평균 성공률로 견고함을 보였으나, 안전 임계 응용(충돌 비용이 비대칭적으로 큰 경우)에서는 증류 오차의 분포적 특성(특히 꼬리)에 대한 추가 분석이 필요하다. consistency model류의 few-step 증류로 꼬리 충실도를 끌어올리면서 속도를 일부만 양보하는 절충이 한 방향이 될 수 있다.</p>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<p>같은 Planner 트랙의 선행 리뷰 중 (a) <strong>diffusion을 플래닝에 쓴</strong> 사례와 (b) <strong>불확실성 하(POMDP) 플래닝 + 학습 근사 가속</strong> 사례를 골라 비교한다.</p>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th><strong>Guided Diffusion ... for Aerial Navigation (ReliaDiffNav)</strong></th>
+<th><strong>Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies (SobolevDiffusion)</strong></th>
+<th><strong>Scout-Assisted Planning for Heterogeneous Robot Teams (ScoutAssistedPlanning)</strong></th>
+<th><strong>VOiLA (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>diffusion의 역할</td>
+<td><strong>궤적 생성기(정책)</strong> — 디퓨전이 경로 자체를 출력</td>
+<td><strong>정책 워밍스타트</strong> — TO 솔버 초기값 생성</td>
+<td>(디퓨전 없음)</td>
+<td><strong>세계 모델(world model)</strong> — 전이/관측 분포를 생성</td>
+</tr>
+<tr>
+<td>불확실성 처리</td>
+<td>지각 신뢰도 히트맵을 조건/가이드로 주입</td>
+<td>미고려(결정론적 TO 가속)</td>
+<td><strong>POMDP</strong> — 부분 지식 환경, belief</td>
+<td><strong>POMDP</strong> — 노이즈 관측, belief tree</td>
+</tr>
+<tr>
+<td>속도 전략</td>
+<td>training-free score 가이드</td>
+<td>Sobolev 1차 손실로 데이터 효율</td>
+<td><strong>GNN으로 MC 계산 근사</strong>(100–300×)</td>
+<td><strong>diffusion→feedforward 증류</strong>(283×) + GPU 벡터화</td>
+</tr>
+<tr>
+<td>실로봇</td>
+<td>✅ 쿼드로터</td>
+<td>✗(시뮬)</td>
+<td>✗(시뮬)</td>
+<td>✅ <strong>Unitree Go2 10/10</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>❌</td>
+<td>❌(승인 후 예정)</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>핵심 신규성</td>
+<td>지각 신뢰성의 1급 시민화</td>
+<td>TO 게인 활용 Sobolev 증류</td>
+<td>정보이득 행동가치 + GNN 가속</td>
+<td><strong>학습 생성모델의 증류로 온라인 POMDP 실현</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>VOiLA의 강점.</strong></p>
+<ul>
+<li>세 선행 연구 중 유일하게 <strong>diffusion을 &quot;정책/궤적 생성기&quot;가 아니라 &quot;세계 모델(전이·관측 분포)&quot;로</strong> 쓴다. 이는 belief planning이라는 더 일반적 틀을 가능케 하며, 목표가 바뀌어도 모델을 재사용한다(task-agnostic). ReliaDiffNav·SobolevDiffusion의 diffusion은 특정 정책/궤적에 묶여 재사용성이 낮다.</li>
+<li><strong>증류 가속(283×)</strong>은 ScoutAssistedPlanning의 &quot;GNN으로 MC 근사(100–300×)&quot;와 같은 철학 — <em>비싼 정확 계산을 학습 근사로 대체해 온라인화</em> — 이나, VOiLA는 그 대상이 belief 시뮬의 <strong>생성 모델 자체</strong>라는 점에서 더 근본적이다.</li>
+<li>샘플 효율(50K vs VTS 32M, 640×)과 미관측 일반화(72–80% vs Recurrent SAC 10–12%)에서 모델프리 RL 대비 압도적.</li>
+</ul>
+<p><strong>VOiLA의 약점.</strong></p>
+<ul>
+<li>ReliaDiffNav가 풍부한 어블레이션(신뢰도 항 제거 0.898→0.783 등)으로 각 부품 기여를 정량화한 데 비해, VOiLA의 공개 정보로는 증류 충실도 손실의 belief 영향이 정량적으로 덜 드러난다.</li>
+<li>코드 미공개는 네 논문 공통 약점이나, VOiLA의 파이프라인(diffusion+증류+InfoNCE+VOPP)이 가장 복잡해 재현 장벽이 가장 높다.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>실로봇 검증(Go2 10/10, sim-only 학습)</strong>은 ScoutAssistedPlanning(시뮬만)·SobolevDiffusion(시뮬만) 대비 실용성에서 앞선다. ReliaDiffNav도 실로봇이지만 UAV 단일 도메인인 반면 VOiLA는 위치추정·다리형 내비·탐색 3종으로 일반성을 보임.</li>
+<li>다만 GPU-native VOPP는 온보드 컴퓨팅 부담이 크다(실험은 off-board 추정). 엣지 배치 시 belief tree 폭/실시간성 트레이드오프가 관건.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>세 선행 연구가 &quot;diffusion을 정책으로(ReliaDiffNav, Sobolev)&quot; 또는 &quot;POMDP를 GNN으로 가속(Scout)&quot;하는 <strong>부분 최적화</strong>라면, VOiLA는 &quot;<strong>학습 세계모델 + 증류 + GPU 플래너</strong>&quot;를 한 스택으로 통합해 <em>불확실성 하 플래닝의 모델 병목 자체</em>를 겨냥한다. diffusion-as-world-model + distillation은 향후 POMDP 플래닝의 유망한 골격이 될 가능성이 높다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li>본 논문: Hoerger, Joshi, Shome, Manchester, Kurniawati. <em>VOiLA: Vectorized Online Planning with Learned Diffusion Model for POMDP Agents.</em> arXiv:2606.19729, 2026. (Submitted to ISRR 2026.)</li>
+<li>비교: <em>Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation</em> (ReliaDiffNav), arXiv:2606.13883.</li>
+<li>비교: <em>Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies</em> (SobolevDiffusion), arXiv:2604.19011.</li>
+<li>비교: <em>Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments</em> (ScoutAssistedPlanning), arXiv:2605.22693.</li>
+<li>배경: POMDP 온라인 플래닝(POMCP, DESPOT, ABT, POMCPOW/PFT-DPW), Progressive Widening, conditional diffusion(v-prediction), InfoNCE 대조학습.</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p><strong>혁신성.</strong> VOiLA의 핵심 통찰은 &quot;고충실도 학습 생성 모델(diffusion)과 온라인 POMDP 플래닝의 실시간성은 충돌하지만, <strong>학습/추론의 비대칭을 distillation으로 메우면 둘을 동시에 가질 수 있다</strong>&quot;는 것이다. diffusion을 정책이 아닌 <strong>세계 모델</strong>로 쓰고, 이를 feedforward로 증류해 283× 가속, GPU 벡터화 VOPP에 결합한 설계는 불확실성 하 플래닝의 모델 병목을 정면으로 푼다.</p>
+<p><strong>실용적 의의.</strong> 손으로 못 적는 센싱(RGB/lidar)까지 belief planning의 사정권에 넣었고, 시뮬-only 학습으로 실제 Unitree Go2에서 10/10을 달성해 sim-to-real 실용성을 입증했다. 샘플 효율(최대 640×)과 미관측 일반화(72–80% vs 10–12%)는 모델프리 RL 대비 belief planning의 우위를 재확인한다.</p>
+<p><strong>향후 연구.</strong> 증류 충실도-속도 트레이드오프의 정밀 분석, 온라인 모델 적응, 동적·다중 에이전트 확장, 그리고 코드 공개를 통한 재현성 확보가 과제다. 그럼에도 &quot;diffusion-as-world-model + distillation + GPU online planner&quot;라는 골격은 POMDP 로봇 플래닝의 차세대 표준 구성요소가 될 잠재력이 크다.</p>
+<hr>
+<p><em>본 리뷰는 공개된 arXiv 정보와 검증된 사실에 근거하며, 미공개 코드/수치를 추정·날조하지 않았다. 작성: 2026-06-21.</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Slow Brain, Fast Planner: Latency-Resilient VLM-Augmented Urban Navigation · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv preprint (cs.RO), 2026-06-18 제출 (확정 미확인)</div>
+    <h1>Slow Brain, Fast Planner: Latency-Resilient VLM-Augmented Urban Navigation</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2606.20458">arXiv:2606.20458</a></span>
+      <span>리뷰 2026-06-20</span>
+      <span>38분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>Slow Brain, Fast Planner: Latency-Resilient VLM-Augmented Urban Navigation — 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Slow Brain, Fast Planner: Latency-Resilient VLM-Augmented Urban Navigation</li>
+<li><strong>저자 (Authors)</strong>: Zhenghao &quot;Mark&quot; Peng, Honglin He, Quanyi Li, Yukai Ma, Bolei Zhou</li>
+<li><strong>소속 (Affiliation)</strong>: Bolei Zhou 연구실 (University of California, Los Angeles 계열 — abstract에 소속 명시 없음, 저자 소속 기준 추정)</li>
+<li><strong>발표처 (Published)</strong>: arXiv preprint (cs.RO), 2026년 6월 18일 제출. 학회/저널 확정 미확인.</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2606.20458">https://doi.org/10.48550/arXiv.2606.20458</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2606.20458">https://arxiv.org/abs/2606.20458</a></li>
+<li><strong>코드 (Code)</strong>: ❌ 미공개 / 확인 불가 (abstract·comments에 코드 저장소 언급 없음, 웹 검색에서도 공개 저장소 미발견)</li>
+<li><strong>프로젝트 페이지 (Project Page)</strong>: ❌ 확인 불가</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>본 연구는 <strong>도시 보도(urban sidewalk) 환경에서 자율주행 배송/서비스 로봇의 로컬 플래닝</strong>을 <strong>Vision-Language Model(VLM)</strong> 로 보강하되, <strong>VLM의 느린 추론 지연(latency)</strong> 을 실시간 제어 루프와 조화시키는 문제를 다룬다.</p>
+<p>문제의식은 다음과 같다. 전통적 모션 플래너(motion planner)는 5~20 Hz의 빠른 주기로 다수의 <strong>후보 궤적(candidate trajectories)</strong> 을 생성하고 비용 함수로 그중 하나를 고른다. 그런데 이 비용 함수는 보도 위의 복잡한 사회적·의미적 맥락(예: &quot;보행자 무리를 가로지르지 말 것&quot;, &quot;공사 구역을 피해 우회&quot;, &quot;교차로에서 양보&quot;)을 충분히 반영하지 못한다. 즉 플래너에는 <strong>궤적 채점 격차(trajectory scoring gap)</strong> — &quot;기하학적으로 실행 가능한 궤적 중 어느 것이 의미적으로 최선인가&quot;를 판단하지 못하는 간극 — 가 존재한다.</p>
+<p>VLM은 바로 이 의미적 판단에 강하다. 그러나 VLM 한 번 질의에 <strong>1<del>3초</strong>가 걸려, 5</del>20 Hz(50~200 ms 주기)로 도는 제어 루프를 VLM이 직접 구동할 수는 없다. VLM의 판단이 도착했을 때는 이미 장면이 바뀌어 있다.</p>
+<p>따라서 본 논문의 핵심 목표는:</p>
+<ol>
+<li>VLM이 <strong>플래너를 대체하지 않고</strong>, 플래너가 만든 후보 궤적 중 하나를 <strong>선택(select)</strong> 하는 <strong>VLM-Planner 인터페이스</strong>를 정의하고,</li>
+<li>VLM의 느린 응답(1~3초 지연)을 빠른 제어 루프와 정합시키는 <strong>학습 불필요(training-free)·지연 탄력적(latency-resilient) 궤적 수준 융합(trajectory-level fusion)</strong> 층을 설계하여,</li>
+<li>실제 도시 보도의 약 2,000개 도전적 시나리오에서 <strong>플래너 자체 최선 선택 대비 ADE(평균 변위 오차) 30% 감소</strong>를 달성하면서, 일상적 상황에서는 플래너 성능을 해치지 않는(competitive) 시스템을 구현하는 것이다.</li>
+</ol>
+<p>제목의 은유 — &quot;느린 뇌(Slow Brain, VLM)와 빠른 플래너(Fast Planner)&quot; — 가 곧 시스템 구조다. 느린 의미적 판단과 빠른 기하적 실행을 <strong>지연을 견디는 융합</strong>으로 잇는다.</p>
+<blockquote>
+<p><strong>트랙 분류 주석.</strong> 본 논문은 자연어 <em>지시</em>를 받아 목표까지 이동하는 VLN(Vision-Language Navigation)이 아니라, VLM을 <strong>플래너의 후보 궤적 채점·선택기</strong>로 쓰는 <strong>로컬 플래닝 보강</strong> 연구다. 따라서 본 리뷰는 <strong>Planner 트랙</strong>으로 분류한다(자연어 지시 추종이 핵심인 VLN 게이트에 해당하지 않음).</p>
+</blockquote>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) 궤적 채점 격차(trajectory scoring gap).</strong>
+플래너는 기하·동역학적으로 실행 가능한 다수 후보를 빠르게 만들지만, &quot;사회적으로/의미적으로 어느 궤적이 최선인가&quot;는 수작업 비용 함수로 포착하기 어렵다. 보도 환경의 보행자 군집, 공사 구역, 교차로 양보, 좁은 통행로 등은 의미 이해를 요구한다.</p>
+<p><strong>(C2) VLM 추론 지연(1<del>3 s) vs 제어 루프(5</del>20 Hz).</strong>
+VLM은 의미 판단에 강하지만 질의당 1<del>3초가 걸린다. 제어 루프는 50</del>200 ms마다 결정을 내려야 한다. VLM을 루프 안에 직접 넣으면 (a) 결정이 너무 느려 위험하거나, (b) VLM 판단이 도착했을 때 장면이 이미 변해 <strong>그 판단의 대상이 사라진</strong> 상태가 된다(stale decision).</p>
+<p><strong>(C3) 지연 동안의 일관성·안전성.</strong>
+VLM 응답을 기다리는 동안에도 로봇은 멈출 수 없다. VLM의 (과거 장면에 대한) 선택을, 현재 시점의 새 후보 궤적 집합에 <strong>안전하게 사상(map)</strong> 해야 한다. 단순히 &quot;VLM이 고른 인덱스의 궤적&quot;을 그대로 쓰면, 후보 집합이 갱신되어 인덱스 의미가 달라졌을 때 위험하다.</p>
+<p><strong>(C4) 학습 비용·일반화.</strong>
+VLM 판단을 플래너에 녹이는 가장 흔한 방법은 대규모 데이터로 정책/채점기를 <strong>학습</strong>하는 것이다. 그러나 이는 데이터 수집·재학습 비용이 크고, 새 도시·새 플래너로의 이식이 어렵다. <strong>학습 없이(training-free)</strong> VLM을 끼워 넣을 수 있다면 이식성이 크게 높아진다.</p>
+<p><strong>(C5) 일상 상황의 무해성(do-no-harm).</strong>
+대부분의 보도 주행은 평범하다. VLM 보강이 이런 일상 상황에서 플래너 기본 성능을 떨어뜨리면 안 된다. 보강은 <strong>어려운 상황에서만 이득을 주고 평시엔 중립</strong>이어야 한다.</p>
+<h3>2.2 핵심 해결책</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>도전과제</th>
+<th>Slow Brain, Fast Planner의 해결책</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>(C1) 채점 격차</td>
+<td><strong>VLM-Planner 인터페이스</strong>: VLM이 후보 궤적 중 최선의 <em>인덱스</em>를 선택(대체 아님)</td>
+</tr>
+<tr>
+<td>(C2) 지연 vs 루프</td>
+<td><strong>비동기 분리</strong>: 느린 VLM(Slow Brain)과 빠른 플래너(Fast Planner)를 분리, 융합층이 중개</td>
+</tr>
+<tr>
+<td>(C3) stale 판단</td>
+<td><strong>궤적 수준 융합(trajectory-level fusion)</strong>: VLM이 과거에 고른 궤적을, 현재 후보 집합에 <strong>기하 유사도</strong>로 재사상</td>
+</tr>
+<tr>
+<td>(C4) 학습 비용</td>
+<td><strong>training-free</strong>: 학습 없이 기하 유사도 + 지수 감쇠만으로 융합</td>
+</tr>
+<tr>
+<td>(C5) 무해성</td>
+<td><strong>exponential decay(지수 감쇠)</strong>: VLM 선호의 영향력이 시간에 따라 사라져, 오래된/무관한 판단은 자연 소멸 → 평시 플래너로 복귀</td>
+</tr>
+</tbody></table></div>
+<p>핵심 통찰은 <strong>&quot;VLM의 선택을 인덱스가 아니라 기하학적 궤적(공간 형상)으로 기억하라&quot;</strong> 는 것이다. 인덱스는 후보 집합이 바뀌면 무의미해지지만, 궤적의 공간 형상은 다음 주기의 후보들과 <strong>기하 유사도</strong>로 비교 가능하다. 여기에 시간 지수 감쇠를 더해 지연을 견디고, 오래되면 자연히 영향력을 잃게 한다.</p>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 VLM-Planner 인터페이스 (대체가 아닌 선택)</h3>
+<p>핵심 설계 결정은 VLM에게 <strong>궤적을 생성하게 하지 않고</strong>, 플래너가 만든 <strong>후보 집합에서 하나를 고르게</strong> 하는 것이다.</p>
+<pre><code>매 플래닝 주기 t:
+  플래너 → 후보 궤적 집합  T_t = { τ_t^1, τ_t^2, ..., τ_t^K }
+                          (각 τ: 기하 궤적 = waypoint 시퀀스)
+  플래너 자체 비용     → 자체 최선 선택  i*_planner = argmin_k cost(τ_t^k)
+
+비동기로(느리게):
+  VLM(장면 이미지 + 후보 시각화) → 의미적 최선 인덱스  i*_vlm  (1~3 s 후 도착)
+</code></pre>
+<p>이 인터페이스의 장점:</p>
+<ul>
+<li><strong>안전 하한 보장</strong>: VLM이 무엇을 고르든 후보는 모두 플래너가 검증한 실행 가능 궤적이므로, 기하·동역학 안전이 보장됨.</li>
+<li><strong>이식성</strong>: 플래너 내부를 바꾸지 않고 &quot;선택기&quot;만 얹음. 어떤 후보-생성 플래너에도 부착 가능.</li>
+<li><strong>해석가능성</strong>: VLM의 기여가 &quot;어느 후보를 골랐는가&quot;로 명확히 드러남.</li>
+</ul>
+<p>문제는 <code>i*_vlm</code>이 <strong>1~3초 전 장면에 대한</strong> 선택이라는 점이다(§3.3에서 해결).</p>
+<h3>3.2 지연의 분리: Slow Brain / Fast Planner 비동기 구조</h3>
+<p>VLM(Slow Brain)과 플래너(Fast Planner)를 <strong>서로 다른 속도의 비동기 프로세스</strong>로 분리한다.</p>
+<pre><code>   ┌──────────────── Fast Planner (5~20 Hz) ────────────────┐
+   │  t  : T_t 생성 → 융합층이 최종 궤적 선택 → 제어         │
+   │  t+1: T_{t+1} 생성 → 융합 → 제어                        │
+   │  ...                                                     │
+   └─────────────────────────────────────────────────────────┘
+            ▲ (선호 주입)            │ (장면/후보 전송)
+            │                        ▼
+   ┌──────────────── Slow Brain / VLM (0.3~1 Hz) ───────────┐
+   │  장면+후보 시각화 → VLM 추론(1~3 s) → i*_vlm 반환       │
+   │  (도착 시점에는 이미 여러 빠른 주기가 경과)             │
+   └─────────────────────────────────────────────────────────┘
+</code></pre>
+<p>빠른 루프는 VLM을 기다리지 않고 계속 돈다. VLM 결과가 도착하면 <strong>융합층에 비동기로 주입</strong>되어, 이후 빠른 주기들의 선택에 영향을 준다. 이것이 &quot;Slow Brain이 Fast Planner를 막지 않는다&quot;의 구현이다.</p>
+<h3>3.3 Training-Free Latency-Resilient Trajectory-Level Fusion (지연 탄력적 궤적 수준 융합)</h3>
+<p>본 논문의 가장 핵심적 기여다. VLM이 과거(t_v 시점)에 고른 궤적 <code>τ_vlm = τ_{t_v}^{i*_vlm}</code> 의 <strong>기하 형상</strong>을 기억해 두고, 현재 주기 t의 새 후보들 <code>{τ_t^k}</code> 각각과 <strong>기하 유사도(geometric similarity)</strong> 를 비교하여, VLM 선호를 현재 후보 채점에 반영한다.</p>
+<p><strong>(1) 기하 유사도 점수</strong></p>
+<p>현재 후보 <code>τ_t^k</code>가 VLM이 선택했던 궤적 <code>τ_vlm</code>과 공간적으로 얼마나 닮았는지를 유사도 <code>sim(τ_t^k, τ_vlm)</code> ∈ [0,1] 로 측정한다(예: 대응 waypoint 간 평균 거리의 음의 지수, 또는 형상 정합). 닮을수록 1에 가깝다.</p>
+<pre><code>sim(τ_t^k, τ_vlm) = exp( - dist(τ_t^k, τ_vlm) / σ )      # 기하 거리 → 유사도
+       dist(·,·) : 두 궤적의 평균/누적 waypoint 거리 (형상 정합)
+</code></pre>
+<p>핵심은 <strong>인덱스가 아니라 형상으로 매칭</strong>한다는 점이다. 후보 집합이 매 주기 갱신되어 인덱스 의미가 사라져도, VLM이 선호했던 &quot;공간적으로 그 방향/그 회피 형태&quot;의 궤적을 현재 후보들 중에서 다시 찾아낼 수 있다(C3 해결).</p>
+<p><strong>(2) 시간 지수 감쇠(exponential decay)</strong></p>
+<p>VLM 선택은 시간이 지날수록 낡는다(장면 변화). VLM 응답이 도착한 시각 <code>t_v</code>로부터 경과 시간에 따라 그 영향력 <code>w(t)</code>를 지수적으로 감쇠시킨다.</p>
+<pre><code>w(t) = exp( - (t - t_v) / λ )      # λ: 감쇠 시상수, t-t_v: VLM 판단의 나이
+</code></pre>
+<p><code>λ</code>가 곧 &quot;VLM 판단을 얼마나 오래 신뢰할지&quot;를 조절한다. 새 VLM 응답이 오면 <code>t_v</code>와 선호 궤적이 갱신되어 <code>w</code>가 다시 1 부근으로 복원된다.</p>
+<p><strong>(3) 융합 채점과 최종 선택</strong></p>
+<p>플래너 자체 비용에 VLM 선호 보너스를 가중 결합하여 최종 궤적을 고른다.</p>
+<pre><code>score(τ_t^k) =  - cost_planner(τ_t^k)                      # 플래너 기하/동역학 적합
+              +  α · w(t) · sim(τ_t^k, τ_vlm)              # VLM 선호(감쇠·기하정합)
+
+i*_final(t) = argmax_k  score(τ_t^k)
+</code></pre>
+<p>해석:</p>
+<ul>
+<li><code>w(t) → 0</code> (VLM 판단이 낡음, 또는 VLM 미응답)이면 두 번째 항이 사라져 <strong>순수 플래너 선택으로 복귀</strong> → 평시 무해성(C5).</li>
+<li>VLM 응답이 신선하고(<code>w≈1</code>) 현재 후보 중 닮은 궤적이 있으면(<code>sim≈1</code>) 그 후보가 가산점을 받아 선택됨 → 어려운 상황에서 의미적 이득(C1).</li>
+<li>모든 후보는 플래너 검증을 통과했으므로 무엇이 뽑혀도 <strong>안전 하한 유지</strong>.</li>
+</ul>
+<pre><code>   궤적 수준 융합 개념도
+   VLM 과거 선택 τ_vlm:        ╱╲___          (t_v 시점, 보행자 우회 형상)
+                              ╱     ╲
+
+   현재 후보들 (t):   k=1 ───────     (직진)        sim 낮음
+                     k=2  ╱╲___       (우회, τ_vlm과 닮음)  sim 높음 ← 선택↑
+                     k=3       ╲╲     (좌회피)       sim 중간
+   최종점수 = -cost_planner + α·w(t)·sim(·,τ_vlm)
+   w(t)=exp(-(t-t_v)/λ): 시간 지나면 VLM 영향 소멸 → 플래너로 복귀
+</code></pre>
+<p>이 융합층은 <strong>학습이 전혀 필요 없다</strong>(training-free) — 기하 유사도와 지수 감쇠라는 두 개의 닫힌 형식 연산뿐이다. 따라서 어떤 VLM·어떤 플래너에도 즉시 부착 가능하다(C4).</p>
+<h3>3.4 지연 탄력성의 작동 원리 (왜 지연을 견디는가)</h3>
+<p>지연 <code>Δ = t - t_v</code>가 커질수록:</p>
+<ol>
+<li><code>w(t) = exp(-Δ/λ)</code> 가 작아져 VLM 영향이 부드럽게 줄어든다 — 갑작스런 stale 판단 주입으로 인한 불안정이 없다.</li>
+<li>그동안 빠른 루프는 멈추지 않고 플래너로 안전하게 주행한다.</li>
+<li>VLM 판단이 신선할 때(작은 Δ)만 큰 영향을 미친다.</li>
+</ol>
+<p>즉 시스템은 VLM 지연이 작을 때는 의미적 이득을 크게 취하고, 지연이 커지면 <strong>자동으로 플래너로 우아하게 퇴행(graceful degradation)</strong> 한다. 시뮬레이션에서 <strong>최대 5초 지연까지도 80% 이상 성공률</strong>을 유지한 것이 이 메커니즘의 직접 증거다.</p>
+<h3>3.5 설계 대안 분석 (왜 &quot;기하 궤적 융합&quot;인가)</h3>
+<p>본 논문의 핵심 설계 선택 — VLM 판단을 <em>기하 궤적 형상</em>으로 기억하는 것 — 의 정당성은, 자연스럽게 떠오르는 대안들이 모두 지연 환경에서 실패한다는 점을 보면 분명해진다.</p>
+<p><strong>(대안 A) 인덱스 직접 사용 (index passthrough).</strong>
+가장 단순한 방법은 VLM이 반환한 <code>i*_vlm</code>을 그대로 현재 주기의 <code>i*_vlm</code>번째 후보로 쓰는 것이다.</p>
+<pre><code>실패 이유:
+  t_v 시점 후보  T_{t_v} = {τ^1, τ^2, τ^3}   (VLM: i*_vlm = 2 선택)
+  t   시점 후보  T_t     = {ρ^1, ρ^2, ρ^3}   (플래너가 새로 생성, 정렬·내용 무관)
+  → ρ^2 가 τ^2 와 전혀 다른 궤적일 수 있음 (인덱스의 의미가 보존되지 않음)
+  → 1~3초 사이 후보 집합이 재생성되면 인덱스는 무의미한 포인터
+</code></pre>
+<p>인덱스는 후보 집합에 종속적인 임시 식별자라, 집합이 갱신되는 순간 의미를 잃는다. 이것이 (C3) stale 판단의 본질이다.</p>
+<p><strong>(대안 B) VLM이 궤적을 직접 생성 (generation).</strong>
+VLM에게 직접 waypoint를 출력하게 하면, (i) 기하·동역학 실현가능성·안전을 보장할 수 없고(환각·비물리 경로 위험), (ii) 생성 지연이 더 커지며, (iii) 플래너의 검증된 후보라는 안전 하한을 포기하게 된다. 본 논문이 &quot;선택(select), 대체(replace) 아님&quot;을 고수하는 이유다.</p>
+<p><strong>(대안 C) 잠재 임베딩 매칭 (latent embedding).</strong>
+VLM 선택 궤적과 현재 후보를 학습된 임베딩 공간에서 매칭할 수도 있다. 그러나 이는 <strong>학습이 필요</strong>(training-free 원칙 위배)하고, 도메인/플래너 변경 시 임베딩 재학습이 필요해 이식성을 해친다.</p>
+<p><strong>(본 논문의 선택) 기하 유사도 + 지수 감쇠.</strong>
+궤적의 <em>공간 형상</em>은 후보 집합 재생성·인덱스 변동과 무관한 <strong>불변 표현(invariant representation)</strong> 이다. 두 궤적이 &quot;공간적으로 같은 회피/방향&quot;이면 인덱스가 달라도 <code>sim</code>이 높다. 여기에 시간 감쇠를 곱해 지연을 견딘다. 학습이 없어 즉시 이식 가능하다. 즉 본 설계는 <strong>(A)의 단순성</strong>(닫힌 형식)과 <strong>(B)의 의미성</strong>(VLM 판단 반영)을 취하면서, (A)의 stale 문제와 (B)의 안전·환각 문제, (C)의 학습 비용을 모두 회피한다.</p>
+<pre><code>   설계 공간 요약
+                  안전하한   지연탄력   무학습   의미반영
+   (A) 인덱스       ✅         ❌        ✅        ⚠(stale)
+   (B) 생성         ❌         ❌        ✅        ✅
+   (C) 임베딩       ✅         △         ❌        ✅
+   (본) 기하+감쇠   ✅         ✅        ✅        ✅
+</code></pre>
+<h3>3.6 융합 채점의 수치 예시 (Worked Example)</h3>
+<p>융합층의 거동을 구체적 숫자로 따라가 본다. 파라미터를 <code>α=1.0, λ=2.0 s, σ=1.0 m</code> 로 두고, VLM이 <code>t_v</code> 에 &quot;보행자 우회&quot; 형상의 궤적을 선택했다고 하자.</p>
+<p><strong>경우 1 — VLM 응답이 신선함 (<code>t - t_v = 0.5 s</code>).</strong></p>
+<pre><code>w(t) = exp(-0.5/2.0) = 0.78
+현재 후보별 플래너 비용 cost 와 τ_vlm 과의 기하거리 dist:
+  k=1 (직진)  : cost=0.20, dist=2.0 m → sim=exp(-2.0)=0.135
+  k=2 (우회)  : cost=0.35, dist=0.3 m → sim=exp(-0.3)=0.741
+  k=3 (좌회피): cost=0.30, dist=1.2 m → sim=exp(-1.2)=0.301
+score = -cost + α·w·sim:
+  k=1: -0.20 + 0.78·0.135 = -0.095
+  k=2: -0.35 + 0.78·0.741 = +0.228   ← 최대 → 선택
+  k=3: -0.30 + 0.78·0.301 = -0.065
+→ 플래너 단독이면 비용최소 k=1(직진)을 골랐겠지만, 신선한 VLM 선호가
+  의미적으로 옳은 k=2(우회)를 끌어올려 선택. (채점 격차 메움)
+</code></pre>
+<p><strong>경우 2 — VLM 응답이 낡음 (<code>t - t_v = 6.0 s</code>).</strong></p>
+<pre><code>w(t) = exp(-6.0/2.0) = 0.050   (거의 소멸)
+  k=1: -0.20 + 0.050·0.135 = -0.193   ← 최대 → 선택
+  k=2: -0.35 + 0.050·0.741 = -0.313
+  k=3: -0.30 + 0.050·0.301 = -0.285
+→ 낡은 VLM 선호의 영향이 0.05로 줄어, 사실상 플래너 단독(k=1)으로 복귀.
+  (graceful degradation — stale 판단이 위험을 만들지 않음)
+</code></pre>
+<p>이 예시는 §3.4의 두 주장을 수치로 확인한다: 신선할 때는 의미적 이득을, 낡으면 안전한 퇴행을 자동으로 달성한다. <code>λ</code>를 키우면 경우 2에서도 VLM 영향이 더 오래 남고(공격적), 줄이면 더 빨리 잊는다(보수적).</p>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<pre><code>┌──────────────────────────────────────────────────────────────────────┐
+│              Slow Brain, Fast Planner 파이프라인                        │
+└──────────────────────────────────────────────────────────────────────┘
+
+  [카메라/센서] ──► 장면 인식 ──┬────────────────────────┐
+                                │                        │
+                                ▼                        ▼
+            ┌──────────────────────────┐   ┌──────────────────────────┐
+            │  Fast Planner (5~20 Hz)  │   │   Slow Brain: VLM (느림)  │
+            │  후보 궤적 T_t={τ^1..τ^K}│   │  장면+후보 시각화 입력     │
+            │  + 플래너 자체 비용       │   │  추론 1~3 s               │
+            └──────────────────────────┘   │  → i*_vlm (의미적 최선)   │
+                       │                    └──────────────────────────┘
+                       │ T_t                            │ τ_vlm (+ t_v) 비동기 주입
+                       ▼                                ▼
+            ┌────────────────────────────────────────────────────────┐
+            │  Trajectory-Level Fusion (training-free) §3.3           │
+            │  score(τ^k) = -cost_planner(τ^k)                        │
+            │             + α · w(t) · sim(τ^k, τ_vlm)                │
+            │  w(t)=exp(-(t-t_v)/λ),  sim=exp(-dist/σ)                │
+            │  i*_final = argmax_k score(τ^k)                          │
+            └────────────────────────────────────────────────────────┘
+                       │ 최종 궤적 (항상 플래너-검증 후보 → 안전 하한)
+                       ▼
+            [제어기 / 실 모바일 로봇 — 캠퍼스 보도]
+</code></pre>
+<p><strong>데이터 흐름.</strong> 빠른 플래너는 매 주기 후보 궤적과 자체 비용을 융합층에 보낸다. 느린 VLM은 비동기로 장면을 보고 의미적 최선 궤적을 골라 그 <strong>형상</strong>과 도착 시각을 융합층에 주입한다. 융합층은 매 빠른 주기마다 플래너 비용과 (감쇠된·기하정합된) VLM 선호를 결합해 최종 궤적을 선택한다. VLM이 느리거나 응답이 없으면 자연히 플래너 단독 선택으로 복귀한다.</p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 / 시나리오 (Datasets / Scenarios)</h3>
+<ul>
+<li><strong>실세계 평가 집합</strong>: 약 <strong>2,000개의 도전적 도시 보도 시나리오</strong> — 교차로(junctions), 보행자(pedestrians) 상호작용 등 의미적 판단이 필요한 상황 위주.</li>
+<li><strong>시뮬레이션</strong>: 인위적 지연(latency)을 0~5초까지 주입하여 지연 탄력성을 통제 실험.</li>
+<li><strong>실 로봇</strong>: 캠퍼스 보도(campus sidewalk)에서 동작하는 모바일 배송/서비스 로봇.</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>ADE (Average Displacement Error)</strong>: 선택된 궤적과 (전문가/기준) 궤적 간 평균 변위 오차. 낮을수록 좋음.</li>
+<li><strong>Success Rate (SR)</strong>: 시나리오를 안전·성공적으로 완료한 비율(시뮬 지연 실험에서 핵심 지표).</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>결과</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>VLM 선택의 ADE 개선</td>
+<td>플래너 자체 최선 선택 대비 <strong>ADE 30% 감소</strong> (~2,000 실세계 시나리오)</td>
+</tr>
+<tr>
+<td>지연 탄력성 (시뮬)</td>
+<td>최대 <strong>5초 지연까지 SR 80% 이상</strong> 유지</td>
+</tr>
+<tr>
+<td>일상 상황</td>
+<td>플래너 대비 <strong>경쟁력 유지(competitive)</strong> — 보강이 평시 성능을 해치지 않음</td>
+</tr>
+<tr>
+<td>실 로봇</td>
+<td>캠퍼스 보도에서 실제 동작 실증</td>
+</tr>
+</tbody></table></div>
+<p><strong>해석.</strong></p>
+<ul>
+<li><strong>ADE 30% 감소</strong>는 &quot;궤적 채점 격차&quot;가 실재하며, VLM 선택이 이를 의미 있게 메운다는 직접 증거다. 단, VLM이 후보를 <em>생성</em>한 게 아니라 <em>선택</em>만 했음에도 이만큼 개선됐다는 점이 인터페이스 설계(§3.1)의 효율성을 뒷받침한다.</li>
+<li><strong>5초 지연에서도 SR 80%+</strong> 는 지수 감쇠 기반 융합(§3.3·§3.4)의 핵심 주장 — &quot;느린 VLM을 안전하게 견딘다&quot; — 를 정량 입증한다. 지연이 커져도 급락하지 않고 플래너로 우아하게 퇴행하기 때문이다.</li>
+<li><strong>평시 무해성</strong>은 <code>w(t)</code>가 낡은/무관한 VLM 영향을 소멸시키는 설계의 결과로, 시스템이 &quot;어려울 때만 돕고 평소엔 가만히 있는&quot; 보강기임을 보인다.</li>
+</ul>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p>실제 캠퍼스 보도에서 모바일 로봇으로 시스템을 구동하여, 보행자·교차로 등이 있는 환경에서 VLM 보강 선택이 동작함을 보였다. 약 2,000개 실세계 시나리오 평가는 본 방법이 통제된 시뮬레이션을 넘어 현실 보도 분포에서 작동함을 뒷받침한다. (구체적 주행거리·시간 등 세부 수치는 본문 표 참조 — 코드/프로젝트 페이지 미공개로 독립 재현은 제한.)</p>
+<h3>5.5 결과의 의미 분해 (Ablation-style 해석)</h3>
+<p>논문이 보고한 세 결과는 각각 시스템의 서로 다른 설계 축을 검증한다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>검증 대상 (설계 축)</th>
+<th>해당 결과</th>
+<th>무엇을 입증하는가</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>VLM-Planner 인터페이스 (§3.1)</td>
+<td>ADE 30% 감소</td>
+<td>VLM의 <em>선택</em>만으로도 채점 격차가 실질적으로 메워짐 (생성 불필요)</td>
+</tr>
+<tr>
+<td>지수 감쇠 융합 (§3.3·§3.4)</td>
+<td>5 s 지연 SR 80%+</td>
+<td>낡은 판단의 안전한 소멸 — 지연 탄력성의 직접 증거</td>
+</tr>
+<tr>
+<td>do-no-harm (§3.3 <code>w→0</code>)</td>
+<td>일상 competitive</td>
+<td>보강이 평시 플래너를 해치지 않음 (중립성)</td>
+</tr>
+</tbody></table></div>
+<p>특히 주목할 점은 <strong>&quot;선택만으로 ADE 30% 감소&quot;</strong> 라는 결과다. VLM이 새 궤적을 만들지 않고 플래너가 이미 만든 후보 중 고르기만 했는데도 큰 개선이 나왔다는 것은, (i) 플래너 후보 집합 안에 <em>이미 좋은 궤적이 존재</em>하지만 플래너의 수작업 비용 함수가 그것을 <em>고르지 못하고</em> 있었다는 뜻이며, (ii) 따라서 문제의 본질이 &quot;생성 능력&quot;이 아니라 &quot;채점 능력&quot;임을 강하게 시사한다. 이는 본 논문의 인터페이스 설계 철학(생성 아닌 선택)을 사후적으로 정당화한다.</p>
+<p>반대로 이 결과는 §8.2의 한계 (1)도 함의한다 — 개선의 상한은 후보 집합의 다양성·품질에 묶여 있다. 후보 집합이 빈약하면 &quot;고를 좋은 것&quot;이 없어 VLM 선택의 가치도 줄어든다. 즉 본 시스템은 <strong>좋은 후보 생성기 위에 얹는 의미적 채점 보강기</strong>로 이해해야 정확하다.</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>VLM-Planner 인터페이스 (선택 패러다임).</strong>
+VLM에게 궤적을 생성·대체시키지 않고 플래너 후보 중 <em>선택</em>하게 함으로써, 기하·동역학 안전 하한을 보장하면서 의미적 판단을 주입. 어떤 후보-생성 플래너에도 부착 가능한 이식성.</p>
+</li>
+<li><p><strong>Training-free latency-resilient trajectory-level fusion.</strong>
+VLM 선택을 <em>인덱스</em>가 아닌 <em>기하 궤적 형상</em>으로 기억하고, 기하 유사도 + 시간 지수 감쇠로 현재 후보에 재사상. 학습 없이 두 닫힌 형식 연산만으로 지연(1~3 s, 실험상 최대 5 s)을 견딤.</p>
+</li>
+<li><p><strong>지연 하 우아한 퇴행(graceful degradation).</strong>
+<code>w(t)=exp(-Δ/λ)</code> 로 VLM 영향이 시간에 따라 소멸 → 신선할 때만 크게 기여, 낡으면 자동으로 플래너 단독 복귀. 평시 무해성과 어려운 상황 이득을 동시 달성.</p>
+</li>
+<li><p><strong>실세계 검증.</strong>
+~2,000 도시 보도 시나리오에서 ADE 30% 감소, 시뮬 5초 지연에서 SR 80%+, 실제 캠퍼스 보도 로봇 실증.</p>
+</li>
+</ol>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<blockquote>
+<p>코드 미공개로, 아래는 본문 기술에 근거한 정리이며 정확한 기본값의 코드 검증은 불가하다.</p>
+</blockquote>
+<pre><code>[VLM-Planner 인터페이스]
+입력  : 플래너 후보 집합 T_t = {τ^1..τ^K} + 장면 이미지(후보 시각화 오버레이)
+VLM   : 후보 중 의미적 최선 인덱스 i*_vlm 반환 (질의 지연 1~3 s)
+출력  : 선택 궤적 τ_vlm = τ_{t_v}^{i*_vlm}, 도착시각 t_v
+
+[융합층 (training-free)]
+기하 유사도  : sim(τ^k, τ_vlm) = exp( -dist(τ^k, τ_vlm)/σ )
+시간 감쇠    : w(t) = exp( -(t - t_v)/λ )
+최종 점수    : score(τ^k) = -cost_planner(τ^k) + α·w(t)·sim(τ^k, τ_vlm)
+선택         : i*_final = argmax_k score(τ^k)
+주요 하이퍼  : α(VLM 가중), λ(감쇠 시상수), σ(유사도 스케일)
+
+[루프 속도]
+Fast Planner : 5~20 Hz
+Slow Brain   : 0.3~1 Hz (1~3 s/질의), 비동기 주입
+지연 실험    : 0~5 s 인위 주입
+</code></pre>
+<p><code>λ</code>(감쇠 시상수)가 시스템 거동의 핵심 노브다: 작으면 VLM을 빨리 잊어 보수적(플래너 편향), 크면 VLM 판단을 오래 신뢰(지연/stale 위험 증가). 5초 지연에서 80% SR을 낸 설정이 이 균형의 실효 영역을 보여준다.</p>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<p>융합층은 후보 수 <code>K</code>에 선형(각 후보당 유사도 1회), VLM 호출과 무관하게 빠른 루프가 돌므로 연산 확장성이 좋다. 학습이 없어 새 도시·새 플래너·새 VLM 교체가 재학습 없이 가능 — 이식성이 본 방법의 가장 큰 실무적 자산이다.</p>
+<h3>8.2 한계점 (Limitations)</h3>
+<ol>
+<li><strong>선택의 천장(ceiling) = 후보 품질.</strong> VLM은 <em>생성</em>하지 않고 <em>선택</em>만 하므로, 플래너 후보 집합에 좋은 궤적이 없으면 VLM도 좋은 선택을 할 수 없다. 후보 다양성이 성능 상한을 결정.</li>
+<li><strong>기하 유사도의 모호성.</strong> 후보들이 서로 비슷한 형상이거나, VLM 선호 궤적과 정확히 대응되는 후보가 없을 때 <code>sim</code> 매칭이 모호해질 수 있다.</li>
+<li><strong>단일 감쇠 시상수.</strong> <code>λ</code>가 전역 상수라, 빠르게 변하는 장면(교차로)과 느린 장면(빈 보도)에 같은 감쇠를 적용. 상황 적응형 <code>λ</code>는 미래 과제.</li>
+<li><strong>VLM 오류 전파.</strong> VLM이 잘못 선택해도 안전 하한(플래너 검증)은 유지되나, 의미적으로 나쁜(그러나 실행 가능한) 궤적이 가산점을 받을 수 있다. VLM 신뢰도 추정은 미고려.</li>
+<li><strong>코드/프로젝트 미공개.</strong> 재현성 제약 — 독립 검증이 현재 불가.</li>
+</ol>
+<h3>8.3 향후 방향 (Future Directions)</h3>
+<ul>
+<li><strong>상황 적응형 감쇠/가중</strong>(<code>λ</code>, <code>α</code>를 장면 동역학에 따라 조절).</li>
+<li><strong>VLM 신뢰도 추정</strong>을 융합 가중에 반영(불확실한 VLM 판단의 영향 축소).</li>
+<li><strong>후보 생성 다양화</strong>와의 결합(선택 천장 완화).</li>
+<li>자연어 <em>지시</em> 입력으로의 확장(현재는 의미적 선택, 지시 추종은 아님) → VLN 영역과의 접점.</li>
+</ul>
+<h3>8.4 이중과정(Dual-Process) 인지 관점에서의 위치</h3>
+<p>제목의 &quot;Slow Brain / Fast Planner&quot;는 인지과학의 <strong>이중과정 이론(dual-process theory)</strong> — Kahneman의 System 2(느리고 신중한 추론) / System 1(빠르고 자동적인 반응) — 을 로보틱스 제어 스택에 사상한 것이다. 본 논문의 기여를 이 관점에서 보면 그 일반성이 드러난다.</p>
+<pre><code>   인지 이론        본 시스템           특성
+   System 2 (느림)  VLM (Slow Brain)    의미·맥락 추론, 1~3 s, 저주파
+   System 1 (빠름)  Planner (Fast)      기하·반응 실행, 50~200 ms, 고주파
+   두 시스템의 중재  융합층 (감쇠+유사도) 느린 판단을 빠른 실행에 안전 주입
+</code></pre>
+<p>기존의 &quot;fast-and-slow&quot; 로보틱스 연구 다수는 <strong>언제 느린 시스템을 호출할지(gating)</strong> 에 초점을 두거나, 느린 시스템 출력을 <strong>그대로 신뢰</strong>한다. 본 논문의 차별점은 <strong>&quot;느린 시스템의 출력이 도착했을 때 이미 낡아 있다&quot;는 지연 문제를 정면으로 다루고, 그것을 시간 감쇠 + 기하 불변 표현으로 해소</strong>한 데 있다. 즉 단순한 &quot;언제 부를까&quot;가 아니라 &quot;느린 답이 늦게 와도 어떻게 안전하게 쓸까&quot;를 푼다. 이 프레이밍은 LLM 플래너 + 실시간 제어기, 클라우드 추론 + 엣지 제어 등 &quot;고지연 고수준 추론 + 저지연 저수준 실행&quot; 일반에 그대로 이식될 수 있어, 본 논문의 학문적 파급력을 보도 내비게이션 너머로 확장한다.</p>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<p>같은 <strong>Planner 트랙</strong>의 선행 리뷰 중, VLM/학습 기반 보강 또는 외부 정보로 플래닝을 강화하는 세 편과 비교한다: <strong>ReliaDiffNav</strong>(&quot;Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation&quot;), <strong>Scout-Assisted Planning</strong>(&quot;Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments&quot;), <strong>FLAP</strong>(&quot;FLAP: FOV-Constrained Active Perception Planning for Prior-Map-Free 3D Navigation&quot;).</p>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>ReliaDiffNav (arXiv 2026)</th>
+<th>Scout-Assisted Planning (arXiv 2026)</th>
+<th>FLAP (arXiv 2026)</th>
+<th><strong>Slow Brain, Fast Planner (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>VLM/언어 사용</td>
+<td>VLM 신뢰도 <em>증류</em>(distill)</td>
+<td>없음 (이종팀 정찰)</td>
+<td>없음 (능동 지각)</td>
+<td><strong>VLM이 후보 궤적 <em>선택</em>(in-loop)</strong></td>
+</tr>
+<tr>
+<td>학습 필요성</td>
+<td>학습(증류+디퓨전)</td>
+<td>계획 알고리즘</td>
+<td>최적화(학습X)</td>
+<td><strong>training-free 융합</strong></td>
+</tr>
+<tr>
+<td>VLM 지연 처리</td>
+<td>오프라인 증류로 회피</td>
+<td>해당 없음</td>
+<td>해당 없음</td>
+<td><strong>온라인 지수감쇠 융합(최대 5 s)</strong></td>
+</tr>
+<tr>
+<td>플래너와의 관계</td>
+<td>디퓨전이 <em>생성</em></td>
+<td>정찰 정보로 계획</td>
+<td>최적화가 <em>생성</em></td>
+<td><strong>기존 플래너에 <em>선택기</em> 부착</strong></td>
+</tr>
+<tr>
+<td>안전 하한</td>
+<td>디퓨전 출력 신뢰도</td>
+<td>부분관측 처리</td>
+<td>FOV 제약</td>
+<td><strong>항상 플래너-검증 후보만 선택</strong></td>
+</tr>
+<tr>
+<td>도메인</td>
+<td>공중(aerial)</td>
+<td>이종 로봇팀</td>
+<td>3D UAV</td>
+<td><strong>도시 보도(ground) 모바일</strong></td>
+</tr>
+<tr>
+<td>실로봇</td>
+<td>(해당 리뷰 참조)</td>
+<td>(해당 리뷰 참조)</td>
+<td>✅ UAV</td>
+<td>✅ 캠퍼스 보도</td>
+</tr>
+<tr>
+<td>이식성</td>
+<td>재학습 필요</td>
+<td>알고리즘</td>
+<td>플래너 교체 시 재설계</td>
+<td><strong>플래너·VLM 교체 무학습</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>ReliaDiffNav 대비.</strong>
+ReliaDiffNav는 VLM의 신뢰도(reliability)를 <strong>오프라인으로 디퓨전 플래너에 증류(distill)</strong> 하여, 추론 시 VLM을 호출하지 않고도 VLM 지식을 활용한다. Slow Brain은 정반대로 <strong>VLM을 추론 루프 안에 유지</strong>하되 지연을 융합으로 견딘다.</p>
+<ul>
+<li>ReliaDiffNav 장점: 추론 시 VLM 지연이 아예 없음(증류 완료). 단점: 증류 학습 비용·데이터 필요, 새 VLM/도메인 변경 시 재증류.</li>
+<li>Slow Brain 장점: 학습 불필요·즉시 이식, 최신 VLM을 그대로 끼워 쓸 수 있음(VLM 발전을 바로 흡수). 단점: 추론 시 실제 VLM 호출 비용·지연을 감내해야 함(그래서 융합층이 필요).</li>
+<li>종합: <strong>&quot;VLM을 굽느냐(증류) vs 곁에 두느냐(in-loop 융합)&quot;</strong> 의 철학 차이. 이식성·최신성은 Slow Brain, 추론 효율·결정성은 ReliaDiffNav.</li>
+</ul>
+<p><strong>Scout-Assisted Planning 대비.</strong>
+Scout-Assisted Planning은 이종 로봇팀에서 정찰 로봇의 부분 관측 정보로 계획을 보강한다. 둘 다 &quot;외부 정보원으로 플래닝을 강화&quot;하지만, 정보원이 다르다(정찰 로봇 vs VLM의 의미 판단).</p>
+<ul>
+<li>공통: 불완전·지연된 외부 정보를 어떻게 안전하게 계획에 반영하느냐.</li>
+<li>차이: Scout는 <em>기하/관측</em> 정보를 더해 미관측 공간 불확실성을 줄임. Slow Brain은 <em>의미적</em> 선호를 더해 채점 격차를 메움. Slow Brain의 지수감쇠 융합은 &quot;지연된 정보의 신뢰를 시간으로 할인&quot;하는 일반 원리로, Scout류 지연 정보 융합에도 차용 가능.</li>
+<li>종합: 상호보완 — 기하 정보(Scout) + 의미 정보(Slow Brain VLM)를 같은 감쇠 융합 틀에서 결합하면 강력.</li>
+</ul>
+<p><strong>FLAP 대비.</strong>
+FLAP은 시야(FOV) 제약을 최적화에 내재화한 <strong>순수 최적화 기반 3D UAV 로컬 플래너</strong>로, 언어/VLM을 쓰지 않는다. 패러다임 대조군이다.</p>
+<ul>
+<li>공통: 둘 다 실시간 로컬 플래닝, 실로봇 검증.</li>
+<li>차이: FLAP은 &quot;어디를 볼지&quot;(능동 지각)를 기하 최적화로 풀고, Slow Brain은 &quot;어느 궤적이 의미적으로 옳은지&quot;를 VLM 선택으로 푼다. FLAP은 의미 이해가 없고, Slow Brain은 능동 지각/FOV를 다루지 않음.</li>
+<li>종합: FLAP=기하·지각 최적화, Slow Brain=의미 보강 — 서로 다른 축. 의미(Slow Brain) + 지각(FLAP)을 결합하면 &quot;무엇을·왜 + 어디를 볼지&quot;를 모두 갖춘 플래너가 될 수 있다.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>즉시 부착성</strong>: training-free·플래너 비침습(선택기만 얹음) 설계는 실제 배송/서비스 로봇 스택에 매우 낮은 통합 비용으로 들어갈 수 있음. Coco Robotics 등 실 배송 플릿 맥락(저자 Bolei Zhou의 산업 연계)과 직접 부합.</li>
+<li><strong>안전 하한</strong>: VLM이 무엇을 고르든 플래너-검증 후보만 실행 → 의미 보강을 켜도 기존 안전성 회귀 위험이 낮음(보수적 도입에 유리).</li>
+<li><strong>최신 VLM 흡수</strong>: 모델 교체가 무학습이라, VLM 성능 향상을 곧바로 시스템 성능으로 전환.</li>
+<li><strong>재현성 리스크</strong>: 코드/프로젝트 미공개 → 현재 독립 재현 제한. 동급 선행(FLAP 등 일부 공개) 대비 단기 약점.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>Slow Brain, Fast Planner는 &quot;느린 의미 판단과 빠른 기하 실행을 <em>지연을 견디는 기하·시간 융합</em>으로 잇는다&quot;는 매우 일반화 가능한 원리를 제시한다. 이 원리는 본 논문의 보도 내비게이션을 넘어, 임의의 &quot;느린 고수준 추론기 + 빠른 저수준 제어기&quot; 시스템(예: LLM 플래너 + MPC, 클라우드 추론 + 엣지 제어)에 이식될 잠재력이 크다. 향후:</p>
+<ol>
+<li><strong>지연-정보 융합의 일반 프레임워크화</strong> — Scout류 기하 정보까지 같은 감쇠 융합으로 통합.</li>
+<li><strong>VLM 신뢰도/불확실성 가중</strong> — 잘못된 VLM 선택의 영향 자동 축소.</li>
+<li><strong>상황 적응형 감쇠</strong> — 장면 동역학에 따른 <code>λ</code> 조절.</li>
+<li><strong>지시 추종(VLN)으로 확장</strong> — 의미 <em>선택</em>에서 자연어 <em>지시</em> 추종으로.</li>
+</ol>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li>Slow Brain, Fast Planner: Latency-Resilient VLM-Augmented Urban Navigation. Zhenghao Peng, Honglin He, Quanyi Li, Yukai Ma, Bolei Zhou. arXiv:2606.20458 (cs.RO).</li>
+<li>(배경) Vision-Language Models for robotics / trajectory scoring — 본 논문의 VLM-Planner 인터페이스 배경.</li>
+<li>(배경) Talker-Reasoner / Fast-and-Slow 인지 이중과정(dual-process) 아키텍처 — &quot;Slow Brain / Fast Planner&quot; 은유의 사상적 배경.</li>
+<li>MetaDrive / 도시 주행 시뮬레이션 (Bolei Zhou 그룹) — 관련 시뮬 인프라 계열.</li>
+<li>[선행 리뷰] Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation (ReliaDiffNav, arXiv 2026).</li>
+<li>[선행 리뷰] Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments (arXiv 2026).</li>
+<li>[선행 리뷰] FLAP: FOV-Constrained Active Perception Planning for Prior-Map-Free 3D Navigation (arXiv 2026).</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p><strong>혁신성.</strong> Slow Brain, Fast Planner의 핵심 혁신은 <strong>VLM의 선택을 &quot;인덱스가 아니라 기하 궤적 형상&quot;으로 기억하고, 기하 유사도와 시간 지수 감쇠로 현재 후보에 재사상하는 training-free 융합층</strong>이다. 이 한 가지 아이디어가 &quot;느린 VLM(1<del>3 s)을 빠른 제어 루프(5</del>20 Hz)에 안전하게 끼워 넣는다&quot;는 본질적 난제를 우아하게 해결한다. VLM은 플래너를 대체하지 않고 선택만 하므로 기하·동역학 안전 하한이 항상 보장되고, 지수 감쇠 덕분에 판단이 낡으면 자동으로 플래너로 퇴행한다.</p>
+<p><strong>실용적 의의.</strong> ~2,000개 실세계 도시 보도 시나리오에서 플래너 자체 최선 대비 <strong>ADE 30% 감소</strong>, 시뮬레이션에서 <strong>최대 5초 지연까지 SR 80%+</strong>, 그리고 실제 캠퍼스 보도 모바일 로봇 실증은, 본 방법이 &quot;궤적 채점 격차&quot;를 현실적으로 메우면서도 VLM 지연이라는 치명적 실무 장벽을 넘었음을 보여준다. 특히 <strong>학습이 전혀 필요 없어 어떤 플래너·어떤 VLM에도 즉시 부착</strong>된다는 점은, 실 배송/서비스 로봇 플릿에 매우 낮은 비용으로 의미적 지능을 더할 수 있는 강력한 실용성을 의미한다.</p>
+<p><strong>향후 연구 방향.</strong> 지연-정보 융합의 일반 프레임워크화(기하+의미 통합), VLM 신뢰도 가중, 상황 적응형 감쇠, 그리고 의미 선택에서 자연어 지시 추종(VLN)으로의 확장이 유망하다. 종합적으로 본 논문은 &quot;느린 고수준 추론기 + 빠른 저수준 제어기&quot;라는 광범위한 로보틱스 시스템 패턴에 적용 가능한 <strong>지연 탄력적 융합 원리</strong>를 제시한, 단순하지만 깊은 통찰을 가진 실용적 기여다.</p>
+<hr>
+<p><em>본 리뷰는 arXiv 논문의 abstract 및 공개 정보에 근거하여 작성되었으며, 코드/프로젝트 페이지가 공개되지 않아 실제 구현 스니펫·세부 수치의 독립 검증은 제한됨을 명시한다.</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,973 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Search-Based Spatiotemporal and Multi-Robot Motion Planning on Graphs of Space-Time Convex Sets · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">IROS 2025 (핵심) + RSS 2025 워크숍 — 본 arXiv는 확장 전체판</div>
+    <h1>Search-Based Spatiotemporal and Multi-Robot Motion Planning on Graphs of Space-Time Convex Sets</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2607.00444">arXiv:2607.00444</a></span>
+      <span>리뷰 2026-07-03</span>
+      <span>60분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>ST-GCS (시공간 볼록집합 그래프 상의 탐색 기반 시공간·다중로봇 모션 플래닝): 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Search-Based Spatiotemporal and Multi-Robot Motion Planning on Graphs of Space-Time Convex Sets</li>
+<li><strong>저자 (Authors)</strong>: Jingtao Tang, Zining Mao, Lufan Yang, Hang Ma</li>
+<li><strong>소속 (Affiliation)</strong>: Simon Fraser University (SFU), Burnaby, Canada</li>
+<li><strong>발표처 (Published)</strong>: 핵심 결과는 <strong>IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) 2025</strong> 에 발표되었고(추가로 RSS 2025 워크숍), 본 arXiv 원고는 그 <strong>확장 완전판(extended full version)</strong> 이다.</li>
+<li><strong>DOI</strong>: (IROS 2025 프로시딩 게재)</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2607.00444">2607.00444</a> (v1, 2026-07-01, cs.RO)</li>
+<li><strong>코드</strong>: ✅ <strong>공개(검증됨)</strong> — <a href="https://github.com/reso1/stgcs">https://github.com/reso1/stgcs</a> (Python, <code>pydrake</code>(Drake) 기반 볼록 최적화, Mosek/Gurobi 솔버, GPL-3.0). 프로젝트 페이지: <a href="https://sites.google.com/view/stgcs">https://sites.google.com/view/stgcs</a></li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>ST-GCS는 <strong>동적 장애물이 존재하는 환경에서의 시공간 시간-최적 모션 플래닝(spatiotemporal time-optimal motion planning)</strong> 과 그 자연스러운 확장인 <strong>다중로봇 모션 플래닝(Multi-Robot Motion Planning, MRMP)</strong> 을 하나의 통일된 틀로 푼다.</p>
+<p>핵심 착안은 최근 각광받는 <strong>볼록집합 그래프(Graphs of Convex Sets, GCS)</strong> 프레임워크를 <strong>시간 축으로 확장</strong>하는 것이다. 기존 GCS(Marcucci et al.)는 공간을 충돌 없는 볼록 영역들의 그래프로 분해하고, &quot;어느 볼록집합들을 어떤 순서로 통과하고 각 집합의 진입/이탈 상태를 어디로 둘 것인가&quot;를 하나의 혼합정수 볼록계획(MICP)으로 푼다. 이 접근은 공간 플래닝에서 강력하지만, <strong>동적 장애물과 다중로봇 상호작용을 시간 차원에서 다루는 데는 그대로 쓰기 어렵다</strong> — 시간을 함께 다루면 그래프가 급격히 커지고, 단일 거대 MICP는 좁은 시공간 통로에서 확장성이 무너진다.</p>
+<p>논문이 답하려는 질문:</p>
+<ul>
+<li>공간 볼록집합을 <strong>시간 축으로 밀어 올려(extrude)</strong> 시공간 볼록집합(space-time convex set)을 만들면, 동적 장애물과 다른 로봇의 궤적을 <strong>시공간 점유 영역(space-time occupancy)</strong> 으로 통일되게 표현할 수 있는가?</li>
+<li>시간-최적 궤적 계획을, 하나의 거대 MICP를 푸는 대신 <strong>경로-인덱스 최선우선 탐색(path-indexed best-first search)</strong> 으로 분해하면 좁은 통로에서 훨씬 빠르고 확장 가능한가?</li>
+<li>이 단일로봇 솔버를 <strong>우선순위 기반 계획(prioritized planning) + 우선순위 기반 탐색(PBS)</strong> 과 <strong>정확 볼록분해(Exact Convex Decomposition, ECD)</strong> 로 결합하면 최대 100대 규모 MRMP를 수 분 내에 풀 수 있는가?</li>
+</ul>
+<p>한 줄 요약: <strong>&quot;GCS를 시간으로 확장하고, 그 위에서 시간-최적 플래닝을 (거대 MICP가 아닌) 경로-인덱스 그래프 탐색으로 분해하며, 궤적 점유를 정확 볼록분해로 예약하여 동적 장애물·다중로봇을 통일 처리한다.&quot;</strong></p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) GCS의 비최적 부분구조(non-optimal substructure).</strong>
+표준 그래프 최단경로(Dijkstra/A*)는 &quot;부분경로의 최적성&quot;을 전제로 한다 — 목표까지의 최적 경로의 어떤 접두부(prefix)도 그 자체로 최적이다. 그러나 GCS에서는 <strong>한 정점 <code>v</code>에 도달하는 비용이 그 정점에 이르기까지 사용한 전체 접두 경로(entire prefix path)에 의존</strong>한다. 왜냐하면 각 볼록집합 내부에서 진입/이탈 상태 <code>(x_v, y_v)</code>를 연속 최적화하는데, 그 최적값이 앞서 통과한 집합들의 상태에 연쇄적으로 얽히기 때문이다. 논문이 명시하듯 <em>&quot;the cost of a path depends on the entire prefix path used to reach that vertex.&quot;</em> 따라서 정점 단위로 최단 비용을 저장하는 통상적 탐색은 <strong>최적성을 보장하지 못한다.</strong></p>
+<p><strong>(C2) 시간 차원 추가로 인한 그래프 폭발.</strong>
+공간만 다루던 GCS에 시간 축을 더하면 상태가 <code>x = (p, t) ∈ ℝ^(m+1)</code> 로 한 차원 커지고, 동적 장애물·다른 로봇의 궤적이 시공간에서 볼록 영역을 잘라내며 정점 수를 늘린다. 하나의 거대 MICP로 풀면 이진 변수가 폭증해 좁은 시공간 통로에서 솔버가 붕괴한다.</p>
+<p><strong>(C3) 동적 장애물·다중로봇의 통일 표현.</strong>
+이동 장애물과 &quot;이미 계획된 다른 로봇의 궤적&quot;은 본질적으로 같은 것 — <strong>시공간을 점유하는 스윕 볼륨(swept volume)</strong> 이다. 그러나 기존 방법은 이 둘을 별개 메커니즘으로 다루는 경우가 많다. 하나의 표현으로 통일하지 못하면 코드·이론이 이원화된다.</p>
+<p><strong>(C4) 다중로봇 결합의 지수 복잡도.</strong>
+<code>N</code>대 로봇을 결합 상태공간(joint configuration space)에서 동시에 풀면 차원이 <code>N</code>에 비례해 폭발한다. 좁은 병목(bottleneck)에서 로봇들이 서로 양보·교차해야 할 때 이 결합이 특히 어렵다.</p>
+<p><strong>(C5) 샘플링 기반 시공간 플래너의 좁은 통로 취약성.</strong>
+ST-RRT*, T-PRM 같은 샘플링 기반 시공간 플래너는 무작위 표본에 의존해, <strong>좁은 시공간 회랑(narrow space-time corridor)</strong> — 예컨대 이동 장애물 사이의 짧은 시간창 — 에서 유효 표본을 거의 못 뽑아 성공률·품질이 저하된다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>ST-GCS의 해법은 <strong>&quot;시공간 GCS + 경로-인덱스 탐색 + 정확 볼록분해 + 우선순위 다중로봇&quot;</strong> 의 4중 결합이다:</p>
+<pre><code>┌──────────────────────────────────────────────────────────────────────┐
+│ (1) ST-GCS 구성:  공간 볼록집합 X_v ⊂ ℝ^m 을 [0,tmax]로 밀어올려        │
+│     시공간 볼록집합 X_v×[0,tmax] ⊂ ℝ^(m+1) 생성 (extrusion)            │
+│              │                                                          │
+│ (2) 경로-인덱스 최선우선 탐색(BFS):  정점이 아니라 &quot;접두경로 π&quot;로       │
+│     탐색 노드를 인덱싱 → C1(비최적 부분구조) 정면 돌파.                 │
+│     각 노드마다 경로-조건부 볼록계획(PathOptimize)으로 시간-최적 궤적. │
+│              │                                                          │
+│ (3) 지배 검사(δset/δstate/δpos) + 상한 가지치기 → 지수 탐색을 실용화.   │
+│              │                                                          │
+│ (4) ECD(정확 볼록분해):  동적 장애물/타 로봇 궤적의 시공간 스윕을        │
+│     볼록집합에서 정확히 도려내 → C3(동적·다중로봇 통일 표현).           │
+│              │                                                          │
+│ (5) MRMP:  우선순위 계획(PP) + PBS로 로봇을 순차 배치, 각 로봇 궤적을    │
+│     ECD로 예약 → 다음 로봇은 정적 장애물로 취급 → C4(지수결합) 회피.    │
+│     윈도우 조정(windowed coordination)으로 100대까지 확장.             │
+└──────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<ul>
+<li><strong>경로-인덱스 탐색(C1 해결)</strong>: 노드를 정점이 아니라 접두경로 전체로 인덱싱해, GCS의 비최적 부분구조를 우회하면서 <code>ε</code>-최적성을 증명한다.</li>
+<li><strong>탐색 분해(C2, C5 해결)</strong>: 하나의 거대 MICP 대신, 각 노드에서 <strong>작은 경로-조건부 볼록계획</strong>만 풀고 최선우선으로 확장 → 좁은 통로에서 MICP·샘플링 대비 수배~수십배 빠름.</li>
+<li><strong>ECD(C3 해결)</strong>: 동적 장애물과 타 로봇 궤적을 모두 시공간 스윕으로 도려내 <strong>통일 처리</strong>.</li>
+<li><strong>우선순위 + PBS + 윈도우(C4 해결)</strong>: 결합 공간을 피하고 로봇을 순차·우선순위로 배치, 시간창 중첩 로봇만 조정 → 100대 수 분.</li>
+</ul>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 배경: 공간 볼록집합 그래프(GCS)</h3>
+<p>먼저 논문의 토대인 공간 GCS를 정리한다. 볼록집합 그래프 <code>G = (V, E, 𝒳)</code> 에서:</p>
+<pre><code>각 정점 v ∈ V  ↔  볼록집합  X_v = { x | A_v x ⪯ b_v } ⊆ ℝ^m   (충돌 없는 영역)
+각 간선 (u,v) ∈ E  ↔  두 집합이 겹침:  X_u ∩ X_v ≠ ∅
+경로 π = ⟨v_1, v_2, ..., v_l⟩  ↔  연속 간선으로 이어진 정점열
+</code></pre>
+<p>공간 GCS 모션 플래닝(논문 식 1a–1e)은 시작→목표를 잇는 경로 <code>π</code>를 고르고, 각 집합 안에서 진입/이탈 상태 <code>(x_v, y_v)</code>를 함께 최적화하여 총비용을 최소화한다. 각 집합 내부는 직선(또는 저차 곡선)으로 연결되고, 집합이 충돌 없는 영역이므로 그 안의 궤적도 충돌 없다. 원래 GCS는 이를 <strong>하나의 혼합정수 볼록계획(MICP)</strong> 으로 통째로 풀거나 볼록완화 후 라운딩한다.</p>
+<h3>3.2 시공간 볼록집합 구성 (Space-Time Convex Sets)</h3>
+<p>ST-GCS의 첫 번째 핵심은 공간 집합을 <strong>시간 축으로 밀어 올리는(extrude)</strong> 것이다. 상태를 <code>x = (p, t)</code> 로 두어 위치 <code>p ∈ ℝ^m</code> 와 시간 <code>t ∈ ℝ</code> 를 결합, 시공간 <code>ℝ^(m+1)</code> 에서 작업한다.</p>
+<p>논문 표현: <em>&quot;an ST-GCS can be initialized by extruding each given spatial collision-free convex set from time 0 to an arbitrarily large but finite time limit <code>t_max</code>.&quot;</em> 즉 초기 시공간 집합은 공간 볼록집합을 <code>[0, t_max]</code> 구간의 시간 프리즘으로 세운 것이다:</p>
+<pre><code>공간 (2D)                     시공간 (2D+시간, 3D)
+                                       t ↑  t_max ┌────────┐
+   ┌──────┐                              │        │        │  ← 시간 프리즘
+   │  X_v │   ── extrude [0,tmax] ─▶     │        │  X_v   │     (extruded set)
+   └──────┘                              │        │        │
+                                     t=0 └────────┴────────┘→ p
+</code></pre>
+<p><strong>코드 근거 (<code>mrmp/stgcs.py</code> <code>STGCS.from_env</code>)</strong>: 실제 구현이 정확히 이 extrusion을 수행한다.</p>
+<pre><code class="language-python">@staticmethod
+def from_env(env, t0=0, tmax=1e2, vlimit=1.0, dt=1e-6) -&gt; STGCS:
+    sets = [make_hpolytope(V) for V in env.C_Space]   # 공간 볼록영역(IRIS 등)
+    dim = 1 + sets[0].ambient_dimension()             # +1 : 시간 차원 추가
+    stgcs = STGCS(dim, t0=t0, tmax=tmax, vlimit=vlimit, dt=dt)
+    for i, s in enumerate(sets):
+        t_set = time_extruded(s, t0, tmax)            # ★ 공간집합을 [t0,tmax]로 시간 압출
+        ...
+        stgcs.add_vertex(t_set, Interval(t0, tmax), space_bounds)
+    for u_name, v_name in combinations(stgcs.G.vertex_names, 2):
+        stgcs.try_build_edge(u_name, v_name)          # 겹치는 시공간집합끼리 간선
+    for obs in env.O_Dynamic:
+        stgcs = obs.reserve(stgcs, env.robot_radius, True, True)  # ★ 동적장애물 예약(ECD)
+    return stgcs
+</code></pre>
+<ul>
+<li><code>dim = 1 + ambient_dimension()</code>: 공간 차원 <code>m</code>에 시간 1차원을 더해 <code>m+1</code>.</li>
+<li><code>time_extruded(s, t0, tmax)</code>: 공간 폴리토프 <code>s</code>를 <code>[t0, tmax]</code> 시간으로 압출한 시공간 폴리토프.</li>
+<li>기본값 <code>tmax=1e2</code>(코드), <code>vlimit=1.0</code> — 논문 실험은 <code>t_max = 50</code> 시간단위, 성분별 속도한계 1 단위/시간을 사용한다.</li>
+</ul>
+<h3>3.3 시간-최적 계획의 정식화 (Time-Optimal Formulation)</h3>
+<p>ST-GCS 상의 시간-최적 궤적은 <strong>총 경과시간의 최소화</strong>로 정의된다(논문 식 3a–3f):</p>
+<pre><code>minimize   c(τ) = Σ_{v∈π}  Δt_v                     (총 경과시간)
+  변수:     경로 π 와 각 집합의 진입/이탈 상태 (x_v, y_v)
+subject to
+  (i)   π ∈ 𝒫(v_s, v_g; G)          경로는 시작→목표 유효경로
+  (ii)  x_v, y_v ∈ X_v               진입/이탈이 시공간집합 내부
+  (iii) x_v = y_u   (연속 간선 u→v)   집합 경계에서 상태 연속
+  (iv)  Δt_v ≥ 0                     시간 단조증가(뒤로 못 감)
+  (v)  -v_lim·Δt_v ⪯ Δp_v ⪯ v_lim·Δt_v   속도 한계 (성분별)
+</code></pre>
+<p>여기서 <code>Δp_v = y_v.p − x_v.p</code>, <code>Δt_v = y_v.t − x_v.t</code> 는 집합 <code>v</code> 안에서의 공간·시간 변위다. 각 집합 안에서는 <strong>균일속도의 조각별 선형(piecewise-linear) 궤적</strong>으로 통과한다. 조건 (v)는 속도가 <code>v_lim</code>을 넘지 않게 하는 볼록 제약이다.</p>
+<p><strong>코드 근거 (<code>STGCS.__init__</code>)</strong>: 이 제약들이 Drake <code>LinearConstraint</code>로 정확히 인코딩되어 있다.</p>
+<pre><code class="language-python"># 속도 한계:  -v_lim·Δt ⪯ Δp ⪯ v_lim·Δt  를 두 반평면으로
+A_vmax = np.hstack([ np.eye(d-1),  vlimit*np.ones((d-1,1)), -np.eye(d-1), -vlimit*np.ones((d-1,1))])
+A_vmin = np.hstack([-np.eye(d-1),  vlimit*np.ones((d-1,1)),  np.eye(d-1), -vlimit*np.ones((d-1,1))])
+A_dt   = np.array([0]*(d-1) + [1] + [0]*(d-1) + [-1])     # 시간 단조: Δt ≥ dt(&gt;0)
+A_time = np.vstack([A_vmax, A_vmin, A_dt])
+self.time_constraint = LinearConstraint(A_time, -inf, b_time)   # b_time[-1] = -dt
+self.time_cost = L2NormCost(A_dt.reshape(1,-1), np.zeros(1))     # ★ 비용 = Δt (경과시간)
+</code></pre>
+<ul>
+<li><code>time_cost = L2NormCost(A_dt, 0)</code>: 비용이 시간 변위 <code>Δt</code>의 L2노름 = 경과시간. 즉 <strong>목적함수가 문자 그대로 &quot;시간&quot;</strong> 임을 코드가 증명한다.</li>
+<li><code>A_dt</code> 행: <code>Δt ≥ dt</code>(작은 양수 <code>dt=1e-6</code>)로 시간 단조성 강제.</li>
+<li>연속 제약(<code>cont_constraint = LinearEqualityConstraint(A_cont, 0)</code>)은 간선 양단의 상태를 같게 묶는다(식 (iii)).</li>
+</ul>
+<p><code>solve()</code>가 반환 시 <code>sol.cost = sol.itvl.duration</code> 로 비용을 다시 시간 길이로 확정한다 — 목적이 시간-최적임을 이중으로 못박는다.</p>
+<h3>3.4 경로-인덱스 탐색 노드 (Path-Indexed Search Node)</h3>
+<p>이 논문의 이론적 심장은 <strong>C1(비최적 부분구조)</strong> 을 정면으로 다루는 경로-인덱스 탐색이다. 정점 단위로 최단 비용을 저장하면 GCS에서 최적성을 잃으므로, <strong>탐색 노드를 접두경로 전체로 인덱싱</strong>한다.</p>
+<p><strong>정의 1 (경로-인덱스 노드)</strong>: <code>N = (π, v, τ, g, f)</code></p>
+<pre><code>N.π : 시작에서 여기까지의 접두경로(prefix path)
+N.v : 현재(말단) 정점
+N.τ : 접두경로 N.π 에 조건부인 최적 궤적 (경로-조건부 볼록계획의 해)
+N.g = c(N.τ) : cost-to-come (여기까지의 최적 시간)
+N.f = N.g + ε·h(N.π) : 탐색 우선순위 키 (A* 유사, ε는 가중치)
+</code></pre>
+<p>핵심은 <code>N.τ</code>가 <strong>경로 전체에 조건부인 최적 궤적</strong>이라는 점 — 정점만 보는 게 아니라 &quot;이 접두경로로 왔을 때의 최적 통과&quot;를 매 노드가 들고 있다. 이 덕에 부분경로의 최적성 가정 없이도 전역 최적성을 회복할 수 있다.</p>
+<p><strong>보조정리 1 (재방문 배제, Revisitation Exclusion)</strong>: 조각별 선형 궤적 표현과 시간-비용 목적 하에서, <em>&quot;반복 정점이 없는 단축 경로 위에도 더 높지 않은 비용의 유효 궤적이 존재한다.&quot;</em> 즉 <strong>정점을 반복하는(사이클) 경로는 결코 이득이 없으므로</strong>, 탐색을 <strong>단순경로(simple path, 사이클 없음)</strong> 로 제한해도 최적성을 잃지 않는다. 이는 탐색 공간을 유한(단순경로 집합)으로 만들어 종료를 보장한다.</p>
+<h3>3.5 최선우선 탐색 솔버 (Algorithm 1: BFS Solver)</h3>
+<p>경로-인덱스 노드 위에서 최선우선 탐색(Best-First Search)이 돈다:</p>
+<pre><code>자료구조:
+  OPEN : 우선순위 큐 (키 = N.f = N.g + ε·h(N.π))
+  S(v) : 정점 v 에 도달해 &quot;채택된(살아남은)&quot; 노드 집합 (지배검사용)
+
+메인 루프:
+  1. OPEN 에서 f 최소 노드 N 팝
+  2. N.v == v_g (목표) 이면 → N.τ 반환 (완료)
+  3. 아니면 인접 정점 w ∉ N.π 각각으로 확장:
+       π&#39; = N.π ⊕ w
+       τ&#39; = PathOptimize(π&#39;)       ← ★ 경로-조건부 볼록계획 풀기
+       N&#39; = (π&#39;, w, τ&#39;, c(τ&#39;), c(τ&#39;)+ε·h(π&#39;))
+  4. 상한 가지치기: N&#39;.f ≥ c_ub 이면 버림 (c_ub = 현재 최선 incumbent 비용)
+  5. 지배 검사(δ): S(w) 의 어떤 채택 노드가 N&#39; 을 지배하면 버림
+  6. 살아남으면 OPEN·S(w) 에 삽입
+</code></pre>
+<pre><code>        ┌─ OPEN (min-heap on f) ─┐
+        │  N1(f=3.2) N2(f=3.5) …  │
+        └───────────┬─────────────┘
+                    │ pop min f
+                    ▼
+              N.v == v_g ?  ──yes──▶  return N.τ  (ε-최적)
+                    │ no
+                    ▼  각 인접 w ∉ N.π
+        π&#39; = N.π ⊕ w  →  τ&#39; = PathOptimize(π&#39;)  (볼록계획, Drake+Mosek)
+                    │
+       상한가지치기 (f ≥ c_ub?)  →  버림
+                    │
+       지배검사 δ (S(w) 내 노드가 N&#39; 지배?) → 버림
+                    │ 통과
+                    ▼
+             OPEN ← N&#39;,   S(w) ← S(w) ∪ {N&#39;}
+</code></pre>
+<p><strong>상한 가지치기(Upper-Bound Pruning)</strong>: incumbent 궤적 비용 <code>c_ub</code> 로 <code>f ≥ c_ub</code> 노드를 잘라낸다. 초기 incumbent <code>τ_ub</code> 는 <strong>보조 정점-인덱스 탐색</strong>(빠르지만 준최적)으로 미리 하나 얻어 둔다 — 좋은 상한이 있어야 가지치기가 강하게 작동한다.</p>
+<p><strong>정리 2 (ε-최적성 보장)</strong>: 허용가능(admissible) 휴리스틱 <code>h</code>, 유효한 incumbent 쌍 <code>(c_ub, τ_ub)</code>, 안전한 지배검사 하에서 알고리즘은 <strong>ε-최적 궤적</strong>을 반환한다. 특히 <strong><code>ε = 1</code> 이면 비용-최적(정확 최적)<strong> 이다. 이것이 샘플링 기반(ST-RRT*는 점근적 최적, T-PRM은 무보장)과의 결정적 차별점 — </strong>탐색이 유한 종료하며 최적성 보장을 갖는다.</strong></p>
+<h3>3.6 지배 검사 (Dominance Checks) — 탐색을 실용화하는 열쇠</h3>
+<p>경로-인덱스 탐색은 원리상 지수적(단순경로 수)이다. 이를 실용화하는 것이 <strong>지배 검사</strong> — &quot;이미 더 나은(또는 최소한 대등한) 노드가 같은 정점에 있으면 새 노드를 버린다&quot;. 논문은 안전성-공격성 트레이드오프가 다른 세 가지를 제시한다.</p>
+<p>먼저 <strong>전방 도달 원뿔(forward reachable cone)</strong> 을 정의한다. 상태 <code>x = (p,t)</code> 에서 속도한계 <code>v_lim</code> 로 앞으로 갈 수 있는 시공간 영역:</p>
+<pre><code>C(x) = { z ∈ ℝ^(m+1) |  z.t ≥ x.t,  -v_lim(z.t−x.t) ⪯ z.p−x.p ⪯ v_lim(z.t−x.t) }
+</code></pre>
+<p>즉 시간이 흐를수록 벌어지는 시공간 원뿔이다. &quot;N&#39;이 N을 지배한다&quot;는 것은 대략 <strong>N&#39;의 도달 원뿔이 N의 도달 원뿔을 덮는다(N이 갈 수 있는 곳은 N&#39;도 간다)</strong> 는 뜻.</p>
+<p><strong>(1) δset (안전 집합-포함 검사)</strong>: 노드 <code>N</code>이 <code>u</code>에서 <code>v</code>로 도달할 때의 도달집합 <code>R_N = X_u ∩ X_v ∩ {x | x.t ≥ N.x.t}</code> 의 <strong>모든</strong> 상태에 대해:</p>
+<pre><code>N&#39; 이 N 을 지배  ⟺  ∀ x ∈ R_N,  C(x) ⊆ C(N&#39;.x)
+</code></pre>
+<p><strong>보조정리 3</strong>이 이 검사가 최적성을 보존함을 증명한다 — N-일관 궤적이 쓸 수 있는 어떤 상태든 N&#39;이 도달함을 인증하므로 N을 안전히 버릴 수 있다.</p>
+<p><strong>(2) δstate (휴리스틱 도착-상태 검사)</strong>: δset의 근사 — <strong>증인 상태(witness state)</strong> 하나만 검사한다.</p>
+<pre><code>C(N.x) ⊆ C(N&#39;.x)   (도착 상태 N.x 하나만 비교)
+</code></pre>
+<p>빠르지만 <code>N.x</code>가 단일 증인이라 휴리스틱적(가능 도착상태 전체가 아님).</p>
+<p><strong>(3) δpos (휴리스틱 위치기반 검사)</strong>: 접두경로를 <strong>표본 공간위치</strong>에서 비교. <code>X_v</code> 내 표본 <code>p</code> 에 대해 <code>J_p(N&#39;.π) ≤ J_p(N.π)</code> 인지 본다. 가장 공격적으로 가지치기하나 <strong>최적성 보장을 잃는다</strong>.</p>
+<pre><code>공격성 / 속도:    δset  &lt;  δstate  &lt;  δpos
+최적성 보장:      δset(안전) | δstate(준-안전) | δpos(무보장, 최고속)
+</code></pre>
+<p><strong>실험(§8.2.2)</strong>: δset은 최적성 손실 없이 상당한 속도향상, δstate·δpos는 추가 속도향상을 주나 incumbent(준최적) 해를 반환할 수 있다.</p>
+<h3>3.7 허용가능 휴리스틱 (Admissible Heuristics)</h3>
+<p>모든 휴리스틱은 목표에서 0(<code>h(⟨v_g⟩)=0</code>)이며 접두경로 <code>N.π</code> 에서 목표까지 남은 최적비용의 <strong>하한(lower bound)</strong> 이다(A* 허용성).</p>
+<pre><code>h_mot (운동-전용):   속도한계 외 모든 제약 완화. 접두 인터페이스 I_N 에서
+                     목표 p_g 까지 v_lim 만으로 가는 최소시간.  (가장 느슨)
+
+h_tri (삼중항 완화): 말단집합 X_{N.v} 내부의 집합소속·운동 제약은 유지하되
+                     집합 간 연속성 완화 → 독립 최적화.
+
+h_tab (인터페이스-집합 비용표): 오프라인 사전계산 표. 인터페이스집합→말단집합
+                     최소통과시간 저장. 온라인에서 목표위치를
+                     ρ(Y,p_g)=min_{x∈Y}‖(p_g−x.p) ⊘ v_lim‖_∞ 로 반영.
+
+h_max = max(h_mot, h_tri, h_tab)   ← 셋의 최댓값 (하한 중 가장 강한 안내)
+</code></pre>
+<p><strong>실험(§8.2.1)</strong>: <code>h_max</code>가 런타임에서 다른 셋을 지배하면서도 해 품질을 유지한다. 세 하한의 최댓값이 여전히 허용가능하면서 가장 타이트한 안내를 주기 때문이다.</p>
+<h3>3.8 정확 볼록분해 (Exact Convex Decomposition, ECD)</h3>
+<p><strong>C3(동적·다중로봇 통일)</strong> 의 핵심 장치. 궤적 <code>τ</code>를 시간에 따라 진화하는 공간 점유로 보고, 그 <strong>시공간 스윕 볼륨 <code>S(τ) ⊂ ℝ^(m+1)</code><strong> 를 기존 볼록집합에서 </strong>정확히 도려낸다</strong>. 도려낸 뒤에도 남은 영역이 볼록집합들로 유지되도록 세분(subdivide)한다. 이로써 <em>&quot;동적 장애물과 로봇 간 상호작용의 통일 처리(unified treatment)&quot;</em> 가 가능해진다.</p>
+<p><strong>코드 근거 (<code>mrmp/ecd.py</code>)</strong>: 실제 구현이 이 도려내기를 수행한다.</p>
+<pre><code class="language-python">@dataclass
+class ECDPair:                     # 궤적 세그먼트가 만드는 시공간 절단 조각
+    bottom_halfspace: HPolyhedron  # 아래 반공간
+    top_halfspace: HPolyhedron     # 위 반공간
+    mid_halfspaces: List[HPolyhedron]
+    bounds: List[Interval]
+
+def reserve(stgcs, trajectory, safe_radius, x0_staying=True, xt_staying=True):
+    new = stgcs.copy()
+    ...
+    for ecd_pair in generate_all_ECD_pairs(stgcs, trajectory, safe_radius, tmin, tmax):
+        for v_name in stgcs.G.vertex_names:      # 이 조각과 겹치는(AABB) 정점 찾기
+            if AABB(ecd_pair.bounds, v.space_bounds + [v.itvl]):
+                split_list[v_name].append(ecd_pair)
+    for v_name, ecd_pairs in split_list.items():
+        v = new.remove_vertex(v_name)            # ★ 겹친 정점 제거
+        for res in slice(hpoly, ecd_pairs, ...): # ★ 스윕을 도려낸 나머지를 볼록조각으로 slice
+            new_v = new.try_add_vertex(*res)     # 남은 볼록조각을 새 정점으로
+    new = update_edge(new, adj_graph, split_map) # 간선 재구성
+    return new
+</code></pre>
+<ul>
+<li><code>generate_all_ECD_pairs</code>: 궤적 세그먼트마다 <code>safe_radius</code> 만큼 부풀린 <strong>평행육면체(parallelepiped) 시공간 튜브</strong>를 만들고, 이를 감싸는 반공간(halfspace)들을 생성. 2D는 <code>parallelepiped_side_halfspace_1d</code>, 3D는 <code>..._2d</code>.</li>
+<li><code>AABB(...)</code>: 축정렬 경계상자 겹침으로 후보 정점 1차 필터(비싼 연산 회피).</li>
+<li><code>slice(...)</code>: 겹친 정점을 스윕 튜브로 도려낸 <strong>남은 볼록조각들</strong>로 분할.</li>
+<li><code>update_edge</code>: 분할된 새 정점들 사이/이웃과의 간선을 재구성(<code>split_map</code> 기반).</li>
+</ul>
+<pre><code>ECD 도려내기 (2D+시간 예시)
+   before:  ┌───────────────┐          after:  ┌───┐   ┌───────┐
+            │    X_v        │  robot j          │   │ ╱╱│       │
+            │      ╱╱╱╱╱ ← τ_j swept tube  ─▶   │   │╱╱ │  남은  │
+            │    ╱╱╱╱╱      │  (safe_radius)     └───┘   │ 볼록  │
+            └───────────────┘                  (스윕 제거) └───────┘
+</code></pre>
+<p>이 &quot;도려내기 → 남은 볼록조각 → 간선 재구성&quot;이 정확(exact)한 이유: 근사 격자화 없이 <strong>반공간 교차로 정확한 볼록 여집합 근사</strong>를 만들기 때문이다.</p>
+<h3>3.9 다중로봇: 우선순위 계획 + PBS (Multi-Robot Planning)</h3>
+<p><strong>C4(지수결합) 회피</strong>의 핵심. 결합 상태공간을 피하고 로봇을 <strong>순차·우선순위로</strong> 배치한다.</p>
+<p><strong>우선순위 계획(Prioritized Planning, PP)</strong>:</p>
+<pre><code>for i in 1..N (우선순위 순):
+    로봇 i 를 현재 ST-GCS 상에서 BFS 솔버로 계획      # 앞 로봇들은 이미 예약됨
+    S(τ_i) = 로봇 i 궤적의 시공간 스윕 계산
+    ST-GCS ← ECD(ST-GCS, S(τ_i))                    # ★ 궤적 예약 → 다음 로봇엔 정적 장애물
+</code></pre>
+<p>이 순차화가 다중로봇 상호작용을 <strong>후속 쿼리의 정적 장애물</strong>로 바꿔 결합 폭발을 피한다.</p>
+<p><strong>우선순위 기반 탐색(Priority-Based Search, PBS)</strong>: PP는 고정 우선순위라 좁은 병목에서 실패(교착)할 수 있다. PBS는 <strong>우선순위 순서(constraint ordering) 자체를 탐색</strong>한다.</p>
+<p><strong>코드 근거 (<code>mrmp/pbs.py</code>)</strong>: PBS가 우선순위를 방향그래프(DiGraph)로 들고, 충돌 시 분기한다.</p>
+<pre><code class="language-python">class Node:
+    def __init__(self, dg: nx.DiGraph):
+        self.dg = dg            # 우선순위 부분순서 (i&lt;j 간선 = i가 j보다 높음)
+        self.sols = []          # 각 로봇의 현재 해
+
+    def update_plans(self, parent, stgcs, idx, robot_radius, ...):
+        # idx 및 그 하위(우선순위 낮은) 로봇만 재계획 (위상정렬 순)
+        for j in nx.topological_sort(self.dg.subgraph(replan_list)):
+            high_priority = list(self.dg.predecessors(j))
+            if replan:
+                stgcs_reserved = stgcs.copy()
+                for k in high_priority:
+                    stgcs_reserved = ecd_reserve(stgcs_reserved, self.sols[k].trajectory, 2*robot_radius)  # ★ 상위 로봇 궤적 ECD 예약
+                sol = stgcs_reserved.solve(starts[j], goals[j], t0s[j], relaxation=True, ...)
+                if not sol.is_success: return False
+                self.sols[j] = sol
+
+    def find_first_conflict(self, num_agents, robot_radius, tmin, tmax):
+        for i, j in combinations(range(num_agents), 2):
+            if collision_checking(self.sols[i].trajectory, self.sols[j].trajectory, ...):
+                return i, j            # 첫 충돌쌍 반환 → 분기
+        return None, None
+
+def PBS(env, tmax, vlimit, starts, goals, t0s, timeout_secs, scaler_multiplier=1.0):
+    stgcs = STGCS.from_env(env=env, t0=0, tmax=tmax, vlimit=vlimit)
+    ...
+    Stack = [(None, root, None)]           # 깊이우선 스택(분기 트리)
+    while Stack != []:
+        parent, node, j = Stack.pop()
+        if j is not None and not node.update_plans(parent, stgcs, j, ...):
+            continue                        # 재계획 실패 → 이 분기 폐기
+        i, j = node.find_first_conflict(...)
+        if (i, j) == (None, None): return node.sols   # 충돌 없음 → 해
+        for (a, b) in [(j, i), (i, j)]:     # 두 우선순위 방향으로 분기
+            child = node.get_child(a, b)    # a&lt;b 간선 추가 (DAG 유지 시)
+            if child: Stack.append((node, child, b))
+</code></pre>
+<ul>
+<li><strong>분기 규칙</strong>: 첫 충돌쌍 <code>(i,j)</code> 에 대해 <code>i&lt;j</code> 와 <code>j&lt;i</code> 두 우선순위를 각각 시도(자식 노드) — CBS의 제약분기를 우선순위 분기로 바꾼 형태.</li>
+<li><strong>부분 재계획</strong>: 우선순위가 바뀐 로봇과 그 하위만 재계획(<code>replan_list</code>), 상위는 그대로 → 효율적.</li>
+<li><strong>ECD 예약</strong>: 상위 로봇 궤적을 <code>2*robot_radius</code> 안전반경으로 도려낸 ST-GCS에서 하위 로봇을 계획.</li>
+<li><strong>노드 순서 규칙(§7 Algorithm 3)</strong>: 충돌 수·경로 길이·도착 시간을 종합해 우선순위를 휴리스틱 배정 → 확장 노드 수·런타임 감소(§8.2.3).</li>
+</ul>
+<p><strong>윈도우 조정(Windowed Coordination)</strong>: 대규모(수십~100대)에서, <strong>시간창이 겹치는 로봇만</strong> 조정 대상으로 좁힌다. 충돌이 집중된 구간으로 동적 윈도우를 조정해 결합 오버헤드를 크게 줄인다(§8.2.4) — 이것이 100대 규모를 분 단위로 푸는 열쇠다.</p>
+<h3>3.10 알고리즘 복잡도 (Complexity)</h3>
+<pre><code>경로-조건부 볼록계획(각 노드):
+  - 연속변수 수: 2m·l   (l개 집합의 진입/이탈 상태)
+  - 볼록 원뿔계획 → 다항시간. Mosek이 m+1=3(2D+시간)을 효율 처리.
+
+탐색 공간:
+  - 그래프 G 상 모든 단순경로 → 최악 |V|에 지수적.
+  - 상한 가지치기 + 지배검사(δ) 가 실제 탐색노드를 크게 축소.
+  - 경로 길이는 합리적 볼록분해에서 통상 O(|V|).
+
+MRMP:
+  - 순차(PP): N개 독립 ST-GCS 쿼리 (로봇당 1회).
+  - PBS: 우선순위 순서 트리 탐색 → 최악 지수적.
+  - 윈도우 조정: 시간중첩 로봇쌍만 → 고차원 결합탐색 가지치기.
+</code></pre>
+<p>핵심 직관: <strong>거대 MICP의 이진변수 지수 폭발</strong>을, 각 노드에서 <strong>작은 연속 볼록계획</strong>만 풀고 그래프 탐색이 조합을 담당하도록 분해했다. 지배검사·가지치기·휴리스틱이 지수 탐색을 실용 시간으로 눌러 준다.</p>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<p>전체 파이프라인:</p>
+<pre><code>[오프라인] 공간 볼록분해 (IRIS) → 공간 볼록집합 {X_v}
+        │
+        ▼
+[1] ST-GCS 구성:  각 X_v 를 [0,tmax] 시간압출 → 시공간 정점,  겹침 → 간선
+        │         (from_env: time_extruded + try_build_edge)
+        │
+        ▼
+[2] 동적장애물 예약:  각 이동장애물 스윕을 ECD로 도려냄 (obs.reserve)
+        │
+        ▼
+┌────────────────── 단일로봇 시공간 계획 (BFS Solver) ──────────────────┐
+│ [3] source/target 정점 빌드 → 경로-인덱스 최선우선 탐색                │
+│      OPEN(f=g+ε·h) pop → 인접 확장 → PathOptimize(볼록계획)           │
+│      → 상한가지치기 → 지배검사 δ(set/state/pos) → 삽입                 │
+│ [4] 목표 도달 시 ε-최적 시공간 궤적 τ 반환                             │
+└───────────────────────────────────────────────────────────────────────┘
+        │  (다중로봇이면)
+        ▼
+┌────────────────── 다중로봇 (PP / PBS) ──────────────────┐
+│ [5] 우선순위 순서 DiGraph 로 로봇 순차 계획              │
+│ [6] 각 로봇 궤적 τ_i 를 ECD로 예약 → 다음 로봇은 정적처리 │
+│ [7] 충돌 검출 시 우선순위 분기 (PBS), 부분 재계획         │
+│ [8] 윈도우 조정으로 시간중첩 로봇만 결합 → 100대 확장     │
+└──────────────────────────────────────────────────────────┘
+        │
+        ▼
+[9] 충돌 없는 시공간 궤적 집합 {τ_1,...,τ_N} 출력
+</code></pre>
+<p><strong>데이터 흐름의 핵심</strong>: 공간분해(오프라인) → 시간압출(정점) → ECD(동적/타로봇 예약) → 경로-인덱스 탐색(단일로봇 최적) → 우선순위+PBS(다중로봇). <strong>ECD가 [2]와 [6]에서 동일하게 재사용</strong>되는 점이 &quot;동적장애물 = 타로봇궤적&quot;이라는 통일 표현의 구조적 증거다 — 코드에서도 <code>from_env</code>의 <code>obs.reserve</code>와 PBS의 <code>ecd_reserve</code>가 같은 <code>mrmp/ecd.py:reserve</code>를 부른다.</p>
+<p><strong>설계 미학 — &quot;조합은 탐색이, 연속은 볼록계획이&quot;</strong>: 원래 GCS는 조합(어느 집합순서)과 연속(집합내 상태)을 하나의 MICP에 섞었다. ST-GCS는 이를 분리 — <strong>조합은 경로-인덱스 그래프 탐색이, 연속은 경로-조건부 볼록계획이</strong> 담당한다. 이 분리가 좁은 통로에서의 확장성과 ε-최적성을 동시에 준다.</p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 / 벤치마크</h3>
+<p><strong>공간 GCS 생성</strong>: 2D 내비게이션 환경(다각형 장애물)에 IRIS(Iterative Regional Inflation by SDP)로 충돌 없는 볼록영역을 생성.</p>
+<p><strong>시공간(단일로봇) 인스턴스</strong>: 2D 격자세계, 성분별 속도한계(예: 1 단위/시간), 시간한계 <code>t_max</code>(논문 실험 50 시간단위 / 코드 기본 <code>1e2</code>).</p>
+<p><strong>코드 기반 벤치마크 환경(검증됨)</strong> — 레포 <code>data/</code>·<code>demos/</code>가 정확한 세 환경을 노출한다:</p>
+<pre><code>환경(난이도 오름차순):   empty2d   &lt;   simple2d   &lt;   complex2d
+로봇 수(demos/):         n1, n2, n4, n8, n12, n16, n20  (최대 20대 데모)
+저장 결과(data/):        {env}-SP+STGCS,  {env}-PP+STGCS,  {env}-PBS+STGCS,
+                         {env}-SP+ST-RRTStar(-C),  {env}-SP+TPRM(-C)
+</code></pre>
+<ul>
+<li><code>SP</code> = 단일로봇 시공간(single-robot spatiotemporal), <code>PP</code> = 우선순위계획, <code>PBS</code> = 우선순위기반탐색.</li>
+<li>베이스라인 파일(<code>baselines/</code>): <code>sp_strrtstar.py</code>(ST-RRT*), <code>sp_tprm.py</code>(T-PRM), <code>rp_stgcs.py</code>(reserved-planning ST-GCS). <code>-C</code> 접미사는 완결(complete)/보정 변형.</li>
+</ul>
+<p><strong>MRMP 인스턴스</strong>: 2D 병목(bottleneck) 시나리오와 혼잡 격자, 최대 100대.</p>
+<h3>5.2 평가 지표 / 베이스라인</h3>
+<ul>
+<li><strong>지표</strong>: 성공률(%), 런타임(s 또는 min), 해 비용(총 경과시간, 시간-최적성).</li>
+<li><strong>단일로봇 베이스라인</strong>:<ul>
+<li><strong>MICP</strong>: 직접 혼합정수 볼록계획(원래 GCS 방식, 하나의 거대 솔버).</li>
+<li><strong>MICP(g)</strong>: 연속완화 + 확률적 경로 라운딩(rounding) 변형.</li>
+<li><strong>ST-RRT*</strong>: 샘플링 기반 시공간 플래너(점근적 최적).</li>
+<li><strong>T-PRM</strong>: 시간적 확률 로드맵(temporal PRM).</li>
+</ul>
+</li>
+<li><strong>다중로봇 베이스라인</strong>: 순수 우선순위 계획(ST-GCS 없이), CBS 계열, 샘플링 기반.</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>(A) 단일로봇 시공간 — 성공률·품질</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>성공률</th>
+<th>런타임</th>
+<th>해 품질(시간비용)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>ST-GCS (BFS)</strong></td>
+<td><strong>100% (전 인스턴스)</strong></td>
+<td>좁은 통로에서 MICP 대비 <strong>자릿수(orders of magnitude) 빠름</strong></td>
+<td>MICP 대비 <strong>5–15% 이내</strong></td>
+</tr>
+<tr>
+<td>MICP</td>
+<td>60–80% (환경 의존)</td>
+<td>단일 거대 솔버 — 좁은 통로에서 붕괴</td>
+<td>기준(최적)</td>
+</tr>
+<tr>
+<td>MICP(g)</td>
+<td>60–80%</td>
+<td>라운딩 오버헤드</td>
+<td>준최적</td>
+</tr>
+<tr>
+<td>ST-RRT*</td>
+<td>좁은 시공간 회랑에서 저조</td>
+<td>—</td>
+<td>점근적 최적(느림)</td>
+</tr>
+<tr>
+<td>T-PRM</td>
+<td>좁은 시공간 회랑에서 저조</td>
+<td>—</td>
+<td>무보장</td>
+</tr>
+</tbody></table></div>
+<p>논문 인용(검증됨): <em>&quot;ST-GCS with best-first search achieves 100% success across test instances while MICP variants achieve 60–80% success rates depending on the environment.&quot;</em> 그리고 <em>&quot;Solution time costs are within 5–15% of MICP solutions across most instances.&quot;</em> 샘플링 기반 대비: <em>&quot;Runtime improvements: 5–50× faster on constrained instances.&quot;</em></p>
+<p>핵심 관찰:</p>
+<ul>
+<li><strong>100% 성공 vs MICP 60–80%</strong>: 하나의 거대 MICP는 좁은 시공간 통로에서 이진변수 폭발로 실패하는데, 경로-인덱스 탐색 분해는 <strong>전 인스턴스 100%</strong> 를 달성한다. 이것이 &quot;탐색 분해&quot;의 직접 증거.</li>
+<li><strong>자릿수 속도향상 + 5–15% 품질</strong>: MICP보다 자릿수 빠르면서 해 비용은 5–15% 이내 — <strong>속도를 위해 품질을 크게 희생하지 않는다</strong>(그리고 <code>ε=1</code>이면 정확 최적).</li>
+<li><strong>샘플링 기반 대비 좁은 통로 우위</strong>: ST-RRT*·T-PRM은 좁은 시공간 회랑에서 유효 표본 부족으로 저조, ST-GCS는 볼록분해 구조를 활용해 <strong>5–50배 빠름</strong>.</li>
+</ul>
+<p><strong>(B) 다중로봇(MRMP) — 규모·런타임</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>규모</th>
+<th>시나리오</th>
+<th>결과(검증됨)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>소규모(≤16대)</td>
+<td>병목·혼잡 격자</td>
+<td>대부분 성공률 높음(&gt;95% 경향), 초~수분</td>
+</tr>
+<tr>
+<td>중규모(32–50대)</td>
+<td>PP + ST-GCS + ECD, 윈도우 조정</td>
+<td>50대 인스턴스 1–5분 경향</td>
+</tr>
+<tr>
+<td>대규모(50대 병목)</td>
+<td>병목 통과 조정</td>
+<td><strong>1.64분에 해결</strong> (논문 명시)</td>
+</tr>
+<tr>
+<td>대규모(100대 밀집)</td>
+<td>밀집 조정</td>
+<td><strong>1.60분에 해결</strong> (논문 명시)</td>
+</tr>
+</tbody></table></div>
+<p>논문 인용(검증됨): <em>&quot;50-robot bottleneck: solved in 1.64 minutes&quot;</em>, <em>&quot;100-robot dense instance: solved within 1.60 minutes&quot;</em>, <em>&quot;the proposed multi-robot motion planner can solve instances with up to 100 robots within only a few minutes.&quot;</em></p>
+<p>핵심 관찰:</p>
+<ul>
+<li><strong>100대 밀집을 1.60분</strong> — 결합 상태공간을 피한 우선순위+PBS+윈도우 조정이 표준 벤치마크를 넘는 규모를 분 단위로 처리.</li>
+<li><strong>50대 병목 1.64분</strong> — 병목은 밀집보다 조정이 어려울 수 있는데(양보·교차 필요) 비슷한 시간 — 윈도우 조정이 병목의 시간중첩 로봇만 결합해 효율적임을 시사.</li>
+</ul>
+<blockquote>
+<p>⚠️ 정직성 노트: 본 리뷰에 명시한 성공률(100%, 60–80%)·품질(5–15%)·MRMP 런타임(1.60/1.64분)·속도향상(5–50×, 자릿수)은 모두 논문 HTML 본문에서 확인한 수치·표현이다. 그러나 <strong>환경별(empty/simple/complex) 개별 런타임 표의 정확한 셀 값</strong>과 <strong>소규모 MRMP의 정확한 성공률 숫자</strong>는 HTML에서 표 셀 단위로 완전히 추출되지 않아, 위에서는 논문이 명시한 범위·경향으로 서술했다(임의 수치 날조 없음).</p>
+</blockquote>
+<h3>5.4 소거 실험 (Ablation Studies)</h3>
+<p>논문은 네 축의 소거를 수행한다:</p>
+<pre><code>§8.2.1 BFS 휴리스틱:   h_mot / h_tri / h_tab / h_max 개별 비교
+                       → h_max 가 런타임 지배, 품질 유지.
+
+§8.2.2 지배 검사:      δ∅(무) / δset(안전) / δstate(휴리스틱) / δpos(휴리스틱)
+                       → δset: 최적성 손실 없이 상당한 가속.
+                          δstate·δpos: 추가 가속(단 incumbent 반환 가능).
+
+§8.2.3 PBS 노드 확장:  충돌수 순서 vs 경로길이 순서
+                       → 충돌집중 확장이 확장노드·런타임 감소.
+
+§8.2.4 윈도우 조정:    시간창 조정 유무
+                       → 100대 밀집을 분 단위로 푸는 결정적 요소.
+</code></pre>
+<p>이 소거들의 함의: ST-GCS의 성능은 <strong>단일 트릭이 아니라 (휴리스틱 h_max) × (지배검사 δset) × (PBS 순서) × (윈도우 조정)</strong> 의 곱이다. 특히 δset은 <strong>안전(최적성 보존)하면서</strong> 가속을 준다는 점에서 이론-실용 균형의 모범이다.</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>시공간 볼록집합 그래프(ST-GCS).</strong>
+공간 GCS를 시간축으로 압출해 시공간 볼록집합을 정의하고, 그 위에서 시간-최적 계획을 정식화. 코드(<code>time_extruded</code>, <code>L2NormCost(Δt)</code>)가 정확히 이 압출·시간비용을 구현.</p>
+</li>
+<li><p><strong>경로-인덱스 최선우선 탐색 + ε-최적성.</strong>
+GCS의 비최적 부분구조(C1)를 정면 돌파 — 노드를 접두경로로 인덱싱하고, 보조정리 1(재방문 배제)로 단순경로에 제한, 정리 2로 <strong>ε-최적성(ε=1이면 정확 최적)</strong> 을 증명. 하나의 거대 MICP를 <strong>작은 경로-조건부 볼록계획들의 그래프 탐색</strong>으로 분해.</p>
+</li>
+<li><p><strong>안전·휴리스틱 지배검사 계열.</strong>
+전방 도달원뿔 기반 <strong>δset(안전, 최적성 보존)</strong> 과 근사 <strong>δstate/δpos</strong>(공격적, 고속)로 지수 탐색을 실용화. 안전성 증명(보조정리 3) 포함.</p>
+</li>
+<li><p><strong>정확 볼록분해(ECD)로 통일 표현.</strong>
+궤적 스윕을 볼록집합에서 정확히 도려내 <strong>동적 장애물과 타 로봇 궤적을 하나의 메커니즘으로</strong> 처리. 코드에서 <code>from_env</code>와 PBS가 동일 <code>ecd.reserve</code>를 공유.</p>
+</li>
+<li><p><strong>대규모 MRMP.</strong>
+우선순위 계획 + PBS + 윈도우 조정으로 <strong>최대 100대를 수 분 내</strong>(100대 밀집 1.60분, 50대 병목 1.64분)에 해결.</p>
+</li>
+<li><p><strong>완전 공개 오픈소스(검증됨).</strong>
+Drake+Mosek 기반 Python 구현, 세 환경·다수 로봇 데모·베이스라인(ST-RRT*, T-PRM) 포함(GPL-3.0). 코퍼스 다수 Planner 논문이 코드 미공개/예정인 것과 대조적으로 <strong>즉시 재현 가능</strong>.</p>
+</li>
+</ol>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 솔버 스택</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>구성요소</th>
+<th>선택</th>
+<th>근거(코드/논문)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>볼록 최적화 백엔드</td>
+<td><strong>Drake (<code>pydrake</code>)</strong></td>
+<td><code>from pydrake.all import HPolyhedron, LinearConstraint, L2NormCost, ...</code></td>
+</tr>
+<tr>
+<td>원뿔계획 솔버</td>
+<td><strong>Mosek</strong> (기본)</td>
+<td>Drake GCS 프로그램 solve 경로. README 명시</td>
+</tr>
+<tr>
+<td>대체 솔버</td>
+<td><strong>Gurobi</strong> (선택)</td>
+<td>Drake 소스 빌드 시. README 명시</td>
+</tr>
+<tr>
+<td>GCS 자료구조</td>
+<td><code>networkx</code> 그래프 + Drake GCS</td>
+<td><code>mrmp/graph.py</code> (<code>Graph</code>, <code>Vertex</code>, <code>Edge</code>, <code>ShortestPathSolution</code>)</td>
+</tr>
+<tr>
+<td>공간 볼록분해</td>
+<td><strong>IRIS</strong></td>
+<td>실험 셋업(2D 다각형 장애물)</td>
+</tr>
+</tbody></table></div>
+<h3>7.2 핵심 하이퍼파라미터 (코드 검증)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>시간한계 <code>t_max</code></td>
+<td>50 (논문 실험) / <code>1e2</code>(코드 기본)</td>
+<td><code>STGCS.__init__(tmax=1e2)</code> / 논문 셋업</td>
+</tr>
+<tr>
+<td>속도한계 <code>v_lim</code></td>
+<td>1.0 단위/시간 (성분별)</td>
+<td><code>STGCS.__init__(vlimit=1.0)</code></td>
+</tr>
+<tr>
+<td>시간 하한 <code>dt</code></td>
+<td><code>1e-6</code></td>
+<td>시간 단조성(<code>Δt ≥ dt</code>)</td>
+</tr>
+<tr>
+<td>정점당 점수</td>
+<td><code>order+2</code> (<code>order=0</code>이면 2: 진입·이탈)</td>
+<td><code>num_pts_per_verts = order + 2</code></td>
+</tr>
+<tr>
+<td>라운딩 경로 상한</td>
+<td><code>BASE_MAX_ROUNDED_PATHS = 1000</code> × scaler</td>
+<td>볼록완화 라운딩</td>
+</tr>
+<tr>
+<td>라운딩 시도 상한</td>
+<td><code>BASE_MAX_ROUNDING_TRIALS = 1000</code> × scaler</td>
+<td></td>
+</tr>
+<tr>
+<td>scaler</td>
+<td><code>clip(log(n_edges),1,10)×mult</code></td>
+<td>그래프 크기에 비례 확장</td>
+</tr>
+<tr>
+<td>MRMP 안전반경</td>
+<td><code>2·robot_radius</code> (ECD 예약)</td>
+<td><code>ecd_reserve(..., 2*robot_radius)</code></td>
+</tr>
+<tr>
+<td>완화/라운딩</td>
+<td><code>relaxation=True</code> (기본)</td>
+<td><code>solve(relaxation=True)</code> — 볼록완화+라운딩</td>
+</tr>
+<tr>
+<td>정확 최적 옵션</td>
+<td><code>solve_shortest_path_optimally()</code></td>
+<td><code>relaxation=False</code> 경로</td>
+</tr>
+</tbody></table></div>
+<h3>7.3 구현상의 미묘함</h3>
+<ul>
+<li><strong>시간비용의 명시성</strong>: <code>time_cost = L2NormCost(A_dt, 0)</code> — 목적함수가 문자 그대로 시간 변위. <code>solve()</code>가 <code>sol.cost = sol.itvl.duration</code>으로 재확정. 시간-최적임을 코드가 이중 보증.</li>
+<li><strong>속도한계의 볼록 인코딩</strong>: <code>A_vmax/A_vmin</code>이 <code>-v_lim·Δt ⪯ Δp ⪯ v_lim·Δt</code>를 두 반평면으로 표현 — 비볼록 없이 순수 선형제약이라 원뿔계획으로 다항시간 해결.</li>
+<li><strong>source/target 하이퍼 정점</strong>: <code>build_source_vertex</code>/<code>build_target_vertex</code>가 시작·(목표,tmax) 상태를 포함하는 정점을 동적으로 붙였다 떼며(<code>solve</code> 끝에서 <code>remove_vertex</code>) 원 그래프를 오염 없이 유지.</li>
+<li><strong>ECD의 AABB 1차 필터</strong>: 비싼 slice 전에 축정렬 경계상자 겹침(<code>AABB</code>)으로 후보 정점을 걸러 연산 절약.</li>
+<li><strong>relaxation vs optimal</strong>: 기본은 볼록완화+확률적 라운딩(빠름). <code>relaxation=False</code>면 정확 최단경로(느리지만 최적). ε-최적성은 후자 경로에 대응.</li>
+<li><strong>PBS 부분 재계획</strong>: 우선순위 변경 로봇과 그 하위만(<code>nx.topological_sort(subgraph)</code>) 재계획해 매 분기 비용을 억제.</li>
+</ul>
+<h3>7.4 실배치 관점의 관찰</h3>
+<ul>
+<li><strong>2D 시뮬 중심</strong>: 코드·실험이 2D(및 3D 그리기 지원)에 집중. 논문은 <code>m+1=3</code>(2D+시간)을 Mosek이 효율 처리한다고 명시하나, <strong>고차원(3D 공간+시간=4D) 대규모 실험이나 실로봇 하드웨어 검증은 본 원고 범위에 두드러지지 않는다</strong> — IROS 데모(<code>iros_formation</code>, <code>iros_rearrange</code>)가 있으나 물리 로봇 상세는 제한적.</li>
+<li><strong>Mosek 라이선스 의존</strong>: 기본 솔버가 상용 Mosek — 완전 오픈 재현엔 Mosek 학술 라이선스 또는 Drake-Gurodi 빌드 필요(순수 무료 스택은 추가 작업).</li>
+</ul>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<ul>
+<li><strong>단일로봇</strong>: 탐색 공간은 최악 <code>|V|</code>에 지수적이나, 상한 가지치기+지배검사가 실제 확장 노드를 크게 줄인다. 경로 길이는 합리적 볼록분해에서 <code>O(|V|)</code>.</li>
+<li><strong>다중로봇</strong>: 결합 공간을 피하는 순차화가 핵심. 100대 밀집 1.60분은 <strong>윈도우 조정</strong> — 시간중첩 로봇만 결합 — 덕이다. 윈도우 없이는 결합 오버헤드가 로봇 수에 급증한다(§8.2.4 소거가 이를 증명).</li>
+<li><strong>볼록집합 수 의존</strong>: ECD가 궤적을 도려낼수록 정점이 세분·증가한다. 로봇이 많아질수록 <code>n_edges</code>가 커지고(코드가 <code>n_edges</code>로 scaler를 키움) 각 쿼리가 무거워진다 — 이것이 확장의 실질 병목.</li>
+</ul>
+<h3>8.2 한계점 (Limitations)</h3>
+<ul>
+<li><strong>(L1) 조각별 선형 궤적</strong>: 각 집합을 균일속도 직선으로 통과 → <strong>동역학(가속도·저크·비홀로노믹) 미고려</strong>. 실 로봇의 관성·조향 제약이 있는 경우 후처리 평활화나 고차 GCS 확장이 필요. 논문의 &quot;시간-최적&quot;은 <strong>속도한계 하 기구학적(kinematic) 최적</strong>이지 동역학 최적이 아니다.</li>
+<li><strong>(L2) 2D 중심·실로봇 미검증</strong>: 실험이 2D 시뮬 중심. 고차원·물리 로봇 전이는 열린 문제.</li>
+<li><strong>(L3) MICP 대비 5–15% 품질 격차(완화 시)</strong>: 기본 <code>relaxation=True</code>(라운딩)는 정확 최적이 아니라 5–15% 이내 준최적. 정확 최적(<code>relaxation=False</code>)은 느려진다 — 속도-최적성 트레이드오프.</li>
+<li><strong>(L4) 우선순위 계획의 불완전성</strong>: PP/PBS는 근본적으로 우선순위 기반이라 <strong>완전성(completeness)을 보장하지 않는다</strong> — 어떤 좁은 병목은 어떤 우선순위로도 못 풀 수 있다(CBS의 완전성과 대비). 논문도 PBS가 CBS보다 빠르나 이론적 완전성은 다르다는 계보 위에 있다.</li>
+<li><strong>(L5) 볼록분해 품질 의존</strong>: 성능이 IRIS 등 공간 볼록분해 품질에 좌우. 분해가 파편적이면 그래프가 커지고 느려진다.</li>
+<li><strong>(L6) Mosek 의존</strong>: 완전 무료 재현에 상용 솔버 라이선스 부담.</li>
+</ul>
+<h3>8.3 향후 방향</h3>
+<ul>
+<li>동역학(고차 GCS: 가속도·저크 제약, Bezier/다항 궤적) 통합으로 실 로봇 실행 가능성 강화.</li>
+<li>3D 공간(4D 시공간) 대규모·물리 로봇(드론 스웜, AGV 창고) 실증.</li>
+<li>우선순위 기반의 불완전성 보완 — CBS 계열과의 하이브리드(경계 있는 최적/완전성).</li>
+<li>ECD 세분으로 인한 정점 증가 억제(병합·근사 볼록분해).</li>
+<li>온라인/재계획 설정(동적 장애물 실시간 관측 → 증분 ECD).</li>
+</ul>
+<h3>8.4 실패 모드 분석</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>실패 모드</th>
+<th>원인</th>
+<th>완화(현재/제안)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>좁은 병목 MRMP 교착</td>
+<td>PP 고정 우선순위</td>
+<td>PBS 우선순위 분기(현) / CBS 하이브리드(제안)</td>
+</tr>
+<tr>
+<td>동역학 위반</td>
+<td>조각별 선형·속도만</td>
+<td>후처리 평활화 / 고차 GCS(제안)</td>
+</tr>
+<tr>
+<td>그래프 폭발</td>
+<td>ECD 세분 누적</td>
+<td>AABB 필터·scaler(현) / 볼록병합(제안)</td>
+</tr>
+<tr>
+<td>준최적 해</td>
+<td>relaxation 라운딩</td>
+<td>relaxation=False(현, 느림)</td>
+</tr>
+<tr>
+<td>재현 장벽</td>
+<td>Mosek 상용</td>
+<td>Drake-Gurobi/오픈솔버(제안)</td>
+</tr>
+</tbody></table></div>
+<p>ST-GCS의 실패는 주로 <strong>(a) 우선순위 기반의 불완전성</strong> 과 <strong>(b) 동역학 미고려</strong> 에 집중된다. 탐색·볼록계획 코어는 견고(ε-최적 증명)하나, 다중로봇 완전성과 실 로봇 동역학이 다음 레버리지다.</p>
+<h3>8.5 이론적 위치짓기</h3>
+<p>ST-GCS는 두 계보의 교차점이다: <strong>(i) GCS(Marcucci et al.)</strong> — 볼록최적화로 모션 플래닝을 푸는 흐름, <strong>(ii) 탐색 기반 다중로봇(MAPF/CBS/PBS)</strong> — 우선순위·충돌기반으로 결합 폭발을 피하는 흐름. 원래 GCS가 조합+연속을 하나의 MICP로 섞은 반면, ST-GCS는 <strong>&quot;조합은 그래프 탐색이, 연속은 볼록계획이&quot;</strong> 로 분리하고, 그 위에 <strong>시간축(시공간)</strong> 과 <strong>다중로봇(PBS+ECD)</strong> 을 얹었다. 특히 ECD가 &quot;동적 장애물 = 타 로봇 궤적&quot;이라는 통일 표현을 코드 수준에서 실현한 점이 개념적으로 우아하다.</p>
+<h3>8.6 재현성 평가</h3>
+<ul>
+<li><strong>코드 ✅ 공개(검증됨)</strong>: <code>github.com/reso1/stgcs</code> — 코어(<code>mrmp/</code>), 베이스라인(ST-RRT*·T-PRM), 세 환경 데이터·데모, 실험 러너(<code>exp.py</code>)·플롯(<code>plot.py</code>) 완비. GPL-3.0.</li>
+<li><strong>다만 Mosek 상용 솔버 기본 의존</strong> — 개념 재현은 완전, 무료-스택 정확 재현엔 라이선스/Gurobi 빌드 필요.</li>
+<li><strong>환경 이름·로봇 수·베이스라인이 코드로 노출</strong>되어(empty/simple/complex2d, n1–n20, SP/PP/PBS+STGCS vs ST-RRTStar/TPRM) 논문 실험 구성과 정합.</li>
+</ul>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>같은 Planner 트랙의 선행 리뷰 중, <strong>연속공간 모션 플래닝·경로 최적화</strong> 관점에서 가장 대비되는 세 편과 비교한다:</p>
+<ul>
+<li><strong>Trajectory Planning for a Multi-UAV Rigid-Payload Cascaded Transportation System Based on Enhanced Tube-RRT*</strong> (Planner/review/TubeRRT_TAES2026) — RRT* 계열 <strong>샘플링 기반</strong> + 볼록 QP 2단계, 다중 UAV 페이로드 운송.</li>
+<li><strong>Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering</strong> (Planner/review/VisualRRT_CVPR2026) — RRT 계열 <strong>샘플링 기반</strong>, 미분 렌더 그래디언트 조향.</li>
+<li><strong>NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning</strong> (Planner/review/NeuPAN_RAL) — <strong>엔드-투-엔드 학습 + 근접 교대최소화(PAN)</strong> 기반 지도없는 실시간 항법.</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>Enhanced Tube-RRT*</th>
+<th>Visual-RRT</th>
+<th>NeuPAN</th>
+<th><strong>ST-GCS (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 패러다임</td>
+<td>샘플링(RRT*)+볼록 QP</td>
+<td>샘플링(RRT)+미분렌더</td>
+<td>E2E 학습(PAN 언롤)</td>
+<td><strong>GCS 볼록최적화 + 그래프 탐색</strong></td>
+</tr>
+<tr>
+<td>확장/조향</td>
+<td>Thompson 샘플링·포텐셜장</td>
+<td>렌더 그래디언트</td>
+<td>학습된 잠재 거리특징</td>
+<td><strong>경로-인덱스 최선우선 + 볼록계획</strong></td>
+</tr>
+<tr>
+<td>시간 차원</td>
+<td>궤적시간(단일)</td>
+<td>없음(정지 목표)</td>
+<td>실시간 제어(암묵)</td>
+<td><strong>명시적 시공간(p,t) 1급 시민</strong></td>
+</tr>
+<tr>
+<td>동적 장애물</td>
+<td>제한적</td>
+<td>정적 씬</td>
+<td>실시간 회피(반응형)</td>
+<td><strong>ECD 시공간 예약(계획적)</strong></td>
+</tr>
+<tr>
+<td>다중로봇</td>
+<td>다중 UAV(강결합 1시스템)</td>
+<td>단일 팔</td>
+<td>단일 로봇</td>
+<td><strong>최대 100대(PP+PBS+윈도우)</strong></td>
+</tr>
+<tr>
+<td>최적성</td>
+<td>점근적(RRT*)+QP 국소</td>
+<td>무보장(국소 탐색)</td>
+<td>무보장(학습)</td>
+<td><strong>ε-최적(ε=1 정확 최적)</strong></td>
+</tr>
+<tr>
+<td>실로봇</td>
+<td>시뮬(페이로드)</td>
+<td>코드 예정</td>
+<td>✅ 다수 실로봇</td>
+<td>2D 시뮬 중심</td>
+</tr>
+<tr>
+<td>코드</td>
+<td>❌ 미공개</td>
+<td>⏳ 예정</td>
+<td>✅ 공개</td>
+<td>✅ <strong>공개(검증)</strong></td>
+</tr>
+<tr>
+<td>게재</td>
+<td>T-AES(투고)</td>
+<td>CVPR 2026</td>
+<td>T-RO 2025</td>
+<td><strong>IROS 2025(확장판)</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>ST-GCS의 강점:</strong></p>
+<ol>
+<li><p><strong>최적성 보장(ε-최적)</strong> — 셋 중 어느 것도 갖지 못한 특성. <em>Enhanced Tube-RRT</em>*는 RRT*의 점근적 최적성 + QP 국소최적이고, <em>Visual-RRT</em>·<em>NeuPAN</em>은 각각 국소탐색·학습으로 최적성 무보장이다. ST-GCS는 <strong>정리 2로 ε-최적(ε=1이면 정확 최적)</strong> 을 증명 — 좁은 통로에서 MICP 60–80% 대비 <strong>100% 성공</strong>은 이 보장의 실증이다.</p>
+</li>
+<li><p><strong>시간을 1급 시민으로(시공간)</strong> — <em>Visual-RRT</em>는 정지 목표(시간 없음), <em>Enhanced Tube-RRT</em>*는 궤적 시간을 다루나 단일 시스템, <em>NeuPAN</em>은 반응형 실시간 회피다. ST-GCS만이 <strong>시공간 볼록집합</strong>으로 동적 장애물·타 로봇을 <strong>계획 단계에서 시공간 영역</strong>으로 미리 예약(ECD)한다 — 반응형이 아닌 계획적(proactive) 시공간 조정.</p>
+</li>
+<li><p><strong>진짜 다중로봇 확장(100대)</strong> — <em>Enhanced Tube-RRT</em>*의 &quot;다중 UAV&quot;는 케이블로 묶인 <strong>하나의 강결합 시스템</strong>이고, <em>Visual-RRT</em>·<em>NeuPAN</em>은 단일 로봇이다. ST-GCS는 <strong>독립 100대</strong>를 PP+PBS+윈도우로 분 단위 조정 — MRMP 규모가 질적으로 다르다.</p>
+</li>
+<li><p><strong>동적/타로봇 통일 표현(ECD)</strong> — 셋 모두에 없는, &quot;이동장애물 = 타로봇궤적 = 시공간 스윕&quot;의 단일 메커니즘.</p>
+</li>
+</ol>
+<p><strong>ST-GCS의 약점:</strong></p>
+<ol>
+<li><p><strong>동역학 미고려</strong> — <em>NeuPAN</em>은 비홀로노믹 로봇의 실시간 제어까지 엔드-투-엔드로 다루고 다수 <strong>실로봇</strong>에서 검증했다. <em>Enhanced Tube-RRT</em>*는 QP 단계에서 케이블 장력·페이로드 동역학을 명시 제약으로 넣는다. ST-GCS는 <strong>조각별 선형·속도한계만</strong> — 관성·조향·저크가 없어 실 로봇 실행엔 후처리가 필요.</p>
+</li>
+<li><p><strong>실로봇 검증 부족</strong> — <em>NeuPAN</em>이 모래상자·복도·주차장 등 다플랫폼 실증인 데 반해, ST-GCS는 2D 시뮬 중심.</p>
+</li>
+<li><p><strong>우선순위 기반 불완전성</strong> — MRMP가 우선순위 계획이라 완전성 무보장(CBS 대비). 어떤 병목은 못 풀 수 있다.</p>
+</li>
+<li><p><strong>준최적(완화 시)·Mosek 의존</strong> — 기본 라운딩은 5–15% 준최적, 정확 최적은 느림. 상용 솔버 의존.</p>
+</li>
+</ol>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>ST-GCS</strong>: <strong>다수 로봇의 시공간 조정(창고 AGV, 교차로, 드론 스웜)</strong> 에 개념적으로 가장 강하다 — 시간을 1급으로 다루고 100대까지 확장. 단 (a) 동역학 후처리, (b) 실로봇 전이, (c) Mosek/Gurobi 라이선스, (d) 온라인 재계획 통합이 실배치 전제. 계획 계층(누가 언제 어디를 통과)엔 즉시 유용, 실행 계층(어떻게 부드럽게)엔 보완 필요.</li>
+<li><strong>Enhanced Tube-RRT*</strong>: 케이블-페이로드 협력 운반이라는 <strong>특정 강결합 시스템</strong>에 특화 — 범용 다중로봇엔 부적합하나 해당 도메인엔 동역학까지 포함.</li>
+<li><strong>Visual-RRT</strong>: 목표가 이미지로만 주어지는 특수 설정 — 데모 모방·생성목표에 유용하나 다중로봇·동적·시간엔 비대상.</li>
+<li><strong>NeuPAN</strong>: 지도없는 단일로봇 실시간 항법에 <strong>가장 실배치 성숙</strong>(다수 실로봇). 다만 다중로봇 계획적 시공간 조정은 비대상.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>ST-GCS는 모션 플래닝의 무게중심을 <strong>&quot;샘플링/학습 → 볼록최적화의 그래프 탐색 분해&quot;</strong> 로, 그리고 <strong>&quot;공간 → 시공간&quot;</strong> 으로 옮긴다. 이는 세 비교 논문과 <strong>직교</strong>한다:</p>
+<ul>
+<li><em>Enhanced Tube-RRT*</em>(샘플링+QP)·<em>Visual-RRT</em>(샘플링+렌더)와는 <strong>샘플링 vs 볼록탐색</strong> 축에서 대립 — ST-GCS의 ε-최적·좁은통로 우위 vs 저들의 유연한 조향(임의 목표 표현·동역학).</li>
+<li><em>NeuPAN</em>(학습 E2E)과는 <strong>계획적 vs 반응형</strong> 축에서 상보 — ST-GCS의 시공간 계획을 상위층에, NeuPAN류 학습 제어를 하위 실행층에 얹는 <strong>계획-실행 이층 구조</strong>가 자연스러운 결합.</li>
+</ul>
+<p>가장 유망한 융합: <strong>ST-GCS의 시공간 그래프 탐색(상위, ε-최적 다중로봇 조정) + 고차 GCS 또는 학습 제어(하위, 동역학 실행)</strong> — 계획적 최적성과 동역학 실행성을 동시에.</p>
+<h3>9.5 일반화 가능성</h3>
+<p>ST-GCS의 &quot;시간압출 + 경로-인덱스 탐색 + ECD 예약&quot; 레시피는 2D 항법에 국한되지 않는다. <strong>어떤 볼록분해 가능 상태공간 + 시간</strong> — 관절공간(매니퓰레이터의 시공간 회피), 3D 드론 스웜, 다차선 교통 — 에 이식 가능한 일반 패턴이다. 특히 <strong>ECD의 &quot;궤적 = 시공간 스윕을 도려냄&quot;</strong> 은 예약 기반 다중에이전트 조정 전반(시간창 예약, 활주로 스케줄링)에 재사용 가능한 원리다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li>ST-GCS: Search-Based Spatiotemporal and Multi-Robot Motion Planning on Graphs of Space-Time Convex Sets. Jingtao Tang, Zining Mao, Lufan Yang, Hang Ma. Simon Fraser University. <em>IROS 2025</em>(핵심) / arXiv:2607.00444(확장판). 코드: <a href="https://github.com/reso1/stgcs">https://github.com/reso1/stgcs</a>, 프로젝트: <a href="https://sites.google.com/view/stgcs">https://sites.google.com/view/stgcs</a></li>
+<li>기반 프레임워크: T. Marcucci et al., <em>Motion Planning around Obstacles with Graphs of Convex Sets</em> (GCS), 그리고 IRIS 볼록분해(R. Deits &amp; R. Tedrake).</li>
+<li>다중로봇 계보: PBS (Priority-Based Search, Ma et al.), CBS (Conflict-Based Search, Sharon et al.), 우선순위 계획(Erdmann &amp; Lozano-Pérez).</li>
+<li>시공간 샘플링 베이스라인: ST-RRT* (Grothe et al.), T-PRM (temporal PRM).</li>
+<li>솔버/툴: Drake (Tedrake et al.), Mosek, Gurobi.</li>
+<li>비교 대상(본 코퍼스):<ul>
+<li>Enhanced Tube-RRT*: Trajectory Planning for a Multi-UAV Rigid-Payload Cascaded Transportation System (IEEE T-AES 투고, arXiv:2604.15074).</li>
+<li>Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering (CVPR 2026, arXiv:2604.16388).</li>
+<li>NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning (IEEE T-RO 2025, arXiv:2403.06828).</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>혁신성</h3>
+<p>ST-GCS의 핵심 혁신은 <strong>볼록집합 그래프(GCS)를 시간축으로 확장하고, 시간-최적 계획을 하나의 거대 MICP가 아니라 경로-인덱스 최선우선 탐색으로 분해</strong>한 것이다. GCS의 비최적 부분구조(부분경로 최적성 부재)를 접두경로 인덱싱으로 정면 돌파하고, 보조정리 1(재방문 배제)로 단순경로에 제한하며, 정리 2로 <strong>ε-최적성(ε=1이면 정확 최적)</strong> 을 증명한다. 전방 도달원뿔 기반 지배검사(안전 δset·고속 δstate/δpos)가 지수 탐색을 실용화하고, 정확 볼록분해(ECD)가 <strong>동적 장애물과 타 로봇 궤적을 하나의 시공간 스윕 예약으로 통일</strong>한다.</p>
+<h3>실용적 의의</h3>
+<p>이 통일 위에서 ST-GCS는 단일로봇 시공간 계획에서 <strong>MICP 60–80% 대비 100% 성공</strong>, MICP 대비 <strong>자릿수 빠른 속도에 5–15% 이내 품질</strong>, 샘플링 기반 대비 좁은 통로에서 <strong>5–50배 가속</strong>을 달성한다. 다중로봇에서는 우선순위 계획+PBS+윈도우 조정으로 <strong>최대 100대를 수 분</strong>(100대 밀집 1.60분, 50대 병목 1.64분)에 조정한다. 그리고 <strong>Drake+Mosek 기반 완전 오픈소스</strong>(세 환경·다수 로봇·ST-RRT*/T-PRM 베이스라인 포함, GPL-3.0)로 재현성이 코퍼스 Planner 논문 중 최상위 축이다.</p>
+<h3>향후 연구 방향</h3>
+<p>한계는 (i) 조각별 선형·속도한계만의 <strong>동역학 미고려</strong>, (ii) <strong>2D 시뮬 중심·실로봇 미검증</strong>, (iii) 우선순위 기반의 <strong>불완전성</strong>, (iv) 완화 시 <strong>준최적</strong>·Mosek 의존, (v) ECD 세분에 따른 그래프 폭발에 있다. 따라서 <strong>고차 GCS(가속도·저크 제약)로 동역학 통합</strong>, <strong>3D·물리 로봇 실증</strong>, <strong>CBS 하이브리드로 완전성 보완</strong>, <strong>하위 학습 제어(NeuPAN류)와의 계획-실행 이층 결합</strong>이 자연스러운 다음 단계다.</p>
+<h3>종합 평가</h3>
+<p>ST-GCS는 &quot;GCS를 시간으로 확장하면 무엇이 가능한가&quot;라는 질문에, <strong>경로-인덱스 탐색(ε-최적)·정확 볼록분해(통일 예약)·우선순위 다중로봇(100대 확장)</strong> 이라는 정연한 답을 내놓는다. 원래 GCS가 조합과 연속을 하나의 MICP에 섞어 좁은 통로에서 무너졌던 지점을, <strong>&quot;조합은 그래프 탐색이, 연속은 볼록계획이&quot;</strong> 로 분리해 100% 성공·자릿수 가속으로 돌파한 것이 본질적 기여다. 코퍼스 내 다른 Planner 논문들이 샘플링(Enhanced Tube-RRT*·Visual-RRT)이나 학습(NeuPAN)으로 <strong>유연한 조향·동역학·실로봇</strong>을 강점으로 갖는 반면, ST-GCS는 <strong>최적성 보장·시공간 1급 표현·대규모 다중로봇 조정</strong>이라는 상보적 축에서 독보적이다. 남은 빈칸 — 동역학과 실 로봇 전이 — 이 후속 연구의 명확한 표적이며, 그 위에 학습 제어를 얹는 계획-실행 이층 구조가 이 방법을 실배치로 잇는 가장 유망한 다리다. 완전 공개된 Drake 기반 구현은 이 모든 후속 연구를 즉시 재현·확장 가능하게 만든다.</p>
+<hr>
+<p><em>본 리뷰는 PhD 수준 상세 분석이며, 논문 본문(arXiv HTML 2607.00444)의 수식·정리·실험 서술과 공개 코드(github.com/reso1/stgcs: <code>mrmp/stgcs.py</code>, <code>mrmp/ecd.py</code>, <code>mrmp/pbs.py</code>)의 실제 구현에 기반한다. 명시한 실험 수치(100%/60–80% 성공, 5–15% 품질, 5–50× 가속, 100대 1.60분/50대 1.64분)는 모두 논문 HTML에서 확인한 값이며, 표 셀 단위로 완전 추출되지 않은 환경별 개별 런타임은 논문이 명시한 범위·경향으로 서술했다(임의 수치 날조 없음).</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

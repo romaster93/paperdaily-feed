@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 2026 (학회 미확정)</div>
+    <h1>NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation</h1>
+    <div class="meta-row">
+      <span class="chip">VLN</span>
+      <span><a href="https://arxiv.org/abs/2606.13494">arXiv:2606.13494</a></span>
+      <span>리뷰 2026-06-15</span>
+      <span>40분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation — 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation</li>
+<li><strong>저자 (Authors)</strong>: Daichi Azuma, Taiki Miyanishi, Koya Sakamoto, Shuhei Kurita, Yaonan Zhu, Petr Khrapchenkov, Motoaki Kawanabe, Yusuke Iwasawa, Yutaka Matsuo</li>
+<li><strong>소속 (Affiliation)</strong>: The University of Tokyo, National Institute of Informatics (NII), AIRoA, ATR</li>
+<li><strong>발표처 (Published)</strong>: arXiv preprint (2026, 학회 미확정 — 제출 형식상 CoRL 계열 추정이나 미확인)</li>
+<li><strong>DOI</strong>: 미부여 (preprint)</li>
+<li><strong>arXiv</strong>: 2606.13494v1 (11 Jun 2026)</li>
+<li><strong>프로젝트 페이지</strong>: <a href="https://dachii-azm.github.io/navwam/">https://dachii-azm.github.io/navwam/</a> (코드 Coming Soon — 미공개, <code>예정</code>)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>NavWAM은 <strong>목표 조건부 시각 내비게이션(goal-conditioned visual navigation)</strong> 문제를 단일 생성 모델 안에서 통합적으로 푸는 것을 목표로 한다. 구체적으로, 로봇이 현재 RGB 관찰과 &quot;목표 이미지(goal image)&quot;를 입력받아, 목표 위치로 도달하는 행동열(action chunk)을 생성하는 image-goal navigation 과제를 다룬다.</p>
+<p>기존 내비게이션 연구는 크게 두 갈래로 나뉘어 있었다.</p>
+<ol>
+<li><strong>정책(policy) 계열</strong> — 관찰을 행동으로 직접 매핑하는 종단간(end-to-end) 정책. 빠르지만 &quot;이 행동을 취하면 미래가 어떻게 될지&quot;에 대한 명시적 예측을 갖지 않는다.</li>
+<li><strong>세계 모델(world model) 계열</strong> — 미래 관찰을 예측(rollout)하고, 그 예측 위에서 비용/가치를 평가해 행동을 탐색(planning)한다. 예측은 풍부하지만, 행동 후보를 샘플링하고 매번 rollout을 돌려 평가하는 CEM류 플래닝은 <strong>계산량이 폭발적</strong>이다 (대표적으로 NWM의 CEM 플래닝).</li>
+</ol>
+<p>NavWAM의 핵심 통찰은 &quot;<strong>미래 관찰 예측 + 가치(목표 도달 진행도) 추정 + 행동 생성을 하나의 디퓨전 캔버스(latent canvas)에서 공동(jointly) 생성</strong>&quot;하는 것이다. 즉 세계 모델의 예측 능력과 정책의 즉답성을 한 모델 안에 융합하여, 별도의 외부 플래너(CEM) 없이도 세계 모델의 이점을 누리되 추론 비용을 정책 수준으로 낮춘다.</p>
+<p>연구의 실용적 목표는 명확하다:</p>
+<ul>
+<li>(a) 사전학습된 대규모 비디오 생성 백본(Cosmos Predict2 2B)의 시각적 예측 능력을 내비게이션에 이식하고,</li>
+<li>(b) 행동·가치·미래관찰을 한 텐서로 묶어 공동 디노이징함으로써 세 가지를 일관되게(coherently) 생성하며,</li>
+<li>(c) 실제 로봇(real-world)에서 기존 7B급 정책(OmniVLA-7B)이나 세계 모델 플래너(NWM)를 능가하는 성공률을 <strong>2B 규모로</strong> 달성하는 것이다.</li>
+</ul>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p>목표 조건부 시각 내비게이션, 특히 image-goal navigation은 다음과 같은 근본 난제를 안고 있다.</p>
+<p><strong>(C1) 정책의 근시안성(myopia)과 분포 이동(distribution shift)</strong>
+종단간 정책은 현재 관찰 → 행동의 반응적(reactive) 매핑이다. 미래를 명시적으로 시뮬레이션하지 않으므로, 학습 분포를 벗어난 장면이나 목표가 멀리 있을 때 누적 오차(compounding error)에 취약하다. 행동의 결과를 &quot;상상&quot;하지 못해 막다른 길에 갇히거나 목표를 지나치는 실패가 흔하다.</p>
+<p><strong>(C2) 세계 모델 플래닝의 계산 폭발</strong>
+세계 모델(예: NWM)은 미래를 예측하고 그 위에서 비용을 최소화하는 행동을 찾는다. 그러나 CEM(Cross-Entropy Method)류 샘플링 플래너는 매 스텝마다 수백~수천 개의 행동 후보를 샘플링하고, 각 후보에 대해 비싼 비디오 디퓨전 rollout을 수행한다. 본 논문 측정에 따르면 NWM의 CEM 플래닝은 행동 1회당 <strong>약 14,521 TFLOPs</strong>에 달해 실시간(real-time) 로봇 제어에 부적합하다.</p>
+<p><strong>(C3) 예측·가치·행동의 불일치(incoherence)</strong>
+세계 모델이 미래를 그럴듯하게 예측하더라도, 그 예측과 실제 취할 행동, 그리고 목표까지의 진행도(value) 추정이 <strong>서로 따로 학습/추론</strong>되면 일관성이 깨진다. &quot;내가 예측한 미래&quot;와 &quot;내가 취할 행동&quot;과 &quot;그 행동이 목표에 얼마나 가까워지는지&quot;가 정합되지 않으면, 예측의 풍부함이 행동 품질로 이어지지 못한다.</p>
+<p><strong>(C4) 도메인 격차(domain gap)와 데이터 부족</strong>
+내비게이션 전용 대규모 데이터는 매니퓰레이션이나 일반 비디오에 비해 적다. 대규모 비디오 생성 모델의 시공간 사전지식(spatiotemporal prior)을 내비게이션으로 전이하면서도, 로봇 구체화(embodiment)와 행동 조건부성을 주입하는 것이 어렵다.</p>
+<p><strong>(C5) 가치 함수의 부재 또는 비용</strong>
+정책 계열은 보통 가치(목표 도달 진행도)를 명시적으로 추정하지 않는다. 세계 모델 계열은 가치를 외부 비용 함수로 두지만, 이는 별도 모듈/플래너를 요구한다. 가치를 &quot;생성 대상&quot;으로 모델 내부에 통합하는 접근은 드물었다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>NavWAM은 위 다섯 난제에 대해 <strong>&quot;하나의 latent canvas에서 미래 관찰·가치·행동을 공동 디퓨전 생성&quot;</strong>하는 단일 아키텍처로 응답한다.</p>
+<ul>
+<li>(C1 대응) 행동을 미래 관찰과 <strong>함께</strong> 생성하므로, 정책은 암묵적으로 &quot;이 행동을 취하면 미래가 이렇게 된다&quot;는 세계 모델적 사전지식을 공유한다 → 근시안성 완화.</li>
+<li>(C2 대응) 외부 CEM 플래너를 제거하고, 행동을 디퓨전으로 <strong>직접 샘플링</strong>한다. 행동 1회당 약 <strong>4.45 TFLOPs</strong>로 NWM 대비 약 3,000배 이상 저렴해 ~5Hz 실시간 동작.</li>
+<li>(C3 대응) 미래 관찰·가치·행동을 하나의 텐서(latent canvas)로 묶어 <strong>공동 디노이징</strong>하므로 세 출력이 구조적으로 일관된다.</li>
+<li>(C4 대응) Cosmos Predict2 2B 비디오 생성 백본을 사전학습 가중치로 활용하여 시공간 prior를 이식하고, 3단계 커리큘럼으로 내비게이션 도메인과 행동 조건부성을 점진적으로 주입.</li>
+<li>(C5 대응) &quot;목표 도달 진행도(goal-progress value)&quot;를 latent canvas의 한 슬롯으로 두어 <strong>생성 대상</strong>으로 학습. 추론 시 가치 채널만 디노이징해 별도 critic 없이 가치 추정이 가능.</li>
+</ul>
+<p>요컨대 NavWAM의 정체성은 <strong>Navigation World Action Model</strong> — 세계 모델(World), 행동 모델(Action), 가치 추정을 한 디퓨전 트랜스포머가 동시에 수행하는 통합 모델이다.</p>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 Latent Canvas — 미래 관찰·가치·행동의 공동 표현</h3>
+<p>NavWAM의 심장은 <strong>latent canvas</strong>라 부르는 통합 텐서 표현이다. 9개 프레임 슬롯으로 구성된 이 캔버스는 이질적인 세 종류의 정보를 하나의 디퓨전 대상 안에 배치한다.</p>
+<pre><code>        Latent Canvas (9 프레임 슬롯)
+ ┌──────────────────────────────────────────────────────────┐
+ │  [현재/조건]      [미래 관찰 예측]        [목표/가치/행동]   │
+ │                                                            │
+ │  o_t (관찰)  →  ô_{t+1} ... ô_{t+k}  →  g(goal img)        │
+ │                                          v (goal-progress) │
+ │                                          a_{t:t+H} (action)│
+ └──────────────────────────────────────────────────────────┘
+   조건부(clean)      디노이징 대상          디노이징 대상
+</code></pre>
+<ul>
+<li><strong>미래 관찰(future observations) ô</strong>: 백본의 비디오 생성 능력으로 행동을 따랐을 때의 미래 RGB 프레임을 예측한다. 이것이 &quot;World&quot; 부분이다.</li>
+<li><strong>목표 진행도 가치(goal-progress value) v</strong>: 현재가 목표에 얼마나 가까운지를 나타내는 스칼라적 신호를 latent 슬롯으로 인코딩한다. 이것이 &quot;Value&quot; 부분이다.</li>
+<li><strong>행동 청크(action chunk) a</strong>: 향후 H 스텝의 행동열(예: 속도/방향 또는 waypoint)을 latent로 임베딩한다. 이것이 &quot;Action&quot; 부분이다.</li>
+</ul>
+<p>세 정보는 <strong>동일한 디퓨전 프로세스에서 공동으로(jointly) 디노이징</strong>된다. 핵심은 이들이 동일한 어텐션 컨텍스트를 공유한다는 점이다. 즉 행동 토큰은 미래 관찰 토큰과 목표 토큰을 어텐션으로 참조하면서 생성되므로, &quot;목표에 도달하는 일관된 미래 + 그 미래를 만드는 행동 + 그 진행도&quot;가 하나의 정합된 출력으로 나온다.</p>
+<pre><code>공동 디노이징 (joint denoising) 개념도:
+
+   noise ──► [DiT blocks] ──► clean latent canvas
+              ▲   ▲   ▲
+              │   │   └─ goal image (조건, clean으로 고정)
+              │   └───── 현재 관찰 o_t (조건, clean으로 고정)
+              └───────── 나머지 슬롯(미래관찰·가치·행동)은 디노이징
+</code></pre>
+<p>여기서 조건(현재 관찰 o_t, 목표 이미지 g)은 노이즈를 주지 않고 clean 상태로 고정(inpainting-style conditioning)하고, 나머지 슬롯만 디노이징한다. 이로써 단일 모델이 조건부 생성기처럼 동작하면서, 어떤 슬롯을 비우고(노이즈) 어떤 슬롯을 고정하느냐에 따라 <strong>여러 동작 모드</strong>(아래 3.4)를 같은 가중치로 구현한다.</p>
+<h3>3.2 Cosmos Predict2 2B 백본과 행동 조건부성 주입</h3>
+<p>NavWAM은 NVIDIA의 <strong>Cosmos Predict2 2B</strong> 비디오 생성 모델을 백본으로 채택한다. 이는 대규모 비디오로 사전학습된 디퓨전 트랜스포머(DiT)로, 풍부한 시공간 prior(물체 영속성, 카메라 모션, 장면 기하 등)를 내장한다.</p>
+<p>핵심 설계는 이 일반 비디오 생성기를 <strong>행동 조건부 내비게이션 생성기</strong>로 개조하는 것이다.</p>
+<pre><code>Cosmos Predict2 2B (일반 비디오 DiT)
+        │
+        │  (1) latent canvas 슬롯 재배치: 미래관찰 + 가치 + 행동 슬롯 추가
+        │  (2) action / value 임베딩용 경량 토크나이저·헤드 추가
+        │  (3) 내비게이션 데이터로 3단계 커리큘럼 파인튜닝
+        ▼
+   NavWAM (Navigation World Action Model)
+</code></pre>
+<p>행동과 가치는 RGB 프레임과 모달리티가 다르므로, 이들을 latent 공간에 임베딩하는 경량 인코더/디코더(헤드)를 추가한다. 행동 슬롯은 RGB 프레임 슬롯과 같은 시퀀스 차원에 배치되어 트랜스포머의 자기어텐션을 통해 시각 토큰과 상호작용한다.</p>
+<p><strong>행동 업웨이트(action upweighting), λ=5.</strong>
+순수하게 비디오 재구성 손실로 학습하면, 픽셀 수가 압도적으로 많은 RGB 관찰 슬롯이 손실을 지배하여 행동 슬롯의 학습 신호가 묻힌다. NavWAM은 행동(및 가치) 슬롯의 손실에 <strong>가중치 λ=5</strong>를 부여해 행동 디노이징이 충분한 그래디언트를 받도록 한다.</p>
+<pre><code class="language-python"># 개념적 손실 구성 (실제 코드 미공개 — 논문 서술 기반 재구성)
+# x: latent canvas, eps: 주입 노이즈, eps_hat: 모델 예측 노이즈
+loss_obs    = mse(eps_hat[obs_slots],    eps[obs_slots])     # 미래 관찰
+loss_value  = mse(eps_hat[value_slot],   eps[value_slot])    # 목표 진행도
+loss_action = mse(eps_hat[action_slots], eps[action_slots])  # 행동 청크
+
+LAMBDA = 5.0  # 행동/가치 슬롯 업웨이트
+loss = loss_obs + LAMBDA * (loss_action + loss_value)
+</code></pre>
+<blockquote>
+<p>주: 위 코드는 논문 본문의 손실 설계 서술을 바탕으로 한 <strong>개념적 재구성</strong>이다. 공식 구현은 Coming Soon 상태로 미공개이므로, 실제 슬롯 인덱싱·노이즈 스케줄·가중치 적용 위치는 공개 시 검증이 필요하다.</p>
+</blockquote>
+<h3>3.3 가치(Goal-Progress Value) 슬롯 — 생성형 critic</h3>
+<p>전통적 세계 모델 플래너는 외부 비용 함수(예: 목표 이미지와 예측 관찰 간 거리)를 두고 CEM으로 최소화한다. NavWAM은 이 비용/가치를 <strong>모델이 생성하는 출력</strong>으로 내재화한다.</p>
+<ul>
+<li><strong>goal-progress value v</strong>: 현재 상태가 목표에 얼마나 가까운지(혹은 남은 진행도)를 나타내는 신호. latent canvas의 전용 슬롯으로 인코딩되어, 디노이징 시 미래 관찰·행동과 함께 출력된다.</li>
+<li>효과: (a) 별도 critic 네트워크/플래너 불필요, (b) 가치가 미래 관찰·행동과 같은 어텐션 컨텍스트에서 나오므로 <strong>정합된 가치 추정</strong>, (c) 추론 시 가치 슬롯만 디노이징하는 &quot;value 모드&quot;로 후보 평가·재정렬에 활용 가능.</li>
+</ul>
+<p>이 설계는 NavDP의 &quot;diffusion으로 궤적 생성 + critic으로 평가&quot;를 <strong>하나의 디퓨전 통합 생성</strong>으로 진화시킨 것으로 볼 수 있다(9장 비교 참조).</p>
+<h3>3.4 단일 가중치, 다중 동작 모드 (Policy / World-Model / Value)</h3>
+<p>NavWAM의 우아함은 <strong>같은 가중치를 어떤 슬롯을 마스킹/조건화하느냐에 따라 세 가지 모드로 운용</strong>한다는 점이다.</p>
+<pre><code>┌────────────────────────────────────────────────────────────────┐
+│ 모드        조건(clean 고정)        디노이징(생성)        용도     │
+├────────────────────────────────────────────────────────────────┤
+│ Policy      o_t, goal             action (+미래관찰·가치)  주행 행동│
+│ World-Model o_t, action           미래 관찰 ô            미래 예측 │
+│ Value       o_t, goal(,미래)       value v               진행도평가│
+└────────────────────────────────────────────────────────────────┘
+</code></pre>
+<p><strong>학습 시 모드 혼합 비율: Policy 50% / World-Model 25% / Value 25%.</strong>
+학습 배치마다 어떤 슬롯을 조건으로 고정하고 어떤 슬롯을 디노이징할지를 위 비율로 샘플링한다. 이 멀티태스크 학습이 단일 모델로 정책·예측·가치 능력을 동시에 습득하게 하며, 세 능력이 같은 표현을 공유하므로 상호 보강된다.</p>
+<p><strong>추론 시</strong>: 기본 주행은 Policy 모드로 행동을 직접 디노이징해 받아 즉시 실행(외부 플래너 없음). 필요 시 World-Model 모드로 미래를 시각화하거나, Value 모드로 후보를 평가/재정렬할 수 있다.</p>
+<h3>3.5 디퓨전 학습 목표와 인페인팅식 조건화</h3>
+<p>NavWAM의 학습은 표준 디퓨전(노이즈 예측) 목표를 latent canvas 위에서 수행하되, <strong>어떤 슬롯을 조건(clean)으로 둘지를 마스크로 제어</strong>하는 인페인팅(inpainting) 방식이라는 점이 핵심이다.</p>
+<pre><code>디퓨전 한 스텝(개념):
+  1) 깨끗한 캔버스 x0 구성 = [o_t | ô(미래) | g | v | a]
+  2) 모드 마스크 m 샘플링 (Policy/WM/Value 비율 50/25/25)
+       - m=1 슬롯: 조건(노이즈 미주입, clean 유지)
+       - m=0 슬롯: 디노이징 대상
+  3) 비조건 슬롯에만 노이즈 주입: x_τ = √ᾱ_τ·x0 + √(1−ᾱ_τ)·ε   (m=0 영역)
+  4) 모델이 ε̂ = f_θ(x_τ, τ, m) 예측
+  5) 손실: 슬롯별 가중 MSE  (행동·가치 슬롯 ×λ=5)
+</code></pre>
+<p>이 설계의 함의는 세 가지다.</p>
+<ul>
+<li><strong>단일 목적함수로 멀티모드 통합</strong>: 마스크 m만 바꾸면 같은 손실식이 정책 학습(행동 디노이징), 세계 모델 학습(미래 관찰 디노이징), 가치 학습(가치 디노이징)을 모두 표현한다. 별도 헤드/별도 학습 루프가 필요 없다.</li>
+<li><strong>조건 일관성</strong>: 조건 슬롯이 clean으로 어텐션 컨텍스트에 항상 노출되므로, 생성 슬롯은 &quot;현재 관찰과 목표가 주어졌을 때&quot;라는 조건을 강하게 따른다(classifier-free 류 별도 가이던스 없이도 강한 조건성).</li>
+<li><strong>추론 유연성</strong>: 추론 시 마스크만 바꿔 동일 가중치로 모드를 전환한다(3.4). 즉 학습/추론이 같은 마스킹 추상화를 공유한다.</li>
+</ul>
+<blockquote>
+<p>주: 정확한 노이즈 스케줄(ᾱ_τ), 샘플러(예: 소수 스텝 ODE/flow 샘플러 여부), 가이던스 사용 여부는 본문 서술만으로 단정하기 어렵다 — 코드 공개 시 검증 항목.</p>
+</blockquote>
+<h3>3.6 Receding-Horizon 실행과 실시간성</h3>
+<p>NavWAM은 한 번의 디노이징으로 길이 H의 행동 청크를 생성하고, <strong>receding-horizon(후퇴 지평선)</strong> 방식으로 앞쪽 일부 행동만 실행한 뒤 새 관찰로 다시 생성한다(MPC-스타일).</p>
+<pre><code>t=0:  관찰 o_0 → [디노이징] → a_{0:H} → 앞 일부 실행
+t=Δ:  새 관찰 o_Δ → [디노이징] → a_{Δ:Δ+H} → 앞 일부 실행
+...
+주기: 약 5Hz (Jetson AGX Orin 온보드)
+</code></pre>
+<p>행동 1회당 약 <strong>4.45 TFLOPs</strong>라는 경량 추론 덕에 임베디드 GPU에서 ~5Hz 폐루프 제어가 가능하다. 이는 NWM CEM(≈14,521 TFLOPs/행동) 대비 3,000배 이상 저렴하며, 세계 모델의 이점을 정책 수준의 비용으로 누린다는 본 논문의 핵심 주장을 뒷받침한다.</p>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인</h3>
+<pre><code>                          ┌─────────────────────────────────────────┐
+   현재 RGB o_t ─────────►│                                         │
+                          │   VAE Encoder (이미지→latent)            │
+   목표 이미지 g ─────────►│                                         │
+                          └──────────────┬──────────────────────────┘
+                                         │ latent 토큰
+                                         ▼
+                    ┌───────────────────────────────────────────┐
+                    │        Latent Canvas 구성 (9 슬롯)          │
+                    │  [o_t(clean)] [ô_{t+1..k}(noise)]          │
+                    │  [g(clean)]   [v(noise)] [a_{t:t+H}(noise)]│
+                    └──────────────┬────────────────────────────┘
+                                   ▼
+                    ┌───────────────────────────────────────────┐
+                    │   Cosmos Predict2 2B DiT (공동 디노이징)     │
+                    │   self-attention: 시각·행동·가치 토큰 상호참조│
+                    │   모드: Policy / World-Model / Value         │
+                    └──────────────┬────────────────────────────┘
+                                   ▼
+              ┌────────────────────┼────────────────────┐
+              ▼                    ▼                    ▼
+     미래 관찰 ô (RGB)      행동 청크 a_{t:t+H}     가치 v (goal-progress)
+              │                    │                    │
+              │             ┌──────▼───────┐            │
+              │             │ Receding-    │            │
+              │             │ Horizon 실행 │            │
+              │             │ (~5Hz)       │            │
+              │             └──────┬───────┘            │
+              │                    ▼                    │
+              │         로봇 액추에이터 (속도/방향)        │
+              └────────► (선택) 시각화/디버깅 ◄───────────┘
+</code></pre>
+<h3>4.2 데이터 흐름 설명</h3>
+<ol>
+<li><strong>입력 인코딩</strong>: 현재 RGB 관찰 o_t와 목표 이미지 g를 사전학습 VAE로 latent 토큰화한다.</li>
+<li><strong>캔버스 조립</strong>: o_t와 g는 clean(조건)으로 고정, 미래 관찰·가치·행동 슬롯은 노이즈로 초기화하여 9-프레임 latent canvas를 만든다.</li>
+<li><strong>공동 디노이징</strong>: Cosmos Predict2 2B DiT가 캔버스를 디노이징한다. 자기어텐션을 통해 행동 토큰이 목표·미래관찰 토큰을 참조하므로 세 출력이 정합된다.</li>
+<li><strong>행동 디코딩 &amp; 실행</strong>: 행동 슬롯을 디코딩해 행동 청크를 얻고, receding-horizon으로 앞쪽 일부를 실행한다.</li>
+<li><strong>폐루프 반복</strong>: 새 관찰로 2~4를 ~5Hz로 반복한다.</li>
+<li>(선택) <strong>예측/평가 활용</strong>: World-Model 모드로 미래를 시각화하거나, Value 모드로 후보 평가에 사용.</li>
+</ol>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<p>NavWAM은 공개 내비게이션 데이터로 학습/평가된다. 핵심 벤치마크는 다음과 같다.</p>
+<ul>
+<li><strong>GO STANFORD (GS)</strong>: 실내 image-goal 내비게이션 궤적 데이터셋. 미래 관찰 예측 품질(ATE, 시각 일관성)과 image-goal 주행 평가에 사용.</li>
+<li><strong>SIT (Social/Indoor Trajectory 계열 벤치마크)</strong>: image-goal 내비게이션 성공률 비교에 사용. OmniVLA-7B 등 정책 베이스라인과 대비.</li>
+<li><strong>실제 로봇(real-world)</strong>: 자체 로봇 플랫폼으로 수행한 24개 에피소드 폐루프 주행.</li>
+</ul>
+<p>학습은 3단계 커리큘럼(아래 7장)으로, 비디오 사전학습 prior → 내비게이션 도메인 적응 → 행동/가치 조건부 미세조정의 순서를 따른다.</p>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>ATE (Absolute Trajectory Error)</strong>: 예측/실행 궤적과 정답 궤적 간 절대 오차. 낮을수록 좋음.</li>
+<li><strong>Subject Consistency</strong>: 생성된 미래 관찰 비디오에서 장면/주체의 시간적 일관성. 높을수록 좋음(세계 모델 예측 품질).</li>
+<li><strong>Success Rate (성공률)</strong>: image-goal 도달 성공 비율(시뮬/실제).</li>
+<li><strong>추론 비용(TFLOPs/action)</strong>: 행동 1회 생성당 부동소수 연산량. 실시간성 지표.</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>미래 관찰 예측 / 궤적 정확도 (GO STANFORD)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>모델</th>
+<th>ATE ↓</th>
+<th>Subject Consistency ↑</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NWM (세계 모델 + CEM)</td>
+<td>0.453</td>
+<td>0.524</td>
+</tr>
+<tr>
+<td>NavWAM (no FT)</td>
+<td>0.324</td>
+<td>0.668</td>
+</tr>
+<tr>
+<td><strong>NavWAM (w/ FT)</strong></td>
+<td><strong>0.192</strong></td>
+<td><strong>0.668</strong></td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>NavWAM은 파인튜닝 없이도 NWM 대비 ATE를 0.453 → 0.324로 낮추고, 파인튜닝 시 0.192까지 개선한다.</li>
+<li>시각 일관성(subject consistency)도 0.524 → 0.668로 크게 향상되어, 백본의 시공간 prior + 공동 디노이징이 더 일관된 미래 예측을 만든다는 것을 보인다.</li>
+</ul>
+<p><strong>Image-Goal 성공률 (SIT 계열)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>모델</th>
+<th>규모</th>
+<th>성능(요지)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OmniVLA</td>
+<td>7B</td>
+<td>강한 정책 베이스라인</td>
+</tr>
+<tr>
+<td><strong>NavWAM</strong></td>
+<td><strong>2B</strong></td>
+<td>OmniVLA-7B와 <strong>경쟁적(competitive)</strong> 성능을 약 1/3.5 규모로 달성</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>핵심 메시지: <strong>3배 이상 작은 모델로 7B급 정책과 대등</strong>한 성공률. 통합 세계-행동 모델링이 파라미터 효율적임을 시사.</li>
+</ul>
+<p><strong>추론 비용 (행동 1회당 TFLOPs)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>모델</th>
+<th>TFLOPs / action ↓</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NWM (CEM 플래닝)</td>
+<td>≈ 14,521</td>
+<td>후보 샘플링 × rollout</td>
+</tr>
+<tr>
+<td><strong>NavWAM (Policy 모드)</strong></td>
+<td><strong>≈ 4.45</strong></td>
+<td>외부 플래너 없음, 직접 디노이징</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>약 <strong>3,000배 이상</strong> 저렴. 이것이 실제 로봇 ~5Hz 폐루프를 가능케 하는 결정적 요인.</li>
+</ul>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p>NavWAM은 시뮬레이션 수치에 그치지 않고 <strong>실제 로봇 폐루프 주행</strong>으로 검증된다.</p>
+<p><strong>로봇 플랫폼</strong></p>
+<ul>
+<li><strong>베이스</strong>: Direct Drive Technology <strong>Diablo</strong> (휠-레그 하이브리드 이동 로봇)</li>
+<li><strong>카메라</strong>: Intel RealSense <strong>D455</strong> (RGB-D)</li>
+<li><strong>LiDAR</strong>: Livox <strong>Mid-360</strong> (상태추정/안전, 주: NavWAM 정책 입력은 RGB 중심)</li>
+<li><strong>온보드 컴퓨트</strong>: NVIDIA <strong>Jetson AGX Orin</strong> (~5Hz 추론)</li>
+</ul>
+<p><strong>결과 (24개 에피소드)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>모델</th>
+<th>실제 성공률 ↑</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NWM (CEM)</td>
+<td>16.7% (4/24)</td>
+</tr>
+<tr>
+<td>OmniVLA</td>
+<td>58.3% (14/24)</td>
+</tr>
+<tr>
+<td><strong>NavWAM</strong></td>
+<td><strong>79.2% (19/24)</strong></td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>NavWAM 79.2%는 OmniVLA(58.3%)와 NWM(16.7%)를 큰 폭으로 능가한다.</li>
+<li>특히 세계 모델 플래너 NWM이 실제에서 16.7%로 급락하는 것과 대조적으로, NavWAM은 세계 모델의 예측 이점을 유지하면서도 정책의 즉응성/강건성을 확보했음을 보인다.</li>
+<li>온보드 Jetson에서 ~5Hz로 동작 → 외부 서버 없이 임베디드 실시간 배치 실현.</li>
+</ul>
+<blockquote>
+<p>주의: 실제 평가는 24 에피소드로 표본이 작고(8장 한계), 정적(static) 장면 위주다. 성공률의 절대 우위는 분명하나, 통계적 신뢰구간/동적 환경 일반화는 후속 검증 대상이다.</p>
+</blockquote>
+<h3>5.5 분해(Ablation) 및 실패 모드 분석</h3>
+<p><strong>핵심 설계요소의 기여 (정성/정량 종합)</strong></p>
+<ul>
+<li><strong>파인튜닝(FT)의 효과</strong>: GO STANFORD ATE가 no-FT 0.324 → FT 0.192로 약 41% 개선. 비디오 백본 prior만으로도 NWM(0.453)을 이기지만, 내비게이션 도메인 파인튜닝이 궤적 정확도에 결정적임을 보인다.</li>
+<li><strong>행동 업웨이트(λ=5)</strong>: 업웨이트가 없으면 픽셀 다수의 관찰 슬롯이 손실을 지배해 행동 슬롯 학습이 약화된다. λ=5는 행동/가치 신호가 충분한 그래디언트를 받게 하는 안정장치로, 통합 모델이 &quot;그림만 잘 그리고 행동은 못 하는&quot; 실패를 방지한다.</li>
+<li><strong>모드 혼합(50/25/25)</strong>: 세 모드 공동 학습이 정책·예측·가치 표현을 공유시켜 상호 보강한다. 정책 단독 학습 대비 미래 예측·가치 추정이 행동 품질을 끌어올리는 정합 효과가 기대된다.</li>
+<li><strong>백본 규모 효율</strong>: 2B로 OmniVLA-7B와 경쟁 — 통합 모델링이 단순 스케일업보다 파라미터 효율적임을 시사하는 간접 ablation.</li>
+</ul>
+<p><strong>관찰된/예상되는 실패 모드</strong></p>
+<ol>
+<li><strong>목표 모호성(visual aliasing)</strong>: image-goal이 시각적으로 유사한 여러 위치와 매칭될 때(복도 끝, 반복 구조) 잘못된 위치로 수렴할 수 있다. 가치 슬롯이 진행도를 단조 증가로 잘못 추정하면 막다른 길 고착 가능.</li>
+<li><strong>장거리 드리프트</strong>: receding-horizon 재계획에도 불구하고 장거리에서는 누적 위치 오차가 커질 수 있다(단·중거리 위주 검증).</li>
+<li><strong>동적 객체</strong>: 정적 장면 학습 분포를 벗어난 보행자/이동 물체에서 미래 관찰 예측이 부정확해져 행동 품질 저하 가능.</li>
+<li><strong>분포 밖 조명/장면</strong>: 비디오 백본 prior가 강하더라도 실내 학습 분포와 크게 다른 환경(야외, 극단 조명)에선 예측 신뢰도 저하.</li>
+</ol>
+<p>이들 실패 모드는 8.2의 한계(소표본·정적·단중거리·image-goal 한정)와 직접 연결되며, 향후 동적 예측 강화·언어 조건·장거리 메모리(8.3)로 완화될 수 있는 지점이다.</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>Navigation World Action Model (통합 정식화)</strong>: 미래 관찰 예측(World) · 행동 생성(Action) · 목표 진행도 가치(Value)를 <strong>하나의 디퓨전 latent canvas에서 공동 생성</strong>하는 최초급의 통합 모델을 제안. 세계 모델과 정책의 이분법을 단일 생성 프로세스로 해소한다.</p>
+</li>
+<li><p><strong>외부 플래너 제거를 통한 실시간 세계 모델 내비게이션</strong>: 행동을 직접 디노이징해 CEM류 샘플링 플래닝을 없앰으로써, 세계 모델적 예측 이점을 누리면서 추론 비용을 행동당 <strong>≈4.45 TFLOPs</strong>로 낮춰 임베디드 ~5Hz 폐루프를 달성(NWM 대비 3,000배↓).</p>
+</li>
+<li><p><strong>대규모 비디오 생성 prior의 내비게이션 이식</strong>: Cosmos Predict2 2B를 백본으로 채택하고, 행동/가치 슬롯 추가 + λ=5 업웨이트 + 3단계 커리큘럼으로 일반 비디오 생성기를 행동 조건부 내비게이션 모델로 변환하는 레시피를 제시.</p>
+</li>
+<li><p><strong>단일 가중치, 다중 모드 운용</strong>: 같은 모델을 Policy / World-Model / Value 모드로(학습 비율 50/25/25) 운용하는 마스킹 기반 멀티태스크 설계로, 정책·예측·가치 능력을 상호 보강한다.</p>
+</li>
+<li><p><strong>강한 실증 결과 (시뮬 + 실제)</strong>: GO STANFORD ATE 0.453→0.192, subject consistency 0.524→0.668, 실제 성공률 79.2%(vs OmniVLA 58.3%, NWM 16.7%), 2B로 OmniVLA-7B와 경쟁 — 정확도·일관성·실세계 성공률·효율을 동시에 입증.</p>
+</li>
+</ol>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 백본 및 표현</h3>
+<ul>
+<li><strong>백본</strong>: Cosmos Predict2 2B (비디오 디퓨전 트랜스포머, 사전학습 가중치 초기화)</li>
+<li><strong>표현</strong>: 9-프레임 latent canvas (미래 관찰 + 가치 + 행동 슬롯). 이미지 슬롯은 VAE latent, 행동/가치는 전용 임베딩.</li>
+<li><strong>조건화</strong>: 현재 관찰 o_t와 목표 이미지 g를 clean으로 고정(inpainting-style), 나머지 슬롯 디노이징.</li>
+</ul>
+<h3>7.2 학습 설정</h3>
+<ul>
+<li><strong>행동 업웨이트</strong>: λ = 5 (행동/가치 슬롯 손실 가중).</li>
+<li><strong>모드 혼합 비율</strong>: Policy 50% / World-Model 25% / Value 25% (배치별 마스킹 샘플링).</li>
+<li><strong>3단계 커리큘럼 (curriculum)</strong>:<ol>
+<li><strong>Phase 1 — 시각/비디오 prior 유지·적응</strong>: 백본의 비디오 생성 능력을 내비게이션 관찰 분포로 도메인 적응.</li>
+<li><strong>Phase 2 — 행동 조건부성 주입</strong>: 행동 슬롯을 도입해 행동↔미래관찰 결합을 학습(world-model/policy 모드 강화).</li>
+<li><strong>Phase 3 — 가치·정책 미세조정</strong>: goal-progress value와 정책 모드를 정교화하여 목표 도달 행동 품질을 끌어올림.</li>
+</ol>
+</li>
+<li><strong>하드웨어(학습)</strong>: 고성능 데이터센터 GPU(논문 서술상 RTX PRO 6000 급) 사용.</li>
+</ul>
+<h3>7.3 추론/실행 설정</h3>
+<ul>
+<li><strong>실행 방식</strong>: receding-horizon(MPC 스타일), 행동 청크 생성 후 앞쪽 일부만 실행 후 재계획.</li>
+<li><strong>추론 비용</strong>: ≈ 4.45 TFLOPs / action.</li>
+<li><strong>온보드 주기</strong>: ~5Hz (Jetson AGX Orin).</li>
+<li><strong>추론 모드</strong>: 기본 Policy 모드(행동 직접 생성), 필요 시 World-Model/Value 모드 전환.</li>
+</ul>
+<h3>7.4 핵심 상수 요약</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>백본 규모</td>
+<td>2B</td>
+<td>Cosmos Predict2</td>
+</tr>
+<tr>
+<td>latent canvas</td>
+<td>9 프레임 슬롯</td>
+<td>관찰+가치+행동 통합</td>
+</tr>
+<tr>
+<td>행동 업웨이트 λ</td>
+<td>5</td>
+<td>행동/가치 손실 가중</td>
+</tr>
+<tr>
+<td>모드 비율</td>
+<td>50/25/25</td>
+<td>Policy/WM/Value</td>
+</tr>
+<tr>
+<td>추론 비용</td>
+<td>≈4.45 TFLOPs/act</td>
+<td>NWM CEM ≈14,521</td>
+</tr>
+<tr>
+<td>제어 주기</td>
+<td>~5Hz</td>
+<td>Jetson AGX Orin</td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p>모든 수치는 논문 본문/부록 서술 기반이며, 공식 코드 미공개(Coming Soon)로 인해 슬롯 인덱싱·노이즈 스케줄 등 세부는 공개 시 재검증 권장.</p>
+</blockquote>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<ul>
+<li><strong>파라미터 효율</strong>: 2B로 7B급 정책과 경쟁 → 통합 세계-행동 모델링이 파라미터 효율적. 더 큰 백본(Cosmos 더 큰 변형)으로 스케일 시 추가 이득 기대.</li>
+<li><strong>모달리티 확장 여지</strong>: latent canvas는 슬롯 추가에 유연. 향후 언어 지시(language-goal) 슬롯, 깊이/세그멘테이션 슬롯 등을 같은 프레임워크로 통합할 잠재력.</li>
+</ul>
+<h3>8.2 한계점 (Limitations)</h3>
+<ol>
+<li><strong>Image-goal 한정</strong>: 목표가 &quot;이미지&quot;로 주어진다. 자연어 지시(language-conditioned VLN)나 객체 카테고리 목표(ObjectNav)는 직접 다루지 않는다. (→ 9장 비교에서 WMNav의 언어/객체 목표와 대비.)</li>
+<li><strong>소표본 실제 평가</strong>: 실제 24 에피소드로 표본이 작아 통계적 신뢰성에 제약. 다양한 장소/조명/군중 일반화 미검증.</li>
+<li><strong>정적 장면 위주</strong>: 동적 장애물(보행자, 움직이는 물체)·혼잡 환경에서의 강건성 미검증.</li>
+<li><strong>단·중거리 위주</strong>: 장거리/대규모 환경(층간 이동, 광역 매핑)에서의 누적 오차·드리프트는 추가 검증 필요.</li>
+<li><strong>코드 미공개</strong>: 프로젝트 페이지가 Coming Soon 상태 — 재현성은 공개 시점에 평가 가능. (현 시점 <code>예정</code>.)</li>
+<li><strong>LiDAR 보조 의존 정도 불명확</strong>: 플랫폼에 Mid-360 LiDAR가 있으나 정책 입력에서의 역할/필요성(안전정지 vs 상태추정)의 경계가 본문상 명료하지 않음.</li>
+</ol>
+<h3>8.3 향후 방향 (Future Directions)</h3>
+<ul>
+<li><strong>언어 조건 통합</strong>: goal 슬롯을 이미지→언어 임베딩으로 확장해 VLN(자연어 지시) 과제로 일반화.</li>
+<li><strong>동적 환경 대응</strong>: 동적 객체 예측을 미래 관찰 슬롯에 명시적으로 강화(소셜 내비게이션).</li>
+<li><strong>장거리 메모리</strong>: 외부 메모리/맵 슬롯을 캔버스에 결합해 장거리 일관성 확보.</li>
+<li><strong>가치 모드의 능동 활용</strong>: Value 모드를 후보 재정렬·안전 검증에 적극 사용하는 하이브리드(빠른 Policy + 선택적 Value 검증) 추론.</li>
+</ul>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<p>비교 대상은 동일 트랙(VLN)에서 토픽이 가장 가까운 선행 리뷰 2편을 선정했다(바운드된 읽기 프로토콜 준수):</p>
+<ul>
+<li><strong>WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation</strong> (IROS 2025) — 세계 모델 + VLM 기반 ObjectNav.</li>
+<li><strong>NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance</strong> (ICRA 2026) — 디퓨전 정책 + critic 기반 맵리스 내비게이션.</li>
+</ul>
+<p>NavWAM은 두 흐름의 교집합에 정확히 위치한다: WMNav의 &quot;세계 모델적 예측&quot; + NavDP의 &quot;디퓨전 정책 + 가치(critic)&quot;를 <strong>단일 디퓨전 생성</strong>으로 융합한다.</p>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>WMNav (IROS 2025)</th>
+<th>NavDP (ICRA 2026)</th>
+<th>NavWAM (본 논문, arXiv 2026)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>과제</td>
+<td>Object-goal nav (객체 목표)</td>
+<td>PointNav/ImageNav/Exploration</td>
+<td><strong>Image-goal nav</strong></td>
+</tr>
+<tr>
+<td>핵심 패러다임</td>
+<td>VLM을 world model로 활용(학습 없음, zero-shot)</td>
+<td>Diffusion policy + critic (sim-to-real)</td>
+<td><strong>World+Action+Value 공동 디퓨전(통합)</strong></td>
+</tr>
+<tr>
+<td>미래 예측</td>
+<td>VLM 스코어맵(curiosity value map)으로 간접</td>
+<td>명시적 미래 예측 없음(정책 중심)</td>
+<td><strong>명시적 미래 관찰 비디오 생성</strong></td>
+</tr>
+<tr>
+<td>가치/평가</td>
+<td>VLM 점수(보상 대체)</td>
+<td>별도 critic 네트워크</td>
+<td><strong>가치 슬롯을 모델이 생성(내재화)</strong></td>
+</tr>
+<tr>
+<td>행동 생성</td>
+<td>2단계 액션 프로포저(탐색/정위)</td>
+<td>디퓨전 궤적 생성</td>
+<td><strong>디퓨전 행동 청크(같은 캔버스)</strong></td>
+</tr>
+<tr>
+<td>플래너</td>
+<td>VLM 프롬프트 루프</td>
+<td>MPC 추적 컨트롤러</td>
+<td><strong>외부 플래너 없음(직접 디노이징)</strong></td>
+</tr>
+<tr>
+<td>백본/학습</td>
+<td>Gemini/Qwen API(클라우드)</td>
+<td>시뮬 3,000 장면 자체학습</td>
+<td><strong>Cosmos Predict2 2B 비디오 prior 전이</strong></td>
+</tr>
+<tr>
+<td>추론 비용</td>
+<td>VLM API 호출(지연·비용)</td>
+<td>정책 추론(경량)</td>
+<td><strong>≈4.45 TFLOPs/act, ~5Hz 온보드</strong></td>
+</tr>
+<tr>
+<td>실세계</td>
+<td>Habitat 시뮬 중심</td>
+<td>시뮬 중심(실세계 수치 제한)</td>
+<td><strong>실제 24ep 79.2% (NWM·OmniVLA 능가)</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>공개(GitHub)</td>
+<td>공개(체크포인트 폼)</td>
+<td><strong>미공개(Coming Soon, <code>예정</code>)</strong></td>
+</tr>
+<tr>
+<td>오프라인 가능</td>
+<td>✗ (API 의존)</td>
+<td>△</td>
+<td><strong>✓ (온보드)</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>WMNav 대비</strong></p>
+<ul>
+<li>장점: WMNav는 클라우드 VLM API에 의존해 오프라인 배치가 불가능하고 호출 지연·비용이 있다. NavWAM은 온보드 2B 모델로 <strong>오프라인 ~5Hz 실시간</strong>이 가능하고, 미래를 점수맵이 아닌 <strong>실제 비디오로 명시 예측</strong>해 일관성이 높다.</li>
+<li>단점: WMNav는 <strong>학습이 필요 없는 zero-shot</strong>이며 <strong>객체/언어 목표</strong>를 다룬다. NavWAM은 학습(대규모 커리큘럼)이 필수이고 <strong>이미지 목표에 한정</strong>되어, &quot;새 객체를 말로 찾아가라&quot;는 과제엔 WMNav가 더 직접적이다.</li>
+</ul>
+<p><strong>NavDP 대비</strong></p>
+<ul>
+<li>장점: NavDP는 디퓨전으로 궤적을 생성하고 <strong>별도 critic</strong>으로 평가하는 2모듈 구조다. NavWAM은 <strong>가치를 같은 디퓨전 캔버스에서 생성</strong>해 정책·예측·가치가 구조적으로 정합되며, <strong>명시적 미래 관찰 예측</strong>이라는 세계 모델 능력을 추가로 갖는다. 또 NavWAM은 <strong>실제 로봇 성공률(79.2%)을 구체적으로 제시</strong>해 실증이 강하다(NavDP 리뷰의 약점으로 지적된 &quot;실세계 수치 부족&quot;을 보완하는 방향).</li>
+<li>단점: NavDP는 <strong>시뮬만으로 sim-to-real</strong>을 달성하는 데이터 효율 철학과 <strong>3,000 장면 대규모 일반화</strong>가 강점이다. NavWAM은 비디오 백본 사전학습 + 커리큘럼 의존도가 높고, 실세계 표본(24ep)이 작아 일반화 폭 측면에선 NavDP의 스케일 검증이 더 광범위하다.</li>
+</ul>
+<p><strong>공통적으로 NavWAM의 차별점</strong></p>
+<ul>
+<li>세 모델 중 NavWAM만이 <strong>예측·행동·가치를 한 생성 프로세스로 통합</strong>하고, <strong>세계 모델 플래너(NWM)를 실세계에서 실제로 능가</strong>(79.2% vs 16.7%)하며 그 비용을 3,000배 낮췄다 — &quot;세계 모델의 이점 + 정책의 효율&quot;이라는 두 토끼를 동시에 잡은 점이 핵심 신규성이다.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>임베디드 실시간성</strong>: Jetson AGX Orin ~5Hz, 오프라인 동작 → 현장 배치 친화적(클라우드 VLM 의존 WMNav 대비 우위).</li>
+<li><strong>하드웨어 현실성</strong>: RGB(+RealSense, 보조 LiDAR)와 흔한 이동 플랫폼(Diablo)로 구성 → 재현 가능한 표준 스택.</li>
+<li><strong>걸림돌</strong>: (1) 코드 미공개로 즉시 재현 불가(<code>예정</code>), (2) image-goal 한정으로 &quot;사진으로 목표 지정&quot;이 가능한 응용에 적합(임의 자연어 명령 응용엔 추가 확장 필요), (3) 동적·장거리 환경 미검증.</li>
+<li>종합: 사진 기반 목표 지정이 가능한 실내 배달/순찰/안내 같은 응용에 단기 적용 잠재력이 높으나, 코드 공개와 동적 환경 검증이 채택의 선결 조건.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<ul>
+<li><strong>기술적 참신성</strong>: 높음. &quot;미래관찰+가치+행동의 공동 디퓨전&quot;은 NavDP(정책+critic 분리)·WMNav(VLM 점수맵)·NWM(세계모델+CEM)의 약점을 동시에 겨냥한 <strong>새로운 통합 접근</strong>이다. 단순 중복 아이디어가 아니라, 세 갈래의 장점을 한 아키텍처로 수렴시킨 점에서 방향성이 뚜렷하다.</li>
+<li><strong>확장 잠재력</strong>: latent canvas의 슬롯 추가성 덕에 언어 목표·동적 예측·장거리 메모리로 자연스럽게 확장 가능 — VLN 본류(자연어 지시)로의 다리 역할 기대.</li>
+<li><strong>검증 성숙도</strong>: 시뮬 정확도·실세계 성공률·효율을 고루 제시했으나, 실세계 표본 규모·동적 환경·코드 공개가 보강되면 탑티어 수용성이 크게 높아질 것.</li>
+</ul>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li>Azuma, D., Miyanishi, T., Sakamoto, K., Kurita, S., Zhu, Y., Khrapchenkov, P., Kawanabe, M., Iwasawa, Y., Matsuo, Y. <em>NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation.</em> arXiv:2606.13494, 2026.</li>
+<li>NVIDIA. <em>Cosmos Predict2</em> (video world foundation model, 2B variant) — 백본.</li>
+<li>NWM (Navigation World Model) — 세계 모델 + CEM 플래닝 베이스라인.</li>
+<li>OmniVLA (7B) — image-goal 정책 베이스라인.</li>
+<li>Nie, D., Guo, X., Duan, Y., Zhang, R., Chen, L. <em>WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation.</em> IROS 2025. arXiv:2503.02247.</li>
+<li>Cai, W., Peng, J., Yang, Y., Zhang, Y., Wei, M., et al. <em>NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance.</em> ICRA 2026. arXiv:2505.08712.</li>
+<li>벤치마크: GO STANFORD, SIT 계열 image-goal 내비게이션 데이터셋.</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p>NavWAM은 목표 조건부 시각 내비게이션에서 <strong>세계 모델과 정책의 이분법을 단일 디퓨전 생성으로 해소</strong>한 통합 모델이다. 미래 관찰·목표 진행도 가치·행동 청크를 9-프레임 latent canvas에서 공동 디노이징함으로써, (1) 정책의 근시안성을 세계 모델적 예측으로 보완하고, (2) CEM류 외부 플래너를 제거해 추론 비용을 행동당 ≈4.45 TFLOPs로 낮춰 임베디드 ~5Hz 폐루프를 실현하며, (3) 예측·가치·행동의 구조적 일관성을 확보했다.</p>
+<p><strong>혁신성</strong>: 단일 가중치를 Policy/World-Model/Value 세 모드로 운용하는 마스킹 멀티태스크 설계와, 가치(critic)를 모델이 직접 생성하도록 내재화한 점이 NavDP(정책+분리 critic)·WMNav(VLM 점수맵)·NWM(세계모델+CEM) 대비 분명한 신규성을 제공한다.</p>
+<p><strong>실용적 의의</strong>: 실제 로봇에서 79.2%(vs OmniVLA 58.3%, NWM 16.7%)를 2B 규모로 달성하고, 세계 모델 플래너(NWM)를 실세계에서 큰 폭으로 능가하면서 비용을 3,000배 낮춘 것은 &quot;세계 모델의 예측 이점 + 정책의 실시간 효율&quot;이라는 오랜 트레이드오프를 실제로 깨뜨린 결과다.</p>
+<p><strong>향후 연구 방향</strong>: image-goal 한정·소표본 실세계·정적 장면·코드 미공개(<code>예정</code>)는 분명한 한계다. latent canvas의 슬롯 확장성을 활용해 언어 조건(VLN 본류)·동적 환경·장거리 메모리로 일반화하고, 실세계 평가 규모와 재현성(코드 공개)을 보강한다면, 통합 세계-행동 모델 패러다임의 대표 사례로 자리매김할 잠재력이 크다.</p>
+<hr>
+<p><em>본 리뷰는 arXiv:2606.13494v1 본문·부록 서술을 근거로 작성되었으며, 공식 구현이 미공개(Coming Soon, <code>예정</code>) 상태이므로 슬롯 인덱싱·노이즈 스케줄·정확한 손실 적용 위치 등 세부 구현은 코드 공개 시 재검증을 권장한다.</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

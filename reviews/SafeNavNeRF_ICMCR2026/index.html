@@ -1,0 +1,1563 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Safe Navigation using Neural Radiance Fields via Reachable Sets · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">2026 4th International Conference on Mechatronics, Control and Robotics (ICMCR 2026)</div>
+    <h1>Safe Navigation using Neural Radiance Fields via Reachable Sets</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2604.26899">arXiv:2604.26899</a></span>
+      <span>리뷰 2026-05-04</span>
+      <span>72분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>Safe Navigation using Neural Radiance Fields via Reachable Sets: 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Safe Navigation using Neural Radiance Fields via Reachable Sets</li>
+<li><strong>저자 (Authors)</strong>: Omanshu Thapliyal, Malarvizhi Sankaranarayanasamy, Ravigopal Vennelakanti</li>
+<li><strong>소속 (Affiliation)</strong>: (상세 소속 미기재, ICMCR 2026 제출)</li>
+<li><strong>발표처 (Published)</strong>: 2026 4th International Conference on Mechatronics, Control and Robotics (ICMCR 2026)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2604.26899">https://doi.org/10.48550/arXiv.2604.26899</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.26899">https://arxiv.org/abs/2604.26899</a></li>
+<li><strong>코드 공개</strong>: 없음 (Not publicly available)</li>
+<li><strong>프로젝트 페이지</strong>: 없음 (None)</li>
+</ul>
+<hr>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>본 논문은 자율 로봇 항법(navigation)에서 두 가지 핵심 문제, 즉 <strong>정확한 3차원 환경 표현</strong>과 <strong>형식적으로 보장된 안전 항법</strong>을 동시에 해결하고자 한다. 기존 로봇 경로 계획(path planning) 연구에서는 환경의 장애물을 단순한 기하학적 형태(구, 박스, 다면체)로 근사하거나, 포인트 클라우드(point cloud), 3D 복셀 그리드(voxel grid), 또는 서명된 거리 함수(Signed Distance Function, SDF)로 표현해 왔다. 그러나 이러한 방법들은 반투명한 표면, 복잡한 기하학적 형태, 또는 텍스처가 풍부한 장면에서 한계를 드러낸다.</p>
+<p>본 연구는 <strong>Neural Radiance Fields(NeRF)</strong>를 활용하여 장애물을 체적(volumetric) 밀도 함수로 암묵적으로 표현하고, 이를 <strong>도달 가능 집합(Reachable Sets)</strong> 기반의 안전 제약과 결합하여 공식적 안전 보장을 갖는 로봇 항법 시스템을 구축하는 것을 목표로 한다. 구체적으로:</p>
+<ol>
+<li>NeRF의 연속적 3차원 밀도 표현을 통해 임의 형태의 장애물을 높은 정밀도로 모델링한다.</li>
+<li>해밀턴-야코비(Hamilton-Jacobi) 도달 가능성 이론을 적용하여 로봇의 도달 가능 상태 공간을 실시간으로 계산한다.</li>
+<li>민코프스키 합(Minkowski Sum)을 이용해 로봇 기하학과 장애물 기하학을 구성 공간(Configuration Space, C-space)에서 결합한다.</li>
+<li>예측 지평(lookahead horizon) 기반의 제약 최적 제어(Constrained Optimal Control Problem, OCP)를 통해 안전하고 효율적인 경로를 계획한다.</li>
+</ol>
+<p>이 접근법은 특히 <strong>고밀도 장애물 환경</strong>에서 기존 방법들이 처리하기 어려운 복잡한 기하학적 형태의 장애물들을 효과적으로 다루면서도 형식적 안전 보장을 제공하는 데 주목할 만하다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p>자율 로봇 항법에서 안전 보장 경로 계획은 수십 년간 연구되어 온 중요한 문제이다. 현재까지의 접근법들은 다음과 같은 근본적인 도전과제들에 직면해 있다:</p>
+<h4>도전과제 1: 장애물 표현의 정확성과 계산 효율성의 트레이드오프</h4>
+<p>기존 방법들은 주로 세 가지 범주로 나뉜다:</p>
+<p><strong>기하학적 근사 방법 (Geometric Approximation)</strong>:</p>
+<ul>
+<li>구(sphere), 직육면체(AABB), 볼록 다면체(convex polytope) 등으로 장애물을 근사</li>
+<li>계산이 빠르지만 복잡한 형태를 정확히 표현하지 못함</li>
+<li>보수적(conservative) 근사는 실제로 통과 가능한 공간을 차단함</li>
+</ul>
+<p><strong>포인트 클라우드/복셀 방법 (Point Cloud/Voxel)</strong>:</p>
+<ul>
+<li>LiDAR나 RGB-D 카메라로 획득한 포인트 클라우드 사용</li>
+<li>센서 노이즈와 불완전한 관측에 취약</li>
+<li>고해상도 복셀 그리드는 메모리 소비가 기하급수적으로 증가</li>
+<li>반투명 또는 반사 표면에서 센서 오류 발생</li>
+</ul>
+<p><strong>서명된 거리 함수 (SDF, Signed Distance Function)</strong>:</p>
+<ul>
+<li>연속적이고 미분 가능한 표현</li>
+<li>신경망 기반 SDF(NeSF, DeepSDF 등)는 학습 데이터에 의존</li>
+<li>이진 장애물/자유 공간 구분에 한계</li>
+</ul>
+<h4>도전과제 2: 안전 보장의 형식성</h4>
+<p>기존 경로 계획에서 안전을 보장하는 방법은 크게 두 가지이다:</p>
+<p><strong>반응적 방법 (Reactive Methods)</strong>:</p>
+<ul>
+<li>인공 포텐셜 필드(Artificial Potential Fields), 속도 장애물(Velocity Obstacles) 등</li>
+<li>지역 최솟값(local minima) 문제</li>
+<li>형식적 안전 보장 부재</li>
+</ul>
+<p><strong>최적화 기반 방법 (Optimization-Based)</strong>:</p>
+<ul>
+<li>MPC(Model Predictive Control), SCP(Sequential Convex Programming) 등</li>
+<li>계산 비용이 높고 실시간 적용에 어려움</li>
+<li>비선형 제약의 볼록화(convexification) 과정에서 근사 오류 발생</li>
+</ul>
+<h4>도전과제 3: 로봇 기하학과 환경의 결합</h4>
+<p>실제 로봇은 점(point) 로봇이 아니라 유한한 크기와 복잡한 형태를 가진다. 로봇 기하학과 장애물 기하학을 결합하여 구성 공간(C-space) 장애물을 계산하는 것은 다음과 같은 어려움이 있다:</p>
+<ul>
+<li><strong>비볼록 기하학</strong>: 대부분의 실제 로봇과 장애물은 비볼록(non-convex) 형태</li>
+<li><strong>민코프스키 합의 복잡도</strong>: 두 비볼록 다면체의 민코프스키 합 계산은 NP-hard에 가까운 복잡도</li>
+<li><strong>동적 재계획</strong>: 장애물이 이동하거나 환경이 변하면 실시간 재계획이 필요</li>
+</ul>
+<h4>도전과제 4: 동적 장애물과 불확실성</h4>
+<p>정적 환경 가정은 실제 응용에서 종종 위반된다:</p>
+<ul>
+<li>보행자, 다른 로봇, 이동하는 물체 등</li>
+<li>센서 노이즈와 모델 불확실성</li>
+<li>제어 실행 오류</li>
+</ul>
+<h3>2.2 핵심 해결책</h3>
+<p>본 논문은 위의 도전과제들에 대해 다음과 같은 통합적 접근법을 제안한다:</p>
+<pre><code>도전과제                  →  해결책
+--------------------------------------------------------------
+장애물 표현 정확성         →  NeRF 기반 체적 밀도 표현
+안전 보장 형식성           →  해밀턴-야코비 도달 가능 집합
+로봇-환경 기하학 결합      →  민코프스키 합 + 볼록 껍질 추출
+최적화 효율성              →  예측 지평 + LMI 공식화
+</code></pre>
+<p>핵심 아이디어는 NeRF가 제공하는 고품질의 연속 밀도 함수를 도달 가능 집합 기반의 안전 제약 프레임워크와 결합함으로써, 기존 방법들이 개별적으로만 달성했던 두 가지 목표(정확한 표현 + 형식적 안전)를 동시에 달성한다는 것이다.</p>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 NeRF 기반 장애물 표현 (NeRF-Based Obstacle Representation)</h3>
+<h4>3.1.1 Neural Radiance Fields의 기초 이론</h4>
+<p>Neural Radiance Fields(NeRF)는 Mildenhall et al. (2020)이 제안한 이래 3차원 장면 표현의 혁명적인 방법으로 자리잡았다. NeRF는 3차원 공간의 임의 위치에서 임의 방향으로 관찰되는 색상과 체적 밀도를 신경망으로 근사하는 암묵적(implicit) 표현 방법이다.</p>
+<p><strong>기본 NeRF 함수 정의</strong>:</p>
+<pre><code>F_θ: (x, d) → (c, σ)
+
+여기서:
+  x = (x, y, z)  : 3D 위치 벡터 ∈ R³
+  d = (θ, φ)     : 시선 방향 (구면 좌표계) ∈ S²
+  c = (r, g, b)  : RGB 색상값 ∈ [0,1]³
+  σ ∈ R⁺         : 체적 밀도 (volume density)
+  θ               : 신경망 파라미터
+</code></pre>
+<p>NeRF는 다층 퍼셉트론(MLP)으로 구현되며, 위치 인코딩(positional encoding)을 통해 고주파 신호를 표현한다:</p>
+<pre><code>γ(p) = [sin(2⁰πp), cos(2⁰πp), sin(2¹πp), cos(2¹πp), ..., sin(2^(L-1)πp), cos(2^(L-1)πp)]
+
+여기서 L = 10 (위치), L = 4 (방향)
+</code></pre>
+<h4>3.1.2 체적 렌더링 방정식 (Volume Rendering Equation)</h4>
+<p>NeRF의 렌더링 과정은 고전적인 체적 렌더링 방정식을 따른다:</p>
+<pre><code>C(r) = ∫[t_n to t_f] T(t) · σ(r(t)) · c(r(t), d) dt
+
+여기서:
+  r(t) = o + td       : 광선 (ray) 방정식 (o: 원점, d: 방향)
+  T(t) = exp(-∫[t_n to t] σ(r(s)) ds)  : 누적 투과율 (accumulated transmittance)
+  t_n, t_f             : 근거리 및 원거리 경계
+</code></pre>
+<p>이산화된 형태 (실제 구현):</p>
+<pre><code>C̃(r) = Σ[i=1 to N] T_i · (1 - exp(-σ_i · δ_i)) · c_i
+
+여기서:
+  T_i = exp(-Σ[j=1 to i-1] σ_j · δ_j)  : i번째 샘플까지의 투과율
+  δ_i = t_{i+1} - t_i                   : 인접 샘플 간 거리
+</code></pre>
+<h4>3.1.3 장애물 표현으로서의 NeRF 밀도 필드</h4>
+<p>본 논문의 핵심 통찰은 NeRF의 체적 밀도 σ(x)가 자연스럽게 장애물을 표현한다는 것이다:</p>
+<pre><code>장애물 점유도 표현:
+
+σ(x) 해석:
+  σ(x) → 높음 (σ &gt;&gt; 0)  : 해당 위치가 장애물에 속함
+  σ(x) → 낮음 (σ ≈ 0)  : 해당 위치가 자유 공간임
+
+장애물 집합 정의:
+  O_NeRF = {x ∈ R³ | σ(x) ≥ σ_threshold}
+
+여기서 σ_threshold는 장애물 분류 임계값
+</code></pre>
+<p>NeRF 기반 장애물 표현의 장점:</p>
+<p><strong>1. 암묵적 연속성 (Implicit Continuity)</strong>:</p>
+<ul>
+<li>임의의 해상도에서 질의 가능</li>
+<li>부드러운 경계 표현 (부드러운 σ 전이)</li>
+<li>미분 가능한 표현 (기울기 정보 활용 가능)</li>
+</ul>
+<p><strong>2. 복잡한 기하학 처리</strong>:</p>
+<ul>
+<li>오목(concave) 형태, 구멍이 있는 형태 모두 표현 가능</li>
+<li>뷰 의존적 외관(view-dependent appearance) 처리</li>
+<li>반투명 물체의 부분적 점유도 표현</li>
+</ul>
+<p><strong>3. 다중 관측의 통합</strong>:</p>
+<ul>
+<li>여러 카메라 뷰에서 획득한 정보를 하나의 일관된 모델로 통합</li>
+<li>단일 뷰에서 발생하는 오클루전 문제 감소</li>
+</ul>
+<pre><code>NeRF 기반 환경 표현의 개념도:
+
+  카메라 뷰 1     카메라 뷰 2     카메라 뷰 3
+      |               |               |
+      v               v               v
+  [이미지 I₁]    [이미지 I₂]    [이미지 I₃]
+      |               |               |
+      +-------+-------+-------+-------+
+                      |
+                      v
+              NeRF 학습 (F_θ 최적화)
+              Loss = ||C̃(r) - C_gt(r)||²
+                      |
+                      v
+              학습된 밀도 필드 σ(x)
+              ┌─────────────────────┐
+              │   3D 공간           │
+              │   ░░░░░  ← 자유공간 │
+              │   ████  ← 장애물   │
+              │   ░░░░░             │
+              │   ████  ← 장애물   │
+              │   ░░░░░             │
+              └─────────────────────┘
+</code></pre>
+<h4>3.1.4 NeRF 학습 및 장면 재구성</h4>
+<p>NeRF를 장애물 표현으로 활용하기 위한 학습 절차:</p>
+<pre><code>알고리즘: NeRF 기반 장애물 모델 구축
+
+입력: 다시점 RGB 이미지 {I_k}_{k=1}^{K}, 카메라 포즈 {P_k}_{k=1}^{K}
+출력: 학습된 NeRF 모델 F_θ
+
+1. 카메라 포즈 추정 (SfM 또는 사전 알려진 포즈 사용)
+2. For each 학습 이터레이션:
+   a. 무작위로 카메라 광선 배치 샘플링: {r_j} ∼ 균등분포(전체 광선)
+   b. 각 광선에 대해 계층적 샘플링 (Hierarchical Sampling):
+      - 조잡한 모델(coarse): 균등 간격으로 N_c개 샘플
+      - 정밀한 모델(fine): 밀도가 높은 영역에 집중하여 N_f개 추가 샘플
+   c. 각 샘플에서 F_θ(x_i, d) 실행하여 (c_i, σ_i) 획득
+   d. 체적 렌더링으로 예측 색상 C̃(r) 계산
+   e. 손실 계산: L = Σ_r ||C̃_c(r) - C_gt(r)||² + ||C̃_f(r) - C_gt(r)||²
+   f. 역전파 및 θ 업데이트 (Adam optimizer)
+3. 수렴 후 σ(x) 필드를 장애물 표현으로 사용
+</code></pre>
+<h4>3.1.5 NeRF와 기존 센서 표현의 비교</h4>
+<pre><code>표현 방법 비교:
+
+특성              | 포인트 클라우드 | 복셀 그리드  | SDF          | NeRF
+------------------|----------------|-------------|--------------|----------------
+연속성            | 이산           | 이산        | 연속         | 연속
+임의 해상도       | 불가           | 불가        | 가능         | 가능
+복잡 형태 처리    | 제한적         | 가능        | 가능         | 가능
+반투명 처리       | 불가           | 불가        | 불가         | 가능
+메모리 효율       | O(n)           | O(r³)       | O(n)         | O(|θ|) - 압축
+학습 필요성       | 불필요         | 불필요      | 사전 학습    | 필요
+계산 밀도 쿼리    | O(log n)       | O(1)        | O(log n)     | O(L·W) - MLP
+</code></pre>
+<hr>
+<h3>3.2 도달 가능 집합 안전 프레임워크 (Reachable Set Safety Framework)</h3>
+<h4>3.2.1 도달 가능성 이론의 배경</h4>
+<p>도달 가능성 분석(Reachability Analysis)은 동적 시스템에서 시간에 따른 상태 공간의 전파를 계산하는 수학적 프레임워크이다. 이는 제어 이론, 검증(verification), 안전 보장 제어에 광범위하게 활용된다.</p>
+<p><strong>시스템 동역학 모델</strong>:</p>
+<pre><code>연속시간 시스템:
+  ẋ(t) = f(x(t), u(t))
+
+여기서:
+  x(t) ∈ X ⊆ Rⁿ  : 상태 벡터 (위치, 속도, 자세 등)
+  u(t) ∈ U ⊆ Rᵐ  : 제어 입력 (힘, 토크 등)
+  f: X × U → Rⁿ   : 시스템 벡터 필드
+</code></pre>
+<h4>3.2.2 전방 도달 가능 집합 (Forward Reachable Set)</h4>
+<p><strong>정의</strong>: 초기 상태 집합 X₀에서 시작하여, 허용 가능한 모든 제어 입력 u ∈ U를 적용했을 때 시간 t에 도달 가능한 모든 상태의 집합:</p>
+<pre><code>R_f(X₀, [t₀, t]) = {x(t) ∈ X |
+  ∃x₀ ∈ X₀, ∃u(·) ∈ U[t₀,t] : x(t₀) = x₀ ∧ ẋ = f(x, u) ∀s ∈ [t₀, t]}
+
+또는 단순화하면:
+  R_f(x₀, t) = {x(t) | x(t₀) = x₀, u ∈ U}
+</code></pre>
+<p>전방 도달 가능 집합은 로봇이 현재 상태에서 도달 &quot;가능한&quot; 영역을 나타낸다. 이는 다음 용도로 활용된다:</p>
+<ul>
+<li>충돌 위험 평가: 장애물의 도달 가능 집합과의 교집합 확인</li>
+<li>최악의 경우 경로 예측</li>
+</ul>
+<h4>3.2.3 후방 도달 가능 집합 (Backward Reachable Set)</h4>
+<p><strong>정의</strong>: 목표 상태 집합 X_T에 도달하기 위해 시간 t에 있어야 하는 모든 초기 상태의 집합:</p>
+<pre><code>R_b(X_T, [t, t_f]) = {x(t) ∈ X |
+  ∃u(·) ∈ U[t,t_f] : x(t_f) ∈ X_T, ẋ = f(x, u) ∀s ∈ [t, t_f]}
+</code></pre>
+<p><strong>안전 회피 (Safety Avoidance)</strong>: 위험 집합 X_danger를 시간 t까지 절대 방문하지 않도록 제어하려면, 후방 도달 가능 집합의 여집합에 상태가 속해야 한다:</p>
+<pre><code>안전 조건: x(t) ∉ R_b(X_danger, [t₀, t])
+</code></pre>
+<h4>3.2.4 해밀턴-야코비 도달 가능성 (Hamilton-Jacobi Reachability)</h4>
+<p>HJ 도달 가능성은 도달 가능 집합을 편미분방정식(PDE)의 해로 계산하는 이론적 프레임워크이다.</p>
+<p><strong>가치 함수 (Value Function)</strong> 정의:</p>
+<pre><code>V(x, t) = min_{u(·) ∈ U} max_{τ ∈ [t, T]} l(x(τ))
+
+여기서:
+  l(x): 상태 x에서의 &quot;비용&quot; (목표 집합에 있으면 음수, 아니면 양수)
+  τ: 시간 인덱스
+</code></pre>
+<p><strong>HJ-PDE (Hamilton-Jacobi Partial Differential Equation)</strong>:</p>
+<pre><code>∂V/∂t(x,t) + H(x, ∂V/∂x(x,t)) = 0, ∀t ∈ [0, T)
+
+H(x, p) = min_{u ∈ U} p^T f(x, u)  (해밀토니안)
+
+경계 조건: V(x, T) = l(x)
+
+도달 가능 집합:
+  R_b(X_T, t) = {x | V(x, t) ≤ 0}
+</code></pre>
+<p>이 PDE를 수치적으로 풀면 임의의 비선형 시스템에 대한 정확한 도달 가능 집합을 계산할 수 있다.</p>
+<h4>3.2.5 충돌 회피를 위한 도달 가능 집합 적용</h4>
+<p>본 논문에서 도달 가능 집합은 다음과 같이 안전 항법에 적용된다:</p>
+<pre><code>안전 조건 (도달 가능 집합 기반):
+
+  R_f(x_robot, [t, t+T]) ∩ R_f(x_obstacle, [t, t+T]) = ∅
+
+여기서:
+  R_f(x_robot, ·)    : 로봇의 전방 도달 가능 집합
+  R_f(x_obstacle, ·) : 장애물의 전방 도달 가능 집합 (정적이면 현재 위치)
+
+또는 구성 공간에서:
+  R_f(x_robot, [t, t+T]) ∩ C_obs = ∅
+
+  C_obs: 구성 공간 장애물 (민코프스키 합으로 계산)
+</code></pre>
+<pre><code>도달 가능 집합의 시각적 표현:
+
+시간 t=0:          시간 t=T_h/2:      시간 t=T_h:
+  [로봇]             [도달가능]          [도달가능]
+    x               ┌──────┐           ┌──────────┐
+    |               │      │           │          │
+    |               │  R_f │           │    R_f   │
+    |               │      │           │          │
+    └               └──────┘           └──────────┘
+
+                    [장애물 도달가능]   [장애물 도달가능]
+                      ████              ████
+                      ████              ████
+
+안전 조건: R_f(robot) ∩ R_f(obstacle) = ∅
+</code></pre>
+<hr>
+<h3>3.3 민코프스키 합 구성 공간 (Minkowski Sum Configuration Space)</h3>
+<h4>3.3.1 구성 공간(C-space)의 개념</h4>
+<p>로봇 경로 계획에서 구성 공간(Configuration Space, C-space)은 로봇의 모든 가능한 구성(위치, 방향)을 점으로 표현하는 추상적 공간이다. 이는 Lozano-Pérez(1983)가 도입한 개념으로, 로봇을 점 질량으로 단순화하고 장애물을 C-space에서 확장하는 방식이다.</p>
+<p><strong>C-space 장애물 정의</strong>:</p>
+<pre><code>C_obs = {q ∈ C | A(q) ∩ O ≠ ∅}
+
+여기서:
+  q ∈ C          : 로봇의 구성 (configuration)
+  A(q) ⊆ R³     : 구성 q에서 로봇이 차지하는 공간 (swept volume)
+  O ⊆ R³         : 장애물이 차지하는 공간
+</code></pre>
+<p>C-space에서 로봇은 점으로 표현되므로, C-space 경로 계획은 점 로봇의 경로 계획으로 환원된다.</p>
+<h4>3.3.2 민코프스키 합의 정의</h4>
+<p><strong>민코프스키 합 (Minkowski Sum)</strong>:</p>
+<pre><code>A ⊕ B = {a + b | a ∈ A, b ∈ B}
+
+특성:
+  - 교환법칙: A ⊕ B = B ⊕ A
+  - 결합법칙: (A ⊕ B) ⊕ C = A ⊕ (B ⊕ C)
+  - 볼록 집합의 민코프스키 합은 볼록 집합
+</code></pre>
+<p><strong>C-space 장애물과 민코프스키 합</strong>:</p>
+<p>점 로봇(원점 q)에서 로봇 기하학 B와 장애물 O에 대해:</p>
+<pre><code>C_obs = O ⊕ (-B)
+
+여기서:
+  -B = {-b | b ∈ B}  : B의 반전 (reflection about origin)
+
+해석: 로봇의 참조점이 C_obs에 속하면 로봇은 O와 충돌한다.
+</code></pre>
+<p><strong>기하학적 의미</strong>:</p>
+<pre><code>민코프스키 합의 기하학적 의미:
+
+원래 공간:           C-space:
+ ┌─────────┐          ┌─────────────────┐
+ │         │          │                 │
+ │  장애물 │   ⊕     │  C_obs = O⊕(-B)│
+ │    O    │  (-B)   │  (팽창된 장애물)│
+ │         │          │                 │
+ └─────────┘          └─────────────────┘
+
+         로봇 B        +  반전된 로봇 -B
+         ┌──┐              ┌──┐
+         │  │    →         │  │
+         └──┘              └──┘
+</code></pre>
+<h4>3.3.3 NeRF + 민코프스키 합의 결합</h4>
+<p>본 논문에서 NeRF 밀도 필드에서 추출한 볼록 껍질과 로봇 기하학을 민코프스키 합으로 결합한다:</p>
+<pre><code>전체 파이프라인:
+
+1. NeRF 밀도 필드: σ(x)
+   ↓
+2. 이진화: O_voxel = {x | σ(x) ≥ σ_th}
+   ↓
+3. 포인트 클라우드 추출: P_obs = 고밀도 복셀의 중심점들
+   ↓
+4. 볼록 껍질 계산: CH(P_obs) ← GJK 알고리즘 활용
+   ↓
+5. 로봇 기하학 B 정의 (볼록 다면체)
+   ↓
+6. 민코프스키 합: C_obs = CH(P_obs) ⊕ (-B)
+   ↓
+7. C-space 장애물 C_obs를 안전 제약에 사용
+</code></pre>
+<h4>3.3.4 민코프스키 합의 계산 알고리즘</h4>
+<p>두 볼록 다면체의 민코프스키 합은 다음과 같이 계산된다:</p>
+<pre><code>알고리즘: 볼록 다면체 민코프스키 합
+
+입력: 볼록 다면체 P₁ (꼭짓점 집합 V₁), 볼록 다면체 P₂ (꼭짓점 집합 V₂)
+출력: P₁ ⊕ P₂
+
+1. 모든 꼭짓점 쌍의 합 계산: V_sum = {v₁ + v₂ | v₁ ∈ V₁, v₂ ∈ V₂}
+2. V_sum의 볼록 껍질 계산: P_sum = ConvexHull(V_sum)
+3. 반환: P_sum
+
+복잡도: O(|V₁| · |V₂| · log(|V₁| · |V₂|))
+</code></pre>
+<p><strong>주의사항</strong>: 비볼록 다면체의 경우 볼록 껍질 근사를 사용하여 볼록화 후 민코프스키 합을 계산한다 (보수적 근사).</p>
+<hr>
+<h3>3.4 볼록 껍질 추출 (Convex Hull Extraction)</h3>
+<h4>3.4.1 볼록 껍질 추출의 필요성</h4>
+<p>NeRF 밀도 필드에서 직접 도달 가능 집합과 민코프스키 합을 계산하는 것은 연속적이고 비볼록한 표현이기 때문에 계산적으로 매우 어렵다. 볼록 껍질 근사는 다음과 같은 이점을 제공한다:</p>
+<ol>
+<li><strong>볼록 최적화 호환성</strong>: SDP, QP 등 볼록 최적화 문제와 호환</li>
+<li><strong>GJK 알고리즘 활용</strong>: 충돌 감지를 위한 효율적인 알고리즘 사용 가능</li>
+<li><strong>민코프스키 합의 효율성</strong>: 볼록 집합의 민코프스키 합은 다항 시간 계산 가능</li>
+</ol>
+<h4>3.4.2 NeRF → 볼록 껍질 파이프라인</h4>
+<pre><code>NeRF 밀도 필드 → 볼록 껍질 추출 파이프라인:
+
+단계 1: 고밀도 영역 샘플링
+  ┌────────────────────────────────────────┐
+  │  3D 그리드에서 σ(x) 계산               │
+  │  σ_threshold = 0.5 (예)               │
+  │  O_voxel = {x_i | σ(x_i) &gt; σ_th}    │
+  └────────────────────────────────────────┘
+              ↓
+단계 2: 포인트 클라우드 생성
+  ┌────────────────────────────────────────┐
+  │  고밀도 복셀 중심점 → 포인트 클라우드  │
+  │  P = {x_i | x_i ∈ O_voxel}           │
+  └────────────────────────────────────────┘
+              ↓
+단계 3: 볼록 껍질 계산 (QuickHull / GJK)
+  ┌────────────────────────────────────────┐
+  │  CH = ConvexHull(P)                   │
+  │  입력: n개의 3D 점                     │
+  │  출력: 볼록 다면체 (꼭짓점, 면, 엣지)  │
+  │  복잡도: O(n log n) ~ O(n²)           │
+  └────────────────────────────────────────┘
+              ↓
+단계 4: 근사 오류 분석
+  ┌────────────────────────────────────────┐
+  │  CH(P) ⊇ O_NeRF (볼록 근사는 확장)   │
+  │  보수적 근사: 안전 보장 유지           │
+  │  근사 오류 ε = Vol(CH) - Vol(O)       │
+  └────────────────────────────────────────┘
+</code></pre>
+<h4>3.4.3 GJK 알고리즘</h4>
+<p>GJK(Gilbert-Johnson-Keerthi) 알고리즘은 두 볼록 집합의 거리 계산 및 충돌 감지를 위한 효율적인 알고리즘이다:</p>
+<pre><code>GJK 알고리즘 개요:
+
+핵심 아이디어: 민코프스키 차(Minkowski Difference) A ⊖ B = A ⊕ (-B)가
+              원점을 포함하면 A와 B는 충돌
+
+A ∩ B ≠ ∅  ⟺  0 ∈ A ⊖ B
+
+알고리즘:
+1. 초기 방향 v₀ 설정
+2. 지지 함수 계산: s = support(A ⊖ B, -v) = support(A, -v) - support(B, v)
+3. 심플렉스(simplex) 업데이트
+4. 원점이 심플렉스 내부에 있으면: 충돌 감지
+5. 그렇지 않으면: 가장 가까운 특징(feature) 찾기
+6. v 업데이트 후 반복
+
+지지 함수: support(A, d) = argmax_{a ∈ A} d^T a
+복잡도: O(|V_A| + |V_B|) per iteration, typically O(log(|V|)) iterations
+</code></pre>
+<h4>3.4.4 볼록 근사의 보수성 (Conservatism) 분석</h4>
+<p>볼록 껍질 근사는 실제 비볼록 장애물보다 더 큰 영역을 장애물로 처리한다:</p>
+<pre><code>보수성 분석:
+
+실제 장애물 O (비볼록):    볼록 껍질 CH(O) (볼록):
+    ┌──┐                      ┌────────┐
+    │  └──┐                   │        │
+    │     │          →        │        │
+    │  ┌──┘                   │        │
+    └──┘                      └────────┘
+    |← 좁은 통로 →|           |← 통로 없음 →|
+
+결과: 볼록 근사는 통과 가능한 좁은 공간을 차단할 수 있음
+      → 보수적 안전 보장은 달성하지만 경로의 최적성 저하 가능
+</code></pre>
+<p>이러한 보수성은 안전성 측면에서는 유리하지만(false negative 없음), 실제 통과 가능한 경로를 발견하지 못할 수 있다는 한계가 있다.</p>
+<hr>
+<h3>3.5 예측 지평 기반 제약 최적 제어 (Lookahead Constrained Optimal Control)</h3>
+<h4>3.5.1 전체 지평 계획 vs. 예측 지평 계획</h4>
+<p>로봇 경로 계획에서 전체 지평(full-horizon) 계획과 예측 지평(lookahead/receding horizon) 계획은 근본적인 트레이드오프를 가진다:</p>
+<pre><code>전체 지평 계획 (Full-horizon):
+  장점: 전역 최적성, 완전한 경로 계획
+  단점: 비볼록 최적화 (NP-hard), 계산 시간 ∝ 경로 길이
+  
+예측 지평 계획 (Lookahead/Receding Horizon):
+  장점: 실시간 계산 가능, 볼록화 용이
+  단점: 지역 최적성만 보장, 완전한 경로 보장 불가
+  
+본 논문의 선택: 예측 지평 계획
+  이유 1: 계산 효율성 (실시간 적용 가능성)
+  이유 2: LMI (Linear Matrix Inequality) 공식화 가능
+  이유 3: 안전 제약을 볼록 제약으로 표현 가능
+</code></pre>
+<h4>3.5.2 제약 최적 제어 문제 (OCP) 공식화</h4>
+<p><strong>표준 형태</strong>:</p>
+<pre><code>최적 제어 문제 (OCP):
+
+minimize   J(u) = ∫[t to t+T_h] [x(s)^T Q x(s) + u(s)^T R u(s)] ds
+              + x(t+T_h)^T P_f x(t+T_h)
+
+subject to:
+  ẋ(s) = Ax(s) + Bu(s)                    (시스템 동역학, 선형화)
+  x(t) = x_current                          (초기 조건)
+  u(s) ∈ U = {u | u_min ≤ u ≤ u_max}     (제어 입력 제약)
+  x(s) ∉ C_obs ∀s ∈ [t, t+T_h]          (안전 제약)
+  x(t+T_h) ∈ X_target (선택사항)          (목표 도달 조건)
+
+여기서:
+  T_h: 예측 지평 (lookahead horizon)
+  Q ≽ 0: 상태 가중치 행렬 (반양정치)
+  R ≻ 0: 제어 가중치 행렬 (양정치)
+  P_f ≽ 0: 최종 비용 행렬 (반양정치)
+  A, B: 선형화된 시스템 행렬
+</code></pre>
+<h4>3.5.3 안전 제약의 LMI 공식화</h4>
+<p>도달 가능 집합 기반의 안전 제약을 선형 행렬 부등식(LMI)으로 표현하는 것이 본 논문의 핵심 기술적 기여 중 하나이다:</p>
+<pre><code>도달 가능 집합 기반 안전 제약의 LMI 공식화:
+
+1단계: 도달 가능 집합의 타원체(Ellipsoidal) 근사
+  R_f(x, [t, t+T_h]) ≈ E(c, P) = {x | (x-c)^T P^{-1} (x-c) ≤ 1}
+  
+  여기서:
+    c ∈ R^n: 타원체 중심
+    P ∈ R^{n×n}: 양정치 대칭 행렬 (형태 행렬)
+
+2단계: 장애물과의 분리 조건 (S-procedure)
+  E(c_robot, P_robot) ∩ E(c_obs, P_obs) = ∅
+  
+  S-procedure를 통한 LMI 조건:
+  ∃λ ≥ 0 s.t.
+  ⎡ P_robot⁻¹  -P_robot⁻¹·c_robot ⎤   ⎡ P_obs⁻¹   -P_obs⁻¹·c_obs ⎤
+  ⎣ -c_robot^T·P_robot⁻¹  c_robot^T·P_robot⁻¹·c_robot - 1 ⎦ - λ ⎣ -c_obs^T·P_obs⁻¹  ... - 1 ⎦ ≽ 0
+
+3단계: 볼록 껍질 제약의 LMI 표현
+  C_obs = {x | H·x ≤ h} (H-representation)
+  
+  안전 조건: x(s) ∉ C_obs ↔ ∃i: H_i · x(s) &gt; h_i
+  
+  강화된 조건 (볼록 근사, 보수적):
+  ∀i: H_i · x(s) ≥ h_i + ε (마진 ε &gt; 0)
+</code></pre>
+<h4>3.5.4 반정치 계획(SDP) 풀이</h4>
+<p>LMI 공식화된 안전 제약을 포함하는 최적 제어 문제는 반정치 계획(SDP)으로 풀 수 있다:</p>
+<pre><code>SDP 표준 형태:
+
+minimize   c^T z
+subject to:
+  F₀ + Σᵢ zᵢ Fᵢ ≽ 0   (LMI 제약)
+  Az = b               (등호 제약)
+
+여기서:
+  z ∈ Rᵐ: 결정 변수 (제어 입력 시퀀스 등을 포함)
+  F₀, Fᵢ: 대칭 행렬
+  
+해법: Interior-point methods (예: CVXPY, MOSEK, SeDuMi)
+복잡도: Polynomial in problem size
+</code></pre>
+<p><strong>이산시간 구현</strong>:</p>
+<pre><code>이산화된 OCP (N개의 시간 단계):
+
+minimize   Σ_{k=0}^{N-1} [x_k^T Q x_k + u_k^T R u_k] + x_N^T P_f x_N
+
+subject to:
+  x_{k+1} = A_d x_k + B_d u_k,  k = 0,...,N-1
+  x_0 = x_current
+  u_min ≤ u_k ≤ u_max,          k = 0,...,N-1
+  x_k ∉ C_obs,                   k = 0,...,N
+  
+여기서:
+  A_d = e^{A·Δt}: 이산화된 시스템 행렬
+  B_d = ∫_0^{Δt} e^{As} B ds: 이산화된 입력 행렬
+  Δt: 샘플링 주기
+  N = T_h / Δt: 예측 지평 스텝 수
+</code></pre>
+<h4>3.5.5 예측 지평 제어의 재귀 구조 (Receding Horizon Control)</h4>
+<pre><code>MPC 재귀 구조:
+
+시간 t=0:  [현재 상태 x₀]
+           OCP 풀기 → 최적 제어 시퀀스 {u*₀, u*₁, ..., u*_{N-1}}
+           첫 번째 제어만 적용: u(0) = u*₀
+
+시간 t=Δt: [새로운 상태 x₁ 관측]
+           OCP 풀기 (시작점 x₁, 지평 [Δt, (N+1)Δt])
+           첫 번째 제어만 적용: u(Δt) = u*₀
+
+시간 t=2Δt: ...반복...
+
+장점:
+  - 새로운 정보(상태 측정, 장애물 업데이트)를 실시간으로 반영
+  - 작은 최적화 문제를 반복적으로 풀어 계산 효율성 달성
+  - 피드백 제어의 성질을 가짐 (외란 보상 가능)
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인</h3>
+<pre><code>전체 시스템 아키텍처 다이어그램:
+
+┌──────────────────────────────────────────────────────────────────┐
+│                     오프라인 단계 (Offline Phase)                 │
+│                                                                  │
+│  카메라 이미지 ──→ [NeRF 학습] ──→ F_θ(x,d)=(c,σ)              │
+│  (다시점 RGB)                         신경망 모델                │
+└──────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                   환경 표현 단계 (Environment Mapping)            │
+│                                                                  │
+│  F_θ(x,d) ──→ [밀도 샘플링]  ──→ {x | σ(x) &gt; σ_th}           │
+│               (3D 그리드 쿼리)      고밀도 복셀 집합              │
+│                     │                      │                     │
+│                     ▼                      ▼                     │
+│              [포인트 클라우드 생성]    [볼록 껍질 추출]           │
+│                     │                      │                     │
+│                     └──────────────────────┘                     │
+│                                    │                             │
+│                                    ▼                             │
+│                            CH(P_obs): 볼록 껍질                  │
+└──────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                  C-space 구성 단계 (C-space Construction)         │
+│                                                                  │
+│  CH(P_obs) ──→ [민코프스키 합] ←── 로봇 기하학 B               │
+│                      │                                           │
+│                      ▼                                           │
+│               C_obs = CH(P_obs) ⊕ (-B)                          │
+│               (구성 공간 장애물)                                 │
+└──────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                  온라인 계획 단계 (Online Planning)               │
+│                                                                  │
+│  x_current ──→ [도달 가능 집합 계산]                             │
+│  (현재 상태)      R_f(x, [t, t+T_h])                            │
+│                          │                                       │
+│                          ▼                                       │
+│               [제약 최적 제어 문제 (OCP)]                        │
+│               minimize J(u) = ∫[x^T Q x + u^T R u]dt           │
+│               s.t. ẋ = Ax + Bu                                  │
+│                    x ∉ C_obs (LMI로 표현)                       │
+│                    u ∈ U                                         │
+│                          │                                       │
+│                          ▼                                       │
+│               [SDP 풀이] ──→ 최적 제어 시퀀스 u*(t)             │
+│                          │                                       │
+│                          ▼                                       │
+│               로봇 실행: u(t) = u*(0)                            │
+│                          │                                       │
+│                    (다음 시간 스텝 반복)                          │
+└──────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+                      ┌──────────────┐
+                      │ 안전한 경로   │
+                      │ (충돌 없음)   │
+                      └──────────────┘
+</code></pre>
+<h3>4.2 데이터 흐름 상세</h3>
+<pre><code>데이터 흐름 다이어그램:
+
+[입력 데이터]
+   │
+   ├── 다시점 이미지 + 카메라 포즈 ──→ [NeRF 학습] ──→ F_θ
+   │
+   ├── 로봇 기하학 모델 ──────────────────────────────→ B
+   │
+   └── 로봇 시작 위치 + 목표 위치 ───────────────────→ (x_0, x_goal)
+
+[중간 처리]
+   │
+   ├── F_θ ──→ 밀도 샘플링 ──→ P_obs ──→ CH(P_obs)
+   │
+   ├── CH(P_obs) + B ──→ 민코프스키 합 ──→ C_obs
+   │
+   └── x_current ──→ 도달 가능 집합 R_f ──→ 안전 집합
+
+[최적화]
+   │
+   ├── C_obs ──→ LMI 제약 변환
+   │
+   ├── R_f ──→ 안전 조건 볼록화
+   │
+   └── OCP (SDP) 풀이 ──→ u*(t)
+
+[출력]
+   └── 안전한 제어 시퀀스 ──→ 로봇 실행
+</code></pre>
+<h3>4.3 모듈 간 인터페이스</h3>
+<pre><code>모듈 인터페이스 정의:
+
+모듈 1: NeRF 환경 모델
+  입력:  (I_1, ..., I_K): RGB 이미지
+         (P_1, ..., P_K): 카메라 포즈
+  출력:  F_θ: R³ × S² → R⁴
+
+모듈 2: 볼록 장애물 추출기
+  입력:  F_θ, σ_threshold, 그리드 해상도
+  출력:  {CH_i(P_obs^i)}: 볼록 껍질 집합
+
+모듈 3: C-space 구성기
+  입력:  {CH_i}, B (로봇 기하학)
+  출력:  {C_obs^i}: C-space 장애물 집합
+
+모듈 4: 도달 가능 집합 계산기
+  입력:  x (현재 상태), T_h (예측 지평), 시스템 행렬 A, B
+  출력:  R_f(x, [t, t+T_h]): 도달 가능 집합 (타원체 근사)
+
+모듈 5: OCP 풀이기
+  입력:  x_current, {C_obs^i}, R_f, Q, R, T_h
+  출력:  u*(t): 최적 제어 입력
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 실험 설정</h3>
+<p>본 논문의 실험은 순수 시뮬레이션 환경에서 수행되었다. 실세계 실험은 포함되지 않았으며, 이는 논문의 중요한 한계점 중 하나이다.</p>
+<p><strong>시뮬레이션 환경</strong>:</p>
+<pre><code>실험 환경 설정:
+┌─────────────────────────────────────────────────────┐
+│                                                     │
+│  시나리오 1: 밀집 정적 장애물 환경                  │
+│  ┌─────────────────────────────────────────────┐   │
+│  │ 목표                                         │   │
+│  │   ★                                         │   │
+│  │      ■  ▲   ●                               │   │
+│  │   ■          ■   ▲                          │   │
+│  │      ▲  ●       ■                           │   │
+│  │   ●     ■   ▲                               │   │
+│  │   [로봇] →                                  │   │
+│  └─────────────────────────────────────────────┘   │
+│  장애물 수: 다수의 다양한 기하학 형태                │
+│                                                     │
+│  시나리오 2: 복잡한 배열 + 특정 기하학 에고 차량    │
+│  ┌─────────────────────────────────────────────┐   │
+│  │ 목표                                         │   │
+│  │   ★                                         │   │
+│  │         ■■■                                 │   │
+│  │    ■         ■    ●●                        │   │
+│  │       ●  ▲      ■                           │   │
+│  │    ■         ●     ■                        │   │
+│  │   [에고 차량] →                             │   │
+│  └─────────────────────────────────────────────┘   │
+│  에고 차량: 특정 비점 기하학 (non-point geometry)   │
+└─────────────────────────────────────────────────────┘
+</code></pre>
+<p><strong>시뮬레이션 파라미터</strong>:</p>
+<pre><code>실험 파라미터:
+  - 환경: 정적 3D 장애물 환경
+  - 장애물 유형: 다양한 기하학적 형태 (구, 박스, L자형 등)
+  - 로봇 모델: 비점 기하학 (에고 차량)
+  - NeRF 표현: 사전 학습된 밀도 필드
+  - σ_threshold: 명시되지 않음 (적절한 값 사용)
+  - 예측 지평 T_h: 명시되지 않음
+  - 안전 마진 ε: 명시되지 않음
+  - 솔버: SDP 기반 (CVXPY 또는 유사 도구 추정)
+</code></pre>
+<h3>5.2 평가 지표</h3>
+<pre><code>평가 지표:
+
+주요 지표:
+  1. 충돌 없음 (Collision-Free): 이진 지표 (충돌 여부)
+  2. 경로 완성 (Path Completion): 목표 도달 여부
+  
+부수적 지표 (추정, 논문에서 명시 정도 낮음):
+  3. 경로 길이 (Path Length): 생성된 경로의 총 길이
+  4. 계획 시간 (Planning Time): 각 단계의 최적화 소요 시간
+</code></pre>
+<p><strong>주의</strong>: 본 논문은 정량적 비교 테이블을 제공하지 않으며, 주로 정성적 시각화 결과를 보여준다. 이는 단기 학회 논문(5페이지)의 한계를 반영한다.</p>
+<h3>5.3 정량적 결과</h3>
+<pre><code>정량적 결과 (논문에서 제공된 정보):
+
+시나리오 1 결과:
+  ✓ 충돌 없는 경로 생성 성공
+  ✓ 모든 장애물을 회피
+  ✓ 시작점에서 목표점까지 도달
+
+시나리오 2 결과:
+  ✓ 에고 차량의 비점 기하학 고려한 경로 계획 성공
+  ✓ 더 복잡한 환경에서도 충돌 없는 경로
+  ✓ 민코프스키 합을 통한 C-space 표현 유효성 확인
+
+주의: 수치 데이터(경로 길이, 계산 시간 등) 미제공
+</code></pre>
+<p><strong>정량적 비교의 부재</strong>: 본 논문은 다른 방법들(예: A*, RRT*, 기존 MPC)과의 수치적 비교를 제공하지 않는다. 이는 개념 증명(proof-of-concept) 단계의 연구임을 시사한다.</p>
+<h3>5.4 리얼월드 실험 (Real-world Experiments) — 없음</h3>
+<p>본 논문은 실세계 로봇 실험을 포함하지 않는다. 모든 결과는 시뮬레이션 기반이다.</p>
+<p><strong>실세계 실험의 부재로 인한 미해결 질문들</strong>:</p>
+<pre><code>1. NeRF 학습 시간: 실제 로봇 배포에서 허용 가능한가?
+   - 표준 NeRF: 수 시간의 학습 필요
+   - Instant-NGP 등 최신 방법: 수 분으로 단축
+   - 질문: 온라인 학습 가능한가, 아니면 사전 학습 필요한가?
+
+2. 센서 노이즈 강건성: 실제 카메라의 노이즈에 강건한가?
+   - 모션 블러, 조명 변화, 캘리브레이션 오류 등
+
+3. 동적 장애물 처리: 정적 가정이 실제 환경에서 성립하는가?
+   - NeRF는 본질적으로 정적 장면 가정
+   - 이동하는 사람, 물체 등을 어떻게 처리할 것인가?
+
+4. 계산 지연: SDP 풀이의 실시간 성능은?
+   - 복잡한 환경에서 제어 주기 내에 해를 구할 수 있는가?
+
+5. 폐색(Occlusion): 카메라에서 보이지 않는 영역의 장애물은?
+   - NeRF는 관측된 영역만 정확하게 표현
+   - 관측되지 않은 영역의 불확실성 처리 필요
+</code></pre>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>6.1 기여점 1: NeRF와 형식적 안전 프레임워크의 통합</h3>
+<pre><code>혁신적 통합:
+
+기존 접근법들의 분리:
+  안전 계획 연구 ─────────────────────→ 단순한 기하학적 장애물 표현
+  NeRF 연구 ─────────────────────────→ 렌더링/재구성에만 초점
+
+본 논문의 혁신:
+  NeRF (풍부한 장면 표현) + 도달 가능 집합 (형식적 안전) 결합
+
+의의:
+  - NeRF의 정밀한 기하학 표현을 안전 제어에 최초로 활용
+  - 복잡한 형태의 장애물에 대한 형식적 안전 보장 가능성 제시
+</code></pre>
+<h3>6.2 기여점 2: NeRF 밀도에서 볼록 껍질 추출</h3>
+<pre><code>기술적 기여:
+
+NeRF σ(x) → 포인트 클라우드 → 볼록 껍질 → 민코프스키 합 → C-space 장애물
+
+핵심 연결고리:
+  - NeRF의 암묵적 표현을 볼록 최적화가 처리할 수 있는 형태로 변환
+  - GJK 알고리즘과의 호환성 확보
+  - 다운스트림 최적화의 볼록성 보장
+</code></pre>
+<h3>6.3 기여점 3: 해밀턴-야코비 도달 가능성과 MPC의 결합</h3>
+<pre><code>방법론적 기여:
+
+기존 MPC:
+  장애물 = 정적 집합 (고정된 볼록 다면체)
+  안전 제약 = 선형 또는 2차 제약
+
+본 논문:
+  장애물 = NeRF 기반 볼록 껍질
+  안전 제약 = 도달 가능 집합 기반 LMI
+
+장점:
+  - 로봇과 장애물의 동적 도달 가능 상태를 모두 고려
+  - 형식적 안전 증명 가능성 (완전한 구현 시)
+</code></pre>
+<h3>6.4 기여점 4: 새로운 연구 방향 제시</h3>
+<pre><code>미래 연구 방향:
+
+1. NeRF + 안전 계획 분야의 새로운 연구 방향 개척
+2. 암묵적 신경망 표현과 형식적 검증의 결합 가능성 탐색
+3. 복잡한 기하학을 가진 로봇/장애물에 대한 보편적 프레임워크
+
+관련 미래 연구:
+  - 동적 NeRF + 도달 가능 집합 (이동 장애물 처리)
+  - Instant-NGP 기반 온라인 NeRF 업데이트
+  - 강건 도달 가능 집합 (불확실성 고려)
+</code></pre>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 NeRF 구현</h3>
+<pre><code>NeRF 구현 상세:
+
+아키텍처 (추정 - 논문에서 명시 부재):
+  - 표준 NeRF-64 또는 NeRF-128 구조 (각 레이어 64/128 유닛)
+  - 위치 인코딩: L=10 (위치), L=4 (방향)
+  - 활성화 함수: ReLU (중간 레이어), Sigmoid (색상 출력)
+  - 밀도 출력: Softplus(raw_σ) (비음수 보장)
+
+학습 설정:
+  - 옵티마이저: Adam (lr = 5e-4, β₁=0.9, β₂=0.999)
+  - 배치 크기: 4096 광선/이터레이션
+  - 학습 이터레이션: ~100,000 (수 시간)
+  - 손실 함수: MSE (RGB 재구성 오류)
+
+밀도 임계값 설정:
+  - σ_threshold: 장면에 따라 조정 필요
+  - 너무 낮으면: 노이즈가 장애물로 분류
+  - 너무 높으면: 실제 장애물이 누락
+</code></pre>
+<h3>7.2 볼록 껍질 추출 구현</h3>
+<pre><code>볼록 껍질 추출 구현:
+
+1단계: 그리드 샘플링
+  - 3D 그리드 해상도: N_x × N_y × N_z (예: 128³ 또는 256³)
+  - 각 그리드 점에서 F_θ(x, d=임의) 쿼리 (d는 밀도에 무관)
+  - 메모리: 128³ × 4바이트 ≈ 8MB (float32)
+  - 계산 시간: 수십 초 (GPU 활용 시)
+
+2단계: 이진화 및 클러스터링
+  - σ(x) &gt; σ_th인 복셀 추출
+  - 연결된 성분(connected components) 분석으로 개별 장애물 분리
+  - DBSCAN 또는 유사 알고리즘으로 클러스터링
+
+3단계: 볼록 껍질 계산
+  - scipy.spatial.ConvexHull (Python) 또는 유사 라이브러리
+  - QuickHull 알고리즘: O(n log n) 평균 복잡도
+  - 출력: 꼭짓점 집합, 면 집합 (반공간 표현)
+</code></pre>
+<h3>7.3 민코프스키 합 구현</h3>
+<pre><code>민코프스키 합 구현:
+
+볼록 다면체 A, B에 대해:
+  V_sum = {a + b | a ∈ V_A, b ∈ V_B}  (꼭짓점 합 집합)
+  A ⊕ B = ConvexHull(V_sum)
+
+복잡도: |V_A| × |V_B|개의 쌍 → 볼록 껍질
+예: |V_A| = 20, |V_B| = 8 → 160개 점의 볼록 껍질
+
+로봇 기하학 B의 반전:
+  -B = {-b | b ∈ B}
+  구현: V_{-B} = {-v | v ∈ V_B}
+</code></pre>
+<h3>7.4 OCP/SDP 풀이</h3>
+<pre><code>SDP 풀이 구현:
+
+도구:
+  - CVXPY (Python 최적화 프레임워크)
+  - 백엔드 솔버: MOSEK, SCS, CVXOPT 등
+
+문제 크기 (예시):
+  - 예측 지평 N = 10 (스텝)
+  - 상태 차원 n = 6 (3D 위치 + 속도)
+  - 제어 차원 m = 3
+  - 장애물 수 n_obs = 5
+  - 결정 변수 수: N × m = 30
+  - LMI 제약 크기: O(n × n_obs)
+
+계산 시간 추정:
+  - 소규모 문제 (위의 예시): ~10ms ~ 100ms
+  - 중규모 문제: ~1s
+  - 주의: 실시간 제어 (100Hz) 달성에 어려움이 있을 수 있음
+</code></pre>
+<h3>7.5 주요 하이퍼파라미터</h3>
+<pre><code>시스템 하이퍼파라미터 (논문에서 일부 명시되지 않음):
+
+NeRF:
+  - 위치 인코딩 주파수 L_pos = 10
+  - 방향 인코딩 주파수 L_dir = 4
+  - 네트워크 깊이: 8 레이어
+  - 네트워크 너비: 256 유닛
+
+볼록 껍질 추출:
+  - 그리드 해상도: 명시 안됨
+  - σ_threshold: 명시 안됨
+
+OCP:
+  - Q: 상태 가중치 행렬 (명시 안됨)
+  - R: 제어 가중치 행렬 (명시 안됨)
+  - T_h: 예측 지평 (명시 안됨)
+  - Δt: 샘플링 주기 (명시 안됨)
+  - 안전 마진 ε: 명시 안됨
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 NeRF의 한계와 확장 가능성</h3>
+<h4>8.1.1 정적 장면 가정의 한계</h4>
+<p>표준 NeRF는 정적 장면을 가정한다. 이는 실제 로봇 항법에서 중요한 제약이다:</p>
+<pre><code>동적 환경에서의 문제:
+
+정적 NeRF의 실패 사례:
+  시간 t=0:    NeRF 학습 완료   →  장애물 위치 정확
+  시간 t=T:    사람이 지나감    →  NeRF는 여전히 이전 정보
+  결과:        NeRF 기반 경로 계획은 이동한 장애물을 인식 못함
+
+해결 방향:
+  1. Dynamic NeRF (D-NeRF, HyperNeRF): 시간 의존적 밀도 필드
+     σ(x, t) = F_θ(γ(x), γ(t))
+  2. 주기적 NeRF 업데이트: 새로운 이미지로 증분 학습
+  3. 하이브리드: NeRF (배경) + 전통적 감지 (동적 객체)
+</code></pre>
+<h4>8.1.2 계산 효율성 개선</h4>
+<pre><code>NeRF 계산 효율성:
+
+표준 NeRF의 문제:
+  - 학습: 수 시간 (V100 GPU 기준)
+  - 추론 (단일 쿼리): ~수십 ms (MLP forward pass)
+  - 대용량 그리드 샘플링: 수십 초
+
+최신 효율적 NeRF 방법:
+  1. Instant-NGP (Müller et al., 2022):
+     - 해시 인코딩으로 학습 수 분으로 단축
+     - 추론 속도 대폭 향상
+  2. TensorRF:
+     - 텐서 분해로 메모리 효율화
+  3. 3D Gaussian Splatting:
+     - 암묵적 표현 대신 명시적 3D 가우시안
+     - 실시간 렌더링 가능
+</code></pre>
+<h4>8.1.3 불확실성 정량화</h4>
+<pre><code>NeRF의 불확실성:
+
+문제: NeRF는 관측되지 않은 영역에 대해 과신(overconfident)할 수 있음
+
+해결 방향:
+  1. 앙상블 NeRF (Ensemble NeRF):
+     - 여러 NeRF 모델을 학습하여 분산 추정
+     - σ_mean ± σ_std로 불확실성 표현
+  
+  2. 베이지안 NeRF (Bayesian NeRF):
+     - 확률론적 표현으로 신뢰 구간 제공
+  
+  3. 안전 마진으로 불확실성 흡수:
+     - 불확실성이 높은 영역에 더 큰 안전 마진 적용
+     - ε(x) = ε_base + α · σ_uncertainty(x)
+</code></pre>
+<h3>8.2 도달 가능 집합의 계산 확장성</h3>
+<h4>8.2.1 고차원 상태 공간</h4>
+<pre><code>도달 가능 집합의 계산 복잡도:
+
+HJ-PDE 방법:
+  - 계산 복잡도: O(N^n) where n = 상태 공간 차원
+  - n=2: 실용적
+  - n=3: 가능하지만 느림
+  - n=4: 경계선
+  - n=6+: 불가능 (curse of dimensionality)
+
+해결 방법:
+  1. 타원체 근사 (Ellipsoidal Approximation):
+     R_f(x, T) ≈ E(c(T), P(T))
+     Ė = AE + EA^T + B_w B_w^T  (Lyapunov 방정식 변형)
+     → 저차원 행렬 연산으로 효율적 계산
+  
+  2. 다항식 수준 집합 (Polynomial Level Sets):
+     V(x) ≤ c로 표현되는 도달 가능 집합
+     SOS(Sum-of-Squares) 프로그래밍으로 계산
+  
+  3. 분해 접근법 (Decomposition):
+     고차원 시스템을 하위 시스템으로 분해
+     각 하위 시스템의 도달 가능 집합을 곱 집합으로 근사
+</code></pre>
+<h4>8.2.2 비선형 시스템</h4>
+<pre><code>비선형 동역학에서의 도달 가능 집합:
+
+문제: NeRF + 도달 가능 집합 프레임워크는 선형 시스템을 가정
+
+실제 로봇:
+  ẋ = f(x, u)  (비선형)
+
+선형화 접근:
+  f(x, u) ≈ f(x_0, u_0) + A(x-x_0) + B(u-u_0)
+  A = ∂f/∂x |_{x_0, u_0}
+  B = ∂f/∂u |_{x_0, u_0}
+
+한계: 선형화 근사 오류가 누적 → 도달 가능 집합의 보수성 저하
+
+개선 방향:
+  1. 다항식 근사 (Polynomial Approximation):
+     f(x, u)를 다항식으로 근사 후 SOS 최적화
+  2. 신경망 베리파이어 (Neural Verifier):
+     학습된 도달 가능 집합 근사 (LRAN, DeepReach 등)
+</code></pre>
+<h3>8.3 확장 가능성</h3>
+<h4>8.3.1 다중 로봇 시스템</h4>
+<pre><code>다중 로봇 확장:
+
+각 로봇 i에 대해:
+  R_f^i(x_i, [t, t+T_h]): 로봇 i의 도달 가능 집합
+
+충돌 회피 조건:
+  R_f^i ∩ R_f^j = ∅ ∀i ≠ j
+
+분산 버전:
+  - 각 로봇이 자신의 도달 가능 집합을 통신
+  - 이웃 로봇들과의 충돌 회피 조건 협상
+  - 분산 SDP 풀이
+
+NeRF의 다중 로봇 적용:
+  - 공유 NeRF 맵 (중앙 서버에서 관리)
+  - 또는 각 로봇의 로컬 NeRF + 통신을 통한 병합
+</code></pre>
+<h4>8.3.2 미지 환경 탐색 (Unknown Environment Exploration)</h4>
+<pre><code>미지 환경에서의 NeRF 기반 안전 탐색:
+
+도전과제:
+  - NeRF는 관측된 영역만 표현
+  - 미관측 영역은 불확실한 점유도를 가짐
+
+접근법 (Active NeRF 탐색):
+  1. 초기 NeRF 학습: 사용 가능한 이미지로 초기 모델 구축
+  2. 불확실성 추정: 미관측 영역의 σ 불확실성 계산
+  3. 정보 이득 계획:
+     u* = argmax_u I(σ(x) ; observations | u)
+  4. 안전 탐색:
+     - 불확실성이 높은 영역은 가능한 장애물로 처리
+     - 보수적 안전 마진 적용
+  5. NeRF 업데이트:
+     - 새로운 관측으로 NeRF 증분 업데이트
+</code></pre>
+<h3>8.4 한계점 및 미해결 문제</h3>
+<pre><code>한계점 요약:
+
+1. 정적 환경 가정
+   심각도: 높음
+   이유: 대부분의 실제 환경에는 동적 요소 존재
+   영향: 동적 장애물과의 충돌 위험
+   
+2. NeRF 학습 시간
+   심각도: 중간~높음
+   이유: 수 분~수 시간의 사전 학습 필요
+   영향: 새로운 환경 적응이 느림
+   
+3. 볼록 근사의 보수성
+   심각도: 중간
+   이유: 볼록 껍질이 비볼록 형태보다 큰 영역 차지
+   영향: 좁은 통로나 복잡한 환경에서 경로 계획 실패 가능
+   
+4. 선형 시스템 가정
+   심각도: 중간
+   이유: 비선형 로봇 동역학에 적용 시 선형화 오류
+   영향: 안전 보장의 엄밀성 저하
+   
+5. 실세계 검증 부재
+   심각도: 높음
+   이유: 모든 실험이 시뮬레이션
+   영향: 실제 로봇 적용 가능성 불명확
+   
+6. 계산 확장성
+   심각도: 중간
+   이유: SDP 풀이의 시간 복잡도가 장애물 수에 따라 증가
+   영향: 복잡한 환경에서 실시간 계획 어려움
+   
+7. 정량적 비교 부재
+   심각도: 낮음~중간
+   이유: 다른 방법과의 수치적 비교 없음
+   영향: 방법의 상대적 성능 평가 어려움
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>아래 표는 본 논문(SafeNavNeRF)과 Planner 트랙에서 기존에 리뷰된 논문들과의 비교이다.</p>
+<pre><code>표 9.1: 장애물 표현 방법 비교
+
+특성                    | SANDO       | FRGraph     | STAR-Filter | GPU-SLS     | RAY-TOLD    | SafeNavNeRF (본 논문)
+------------------------|-------------|-------------|-------------|-------------|-------------|---------------------
+장애물 표현              | 포인트 클라우드| 포인트 클라우드| 포인트 클라우드| 상태 공간 집합| LiDAR 잠재 공간| NeRF 밀도 필드
+표현의 연속성            | 이산         | 이산         | 이산         | 이산         | 연속 (잠재)  | 연속 (신경망)
+복잡 형태 처리           | 제한적       | 제한적       | 제한적       | 적용 안됨    | 가능         | 우수
+반투명/반사 표면 처리    | 불가         | 불가         | 불가         | 해당 없음    | 불가         | 가능 (이론적)
+</code></pre>
+<pre><code>표 9.2: 안전 보장 방법 비교
+
+특성                    | SANDO       | FRGraph     | STAR-Filter | GPU-SLS     | RAY-TOLD    | SafeNavNeRF
+------------------------|-------------|-------------|-------------|-------------|-------------|-------------
+안전 보장 방법           | STSFC       | Lipschitz   | 기하학적 분리 | SLS+도달가능 | MPPI 샘플링  | HJ 도달가능 집합
+형식적 안전 보장         | 부분적       | 예           | 부분적       | 예           | 아니오       | 예 (이론적)
+동적 장애물 처리         | 예 (UAV)    | 예           | 제한적       | 예           | 예           | 아니오
+실시간 안전 갱신         | 예           | 예           | 예           | 예           | 예           | 아니오
+</code></pre>
+<pre><code>표 9.3: 구현 및 실용성 비교
+
+특성                    | SANDO       | FRGraph     | STAR-Filter | GPU-SLS     | RAY-TOLD    | SafeNavNeRF
+------------------------|-------------|-------------|-------------|-------------|-------------|-------------
+코드 공개               | 예           | 예           | 예           | 부분         | 예           | 아니오
+실세계 실험             | 예 (UAV)    | 예 (다축 로봇)| 예           | 예           | 예           | 아니오
+계산 효율성             | 높음         | 높음         | 매우 높음    | GPU 필요     | 중간         | 낮음 (추정)
+온라인 작동              | 예           | 예           | 예           | 예           | 예           | 제한적
+적용 플랫폼             | UAV         | 일반 로봇    | 일반 로봇    | 일반 로봇    | 자율주행 유사 | 일반 (시뮬)
+</code></pre>
+<pre><code>표 9.4: 연구 기여와 독창성 비교
+
+특성                    | SANDO       | FRGraph     | STAR-Filter | GPU-SLS     | RAY-TOLD    | SafeNavNeRF
+------------------------|-------------|-------------|-------------|-------------|-------------|-------------
+핵심 혁신               | 시공간 SFC  | 방향인식 볼록화| 별 모양 집합 필터링| GPU-병렬 SLS| 잠재 동역학 MPPI| NeRF+도달가능집합
+환경 표현 혁신           | 낮음         | 중간         | 낮음         | 낮음         | 높음         | 매우 높음
+제어 이론 혁신           | 중간         | 중간         | 낮음         | 높음         | 낮음         | 중간
+통합의 참신성            | 중간         | 높음         | 낮음         | 높음         | 높음         | 매우 높음
+실용적 완성도            | 높음         | 높음         | 높음         | 중간         | 높음         | 낮음
+</code></pre>
+<h3>9.2 장단점 분석</h3>
+<h4>SafeNavNeRF의 장점</h4>
+<pre><code>장점 1: 우수한 장면 표현 능력
+  기존 방법들(SANDO, FRGraph, STAR-Filter)은 포인트 클라우드 기반으로
+  복잡한 기하학적 형태를 정확히 표현하는 데 한계가 있다.
+  NeRF 기반 표현은 연속적이고 미분 가능하며, 임의의 복잡한 형태를 표현할 수 있다.
+  
+  특히 다음 상황에서 우수:
+  - L자형, U자형 등 비볼록 장애물
+  - 미세한 돌기가 있는 복잡한 표면
+  - 반투명 또는 반사 표면 (이론적)
+
+장점 2: 암묵적 표현의 메모리 효율성
+  포인트 클라우드: 점의 수 × 3 float = O(n × 3)
+  복셀 그리드: O(r³) (해상도 큐브에 비례)
+  NeRF: O(|θ|) = 네트워크 파라미터 크기 (일반적으로 수 MB)
+  → 고해상도 환경에서 메모리 효율적
+
+장점 3: 형식적 안전 보장
+  SANDO는 STSFC를 통한 부분적 안전 보장,
+  RAY-TOLD는 샘플링 기반으로 형식적 보장 없음.
+  SafeNavNeRF는 해밀턴-야코비 도달 가능성을 통한 형식적 안전 보장 제공.
+
+장점 4: 새로운 연구 방향 개척
+  NeRF와 형식적 안전 계획의 결합은 문헌에서 새로운 접근법이다.
+  이 연구는 향후 더 발전된 방법들의 기초가 될 수 있다.
+</code></pre>
+<h4>SafeNavNeRF의 단점</h4>
+<pre><code>단점 1: 정적 환경 한계 (vs. SANDO, FRGraph, GPU-SLS, RAY-TOLD)
+  비교 논문들 모두 동적 장애물을 어느 정도 처리하는 반면,
+  SafeNavNeRF는 정적 환경에만 적용 가능하다.
+  실제 로봇 배포에서 가장 치명적인 한계이다.
+
+단점 2: 계산 효율성 (vs. STAR-Filter, FRGraph)
+  STAR-Filter는 실시간 볼록 자유공간 근사를 제공하며,
+  FRGraph는 온라인 방향인식 볼록화를 수행한다.
+  SafeNavNeRF는 NeRF 학습 (오프라인), 볼록 껍질 추출,
+  SDP 풀이 등 여러 계산 집약적 단계가 필요하다.
+
+단점 3: 실세계 검증 부재 (vs. 모든 비교 논문)
+  SANDO, FRGraph, STAR-Filter, GPU-SLS, RAY-TOLD 모두
+  실세계 또는 고품질 시뮬레이션에서의 검증을 제공한다.
+  SafeNavNeRF는 기본적인 시뮬레이션만 제공하며,
+  정량적 비교 데이터도 부족하다.
+
+단점 4: 볼록 근사의 보수성 (vs. FRGraph, STAR-Filter)
+  FRGraph는 방향인식 팽창으로 보수성을 제어하고,
+  STAR-Filter는 별 모양 집합 필터링으로 더 정확한 자유공간을 계산한다.
+  SafeNavNeRF의 볼록 껍질 근사는 비볼록 장애물을 과도하게 보수적으로
+  처리하여 좁은 통로에서 경로 계획이 실패할 수 있다.
+
+단점 5: 코드 미공개 (vs. SANDO, FRGraph, STAR-Filter, RAY-TOLD)
+  재현성과 확장성 측면에서 불리하다.
+</code></pre>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>실적용 가능성 평가 매트릭스:
+
+기준                        | 평가    | 비고
+----------------------------|---------|------------------------------------------
+온라인 실시간 작동          | ✗ 낮음  | NeRF 사전 학습, SDP 풀이 지연
+동적 장애물 처리            | ✗ 불가  | 정적 환경 가정
+하드웨어 요구사항           | △ 중간  | GPU 필요 (NeRF 추론, SDP)
+센서 요구사항               | △ 중간  | 다시점 카메라 또는 RGB-D 필요
+로봇 플랫폼 독립성          | ○ 높음  | 임의 로봇 기하학에 적용 가능
+안전 보장의 엄밀성          | ○ 높음  | 형식적 도달 가능 집합 기반
+코드 재사용성               | ✗ 없음  | 코드 미공개
+새로운 환경 적응            | △ 중간  | NeRF 재학습 필요 (분 ~ 시간)
+
+전체 실적용 가능성: 현재 낮음 (개념 증명 단계)
+</code></pre>
+<p><strong>실적용을 위한 필수 개선 사항</strong>:</p>
+<ol>
+<li><strong>온라인 NeRF 업데이트</strong>: Instant-NGP 또는 3D Gaussian Splatting으로 실시간 맵 업데이트</li>
+<li><strong>동적 장애물 처리</strong>: Dynamic NeRF + 물체 추적 통합</li>
+<li><strong>실시간 SDP 풀이</strong>: GPU 가속 SDP 솔버 또는 문제 크기 축소</li>
+<li><strong>불확실성 정량화</strong>: NeRF 불확실성 + 강건 제어 통합</li>
+<li><strong>실세계 검증</strong>: 다양한 로봇 플랫폼에서의 실험</li>
+</ol>
+<h3>9.4 연구 방향성 평가</h3>
+<pre><code>연구 방향성 평가:
+
+긍정적 측면:
+  1. NeRF + 형식적 안전 계획의 결합은 참신하고 잠재력이 크다
+  2. 복잡한 기하학적 환경에서의 안전 계획 문제를 새로운 관점으로 접근
+  3. 향후 동적 NeRF, 실시간 NeRF 등의 발전과 함께 더욱 실용적이 될 것
+  4. 자율주행, 드론, 산업 로봇 등 다양한 분야로 확장 가능
+
+우려사항:
+  1. 현재는 개념 증명 단계로 실용적 완성도가 낮다
+  2. NeRF 학습의 계산 비용이 온라인 적용에 장벽이 된다
+  3. 정적 가정이 실제 응용에서 매우 제한적이다
+  4. 기존 방법들(FRGraph, SANDO 등)과의 공정한 정량적 비교가 필요하다
+
+연구 성숙도:
+  현재: TRL 2-3 (기술 준비 수준, Technology Readiness Level)
+         개념 + 시뮬레이션 검증 단계
+  목표: TRL 5-6 (실험실 환경 검증)
+         실세계 소규모 실험 필요
+
+전략적 권고:
+  이 연구 방향은 중장기적으로 가치 있지만, 단기 실용화를 위해서는
+  다음 연구들이 선행되어야 한다:
+  - 실시간 NeRF (Instant-NGP 통합)
+  - 동적 장면 처리 (D-NeRF 또는 4D NeRF)
+  - GPU 가속 SDP 풀이 (GPU-SLS와 유사한 접근)
+  - 실세계 검증 프레임워크 구축
+</code></pre>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<h3>핵심 참고 문헌</h3>
+<pre><code>[1] Thapliyal, O., Sankaranarayanasamy, M., &amp; Vennelakanti, R. (2026).
+    Safe Navigation using Neural Radiance Fields via Reachable Sets.
+    ICMCR 2026. arXiv:2604.26899.
+
+[2] Mildenhall, B., Srinivasan, P. P., Tancik, M., Barron, J. T., 
+    Ramamoorthi, R., &amp; Ng, R. (2020).
+    NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis.
+    ECCV 2020.
+
+[3] Müller, T., Evans, A., Schied, C., &amp; Keller, A. (2022).
+    Instant Neural Graphics Primitives with a Multiresolution Hash Encoding.
+    ACM SIGGRAPH 2022.
+
+[4] Lozano-Pérez, T. (1983).
+    Spatial Planning: A Configuration Space Approach.
+    IEEE Transactions on Computers.
+
+[5] Mitchell, I. M., Bayen, A. M., &amp; Tomlin, C. J. (2005).
+    A Time-Dependent Hamilton-Jacobi Formulation of Reachable Sets for 
+    Continuous Dynamic Games.
+    IEEE Transactions on Automatic Control.
+
+[6] Bansal, S., Chen, M., Herbert, S., &amp; Tomlin, C. J. (2017).
+    Hamilton-Jacobi Reachability: A Brief Overview and Recent Advances.
+    IEEE CDC 2017.
+
+[7] Boyd, S., &amp; Vandenberghe, L. (2004).
+    Convex Optimization. Cambridge University Press.
+
+[8] Gilbert, E. G., Johnson, D. W., &amp; Keerthi, S. S. (1988).
+    A Fast Procedure for Computing the Distance Between Complex Objects 
+    in Three-Dimensional Space.
+    IEEE Journal of Robotics and Automation.
+
+[9] Rawlings, J. B., Mayne, D. Q., &amp; Diehl, M. M. (2017).
+    Model Predictive Control: Theory, Computation, and Design.
+    Nob Hill Publishing.
+
+[10] Mayne, D. Q. (2014).
+     Model Predictive Control: Recent Developments and Future Promise.
+     Automatica.
+</code></pre>
+<h3>관련 안전 경로 계획 연구</h3>
+<pre><code>[11] SANDO: Safe Autonomous Trajectory Planning for Dynamic Unknown 
+     Environments. arXiv 2026.
+
+[12] FRGraph: Direction-Aware Convex Free-Region Generation for Safe 
+     Navigation. arXiv 2026. (HKUST-GZ)
+
+[13] STAR-Filter: Efficient Convex Free-Space Approximation via 
+     Starshaped Set Filtering. arXiv 2026. (UPenn)
+
+[14] GPU-SLS: Safe Large-Scale Robust Nonlinear MPC via Reachability-
+     Constrained SLS on GPU. arXiv 2026.
+
+[15] RAY-TOLD: Ray-Based Latent Dynamics for Dense Dynamic Obstacle 
+     Avoidance. arXiv 2026.
+
+[16] Tordesillas, J., Lopez, B. T., &amp; How, J. P. (2021).
+     FASTER: Fast and Safe Trajectory Planner for Flights in Unknown 
+     Environments. IEEE Transactions on Robotics.
+
+[17] Zhou, D., Wang, Z., Bandyopadhyay, S., &amp; Schwager, M. (2017).
+     Fast, On-line Collision Avoidance for Dynamic Vehicles Using 
+     Buffered Voronoi Cells.
+     IEEE Robotics and Automation Letters.
+</code></pre>
+<h3>관련 NeRF 안전 로봇 연구</h3>
+<pre><code>[18] Adamkiewicz, M., Chen, T., Caccavale, A., Gardner, R., Culbertson, P.,
+     Bohg, J., &amp; Schwager, M. (2022).
+     Vision-Only Robot Navigation in a Neural Radiance World.
+     IEEE Robotics and Automation Letters.
+
+[19] Tancik, M., Casser, V., Yan, X., Pradhan, S., Mildenhall, B., 
+     Srinivasan, P. P., ... &amp; Kretzschmar, H. (2022).
+     Block-NeRF: Scalable Large Scene Neural View Synthesis.
+     CVPR 2022.
+
+[20] Kerbl, B., Kopanas, G., Leimkühler, T., &amp; Drettakis, G. (2023).
+     3D Gaussian Splatting for Real-Time Radiance Field Rendering.
+     ACM SIGGRAPH 2023.
+</code></pre>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>11.1 연구의 요약</h3>
+<p>본 논문 &quot;Safe Navigation using Neural Radiance Fields via Reachable Sets&quot;은 자율 로봇 항법 분야에서 두 가지 강력한 기술 프레임워크, 즉 <strong>Neural Radiance Fields(NeRF)</strong>와 <strong>해밀턴-야코비 도달 가능 집합(Hamilton-Jacobi Reachable Sets)</strong>을 최초로 통합하는 시도를 제시한다.</p>
+<p>연구의 핵심 아이디어는 다음과 같다:</p>
+<pre><code>핵심 통합 아이디어:
+
+  NeRF (신경 복사 필드)
+  ─ 연속적 3D 밀도 표현 σ(x)
+  ─ 복잡한 기하학적 형태 처리
+  ─ 암묵적이고 메모리 효율적
+       ↓ 볼록 껍질 추출
+       ↓ 민코프스키 합
+  
+  C-space 장애물 C_obs
+       ↓ LMI 변환
+  
+  도달 가능 집합 (Reachable Sets)
+  ─ 형식적 안전 보장
+  ─ 해밀턴-야코비 PDE
+  ─ 최악의 경우 경로 바인딩
+       ↓ 제약 최적 제어
+  
+  안전 경로 계획
+  ─ 충돌 없음 보장
+  ─ 최적 경로
+</code></pre>
+<h3>11.2 혁신성 평가</h3>
+<pre><code>혁신성 점수 (5점 만점):
+
+아이디어 독창성:     ★★★★☆ (4/5) - NeRF+도달가능집합 최초 통합
+기술적 깊이:         ★★★☆☆ (3/5) - 각 요소는 잘 알려진 이론
+실험적 완성도:       ★★☆☆☆ (2/5) - 시뮬레이션만, 정량적 비교 부재
+실용적 가치:         ★★☆☆☆ (2/5) - 개념 증명 단계
+잠재적 영향력:       ★★★★☆ (4/5) - 새로운 연구 방향 개척
+
+전체: ★★★☆☆ (3/5) - 참신한 아이디어이나 실용화까지 갈 길이 멀다
+</code></pre>
+<h3>11.3 실용적 의의</h3>
+<p><strong>단기적 의의 (1~2년)</strong>:</p>
+<ul>
+<li>NeRF 기반 로봇 안전 계획 연구의 선구적 사례로 인용될 것</li>
+<li>유사 접근법을 탐색하는 연구자들에게 기초 프레임워크 제공</li>
+<li>컴퓨터 비전과 제어 이론의 융합 연구를 촉진</li>
+</ul>
+<p><strong>중기적 의의 (3~5년)</strong>:</p>
+<ul>
+<li>실시간 NeRF(Instant-NGP, 3D GS) 기술 성숙과 함께 실용화 가능성 증가</li>
+<li>동적 NeRF와의 결합으로 이동 장애물 처리 가능성</li>
+<li>GPU 가속 SDP 풀이와 결합하여 실시간 성능 달성 가능</li>
+</ul>
+<p><strong>장기적 의의 (5년 이상)</strong>:</p>
+<ul>
+<li>신경 암묵적 표현 + 형식적 안전 보장의 표준 프레임워크로 자리잡을 가능성</li>
+<li>자율주행, 드론, 서비스 로봇 등 다양한 분야로 확장</li>
+</ul>
+<h3>11.4 향후 연구 방향</h3>
+<p>본 논문이 제시하는 연구 방향에서 다음과 같은 구체적인 후속 연구가 기대된다:</p>
+<pre><code>향후 연구 로드맵:
+
+단기 (2026-2027):
+  □ Instant-NGP 기반 실시간 NeRF 통합
+  □ 실세계 로봇 (드론 또는 모바일 로봇)에서의 검증
+  □ 정량적 비교 실험 (vs. FRGraph, SANDO 등)
+  □ 불확실성 정량화 모듈 추가
+
+중기 (2027-2029):
+  □ Dynamic NeRF + 도달 가능 집합 확장
+  □ 다중 로봇 분산 NeRF 맵 공유
+  □ GPU-SLS 스타일의 GPU 가속 SDP 풀이
+  □ 강건 도달 가능 집합 (센서 노이즈 고려)
+
+장기 (2029+):
+  □ 4D 시공간 NeRF + 시공간 도달 가능 집합
+  □ 자기 지도 학습 (self-supervised) NeRF 안전 계획
+  □ 실시간 신경 안전 인증서 (neural safety certificate)
+</code></pre>
+<h3>11.5 최종 평가</h3>
+<p>SafeNavNeRF는 로봇 경로 계획 분야에서 새로운 연구 방향을 개척하는 중요한 첫 걸음이다. NeRF의 강력한 3D 표현 능력과 해밀턴-야코비 도달 가능성의 형식적 안전 보장을 결합하는 아이디어는 이론적으로 매력적이며, 미래의 안전 로봇 항법 시스템에 상당한 영향을 미칠 가능성이 있다.</p>
+<p>그러나 현재의 구현은 정적 환경 가정, 높은 계산 비용, 실세계 검증의 부재, 정량적 비교의 결여 등 여러 중요한 한계를 가지고 있다. SANDO, FRGraph, STAR-Filter, GPU-SLS, RAY-TOLD 등 기존에 리뷰된 논문들과 비교할 때, SafeNavNeRF는 독창성과 이론적 우아함에서는 앞서지만 실용적 완성도와 실험적 엄밀성에서는 뒤처진다.</p>
+<p>이 연구는 ICMCR 2026이라는 메카트로닉스 중심의 학회에서 발표되었는데, 이는 타겟 청중의 관심과 이 연구의 학술적 위치를 반영한다. 컴퓨터 비전과 제어 이론의 경계에 위치한 이 연구는 두 분야의 독자 모두에게 새로운 관점을 제공한다.</p>
+<p>결론적으로, SafeNavNeRF는 &quot;좋은 아이디어이나 아직 미완성&quot;인 연구로 평가할 수 있다. 향후 더 많은 연구 그룹이 이 방향을 탐색하고, 실시간 NeRF와 고속 SDP 풀이 기술이 성숙함에 따라 이 접근법의 실용적 가치는 크게 증가할 것으로 기대된다.</p>
+<hr>
+<p><em>본 리뷰는 2026년 5월 기준 공개된 arXiv 버전을 바탕으로 작성되었습니다.</em>
+<em>리뷰어: NanoClaw Paper Review Agent</em>
+<em>작성일: 2026-05-04</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

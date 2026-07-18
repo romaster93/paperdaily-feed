@@ -1,0 +1,1386 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>FineCog-Nav: Fine-Grained Cognitive Navigation Framework for Aerial VLN · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">CVPR 2026</div>
+    <h1>FineCog-Nav: A Fine-Grained Cognitive Navigation Framework for Aerial Vision-Language Navigation</h1>
+    <div class="meta-row">
+      <span class="chip">VLN</span>
+      <span><a href="https://arxiv.org/abs/2604.16298">arXiv:2604.16298</a></span>
+      <span>리뷰 2026-04-21</span>
+      <span>46분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>FineCog-Nav: 인지 모듈 기반 제로샷 UAV VLN 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: FineCog-Nav: Integrating Fine-grained Cognitive Modules for Zero-shot Multimodal UAV Navigation</li>
+<li><strong>저자 (Authors)</strong>: Dian Shao, Zhengzheng Xu, Peiyang Wang, Like Liu, Yule Wang, Jieqi Shi (교신저자), Jing Huo</li>
+<li><strong>소속 (Affiliation)</strong>:<ul>
+<li>Dian Shao, Zhengzheng Xu, Like Liu, Yule Wang: Northwestern Polytechnical University (NPU), Xi&#39;an, China</li>
+<li>Peiyang Wang, Jieqi Shi, Jing Huo: Nanjing University, Nanjing, China</li>
+</ul>
+</li>
+<li><strong>발표처 (Published)</strong>: CVPR 2026 Findings (IEEE/CVF Conference on Computer Vision and Pattern Recognition 2026)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2604.16298">https://doi.org/10.48550/arXiv.2604.16298</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.16298v1">https://arxiv.org/abs/2604.16298v1</a></li>
+<li><strong>프로젝트 페이지</strong>: <a href="https://smartdianlab.github.io/projects-FineCogNav">https://smartdianlab.github.io/projects-FineCogNav</a></li>
+<li><strong>코드</strong>: 미공개 (프로젝트 페이지에서 공개 예정)</li>
+<li><strong>지원</strong>: NSFC Grant 62306239, Grant 62506153; 섬서성 Sanqin Talents Introduction Plan</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>FineCog-Nav는 <strong>UAV(무인 항공기) 비전-언어 내비게이션(VLN)</strong> 분야에서 제로샷(zero-shot) 설정의 핵심 한계를 해결하기 위한 인지 기반 모듈러 프레임워크다. 기존 제로샷 VLN 방법론들은 GPT-4V 수준의 초대형 모델(LFMs)에 의존하거나, 모듈 간 느슨한 조율로 인한 성능 한계에 봉착해왔다. FineCog-Nav의 핵심 질문은: <strong>&quot;인간의 인지 구조—언어 처리, 지각, 주의, 기억, 상상, 추론, 의사결정—를 세분화된 독립 모듈로 명시적으로 구현하면, 중간 크기 모델(72B 이하)로도 UAV 장거리 내비게이션을 효과적으로 수행할 수 있는가?&quot;</strong></p>
+<p>연구의 두 가지 핵심 기여:</p>
+<ol>
+<li><strong>FineCog-Nav 프레임워크</strong>: 7가지 인지 기능을 독립 모듈로 구현하고, 각 모듈이 역할 특화 프롬프트와 구조화된 입출력 프로토콜을 통해 협력하는 제로샷 UAV VLN 시스템</li>
+<li><strong>AerialVLN-Fine 벤치마크</strong>: 기존 AerialVLN의 데이터 품질 문제를 해결하고 문장 수준 주석을 추가한 300개 고품질 궤적 데이터셋</li>
+</ol>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. UAV VLN의 고유한 난이도</h4>
+<p>지상 기반 VLN과 달리, UAV 내비게이션은 근본적으로 더 복잡한 3차원 공간에서 에고센트릭(egocentric) 관점의 탐색을 요구한다:</p>
+<pre><code>지상 VLN의 특성:
+  이동 공간: 2D (수평면 이동)
+  시점: 카메라 높이 고정
+  랜드마크: 문, 가구 등 근거리 밀집 배치
+  평균 경로 길이: ~10m, ~15 단계
+
+UAV VLN의 특성:
+  이동 공간: 3D (고도 변화 포함)
+  시점: 비행 중 연속 변화 (에고센트릭 FPV)
+  랜드마크: 건물, 강, 다리 등 원거리 분산 배치
+  평균 경로 길이: ~189m, ~76 단계 (AerialVLN-Fine 기준)
+  장거리 비율: 지상 VLN 대비 10-15배 긴 궤적
+</code></pre>
+<h4>B. 기존 제로샷 방법의 한계</h4>
+<p>현재 제로샷 UAV VLN의 주요 문제:</p>
+<p><strong>1. 초대형 모델 의존성 문제</strong>:</p>
+<pre><code>현상: CityNavAgent [Zhang et al., 2025]에서
+  GPT-4V 사용 시 SR: 28.3%
+  LLaVA-7B 교체 시 SR: 1.7%  (→ 94% 성능 하락)
+
+원인: 일반적인 프롬프트가 소형 모델의 추론 능력을 충분히 활용하지 못함
+결과: 엣지 디바이스 배치 불가 (대용량 메모리, 높은 지연)
+</code></pre>
+<p><strong>2. 느슨한 모듈 조율 문제</strong>:</p>
+<pre><code>기존 아키텍처 (NavGPT 류):
+  인식 모듈 → [정보 전달] → 계획 모듈 → [정보 전달] → 행동 모듈
+  
+문제: 
+  - 모듈 간 정보 전달이 비구조화된 자연어 텍스트로만 이루어짐
+  - 인식 결과가 기억 모듈에 반영되지 않고 즉시 소실
+  - 하위 목표(subgoal) 달성 여부를 판단하는 명시적 메커니즘 부재
+  - 장거리 궤적에서 인지 일관성 유지 불가
+</code></pre>
+<p><strong>3. UAV 특화 요소 누락</strong>:</p>
+<pre><code>기존 방법에서 누락된 UAV 핵심 요소:
+  - 계층적 경로 계획 (장거리 → 중간 지점 → 단계별 행동)
+  - 동적 하위 목표 추출 및 완료 판단
+  - 3D 공간에서의 충돌 경고 시스템
+  - UAV 연속 제어 명령 매핑
+</code></pre>
+<p><strong>4. 평가 데이터의 품질 문제</strong>:</p>
+<pre><code>AerialVLN 원본 데이터셋의 문제:
+  - 궤적-지시 정렬 불일치 (지시가 궤적과 맞지 않음)
+  - 모호한 지시어 (&quot;the building&quot;이 여러 건물 중 어느 것인지 불명확)
+  - 충돌 이상값 (궤적이 장애물을 통과)
+  - 보이지 않거나 식별 불가능한 랜드마크 참조
+</code></pre>
+<h3>2.2 핵심 해결책</h3>
+<p>FineCog-Nav의 해결 전략은 <strong>인간 인지 심리학의 구조적 분리 원리</strong>를 VLN에 적용하는 것이다. 인간이 복잡한 내비게이션 과제를 수행할 때 뇌는 각기 다른 인지 기능을 병렬적으로, 그러나 통합적으로 활용한다:</p>
+<pre><code>인간의 인지 내비게이션 구조:
+  언어 이해: &quot;다음 신호등에서 오른쪽으로 돌아라&quot; → 하위 목표 파악
+  지각:     현재 시야에서 신호등, 건물, 도로 인식
+  주의:     &quot;신호등&quot;에 주의 집중, 배경 노이즈 억제
+  기억:     &quot;이전에 오른쪽에 이미 돌았음&quot;을 기억
+  상상:     &quot;오른쪽으로 돌면 어떤 장면이 펼쳐질까?&quot; 예측
+  추론:     &quot;아직 목적지에 도달하지 않았다, 계속 이동해야 한다&quot;
+  의사결정: &quot;오른쪽 전진 3m&quot; 행동 선택
+
+→ FineCog-Nav는 이 7가지 기능을 독립 모듈로 구현
+</code></pre>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 인지 모듈 아키텍처 개요</h3>
+<p>FineCog-Nav는 UAV 내비게이션을 <strong>7개의 인지 모듈과 3단계 파이프라인</strong>으로 구성한다:</p>
+<pre><code>[입력층]
+  자연어 지시 I = {I_1, I_2, ..., I_N}  (N개 지시문)
+  에고센트릭 RGB 관찰 O_t                (시간 t에서의 UAV 카메라 영상)
+  충돌 경고 W_t                          (규칙 기반 장애물 감지 신호)
+
+[파이프라인]
+  Stage 1: 지시 분해 (Instruction Parsing)
+    Instruction Parser → 지시문 I_i를 하위 목표 집합으로 분해
+    Subgoal Extractor → {g_i^(1), g_i^(2), ..., g_i^(K)}
+
+  Stage 2: 장면 이해 (Scene Understanding)
+    Perception Module → 장면 설명 P_t (현재 시야 기술)
+    Attention Module  → A_t (핵심 랜드마크 및 시각적 단서 강조)
+    Imagination Module → R[g_i^(k)] (하위 목표 완료 시 예상 장면)
+
+  Stage 3: 실행 결정 (Execution &amp; Decision)
+    Memory Module     → M (3단계 계층적 기억)
+    Subgoal Judger    → J(...) → {True, False}
+    Decision Module   → {p, a_t, τ} (행동 선호도, 행동, 해석)
+
+[출력층]
+  a_t ∈ A = {전진, 후진, 좌회전, 우회전, 상승, 하강, 정지}
+  τ: 해석 가능한 추론 근거
+</code></pre>
+<h3>3.2 지시 파서 및 하위 목표 추출기 (Instruction Parser &amp; Subgoal Extractor)</h3>
+<p>복잡한 장거리 지시를 관리 가능한 단위로 분해하는 첫 번째 단계:</p>
+<pre><code>입력 지시 예시:
+  I_3 = &quot;Turn right to face the river and follow the water way until 
+         reaching a bridge&quot;
+
+지시 파서 처리:
+  I_3 → 의미 단위 분해 → 
+  하위 목표 추출기 적용:
+    g_3^(1) = &quot;Turn right and face the river&quot;    (방향 전환)
+    g_3^(2) = &quot;Follow waterway&quot;                  (경로 추적)
+    g_3^(3) = &quot;Reach the bridge&quot;                 (목표 도달)
+
+핵심 설계 원칙:
+  - 각 하위 목표 = 시각적으로 검증 가능한 체크포인트
+  - 명시적 랜드마크 또는 행동 동사 포함
+  - 순서적 의존성 인코딩 (g_i^(k) 완료 후 g_i^(k+1) 진행)
+</code></pre>
+<p>역할 특화 프롬프트 구조:</p>
+<pre><code>시스템 프롬프트 [지시 파서]:
+  역할: &quot;You are an instruction segmentation expert for UAV navigation.&quot;
+  일반 태스크: &quot;Break down the given instruction into sequential subtasks.&quot;
+  UAV 특화: &quot;Consider 3D movement including altitude changes, 
+             and identify visual landmarks in each subtask.&quot;
+  I/O 프로토콜: &quot;Output: JSON array of {subgoal_id, description, landmark}&quot;
+</code></pre>
+<h3>3.3 지각 및 주의 모듈 (Perception &amp; Attention Modules)</h3>
+<p>현재 에고센트릭 관찰을 분석하는 두 번째 단계:</p>
+<pre><code>지각 모듈 (Perception Module P):
+  입력: 에고센트릭 RGB 이미지 O_t
+  역할: 장면을 1인칭 시점으로 서술
+  출력 P_t: &quot;I currently see a wide bridge spanning a river.
+             The bridge appears to be approximately 50 meters long.
+             There are traffic barriers on both sides.&quot;
+
+주의 모듈 (Attention Module AT):
+  입력: P_t + 현재 하위 목표 g_i^(k)
+  역할: 하위 목표와 관련된 핵심 시각 단서 식별
+  출력 A_t: &quot;Key landmarks relevant to current subgoal &#39;reach bridge&#39;:
+             - BRIDGE: Detected in forward direction, ~30m distance
+             - RIVER: Visible on both sides, confirming waterway alignment
+             - BARRIERS: Road safety indicators on bridge edges&quot;
+
+모듈 간 상호작용:
+  P_t ──────→ Subgoal Judger (현재 관찰 제공)
+  A_t ──────→ Decision Module (주의 집중 랜드마크 제공)
+  A_t ──────→ Memory Module (중요 시각 단서 기억화)
+</code></pre>
+<p>VLM 선택 원칙:</p>
+<pre><code>Perception/Attention에 사용된 VLM: Qwen2.5-VL-32B
+선택 기준:
+  - 32B 파라미터: 엣지 배치 고려 (VS. GPT-4V의 수백 B)
+  - 에고센트릭 이미지 처리 능력 검증됨
+  - API 인터페이스 제공 (모든 실험에서 동일 VLM 고정)
+</code></pre>
+<h3>3.4 상상 모듈 (Imagination Module)</h3>
+<p>FineCog-Nav의 가장 독창적인 모듈 중 하나로, 하위 목표 완료 시 예상되는 장면을 <strong>제약적 방식</strong>으로 생성한다:</p>
+<pre><code>상상 모듈의 역할:
+  목적: 하위 목표 g_i^(k) 완료 시점의 예상 장면 R[g_i^(k)] 생성
+  
+  조건부 생성:
+    입력: 현재 하위 목표 g_i^(k) + 인접 하위 목표 g_i^(k±1) + 관련 랜드마크
+    출력: &quot;Upon reaching the bridge, the scene should show:
+           - Bridge structure directly in front or below
+           - River visible on both sides
+           - Transition from water to bridge surface visible&quot;
+  
+  설계 철학:
+    ❌ 오픈-엔디드 장면 생성 (환각 위험)
+    ✅ 랜드마크 중심의 제약적 기술 생성 (환각 억제)
+    
+  환각 억제 메커니즘:
+    - 현재 지시 I_i에 언급된 랜드마크로 범위 제한
+    - 인접 하위 목표 정보로 일관성 유지
+    - &quot;Brief, landmark-centric description&quot; 형식 강제
+</code></pre>
+<p>상상 모듈의 하위 목표 판단 기여:</p>
+<pre><code>수식 (5):
+  J(O_t, g_i^(k), M^[g_i^(k)], R^[g_i^(k)]) → {True, False}
+  
+  판단 논리:
+    IF 현재 관찰 O_t ≈ 상상된 기준 상태 R[g_i^(k)] THEN True
+    
+  세 가지 증거 통합:
+    1. O_t: 현재 시각 관찰 (실제)
+    2. M^[g_i^(k)]: 하위 목표 관련 기억 (역사)
+    3. R^[g_i^(k)]: 상상된 기준 상태 (기대)
+  
+  장점: 단일 모달리티 판단 대비 훨씬 높은 신뢰도
+</code></pre>
+<h3>3.5 계층적 기억 관리 (Multi-level Memory Module)</h3>
+<p>FineCog-Nav의 기억 모듈은 3단계 계층 구조로 장기 문맥을 유지한다:</p>
+<pre><code>Level 1: 단계 기억 (Step Memory) M[t]
+  저장 내용: 시간 t에서의 관찰 + 행동
+  형식: &quot;I see [P_t summary]. I do [a_t].&quot;
+  역할: 최근 몇 단계의 상세 이력 보존
+  
+Level 2: 하위 목표 기억 (Subgoal Memory) M^[g_i^(k)]
+  저장 내용: 하위 목표 g_i^(k) 수행 중의 단계 기억들
+  완료 시 압축: LLM이 단계 기억들을 콤팩트한 요약으로 통합
+    M^[g_i^(k)]_★ = LLM_summarize({M[t] : t ∈ 하위 목표 k 수행 기간})
+  영감: 인간 기억 공고화(memory consolidation) 원리
+  
+Level 3: 지시 기억 (Instruction Memory) M^[I_i]
+  저장 내용: 지시 I_i에 속한 모든 완료된 하위 목표 요약들
+  수식 (6): M^[I_i] = {M^[g_i^(1)]_★, M^[g_i^(2)]_★, ..., M^[g_i^(k)]_★}
+  역할: 지시 전체에 걸친 장기 문맥 유지
+
+계층 기억의 장점 (Ablation 결과):
+  플랫 히스토리(NavGPT 방식) 대비:
+    SR2D: 0.67% → 6.00% (+795%)   ← 계층 기억이 결정적
+    OSR:  2.67% → 9.00% (+237%)
+    NE:   97.76m → 91.43m (-6.4%)
+</code></pre>
+<p>기억 공고화 알고리즘:</p>
+<pre><code class="language-python">def consolidate_subgoal_memory(step_memories, llm):
+    &quot;&quot;&quot;하위 목표 완료 시 단계 기억들을 요약&quot;&quot;&quot;
+    prompt = f&quot;&quot;&quot;
+    Summarize the following navigation steps for subgoal completion:
+    
+    Steps: {step_memories}
+    
+    Provide a concise summary capturing:
+    1. What was observed (key landmarks)
+    2. What actions were taken
+    3. Current spatial position relative to goal
+    
+    Format: [Landmark observations] → [Key actions] → [Current status]
+    &quot;&quot;&quot;
+    return llm.generate(prompt)  # 압축된 하위 목표 기억 반환
+</code></pre>
+<h3>3.6 의사결정 모듈 (Decision-Making Module)</h3>
+<p>최종 행동을 선택하는 모듈로, 5가지 정보를 통합한다:</p>
+<pre><code>입력 (수식 7):
+  g_i^(k): 현재 하위 목표
+  I_i:     현재 지시문
+  O_t:     현재 시각 관찰
+  W_t:     충돌 경고 신호
+  M^[I_i]: 계층적 지시 기억
+
+출력:
+  p:   후보 행동들에 대한 상대적 선호도 점수
+  a_t: 최적 선택 행동 (최고 점수 행동)
+  τ:   해석 가능한 추론 근거 (interpretable rationale)
+
+행동 공간 A = {
+  Forward, Backward,   # 전후 이동
+  Turn_Left, Turn_Right, # 방향 전환
+  Ascend, Descend,     # 고도 변경
+  Stop                 # 목표 도달 판단
+}
+
+추론 근거 τ 예시:
+  &quot;I observe the bridge 30 meters ahead which matches subgoal 3.
+   Memory confirms I have been following the river.
+   No collision warning detected. Optimal action: Forward.&quot;
+</code></pre>
+<h3>3.7 전체 내비게이션 루프 (Navigation Loop)</h3>
+<pre><code>초기화:
+  지시 I = {I_1, ..., I_N} 수신
+  하위 목표 추출: {g_1^(1), ..., g_N^(K)} 생성
+  기억 초기화: M^[I_i] = {} for all i
+
+각 시간 단계 t에서:
+  1. 관찰 O_t, 충돌 W_t 획득
+  2. 지각 P_t = Perception(O_t)
+  3. 주의 A_t = Attention(O_t, g_i^(k))
+  4. 기억 업데이트: M[t] = record(P_t, A_t)
+  5. 하위 목표 판단: done = J(O_t, g_i^(k), M^[g_i^(k)], R^[g_i^(k)])
+     IF done: M^[g_i^(k)]_★ 생성, M^[I_i] 업데이트, g_i^(k+1)로 전환
+  6. 의사결정: {p, a_t, τ} = D(g_i^(k), I_i, O_t, W_t, M^[I_i])
+  7. 행동 a_t 실행
+
+종료 조건:
+  모든 지시 I_N의 모든 하위 목표 완료 OR 최대 단계 수 도달
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인 다이어그램</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                     FineCog-Nav 시스템                           │
+│                                                                  │
+│  [자연어 지시 I]          [에고센트릭 관찰 O_t]   [충돌 경고 W_t] │
+│         │                        │                     │        │
+│         ▼                        ▼                     │        │
+│  ┌──────────────┐      ┌──────────────────┐             │        │
+│  │ Instruction  │      │  Perception      │             │        │
+│  │   Parser     │      │    Module        │             │        │
+│  │  (LLM)       │      │   (VLM-32B)      │             │        │
+│  └──────┬───────┘      └────────┬─────────┘             │        │
+│         │                       │                        │        │
+│         ▼                       ▼                        │        │
+│  ┌──────────────┐      ┌──────────────────┐             │        │
+│  │  Subgoal     │      │    Attention     │             │        │
+│  │  Extractor   │      │     Module       │             │        │
+│  │  (LLM)       │      │    (LLM)         │             │        │
+│  └──────┬───────┘      └────────┬─────────┘             │        │
+│         │                       │                        │        │
+│         ▼                       ▼                        │        │
+│  {g_i^(k)}         ┌──────────────────┐                 │        │
+│    │               │   Imagination     │                 │        │
+│    │               │     Module        │                 │        │
+│    │               │   (LLM)          │                 │        │
+│    │               └────────┬─────────┘                 │        │
+│    │                        │ R[g_i^(k)]                │        │
+│    │                        ▼                            │        │
+│    │               ┌──────────────────┐                 │        │
+│    ├──────────────→│  Subgoal Judger  │←───────────────┐│        │
+│    │               │    (LLM)         │                 ││        │
+│    │               └────────┬─────────┘                 ││        │
+│    │                        │                            ││        │
+│    │      ┌─────────────────┼────────────────────────┐  ││        │
+│    │      │       Memory Module (LLM)                 │  ││        │
+│    │      │  Step: M[t] → Subgoal: M[g]★ → Inst: M[I]│  ││        │
+│    │      └─────────────────┬────────────────────────┘  ││        │
+│    │                        │ M^[I_i]                    ││        │
+│    ▼                        ▼                            ││        │
+│  ┌─────────────────────────────────────────────────────────┐     │
+│  │              Decision-Making Module (LLM)               │     │
+│  │     g_i^(k) + I_i + O_t + W_t + M^[I_i] → {p, a_t, τ}│←────┘│
+│  └─────────────────────────────────────────────────────────┘      │
+│                          │                                         │
+│                          ▼                                         │
+│               [행동 a_t 실행 → UAV 이동]                          │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 데이터 흐름 상세</h3>
+<pre><code>T=1: 지시 분해 단계 (1회)
+  Input:  &quot;Lift off and head towards the bridge...&quot;
+  Parser: 5개 지시문으로 분리
+  Extractor: 각 지시문에서 2-4개 하위 목표 추출
+  → 총 ~15개 하위 목표 생성
+
+T=t (각 내비게이션 단계):
+  RGB Frame ──→ VLM-32B (Perception) → P_t (장면 기술)
+               ├──→ LLM (Attention) → A_t (주의 단서)
+               └──→ LLM (Imagination) → R[g_i^(k)] (예상 장면)
+  
+  메모리 업데이트:
+    M[t] = {P_t, A_t, a_{t-1}}
+    
+  하위 목표 판단:
+    J(O_t, g_i^(k), M^[g_i^(k)], R^[g_i^(k)]) → True/False
+    → True: 기억 압축 &amp; 다음 하위 목표로 전환
+    
+  의사결정:
+    {M^[I_i], g_i^(k), W_t} → LLM → a_t
+
+API 호출 횟수 (1 내비게이션 단계당):
+  Perception: 1 (VLM)
+  Attention: 1 (LLM)
+  Subgoal Judger: 1 (LLM)
+  Decision: 1 (LLM)
+  Total: ~4 API calls per step
+  → 76단계 평균 궤적: ~304 API calls per trajectory
+</code></pre>
+<p><img src="figures/fig_01_01.jpeg" alt="FineCog-Nav 시스템 개요" loading="lazy"></p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<h4>AerialVLN-Fine (신규 제안)</h4>
+<pre><code>출처:    AerialVLN [Liu et al., ICCV 2023]의 검증 세트에서 선별
+크기:    300개 고품질 궤적 (15개 장면, 장면당 ~20개)
+평균 궤적 길이: 189m
+평균 행동 수:   76 steps
+지시문 수:      평균 4.6개 문장 (문장 수준 주석 포함)
+지시 길이:      평균 103 단어 (원본 59 → 1.75배 상세화)
+총 문장 수:     1,383개 (문장당 평균 41m, 17 actions)
+5가지 역량 차원: 방향 추적, 랜드마크 탐색, 거리 추정, 고도 조절, 전환 인식
+</code></pre>
+<p>품질 보증 프로세스:</p>
+<pre><code>1. 수동 검토 및 선별:
+   - 4가지 품질 기준으로 각 궤적 수동 확인
+   - 장면당 ~20개 다양한 고품질 샘플 유지
+
+2. 지시 분할 및 정제:
+   - 복잡한 지시를 문장 단위로 분할
+   - 명시적 행동 동사, 명확한 끝점, 명확한 랜드마크로 정제
+   
+3. 궤적 분할 및 정렬:
+   - 궤적을 지시 문장에 정밀 정렬
+   
+4. 품질 관리:
+   - 모든 주석 다중 라운드 수동 검토
+</code></pre>
+<h4>AerialVLN-S-Val (기존 벤치마크)</h4>
+<pre><code>크기:    864개 궤적 (더 크고 노이즈 있음)
+사용 목적: 로버스트니스 및 확장성 검증
+</code></pre>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<pre><code>3D 확장 메트릭 (기존 2D → 3D 공간으로 확장):
+
+NE (Navigation Error):
+  정의: UAV 최종 위치와 목표 간 3D 유클리드 거리 (m)
+  계산: ||p_final - p_goal||_3D
+  해석: 낮을수록 좋음
+
+SR2D / SR3D (Success Rate):
+  정의: 목표로부터 20m 이내에 도달한 궤적의 비율 (%)
+  2D: (x,y) 평면 거리 기준
+  3D: (x,y,z) 3D 거리 기준
+  해석: 높을수록 좋음
+
+OSR (Oracle Success Rate):
+  정의: 궤적 중 어느 시점에서든 목표 20m 이내에 도달한 비율 (%)
+  해석: 목표 &quot;통과&quot; 여부 측정, 정지 조건 무관
+
+nDTW (Normalized Dynamic Time Warping):
+  정의: 실제 궤적과 참조 궤적 간의 유사도 (0~1)
+  해석: 높을수록 궤적 충실도 우수
+
+PL (Path Length): 총 이동 거리 (m)
+Steps: 총 행동 수
+</code></pre>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<h4>표 1: LLM 크기별 Single-module BaseModel vs. FineCog-Nav (AerialVLN-Fine)</h4>
+<p>모든 실험에서 VLM = Qwen2.5-VL-32B 고정</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>모델</th>
+<th>방법</th>
+<th>SR2D(%)</th>
+<th>SR3D(%)</th>
+<th>OSR(%)</th>
+<th>NE(m)↓</th>
+<th>nDTW(%)</th>
+<th>PL(m)</th>
+<th>Steps</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Gemini 2.5 Flash-Lite</strong></td>
+<td>BaseModel</td>
+<td>1.33</td>
+<td>1.00</td>
+<td>3.67</td>
+<td>240.04</td>
+<td>8.84</td>
+<td>329.78</td>
+<td>129.70</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>FineCog-Nav</strong></td>
+<td><strong>4.00</strong></td>
+<td><strong>2.67</strong></td>
+<td><strong>6.33</strong></td>
+<td><strong>120.70</strong></td>
+<td><strong>15.66</strong></td>
+<td>146.24</td>
+<td>57.52</td>
+</tr>
+<tr>
+<td><strong>GPT-4o-mini</strong></td>
+<td>BaseModel</td>
+<td>0.33</td>
+<td>0.33</td>
+<td>2.00</td>
+<td>325.98</td>
+<td>8.74</td>
+<td>350.43</td>
+<td>103.10</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>FineCog-Nav</strong></td>
+<td><strong>4.00</strong></td>
+<td><strong>2.33</strong></td>
+<td><strong>3.67</strong></td>
+<td><strong>100.37</strong></td>
+<td><strong>20.45</strong></td>
+<td>56.98</td>
+<td>31.73</td>
+</tr>
+<tr>
+<td><strong>InternLM3-8B</strong></td>
+<td>BaseModel</td>
+<td>0.67</td>
+<td>0.33</td>
+<td>3.33</td>
+<td>128.13</td>
+<td>14.01</td>
+<td>86.30</td>
+<td>34.65</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>FineCog-Nav</strong></td>
+<td><strong>2.67</strong></td>
+<td><strong>2.33</strong></td>
+<td><strong>6.67</strong></td>
+<td><strong>120.72</strong></td>
+<td><strong>14.91</strong></td>
+<td>139.72</td>
+<td>42.22</td>
+</tr>
+<tr>
+<td><strong>ChatGLM-4-9B</strong></td>
+<td>BaseModel</td>
+<td>1.00</td>
+<td>0.33</td>
+<td>1.33</td>
+<td>124.03</td>
+<td>13.27</td>
+<td>50.19</td>
+<td>20.36</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>FineCog-Nav</strong></td>
+<td><strong>3.00</strong></td>
+<td><strong>2.67</strong></td>
+<td><strong>2.67</strong></td>
+<td><strong>97.05</strong></td>
+<td><strong>19.26</strong></td>
+<td>30.49</td>
+<td>19.39</td>
+</tr>
+<tr>
+<td><strong>InternLM2.5-20B</strong></td>
+<td>BaseModel</td>
+<td>0.33</td>
+<td>0.33</td>
+<td>1.67</td>
+<td>152.34</td>
+<td>9.94</td>
+<td>141.27</td>
+<td>74.16</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>FineCog-Nav</strong></td>
+<td><strong>2.00</strong></td>
+<td><strong>2.00</strong></td>
+<td><strong>4.00</strong></td>
+<td><strong>103.94</strong></td>
+<td><strong>19.35</strong></td>
+<td>61.05</td>
+<td>28.49</td>
+</tr>
+<tr>
+<td><strong>ChatGLM-4-32B</strong></td>
+<td>BaseModel</td>
+<td>2.33</td>
+<td>2.00</td>
+<td>5.00</td>
+<td>180.66</td>
+<td>10.59</td>
+<td>235.03</td>
+<td>104.20</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>FineCog-Nav</strong></td>
+<td><strong>3.33</strong></td>
+<td><strong>2.33</strong></td>
+<td><strong>5.33</strong></td>
+<td><strong>94.18</strong></td>
+<td><strong>21.25</strong></td>
+<td>45.91</td>
+<td>20.18</td>
+</tr>
+<tr>
+<td><strong>Qwen3-32B</strong></td>
+<td>BaseModel</td>
+<td>2.67</td>
+<td>3.00</td>
+<td>6.33</td>
+<td>142.72</td>
+<td>17.07</td>
+<td>114.56</td>
+<td>39.12</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>FineCog-Nav</strong></td>
+<td><strong>5.00</strong></td>
+<td><strong>4.00</strong></td>
+<td><strong>7.00</strong></td>
+<td><strong>95.31</strong></td>
+<td><strong>20.31</strong></td>
+<td>60.36</td>
+<td>26.05</td>
+</tr>
+<tr>
+<td><strong>Llama3.3-70B</strong></td>
+<td>BaseModel</td>
+<td>3.00</td>
+<td>2.67</td>
+<td>5.67</td>
+<td>263.10</td>
+<td>9.67</td>
+<td>329.36</td>
+<td>111.48</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>FineCog-Nav</strong></td>
+<td><strong>6.67</strong></td>
+<td><strong>6.00</strong></td>
+<td><strong>9.67</strong></td>
+<td><strong>98.84</strong></td>
+<td><strong>20.17</strong></td>
+<td>84.96</td>
+<td>38.91</td>
+</tr>
+<tr>
+<td><strong>Qwen2.5-72B</strong></td>
+<td>BaseModel</td>
+<td>2.67</td>
+<td>2.67</td>
+<td>6.33</td>
+<td>270.10</td>
+<td>10.69</td>
+<td>298.24</td>
+<td>116.91</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>FineCog-Nav</strong></td>
+<td><strong>8.00</strong></td>
+<td><strong>6.00</strong></td>
+<td><strong>9.00</strong></td>
+<td><strong>91.43</strong></td>
+<td><strong>22.48</strong></td>
+<td>67.96</td>
+<td>33.90</td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 관찰</strong>:</p>
+<ul>
+<li>FineCog-Nav는 <strong>모든 LLM 크기에서</strong> BaseModel을 지속적으로 능가</li>
+<li>72B 모델 기준 SR2D: 2.67% → 8.00% (<strong>+199%</strong> 향상)</li>
+<li>72B 모델 기준 NE: 270.10m → 91.43m (<strong>−66%</strong> 감소)</li>
+<li>LLM이 커질수록 FineCog-Nav의 성능 향상 폭이 더 큼 → <strong>강한 확장성</strong></li>
+<li>단순히 LLM 크기를 키우는 것만으로는 BaseModel이 일관된 개선을 보이지 않음</li>
+</ul>
+<h4>표 2: 프레임워크 기준선 비교 (AerialVLN-Fine + AerialVLN-S-Val)</h4>
+<p>모든 방법: Qwen2.5-72B + Qwen2.5-VL-32B</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>데이터셋</th>
+<th>방법</th>
+<th>SR2D(%)</th>
+<th>SR3D(%)</th>
+<th>OSR(%)</th>
+<th>nDTW(%)</th>
+<th>NE(m)↓</th>
+<th>PL(m)</th>
+<th>Steps</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AerialVLN-Fine</td>
+<td>NavGPT</td>
+<td>0.33</td>
+<td>0.00</td>
+<td>0.67</td>
+<td>15.90</td>
+<td>110.94</td>
+<td>21.44</td>
+<td>9.33</td>
+</tr>
+<tr>
+<td></td>
+<td>DiscussNav</td>
+<td>2.67</td>
+<td>2.67</td>
+<td>3.33</td>
+<td>19.63</td>
+<td>98.36</td>
+<td>39.51</td>
+<td>17.76</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>FineCog-Nav</strong></td>
+<td><strong>8.00</strong></td>
+<td><strong>6.00</strong></td>
+<td><strong>9.00</strong></td>
+<td><strong>22.48</strong></td>
+<td><strong>91.43</strong></td>
+<td>67.96</td>
+<td>33.90</td>
+</tr>
+<tr>
+<td>AerialVLN-S-Val</td>
+<td>NavGPT</td>
+<td>0.12</td>
+<td>0.12</td>
+<td>0.46</td>
+<td>8.29</td>
+<td>135.65</td>
+<td>44.92</td>
+<td>13.02</td>
+</tr>
+<tr>
+<td></td>
+<td>DiscussNav</td>
+<td>0.46</td>
+<td>0.46</td>
+<td>0.93</td>
+<td>8.33</td>
+<td>158.46</td>
+<td>81.06</td>
+<td>22.46</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>FineCog-Nav</strong></td>
+<td><strong>1.97</strong></td>
+<td><strong>1.50</strong></td>
+<td><strong>1.85</strong></td>
+<td><strong>11.47</strong></td>
+<td><strong>130.32</strong></td>
+<td>75.28</td>
+<td>34.52</td>
+</tr>
+</tbody></table></div>
+<p><strong>주요 차별점</strong>:</p>
+<ul>
+<li>NavGPT: 환경 탐색 거의 없음 → 21m 경로 길이 (매우 짧음, 조기 정지)</li>
+<li>DiscussNav: 다중 라운드 대화로 효율 저하</li>
+<li><strong>FineCog-Nav</strong>: 가장 높은 SR, OSR, nDTW, 가장 낮은 NE</li>
+</ul>
+<h3>5.4 절제 연구 (Ablation Studies)</h3>
+<h4>표 3: 인지 모듈 제거 실험 (Qwen2.5-72B, AerialVLN-Fine)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Attn</th>
+<th>Imag</th>
+<th>Subgoal</th>
+<th>Memory</th>
+<th>SR(%)</th>
+<th>OSR(%)</th>
+<th>NE(m)</th>
+<th>nDTW(%)</th>
+<th>S-SR(%)</th>
+<th>S-NE(m)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>✗</td>
+<td>✓</td>
+<td>✓</td>
+<td>H</td>
+<td>3.00</td>
+<td>7.00</td>
+<td>104.38</td>
+<td>19.55</td>
+<td>19.92</td>
+<td>66.21</td>
+</tr>
+<tr>
+<td>✓</td>
+<td>✗</td>
+<td>✓</td>
+<td>H</td>
+<td>3.67</td>
+<td>5.00</td>
+<td>101.27</td>
+<td>19.67</td>
+<td>20.48</td>
+<td>64.85</td>
+</tr>
+<tr>
+<td>✓</td>
+<td>✓</td>
+<td>✗</td>
+<td>H</td>
+<td>2.00</td>
+<td>4.33</td>
+<td>102.32</td>
+<td>19.13</td>
+<td>19.42</td>
+<td>65.54</td>
+</tr>
+<tr>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td><strong>P</strong></td>
+<td>0.67</td>
+<td>2.67</td>
+<td>97.76</td>
+<td>19.69</td>
+<td>19.42</td>
+<td>62.90</td>
+</tr>
+<tr>
+<td>✗</td>
+<td>✗</td>
+<td>✓</td>
+<td>H</td>
+<td>3.67</td>
+<td>8.67</td>
+<td>106.59</td>
+<td>18.14</td>
+<td>19.35</td>
+<td>70.16</td>
+</tr>
+<tr>
+<td>✓</td>
+<td>✗</td>
+<td>✗</td>
+<td>H</td>
+<td>4.00</td>
+<td>8.67</td>
+<td>98.75</td>
+<td>19.78</td>
+<td>16.68</td>
+<td>65.36</td>
+</tr>
+<tr>
+<td><strong>✓</strong></td>
+<td><strong>✓</strong></td>
+<td><strong>✓</strong></td>
+<td><strong>H</strong></td>
+<td><strong>6.00</strong></td>
+<td><strong>9.00</strong></td>
+<td><strong>91.43</strong></td>
+<td><strong>22.48</strong></td>
+<td><strong>22.03</strong></td>
+<td><strong>59.02</strong></td>
+</tr>
+</tbody></table></div>
+<p>H = 계층적 기억 (Hierarchical Memory)<br>P = 평탄 히스토리 (Plain History)</p>
+<p><strong>핵심 발견</strong>:</p>
+<ol>
+<li><strong>계층적 기억 제거</strong>가 가장 큰 성능 저하: SR2D 6.00% → 0.67% (-89%)</li>
+<li><strong>하위 목표 메커니즘 제거</strong>: SR 2.00%로 하락, 문장 수준 S-SR도 최저</li>
+<li><strong>모듈 결합 제거</strong>(행 5,6): 단일 모듈 제거보다 일부 지표가 높은 역설
+→ &quot;긴밀하게 결합된 모듈들은 하나 제거 시 연쇄 실패 유발, 둘 다 제거하면 해당 실패 회피&quot;</li>
+<li><strong>전체 모듈 활성화</strong>가 모든 메트릭에서 최고 성능</li>
+</ol>
+<h3>5.5 리얼월드 배치 (Real-World Deployment)</h3>
+<p>FineCog-Nav의 예비 실세계 검증이 수행되었다:</p>
+<pre><code>실험 설정:
+  하드웨어: RoboMaster TT UAV
+  환경: 실내 공간
+  지시: &quot;Find a chair for me, then land on the table&quot;
+  
+결과:
+  - 에이전트가 단계적 탐색 수행
+  - 중간 하위 목표(의자 찾기) 달성
+  - 17 단계 만에 목표 지점(테이블) 도달
+  - 시작점, 하위 목표 포인트, 종점 시각화 성공
+  
+한계:
+  - 센서 노이즈, 제어 오차에 대한 처리는 미래 과제
+  - 단일 예비 실험으로 통계적 검증 미흡
+  - 복잡한 외부 환경에서의 성능 미확인
+</code></pre>
+<p><img src="figures/fig_05_02.jpeg" alt="실세계 배치 예시 및 궤적 시각화" loading="lazy"></p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>6.1 FineCog-Nav 프레임워크의 혁신성</h3>
+<p><strong>기여 1: 세분화된 인지 모듈화의 최초 UAV VLN 적용</strong></p>
+<pre><code>기존 방법들의 모듈화 수준:
+  NavGPT:     인식 + 기억 + 계획 (3모듈)
+  DiscussNav: 다중 에이전트 토론 (역할 정의 없음)
+  CityNavAgent: 계획 + 실행 (2단계)
+
+FineCog-Nav:
+  7가지 인지 기능의 독립 모듈화
+  → 각 모듈이 명확한 인지 역할을 가짐
+  → 역할 특화 프롬프트로 소형 모델 잠재력 극대화
+  → 모듈 간 구조화된 정보 전달 프로토콜
+</code></pre>
+<p><strong>기여 2: 상상 모듈 (Imagination Module)의 도입</strong></p>
+<ul>
+<li>기존 VLN 시스템에 없던 &quot;예상 장면 생성&quot; 기능</li>
+<li>제약적 랜드마크 중심 생성으로 환각 억제</li>
+<li>하위 목표 완료 판단 정확도 향상에 직접 기여</li>
+</ul>
+<p><strong>기여 3: 3단계 계층적 기억 시스템</strong></p>
+<ul>
+<li>인간 기억 공고화 원리를 LLM 기반 요약으로 구현</li>
+<li>장거리 UAV 내비게이션의 문맥 유지 문제 해결</li>
+<li>NavGPT의 단순 히스토리 대비 압도적 성능 차이 입증</li>
+</ul>
+<p><strong>기여 4: AerialVLN-Fine 벤치마크</strong></p>
+<ul>
+<li>기존 AerialVLN의 품질 문제 해결</li>
+<li>문장 수준 정렬 주석으로 세분화된 평가 가능</li>
+<li>5가지 역량 차원 분류로 능력별 진단 지원</li>
+</ul>
+<h3>6.2 LLM 확장성 검증</h3>
+<pre><code>FineCog-Nav의 중요한 특성: LLM 크기 확장에 따른 일관된 성능 향상
+
+8B → 72B LLM 크기 증가 시:
+  FineCog-Nav SR2D: 2.67% → 8.00% (+199%)
+  BaseModel SR2D:   0.67% → 2.67% (+299%, 절대값은 낮음)
+
+의미:
+  - 중간 크기 모델도 충분히 활용 가능 (엣지 배치 가능성)
+  - 더 강력한 모델 등장 시 자동으로 성능 향상
+  - 모듈러 설계가 LLM 발전과 함께 지속 개선 가능
+</code></pre>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 모델 구성</h3>
+<pre><code>VLM (모든 실험 고정):
+  모델: Qwen2.5-VL-32B
+  용도: Perception Module (장면 기술)
+  접근: API 호출
+  선택 이유: 에지 배치 고려 + 검증된 에고센트릭 이미지 이해
+
+LLM (실험별 변경):
+  소형 (8-15B): InternLM3-8B, ChatGLM-4-9B
+  중형 (20-32B): InternLM2.5-20B, ChatGLM-4-32B, Qwen3-32B
+  대형 (70-72B): Llama3.3-70B, Qwen2.5-72B
+  클로즈드소스: Gemini 2.5 Flash-Lite, GPT-4o-mini
+  최대 파라미터 제한: 72B (엣지 배치 고려)
+
+주요 하이퍼파라미터:
+  성공 임계값: 20m (2D 및 3D)
+  최대 내비게이션 단계: 지시 복잡도에 따라 가변
+  충돌 경고: 규칙 기반 시스템 (모든 방법 동일 적용)
+</code></pre>
+<h3>7.2 UAV 연속 제어 매핑</h3>
+<pre><code>LLM 출력 → UAV 제어 명령 매핑:
+  {Forward, Backward} → 전후 이동 속도 명령
+  {Turn_Left, Turn_Right} → 요(yaw) 회전 명령
+  {Ascend, Descend} → 고도 변화 명령
+  {Stop} → 호버링 명령
+
+일관성 보장:
+  모든 방법(FineCog-Nav, NavGPT, DiscussNav)이 동일한 연속 UAV 명령 공간 사용
+  → 공정한 비교 보장
+</code></pre>
+<h3>7.3 충돌 경고 시스템</h3>
+<pre><code>규칙 기반 충돌 감지:
+  입력: 환경 내 장애물 위치 + UAV 현재 위치
+  출력: 위험도 레벨 (없음/낮음/높음)
+  
+Decision Module 통합:
+  W_t를 입력으로 받아 안전 행동 선호 유도
+  &quot;Collision warning: HIGH → 전진 행동 가중치 감소&quot;
+  
+모든 방법에 동일 W_t 제공 (공정성 보장)
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 한계점 및 실용적 고려사항</h3>
+<p><strong>1. 계산 비용</strong>:</p>
+<pre><code>API 호출 오버헤드:
+  단계당: ~4 LLM/VLM API 호출
+  76단계 평균 궤적: ~304 API 호출
+  
+비용 추정 (Qwen2.5-72B 기준):
+  추론 지연: ~0.5-1초/호출 (API)
+  단계당: ~2-4초
+  전체 궤적: ~3-5분
+
+→ 실시간 고속 UAV 제어에는 부적합
+→ 조사/탐색 임무 (저속, 신중한 내비게이션)에 적합
+</code></pre>
+<p><strong>2. 시뮬레이션-실세계 격차</strong>:</p>
+<pre><code>AerialVLN 환경: Unreal Engine 기반 시뮬레이션
+실세계 배치 시 추가 문제:
+  - 센서 노이즈 (RGB 이미지 품질 저하)
+  - 제어 오차 (이동 명령의 불정확한 실행)
+  - GPS 신호 불안정
+  - 동적 장애물 (보행자, 차량)
+
+현재 상태: 예비 실세계 실험만 수행 (통계적 검증 미흡)
+</code></pre>
+<p><strong>3. 성능의 절대적 한계</strong>:</p>
+<pre><code>최고 성능 (Qwen2.5-72B, AerialVLN-Fine):
+  SR2D = 8.00%
+
+비교 기준:
+  훈련된 SOTA 방법 (HTNav, NavDP): SR ~6.3-9.0% (AerialVLN-S)
+  완전 훈련 방법과 유사하나, 제로샷이라는 점에서 의미 있음
+  
+낮은 SR의 원인:
+  - UAV VLN의 근본적 어려움 (3D, 장거리)
+  - 제로샷 설정의 한계
+  - 현재 중간 크기 모델의 능력 상한
+</code></pre>
+<h3>8.2 향후 연구 방향</h3>
+<p><strong>1. 멀티모달 지도 통합</strong>:</p>
+<pre><code>현재 FineCog-Nav: 순수 에고센트릭 + 기억
+향후 개선: 
+  - 점유 지도 또는 토폴로지 맵 통합
+  - Bird&#39;s-eye view + FPV 하이브리드 지각
+  → HTNav의 SCConv 맵 + FineCog-Nav의 인지 구조 결합 가능성
+</code></pre>
+<p><strong>2. 실시간 엣지 배치</strong>:</p>
+<pre><code>현재 한계: API 호출 지연 (~2-4초/단계)
+해결 방향:
+  - 양자화(quantization)된 소형 LLM 온디바이스 실행
+  - 모듈별 병렬 처리 최적화
+  - Key-Value 캐시 재활용으로 API 호출 최소화
+</code></pre>
+<p><strong>3. 대규모 데이터셋 확장</strong>:</p>
+<pre><code>AerialVLN-Fine: 300개 궤적 (상대적 소규모)
+향후: 
+  - 동일 파이프라인으로 더 큰 규모 데이터셋 구축
+  - 야외 실세계 데이터 포함
+  - 다국어 지시 지원
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>VLN 트랙에서 기존에 리뷰된 논문들(HTNav, DeCoNav, GNPFkCT)과 FineCog-Nav를 체계적으로 비교한다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>HTNav (NUAA, arXiv&#39;26)</th>
+<th>DeCoNav (arXiv&#39;26)</th>
+<th>GNPFkCT (arXiv&#39;26)</th>
+<th><strong>FineCog-Nav (CVPR&#39;26)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>타겟 플랫폼</strong></td>
+<td>도심 항공 UAV</td>
+<td>지상 협력 로봇 2대</td>
+<td>지상 로봇</td>
+<td>항공 UAV (3D FPV)</td>
+</tr>
+<tr>
+<td><strong>접근 방식</strong></td>
+<td>Hybrid IL-RL</td>
+<td>대화 강화 협력</td>
+<td>POMDP+MCTS</td>
+<td>제로샷 인지 모듈</td>
+</tr>
+<tr>
+<td><strong>훈련 요구</strong></td>
+<td>필요 (IL+RL)</td>
+<td>필요</td>
+<td>필요 (MCTS 통계)</td>
+<td>불필요 (zero-shot)</td>
+</tr>
+<tr>
+<td><strong>벤치마크</strong></td>
+<td>CityNav</td>
+<td>DeCoNav-Bench</td>
+<td>POMDP-Obj</td>
+<td>AerialVLN / AerialVLN-Fine</td>
+</tr>
+<tr>
+<td><strong>최고 SR</strong></td>
+<td>NE↓ 40.3m (CityNav)</td>
+<td>72.4% SR</td>
+<td>56.8% SR (seen)</td>
+<td>SR2D 8.00% (AerialVLN-Fine)</td>
+</tr>
+<tr>
+<td><strong>멀티로봇</strong></td>
+<td>아니오</td>
+<td>예 (2 로봇)</td>
+<td>아니오</td>
+<td>아니오</td>
+</tr>
+<tr>
+<td><strong>코드 공개</strong></td>
+<td>아니오</td>
+<td>아니오</td>
+<td>아니오</td>
+<td>아니오</td>
+</tr>
+<tr>
+<td><strong>프로젝트 페이지</strong></td>
+<td>아니오</td>
+<td>아니오</td>
+<td>예</td>
+<td>예</td>
+</tr>
+<tr>
+<td><strong>학회</strong></td>
+<td>arXiv</td>
+<td>arXiv</td>
+<td>arXiv</td>
+<td><strong>CVPR 2026 Findings</strong></td>
+</tr>
+<tr>
+<td><strong>실세계 실험</strong></td>
+<td>아니오</td>
+<td>아니오</td>
+<td>예 (실제 로봇)</td>
+<td>예 (예비)</td>
+</tr>
+<tr>
+<td><strong>인지 모듈 수</strong></td>
+<td>2 (Macro+Micro)</td>
+<td>2 (FH+SH 로봇)</td>
+<td>3 (인식+계획+실행)</td>
+<td><strong>7 (인지 함수별)</strong></td>
+</tr>
+<tr>
+<td><strong>기억 계층</strong></td>
+<td>1 (맵 기반)</td>
+<td>2 (로봇 간 공유)</td>
+<td>없음</td>
+<td><strong>3 (단계/하위목표/지시)</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>FineCog-Nav의 장점</strong>:</p>
+<pre><code>1. 훈련 데이터 불필요 (제로샷)
+   → 새로운 환경, 새로운 언어 모델에 즉시 적용 가능
+   → HTNav/DeCoNav의 도메인 특화 훈련 없이도 유사 수준 성능
+
+2. 최고 수준의 인터프리터빌리티
+   → 각 단계에서 τ (추론 근거) 생성
+   → 실패 원인 진단 가능 (&quot;어느 모듈에서 오류가 발생했는가?&quot;)
+
+3. LLM 확장성
+   → 더 강력한 LLM 등장 시 자동 성능 향상
+   → 특정 모델에 종속되지 않음
+
+4. 상상 모듈의 독창성
+   → 기존 VLN 시스템에 없던 &quot;예상 장면&quot; 기반 하위 목표 판단
+   → 환각을 제약적 생성으로 억제하는 설계
+
+5. CVPR 2026 출판
+   → 피어 리뷰 검증된 방법론
+   → 재현성과 신뢰성 확보
+</code></pre>
+<p><strong>FineCog-Nav의 단점</strong>:</p>
+<pre><code>1. 낮은 절대 성능
+   → SR2D = 8.0% (AerialVLN-Fine)
+   → 훈련 기반 방법 대비 여전히 낮음
+   → 복잡한 UAV VLN 환경에서의 근본적 한계
+
+2. 높은 API 호출 비용
+   → 단계당 ~4 API 호출
+   → 실시간 제어에 부적합 (지연 문제)
+   → 상용 API 비용 발생
+
+3. 리얼월드 검증 부족
+   → 시뮬레이션 기반 평가가 주
+   → RoboMaster TT 예비 실험만으로는 충분하지 않음
+
+4. 코드 미공개
+   → 재현성 제한
+   → 연구자들의 직접 검증 어려움
+</code></pre>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>적용 시나리오별 평가:
+
+시나리오 1: 저속 UAV 수색-구조 임무
+  적합성: ★★★★☆
+  이유: 고도로 해석 가능한 의사결정, 안전 중시
+       속도 요구가 낮아 API 지연 허용
+  
+시나리오 2: 실시간 배달 UAV
+  적합성: ★★☆☆☆
+  이유: API 지연이 치명적, 더 빠른 반응 속도 필요
+       FineCog-Nav는 이 시나리오에 부적합
+
+시나리오 3: 인도어 UAV 탐색/모니터링
+  적합성: ★★★☆☆
+  이유: 통제된 환경에서 합리적 성능
+       실세계 노이즈 처리 미흡
+
+시나리오 4: 교육/연구 목적 UAV 에이전트
+  적합성: ★★★★★
+  이유: 투명한 의사결정, LLM 능력 벤치마킹에 이상적
+       인지 모듈 개별 연구 가능
+</code></pre>
+<h3>9.4 연구 방향성 평가</h3>
+<p>FineCog-Nav는 UAV VLN 연구의 흥미로운 분기점을 제시한다:</p>
+<pre><code>방향 A: 훈련 기반 특화 방법 (HTNav, NavDP 류)
+  장점: 높은 성능, 빠른 추론
+  단점: 훈련 데이터 필요, 특정 환경/언어 종속
+
+방향 B: 제로샷 LLM 기반 방법 (FineCog-Nav 류)
+  장점: 훈련 불필요, 해석 가능, 범용성
+  단점: 낮은 성능, 높은 비용
+
+FineCog-Nav의 평가:
+  - CVPR 2026 게재로 방향 B의 가능성 공식 검증
+  - LLM 발전과 함께 빠르게 개선될 가능성 높음
+  - 장기적으로 방향 A와 B의 하이브리드가 최적
+  
+예상 발전 경로:
+  1단계: FineCog-Nav의 인지 구조 → 더 강력한 LLM으로 성능 향상
+  2단계: 인지 모듈별 파인튜닝 → 도메인 특화 개선
+  3단계: 훈련 기반 방법과 인지 모듈 통합 → 최적 하이브리드
+</code></pre>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li>Shao, D., et al. &quot;FineCog-Nav: Integrating Fine-grained Cognitive Modules for Zero-shot Multimodal UAV Navigation.&quot; CVPR 2026.</li>
+<li>Liu, S., et al. &quot;AerialVLN: Vision-and-language navigation for UAVs.&quot; ICCV 2023.</li>
+<li>Long, Y., et al. &quot;NavGPT: Explicit reasoning in vision-and-language navigation with large language models.&quot; AAAI 2024.</li>
+<li>Long, Y., et al. &quot;Discuss before moving: Visual language navigation via multi-expert discussions.&quot; arXiv, 2023.</li>
+<li>Zhang, W., et al. &quot;CityNavAgent: Aerial vision-and-language navigation with hierarchical semantic planning.&quot; arXiv 2025.</li>
+<li>Gao, Y., et al. &quot;Aerial vision-and-language navigation via semantic-topo-metric representation guided LLM reasoning.&quot; arXiv 2024.</li>
+<li>Anderson, P., et al. &quot;Vision-and-language navigation: Interpreting visually-grounded navigation instructions.&quot; CVPR 2018.</li>
+<li>Fan, C., et al. &quot;HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial VLN.&quot; arXiv 2026.</li>
+<li>Hu, C.Y., et al. &quot;See, point, fly: A learning-free VLM framework for universal unmanned aerial navigation.&quot; CoRL 2025.</li>
+<li>Wang, X., et al. &quot;Towards realistic UAV vision-language navigation: Platform, benchmark, and methodology.&quot; arXiv 2024.</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p>FineCog-Nav는 UAV VLN 분야에서 <strong>제로샷 설정의 새로운 방향성</strong>을 제시한 CVPR 2026 논문이다. 핵심 혁신은 인간의 7가지 인지 기능(언어 처리, 지각, 주의, 기억, 상상, 추론, 의사결정)을 명시적인 독립 모듈로 구현하고, 각 모듈을 역할 특화 프롬프트와 구조화된 I/O 프로토콜로 협력시키는 것이다.</p>
+<p><strong>혁신성</strong>:</p>
+<ul>
+<li>최초의 UAV VLN용 세분화 인지 모듈 프레임워크</li>
+<li>상상 모듈: VLN 시스템에 최초로 &quot;예상 장면&quot; 개념 도입</li>
+<li>계층적 기억(단계→하위목표→지시): LLM 기반 기억 공고화 구현</li>
+<li>AerialVLN-Fine: 문장 수준 주석을 포함한 새로운 고품질 벤치마크</li>
+</ul>
+<p><strong>실용적 의의</strong>:</p>
+<ul>
+<li>훈련 데이터 없이 새로운 환경에 즉시 적용 가능</li>
+<li>소중간형 LLM(8B~72B)으로 합리적 성능 달성</li>
+<li>투명한 의사결정 과정 → 실패 진단 및 개선 용이</li>
+<li>예비 실세계 배치 성공 → 실용화 가능성 초기 검증</li>
+</ul>
+<p><strong>한계와 미래 과제</strong>:</p>
+<ul>
+<li>절대 SR이 여전히 낮음 (최고 8.0%) → LLM 발전으로 해결 가능</li>
+<li>API 지연 문제 → 온디바이스 소형 LLM 사용으로 해결 가능</li>
+<li>리얼월드 검증 부족 → 향후 체계적 실험 필요</li>
+</ul>
+<p>FineCog-Nav의 등장은 UAV VLN 커뮤니티에서 &quot;훈련 기반 특화&quot;와 &quot;제로샷 범용&quot; 두 접근의 균형점을 찾는 중요한 이정표다. 특히 LLM이 빠르게 발전하는 현재 트렌드에서, 인지 모듈 구조는 새로운 모델 등장과 함께 자동으로 개선되는 미래지향적 설계라는 점에서 높이 평가된다.</p>
+<hr>
+<p><em>리뷰 작성일: 2026-04-21</em><br><em>논문 arXiv 등록일: 2026-04-17</em><br><em>리뷰어: NanoClaw Paper Bot</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

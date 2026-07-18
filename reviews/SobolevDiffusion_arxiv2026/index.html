@@ -1,0 +1,1130 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 2026</div>
+    <h1>Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2604.19011">arXiv:2604.19011</a></span>
+      <span>리뷰 2026-04-25</span>
+      <span>43분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>Sobolev-Trained Diffusion Policies: 궤적 최적화 워밍스타트를 위한 1차 확산 정책 학습 — 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Accelerating trajectory optimization with Sobolev-trained diffusion policies</li>
+<li><strong>저자 (Authors)</strong>: Théotime Le Hellard* , Franki Nguimatsia Tiofack* , Quentin Le Lidec, Justin Carpentier (*공동 제1저자)</li>
+<li><strong>소속 (Affiliation)</strong>: Inria / Département d&#39;Informatique de l&#39;École normale supérieure (ENS), PSL Research University, France; Courant Institute, New York University, USA</li>
+<li><strong>발표처 (Published)</strong>: arXiv 프리프린트 (2026년 4월 21일, cs.LG + cs.RO)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2604.19011">https://doi.org/10.48550/arXiv.2604.19011</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.19011">https://arxiv.org/abs/2604.19011</a></li>
+<li><strong>GitHub</strong>: 미공개 (논문 승인 후 공개 예정)</li>
+<li><strong>프로젝트 페이지</strong>: 없음</li>
+<li><strong>관련 라이브러리</strong>: Aligator (github.com/Simple-Robotics/aligator, ProxDDP 솔버)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 논문은 <strong>학습 기반 워밍스타트(warm-start)를 통해 경사 기반 궤적 최적화(TO)의 수렴 속도와 해 품질을 동시에 개선하는 방법</strong>을 제안한다.</p>
+<p>경사 기반 궤적 최적화(iLQR, DDP, ProxDDP)는 로봇의 최적 제어에서 강력한 도구지만 한계가 있다:</p>
+<ol>
+<li><strong>인스턴스 독립성</strong>: 매 새로운 문제(초기 위치, 목표)마다 처음부터 반복 수렴 → 이전 문제 해결 경험 미활용</li>
+<li><strong>초기값 민감성</strong>: 나쁜 초기 궤적에서 시작하면 지역 최솟값(local minimum)에 수렴 → 해 품질 저하</li>
+<li><strong>복잡한 제약 처리</strong>: 접촉-풍부(contact-rich) 시나리오나 다중 장애물에서 수렴이 느림 또는 실패</li>
+</ol>
+<p>OLAhGP 방법으로 이를 해결하려면 <strong>학습된 정책이 각 문제에 대한 좋은 초기 궤적 추정값을 제공</strong>해야 한다. 그러나 TO 솔버가 생성한 데이터(로컬 최적 궤적)로 정책을 학습하면 <strong>복합 오차(compounding errors)</strong> 문제가 발생한다: 작은 궤적 이탈이 학습 데이터에 없던 상태로 정책을 이끌고, 이로부터 회복 불가한 오차가 연쇄 증폭된다.</p>
+<p>핵심 기여: <strong>Sobolev 학습(Sobolev learning)</strong>을 확산 정책(diffusion policy)에 적용하여, 궤적 데이터와 함께 1차 정보(피드백 게인, feedback gains)를 학습에 통합한다. 1차 정보는 TO 솔버의 역방향 패스에서 추가 계산 없이 무료로 얻을 수 있으며, 이를 통해 <strong>5<del>10배 적은 궤적 데이터로 효과적인 워밍스타트를 달성</strong>하고 TO 수렴을 <strong>2×</del>20× 가속</strong>한다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 인스턴스별 독립 해결(Per-Instance Solving)의 비효율성</h4>
+<p>경사 기반 TO 솔버(iLQR, DDP, ProxDDP)의 구조적 한계:</p>
+<pre><code>TO 솔버의 인스턴스 독립성 문제:
+
+문제 인스턴스 ξ₁ (초기상태 x̂₁, 목표 x_goal1)
+  → 직선 보간 초기값
+  → TO 수렴: 1,000회 반복, 4.1초 소요
+  → 최적 궤적 τ₁*
+
+문제 인스턴스 ξ₂ (초기상태 x̂₂, 목표 x_goal2)  ← τ₁*에서 배운 것 없음
+  → 직선 보간 초기값
+  → TO 수렴: 900회 반복, 3.8초 소요
+  → 최적 궤적 τ₂*
+
+...반복...
+
+비효율: 유사한 문제들이 독립적으로 해결됨
+        이전 경험이 초기값 품질 개선에 활용되지 않음
+</code></pre>
+<p><strong>양적 규모</strong>: 로봇팔(UR5), 이중 진자, 사족 드론 실험에서 TO 단독으로는 평균 400<del>900회 반복, 4</del>16초 소요. 실시간 모션 계획에는 너무 느리다.</p>
+<h4>B. 복합 오차(Compounding Errors) 문제 - TO 기반 데이터의 역설</h4>
+<p>TO 솔버가 생성한 학습 데이터의 특수성이 오히려 독이 된다:</p>
+<pre><code>TO 생성 데이터의 로컬 최적성 역설:
+
+TO 솔버:
+  초기값 → 반복 → 로컬 최적 궤적 τ*
+  특성: τ* 상의 모든 상태는 토크 제약 만족, 목표 도달
+        τ* 주변에서 &quot;미끄러짐(misstep)&quot; 없음
+
+학습 데이터: D = {τ₁*, τ₂*, ...}
+  → 모든 궤적이 로컬 최솟값 주변의 완벽한 경로
+  → 경로를 벗어난 상태 (out-of-distribution, OOD) 데이터 없음
+
+정책 롤아웃 시:
+  소규모 예측 오차 → OOD 상태 s_OOD 진입
+  정책은 s_OOD에서 어떻게 해야 할지 학습 안 됨
+  → 오차 증폭: δ₁ → δ₂ → ... → 완전한 실패
+
+비교: 인간 시연 데이터는 자연스럽게 불완전 → 소규모 이탈 경험 포함
+</code></pre>
+<p><strong>실제 규모</strong>: DiffuSolve(Li et al., 2024)는 이 문제를 해결하기 위해 <strong>200,000개 궤적</strong>(200 CPU 코어, 20시간 계산)이 필요했다. 이 논문의 Sobolev 접근법은 <strong>수백 개</strong> 궤적으로 동등한 성능을 달성한다.</p>
+<h4>C. 확산 정책의 MLP 대비 장점과 한계</h4>
+<p><strong>확산 정책의 장점</strong>:</p>
+<ul>
+<li>복잡한 다중 모달(multi-modal) 분포 표현 가능</li>
+<li>표현력(expressiveness)이 MLP 직접 정책보다 훨씬 강력</li>
+<li>장기 수평선(long horizon) 궤적에서 일관된 동작 생성</li>
+</ul>
+<p><strong>확산 정책의 현재 한계</strong>:</p>
+<ul>
+<li>학습에 많은 데이터 필요 → 로컬 최적 데이터에서 복합 오차에 더 취약</li>
+<li>추론 시 여러 확산 단계 필요 → 지연 시간(latency) 발생</li>
+<li>기존 Sobolev 학습 방법은 MLP 직접 정책에만 적용 (Le Lidec et al., 2023)</li>
+</ul>
+<p>이 논문의 핵심 질문: <strong>확산 정책에 Sobolev 학습을 적용하여 복합 오차 문제를 해결하면서도 표현력의 장점을 유지할 수 있는가?</strong></p>
+<h3>2.2 핵심 해결책</h3>
+<p>Sobolev-trained Diffusion Policy는 두 가지 아이디어로 위 문제를 해결한다:</p>
+<ol>
+<li><strong>Sobolev 1차 손실</strong>: 궤적 데이터(τ₀)와 함께 TO 솔버의 피드백 게인(∂u/∂x)을 사용하여 정책이 궤적 주변의 국소 동특성(local dynamics)을 학습 → 복합 오차 저항성 향상</li>
+<li><strong>교번 알고리즘</strong>: 궤적 수집과 정책 학습을 반복하여 점진적으로 어려운 문제에 도전 → TO 솔버가 해결 못한 문제도 정책의 워밍스타트로 해결</li>
+</ol>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 확산 정책(Diffusion Policy) 배경</h3>
+<h4>3.1.1 DDPM (Denoising Diffusion Probabilistic Models)</h4>
+<p>Ho et al. (2020)의 DDPM은 정방향 노이즈 추가와 역방향 노이즈 제거 과정을 통해 데이터 분포를 학습한다:</p>
+<pre><code>DDPM 정방향 프로세스 (노이즈 추가):
+p_D(τ_k | τ_{k-1}) := N(τ_k; √(1-β_k) τ_{k-1}, β_k I)
+
+직접 샘플링 (Eq. 3):
+τ_k = √(ᾱ_k) τ_0 + √(1-ᾱ_k) ε,   ε ~ N(0, I)
+ᾱ_k = ∏_{s=1}^k (1-β_s)
+
+여기서:
+  k = 1, ..., K: 노이즈 단계 (K = 5 고정)
+  τ_0: 깨끗한 궤적 (학습 목표)
+  τ_k: k 단계 노이즈가 추가된 궤적
+  β_k: 노이즈 스케줄 (square cosine)
+
+역방향 프로세스 (denoising):
+p_θ(τ_{k-1} | τ_k) = N(τ_{k-1}; μ_θ(τ_k, k), β̃_k I)
+β̃_k = [(1-ᾱ_{k-1})/(1-ᾱ_k)] β_k
+
+신경망 τ_θ: τ_k, k, 조건(ξ, 관측 이력)을 입력받아 깨끗한 τ_0를 예측
+</code></pre>
+<p><strong>τ_0 파라미터화 선택</strong>: 이 논문은 ε 예측 대신 τ_0 직접 예측을 선택. 실험적으로 더 나은 성능.</p>
+<h4>3.1.2 인페인팅(Inpainting) 기법</h4>
+<p>조건화를 위해 각 역방향 단계에서 과거 행동을 τ_k에 직접 삽입:</p>
+<pre><code>인페인팅 (관측 이력 조건화):
+각 k 단계에서: τ_k[1:T_o] ← a_hist  (과거 T_o개 행동으로 고정)
+선택적으로:   τ_k[T_h] ← x_target   (목표 상태로 고정)
+
+T_o = 1: 관측 이력 길이
+T_h = 32: 예측 수평선
+T_a = T_h - T_o = 31: 실행 행동 길이 (재계획 전)
+</code></pre>
+<h4>3.1.3 표준 DDPM 학습 손실</h4>
+<p>기본 확산 정책 학습(Diff):</p>
+<pre><code>L^Diff = E_{(ξ, τ_0, o_hist), ε, k} [||τ_0 - τ_θ(τ_k, k, ξ, o_hist)||²]
+
+여기서:
+  ξ: 문제 파라미터 (초기 위치, 목표)
+  τ_0: TO 솔버가 생성한 최적 궤적
+  k ~ U(1, K): 무작위 노이즈 단계
+  τ_k = √(ᾱ_k) τ_0 + √(1-ᾱ_k) ε: k 단계 노이즈 궤적
+</code></pre>
+<p>이 손실로 학습한 정책(Diff)이 복합 오차 문제로 어려움을 겪는 것이 핵심 동기다.</p>
+<h3>3.2 Sobolev 학습 이론 (Sobolev Learning Theory)</h3>
+<h4>3.2.1 Sobolev 학습의 기본 원리</h4>
+<p>Czarnecki et al. (2017, NeurIPS) &quot;Sobolev Training for Neural Networks&quot;는 신경망 학습 시 함수값(0차)과 함께 <strong>도함수(1차 이상)를 손실에 포함</strong>하는 방법을 제안했다:</p>
+<pre><code>일반 Sobolev 손실 (Eq. 8):
+L^Sobolev = E_x [||f_θ(x) - y||² + α_Sob ||∂f_θ(x)/∂x - ∂y/∂x||²_F]
+
+여기서:
+  f_θ(x): 신경망 예측값
+  y: 레이블 (목표값)
+  ∂y/∂x: 레이블의 x에 대한 도함수 (외부 제공 필요)
+  α_Sob: Sobolev 손실 가중치 (α_Sob = 1.0 기본)
+</code></pre>
+<p><strong>Sobolev 학습의 이점</strong>:</p>
+<ul>
+<li>함수값뿐 아니라 함수의 <strong>국소 동특성(local behavior)</strong>까지 정확히 모사</li>
+<li>레이블 근방에서 더 견고한 예측 → 작은 이탈에도 올바른 방향 안내</li>
+<li><strong>데이터 효율성</strong>: 각 데이터 포인트에서 추가 정보를 추출 → 더 적은 샘플로 동등한 성능</li>
+</ul>
+<h4>3.2.2 TO 피드백 게인에서의 1차 정보</h4>
+<p>경사 기반 TO 솔버(ProxDDP)의 역방향 패스는 피드백 게인을 자연스럽게 생성한다:</p>
+<pre><code>최적 제어 피드백 게인 (Riccati 방정식의 부산물):
+∂u_t/∂x_t: t 시점에서 상태 x_t에 대한 제어 u_t의 민감도
+
+연쇄 법칙에 의한 상태 전이 미분 (Eq. 2):
+∂x_{t+1}/∂x_t = ∂f/∂x_t(x_t, u_t) + ∂f/∂u_t(x_t, u_t) · ∂u_t/∂x_t
+
+다단계 미분 전파 (Eq. 7):
+∂a_{t+h}/∂x_{t+o} = [∂x_{t+o+1}/∂x_{t+o}] · [∂x_{t+o+2}/∂x_{t+o+1}] · ... · [∂a_{t+h}/∂x_{t+h}]
+for 0 ≤ o ≤ h &lt; T_h
+
+결과: ∂τ_0/∂x_hist = ∂a_{t1:t1+T_h-1}/∂x_{t1:t1+T_o-1}
+     (전체 예측 궤적의 관측 이력에 대한 야코비안)
+</code></pre>
+<p><strong>핵심 통찰</strong>: TO 솔버의 피드백 게인은 솔버가 수렴한 후 역방향 패스에서 <strong>추가 계산 없이 무료로 얻을 수 있다</strong>. 이는 정책 학습에 귀중한 1차 정보를 비용 없이 제공한다.</p>
+<p><strong>물리적 해석</strong>: ∂u_t/∂x_t는 현재 상태에서 약간 이탈했을 때 제어 입력을 어떻게 조정해야 하는지를 나타낸다. 이를 정책이 학습하면, 롤아웃 중 작은 이탈이 발생해도 올바른 복구 방향을 알 수 있다.</p>
+<h4>3.2.3 확률적 Sobolev 학습 (Stochastic Sobolev, Eq. 9)</h4>
+<p>야코비안 전체를 계산하는 것은 비용이 크다. 확률적 투영(stochastic projection)으로 근사:</p>
+<pre><code>확률적 Sobolev 손실 (Eq. 9):
+L^Sobolev_Stochastic = E_x [||f_θ(x) - y||²
+                           + (α_Sob/n_proj) Σᵢ ||vᵢᵀ · ∂y/∂x - ∂/∂x(vᵢᵀ · f_θ(x,ξ))||²]
+
+여기서:
+  vᵢ: 단위 구면에서 무작위 샘플링한 투영 벡터
+  n_proj: 투영 수 (n_proj = 1로 충분함을 실험으로 확인)
+
+계산 비용: Sob+Diff 학습이 Diff 대비 에포크당 ~2배 느림
+           → 하지만 필요한 에포크 수가 훨씬 적으므로 전체 비용은 비슷하거나 낮음
+</code></pre>
+<h3>3.3 확산 정책에 Sobolev 학습 적용</h3>
+<h4>3.3.1 실패한 나이브 접근법 (Eq. 10)</h4>
+<p>처음의 직관적 시도: 전체 확산 프로세스 출력에 Sobolev 손실 적용:</p>
+<pre><code>나이브 Sobolev+Diffusion 손실 (실패):
+L^Sob+Diff_full = E_{(ξ, τ_0, ∂τ_0/∂x_hist), τ_K} [
+    ||τ_0 - τ̄_0^θ||²
+  + α_Sob ||∂τ_0/∂x_hist - ∂τ̄_0^θ/∂x_hist||²
+]
+
+여기서 τ̄_0^θ: K번의 역방향 단계를 모두 거친 최종 출력
+
+문제: &quot;This opposes how diffusion models are typically trained,
+       and it did not work in practice.&quot;
+  → 전체 확산 체인의 야코비안 계산이 극도로 복잡하고 불안정
+  → 그래디언트 소실/폭발 발생
+</code></pre>
+<h4>3.3.2 핵심 기여: 단계별 Sobolev 손실 (Eq. 11)</h4>
+<p>해결책: 최종 출력이 아닌 <strong>각 노이즈 단계 k에서의 단일 스텝 예측에 Sobolev 손실 적용</strong>:</p>
+<pre><code>제안 Sobolev+Diffusion 손실 (핵심 기여, Eq. 11):
+L^Sob+Diff = E_{(ξ, τ_0, ∂τ_0/∂x_hist), ε, k} [
+    ||τ_0 - τ_0^{θ,k}||²                                          (0차 항)
+  + (α_Sob/n_proj) Σᵢ ||vᵢᵀ·∂τ_0/∂x_hist - ∂/∂x_hist(vᵢᵀ·τ_0^{θ,k})||²  (1차 항)
+]
+
+여기서:
+  τ_0^{θ,k} = τ_θ(τ_k, k, ξ, o_hist): k번째 노이즈에서의 단일 스텝 τ_0 예측
+  ∂τ_0^{θ,k}/∂x_hist: 이 단일 스텝 예측의 관측 이력에 대한 미분
+
+핵심 구분:
+  τ_0^{θ,k} (사용): k 단계에서의 단일 스텝 네트워크 예측
+  τ̄_0^θ (미사용): K번 역방향 패스를 거친 최종 출력
+</code></pre>
+<p><strong>왜 이 방식이 작동하는가?</strong></p>
+<pre><code>직관적 설명:
+
+표준 DDPM 학습의 핵심:
+  &quot;모든 노이즈 수준 k에서 τ_0를 예측하도록 학습&quot;
+  → 단일 네트워크 τ_θ가 모든 k에서 일관된 예측 제공
+
+단계별 Sobolev는 이 원칙과 완벽히 호환:
+  &quot;모든 노이즈 수준 k에서 τ_0의 도함수까지 예측하도록 학습&quot;
+  → 각 노이즈 단계에서의 국소 동특성을 학습
+  → 완전한 확산 체인 없이 단일 네트워크 평가로 미분 계산
+  → 복잡한 그래디언트 역전파 불필요
+
+vs 나이브 접근법의 실패 이유:
+  &quot;K번의 역방향 패스를 거친 최종 출력의 도함수&quot;
+  → K개 네트워크 평가를 통한 역전파 → 그래디언트 소실
+  → 확산 훈련 원리와 상충 → 학습 불안정
+</code></pre>
+<p><strong>α_Sob 가중치 설계</strong>:</p>
+<pre><code>고정 가중치 (최종 선택):
+  α_Sob = 1.0: 대부분의 태스크
+  α_Sob = 10⁻³: 쿼드로터 태스크 (물리적 스케일 차이가 큼)
+
+시간 의존 가중치 (실험 후 폐기):
+  α_Sob · k/K (k가 클수록 증가): 0차/1차 항이 서로 상쇄
+  α_Sob · (K-k)/K (k가 클수록 감소): 마찬가지 문제
+  → 고정 가중치보다 성능 열등 → 폐기
+</code></pre>
+<h3>3.4 교번 학습 알고리즘 (Alternating Loop, Algorithm 1)</h3>
+<h4>3.4.1 알고리즘 구조</h4>
+<pre><code>Sob+Diff 교번 알고리즘 (Algorithm 1):
+
+초기화: 확산 정책 네트워크 τ_θ; 버퍼 D = ∅
+
+for n_algo 반복:
+  ┌─────────────────────────────────────────────────────────┐
+  │  [궤적 수집 단계]                                        │
+  │  D ← ∅  (버퍼 리셋)                                     │
+  │                                                         │
+  │  for n_traj 개 궤적:                                     │
+  │    ξ ~ P  (태스크 파라미터 샘플링)                        │
+  │    X₀, U₀ ← Interpolate(x_0, x_target)  (기본 초기값)   │
+  │    X_π, U_π ← PolicyRollout(τ_θ, ξ, T_a, K)  (정책 초기값) │
+  │                                                         │
+  │    [두 초기값 모두로 TO 실행, 더 나은 것 선택]             │
+  │    X, U, ∂u_t/∂x_t, ∂x_{t+1}/∂x_t ← ArgminCost(       │
+  │        TO(X₀, U₀, ξ), TO(X_π, U_π, ξ))                 │
+  │                                                         │
+  │    if 둘 다 n_max = 1,000회 내 미수렴: 거부, 재시도        │
+  │    else: D ← D ∪ {(X, U, ∂u_t/∂x_t, ∂x_{t+1}/∂x_t)}  │
+  └─────────────────────────────────────────────────────────┘
+  
+  ┌─────────────────────────────────────────────────────────┐
+  │  [정책 학습 단계]                                        │
+  │                                                         │
+  │  for n_pl 에포크:                                        │
+  │    D에서 (ξ, τ_0, x_hist, o_hist, 도함수) 샘플링         │
+  │    ∂τ_0/∂x_hist ← ChainRule(∂x_{t+1}/∂x_t, ∂u_t/∂x_t) │
+  │    k ~ U(1, K), ε ~ N(0, I)                             │
+  │    τ_k = √(ᾱ_k) τ_0 + √(1-ᾱ_k) ε                      │
+  │    τ_k[1:T_o] ← a_hist  (인페인팅)                      │
+  │    τ_0^{θ,k} = τ_θ(τ_k, k, ξ, o_hist)                 │
+  │    n_proj개 투영 벡터 vᵢ 샘플링                           │
+  │    ∇_θ L^Sob+Diff 계산 후 그래디언트 스텝                  │
+  └─────────────────────────────────────────────────────────┘
+</code></pre>
+<h4>3.4.2 세 가지 핵심 알고리즘 선택</h4>
+<p><strong>선택 1: ArgminCost — 두 초기값 경쟁</strong></p>
+<pre><code>목적: 정책 워밍스타트 + TO 솔버의 시너지 극대화
+
+구현:
+  TO(직선 보간 초기값, ξ) → 궤적 A, 비용 J_A
+  TO(정책 롤아웃 초기값, ξ) → 궤적 B, 비용 J_B
+  선택: min(J_A, J_B)
+
+효과:
+  - 정책이 나쁜 초기값을 줘도 안전장치 존재
+  - 정책이 새로운 로컬 미니마 발견 가능 → D에 더 다양한 궤적 추가
+  - D의 품질 점진적 향상
+</code></pre>
+<p><strong>선택 2: 수렴 기준 n_max = 1,000회</strong></p>
+<pre><code>목적: D에 미수렴(품질 나쁜) 궤적이 들어가는 것 방지
+
+거부 조건: 두 TO 시작점 모두 1,000회 이내에 수렴 실패
+  → 해당 ξ 폐기, 새 ξ 샘플링
+  
+효과: 낮은 품질 지역 자동 배제, 점진적 어려움 증가에 자연스럽게 대응
+</code></pre>
+<p><strong>선택 3: 매 반복마다 D 리셋</strong></p>
+<pre><code>목적: 오래된(과거 정책 초기값으로 생성된) 궤적이 현재 학습을 방해하지 않도록
+
+구현: 매 n_algo 반복 시작 시 D = ∅
+      n_traj개 새 궤적을 현재 정책으로 생성
+
+효과: 정책 발전에 따른 데이터 분포 이동 자동 처리
+      (DAgger 알고리즘과 유사한 on-policy 특성)
+</code></pre>
+<h4>3.4.3 정책 롤아웃 (Algorithm 2)</h4>
+<pre><code>PolicyRollout(τ_θ, ξ, T_a, K_rollout):
+
+초기화: t = 0, 관측 이력 o_hist, 행동 이력 a_hist
+
+while t &lt; T:
+  τ_K ~ N(0, I)  (순수 노이즈에서 시작)
+  
+  for k = K_rollout 내려가며 1까지:
+    τ_k[1:T_o] ← a_hist    (인페인팅으로 과거 행동 고정)
+    τ_0^{θ,k} = τ_θ(τ_k, k, ξ, o_hist)
+    τ_{k-1} ~ N(μ̃_k(τ_k, τ_0^{θ,k}), β̃_k I)  (DDPM 역방향 스텝)
+  
+  for s = 1 to T_a:
+    if t+s &gt; T: break
+    if a가 제어 u: u_{t+s-1} = τ_0[s]
+    if a가 상태 x: u_{t+s-1} = PD제어/RNEA(x_{t+s-1}, τ_0[s])
+    x_{t+s} = f(x_{t+s-1}, u_{t+s-1})
+  
+  o_hist, a_hist 업데이트
+  t ← t + T_a
+  
+return X, U
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<pre><code>Sobolev Diffusion 전체 파이프라인
+
+┌─────────────────────────────────────────────────────────────────┐
+│                     오프라인 학습 단계                             │
+│                                                                  │
+│  [n_algo 교번 반복]                                               │
+│       │                                                          │
+│       ↓                                                          │
+│  ┌────────────────┐   궤적 + 피드백 게인   ┌──────────────────┐   │
+│  │  TO 솔버       │ ────────────────────→ │  버퍼 D           │   │
+│  │  (ProxDDP)     │                       │  D = {τ₀, ∂u/∂x} │   │
+│  │   + Riccati   │                       └────────┬─────────┘   │
+│  │   (피드백 게인) │                                │             │
+│  └────────────────┘                     연쇄 법칙  ↓             │
+│       ↑                             ┌──────────────────────────┐ │
+│  워밍스타트                           │  ∂τ₀/∂x_hist 계산        │ │
+│       │                             │  (Eq. 7)                 │ │
+│  ┌────────────────┐                 └──────────┬───────────────┘ │
+│  │  정책 τ_θ       │                            │                 │
+│  │  (U-Net,300k)  │◄──────────────────────────┘                 │
+│  │                │  Sobolev+Diff 학습 (Eq. 11)                  │
+│  └────────────────┘  (n_pl 에포크)                                │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+              │
+              │ 학습된 정책 τ_θ
+              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                     온라인 추론 단계                               │
+│                                                                  │
+│  새 문제 ξ 도착 (x_0, x_target)                                   │
+│       │                                                          │
+│       ↓                                                          │
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │  K=5 역방향 확산 단계 (DDPM)                                │  │
+│  │  τ_K ~ N(0,I) → τ_{K-1} → ... → τ_1 → 예측 궤적 τ̄_0      │  │
+│  └────────────────────────────┬───────────────────────────────┘  │
+│                               │ 워밍스타트 τ̄_0                    │
+│                               ↓                                  │
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │  TO 솔버 (ProxDDP) 수렴                                     │  │
+│  │  τ̄_0에서 시작 → 37회 반복 → τ* (최적 궤적)                 │  │
+│  │  vs 직선 보간에서 시작 → 900회 반복 → τ* (동일 품질)        │  │
+│  └────────────────────────────┬───────────────────────────────┘  │
+│                               │ τ* 실행                           │
+│                               ↓                                  │
+│                         로봇 제어기                               │
+└─────────────────────────────────────────────────────────────────┘
+
+데이터 흐름 설명:
+1. TO 솔버: 궤적 τ* + 피드백 게인 ∂u/∂x 생성 (역방향 패스 부산물)
+2. 연쇄 법칙: 피드백 게인 → 관측 이력에 대한 야코비안 ∂τ₀/∂x_hist
+3. Sobolev 학습: τ₀와 ∂τ₀/∂x_hist 모두 사용해 τ_θ 업데이트
+4. 추론: 확산으로 τ̄_0 생성 → TO 솔버가 τ̄_0에서 신속 수렴
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 실험 환경 및 태스크 (Experimental Setup)</h3>
+<pre><code>소프트웨어:
+  - 물리 시뮬레이터: Pinocchio (강체 동역학 라이브러리)
+  - TO 솔버: Aligator (ProxDDP 구현)
+  - 딥러닝: PyTorch + U-Net (조건부)
+    구조: 숨겨진 채널 [24, 24, 32, 32] → ~300k 파라미터
+    Janner et al. (2022), Chi et al. (2023) 동일 아키텍처
+  - DDPM 스케줄러: square cosine (Nichol &amp; Dhariwal, 2021)
+
+하드웨어: 단일 노트북
+  - CPU: Intel Core i9-13950HX
+  - GPU: Nvidia RTX2000 ADA
+  ※ 훈련과 평가 모두 상용 노트북에서 가능한 규모
+
+하이퍼파라미터:
+  K = 5 (확산 단계, 고정)
+  T_h = 32 (기본 예측 수평선)
+  T_o = 1 (관측 이력 길이)
+  T_a = 31 (실행 행동 길이)
+  n_proj = 1 (확률적 Sobolev 투영 수)
+  α_Sob = 1.0 (기본), 10⁻³ (쿼드로터)
+  n_max = 1,000 (TO 최대 반복 수, 수렴 기준)
+</code></pre>
+<h3>5.2 태스크 설명 (Task Descriptions)</h3>
+<h4>A. 역진자 (Inverted Pendulum)</h4>
+<pre><code>단일 역진자:
+  x_t: 관절 각도 및 속도
+  u_t: 관절 토크
+  목표: 아래를 향한 임의 초기 위치 → 수직 균형
+  제약: |u_t| ≤ 25 (토크 제한)
+  비용: 10 ||end-effector - goal||² + 0.1 ||u_t||²
+
+이중 역진자 (어려운 태스크):
+  2자유도, T_h = 16, T_a = 4
+  카오스 동역학: 작은 이탈 → 급격한 상태 변화
+  TO 단독으로는 80% 실패 → Sob+Diff 워밍스타트 필수
+</code></pre>
+<h4>B. UR5 로봇팔 (6자유도)</h4>
+<pre><code>UR5 태스크 변형 4가지:
+  q_t: 6 관절 각도 (cos/sin 전처리)
+  a_t = x_t (상태 제어), u_t는 RNEA로 계산
+
+  변형 기준: r_init (초기 위치 범위), r_tgt (목표 위치 범위)
+  ┌───────────────┬──────────────┬──────────────┬────────┐
+  │ 변형          │ r_init       │ r_tgt        │ 난이도  │
+  ├───────────────┼──────────────┼──────────────┼────────┤
+  │ UR5(0,0)      │ 좁은 영역     │ 고정 목표     │ 쉬움   │
+  │ UR5(0,1)      │ 좁은 영역     │ 무작위 목표   │ 중간   │
+  │ UR5(1,0)      │ 전체 작업공간  │ 고정 목표     │ 어려움 │
+  │ UR5(1,1)      │ 전체 작업공간  │ 무작위 목표   │ 최고 난이도│
+  └───────────────┴──────────────┴──────────────┴────────┘
+</code></pre>
+<h4>C. 쿼드로터 (SE3 드론)</h4>
+<pre><code>쿼드로터 태스크:
+  SE3 다이나믹스: 6자유도 강체
+  목표: 임의 초기→임의 목표 (동일 고도)
+  제약: 토크 제한, 천장/바닥 충돌 방지
+  a_t = (dq_t, v_t): 접선 공간 상태 표현
+
+  장애물 변형:
+    장애물 수: 0, 1, 3, 9개 수직 기둥
+    9개 장애물이 가장 어려운 태스크
+</code></pre>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<h4>샘플 효율성 실험 (n_algo = 1, Figure 1)</h4>
+<p>단일 데이터 수집 후 정책 학습. n_traj 변화에 따른 성능:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>특징</th>
+<th>n_traj 수요 (목표 달성)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Sob+Diff (제안)</td>
+<td>Diffusion + Sobolev</td>
+<td><strong>3~50개</strong></td>
+</tr>
+<tr>
+<td>Diff</td>
+<td>Diffusion만</td>
+<td>5~10× 더 필요</td>
+</tr>
+<tr>
+<td>MLP</td>
+<td>직접 MLP</td>
+<td>불안정, 발산 빈번</td>
+</tr>
+<tr>
+<td>Sob+MLP</td>
+<td>MLP + Sobolev</td>
+<td>특정 범위에서만 작동</td>
+</tr>
+<tr>
+<td>TO 단독</td>
+<td>초기값 없음</td>
+<td>N/A (기준선)</td>
+</tr>
+</tbody></table></div>
+<p><strong>주목할 결과</strong>:</p>
+<ul>
+<li>Sob+Diff: 단일 역진자에서 <strong>n_traj = 3</strong> 으로 TO 솔버 수준 도달</li>
+<li>Diff: 단일 역진자 토크 제어에서 체계적으로 실패</li>
+<li>MLP, Sob+MLP: 강한 발산 경향 (비용이 10⁵ 이상)</li>
+<li>Sob+MLP: UR5(0,0)에서만 특정 n_traj 범위에서 작동</li>
+</ul>
+<h4>이중 역진자 - 교번 알고리즘 (Figure 2)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>지표</th>
+<th>TO 단독</th>
+<th>Sob+Diff 워밍스타트</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>수렴 실패율</td>
+<td><strong>80%</strong></td>
+<td>~0%</td>
+</tr>
+<tr>
+<td>평균 IPOPT 반복</td>
+<td>896회</td>
+<td><strong>35회</strong></td>
+</tr>
+<tr>
+<td>총 해결 시간 (T_a=9)</td>
+<td>4.1초</td>
+<td><strong>1.6초</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>T_a(실행 길이) 민감도 분석</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>T_a</th>
+<th>정책 비용</th>
+<th>정제 비용</th>
+<th>TO 반복</th>
+<th>총 시간(s)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>31.7</td>
+<td>31.3</td>
+<td>27</td>
+<td>9.4</td>
+</tr>
+<tr>
+<td>2</td>
+<td>31.7</td>
+<td>31.3</td>
+<td>35</td>
+<td>5.0</td>
+</tr>
+<tr>
+<td>4</td>
+<td>31.8</td>
+<td>31.2</td>
+<td>35</td>
+<td>2.6</td>
+</tr>
+<tr>
+<td><strong>9</strong></td>
+<td><strong>32.5</strong></td>
+<td><strong>31.7</strong></td>
+<td><strong>43</strong></td>
+<td><strong>1.6</strong> (최적)</td>
+</tr>
+<tr>
+<td>12</td>
+<td>85.1</td>
+<td>48.1</td>
+<td>405</td>
+<td>3.3</td>
+</tr>
+<tr>
+<td>15</td>
+<td>137</td>
+<td>59.7</td>
+<td>690</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td>TO 단독</td>
+<td>—</td>
+<td>50.1</td>
+<td>896</td>
+<td>4.1</td>
+</tr>
+</tbody></table></div>
+<p>T_a = 9가 최적 균형점: <strong>2.6× 전체 속도향상</strong>, TO보다 나은 궤적 품질(31.7 vs 50.1 비용).</p>
+<h4>쿼드로터 장애물 회피 (9개 장애물, Figure 4)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>해결 시간</th>
+<th>가속비</th>
+<th>장애물 충돌</th>
+<th>목표 정밀도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TO 단독</td>
+<td>16.3초</td>
+<td>1.0×</td>
+<td>없음</td>
+<td>좋음</td>
+</tr>
+<tr>
+<td>Diff</td>
+<td>9.0초</td>
+<td>1.8×</td>
+<td><strong>빈번</strong></td>
+<td><strong>나쁨</strong></td>
+</tr>
+<tr>
+<td><strong>Sob+Diff</strong></td>
+<td><strong>7.8초</strong></td>
+<td><strong>2.1×</strong></td>
+<td><strong>없음</strong></td>
+<td><strong>좋음</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>Diff의 복합 오차 시각화</strong>: 장애물 근처에서 약간 최적 경로를 이탈하면 제약을 위반하는 OOD 상태 진입 → 목표 미도달. Sob+Diff는 피드백 게인 학습으로 이런 이탈에서 자연스럽게 복구.</p>
+<h3>5.4 실세계 실험 (Real-world Experiments)</h3>
+<p><strong>없음.</strong> 모든 실험은 Pinocchio 시뮬레이터 기반이다.</p>
+<ul>
+<li>역진자(Pybullet), UR5(Pinocchio), 쿼드로터(Pinocchio)</li>
+<li>실제 로봇 실험은 향후 연구로 남겨둠</li>
+<li>제한 인정: 접촉이 풍부한 시나리오(contact-rich)에서의 검증 부재</li>
+</ul>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>6.1 확산 정책에 대한 1차 Sobolev 손실 (핵심 기여)</h3>
+<p>기존 Sobolev 학습(Le Lidec et al., 2023)은 MLP 직접 정책에만 적용되었다. 이 논문은 확산 정책의 각 노이즈 단계에서의 단일 스텝 예측에 Sobolev 손실을 적용하여 <strong>표현력 높은 확산 정책과 복합 오차 저항성을 동시에 달성</strong>하는 최초의 방법을 제시한다.</p>
+<p>핵심 아이디어인 &quot;단계별 적용 vs 전체 체인 적용&quot;의 차이는 단순해 보이지만, 실제로 확산 모델의 훈련 원리(각 노이즈 단계에서 독립적으로 τ_0 예측 학습)와 Sobolev 손실(예측의 입력 미분까지 일치)이 자연스럽게 결합되는 지점을 정확히 포착했다.</p>
+<h3>6.2 데이터 효율성 향상 (5~10×)</h3>
+<p>DiffuSolve(200,000개 궤적, 20시간, 200 CPU)와 비교하여 수백 개 궤적, 단일 노트북에서 동등하거나 우수한 성능을 달성한다. 이는 데이터 수집 비용이 높은 실제 로봇 환경에서 특히 중요하다.</p>
+<h3>6.3 TO 수렴 가속 (2×~20×)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>태스크</th>
+<th>가속비</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>이중 역진자 (T_a=9)</td>
+<td>~2.6×</td>
+<td>전체 시간 기준</td>
+</tr>
+<tr>
+<td>이중 역진자 (T_a=1, 솔버만)</td>
+<td>~20×</td>
+<td>솔버 시간만 기준</td>
+</tr>
+<tr>
+<td>쿼드로터 9 장애물</td>
+<td>~2.1×</td>
+<td>전체 시간 기준</td>
+</tr>
+</tbody></table></div>
+<p>단순 속도 향상뿐 아니라 <strong>TO 단독으로는 해결 불가한 어려운 태스크를 해결 가능</strong>하게 만드는 질적 도약도 달성한다(이중 역진자: TO 80% 실패 → Sob+Diff 워밍스타트로 수렴).</p>
+<h3>6.4 교번 알고리즘으로 어려운 태스크 점진적 해결</h3>
+<p>DAgger와 유사하지만 중요한 차이: TO 솔버가 정책 워밍스타트를 받아 이전에 실패했던 태스크를 해결하고, 그 궤적이 다시 정책 학습에 활용된다. 이 양방향 부트스트래핑으로 어려운 태스크에서 점진적 수렴이 가능하다.</p>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 U-Net 아키텍처 상세</h3>
+<pre><code>조건부 U-Net 구조 (Janner 2022, Chi 2023과 동일):
+
+입력:
+  - τ_k: 노이즈 궤적 [T_h × a_dim]
+  - k: 노이즈 단계 (정수 → 임베딩)
+  - ξ: 태스크 파라미터 (초기 위치, 목표)
+  - o_hist: 관측 이력 [T_o × x_dim]
+
+U-Net 구조:
+  다운샘플링: [24, 24, 32, 32] 채널 (stride 2 컨볼루션)
+  업샘플링: 대응하는 스킵 연결
+  조건화: k와 ξ를 Feature-wise Linear Modulation (FiLM)으로 주입
+
+파라미터: ~300k (경량 설계)
+
+출력: τ_0^{θ,k} ∈ R^{T_h × a_dim}
+      (노이즈 없는 궤적 예측)
+</code></pre>
+<h3>7.2 ProxDDP 솔버 특성</h3>
+<pre><code>ProxDDP (Proximal Differential Dynamic Programming):
+  - Jallet et al. (IEEE Trans. on Robotics, 2025)의 최신 DDP 변형
+  - 등식/부등식 제약 처리 (ProxALM 기반)
+  - 역방향 패스: 2차 근사 + 피드백 게인 자동 계산
+  - 핫스타팅: 이전 솔루션에서 따뜻하게 시작
+
+피드백 게인 계산:
+  DDP 역방향 패스의 부산물로 자동 생성
+  추가 계산 없이 ∂u_t/∂x_t 획득
+  → Sobolev 학습에 추가 비용 없이 활용
+</code></pre>
+<h3>7.3 에포크 크기 정의</h3>
+<pre><code>에포크 크기 (데이터 규모 정규화):
+
+MLP 기반 (직접 정책):
+  E = |D| × T: 전체 상태-행동 쌍 수
+  
+확산 기반 (청크 예측):
+  E = |D| × (T - T_h) / T_h: 예측 청크 수
+  
+이유: 확산 정책은 T_h 길이 청크를 예측하므로
+     실제 학습 샘플 수는 T_h배 적음
+     → 비교를 위해 정규화 필요
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 Sobolev 학습의 이론적 기반</h3>
+<p>Pfrommer et al. (2022, NeurIPS) &quot;TaSIL&quot;은 모방 학습에서 Sobolev 도함수 일치의 이론적 기반을 제공한다:</p>
+<ul>
+<li>k차 Sobolev 손실을 사용하면 모방 오차가 O(T^{2k+1})로 감소 (T: 수평선)</li>
+<li>1차 도함수만으로도 컴파운딩 오차의 지수적 증폭을 다항식으로 감소</li>
+<li>이론: DAgger 같은 추가 데이터 없이도 복합 오차 저항성 달성 가능</li>
+</ul>
+<pre><code>오차 증폭 모델 (단순화):
+표준 BC: ||x_t - x_t*|| ≤ C · t · ||π - π*||_{0}  (선형 증폭)
+Sobolev: ||x_t - x_t*|| ≤ C · t^{1/2} · ||π - π*||_{1}  (완화된 증폭)
+
+여기서 ||π - π*||_{k}: k차 Sobolev 노름에서의 정책 오차
+</code></pre>
+<h3>8.2 확장 가능성</h3>
+<pre><code>향후 연구 방향:
+
+1. 접촉-풍부 시나리오 (Contact-Rich Scenarios)
+   현재: 마찰, 접촉 이벤트 없는 단순 연속 동역학
+   향후: 물체 조작, 보행에서의 접촉 처리
+   도전: 접촉 역학의 불연속성 → ProxDDP 확장 필요
+
+2. 가변 장애물 수 (Variable Obstacle Count)
+   현재: 장애물 수 고정 (9개 쿼드로터)
+   향후: 트랜스포머 or 순환 정책으로 가변 입력 처리
+
+3. 오프라인 RL과의 결합
+   ArgminCost로 좋은 궤적만 선택하지만 더 세련된 필터링 가능
+   → 오프라인 RL 크리틱으로 낮은 품질 로컬 미니마 식별/거부
+
+4. 커리큘럼 학습 (Curriculum Learning)
+   현재: 균일 태스크 샘플링 ξ ~ P
+   향후: 정책 능력에 맞는 점진적 난이도 조절
+
+5. 실로봇 검증
+   현재: 시뮬레이션 전용
+   향후: UR5, 쿼드로터 실하드웨어 적용 필요
+</code></pre>
+<h3>8.3 한계점 (Limitations)</h3>
+<pre><code>주요 한계:
+
+1. 시뮬레이션 전용 검증
+   실세계 로봇 실험 없음
+   Sim-to-real 전이 성능 미검증
+
+2. 경사 기반 TO 의존성
+   ProxDDP의 피드백 게인이 핵심 → 다른 TO 솔버에는 재설계 필요
+   접촉 불연속 동역학에서 DDP 자체가 어려움
+
+3. 단일 노트북 실험 범위
+   더 복잡한 로봇 시스템(휴머노이드, 발 로봇)에서의 확장성 미검증
+
+4. 코드 미공개
+   논문 승인 후 공개 예정이지만 현재는 재현 불가
+
+5. 가변 장애물 처리 불가
+   쿼드로터에서 장애물 수가 달라지면 정책 재학습 필요
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 Planner 트랙 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>DreamFlow (KAIST)</th>
+<th>ViLiNT (AMIAD)</th>
+<th>SANDO (MIT)</th>
+<th>UGE-MPC (UMN)</th>
+<th><strong>Sob+Diff (Inria)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 방법</td>
+<td>CFM 잠재 공간 예측</td>
+<td>RGB+LiDAR 트랜스포머</td>
+<td>STSFC + MIQP</td>
+<td>Hellinger 다양성 MPC</td>
+<td><strong>Sobolev 확산 정책</strong></td>
+</tr>
+<tr>
+<td>학습 패러다임</td>
+<td>RL (비대칭 AC)</td>
+<td>지도 학습 (이미테이션)</td>
+<td>최적화 (MIQP)</td>
+<td>샘플링 최적화</td>
+<td><strong>이미테이션 + TO 워밍스타트</strong></td>
+</tr>
+<tr>
+<td>TO 통합</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>부분적 (MPC)</td>
+<td>✅ <strong>(핵심)</strong></td>
+</tr>
+<tr>
+<td>1차 정보 활용</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅ <strong>(피드백 게인)</strong></td>
+</tr>
+<tr>
+<td>실세계 실험</td>
+<td>✅ (사족보행)</td>
+<td>✅ (지상 로봇)</td>
+<td>✅ (UAV)</td>
+<td>✅ (지상 로봇)</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>코드 공개</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌ (승인 후)</td>
+</tr>
+<tr>
+<td>대상 태스크</td>
+<td>지역 내비게이션</td>
+<td>목표 조건 내비</td>
+<td>UAV 안전 비행</td>
+<td>탐색 계획</td>
+<td><strong>일반 최적 제어</strong></td>
+</tr>
+<tr>
+<td>표현 모델</td>
+<td>CFM 생성 모델</td>
+<td>트랜스포머</td>
+<td>볼록 분해</td>
+<td>가우시안 샘플링</td>
+<td><strong>확산 정책</strong></td>
+</tr>
+<tr>
+<td>데이터 효율성</td>
+<td>중간</td>
+<td>높음</td>
+<td>N/A</td>
+<td>N/A</td>
+<td><strong>매우 높음 (3~50개)</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 DiffuSolve (주요 선행연구)와의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>지표</th>
+<th>DiffuSolve (Li et al., 2024)</th>
+<th>Sob+Diff (제안)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>필요 궤적 수</td>
+<td>~200,000개</td>
+<td><strong>수백 개</strong></td>
+</tr>
+<tr>
+<td>수집 시간</td>
+<td>20시간 (200 CPU)</td>
+<td>수 분 (1 노트북)</td>
+</tr>
+<tr>
+<td>접근법</td>
+<td>더 많은 데이터로 복합 오차 극복</td>
+<td><strong>1차 정보로 복합 오차 방지</strong></td>
+</tr>
+<tr>
+<td>제약 처리</td>
+<td>별도 패널티 항 추가 (DiffuSolve+)</td>
+<td>TO 솔버에서 자동 처리</td>
+</tr>
+<tr>
+<td>코드</td>
+<td>공개</td>
+<td>미공개</td>
+</tr>
+</tbody></table></div>
+<p>Sobolev 접근법은 DiffuSolve의 &quot;더 많은 데이터&quot; 전략을 &quot;더 나은 정보&quot;로 대체한다.</p>
+<h3>9.3 PDDP+S (Le Lidec et al., 2023)와의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>지표</th>
+<th>PDDP+S (선행연구)</th>
+<th>Sob+Diff (제안)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>정책 아키텍처</td>
+<td>MLP (직접 정책)</td>
+<td><strong>확산 정책</strong></td>
+</tr>
+<tr>
+<td>표현력</td>
+<td>중간</td>
+<td><strong>높음 (다중 모달)</strong></td>
+</tr>
+<tr>
+<td>장기 수평선</td>
+<td>불안정</td>
+<td><strong>안정 (T_h=64도 가능)</strong></td>
+</tr>
+<tr>
+<td>Sobolev 적용 방식</td>
+<td>직접 MLP에 적용</td>
+<td>각 노이즈 단계에 적용</td>
+</tr>
+</tbody></table></div>
+<p>Sob+Diff는 PDDP+S의 Sobolev 아이디어를 더 표현력 있는 확산 모델로 확장한다.</p>
+<h3>9.4 장단점 분석</h3>
+<p><strong>Sob+Diff의 강점</strong>:</p>
+<ol>
+<li><p><strong>TO와의 시너지</strong>: 기존 리뷰 논문들은 TO와 독립적으로 작동한다. Sob+Diff는 TO를 대체하지 않고 <strong>TO를 더 효율적으로 만드는 보완재</strong>다. 이는 TO의 안전성(constraint satisfaction)과 학습의 효율성을 모두 취하는 최선의 접근이다.</p>
+</li>
+<li><p><strong>데이터 효율성의 혁신</strong>: 3개 궤적으로 시작할 수 있다는 것은 실제 로봇에서 데이터 수집이 비용이 큰 경우(안전 제약, 마모, 시간) 매우 중요하다.</p>
+</li>
+<li><p><strong>이론적 기반</strong>: Sobolev 학습의 이론적 근거(TaSIL, Czarnecki 2017)가 명확하고, DDP의 피드백 게인 활용이 수학적으로 자연스럽다.</p>
+</li>
+</ol>
+<p><strong>Sob+Diff의 약점</strong>:</p>
+<ol>
+<li><p><strong>실세계 실험 부재</strong>: SANDO, UGE-MPC, DreamFlow, ViLiNT는 모두 실제 로봇 실험을 포함한다. Sob+Diff의 시뮬레이션 전용 검증은 실용성에 물음표를 남긴다.</p>
+</li>
+<li><p><strong>ProxDDP 의존성</strong>: 피드백 게인이 필요하므로 역방향 패스가 있는 경사 기반 TO 솔버에 제한된다. Sampling-based MPC(MPPI 등)와는 직접 결합 불가.</p>
+</li>
+<li><p><strong>협소한 적용 범위 검증</strong>: 3개 태스크(역진자, UR5, 쿼드로터)는 모두 시뮬레이션 기반이고 단순한 연속 동역학이다. 보행, 접촉 조작 같은 복잡한 시나리오로의 확장은 미검증이다.</p>
+</li>
+</ol>
+<h3>9.5 실적용 가능성 평가</h3>
+<pre><code>실적용 시나리오별 평가:
+
+시나리오 1: 산업 로봇팔 반복 작업 (적합)
+  - 동일/유사한 초기 설정에서 다양한 목표로 이동
+  - UR5 실험과 직접 일치
+  - 사이클 시간 단축이 핵심 가치
+
+시나리오 2: 고속 드론 내비게이션 (부분 적합)
+  - 쿼드로터 실험에서 2× 가속 확인
+  - 그러나 장애물 수 변화에 대응 어려움
+  - 고정 환경에서는 강한 후보
+
+시나리오 3: 접촉 풍부 조작 (부적합, 향후 과제)
+  - 파지, 슬라이딩 접촉 등 불연속 동역학
+  - DDP/ProxDDP 자체의 어려움
+  - 현재 미검증, 향후 연구 과제
+
+시나리오 4: 빠른 재계획 필요 시나리오 (적합)
+  - 2~20× 속도 향상이 실시간 제어 가능성 제공
+  - MPC 주기를 유지하면서 더 복잡한 솔버 사용 가능
+</code></pre>
+<h3>9.6 연구 방향성 평가</h3>
+<p>Sob+Diff는 <strong>학습-최적화 하이브리드(learning-to-optimize)</strong> 패러다임의 중요한 진전을 대표한다. 기존 Planner 트랙 리뷰 논문들이 주로 경로 계획이나 내비게이션에 집중한 것과 달리, Sob+Diff는 <strong>일반 궤적 최적화 문제의 솔버 가속</strong>이라는 더 근본적인 문제를 다룬다.</p>
+<p>TO의 장점(제약 만족, 안전성, 지역 최적)을 유지하면서 학습의 장점(경험 재활용, 빠른 추론)을 결합하는 이 방향은 실시간 로봇 제어의 핵심 병목 중 하나를 해결한다. 향후 실세계 검증과 접촉 동역학으로의 확장이 이루어진다면 상당한 실용적 가치를 가질 것이다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li>Czarnecki et al. (2017, NeurIPS): Sobolev Training for Neural Networks — Sobolev 학습의 원천 논문</li>
+<li>Le Lidec et al. (2023, ICRA): PDDP+S — MLP 정책에 Sobolev 적용 (이 논문의 직접 선행연구)</li>
+<li>Pfrommer et al. (2022, NeurIPS): TaSIL — 모방 학습에서 Sobolev 도함수 일치의 이론적 기반</li>
+<li>Li et al. (2024): DiffuSolve — 확산 기반 TO 워밍스타트 (주요 비교 대상, 200k 궤적 필요)</li>
+<li>Ho et al. (2020, NeurIPS): DDPM — 확산 정책의 기반</li>
+<li>Chi et al. (2023): Diffusion Policy — 로보틱스 확산 정책의 기준선</li>
+<li>Janner et al. (2022, ICML): Diffuser — 의사결정을 위한 확산 모델</li>
+<li>Ajay et al. (2022): Decision Diffuser — 10k 궤적 필요 (대조군)</li>
+<li>Jallet et al. (2025, IEEE Trans. Robotics): ProxDDP — 사용된 TO 솔버</li>
+<li>Ross et al. (2011, AISTATS): DAgger — 교번 알고리즘의 선행연구</li>
+<li>Carpentier et al. (2019): Pinocchio — 강체 동역학 라이브러리</li>
+<li>Nichol &amp; Dhariwal (2021, ICML): Improved DDPM — square cosine 스케줄러</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p>Sobolev-trained Diffusion Policy(Sob+Diff)는 <strong>경사 기반 궤적 최적화(TO)와 확산 정책의 시너지를 1차 피드백 게인 정보로 극대화하는</strong> 혁신적 접근법이다.</p>
+<p>핵심 통찰은 세 가지다:</p>
+<p><strong>1. 피드백 게인은 무료 정보다</strong>: TO 솔버의 역방향 패스에서 추가 계산 없이 얻는 ∂u/∂x는 로컬 동특성을 완전히 기술한다. 이 정보를 정책 학습에 통합하면 복합 오차를 방지할 수 있다.</p>
+<p><strong>2. 단계별 Sobolev 적용이 핵심이다</strong>: 전체 확산 체인에 Sobolev를 적용하면 실패한다. 각 노이즈 단계에서의 단일 스텝 예측에 적용하는 것이 확산 모델의 훈련 원리와 Sobolev 학습을 자연스럽게 결합하는 유일한 방법이다.</p>
+<p><strong>3. 교번 알고리즘으로 어려운 태스크를 부트스트랩한다</strong>: TO 단독으로는 80% 실패하는 이중 역진자를 Sob+Diff 워밍스타트로 해결하고, 그 궤적으로 더 나은 정책을 훈련하는 양방향 강화 루프가 핵심이다.</p>
+<p>기존 Planner 트랙 리뷰 논문들(SANDO, DreamFlow, ViLiNT, UGE-MPC)이 경로 계획·내비게이션에 집중한 것과 달리, Sob+Diff는 <strong>최적 제어 솔버 자체를 가속하는</strong> 더 근본적인 문제를 다룬다. 실세계 검증과 접촉 동역학으로의 확장이 이루어진다면, 산업 로봇팔 사이클 타임 단축, 실시간 드론 제어, 자유도 높은 물체 조작 등에서 실질적 영향을 미칠 수 있는 연구 방향이다.</p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

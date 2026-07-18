@@ -1,0 +1,1027 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP) · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 2026</div>
+    <h1>Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP)</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2604.19148">arXiv:2604.19148</a></span>
+      <span>리뷰 2026-04-25</span>
+      <span>40분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>OLAhGP: 다단계 가우시안 프로세스 전파 기반 적응적 경로 계획 — 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Multi-Step Gaussian Process Propagation for Adaptive Path Planning</li>
+<li><strong>저자 (Authors)</strong>: Alex Beaudin*, Bjørn Andreas Kristiansen*, Kristoffer Gryte, Corrado Chiatante, Morten Omholt Alver, Murat Arcak, Tor Arne Johansen (*공동 제1저자)</li>
+<li><strong>소속 (Affiliation)</strong>: UC Berkeley (EECS); NTNU (Norwegian University of Science and Technology, Engineering Cybernetics &amp; Electronic Systems)</li>
+<li><strong>발표처 (Published)</strong>: arXiv 프리프린트 (2026년 4월 21일, cs.RO)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2604.19148">https://doi.org/10.48550/arXiv.2604.19148</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.19148">https://arxiv.org/abs/2604.19148</a></li>
+<li><strong>GitHub</strong>: 미공개 (코드 공개 계획 없음)</li>
+<li><strong>프로젝트 페이지</strong>: 없음</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>OLAhGP(Online Look-Ahead Gaussian Process Path Planning)는 <strong>자율 로봇의 환경 탐사·모니터링 임무에서 베이지안 불확실성을 실시간으로 활용한 적응적 경로 계획</strong> 문제를 해결한다.</p>
+<p>기존 경로 계획기들은 고정된 목표 지점이나 미리 알려진 지도를 기반으로 계획한다. 그러나 해양 조류 번성(algal bloom) 모니터링, 오염 지역 탐색, 환경 매핑 같은 임무에서는:</p>
+<ol>
+<li><strong>측정 데이터가 로봇이 이동하면서 점진적으로 축적</strong>된다 (온라인 학습)</li>
+<li><strong>어디를 측정해야 최대 정보를 얻는지 사전에 모른다</strong> (정보 이득 최대화)</li>
+<li><strong>환경의 물리적 상태가 시공간적으로 불균일</strong>하다 (공간 의존 불확실성)</li>
+</ol>
+<p>이를 해결하기 위해 OLAhGP는 <strong>가우시안 프로세스(GP)를 사용해 현재까지 획득한 측정 데이터에서 환경의 확률적 믿음(posterior)을 유지</strong>하고, 이 믿음의 불확실성을 최소화하는 방향으로 미래 경유지를 연속적으로 최적화한다.</p>
+<p>핵심 기여: <strong>다단계(multi-step) 미래 GP 전파(propagation)</strong> — 최적화 변수인 미래 경유지 R에서의 측정이 현재 믿음에 어떤 영향을 미치는지를 해석적으로(analytically) 계산하여, 실시간 소요(&lt; 1ms)에 윈도우 크기 N개 경유지를 동시에 최적화한다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 환경 모니터링에서의 경로 계획 특수성</h4>
+<p>일반적인 Point-A → Point-B 내비게이션과 달리 환경 모니터링 경로 계획은 다음과 같은 특수성을 지닌다:</p>
+<pre><code>일반 경로 계획 vs 환경 모니터링 경로 계획:
+
+              일반 경로 계획           환경 모니터링 경로 계획
+목표           목표 지점 도달           환경 상태 파악 (분류/매핑)
+장애물         알려진 장애물            알려지지 않은 고위험 지역
+비용 함수       거리/시간 최소화         정보 불확실성 최소화
+데이터          출발 전 완전한 지도        이동하면서 점진적 획득
+계획 갱신       이벤트 기반 (장애물 발견시) 매 측정마다 갱신 필요
+에이전트 수     단일~다중 UAV           ASV, AUV, UAV 혼합 가능
+</code></pre>
+<p>해양 조류 번성 모니터링은 이러한 특수성을 모두 가진 대표적 문제다:</p>
+<ul>
+<li>조류 번성 지역은 사전에 모름 → 로봇이 탐사하며 발견</li>
+<li>조류 밀도는 공간적으로 연속적이지만 임계값(γ)을 기준으로 분류</li>
+<li>탐사 효율성은 총 이동 거리 제약 L_max에 의해 제한</li>
+<li>해류·조류·바람이 실시간으로 경로에 영향</li>
+</ul>
+<h4>B. 그리디(Greedy) 단일 스텝 계획의 한계</h4>
+<p>가장 직관적인 접근인 <strong>그리디 계획</strong>(N=1, 현재 위치에서 다음 한 단계만 최적화)은 다음과 같은 구조적 한계를 가진다:</p>
+<pre><code>그리디 계획의 근시안적 실패 패턴:
+
+현재 위치 (*)
+     |
+     ↓
+[측정값 반영 후 가장 불확실한 인근 지점 A 선택]
+     |
+     ↓
+[A에서 다시 가장 불확실한 인근 지점 B 선택]
+     |
+결과: 지역적 최적만 달성, 멀리 떨어진 고불확실성 지역 미탐사
+
+다단계 계획의 장점:
+(*) → A → B → C → D → E 를 동시 최적화
+→ C-E 지역의 고불확실성이 A 선택에도 영향
+→ 전체 임무 관점에서 최적 경로
+</code></pre>
+<p>실험 결과, N=5 OLAhGP는 그리디(N=1)에 비해 오분류 확률(misclassification probability)에서 일관되게 우수한 성능을 보인다.</p>
+<h4>C. 글로벌(Static/Offline) 계획의 적응성 부재</h4>
+<p>임무 시작 전에 전체 경로를 한 번에 계획하는 방식(Offline)은 온라인 측정 데이터를 활용하지 못한다:</p>
+<pre><code>오프라인 계획 vs 온라인 적응 계획:
+
+오프라인:  고정 경로 (zigzag/lawnmower/random)
+          → 기 탐사된 불확실성 낮은 지역 재방문 낭비
+          → 새 측정으로 드러난 고불확실성 지역 무시
+
+온라인:   매 측정마다 GP 후험 갱신
+          → 현재 믿음 기준 가장 가치 있는 미래 경로 재계획
+          → 예상치 못한 조류 번성 지역 발견 시 즉시 방향 전환
+</code></pre>
+<h4>D. 기존 MIP(혼합정수계획) 방법의 계산 복잡도</h4>
+<p>Dutta 등(2025, IEEE T-RO)의 MIP 기반 방법은 8×8 그리드의 볼록 분할(convex decomposition)에서 MOSEK 솔버를 사용한다. 이는:</p>
+<ul>
+<li><strong>평균 17ms</strong> 계산 시간 (OLAhGP N=5: 0.99ms 대비 17배 느림)</li>
+<li><strong>8,600회 이상의 IPOPT 반복</strong> (OLAhGP: 37회 대비 232배 많음)</li>
+<li>그리드 해상도에 민감 → 세밀한 환경 표현 시 계산 폭발</li>
+</ul>
+<p>OLAhGP는 이를 베이지안 위원회 머신(BCM) 근사와 CasADi+IPOPT 연속 최적화로 대체하여 극적인 계산 효율을 달성한다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>OLAhGP는 세 가지 상호보완적 아이디어로 위 문제를 해결한다:</p>
+<ol>
+<li><strong>다단계 GP 전파</strong>: 미래 N개 경유지 R에서의 측정이 현재 믿음에 미치는 영향을 블록 행렬 역산으로 해석적으로 계산</li>
+<li><strong>베이지안 위원회 머신(BCM) 근사</strong>: 기존 데이터와 미래 경유지의 기여를 분리하여 최적화 변수와 데이터 처리를 분리</li>
+<li><strong>후퇴 수평선(receding horizon) 온라인 최적화</strong>: 매 경유지마다 GP를 갱신하고 N 스텝 앞을 동시에 최적화</li>
+</ol>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 가우시안 프로세스 환경 모델 (Gaussian Process Environment Model)</h3>
+<h4>3.1.1 GP 기본 구조</h4>
+<p>GP는 무한차원 함수에 대한 확률 분포로, 임의의 유한 점 집합에서 가우시안 분포를 정의한다:</p>
+<pre><code>f(·) ~ GP(m(·), k(·,·))
+
+여기서:
+  m(x): 평균 함수 (통상 0 또는 상수)
+  k(x₁,x₂): 공분산 커널 함수
+
+제곱지수 커널 (Squared Exponential / RBF Kernel):
+k(x₁,x₂) = σ² · exp(-½ (x₁-x₂)ᵀ L⁻¹ (x₁-x₂))
+
+여기서:
+  σ²: 신호 분산 (signal variance)
+  L: 길이 스케일 행렬 (length scale matrix, 공간적 상관 거리 제어)
+     OLAhGP 실험: ℓ = 600m (해양 조류 번성의 공간적 스케일)
+</code></pre>
+<p>데이터셋 𝒟ₜ = {(xᵢ, yᵢ)}ᵢ₌₁ⁿ 가 주어졌을 때, 새로운 지점 x*에서의 GP 후험 분포:</p>
+<pre><code>사후 평균 (Posterior Mean):
+μ(x*|𝒟ₜ) = m(x*) + k(x*, X) [k(X,X) + Σ]⁻¹ (Ȳ - m(X))
+
+사후 분산 (Posterior Variance):
+σ²(x*|𝒟ₜ) = k(x*,x*) - k(x*, X) [k(X,X) + Σ]⁻¹ k(X, x*)
+
+여기서:
+  X = [x₁, ..., xₙ]ᵀ: 관측 위치들
+  Ȳ = [y₁, ..., yₙ]ᵀ: 관측값들
+  Σ = σ²_noise · I: 관측 노이즈 공분산
+</code></pre>
+<p><strong>물리적 해석</strong>: μ(x*)는 해당 지점의 예측 조류 밀도이고, σ²(x*)는 예측의 불확실성이다. 관측 위치 근방에서는 σ²가 작고(확신), 미탐사 지역에서는 크다(불확실).</p>
+<h4>3.1.2 미래 경유지를 포함한 GP 전파</h4>
+<p>OLAhGP의 핵심 아이디어는 <strong>미래 계획 경유지 R = [r₁, r₂, ..., rₙ]에서 측정이 이루어질 것을 가정</strong>하고, 이를 현재 GP 후험에 통합한 결합 분포를 계산하는 것이다.</p>
+<p>기존 데이터 𝒟ₜ와 미래 경유지 R을 결합한 데이터셋:</p>
+<pre><code>𝒟ₜ ∪ R = {(x₁,y₁),...,(xₙ,yₙ), (r₁,ŷ₁),...,(rₙ,ŷₙ)}
+</code></pre>
+<p>이때 미래 경유지에서의 측정값 ŷᵢ는 알 수 없으므로, 현재 GP 사후 평균으로 대체한다:</p>
+<pre><code>ŷᵢ = μ(rᵢ|𝒟ₜ)    (최선 추정값)
+</code></pre>
+<p>결합 사후 분산을 블록 행렬로 표현하면 (Eq. 6):</p>
+<pre><code>[k(X,X) + Σ    k(X,R)   ]⁻¹
+[k(R,X)        k(R,R) + Σ]
+
+이를 이용한 임의 지점 x에서의 결합 사후 분산:
+σ²(x|𝒟ₜ, R) = k(x,x) - [k(x,X), k(x,R)] [블록 행렬]⁻¹ [k(X,x); k(R,x)]
+</code></pre>
+<p><strong>문제</strong>: 이 결합 역산은 O((n+N)³) 시간 복잡도로 최적화 변수 R의 변화마다 재계산이 필요 → 실시간 불가</p>
+<h4>3.1.3 베이지안 위원회 머신(BCM) 근사</h4>
+<p>OLAhGP는 Tresp(2000)의 BCM 근사를 사용하여 계산 복잡도를 드라마틱하게 감소시킨다:</p>
+<pre><code>BCM 근사 (Eq. 7):
+1/σ²(x|𝒟ₜ, R) ≈ 1/σ²(x|𝒟ₜ) + 1/σ²(x|R) - 1/k(x,x)
+
+즉, 사후 정밀도(precision)의 가산 분해:
+   결합 정밀도 ≈ [기존 데이터 기여] + [미래 경유지 기여] - [사전 정밀도]
+</code></pre>
+<p><strong>핵심 장점</strong>:</p>
+<ul>
+<li><code>σ²(x|𝒟ₜ)</code>: 기존 데이터만의 사후 분산 → 최적화 중 고정 상수 (변하지 않음)</li>
+<li><code>σ²(x|R)</code>: 미래 경유지만의 사후 분산 → 최적화 변수 R에 대해서만 계산</li>
+<li><strong>분리 가능성</strong>: 기존 데이터 처리와 미래 경유지 최적화를 완전히 독립적으로 수행 가능</li>
+</ul>
+<pre><code>계산 복잡도 비교:
+
+방법              복잡도              OLAhGP 실험(n=25, N=5) 소요시간
+정확한 결합 역산  O((n+N)³)           ~수백ms
+BCM 근사          O(n³) + O(N³)       O(n³)은 사전 계산, O(N³)≈0.99ms
+MIP (그리드)      O(MIP 크기 × MOSEK) 17ms
+</code></pre>
+<p>BCM은 근사이지만, 실험 결과에서 정확한 결합 역산 대비 성능 차이가 미미함을 확인했다.</p>
+<h4>3.1.4 오분류 확률 (Misclassification Probability)</h4>
+<p>조류 번성 지역을 분류하기 위해 임계값 γ (클로로필-a 농도 기준)를 사용한다. 지점 x에서의 오분류 확률은 GP 사후 평균과 분산을 이용한 정규 분포 꼬리 확률:</p>
+<pre><code>오분류 확률 (Eq. 8):
+p(x|𝒟ₜ, R) = Φ(-|μ(x|𝒟ₜ,R) - γ| / σ(x|𝒟ₜ,R))
+
+여기서:
+  Φ: 표준 정규 CDF
+  γ: 조류 번성 임계값 (클로로필-a 농도)
+  μ: GP 사후 평균 (예측 농도)
+  σ: GP 사후 표준편차 (불확실성)
+
+직관적 해석:
+  μ ≫ γ이고 σ가 작음: Φ(-큰수) ≈ 0 → 고확신 번성 지역
+  μ ≪ γ이고 σ가 작음: Φ(-큰수) ≈ 0 → 고확신 비번성 지역
+  μ ≈ γ 또는 σ가 큼: Φ ≈ 0.5 → 높은 오분류 가능성
+</code></pre>
+<p>오분류 확률의 합산이 최소화 목표가 된다: 전체 관심 영역 𝒳에서 오분류 가능성이 가장 큰 지역을 우선 탐사하도록 경로를 최적화한다.</p>
+<h3>3.2 후퇴 수평선 최적화 문제 (Receding Horizon Optimization)</h3>
+<h4>3.2.1 기본 최적화 문제 (Eq. 9)</h4>
+<p>OLAhGP의 경로 계획은 다음 최적화 문제로 공식화된다:</p>
+<pre><code>최적화 문제:
+R* = argmin_{R∈Ω^N}  Σ_{x∈𝒳} p(x|𝒟ₜ, R) + λ₁ Σᵢ ||rᵢ₊₁ - rᵢ||₂
+
+subject to:
+  Σᵢ ||rᵢ₊₁ - rᵢ||₂ ≤ L_max      (총 이동 거리 제한)
+  r₀ = r(0)                         (현재 위치에서 출발)
+  R ∈ Ω^N                           (경유지는 허용 영역 내에 있어야 함)
+
+여기서:
+  R = [r₁, r₂, ..., rₙ] ∈ R^{N×2}: N개 미래 경유지 (최적화 변수)
+  Ω: 허용 작업 영역 (operational domain)
+  N: 계획 수평선 (horizon length, 실험: N=5)
+  λ₁ = 10⁻³: 경로 길이 정규화 가중치
+  L_max = 6160m: 임무별 총 이동 거리 상한
+</code></pre>
+<p><strong>목적 함수의 이중 구조</strong>:</p>
+<ul>
+<li><code>Σ p(x|𝒟ₜ, R)</code>: 전체 관심 영역에서 오분류 가능성 합산 최소화 → 정보 이득 최대화</li>
+<li><code>λ₁ Σ ||rᵢ₊₁ - rᵢ||₂</code>: 경로 길이 최소화 → 불필요한 우회 방지</li>
+</ul>
+<h4>3.2.2 실세계 ASV 확장 목적 함수 (Eq. 10)</h4>
+<p>실제 해양 임무에서는 해류, 바람, 조류가 경로에 영향을 준다. 이를 위해 추가 비용 항목:</p>
+<pre><code>실세계 확장 목적 함수:
+R* = argmin_{R∈Ω^N}  Σ_{x∈𝒳} p(x|𝒟ₜ, R)
+                    + λ₁ Σᵢ ||rᵢ₊₁ - rᵢ||₂
+                    + λ₂ · c(R)           (해류 비용)
+                    + λ₃ · w(R)           (바람 비용)
+
+실험 파라미터:
+  λ₂ = 10⁻⁸: 해류 비용 가중치
+  λ₃ = 10⁻⁵: 바람 비용 가중치
+  c(R): 해류 방향 역행 비용 (SINMOD 해류 예보 사용)
+  w(R): 바람 방향 역행 비용 (날씨 API 사용)
+</code></pre>
+<p><strong>가중치 설계 원칙</strong>: λ₂, λ₃를 매우 작게 설정하여 해류·바람 비용이 정보 이득을 압도하지 않도록 한다. 즉, 정보가 풍부한 지역이 있다면 바람 역행을 감수하고라도 탐사한다.</p>
+<h4>3.2.3 CasADi + IPOPT 솔버</h4>
+<p>비선형 최적화에 CasADi(자동 미분 프레임워크)와 IPOPT(Interior Point Optimizer)를 사용한다:</p>
+<pre><code>솔버 설정:
+  - CasADi: 목적 함수와 제약의 자동 미분 → 그래디언트 정확 계산
+  - IPOPT: Interior Point Method로 비볼록 비선형 문제 해결
+  - 핫스타팅(hot-starting): 이전 최적해를 초기값으로 재사용
+    → 수렴 속도 극적 향상 (37회 반복 vs 미사용 시 수백 회)
+</code></pre>
+<p><strong>그리드화(gridding)</strong>: 연속 영역 𝒳를 RES×RES 그리드(실험: 32×32 = 1024 지점)로 이산화하여 합산 계산. 이 그리드는 최적화 변수가 아니고 고정이므로 계산 부하가 작다.</p>
+<h3>3.3 OLAhGP 알고리즘 전체 흐름 (Algorithm 1)</h3>
+<pre><code>OLAhGP 후퇴 수평선 루프:
+
+초기화:
+  GP 모델 초기화 (사전 분포)
+  t = 0, 현재 위치 r₀
+
+repeat:
+  [1] 현재 위치 r(t)에서 측정값 y(t) 획득 (클로로필-a 센서)
+  
+  [2] GP 갱신:
+      𝒟ₜ ← 𝒟ₜ₋₁ ∪ {(r(t), y(t))}
+      GP 사후 평균/분산 업데이트
+      소요: ~50ms (행렬 역산 O(n³))
+  
+  [3] BCM 분리:
+      σ²(x|𝒟ₜ) 사전 계산 → 최적화 중 고정
+      
+  [4] N-스텝 경로 최적화 (CasADi+IPOPT):
+      R* ← argmin_{R} Σ_x p(x|𝒟ₜ, R) + λ₁||R||
+      초기값: 이전 R* (핫스타팅)
+      소요: ~1ms (N=5 기준)
+  
+  [5] 첫 번째 경유지 r₁로 이동 (물리 이동)
+  
+  [6] 시프팅: R ← [r₂, ..., rₙ, rₙ + Δ] (수평선 전진)
+  
+  t ← t + 1
+until 총 이동 거리 소진 or 임무 완료
+</code></pre>
+<p><strong>후퇴 수평선의 장점</strong>: 계획된 N개 경유지 중 첫 번째만 실행하고 나머지는 다음 GP 갱신 후 재최적화된다. 이를 통해 새로운 측정 정보가 즉시 계획에 반영된다.</p>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<pre><code>OLAhGP 전체 파이프라인
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    실세계 ASV 시스템                              │
+│                                                                  │
+│  [클로로필-a 센서] ──→ [측정값 y(t)]                             │
+│  [SINMOD 해양 모델] ──→ [해류 예보 c(R)]                         │
+│  [날씨 API] ──────→ [바람 데이터 w(R)]                           │
+│  [LSTS 통신] ──────→ [육상 컴퓨터 원격 계획]                     │
+└────────────────┬────────────────────────────────────────────────┘
+                 │ 측정 데이터
+                 ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                    OLAhGP 계획 엔진                               │
+│                                                                  │
+│  ┌───────────────┐    측정 추가     ┌─────────────────────┐      │
+│  │  데이터셋 𝒟ₜ   │ ──────────────→ │   GP 후험 계산       │      │
+│  │  (누적 관측)   │                 │   μ(x|𝒟ₜ), σ²(x|𝒟ₜ) │      │
+│  └───────────────┘                 └──────────┬──────────┘      │
+│                                               │                  │
+│                                      BCM 분리 │                  │
+│                                               ↓                  │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │              N-스텝 최적화 (CasADi + IPOPT)                │  │
+│  │                                                           │  │
+│  │  min_{R∈Ω^N}  Σ_x p(x|𝒟ₜ,R) + λ₁||R|| + λ₂c(R) + λ₃w(R) │  │
+│  │                                                           │  │
+│  │  입력: σ²(x|𝒟ₜ) (고정), k(x,R) (R에 의존)               │  │
+│  │  출력: R* = [r₁*, r₂*, ..., rₙ*]                         │  │
+│  └─────────────────────────────┬─────────────────────────────┘  │
+│                                │                                  │
+│         r₁*만 실행             ↓                                  │
+│  ┌──────────────────┐    ┌──────────┐                            │
+│  │  ASV 경유지 전송  │    │ 수평선   │                            │
+│  │  (LSTS toolchain)│    │ 시프팅   │                            │
+│  └──────────────────┘    └──────────┘                            │
+└─────────────────────────────────────────────────────────────────┘
+                 │ r₁* 이동 후
+                 ↓ 다음 측정 → 반복
+</code></pre>
+<p><strong>데이터 흐름 설명</strong>:</p>
+<ul>
+<li>측정 단계: 센서가 현재 위치에서 클로로필-a 농도를 측정, GP 데이터셋에 추가</li>
+<li>GP 갱신: 새 측정으로 전체 환경의 믿음 업데이트 (~50ms)</li>
+<li>BCM 분리: 기존 데이터의 기여(σ²(x|𝒟ₜ))를 고정 상수로 캐시</li>
+<li>최적화: 미래 경유지 R에 대해서만 최적화 (~1ms)</li>
+<li>실행: 첫 번째 경유지 r₁*만 ASV에 전달, 나머지는 다음 반복에 재최적화</li>
+</ul>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 및 환경 (Datasets)</h3>
+<h4>A. SINMOD 고충실도 시뮬레이션</h4>
+<ul>
+<li><strong>SINMOD</strong>: 노르웨이 해양 지화학 모델 (Department of Marine Technology, NTNU)</li>
+<li>지역: 노르웨이 해안 특정 구역</li>
+<li>날짜: 2025년 9월 3일 데이터</li>
+<li>클로로필-a 농도 분포를 고해상도로 제공 → 기준 진실(ground truth) 역할</li>
+<li>해류·바람 예보도 SINMOD에서 제공</li>
+</ul>
+<h4>B. 실세계 현장 측정 (Field Campaign)</h4>
+<ul>
+<li><strong>하드웨어</strong>: 파도 추진 자율 수상 선박(ASV, Autonomous Surface Vessel)</li>
+<li><strong>통신</strong>: LSTS(Lightweight Unmanned Vehicle Toolchain)로 육상 컴퓨터와 연결</li>
+<li><strong>센서</strong>: 클로로필-a 측정 센서 (실시간 해양 측정)</li>
+<li><strong>환경</strong>: 노르웨이 해안, 강한 조류와 바람 존재</li>
+<li><strong>날짜</strong>: 2025년 9월 2일 현장 측정 데이터</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<pre><code>지표 1: 오분류 확률 합산 (Total Misclassification Probability)
+  Σ_{x∈𝒳} p(x|𝒟_T)
+  → 임무 완료 후 전체 지역에서 분류 오류 가능성의 합
+  → 낮을수록 좋음
+
+지표 2: 이분류 오분류율 (Binary Misclassification Rate, BMR)
+  (잘못 분류된 셀 수) / (전체 셀 수)
+  → 임무 완료 후 진짜 번성/비번성과 예측의 불일치 비율
+  → 낮을수록 좋음
+
+지표 3: 계산 시간 (Runtime)
+  GP 갱신 시간 + 최적화 설정 시간 + IPOPT 최적화 시간
+  → 낮을수록 좋음 (실시간 요건)
+
+지표 4: IPOPT 반복 횟수 (Iterations)
+  솔버 수렴까지의 반복 횟수
+  → 낮을수록 효율적
+</code></pre>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<h4>실험 설정</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>N_POINTS (지도 샘플 그리드)</td>
+<td>128</td>
+</tr>
+<tr>
+<td>RES (최적화 그리드)</td>
+<td>32</td>
+</tr>
+<tr>
+<td>N_STEPS (총 경유지)</td>
+<td>25</td>
+</tr>
+<tr>
+<td>N (계획 수평선)</td>
+<td>5 (또는 7)</td>
+</tr>
+<tr>
+<td>L_max (최대 이동 거리)</td>
+<td>6,160 m</td>
+</tr>
+<tr>
+<td>GP 길이 스케일 ℓ</td>
+<td>600 m</td>
+</tr>
+<tr>
+<td>λ₁</td>
+<td>10⁻³ m⁻¹</td>
+</tr>
+<tr>
+<td>GP 분산 σ</td>
+<td>1.0 (mg/m³)²</td>
+</tr>
+<tr>
+<td>반복 횟수</td>
+<td>10회 × 25 경유지</td>
+</tr>
+</tbody></table></div>
+<h4>계산 시간 비교 (Table II)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>GP 갱신 (ms)</th>
+<th>설정 (ms)</th>
+<th>최적화 (ms)</th>
+<th>IPOPT 반복</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>OLAhGP N=5</strong></td>
+<td>50±32</td>
+<td>3.7±0.1</td>
+<td><strong>0.99±0.70</strong></td>
+<td><strong>37±25</strong></td>
+</tr>
+<tr>
+<td><strong>OLAhGP N=7</strong></td>
+<td>51±33</td>
+<td>6.8±0.1</td>
+<td>3.4±5.9</td>
+<td>56±94</td>
+</tr>
+<tr>
+<td>Greedy (N=1)</td>
+<td>57±34</td>
+<td>0.62±0.04</td>
+<td>21±7</td>
+<td>16±5</td>
+</tr>
+<tr>
+<td>MIP (Dutta 2025)</td>
+<td>50±33</td>
+<td>7±5</td>
+<td>17±9</td>
+<td>8,600±3,900</td>
+</tr>
+<tr>
+<td>Offline</td>
+<td>—</td>
+<td>81±5</td>
+<td>730±1,200</td>
+<td>670±1,100</td>
+</tr>
+</tbody></table></div>
+<p><strong>주목할 점</strong>:</p>
+<ul>
+<li>OLAhGP N=5의 최적화 시간(0.99ms)이 MIP(17ms)보다 <strong>17배 빠름</strong></li>
+<li>단, GP 갱신 시간(~50ms)이 지배적 → 전체 스텝 시간 ≈ 55ms</li>
+<li>Greedy의 최적화 시간(21ms)이 OLAhGP N=5보다 오히려 느린 이유: 핫스타팅 없이 매번 새 초기점에서 시작</li>
+</ul>
+<h4>성능 비교 (시뮬레이션, SINMOD)</h4>
+<p>성능 순위 (오분류 확률 기준): <strong>OLAhGP N=5 &gt; OLAhGP N=7 &gt; MIP &gt; Greedy &gt; Offline</strong></p>
+<ul>
+<li>OLAhGP N=5가 N=7보다 약간 우수한 이유: 수평선이 너무 길어지면 BCM 근사 오차 누적</li>
+<li>MIP보다 OLAhGP가 우수한 이유: 그리드 해상도 제한 없이 연속 최적화로 더 정밀한 경로 탐색</li>
+</ul>
+<h4>실세계 현장 실험 결과</h4>
+<ul>
+<li>노르웨이 해안 ASV 실험에서 OLAhGP가 Greedy 대비 일관되게 우수한 성능</li>
+<li>실시간 해류·바람 비용 항목(λ₂, λ₃)이 실제 환경 조건에 적응</li>
+<li>파도 추진 ASV 특성상 물리적 제약(조류, 바람 방향)이 경로에 영향 → 확장 목적 함수로 처리</li>
+</ul>
+<h3>5.4 실세계 실험 (Real-world Experiments)</h3>
+<pre><code>실세계 실험 개요:
+
+환경: 노르웨이 해안 (Norwegian Coastal Area)
+     강한 조류 (tidal currents)
+     바람 조건 (weather API 데이터)
+     
+플랫폼: 파도 추진 자율 수상 선박 (Wave-propelled ASV)
+       - 에너지 무제한 (파도 에너지 이용)
+       - 속도 제한 있음
+       
+통신: LSTS toolchain
+      - 온보드 계산 아님
+      - 육상 컴퓨터에서 최적 경유지 계산 후 ASV로 전송
+      - 각 경유지 도달 후 측정값 수신 → 다음 경유지 계산
+      
+센서: 클로로필-a 농도 측정 (인시투 센서)
+      2025년 9월 2일 현장 데이터
+
+실험 결과:
+- OLAhGP N=5: Greedy 대비 낮은 오분류율 달성
+- 해류·바람 비용 항목이 실제 에너지 효율 개선에 기여
+- 총 25 경유지 × 10회 실험 기준 재현 가능한 우수 성능
+</code></pre>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>6.1 다단계 미래 GP 전파 (Multi-Step Future GP Propagation)</h3>
+<p>기존 정보 경로 계획(Informative Path Planning, IPP) 연구의 대부분은 단일 스텝(그리디) 또는 제한된 이산 그리드에서의 최적화에 의존한다. OLAhGP는 <strong>연속 공간에서 N개 미래 경유지를 동시에 최적화</strong>하면서 각 경유지에서의 가상 측정이 전체 믿음에 미치는 영향을 해석적으로 계산하는 최초의 방법 중 하나다.</p>
+<pre><code>기존 방법과의 차이:
+
+방법            최적화 방식           계획 수평선    연속/이산
+Greedy IPP     현재→다음 1스텝       N=1           연속
+MIP (Dutta)    8×8 볼록 분해         N=full        이산 그리드
+시뮬레이션 어닐링  확률적 탐색         N=full        이산
+OLAhGP         비선형 연속 최적화      N=5~7         연속 (CasADi)
+</code></pre>
+<h3>6.2 BCM 근사를 통한 실시간 가능성</h3>
+<p>베이지안 위원회 머신(BCM) 근사는 단순해 보이지만 계산 구조에 근본적인 변화를 가져온다. <strong>O((n+N)³) → O(n³) + O(N³)</strong> 로 복잡도를 분리하고, 최적화 루프 내부에서는 O(N³)만 반복 계산한다(실험 기준 N=5, 0.99ms). 이는 오프라인 계획이나 MIP 방법 대비 실시간 재계획을 가능케 하는 핵심 이유다.</p>
+<h3>6.3 실세계 ASV 검증</h3>
+<p>해양 조류 번성 모니터링이라는 실용적인 환경에서 파도 추진 ASV로 현장 실험을 수행했다. 이는 대부분의 IPP 논문이 시뮬레이션에만 국한되는 것과 대비되는 중요한 기여다. 실세계 환경의 해류, 바람, 조류를 목적 함수에 직접 통합하는 확장 공식화(Eq. 10)도 제안한다.</p>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 소프트웨어 스택</h3>
+<pre><code>OLAhGP 구현 스택:
+
+GP 라이브러리:
+  - 커스텀 구현 (BCM 근사를 위해 표준 라이브러리 미사용)
+  - Numpy 기반 행렬 연산
+
+최적화:
+  - CasADi: 자동 미분 프레임워크 (Python/C++ 바인딩)
+  - IPOPT: Interior Point Optimizer (오픈소스 비선형 최적화)
+  - 핫스타팅: 이전 솔루션 R*를 초기값으로 재사용
+
+통신:
+  - LSTS (Lightweight Unmanned Vehicle Toolchain)
+  - ASV-육상 컴퓨터 양방향 통신
+
+환경 데이터:
+  - SINMOD: 노르웨이 해양 지화학 모델 (API)
+  - 날씨 API: 바람 데이터 (실세계 임무)
+</code></pre>
+<h3>7.2 하이퍼파라미터 설계 원칙</h3>
+<pre><code>GP 커널 설계:
+  - 길이 스케일 ℓ = 600m: 해양 조류의 공간적 상관 거리에 맞춤
+    (수 km 규모의 해양 현상 반영)
+  - GP 분산 σ² = 1.0 (mg/m³)²: 측정 범위에 맞춤
+  - 노이즈 분산 Σ: 센서 특성에 맞춰 설정
+
+그리드 파라미터:
+  - RES = 32: 최적화 그리드 해상도 (32×32 = 1,024 평가 지점)
+    세밀할수록 정확하지만 계산 증가 → 해양 임무에 충분
+  - N_POINTS = 128: GP 후험 평가를 위한 지도 그리드
+    (RES보다 세밀한 시각화용)
+
+실세계 가중치:
+  λ₁ = 10⁻³: 경로 길이 가중치 (단위: m⁻¹)
+  λ₂ = 10⁻⁸: 해류 비용 (매우 작음 → 정보 이득이 주도)
+  λ₃ = 10⁻⁵: 바람 비용 (λ₂보다 크지만 여전히 작음)
+</code></pre>
+<h3>7.3 핫스타팅(Hot-Starting) 전략</h3>
+<pre><code>핫스타팅 효과:
+
+경우 A: 핫스타팅 없음 (Offline 방법)
+  → 매번 직선 경로(interpolation)에서 시작
+  → 평균 670±1,100회 IPOPT 반복 필요
+  → 730ms±1,200ms 소요
+
+경우 B: 핫스타팅 적용 (OLAhGP)
+  → 이전 최적해 R* = [r₁*, ..., rₙ*]에서 시작
+  → 다음 단계에서 R = [r₂*, ..., rₙ*, rₙ*+Δ]로 시프팅
+  → 환경 변화가 점진적이므로 이전 해가 좋은 초기값
+  → 평균 37±25회 IPOPT 반복만 필요
+  → 0.99ms±0.70ms 소요 (730× 가속!)
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 BCM 근사의 이론적 한계</h3>
+<p>BCM(베이지안 위원회 머신)은 각 전문가 GP가 서로 독립임을 가정한다. 실제로 기존 데이터 𝒟ₜ와 미래 경유지 R은 공간적으로 상관되어 있어 이 가정이 엄밀하지 않다. 특히:</p>
+<pre><code>BCM 근사 오차의 원인:
+  1. 기존 관측 근처에 경유지가 있을 때: 두 전문가의 정보가 중복
+  2. 경유지가 많을수록(큰 N): 경유지 간 상관도 무시 → 분산 과소 추정
+  3. 길이 스케일 ℓ이 경유지 간격 대비 클 때: 근사 오차 증가
+
+실험에서 N=7이 N=5보다 성능이 약간 낮은 이유:
+  → N 증가에 따른 BCM 근사 오차 누적 가능성
+</code></pre>
+<h3>8.2 확장 가능성</h3>
+<pre><code>향후 연구 방향:
+
+1. 연속 측정 경로 계획 (Continuous Measurement Path Planning)
+   현재: 이산 경유지 → 측정 → 이동 반복
+   향후: 이동 중에도 연속 측정, 경로 전체에서 적분된 정보 이득
+
+2. Sparse/Variational GP (SVGP) 기반 데이터 압축
+   현재: O(n³) GP 갱신 → 관측 수 증가 시 느려짐
+   향후: 유도 포인트(inducing points) m개로 요약 → O(nm²) + O(m³)
+
+3. 다중 에이전트 협력 계획 (Multi-Agent Coordination)
+   UAV + AUV + ASV 혼합 플릿으로 넓은 해역 신속 탐사
+   분산 GP 공유 + 중복 탐사 회피
+
+4. 파도 효과 통합 (Wave Effects Modeling)
+   파도 추진 ASV는 파도 방향·세기에 따라 속도가 결정적으로 다름
+   이를 운동 비용에 반영하면 에너지 효율 극대화
+</code></pre>
+<h3>8.3 한계점 (Limitations)</h3>
+<pre><code>OLAhGP의 주요 한계:
+
+1. 전역 최적성 보장 없음
+   비볼록(non-convex) 문제 → IPOPT는 로컬 최솟값만 보장
+   핫스타팅이 이를 완화하지만 전역 최적 경로 보장 불가
+
+2. 그리드 이산화 의존성
+   최적화 그리드 셀 크기 &lt;&lt; GP 길이 스케일 ℓ 요건
+   세밀한 환경(예: 강 하구)에서는 더 작은 셀 필요 → 계산 증가
+
+3. GP 계산 복잡도 O(n³) 병목
+   관측 수 n이 수백 개 이상이면 GP 갱신이 지배적 (~50ms)
+   장기 임무에서는 SVGP 등으로 완화 필요
+
+4. 코드 미공개
+   재현성 검증 불가, 다른 로봇 플랫폼 적용 어려움
+
+5. 단일 에이전트 제한
+   현재 공식화는 단일 ASV 가정
+   다중 에이전트 협력에는 분산 GP 공유 프로토콜 필요
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 Planner 트랙 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>SANDO (MIT)</th>
+<th>UGE-MPC (UMN)</th>
+<th>DreamFlow (KAIST)</th>
+<th>ViLiNT (AMIAD)</th>
+<th><strong>OLAhGP (UC Berkeley/NTNU)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 방법</td>
+<td>STSFC + MIQP</td>
+<td>Hellinger 다양성 MPC</td>
+<td>CFM 잠재 공간 예측</td>
+<td>GP+LiDAR 융합 트랜스포머</td>
+<td>다단계 GP 전파 + BCM 근사</td>
+</tr>
+<tr>
+<td>임무 유형</td>
+<td>UAV 안전 비행</td>
+<td>로봇 경로 탐색</td>
+<td>사족보행 로컬 내비</td>
+<td>지상 로봇 내비</td>
+<td>환경 모니터링 (ASV)</td>
+</tr>
+<tr>
+<td>불확실성 처리</td>
+<td>시공간 안전 팽창</td>
+<td>불확실성 유도 샘플링</td>
+<td>생성 모델로 미지 예측</td>
+<td>LiDAR 클리어런스 예측</td>
+<td><strong>GP 베이지안 불확실성</strong></td>
+</tr>
+<tr>
+<td>정보 이득 최대화</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅ (핵심 목표)</td>
+</tr>
+<tr>
+<td>실세계 실험</td>
+<td>✅ (UAV)</td>
+<td>✅ (지상 로봇)</td>
+<td>✅ (사족보행 Go2)</td>
+<td>✅ (지상 로봇)</td>
+<td>✅ <strong>(해양 ASV)</strong></td>
+</tr>
+<tr>
+<td>코드 공개</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>동적 재계획</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>계획 수평선 N</td>
+<td>제한 없음</td>
+<td>수십~수백</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>N=5~7</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>OLAhGP의 강점</strong>:</p>
+<ol>
+<li><p><strong>정보 이득 중심 설계</strong>: 기존 리뷰 논문들(SANDO, UGE-MPC, DreamFlow, ViLiNT)은 모두 &#39;목표 지점 도달&#39; 또는 &#39;장애물 회피&#39;에 집중한다. OLAhGP는 이와 다른 패러다임인 <strong>&#39;불확실성 최소화를 통한 환경 이해&#39;</strong> 에 집중하여 애플리케이션 니치(niche)가 명확히 구별된다.</p>
+</li>
+<li><p><strong>베이지안 불확실성의 일류 시민화(First-class)</strong>: GP의 사후 분산이 단순한 부산물이 아니라 경로 계획의 <strong>핵심 목적 함수</strong>가 된다. 이는 베이지안 최적 탐험(Bayesian Optimization)의 패러다임을 경로 계획에 적용한 것이다.</p>
+</li>
+<li><p><strong>해양 환경 실용성</strong>: SANDO(UAV), DreamFlow(사족보행), ViLiNT(지상 로봇)과 달리 OLAhGP는 <strong>해양 ASV 플랫폼</strong>에 특화되어 있어 해류·바람·조류를 공식화에 직접 통합한다.</p>
+</li>
+</ol>
+<p><strong>OLAhGP의 약점</strong>:</p>
+<ol>
+<li><p><strong>적용 범위 협소</strong>: 환경 모니터링 임무에 특화되어 있어 일반적인 경로 계획(장애물 회피, 목표 도달)에는 직접 적용 불가. SANDO나 UGE-MPC는 더 일반적인 임무에 적용 가능하다.</p>
+</li>
+<li><p><strong>코드 미공개</strong>: 기존 리뷰 논문 중 SANDO, UGE-MPC, ViLiNT, BTIT*은 모두 코드를 공개하여 재현성을 보장했다. OLAhGP는 코드가 없어 독립적 검증이 어렵다.</p>
+</li>
+<li><p><strong>정적 환경 가정</strong>: GP 모델은 정적 환경(시간 불변 조류 밀도)을 가정한다. 실제 해양 조류는 조류(tidal)에 따라 시간적으로도 변하므로 시공간 GP(spatio-temporal GP) 확장이 필요하다.</p>
+</li>
+<li><p><strong>N 확장성 제한</strong>: BCM 근사의 누적 오차로 N&gt;7에서 성능 저하. BTIT*, UGE-MPC 같은 장거리 계획 방법과 비교하면 수평선이 짧다.</p>
+</li>
+</ol>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>실적용 시나리오별 평가:
+
+시나리오 1: 해양 환경 모니터링 (적합)
+  - 조류 번성, 오염 감지, 수온 분포 매핑
+  - ASV, AUV 플랫폼에 즉시 적용 가능
+  - 실세계 검증 완료 → 실용성 높음
+
+시나리오 2: 육상 환경 매핑 (부분 적합)
+  - 방사선 오염 지역 매핑 (무인 지상 로봇)
+  - GP 커널을 다른 스케일로 조정하면 적용 가능
+  - 장애물 회피 기능 없음 → 별도 충돌 회피 레이어 필요
+
+시나리오 3: 일반 내비게이션 (부적합)
+  - 목표 지점 도달을 위한 내비게이션에는 과도한 설계
+  - SANDO, DreamFlow가 더 적합
+</code></pre>
+<h3>9.4 연구 방향성 평가</h3>
+<p>OLAhGP가 대표하는 <strong>정보 이득 기반 경로 계획(Informative Path Planning)</strong> 은 기존 리뷰 논문들이 다루지 않은 영역이다. 특히 기후 변화 모니터링, 환경 재난 대응, 해양 생태 조사 같은 실용적 임무에서 증가하는 수요를 반영한다.</p>
+<p>그러나 단순한 격자 탐사 대비 얼마나 실질적 이익이 있는지를 더 광범위한 시나리오에서 검증할 필요가 있다. 또한 코드 공개와 장기 임무에서의 확장성 개선이 필수적이다.</p>
+<hr>
+<h2>9.5 OLAhGP의 위치: 정보 경로 계획 분야 내에서</h2>
+<p>OLAhGP는 <strong>Informative Path Planning(IPP)</strong> 이라는 세부 분야에 속한다. IPP는 환경의 불확실성을 최소화하기 위해 경로를 계획하는 연구 분야로, 경로 계획의 전통적 목표(거리 최소화, 장애물 회피)와는 다른 패러다임이다.</p>
+<pre><code>IPP 분야 내 OLAhGP의 위치:
+
+IPP 방법론 분류:
+
+1. 그리디 / 탐욕적 접근
+   - 현재 믿음에서 단일 스텝 최대 정보 이득 방향 선택
+   - 장점: 계산 단순, 빠름
+   - 단점: 근시안적, 글로벌 최적과 멀 수 있음
+   - 대표: Simple Myopic, Greedy IPP
+   → OLAhGP의 N=1 특수 경우와 동일
+
+2. 이산 그리드 기반 최적화
+   - 작업 공간을 격자로 이산화 후 전역 최적화 (MIP, DP)
+   - 장점: 전역 최적성 근사 가능
+   - 단점: 그리드 해상도 한계, 계산 복잡도
+   - 대표: Dutta et al. (2025, IEEE T-RO) MIP
+
+3. 샘플링 기반 비순서적 최적화
+   - 랜덤 샘플링 + 에너지 최소화 (SA, 유전자 알고리즘)
+   - 장점: 글로벌 탐색 가능
+   - 단점: 수렴 보장 없음, 계산 비용
+   - 대표: Simulated Annealing IPP
+
+4. 순차적 수평선 최적화 (OLAhGP)
+   - 후퇴 수평선으로 N 스텝 동시 최적화
+   - 연속 공간 비선형 최적화 (CasADi+IPOPT)
+   - BCM 근사로 실시간 가능성 확보
+   → OLAhGP의 위치
+   장점: 연속 공간, 실시간, N&gt;1 다단계
+   단점: 로컬 최적 수렴, 전역 탐색 없음
+
+5. 강화 학습 기반
+   - 보상 함수로 정보 이득을 모델링하고 정책 학습
+   - 장점: 복잡한 제약 처리 가능, 훈련 후 빠름
+   - 단점: 데이터 효율성 낮음, 시뮬레이터 필요
+</code></pre>
+<p><strong>OLAhGP의 독특한 포지션</strong>: 연속 공간에서 실시간으로 동작하면서 N&gt;1 다단계 전망을 가진 유일한 방법으로, MIP의 이산화 한계와 그리디의 근시안 사이를 메우는 중간 지점을 제공한다.</p>
+<hr>
+<h2>9.6 GP 기반 경로 계획의 역사적 맥락</h2>
+<p>가우시안 프로세스를 경로 계획에 활용하는 연구는 2000년대 초부터 시작되었다:</p>
+<pre><code>GP 기반 IPP의 발전 흐름:
+
+초기 (2007~2014):
+  Krause &amp; Guestrin (2007): NP-hard 최적 센서 배치 → 그리디 근사
+  Singh et al. (2009): GP 기반 자율 탐사 (연속 공간 최초)
+  
+성장 (2014~2020):
+  Marchant &amp; Ramos (2014): Bayesian Optimization 기반 IPP
+  Popovic et al. (2017~): UAV 기반 GP 농업 모니터링
+  Hitz et al. (2017): ASV 수질 모니터링 (OLAhGP와 유사한 플랫폼)
+  
+최근 (2020~현재):
+  Dutta et al. (2025): MIP 기반 GP 경로 계획 (OLAhGP의 주요 비교 대상)
+  OLAhGP (2026): BCM + 연속 최적화 + 다단계 수평선
+</code></pre>
+<p>OLAhGP는 이 계보에서 두 가지 새로운 요소를 추가한다: <strong>(1) 베이지안 위원회 머신 근사로 계산 분리</strong>, <strong>(2) CasADi+IPOPT 연속 비선형 최적화</strong>. 이를 통해 이산 MIP 방법의 해상도 한계를 극복하면서도 실시간 성능을 달성한다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li>Tresp (2000): A Bayesian Committee Machine — BCM 근사의 원천 논문</li>
+<li>Dutta et al. (2025) IEEE T-RO: Convex Optimization for GP Path Planning — 주요 비교 대상 (MIP 기반)</li>
+<li>Rasmussen &amp; Williams (2006): Gaussian Processes for Machine Learning — GP 이론의 표준 참고서</li>
+<li>Wächter &amp; Biegler (2006): IPOPT — 내부점 비선형 최적화 솔버</li>
+<li>Andersson et al. (2019): CasADi — 자동 미분 소프트웨어</li>
+<li>SINMOD: Slagstad &amp; McClimans (2005) — 노르웨이 해양 지화학 모델</li>
+<li>Krause &amp; Guestrin (2007): Near-Optimal Sensor Placements in GP Models — IPP의 이론적 기반</li>
+<li>Lhotský et al. (2024): LSTS Toolchain — 무인 해양 차량 통신</li>
+<li>Singh et al. (2009): Efficient Informative Sensing using Multiple Robots — GP IPP의 초기 연구</li>
+<li>Marchant &amp; Ramos (2014): Bayesian Optimisation for Intelligent Environmental Monitoring — BO 기반 IPP</li>
+<li>Popovic et al. (2017): Informative Path Planning for Active Field Mapping — UAV 기반 GP 농업 모니터링</li>
+<li>Hitz et al. (2017): Adaptive Continuous-Space Informative Path Planning for Online Environmental Monitoring — ASV 수질 모니터링</li>
+</ul>
+<hr>
+<h2>10.1 OLAhGP 수식 요약표 (Quick Reference)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>기호</th>
+<th>의미</th>
+<th>차원/단위</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>f(·)</td>
+<td>환경 스칼라 필드 (클로로필-a 농도)</td>
+<td>mg/m³</td>
+</tr>
+<tr>
+<td>k(x₁,x₂)</td>
+<td>GP 공분산 커널 (RBF)</td>
+<td>(mg/m³)²</td>
+</tr>
+<tr>
+<td>σ²</td>
+<td>GP 신호 분산</td>
+<td>1.0 (mg/m³)²</td>
+</tr>
+<tr>
+<td>ℓ</td>
+<td>GP 길이 스케일</td>
+<td>600 m</td>
+</tr>
+<tr>
+<td>μ(x|𝒟ₜ)</td>
+<td>GP 사후 평균</td>
+<td>mg/m³</td>
+</tr>
+<tr>
+<td>σ²(x|𝒟ₜ)</td>
+<td>GP 사후 분산</td>
+<td>(mg/m³)²</td>
+</tr>
+<tr>
+<td>γ</td>
+<td>조류 번성 임계값</td>
+<td>mg/m³</td>
+</tr>
+<tr>
+<td>p(x|𝒟ₜ,R)</td>
+<td>오분류 확률</td>
+<td>[0, 1]</td>
+</tr>
+<tr>
+<td>R = [r₁,...,rₙ]</td>
+<td>미래 N개 경유지</td>
+<td>m (2D 좌표)</td>
+</tr>
+<tr>
+<td>N</td>
+<td>계획 수평선</td>
+<td>5 또는 7</td>
+</tr>
+<tr>
+<td>L_max</td>
+<td>최대 이동 거리</td>
+<td>6,160 m</td>
+</tr>
+<tr>
+<td>λ₁</td>
+<td>경로 길이 가중치</td>
+<td>10⁻³ m⁻¹</td>
+</tr>
+<tr>
+<td>λ₂</td>
+<td>해류 비용 가중치</td>
+<td>10⁻⁸</td>
+</tr>
+<tr>
+<td>λ₃</td>
+<td>바람 비용 가중치</td>
+<td>10⁻⁵</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p>OLAhGP(Online Look-Ahead Gaussian Process Path Planning)는 <strong>환경 모니터링이라는 특수 임무에 특화된 정보 이득 기반 경로 계획기</strong>로, 다음 세 가지 핵심 혁신으로 기존 방법의 한계를 극복한다:</p>
+<p><strong>1. 다단계 미래 GP 전파</strong>: 미래 N개 경유지에서의 가상 측정이 현재 GP 믿음에 미치는 영향을 해석적으로 계산. 단일 스텝 그리디 계획의 근시안적 한계를 극복하면서도 MIP 기반 방법보다 17배 빠른 최적화를 달성한다.</p>
+<p><strong>2. BCM 근사를 통한 실시간 가능성</strong>: O((n+N)³) → O(N³) 분해로 최적화 계산 부하를 극적으로 감소. 이를 핫스타팅과 결합하면 IPOPT 반복이 37회로 수렴하여 1ms 이내에 N=5 경로를 계획한다.</p>
+<p><strong>3. 실세계 해양 검증</strong>: 파도 추진 ASV로 노르웨이 해안에서 현장 실험을 수행, 해류·바람 비용을 통합한 확장 공식화로 실용성을 입증했다.</p>
+<p>기존 Planner 트랙 리뷰 논문들(SANDO, UGE-MPC, DreamFlow, ViLiNT)이 장애물 회피·목표 도달에 집중한 것과 달리, OLAhGP는 <strong>환경 상태 파악을 위한 탐사 계획</strong>이라는 새로운 방향을 대표한다. 향후 다중 에이전트 협력, Sparse GP 확장, 시공간 GP 통합을 통해 기후 변화 모니터링, 재난 대응, 해양 생태 조사 등 실용적 임무에서의 활용이 기대된다.</p>
+<p>코드 공개와 더 다양한 환경에서의 검증이 이루어진다면 환경 모니터링 로보틱스 분야의 중요한 기준선 방법이 될 것이다.</p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>STEMbot: A Compliant Robot for Under-Canopy Plant Navigation · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">IROS 2026</div>
+    <h1>STEMbot: A Compliant Robot for Under-Canopy Plant Navigation</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2607.07873">arXiv:2607.07873</a></span>
+      <span>리뷰 2026-07-11</span>
+      <span>38분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>STEMbot: A Compliant Robot for Under-Canopy Plant Navigation: 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: STEMbot: A Compliant Robot for Under-Canopy Plant Navigation</li>
+<li><strong>저자 (Authors)</strong>: (UM-ARM Lab 연구진, incl. Dmitry Berenson)</li>
+<li><strong>소속 (Affiliation)</strong>: University of Michigan, Autonomous Robotic Manipulation (ARM) Lab</li>
+<li><strong>발표처 (Published)</strong>: IROS 2026</li>
+<li><strong>DOI</strong>: (IROS 2026 게재 예정)</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2607.07873">2607.07873</a></li>
+<li><strong>프로젝트 페이지</strong>: ✅ <a href="https://um-arm-lab.github.io/stembot-site/">um-arm-lab.github.io/stembot-site</a></li>
+<li><strong>코드</strong>: ✅ 공개 <a href="https://github.com/UM-ARM-Lab/stembot">github.com/UM-ARM-Lab/stembot</a> (C++ 50.5% / Python 44.6% / CMake, ROS 워크스페이스·Docker·독립 실행 플래너 <code>scripts/plan.py</code>·Arduino 펌웨어 포함. LICENSE는 특허 심사 중 pending)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>본 연구는 <strong>식물 캐노피 아래(under-canopy)의 극도로 좁고 복잡한 공간을 항해하는 초소형 순응형(compliant) 로봇 STEMbot</strong> 과, 그 로봇이 <strong>식물 줄기(stem)를 타고 오르며 목표 지점까지 경로를 계획·실행</strong>하는 모션 플래닝 시스템을 제안한다.</p>
+<p>정밀 농업·식물 표현형 분석(phenotyping)·생태 모니터링에서는 잎 뒤·줄기 사이·가지 분기점 같은 <strong>지상 로봇이나 드론이 접근할 수 없는 미시 공간</strong>의 근접 관측이 필요하다. 기존 접근은 (a) 큰 지상 로봇으로 캐노피 위에서 내려다보거나, (b) 드론으로 접근하지만, 둘 다 잎에 가려진 줄기 표면·분기점 내부를 근접 검사할 수 없다.</p>
+<p>STEMbot의 목표는:</p>
+<ol>
+<li><strong>하드웨어</strong>: 67g의 초경량 순응형 로봇으로, 실리콘 순응 바퀴와 4절 링크(four-bar linkage)+수동 스프링 클램핑을 이용해 <strong>7–33mm 굵기의 줄기를 안정적으로 등반</strong>한다.</li>
+<li><strong>인지·매핑</strong>: 스테레오/ToF 센서 + PIN-SLAM + SAM/CLIP 의미 분할로 <strong>확률적 의미 OcTree(semantic OcTree)</strong> 를 구축, 어느 표면이 &quot;등반 가능(traversable)&quot;한지 식별한다.</li>
+<li><strong>모션 플래닝</strong>: 줄기 표면이라는 <strong>매니폴드(manifold) 위에 구속된 A* 탐색</strong>으로 목표(웨이포인트 또는 가시성 제약 관측점)까지 경로를 생성하고, <strong>수신 지평선(receding horizon)</strong> 으로 재계획한다.</li>
+</ol>
+<p>즉 본 논문은 하드웨어(순응 메커니즘)·인지(의미 매핑)·플래닝(매니폴드 제약 탐색)을 통합한 <strong>under-canopy 식물 항해 시스템</strong>이며, 본 리뷰의 초점(Planner 트랙)은 §3의 <strong>매니폴드 제약 A* 모션 플래닝</strong>과 이를 뒷받침하는 의미 매핑 파이프라인이다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p>식물 줄기 등반 항해는 표준 지상/공중 모션 플래닝과 근본적으로 다른 도전을 안는다.</p>
+<ol>
+<li><p><strong>비평면·비유클리드 구성공간</strong>: 로봇은 자유공간을 나는 것이 아니라 <strong>줄기 표면(곡면 매니폴드)에 물리적으로 구속</strong>되어 움직인다. 따라서 경로는 3D 자유공간이 아니라 곡면 위에 있어야 하며, 표면 법선(normal)·가지 방향(branch heading)까지 상태에 포함되어야 한다.</p>
+</li>
+<li><p><strong>가지 분기점(branch junction) 전이</strong>: 줄기가 갈라지는 분기점에서 로봇은 한 가지에서 다른 가지로 옮겨타야 한다. 이때 물리적으로 불가능한 측면 기동을 배제하는 <strong>전이 제약</strong>이 필요하다.</p>
+</li>
+<li><p><strong>좁고 변형 가능한 환경</strong>: 줄기 굵기 7–33mm, 분기 각도 최대 90°, 곡률 반경 최소 50mm의 극한 형상. 로봇 자체가 초경량(67g)·순응형이어야 통과 가능.</p>
+</li>
+<li><p><strong>불확실한 의미 인지</strong>: 어느 표면이 등반 가능한 줄기인지, 어디가 잎/장애물인지 실시간으로 판별해야 한다. 살아있는 식물은 형상이 불규칙하고 SLAM 추적이 어렵다.</p>
+</li>
+<li><p><strong>온라인 재계획</strong>: 매핑 오차·미끄러짐·추적 손실에 대응해 매 동작 후 갱신된 오도메트리로 재계획해야 한다.</p>
+</li>
+</ol>
+<h3>2.2 핵심 해결책</h3>
+<p>STEMbot은 위 도전을 3계층으로 해결한다:</p>
+<ul>
+<li><strong>매니폴드 제약 상태공간</strong>: 상태를 <code>s = {p, n, b}</code>(3D 위치, 표면 법선, 가지 방향)로 정의하여 곡면 구속을 명시적으로 인코딩. A* 탐색이 이 매니폴드 위에서만 확장된다.</li>
+<li><strong>의미 OcTree + PIN-SLAM 매핑</strong>: 등반 가능 표면을 확률적 로그-오즈로 누적, 플래너의 유효 상태 집합(traversable voxel centroid)을 제공.</li>
+<li><strong>수신 지평선 A* + 전이/충돌 제약</strong>: 매 이산 동작 후 재계획하며, 분기 전이 임계(γ, ε)와 k-d tree 충돌 검사로 물리적 실현성을 보장.</li>
+</ul>
+<p><strong>왜 기존 플래너로 안 되는가.</strong> 표준 지상 플래너(예: TRG-Planner의 주행가능성 그래프)는 로봇이 지형 &quot;위에&quot; 지지된다고 가정하고 중력을 지지력으로 상쇄한다. 등반 로봇은 반대로 <strong>중력에 맞서 표면에 매달려</strong> 있으며, 지지력이 순응 바퀴 그립과 스프링 클램핑에서 나온다. 따라서 &quot;이 지점이 등반 가능한가&quot;는 단순 기하(경사·거칠기)가 아니라 <strong>줄기 굵기·법선·클램핑 가능성</strong>의 함수다. 또한 자유공간 샘플링 플래너(RRT/PRM)는 3D 볼륨을 샘플링하지만, 로봇이 존재할 수 있는 공간은 줄기 표면(측정 0의 2D 다양체)이라 무작위 샘플이 거의 전부 무효가 된다 — 이것이 곡면 매니폴드에 특화된 A*가 필요한 근본 이유다.</p>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 매니폴드 제약 상태 표현</h3>
+<p>핵심은 로봇이 <strong>줄기 표면이라는 2D 매니폴드에 구속</strong>된다는 사실을 상태 정의에 직접 담는 것이다.</p>
+<pre><code>   상태:  s = { p, n, b }
+          p ∈ ℝ³   : 3D 위치 (줄기 표면 위)
+          n ∈ ℝ³   : 표면 법선 (로봇이 붙어있는 면의 방향)
+          b ∈ ℝ³   : 가지 방향(branch heading, 줄기 축 방향)
+</code></pre>
+<p>이 세 벡터가 함께 로봇의 곡면 위 자세를 완전히 규정한다. 표준 지상 플래닝의 <code>(x, y, θ)</code>나 자유공간 플래닝의 <code>SE(3)</code>와 달리, <code>n</code>과 <code>b</code>가 표면 기하에 고정되어 있어 <strong>자유도가 곡면으로 제한</strong>된다.</p>
+<p>법선 <code>n</code>과 가지 방향 <code>b</code>는 지역 점군에 대한 <strong>PCA(주성분분석)</strong> 로 추정한다:</p>
+<pre><code>   n = PCA_normal(P_local, r_normal=0.005 m)   ← 작은 반경, 표면 법선
+   b = PCA_branch(P_local, r_branch=0.14 m)    ← 큰 반경, 줄기 축 방향
+</code></pre>
+<p>두 반경(0.005m vs 0.14m)의 차이가 의미심장하다 — 작은 반경으로는 국소 표면 법선을, 큰 반경으로는 줄기의 전역 축 방향을 잡아낸다. 이 다중 스케일 PCA가 매니폴드의 국소 좌표계를 구성한다.</p>
+<h3>3.2 매니폴드 제약 A* 탐색</h3>
+<p>플래너는 이산화된 상태공간 위에서 <strong>manifold-constrained A* search</strong> 를 수행한다.</p>
+<p><strong>행동 원시(action primitives).</strong> 4개의 이산 동작:</p>
+<pre><code>   {UP, DOWN, LEFT, RIGHT}
+   - UP/DOWN   : 줄기 축(b) 방향 상하 이동, 스텝 δ_linear (0.1–0.2 mm)
+   - LEFT/RIGHT: 표면 상 요(yaw) 회전, 스텝 δ_angular (0.1°)
+</code></pre>
+<p><strong>비용 함수(cost).</strong> 매니폴드 위 경로 길이:</p>
+<pre><code>   g(s_{t+1}) = g(s_t) + || p_{t+1} − p_t ||_2
+</code></pre>
+<p>즉 누적 이동 거리를 최소화한다.</p>
+<p><strong>휴리스틱(heuristic).</strong> 공간 거리 + 헤딩 정렬(heading alignment)을 가중 결합:</p>
+<pre><code>   h(s) = 공간거리(p → goal) + W_θ · 헤딩정렬비용    (W_θ = 1.0)
+</code></pre>
+<p>헤딩 정렬 항이 있어, 단순 최단거리뿐 아니라 로봇이 목표를 향하도록 자세도 유도한다.</p>
+<p><strong>매니폴드 투영(manifold projection).</strong> 후보 상태를 그대로 쓰면 곡면을 벗어날 수 있으므로, <strong>등반 가능 복셀 중심(traversable voxel centroid)의 k-d tree에서 최근접 이웃으로 투영</strong>한다. 즉 A*가 확장한 후보 위치를 항상 실제 줄기 표면으로 스냅(snap)한다. 방향 일관성은 내적(dot-product) 제약으로 강제한다.</p>
+<pre><code>   후보 p_cand  ──투영──▶  p&#39; = NN_kdtree(p_cand, traversable_centroids)
+   법선/헤딩 일관성:  n&#39;·n_prev, b&#39;·b_prev 내적 제약 만족해야 유효
+</code></pre>
+<h3>3.3 가지 전이 제약 (Branch Transition)</h3>
+<p>분기점에서 한 가지→다른 가지로 옮겨탈 때 <strong>물리적으로 불가능한 측면 기동을 차단</strong>하는 것이 핵심 안전장치다.</p>
+<pre><code>   가지 전이 유효 조건:   | m · b_{t+1} | &lt; ε
+   여기서   m = b_t × n_t   (현재 가지방향 × 법선 = 측면 벡터)
+            ε = 0.40        (전이 임계, 비물리적 측면기동 방지)
+            γ = 0.995       (가지 검출 임계)
+</code></pre>
+<p><code>m = b_t × n_t</code>는 현재 줄기 축과 표면 법선의 외적으로, <strong>로봇 몸체의 측면 방향</strong>을 나타낸다. 새 가지 방향 <code>b_{t+1}</code>이 이 측면 벡터와 지나치게 정렬되면(<code>|m·b_{t+1}| ≥ ε</code>) 로봇이 옆으로 미끄러져 붙어야 한다는 뜻이라 <strong>물리적으로 불가능</strong> → 전이 무효. 이 단순한 외적·내적 제약이 순응형 등반 로봇의 운동학적 한계를 우아하게 인코딩한다.</p>
+<h3>3.4 충돌 검사 및 목표 명세</h3>
+<p><strong>충돌 검사(collision checking).</strong> 장애물 집합 <code>P_obs</code>에 대한 k-d tree 최근접 질의:</p>
+<pre><code>   상태 유효 ⟺  d(p_t, P_obs) ≥ r_robot
+</code></pre>
+<p><strong>목표 명세(goal specification).</strong> 두 가지 모달리티:</p>
+<ol>
+<li><strong>상태 기반 웨이포인트(state-based)</strong>: 특정 3D 상태를 목표로. 도달 허용오차 <code>d_goal = 0.01 m</code>.</li>
+<li><strong>가시성 제약 관측점(visibility-constrained)</strong>: 관심 대상(예: 잎 뒤 병변)을 가리지 않고 볼 수 있는 지점을 <strong>레이 캐스팅 + 피보나치 구(Fibonacci sphere) 샘플링</strong>으로 탐색. 검사(inspection) 임무에 특화된 목표 정의로, &quot;어디서 봐야 대상이 안 가려지나&quot;를 자동 결정.</li>
+</ol>
+<h3>3.5 수신 지평선 재계획 (Receding Horizon)</h3>
+<p>플래너는 <strong>매 이산 동작마다 재계획</strong>한다:</p>
+<pre><code>   loop:
+     1) 현재 오도메트리로 상태 s_t 갱신
+     2) 매니폴드 제약 A* 로 s_t → goal 경로 계획
+     3) 경로의 첫 동작 1개만 실행 (300 ms 이동)
+     4) 1 s 정지 — 자세 동기화 + 다음 계획 동시 수행
+     5) goto 1
+</code></pre>
+<p><strong>동작 타이밍</strong>이 특징적이다: <strong>300ms 이동 후 1s 정지</strong>. 정지 구간에 자세를 동기화하고 다음 계획을 병행 수행한다. 이 stop-and-go 방식은 순응형 로봇의 미끄러짐·SLAM 추적 안정성을 확보하기 위한 실용적 선택이다.</p>
+<h3>3.6 매니폴드 제약 A* 의사코드 (통합)</h3>
+<p>앞의 구성요소(§3.1–3.5)를 하나의 탐색 루프로 종합하면 다음과 같다:</p>
+<pre><code>manifold_astar(s_start, goal, OcTree):
+    traversable ← OcTree.query(&quot;traversable&quot;)      # 의미 복셀 중심 집합
+    kdtree_free ← KDTree(traversable)              # 투영용
+    kdtree_obs  ← KDTree(OcTree.query(&quot;obstacle&quot;)) # 충돌검사용
+    OPEN ← {s_start},  g[s_start] ← 0
+    while OPEN not empty:
+        s ← argmin_{s∈OPEN} (g[s] + h(s, goal))    # h = 거리 + W_θ·헤딩
+        if || s.p − goal.p || &lt; d_goal: return reconstruct(s)
+        for a in {UP, DOWN, LEFT, RIGHT}:
+            p_cand ← apply(a, s, δ_linear, δ_angular)
+            p&#39; ← NN(kdtree_free, p_cand)            # 매니폴드 투영
+            n&#39;, b&#39; ← PCA(p&#39;, r_normal, r_branch)    # 국소 좌표계 재추정
+            # --- 유효성 3중 검사 ---
+            if NN_dist(kdtree_obs, p&#39;) &lt; r_robot: continue      # 충돌
+            if (n&#39;·s.n &lt; τ_n) or (b&#39;·s.b &lt; τ_b):   continue      # 방향 일관성
+            if is_branch(γ) and |cross(s.b,s.n)·b&#39;| ≥ ε: continue # 전이 제약
+            g&#39; ← g[s] + || p&#39; − s.p ||
+            relax(s&#39; = {p&#39;,n&#39;,b&#39;}, g&#39;, parent=s)
+    return FAIL
+</code></pre>
+<p>이 의사코드는 <strong>투영(projection) → 국소좌표 재추정 → 3중 유효성 검사(충돌/방향/전이)</strong> 라는 매 확장 단계를 드러낸다. 표준 A*와의 결정적 차이는 (a) 후보를 매번 실제 표면으로 스냅하고, (b) 확장마다 <code>{n, b}</code>를 PCA로 재추정하며, (c) 외적 기반 전이 제약으로 비물리적 이웃을 가지치기(prune)한다는 점이다. 이로써 탐색 트리가 곡면을 벗어나지 않는다.</p>
+<h3>3.7 확률적 의미 OcTree의 베이지안 갱신</h3>
+<p>플래너의 유효 상태 집합을 제공하는 의미 OcTree는 각 복셀의 클래스 확률을 <strong>로그-오즈(log-odds)</strong> 로 누적한다:</p>
+<pre><code>   L_t(voxel, c) = L_{t-1}(voxel, c) + log[ p(c | z_t) / (1 − p(c | z_t)) ]
+</code></pre>
+<p>여기서 <code>z_t</code>는 스텝 <code>t</code>의 SAM/CLIP 의미 관측(<code>p&gt;0.90</code> 임계 통과분), <code>c ∈ {traversable, obstacle, ...}</code>. 로그-오즈 누적은 다중 관측을 베이지안으로 융합하여 <strong>단발 오분류에 강건</strong>하게 만든다 — 한 프레임의 잘못된 분할이 여러 프레임의 일관된 관측에 의해 교정된다.</p>
+<p>그럼에도 살아있는 식물의 traversable 오차(37.56mm, §5.3)가 큰 것은, 반투명 잎·불규칙 형상에서 <strong>관측 자체가 계통적으로(systematically) 편향</strong>되어 로그-오즈 융합으로도 상쇄되지 않기 때문이다. 이는 인지-플래닝 결합 구조의 근본 취약점을 드러낸다: 매핑이 계통 오차를 가지면 플래너 매니폴드도 계통적으로 왜곡된다.</p>
+<h3>3.8 가시성 제약 목표의 기하</h3>
+<p>검사 임무용 목표 모달리티는 <strong>&quot;대상 t를 가리지 않고 관측 가능한 지점&quot;</strong> 을 자동 탐색한다. 대상 주위 구면에 <strong>피보나치 구(Fibonacci sphere) 샘플링</strong>으로 균등 분포 후보 관측점을 뿌리고, 각 후보에서 대상으로 <strong>레이 캐스팅</strong>하여 가림(occlusion)을 검사한다:</p>
+<pre><code>   for k in 0..N_sample-1:                     # 피보나치 구 균등 샘플
+       φ = π(3 − √5)·k                          # 황금각
+       y = 1 − 2k/(N−1);  r = √(1−y²)
+       obs_k = target + R·(r·cos φ, y, r·sin φ)
+       if raycast(obs_k → target) 무가림 and obs_k ∈ traversable:
+           후보 목록에 추가
+   goal ← argmin_{obs_k} 경로비용(현재→obs_k)
+</code></pre>
+<p>피보나치 구는 구면 위 점을 거의 균등하게 분포시키는 결정론적 방법으로, 무작위 샘플링보다 커버리지가 균일하다. 무가림 + 등반가능(traversable) 두 조건을 만족하는 관측점만 목표 후보가 되고, 그중 경로비용 최소점을 최종 목표로 삼는다. 이 설계는 &quot;물리적으로 도달 가능하면서 대상을 볼 수 있는&quot; 지점을 자동 계산하여, 잎에 가린 병변·분기점 내부 검사를 가능케 한다.</p>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<pre><code>┌───────────────────── 센싱 ─────────────────────┐
+│ Intel RealSense D405 (스테레오, 30Hz depth)      │
+│   → 서브샘플 3.75Hz 오도메트리                   │
+│ Adafruit VL6180X ToF (피치 피드백, 90Hz)         │
+└───────────────────┬─────────────────────────────┘
+                    ▼
+┌───────────────── 인지·매핑 ─────────────────────┐
+│ PIN-SLAM (depth 기반 기하 SLAM)                  │
+│ SAM + CLIP (closed vocab, p&gt;0.90) 의미 분할      │
+│ → 확률적 의미 OcTree (Bayesian log-odds, 1Hz)   │
+│   클래스: traversable(줄기) / obstacle / ...     │
+└───────────────────┬─────────────────────────────┘
+                    ▼
+┌───────────────── 모션 플래닝 ───────────────────┐
+│ 상태 s={p,n,b}, 다중스케일 PCA(0.005/0.14m)      │
+│ 매니폴드 제약 A* ({UP,DOWN,LEFT,RIGHT})          │
+│   비용 g=경로길이, 휴리스틱 h=거리+W_θ·헤딩      │
+│ k-d tree 투영 + 충돌검사(d≥r_robot)              │
+│ 가지 전이 제약 |m·b|&lt;ε(0.40), γ=0.995            │
+│ 수신 지평선: 매 동작 후 재계획                   │
+└───────────────────┬─────────────────────────────┘
+                    ▼
+┌───────────────── 제어·구동 ─────────────────────┐
+│ PID (Kp=20, Kd=5, Ki=0.1), ToF 피드백 90Hz       │
+│ 4× Pololu 700:1 기어모터 (≤900 g-cm 토크)        │
+│ 실리콘 순응 바퀴 (EcoFlex 00-45) + 4절링크+스프링 │
+│ Arduino 펌웨어. 300ms 이동 / 1s 정지             │
+└──────────────────────────────────────────────────┘
+</code></pre>
+<p><strong>데이터 흐름의 핵심.</strong> 의미 OcTree의 &quot;traversable&quot; 복셀 중심이 곧 A*의 유효 상태 집합(k-d tree 투영 대상)이 된다 — <strong>인지(의미 분할)와 플래닝(매니폴드 투영)이 OcTree를 매개로 긴밀히 결합</strong>되어 있다. 잘못 분류된 표면(§5의 live plant traversable 오차 37.56mm)은 곧바로 플래너의 매니폴드를 오염시키므로, 인지 정확도가 플래닝 성패를 좌우한다.</p>
+<h3>4.1 계층적 시간 스케일 (Multi-rate control)</h3>
+<p>STEMbot의 구성요소들은 <strong>서로 다른 주파수</strong>에서 동작하며, 이 다중 속도(multi-rate) 구조가 순응 등반의 안정성을 확보하는 핵심이다:</p>
+<pre><code>   90.0 Hz  ── ToF 피드백 PID 피치 제어 (가장 빠름, 접촉 유지)
+    3.75 Hz ── 오도메트리 (30Hz depth 서브샘플)
+    1.0 Hz  ── 의미 OcTree 갱신 (가장 느림, 무거운 SAM/CLIP)
+   이산동작 ── 매니폴드 A* 재계획 (300ms 이동/1s 정지 주기)
+</code></pre>
+<p><strong>왜 이렇게 분리하는가?</strong> 접촉 유지(피치 제어)는 미끄러짐을 즉시 교정해야 하므로 최고속(90Hz)이 필요하다. 반면 의미 분할(SAM/CLIP)은 계산이 무거워 1Hz로 충분하다 — 식물은 정적이라 지도가 빠르게 변하지 않는다. 오도메트리(3.75Hz)는 depth(30Hz)를 서브샘플해 계산 부하와 정확도를 절충한다. 이 <strong>주파수 계층 분리</strong>는 초경량 임베디드 플랫폼(67g)의 제한된 연산 자원을 효율 배분하는 설계 원칙이다.</p>
+<h3>4.2 피치 피드백 제어 (ToF-based PID)</h3>
+<p>ToF 센서(VL6180X)로 줄기 표면까지 거리를 재고, 설정점 <code>d_ToF</code>(16–21mm)를 유지하도록 PID로 피치를 제어한다:</p>
+<pre><code>   e(t) = d_ToF − d_measured(t)
+   u_pitch(t) = Kp·e(t) + Kd·ė(t) + Ki·∫e dt
+                (Kp=20, Kd=5, Ki=0.1, 90Hz)
+</code></pre>
+<p>이 피드백 루프가 로봇을 줄기 표면에 <strong>일정 거리로 밀착</strong>시켜 순응 바퀴의 그립을 유지한다. 큰 <code>Kp</code>(20)는 빠른 접촉 회복을, 작은 <code>Ki</code>(0.1)는 정상상태 오차 제거를 담당한다. 플래너(A*)가 &quot;어디로 갈지&quot;를 결정하면, 이 저수준 PID가 &quot;어떻게 붙어있을지&quot;를 담당하는 <strong>2계층 제어 분리</strong>다.</p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 / 실험 대상 (Specimens)</h3>
+<p>실물 식물 표본 <strong>4종</strong>(시뮬레이션이 아닌 실 로봇 실험):</p>
+<ul>
+<li><strong>살아있는 식물 2종</strong>: Monstera deliciosa, Ficus lyrata</li>
+<li><strong>인공 식물 2종</strong>: Dracaena, Olea europaea</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>기계적 검증 범위</strong>: 등반 가능한 줄기 굵기, 분기 각도, 곡률 반경.</li>
+<li><strong>매핑 정확도</strong>: Chamfer Distance (재구성 점군 vs 실측).</li>
+<li><strong>항해 성공</strong>: 상태 기반·가시성 기반 목표 자율 항해 성공 여부(정성적).</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>기계적 검증(mechanical validation):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>달성 범위</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>줄기 굵기</td>
+<td>7 – 33 mm</td>
+</tr>
+<tr>
+<td>분기 각도(junction angle)</td>
+<td>최대 90°</td>
+</tr>
+<tr>
+<td>곡률 반경(radius of curvature)</td>
+<td>최소 50 mm</td>
+</tr>
+<tr>
+<td>로봇 질량</td>
+<td>67 g (untethered)</td>
+</tr>
+<tr>
+<td>모터 토크</td>
+<td>≤ 900 g-cm (Pololu 700:1)</td>
+</tr>
+</tbody></table></div>
+<p><strong>매핑 정확도(Chamfer Distance):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>대상</th>
+<th>평균 Chamfer 거리</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>인공 식물</td>
+<td>3.85 mm</td>
+</tr>
+<tr>
+<td>살아있는 식물</td>
+<td>13.36 mm</td>
+</tr>
+<tr>
+<td>살아있는 식물 &quot;traversable&quot; 클래스</td>
+<td>37.56 mm (오분류 기인)</td>
+</tr>
+</tbody></table></div>
+<p>인공 식물(3.85mm)이 살아있는 식물(13.36mm)보다 정확한 것은 예상대로다 — 살아있는 식물은 반투명 잎·불규칙 형상으로 depth·SLAM 오차가 크다. 특히 traversable 클래스의 37.56mm 오차는 의미 분할 오분류에서 비롯되며, 이것이 플래너의 매니폴드 품질 한계를 규정한다.</p>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<ul>
+<li><strong>4개 표본 전부에서 자율 상태·가시성 목표 항해 시연</strong>(실 로봇).</li>
+<li>등반 능력: 굵기 7–33mm, 분기 각도 90°, 곡률 반경 50mm까지 물리적으로 통과 확인.</li>
+<li><strong>명시적 성공률(%) 수치는 보고되지 않음.</strong> 대신 실패 모드를 정성적으로 서술: (a) depth 카메라 오차, (b) PIN-SLAM 추적 손실, (c) 하드웨어 이동 실패(미끄러짐 등). 발생 빈도는 정량화하지 않음.</li>
+</ul>
+<p>이 점은 정직하게 짚어야 한다 — STEMbot은 <strong>성공률 벤치마크가 아니라 &quot;새로운 로봇 폼팩터 + 통합 항해 시스템의 실현 가능성 실증(feasibility demonstration)&quot;</strong> 에 가깝다. 실 식물 4종을 자율 등반·검사했다는 정성적 성취가 기여의 핵심이며, 통계적 성공률은 후속 과제로 남는다.</p>
+<h3>5.5 결과 해석 및 실패 모드 분석</h3>
+<p><strong>Chamfer 거리의 함의.</strong> 인공 식물 3.85mm vs 살아있는 식물 13.36mm의 3.5배 격차는 단순히 &quot;살아있는 식물이 어렵다&quot;를 넘어, <strong>플래너의 상한 성능이 인지 품질에 종속</strong>됨을 보여준다. 매니폴드 A*의 상태 투영(k-d tree NN)과 PCA 법선/가지 추정이 모두 OcTree 복셀 위치에 의존하므로, 13mm급 매핑 오차는 곧 13mm급 경로 오차로 전파된다. 특히 traversable 클래스 오차 37.56mm는 δ_linear(0.1–0.2mm)·d_goal(0.01m=10mm) 같은 플래너 정밀도 파라미터보다 훨씬 커, <strong>인지 오차가 플래닝 해상도를 압도</strong>하는 역전 현상이 관찰된다.</p>
+<p><strong>세 가지 실패 모드의 계층.</strong> 논문이 정성 서술한 실패 모드는 시스템 계층별로 대응된다:</p>
+<pre><code>   (a) depth 카메라 오차     → 인지 계층 (OcTree 오염)
+   (b) PIN-SLAM 추적 손실    → 상태추정 계층 (오도메트리 발산)
+   (c) 하드웨어 이동 실패     → 구동 계층 (순응 바퀴 미끄러짐)
+</code></pre>
+<p>주목할 점은 <strong>세 실패 모드가 모두 플래너 자체(A*)가 아니라 그 입력(지도·상태)이나 출력(구동)에서 발생</strong>한다는 것이다. 즉 매니폴드 A* 알고리즘은 주어진 정확한 매니폴드에서는 견실하나, 시스템 전체의 신뢰성은 인지·상태추정·구동의 약한 고리에 의해 결정된다. 이는 §4의 &quot;인지-플래닝 긴밀 결합&quot;이 양날의 검임을 재확인한다 — 결합이 강할수록 인지 오차가 플래너로 직결된다.</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>초경량 순응형 등반 로봇(67g)</strong>: 실리콘 순응 바퀴(EcoFlex 00-45)+4절 링크+수동 스프링 클램핑으로 7–33mm 줄기를 3-DOF(수직/요/피치)로 안정 등반. Under-canopy 미시 공간 접근이라는 새 폼팩터.</p>
+</li>
+<li><p><strong>매니폴드 제약 A* 모션 플래닝</strong>: 상태를 <code>{p, n, b}</code>로 정의해 줄기 표면 곡면 구속을 명시 인코딩. 등반 가능 복셀 k-d tree 투영으로 곡면 이탈 방지.</p>
+</li>
+<li><p><strong>가지 전이 제약</strong>: 외적 <code>m=b×n</code>과 내적 임계 <code>|m·b&#39;|&lt;ε</code>로 물리적으로 불가능한 측면 기동을 배제 — 순응 등반 운동학의 우아한 인코딩.</p>
+</li>
+<li><p><strong>의미 OcTree 기반 인지-플래닝 결합</strong>: PIN-SLAM + SAM/CLIP → 확률적 의미 OcTree. traversable 복셀이 곧 플래너 매니폴드가 되는 긴밀한 결합.</p>
+</li>
+<li><p><strong>가시성 제약 목표 명세</strong>: 레이 캐스팅 + 피보나치 구 샘플링으로 대상을 가리지 않는 관측점 자동 탐색 — 식물 검사 임무 특화.</p>
+</li>
+<li><p><strong>완전 공개 시스템</strong>: ROS 워크스페이스·Docker·독립 플래너·Arduino 펌웨어까지 공개(특허 심사로 LICENSE는 pending). 실 로봇 4종 실증.</p>
+</li>
+<li><p><strong>다중 속도 계층 제어</strong>: 90Hz ToF 피치 PID / 3.75Hz 오도메트리 / 1Hz 의미매핑 / 이산 A* 재계획의 주파수 분리로, 67g 초경량 임베디드 자원에서 실시간 순응 등반을 실현. 고수준 플래닝(A*)과 저수준 접촉 유지(PID)의 2계층 분리 설계.</p>
+</li>
+</ol>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<p><strong>주요 하이퍼파라미터:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ToF 거리 설정점 d_ToF</td>
+<td>16–21 mm (시행별)</td>
+</tr>
+<tr>
+<td>선형 스텝 δ_linear</td>
+<td>0.1–0.2 mm</td>
+</tr>
+<tr>
+<td>각 스텝 δ_angular</td>
+<td>0.1°</td>
+</tr>
+<tr>
+<td>가지 검출 임계 γ</td>
+<td>0.995</td>
+</tr>
+<tr>
+<td>가지 전이 임계 ε</td>
+<td>0.40</td>
+</tr>
+<tr>
+<td>회전 가중 W_θ</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>PCA 법선 반경 r_normal</td>
+<td>0.005 m</td>
+</tr>
+<tr>
+<td>PCA 가지 반경 r_branch</td>
+<td>0.14 m</td>
+</tr>
+<tr>
+<td>목표 거리 허용오차 d_goal</td>
+<td>0.01 m</td>
+</tr>
+<tr>
+<td>PID Kp / Kd / Ki</td>
+<td>20 / 5 / 0.1</td>
+</tr>
+<tr>
+<td>제어 주파수 (ToF)</td>
+<td>90 Hz</td>
+</tr>
+<tr>
+<td>오도메트리 주파수</td>
+<td>3.75 Hz (30Hz 서브샘플)</td>
+</tr>
+<tr>
+<td>의미 매핑 갱신</td>
+<td>1 Hz</td>
+</tr>
+<tr>
+<td>CLIP 신뢰 임계</td>
+<td>p &gt; 0.90</td>
+</tr>
+<tr>
+<td>동작 타이밍</td>
+<td>300ms 이동 / 1s 정지</td>
+</tr>
+<tr>
+<td>로봇 질량</td>
+<td>67 g</td>
+</tr>
+<tr>
+<td>구동</td>
+<td>4× Pololu 700:1, ≤900 g-cm</td>
+</tr>
+</tbody></table></div>
+<p><strong>코드베이스 구조</strong> (github.com/UM-ARM-Lab/stembot, C++ 50.5% / Python 44.6% / CMake):</p>
+<pre><code>├── catkin_ws / ROS 워크스페이스     # 노드, 런치, 통합
+├── perception/                      # PIN-SLAM 연동, SAM/CLIP 의미 분할
+├── mapping/                         # 확률적 의미 OcTree (Bayesian log-odds)
+├── scripts/plan.py                  # 독립 실행 가능한 매니폴드 A* 플래너
+├── control/ (MPC/PID)               # ToF 피드백 PID, 자세 동기화
+├── firmware/ (Arduino)              # 모터 구동 펌웨어
+└── docker/                          # 재현 환경
+</code></pre>
+<ul>
+<li><code>scripts/plan.py</code>가 <strong>독립 실행 가능한 플래너</strong>로 제공되어, 매니폴드 A* 로직을 로봇 없이도 검증·재사용할 수 있다.</li>
+<li>Docker 환경 포함으로 재현성 확보. C++(성능 핵심: SLAM/OcTree/충돌)과 Python(플래닝/상위 로직) 혼합.</li>
+<li><strong>LICENSE는 특허 심사 중이라 미확정(pending)</strong> — 코드는 공개돼 있으나 라이선스 조건은 확정 전. 상업적 사용 전 확인 필요.</li>
+</ul>
+<p><strong>코드 검증.</strong> browser로 확인 결과 placeholder가 아닌 실제 실행 가능한 ROS 시스템(펌웨어·Docker·독립 플래너 포함)임을 확인.</p>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<ul>
+<li><strong>더 큰/복잡한 식물</strong>: 현재 4종·단순 분기 구조. 조밀한 실제 작물 캐노피(옥수수·토마토 하우스)에서 다중 분기·잎 밀집 시 의미 OcTree 오분류(37.56mm)가 누적되어 매니폴드 품질이 저하될 수 있다.</li>
+<li><strong>다중 로봇</strong>: 단일 로봇. 캐노피 전체 커버리지를 위한 군집 협력은 미탐구.</li>
+<li><strong>플래닝 복잡도</strong>: A* 이산 탐색은 상태공간이 커지면 지수적. 매니폴드 투영이 탐색 공간을 곡면으로 제한해 완화하지만, 긴 줄기·많은 분기에서 실시간성 검증 필요.</li>
+</ul>
+<h3>8.2 한계점 (Limitations)</h3>
+<ol>
+<li><strong>성공률 미보고</strong>: 정량적 성공률(%) 부재 → 신뢰성·재현성의 통계적 근거 약함. feasibility 실증 수준.</li>
+<li><strong>인지 오차 의존성</strong>: 살아있는 식물 traversable 오분류(37.56mm)가 플래너 매니폴드를 오염. 인지가 곧 플래닝 병목.</li>
+<li><strong>실패 모드 정량화 부재</strong>: depth 오차·PIN-SLAM 추적 손실·하드웨어 미끄러짐의 발생 빈도 미보고.</li>
+<li><strong>stop-and-go의 느림</strong>: 300ms 이동 / 1s 정지 → 실효 속도 낮음. 대규모 검사 임무엔 시간 비용 큼.</li>
+<li><strong>줄기 굵기 상한 33mm</strong>: 굵은 나무 줄기·목질 가지엔 부적합.</li>
+<li><strong>LICENSE pending</strong>: 특허 심사로 상용 재사용 조건 미확정.</li>
+</ol>
+<h3>8.3 향후 방향 (Future Directions)</h3>
+<ul>
+<li>의미 분할 강건화(반투명 잎·조명 변화)로 매니폴드 품질 향상.</li>
+<li>성공률·실패빈도 정량 벤치마크 수립.</li>
+<li>stop-and-go 완화(연속 제어)로 속도 개선.</li>
+<li>다중 로봇 캐노피 커버리지, 더 다양한 실제 작물로 일반화.</li>
+<li>학습 기반 traversability 추정(SAM/CLIP closed-vocab → open-vocab 또는 도메인 파인튜닝)으로 살아있는 식물 매핑 오차(37.56mm→) 저감.</li>
+<li>능동 인지(active perception): 플래너가 인지 불확실성이 큰 영역을 우선 관측하도록 목표를 자동 배치, 인지-플래닝 결합의 취약점을 폐루프로 보완.</li>
+</ul>
+<h3>8.4 매니폴드 제약 플래닝의 일반성</h3>
+<p>STEMbot의 <code>{p, n, b}</code> 상태 + k-d tree 투영 + 외적 전이 제약은 <strong>표면 구속 로봇 일반(surface-constrained robots)</strong> 에 이식 가능한 프레임워크다. 파이프 검사 로봇(내벽 곡면), 선체 청소 로봇(곡면 외벽), 구조물 등반 로봇 등 &quot;자유공간이 아니라 곡면 위를 기어가는&quot; 문제에 동일한 매니폴드 A* 정식화를 적용할 수 있다. 이는 본 논문의 플래닝 기여가 식물 항해라는 특정 응용을 넘어서는 일반성을 가짐을 시사한다.</p>
+<h3>8.5 매니폴드 플래닝 vs 자유공간 플래닝 — 이론적 위치</h3>
+<p>전통적 모션 플래닝(RRT, PRM, 자유공간 A*)은 <code>SE(2)</code>/<code>SE(3)</code> 자유공간에서 충돌 없는 경로를 찾는다. STEMbot은 근본적으로 다른 <strong>구속 매니폴드 플래닝(constrained manifold planning)</strong> 계열에 속한다 — 로봇은 자유공간을 나는 것이 아니라 저차원 곡면(줄기 표면)에 물리적으로 붙어 있어야 한다. 이는 로보틱스에서 <strong>task-constrained motion planning</strong>(예: 문 손잡이를 돌리며 이동, 표면을 닦으며 이동) 문헌과 맞닿는다.</p>
+<p>핵심 차이를 정리하면:</p>
+<pre><code>   자유공간 플래닝:  q ∈ C_free ⊂ SE(3),   충돌회피가 유일 제약
+   매니폴드 플래닝:  q ∈ M ⊂ SE(3),  dim(M) &lt; dim(SE(3))
+                     추가로 곡면 접촉·법선정렬·전이가능성 제약
+</code></pre>
+<p>STEMbot의 기여는 이 추상적 매니폴드 제약을 <strong>실물 하드웨어의 운동학</strong>(순응 바퀴 그립, 4절 링크, 90Hz ToF 피치제어)과 <strong>실시간 인지</strong>(의미 OcTree)에 연결하여, 이론적 정식화를 실 로봇에서 작동시켰다는 데 있다. Berenson 그룹의 제약 기반 플래닝(constrained planning) 계보가 식물 등반이라는 극한 응용으로 구체화된 사례로 읽힌다.</p>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>STEMbot은 코퍼스 내 Planner 리뷰들과 <strong>문제 도메인(곡면 구속 등반)</strong> 에서 독보적이다. 그러나 기법 축에서는 (a) 실 로봇 지역 플래닝(NeuPAN), (b) 의미/주행가능성 매핑 기반 그래프 탐색(TRG-Planner), (c) 목표 조향 탐색(VisualRRT)과 비교 가능하다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>NeuPAN (RA-L)</th>
+<th>TRG-Planner (RA-L 2025)</th>
+<th>본 논문 STEMbot (IROS 2026)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>플래닝 패러다임</td>
+<td>엔드투엔드 신경망(PAN) 지역계획</td>
+<td>주행가능성 그래프 탐색</td>
+<td><strong>매니폴드 제약 A* 탐색</strong></td>
+</tr>
+<tr>
+<td>구성공간</td>
+<td>2D 지상 자유공간</td>
+<td>3D 지형 표면 그래프</td>
+<td><strong>줄기 표면 곡면 매니폴드</strong></td>
+</tr>
+<tr>
+<td>상태 표현</td>
+<td>(x,y,θ) + 점군 거리특성</td>
+<td>지형 노드 + 주행가능성</td>
+<td><strong>{p, n, b}(위치+법선+가지)</strong></td>
+</tr>
+<tr>
+<td>인지-플래닝 결합</td>
+<td>점군 직접 매핑(map-free)</td>
+<td>주행가능성 그래프</td>
+<td><strong>의미 OcTree traversable 복셀</strong></td>
+</tr>
+<tr>
+<td>안전/실현성</td>
+<td>학습된 거리특성 제약</td>
+<td>주행가능성 비용</td>
+<td>외적 전이제약</td>
+</tr>
+<tr>
+<td>실 로봇</td>
+<td>✅ 차륜 로봇</td>
+<td>✅ 지상 로봇</td>
+<td>✅ <strong>67g 순응 등반 로봇(4종 식물)</strong></td>
+</tr>
+<tr>
+<td>도메인</td>
+<td>실내외 지상 항법</td>
+<td>거친 지형 항법</td>
+<td><strong>under-canopy 식물 등반</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (LICENSE pending)</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>장점:</strong></p>
+<ul>
+<li><strong>문제 정식화의 독창성</strong>: &quot;곡면 매니폴드 위의 등반 항해&quot;를 <code>{p,n,b}</code> 상태로 명확히 인코딩. 코퍼스 유일의 표면 구속 등반 플래너.</li>
+<li><strong>하드웨어-플래닝 공동 설계</strong>: 67g 순응 로봇과 매니폴드 A*가 서로 맞물려 극한 형상(7–33mm 줄기) 통과.</li>
+<li><strong>우아한 전이 제약</strong>: 외적/내적만으로 순응 등반 운동학 제약을 표현.</li>
+<li><strong>완전 공개 + 독립 플래너</strong>: <code>scripts/plan.py</code> 재사용성, Docker 재현성.</li>
+</ul>
+<p><strong>단점:</strong></p>
+<ul>
+<li><strong>정량 성능 부재</strong>: NeuPAN(좁은 통로 정량 성공률)·TRG-Planner(주행 성공률·계획 시간)와 달리 성공률·계획시간 벤치마크가 없어 정량 비교 곤란.</li>
+<li><strong>인지 병목</strong>: 살아있는 식물 매핑 오차(37.56mm)가 플래너를 제약. TRG-Planner의 주행가능성 추정보다 오차 민감도 높음.</li>
+<li><strong>느린 실효 속도</strong>: stop-and-go(300ms/1s)로 NeuPAN·TRG류 연속 제어 대비 느림.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>직접 적용도</strong>: 정밀농업·식물 표현형·생태 모니터링의 근접 검사에 즉시 유효한 폼팩터. 잎 뒤 병변·줄기 내부 관측은 기존 지상/공중 로봇이 못하던 영역.</li>
+<li><strong>일반화 잠재력</strong>: §8.4처럼 파이프·선체·구조물 등 곡면 구속 로봇 일반으로 확장 가능.</li>
+<li>NeuPAN·TRG-Planner가 &quot;넓은 지상/지형을 빠르게 지나가는&quot; 문제를 푼다면, STEMbot은 &quot;좁은 곡면을 정밀하게 기어오르는&quot; 상보적 문제를 개척한다.</li>
+</ul>
+<h3>9.4 목표 조향 탐색과의 비교 (vs VisualRRT)</h3>
+<p>코퍼스의 <em>VisualRRT</em>(CVPR 2026)는 미분가능 3DGS 렌더 그래디언트로 RRT 트리를 visual-goal 방향으로 조향하는 샘플링 기반 플래너다. STEMbot과 VisualRRT는 모두 &quot;지각 정보로 탐색을 유도&quot;하지만 방식이 대조적이다:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>측면</th>
+<th>VisualRRT</th>
+<th>STEMbot</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>탐색 알고리즘</td>
+<td>샘플링(RRT)</td>
+<td>결정론적 A*</td>
+</tr>
+<tr>
+<td>지각 활용</td>
+<td>렌더 그래디언트로 트리 조향</td>
+<td>의미 OcTree로 매니폴드 정의</td>
+</tr>
+<tr>
+<td>구성공간</td>
+<td>자유공간(매니퓰레이터)</td>
+<td>곡면 매니폴드(등반)</td>
+</tr>
+<tr>
+<td>목표</td>
+<td>시각 목표 도달</td>
+<td>가시성 관측점 + 웨이포인트</td>
+</tr>
+</tbody></table></div>
+<p>VisualRRT가 자유공간에서 시각 목표로 <strong>트리를 확률적으로 뻗는다면</strong>, STEMbot은 곡면 위에서 <strong>결정론적으로 최단 경로를 탐색</strong>한다. 등반 문제는 표면 구속이 강해 무작위 샘플링의 낭비가 크므로, 이산 A* + 매니폴드 투영이 더 적합한 선택이다. 이 대비는 &quot;지각-플래닝 결합&quot;이라는 공통 트렌드가 문제 구조(자유공간 vs 곡면 구속)에 따라 다른 알고리즘 형태로 구현됨을 보여준다.</p>
+<h3>9.5 연구 방향성 평가</h3>
+<p>Berenson(ARM Lab)의 모션 플래닝 계보에서 나온 이 연구는, 매니폴드 제약 플래닝을 <strong>실물 순응 등반 로봇</strong>에 적용한 시스템 통합의 모범 사례다. 성공률 정량화·속도 개선·인지 강건화가 뒷받침되면, under-canopy 로보틱스라는 신생 분야의 기준점(reference platform)이 될 잠재력이 크다. 코드·펌웨어·Docker의 완전 공개는 후속 연구의 재현·확장을 크게 낮춘다.</p>
+<p><strong>요약 평가.</strong> STEMbot의 진정한 기여는 개별 구성요소의 참신성보다 <strong>하드웨어(순응 메커니즘)·인지(의미 OcTree)·플래닝(매니폴드 A*)·제어(다중속도 PID)를 하나의 작동하는 시스템으로 통합</strong>하고, 이를 실 식물 4종에서 실증했다는 시스템적 완결성에 있다. NeuPAN이 알고리즘 참신성(엔드투엔드 미분가능 플래닝), TRG-Planner가 지형 표현(주행가능성 그래프)에서 두드러진다면, STEMbot은 <strong>극한 폼팩터에서의 시스템 통합</strong>에서 두드러진다. 세 논문은 모두 실 로봇 검증이라는 코퍼스 상위 기준을 충족하며, 상호 보완적 문제 영역을 커버한다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li>STEMbot: A Compliant Robot for Under-Canopy Plant Navigation. IROS 2026. arXiv:2607.07873. (UM-ARM Lab, incl. D. Berenson)</li>
+<li>Pan, Y. et al. &quot;PIN-SLAM: LiDAR SLAM Using a Point-Based Implicit Neural Representation.&quot; T-RO 2024.</li>
+<li>Kirillov, A. et al. &quot;Segment Anything (SAM).&quot; ICCV 2023.</li>
+<li>Radford, A. et al. &quot;Learning Transferable Visual Models From Natural Language Supervision (CLIP).&quot; ICML 2021.</li>
+<li>Hornung, A. et al. &quot;OctoMap: An Efficient Probabilistic 3D Mapping Framework Based on Octrees.&quot; Autonomous Robots 2013.</li>
+<li>Hart, P., Nilsson, N., Raphael, B. &quot;A Formal Basis for the Heuristic Determination of Minimum Cost Paths (A*).&quot; IEEE TSSC 1968.</li>
+<li>NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning. RA-L. (코퍼스 내 비교 대상)</li>
+<li>TRG-Planner: Traversability-aware Graph Planner. RA-L 2025. (코퍼스 내 비교 대상)</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p><strong>혁신성.</strong> STEMbot은 67g 초경량 순응형 등반 로봇과 <strong>매니폴드 제약 A* 모션 플래닝</strong>을 공동 설계하여, 지상 로봇·드론이 접근 못하던 under-canopy 미시 공간을 개척한다. 상태를 <code>{위치, 법선, 가지방향}</code>으로 정의해 곡면 구속을 명시 인코딩하고, 등반 가능 복셀 k-d tree 투영과 외적 기반 가지 전이 제약(<code>|m·b|&lt;ε</code>)으로 순응 등반의 물리적 실현성을 우아하게 보장한다. PIN-SLAM + SAM/CLIP 의미 OcTree가 인지와 플래닝을 긴밀히 결합한다.</p>
+<p><strong>실용적 의의.</strong> 실 식물 4종(살아있는 2 + 인공 2)에서 7–33mm 줄기, 90° 분기, 50mm 곡률을 자율 등반·검사한 실증은, 정밀농업·식물 표현형·생태 모니터링의 근접 관측이라는 새 응용을 연다. 가시성 제약 목표(피보나치 구 샘플링)는 &quot;대상을 안 가리는 관측점&quot;을 자동 계산해 검사 임무에 특화된다. 코드·펌웨어·Docker 완전 공개(LICENSE pending)는 재현·확장을 크게 낮춘다.</p>
+<p><strong>한계와 향후 방향.</strong> 정량적 성공률 부재, 살아있는 식물 인지 오차(37.56mm) 의존, stop-and-go의 느린 속도가 명확한 한계다. 성공률 벤치마크 수립, 의미 분할 강건화, 연속 제어로의 속도 개선, 다양한 실제 작물 일반화가 뒷받침되면, STEMbot의 매니폴드 제약 플래닝 프레임워크는 식물 항해를 넘어 파이프·선체·구조물 등 곡면 구속 로봇 일반으로 확장될 수 있는 개척적 시스템 기여로 평가된다.</p>
+<p><strong>종합.</strong> Planner 트랙의 관점에서 STEMbot의 핵심 가치는 <strong>매니폴드 제약 A* 라는 고전적 탐색 알고리즘을, 의미 인지(OcTree)와 초경량 순응 하드웨어에 결합하여 실물에서 작동시킨 시스템 통합</strong>에 있다. 알고리즘의 개별 요소(A*, PCA 법선, log-odds OcTree, 피보나치 샘플링)는 각각 잘 알려진 기법이지만, 이들을 곡면 등반이라는 극한 제약 하에서 하나로 엮어 낸 통합 설계와 실 로봇 실증이 이 논문을 IROS 게재 수준의 기여로 만든다. 코드·펌웨어·Docker의 완전 공개는 under-canopy 로보틱스라는 신생 분야에 재현 가능한 출발점을 제공하며, 후속 연구가 각 계층(인지 강건화, 연속 제어, 다중 로봇)을 독립적으로 개선할 수 있는 모듈러 기반을 마련한다.</p>
+<hr>
+<p><em>리뷰 작성: 2026-07-11 | 트랙: Planner | 발표처: IROS 2026 | 코드: ✅ 공개(LICENSE pending) | 프로젝트: ✅</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

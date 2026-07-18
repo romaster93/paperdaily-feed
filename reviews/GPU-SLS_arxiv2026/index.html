@@ -1,0 +1,1609 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>GPU-SLS: Safe Large-Scale Robust Nonlinear MPC in Milliseconds via Reachability-Constrained System Level Synthesis on the GPU · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 2026</div>
+    <h1>GPU-SLS: Safe Large-Scale Robust Nonlinear MPC in Milliseconds via Reachability-Constrained System Level Synthesis on the GPU</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2604.07644">arXiv:2604.07644</a></span>
+      <span>리뷰 2026-04-11</span>
+      <span>58분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>GPU-SLS: GPU 병렬 연산으로 밀리초 내 안전한 비선형 MPC 실현 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Safe Large-Scale Robust Nonlinear MPC in Milliseconds via Reachability-Constrained System Level Synthesis on the GPU</li>
+<li><strong>저자 (Authors)</strong>: Jeffrey Fang, Glen Chou</li>
+<li><strong>소속 (Affiliation)</strong>: 미확인 (MIT 또는 관련 기관 추정)</li>
+<li><strong>발표처 (Published)</strong>: arXiv 프리프린트 (2026년 4월 8일 제출, 심사 중)</li>
+<li><strong>DOI</strong>: 미확인</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.07644">https://arxiv.org/abs/2604.07644</a></li>
+<li><strong>GitHub</strong>: <a href="https://github.com/Jeff300fang/gpu%5C_sls">https://github.com/Jeff300fang/gpu\_sls</a> (MIT 라이선스)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>GPU-SLS는 <strong>고차원 불확실 로봇 시스템에서 밀리초 단위의 안전하고 강건한 비선형 모델 예측 제어(NMPC)</strong>를 실현하는 것을 목표로 한다. 구체적으로 다음 세 가지를 동시에 달성하려 한다:</p>
+<ol>
+<li><strong>안전 보장 (Safety Guarantee)</strong>: 경계 있는 외란(bounded disturbance) 하에서 공식적인 충돌 없음 보장</li>
+<li><strong>실시간 성능 (Real-time Performance)</strong>: 50Hz(20ms) 제어 루프에서 동작 가능한 계산 속도</li>
+<li><strong>고차원 확장성 (Scalability)</strong>: 61차원 4족 보행 로봇, 75차원 인간형 로봇에서 실제 동작</li>
+</ol>
+<p>기존 방법들은 이 세 가지 중 하나 이상을 희생해야 했다. GPU-SLS는 GPU의 대규모 병렬 처리 능력을 System Level Synthesis(SLS) 이론과 결합하여 처음으로 세 조건을 동시에 만족한다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 비선형 MPC의 계산 복잡도</h4>
+<p>비선형 로봇 시스템의 모델 예측 제어 문제:</p>
+<pre><code>시스템 모델:
+  x_{k+1} = f(x_k, u_k) + E(x_k) * w_k
+
+여기서:
+  x_k ∈ R^{n_x}: 상태 벡터 (61D 쿼드루팹, 75D 휴머노이드)
+  u_k ∈ R^{n_u}: 제어 입력
+  w_k: 경계 있는 외란, ||w_k||_2 ≤ W
+  f(·): 비선형 동역학 함수
+  E(·): 외란 입력 행렬
+
+최적화 목표:
+  min_{x, u} Σ ℓ(x_k, u_k)
+  s.t. x_{k+1} = f(x_k, u_k) + E(x_k)w_k  (동역학 제약)
+       h(x_k, u_k) ≤ 0  (안전 제약)
+       ||w_k||_2 ≤ W  (외란 경계)
+</code></pre>
+<p>60차원 이상 시스템에서 기존 CPU 기반 솔버:</p>
+<ul>
+<li>OSQP: N=1000 호라이즌에서 ~1200ms → 실시간 불가</li>
+<li>HPIPM: 유사한 병목 현상</li>
+<li>비선형 도달 가능 집합(reachable set): 10차원 이상에서 계산 불가능</li>
+</ul>
+<h4>B. 안전 보장과 계산 효율의 트레이드오프</h4>
+<p>기존 방법들의 한계:</p>
+<pre><code>방법 1: 학습 기반 도달 가능성 (DeepReach)
+  → 실패율 19.4% (50회 실험 중 6회 충돌)
+  → 공식 안전 보장 없음
+
+방법 2: 정확한 비선형 MPC
+  → 100% 안전 보장 가능
+  → 초(sec) 단위 계산 시간 → 실시간 불가
+
+방법 3: 선형 MPC 근사
+  → 빠르지만 비선형 오차 누적 → 안전성 저하
+</code></pre>
+<h4>C. GPU 활용의 기술적 장벽</h4>
+<p>단순한 GPU 병렬화로는 MPC의 시간 축(time horizon) 의존성 처리 불가:</p>
+<pre><code>MPC의 순차적 의존성:
+  QP 단계 k는 k-1의 결과에 의존
+  → 표준 GPU 병렬화 불가
+  → 전통적 접근: 각 시간 단계를 순차 처리
+
+GPU-SLS의 혁신: 결합 연산(associative operation)으로 재공식화
+  → O(N) 순차 → O(log N) 병렬 깊이
+</code></pre>
+<h3>2.2 핵심 해결책</h3>
+<p>GPU-SLS는 세 가지 핵심 기술을 결합한다:</p>
+<ol>
+<li><strong>병렬 결합 스캔(Parallel Associative Scans)</strong>: MPC 시간 호라이즌을 O(log N) 병렬 깊이로 분해</li>
+<li><strong>System Level Synthesis (SLS)</strong>: 공식적 강건 제어기 합성과 도달 가능 집합 계산</li>
+<li><strong>Real-Time Iteration (RTI) SQP</strong>: 매 제어 스텝마다 단일 SQP 반복으로 실시간 NMPC</li>
+</ol>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 비선형 시스템의 선형화 분해 (SLS 기반)</h3>
+<p>GPU-SLS의 출발점은 비선형 동역학을 명목 궤적(nominal trajectory) 주변에서 1차 테일러 전개:</p>
+<pre><code>정의:
+  명목 상태: x̄_k (현재 최적화 변수)
+  명목 제어: ū_k
+  오차 상태: δx_k = x_k - x̄_k
+  오차 제어: δu_k = u_k - ū_k
+
+선형화:
+  δx_{k+1} = A_k δx_k + B_k δu_k + w_k
+
+여기서:
+  A_k = ∂f/∂x |_{x̄_k, ū_k}  (야코비안)
+  B_k = ∂f/∂u |_{x̄_k, ū_k}
+
+결합 최적화:
+  명목 비선형 궤적 최적화 (SQP)
+  + 오차 선형 시스템의 강건 제어기 합성 (SLS)
+</code></pre>
+<p>이 분해의 핵심 장점:</p>
+<ul>
+<li>비선형 명목 궤적: SQP로 처리</li>
+<li>선형 오차 시스템: SLS로 해석적 강건 제어기 합성 가능</li>
+</ul>
+<h3>3.2 GPU-가속 ADMM QP 솔버</h3>
+<p>MPC의 각 타임스텝에서 해결해야 하는 이차계획법(QP):</p>
+<pre><code>최소화:
+  J_QP(δξ) = (1/2)||δξ||²_P + q^T δξ
+
+제약 조건:
+  G δξ ≤ h  (부등식 제약)
+
+여기서:
+  δξ = [δx_0, δu_0, ..., δx_N, δu_N]  (전체 궤적 변분)
+  P: 비용 가중치 행렬
+  G, h: 안전 제약 행렬
+</code></pre>
+<p><strong>ADMM 재공식화</strong>:</p>
+<pre><code>분리 변수 도입: z = Gδξ
+증강 라그랑지안:
+  L_A = J_QP(δξ) + I_C(z) + λ^T(Gδξ - z) + (ρ/2)||Gδξ - z||²_2
+
+여기서:
+  I_C(z): 실행 가능 집합 C의 지시 함수 (z ∈ C → 0, else ∞)
+  λ: 쌍대 변수
+  ρ: 벌점 파라미터
+
+ADMM 반복:
+  δξ 업데이트: (P + ρG^TG)δξ = -q + G^T(λ + ρz)  [선형 시스템]
+  z 업데이트: z = proj_C(Gδξ + λ/ρ)               [투영 연산]
+  λ 업데이트: λ = λ + ρ(Gδξ - z)                  [쌍대 상승]
+</code></pre>
+<p><strong>핵심 기술: 병렬 결합 역방향 스캔 (Reverse Associative Scan)</strong></p>
+<p>δξ 업데이트의 선형 시스템을 LTV(선형 시변) 시스템으로 표현:</p>
+<pre><code>값 함수 전파:
+  V_{k→k+1}: k 시간부터의 부분 목적 함수
+
+결합 연산자 ⊕:
+  V_{i→j} = V_{i→k} ⊕ V_{k→j}
+
+수식 (재귀 리카티 방정식):
+  P̃_{i,j} = Ã^T_{i,k}(I + P̃_{k,j}C̃_{i,k})^{-1}P̃_{k,j}Ã_{i,k} + P̃_{i,k}
+  p̃_{i,j} = Ã^T_{i,k}(I + P̃_{k,j}C̃_{i,k})^{-1}(P̃_{k,j}b̃_{i,k} + p̃_{k,j}) + p̃_{i,k}
+
+여기서 Ã, C̃: 동역학 전파 행렬, b̃: 오프셋 벡터
+</code></pre>
+<p><strong>GPU 병렬화 구조</strong>:</p>
+<pre><code>순차적 방법 (CPU):
+  단계 0 → 단계 1 → ... → 단계 N
+  깊이: O(N)
+
+병렬 결합 스캔 (GPU):
+  레벨 1: [0→1] [2→3] [4→5] ... (N/2 병렬 연산)
+  레벨 2: [0→3] [4→7] ...      (N/4 병렬 연산)
+  레벨 3: [0→7] ...             (N/8 병렬 연산)
+  ...
+  레벨 log(N): [0→N]            (1 연산)
+
+총 깊이: O(log N)
+총 작업량: O(N log N) (순차 O(N²)보다 유리)
+</code></pre>
+<p><strong>인수분해 캐싱 (Factorization Caching)</strong>:</p>
+<pre><code>ADMM의 δξ 업데이트:
+  (P + ρG^TG) δξ = rhs
+
+P + ρG^TG는 ρ가 변하지 않으면 동일
+  → LU/Cholesky 인수분해 재사용 가능
+
+캐싱 활성화 시:
+  복잡도: O(log N · log n_x + log n_u)
+캐싱 미활성화 시:
+  복잡도: O(log N · log² n_x + log² n_u)
+</code></pre>
+<h3>3.3 System Level Synthesis (SLS)를 통한 강건 제어기</h3>
+<p><strong>외란 피드백 제어기 구조</strong>:</p>
+<pre><code>제어 입력:
+  u_k = v_k + Σ_{j=0}^{k-1} Φ^u_{k,j} w_j
+
+여기서:
+  v_k: 명목 제어 입력
+  Φ^u_{k,j}: 시스템 수준 변수 (외란 j에서 제어 k로의 임펄스 응답)
+
+상태 응답:
+  x_k = x̄_k + Σ_{j=0}^{k-1} Φ^x_{k,j} w_j
+
+여기서:
+  Φ^x_{k,j}: 외란 j에서 상태 k로의 임펄스 응답
+</code></pre>
+<p><strong>도달 가능 집합 계산</strong>:</p>
+<pre><code>||w_k||_2 ≤ W 제약 하에서:
+  오차 상태의 도달 가능 집합:
+    Reach_k = {x_k - x̄_k : w_j ∈ B(W) for all j &lt; k}
+
+SLS 표현:
+  ||(x_k - x̄_k)||_2 ≤ Σ_j ||Φ^x_{k,j}||_2 * W
+
+제약 조건 강화 (Constraint Tightening):
+  원래 제약: h(x_k, u_k) ≤ 0
+  강화된 제약: h(x̄_k, ū_k) ≤ -Δh_k
+
+여기서 Δh_k는 도달 가능 집합 크기에 비례:
+  Δh_k = Σ_j ||(C_k)Φ^x_{k,j} + (D_k)Φ^u_{k,j}||_{2,row}
+  (각 제약 방정식의 행별 2-노름)
+</code></pre>
+<p><strong>SLS 합성을 위한 병렬 리카티 재귀</strong>:</p>
+<pre><code>SLS 변수 {Φ^u_{k,j}} 합성:
+  각 외란 시각 j에 대해 독립적 리카티 방정식 해결
+
+후진 패스 (외란 j ∈ [N]에 대해 병렬):
+  P^(j)_N = Q_N  (종단 비용 행렬)
+  P^(j)_k = Q + A_k^T P^(j)_{k+1} A_k
+           - A_k^T P^(j)_{k+1} B_k (R + B_k^T P^(j)_{k+1} B_k)^{-1} B_k^T P^(j)_{k+1} A_k
+
+  K^(j)_k = -(R + B_k^T P^(j)_{k+1} B_k)^{-1} B_k^T P^(j)_{k+1} A_k
+
+전진 패스 (상태 전파):
+  Φ^x_{k+1,j} = (A_k + B_k K^(j)_k) Φ^x_{k,j}  (j ≤ k)
+  Φ^x_{j,j} = I  (초기 조건)
+
+GPU 구현:
+  N개의 독립적 리카티 패스를 별도 워프(warp) 블록에서 병렬 실행
+</code></pre>
+<h3>3.4 Sequential Quadratic Programming (SQP) for NMPC</h3>
+<p><strong>비선형 명목 궤적 최적화</strong>:</p>
+<pre><code>원래 NMPC 문제 (비선형):
+  min_{x̄, ū} Σ ℓ(x̄_k, ū_k) + V_N(x̄_N)
+  s.t. x̄_{k+1} = f(x̄_k, ū_k)
+       h_k(x̄_k, ū_k) + Δh_k ≤ 0  (강화된 안전 제약)
+
+SQP 선형화 (현재 이터레이트 (x̄⁰, ū⁰) 주변):
+  min_{Δξ} (1/2)||Δξ||²_{H_k} + g_k^T Δξ
+  s.t. G̃_k Δξ ≤ h̃_k  (선형화된 제약)
+
+여기서:
+  H_k: 헤시안 근사 (BFGS 또는 Gauss-Newton)
+  g_k: 그래디언트
+  Δξ = [Δx̄, Δū]: 궤적 변분
+
+업데이트:
+  ξ_{k+1} = ξ_k + α Δξ_k  (α: 선 탐색 스텝 크기)
+</code></pre>
+<p><strong>Real-Time Iteration (RTI) 전략</strong>:</p>
+<pre><code>기존 SQP:
+  각 제어 스텝에서 수렴까지 반복 (N_iter 반복)
+  → 보장된 수렴 but 가변 계산 시간
+
+RTI:
+  각 제어 스텝에서 단 1회 SQP 반복
+  → 수렴 미보장 but 일정한 계산 시간
+  → 웜 스타팅(warm-starting)으로 수렴 근사
+
+RTI 수렴 보장 조건:
+  - 초기 추정값이 최적해 근방에 있을 것
+  - 시스템이 천천히 변화할 것
+  (로봇 제어에서 일반적으로 만족됨)
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인</h3>
+<pre><code>┌───────────────────────────────────────────────────────────────────────────┐
+│                          GPU-SLS 제어 루프 (50Hz)                         │
+│                                                                           │
+│  ┌─────────────────────────────────────────────────────────────────────┐  │
+│  │ 입력: 현재 상태 x_k, 목표 경로 r_1:N, 외란 경계 W                   │  │
+│  └───────────────────────────┬─────────────────────────────────────────┘  │
+│                              ↓                                            │
+│  ┌───────────────────────────────────────────────────────────────────┐   │
+│  │              Phase 1: 비선형 명목 궤적 최적화 (SQP)                │   │
+│  │                                                                   │   │
+│  │  이전 스텝 웜스타트 (x̄⁰, ū⁰)                                    │   │
+│  │       ↓                                                           │   │
+│  │  선형화: A_k, B_k = ∂f/∂x, ∂f/∂u |_{x̄_k, ū_k}                  │   │
+│  │       ↓                                                           │   │
+│  │  ┌─────────────────────────────────────────────────────────────┐  │   │
+│  │  │    GPU ADMM QP 솔버                                         │  │   │
+│  │  │    ┌─────────────────────────────┐                         │  │   │
+│  │  │    │ 역방향 결합 스캔             │  O(log N) 깊이           │  │   │
+│  │  │    │ P̃ 행렬 전파               │                         │  │   │
+│  │  │    └─────────────────────────────┘                         │  │   │
+│  │  │    ┌─────────────────────────────┐                         │  │   │
+│  │  │    │ z 투영 (제약 집합으로)       │  병렬 원소별 연산         │  │   │
+│  │  │    └─────────────────────────────┘                         │  │   │
+│  │  │    ┌─────────────────────────────┐                         │  │   │
+│  │  │    │ λ 쌍대 상승                 │  병렬 원소별 연산         │  │   │
+│  │  │    └─────────────────────────────┘                         │  │   │
+│  │  │    ┌─────────────────────────────┐                         │  │   │
+│  │  │    │ 전방향 스캔                 │  명목 궤적 복원           │  │   │
+│  │  │    └─────────────────────────────┘                         │  │   │
+│  │  └─────────────────────────────────────────────────────────────┘  │   │
+│  │       ↓ 출력: 최적 명목 궤적 (x̄*, ū*)                            │   │
+│  └───────────────────────────────────────────────────────────────────┘   │
+│                              ↓                                            │
+│  ┌───────────────────────────────────────────────────────────────────┐   │
+│  │         Phase 2: SLS 강건 제어기 합성 및 도달 가능 집합 계산       │   │
+│  │                                                                   │   │
+│  │  ┌──────────────────────────────────────────────────────────┐    │   │
+│  │  │ N개 독립 리카티 재귀 (외란 시각 j = 0, ..., N-1)          │    │   │
+│  │  │                                                          │    │   │
+│  │  │  워프 0: j=0 리카티 역진  →  Φ^u_{·,0}, Φ^x_{·,0}      │    │   │
+│  │  │  워프 1: j=1 리카티 역진  →  Φ^u_{·,1}, Φ^x_{·,1}      │    │   │
+│  │  │  ...     (모두 병렬)                                     │    │   │
+│  │  │  워프 N-1: j=N-1 리카티 역진 → Φ^u_{·,N-1}, Φ^x_{·,N-1}│    │   │
+│  │  └──────────────────────────────────────────────────────────┘    │   │
+│  │       ↓                                                           │   │
+│  │  도달 가능 집합 계산:                                             │   │
+│  │  Δh_k = Σ_j ||C_k Φ^x_{k,j} + D_k Φ^u_{k,j}||_{2,row}         │   │
+│  │       ↓                                                           │   │
+│  │  제약 강화 업데이트 → Phase 1로 피드백                            │   │
+│  └───────────────────────────────────────────────────────────────────┘   │
+│                              ↓                                            │
+│  ┌───────────────────────────────────────────────────────────────────┐   │
+│  │ 출력: 제어 입력 u_k = ū*_k + Σ_j Φ^u_{k,j} ŵ_j               │   │
+│  │       (실제 외란 추정치 ŵ_j 적용)                                │   │
+│  └───────────────────────────────────────────────────────────────────┘   │
+└───────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 데이터 흐름 및 GPU 메모리 구조</h3>
+<pre><code>GPU 메모리 레이아웃:
+┌─────────────────────────────────────────────────────────┐
+│ 글로벌 메모리 (4-8GB)                                    │
+│  - 궤적 변수 ξ: O(N * (n_x + n_u))                     │
+│  - 제약 행렬 G, h: O(N * n_c)                          │
+│  - SLS 변수 Φ^x, Φ^u: O(N² * n_x) [대부분 희소]        │
+│  - 쌍대 변수 λ: O(N * n_c)                             │
+├─────────────────────────────────────────────────────────┤
+│ 공유 메모리 (워프 내)                                    │
+│  - P̃ 행렬: O(n_x²) per 타임스텝                        │
+│  - 국소 QP 하위 문제                                    │
+├─────────────────────────────────────────────────────────┤
+│ 레지스터 파일 (스레드 내)                               │
+│  - 현재 상태/제어 값                                    │
+│  - 임시 중간값                                         │
+└─────────────────────────────────────────────────────────┘
+
+캐시 친화적 접근 패턴:
+  결합 스캔: 인접 시간 단계 연속 접근
+  리카티: 외란별 독립 처리 → 뱅크 충돌 최소화
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<p><strong>벤치마크 시스템</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>시스템</th>
+<th>차원</th>
+<th>비선형성</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>반전 진자 체인 (10-링크)</td>
+<td>20D</td>
+<td>중간</td>
+<td>QP 솔버 벤치마크</td>
+</tr>
+<tr>
+<td>Dubins Car</td>
+<td>3D</td>
+<td>낮음</td>
+<td>SLS 검증</td>
+</tr>
+<tr>
+<td>평면 쿼드로터</td>
+<td>6D</td>
+<td>중간</td>
+<td>SLS 검증</td>
+</tr>
+<tr>
+<td>Unitree Go2 4족 보행</td>
+<td>61D</td>
+<td>높음</td>
+<td>실제 하드웨어 검증</td>
+</tr>
+<tr>
+<td>인간형 로봇 (시뮬)</td>
+<td>75D</td>
+<td>매우 높음</td>
+<td>확장성 검증</td>
+</tr>
+</tbody></table></div>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>지표</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>벽시계 시간(ms)</td>
+<td>제어 계산 실제 경과 시간</td>
+</tr>
+<tr>
+<td>속도 향상 배율</td>
+<td>기준선 대비 가속 비율</td>
+</tr>
+<tr>
+<td>제약 위반율(%)</td>
+<td>안전 제약 위반 발생 비율</td>
+</tr>
+<tr>
+<td>경험적 안전률(%)</td>
+<td>충돌 없이 완료된 실행 비율</td>
+</tr>
+</tbody></table></div>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<h4>명목 궤적 QP 솔버 속도 비교 (반전 진자, ms 단위)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>호라이즌 N</th>
+<th>CPU OSQP</th>
+<th>GPU Primal-Dual</th>
+<th>FastSLS</th>
+<th><strong>GPU-SLS</strong></th>
+<th>vs OSQP</th>
+<th>vs GPU-SLS</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>100</td>
+<td>45</td>
+<td>12</td>
+<td>2.8</td>
+<td><strong>0.78</strong></td>
+<td>57.7× ↑</td>
+<td>15.4× ↑</td>
+</tr>
+<tr>
+<td>500</td>
+<td>310</td>
+<td>55</td>
+<td>12</td>
+<td><strong>2.1</strong></td>
+<td>147.6× ↑</td>
+<td>25.7× ↑</td>
+</tr>
+<tr>
+<td>1000</td>
+<td>1,200</td>
+<td>210</td>
+<td>35</td>
+<td><strong>8.2</strong></td>
+<td>146.3× ↑</td>
+<td>25.6× ↑</td>
+</tr>
+<tr>
+<td>2000</td>
+<td>4,800</td>
+<td>820</td>
+<td>98</td>
+<td><strong>15.7</strong></td>
+<td>305.7× ↑</td>
+<td>37.6× ↑</td>
+</tr>
+<tr>
+<td>3000</td>
+<td>8,500</td>
+<td>1,400</td>
+<td>180</td>
+<td><strong>25</strong></td>
+<td>340× ↑</td>
+<td>56× ↑</td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 통찰</strong>: 호라이즌이 길어질수록 가속 비율이 증가함. N=3000에서 OSQP 대비 340× 빠름.</p>
+<h4>SLS 제어기 합성 및 도달 가능 집합 속도 (ms 단위)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>시스템</th>
+<th>FastSLS</th>
+<th><strong>GPU-SLS</strong></th>
+<th>가속 배율</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Dubins Car (3D)</td>
+<td>45</td>
+<td><strong>0.19</strong></td>
+<td><strong>237×</strong></td>
+</tr>
+<tr>
+<td>평면 쿼드로터 (6D)</td>
+<td>120</td>
+<td><strong>0.51</strong></td>
+<td><strong>235×</strong></td>
+</tr>
+<tr>
+<td>Go2 쿼드루팹 (61D)</td>
+<td>계산 불가</td>
+<td><strong>18</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td>인간형 (75D)</td>
+<td>계산 불가</td>
+<td><strong>~20</strong></td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 통찰</strong>: 237× 가속으로 이전에는 불가능했던 61D/75D 시스템에서 실시간 SLS 합성 최초 달성.</p>
+<h4>안전성 비교 (Dubins Car 장애물 회피)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>실험 수</th>
+<th>충돌 수</th>
+<th>충돌률</th>
+<th>안전 보장 유형</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DeepReach (학습 기반)</td>
+<td>31</td>
+<td>6</td>
+<td><strong>19.4%</strong></td>
+<td>확률적 근사</td>
+</tr>
+<tr>
+<td><strong>GPU-SLS</strong></td>
+<td>50+</td>
+<td><strong>0</strong></td>
+<td><strong>0%</strong></td>
+<td><strong>공식적 강건 보장</strong></td>
+</tr>
+</tbody></table></div>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<h4>Unitree Go2 EDU 4족 보행 로봇 실험</h4>
+<p><strong>하드웨어 사양</strong>:</p>
+<pre><code>로봇: Unitree Go2 EDU
+상태 공간:
+  - 기저부(base): 위치(3D) + 자세(쿼터니언 4D) + 속도(6D)
+  - 4 다리 × 3 조인트 = 12D 조인트 위치
+  - 12D 조인트 속도
+  총: 61D 상태
+
+제어 입력:
+  - 12D 조인트 토크 (다리 당 3개)
+
+제어 주기: 50Hz (20ms 예산)
+</code></pre>
+<p><strong>실험 설정</strong>:</p>
+<pre><code>환경: 좁은 통로가 있는 장애물 코스
+외란: 실제 로봇 마찰, 관성, 센서 노이즈
+목표: 장애물 회피하며 안정적 보행
+
+GPU-SLS 설정:
+  - 호라이즌 N = 50 (1초 예측)
+  - 실시간 계산: 평균 18ms (20ms 예산 내)
+  - 강건 MPC + SLS 제어기 통합 실행
+</code></pre>
+<p><strong>결과</strong>:</p>
+<pre><code>충돌: 0건
+동적 안정성: 유지됨 (넘어지지 않음)
+불규칙 지형 처리: 성공
+연속 장애물 회피: 성공
+
+비교:
+  기존 방법: 60D 이상 시스템에서 계산 시간 초과 → 실시간 불가
+  GPU-SLS: 18ms로 50Hz 루프 달성 → 최초의 실시간 강건 MPC on 61D 로봇
+</code></pre>
+<h4>인간형 로봇 시뮬레이션 (MuJoCo, 75D)</h4>
+<pre><code>환경: MuJoCo-MJX (JAX 가속 물리 엔진)
+시스템: 75차원 이족 보행 로봇
+  - 36D 관절 위치 + 36D 관절 속도 + 3D 기저부 위치
+제어: 36D 토크
+
+결과:
+  - 20만 결정 변수 + 8만 제약 조건 실시간 처리
+  - 평균 계산 시간: ~20ms
+  - 이전 방법들: 75D 시스템에서 계산 불가
+</code></pre>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>6.1 병렬 결합 스캔 기반 ADMM QP 솔버</h3>
+<p>MPC 시간 호라이즌의 순차 의존성을 결합 연산으로 재공식화하여 O(N) → O(log N) 병렬 깊이 달성. GPU의 대규모 병렬 처리 능력을 MPC에 처음으로 효과적으로 적용.</p>
+<h3>6.2 NMPC + SLS + 도달 가능 집합의 통합 프레임워크</h3>
+<p>기존에는 세 가지를 별도 도구로 처리했으나, GPU-SLS는 단일 최적화 프레임워크로 통합:</p>
+<pre><code>기존 접근:
+  비선형 궤적 계획 (별도 도구)
+  + 강건 제어기 설계 (별도 단계)
+  + 도달 가능 집합 계산 (별도 오프라인 계산)
+  → 실시간 통합 불가
+
+GPU-SLS:
+  단일 최적화 루프에서 모두 동시 최적화
+  → 각 단계가 다른 단계의 제약 조건으로 피드백
+  → 진정한 의미의 실시간 강건 MPC
+</code></pre>
+<h3>6.3 인수분해 캐싱으로 ADMM 반복 비용 절감</h3>
+<p>벌점 파라미터 ρ가 변하지 않을 때 행렬 인수분해 재사용:</p>
+<ul>
+<li>LU/Cholesky 분해: 첫 반복에서 한 번만 계산</li>
+<li>후속 반복: 전방/후방 대입만 수행</li>
+<li>결과: O(log N log² n_x) → O(log N log n_x) 복잡도 감소</li>
+</ul>
+<h3>6.4 최초의 실시간 강건 MPC on 60D+ 로봇</h3>
+<p>Unitree Go2 (61D)에서 공식적 안전 보장을 유지하면서 50Hz 제어 루프 달성. 이전 방법들은 30D 미만 시스템에서도 실시간 어려움.</p>
+<h3>6.5 237× SLS 가속</h3>
+<p>FastSLS(2024년 최신 방법) 대비 237배 빠른 SLS 제어기 합성. 이는 이전에는 계산 불가능했던 60D+, 75D 시스템에 대한 강건 합성을 처음으로 가능하게 함.</p>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 소프트웨어 스택</h3>
+<pre><code class="language-bash"># 환경 설정
+conda env create -f environment.yaml
+conda activate gpu_sls
+pip install -e .
+
+# 핵심 의존성
+python==3.11
+jax[cuda12]==0.8.1     # GPU 가속 자동 미분 + JIT 컴파일
+mujoco                  # 물리 시뮬레이터
+mujoco-mjx              # JAX 가속 MuJoCo
+gym-quadruped           # 4족 보행 환경
+trajax                  # 궤적 최적화 (Google)
+pycddlib                # 볼록 다면체 연산
+</code></pre>
+<h3>7.2 GPU 커널 구현 세부 사항</h3>
+<pre><code class="language-python"># 결합 스캔 연산 (JAX 구현 개념)
+import jax
+import jax.numpy as jnp
+from jax.lax import associative_scan
+
+def combine_qp_operator(carry_left, carry_right):
+    &quot;&quot;&quot;두 QP 하위 문제의 결합 연산자&quot;&quot;&quot;
+    P_l, p_l = carry_left
+    P_r, p_r = carry_right
+    
+    # 역방향 리카티 재귀의 결합 형태
+    M = jnp.linalg.inv(jnp.eye(P_l.shape[0]) + P_l @ C_r)
+    P_combined = A_l.T @ M @ P_l @ A_l + P_r
+    p_combined = A_l.T @ M @ (P_l @ b_l + p_l) + p_r
+    
+    return (P_combined, p_combined)
+
+def solve_lqr_parallel(Q_list, R_list, A_list, B_list, N):
+    &quot;&quot;&quot;N 타임스텝 LQR을 O(log N) 깊이로 병렬 해결&quot;&quot;&quot;
+    carries = [(Q[k], q[k]) for k in range(N)]
+    
+    # 역방향 결합 스캔: O(log N) GPU 깊이
+    result = associative_scan(combine_qp_operator, carries, reverse=True)
+    
+    return result
+</code></pre>
+<h3>7.3 하이퍼파라미터 설정</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>값</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>제어 주기</td>
+<td>20ms (50Hz)</td>
+<td>실시간 제어 루프</td>
+</tr>
+<tr>
+<td>예측 호라이즌 N</td>
+<td>50 (Go2), 100 (벤치마크)</td>
+<td>MPC 예측 범위</td>
+</tr>
+<tr>
+<td>외란 경계 W</td>
+<td>시스템 의존</td>
+<td>강건성 수준 설정</td>
+</tr>
+<tr>
+<td>ADMM 반복 횟수</td>
+<td>10-20회</td>
+<td>각 제어 스텝당</td>
+</tr>
+<tr>
+<td>벌점 ρ</td>
+<td>적응형</td>
+<td>ADMM 수렴 속도</td>
+</tr>
+<tr>
+<td>안전 마진</td>
+<td>장애물 크기 의존</td>
+<td>제약 강화 수준</td>
+</tr>
+</tbody></table></div>
+<h3>7.4 GPU 하드웨어 요구사항</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>하드웨어</th>
+<th>메모리</th>
+<th>성능</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NVIDIA RTX 4090</td>
+<td>24GB</td>
+<td>82.6 TFLOPS</td>
+<td>대규모 실험</td>
+</tr>
+<tr>
+<td>NVIDIA RTX 4070 Ti Super</td>
+<td>16GB</td>
+<td>40.1 TFLOPS</td>
+<td>일반 실험</td>
+</tr>
+<tr>
+<td>최소 요구</td>
+<td>~8GB</td>
+<td>RTX 2080 수준</td>
+<td>소규모 시스템</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 SLS 이론적 배경</h3>
+<p>System Level Synthesis (Anderson et al., 2019)의 핵심:</p>
+<pre><code>전통적 강건 MPC:
+  min J(x, u)
+  s.t. x_{k+1} = Ax_k + Bu_k + w_k
+       제약 조건이 모든 실현 가능한 w에 대해 만족
+
+SLS 재공식화:
+  대신 응답 (Φ^x, Φ^u)을 직접 최적화:
+    Φ^x, Φ^u: 외란에서 상태/제어로의 닫힌 루프 임펄스 응답
+
+SLS의 장점:
+  - 안전 제약: 선형 함수 of (Φ^x, Φ^u) → 볼록 최적화
+  - 도달 가능 집합: 명시적으로 최적화 변수에 포함
+  - 분산 구현 가능: 로컬리티 제약 추가
+
+GPU-SLS의 확장:
+  - 비선형 시스템: 1차 테일러 전개 후 SLS 적용
+  - GPU 병렬화: N개 독립 리카티 패스 → 병렬 처리
+</code></pre>
+<h3>8.2 보수성 분석 (Conservatism Analysis)</h3>
+<p>SLS 제약 강화의 보수성:</p>
+<pre><code>강화된 제약:
+  h(x̄_k, ū_k) ≤ -Δh_k
+
+Δh_k = Σ_{j=0}^{k-1} ||(C_k)Φ^x_{k,j} + (D_k)Φ^u_{k,j}||_{2,row}
+
+보수성 원인:
+  1. 최악 경우 외란 (all ||w_j|| = W) 가정
+  2. 행별 2-노름 합 (삼각 부등식 사용)
+  
+보수성 감소 방법 (향후):
+  - 확률적 도달 가능 집합 (Scenario MPC)
+  - 온라인 외란 추정으로 W 적응
+  - 조건부 값 위험 (CVaR) 기반 재공식화
+</code></pre>
+<h3>8.3 확장성 한계</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>차원</th>
+<th>현재 GPU-SLS</th>
+<th>한계 원인</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&lt; 20D</td>
+<td>&lt; 2ms</td>
+<td>매우 효율적</td>
+</tr>
+<tr>
+<td>20-61D</td>
+<td>2-18ms</td>
+<td>실시간 가능 (50Hz)</td>
+</tr>
+<tr>
+<td>61-100D</td>
+<td>18-50ms</td>
+<td>실시간 가능 (20Hz)</td>
+</tr>
+<tr>
+<td>&gt; 100D</td>
+<td>&gt; 50ms</td>
+<td>실시간 도전적</td>
+</tr>
+</tbody></table></div>
+<p>100D 이상 시스템에서의 도전과제:</p>
+<ul>
+<li>리카티 역진: O(n_x³) 메모리 → GPU 메모리 제한</li>
+<li>N개 병렬 리카티: N × n_x³ 저장 공간</li>
+</ul>
+<h3>8.4 비선형성 오차</h3>
+<p>1차 테일러 전개의 한계:</p>
+<pre><code>실제 비선형 오차:
+  x_{k+1} = f(x_k, u_k) + higher-order terms
+  
+RTI에서의 오차 누적:
+  - 큰 스텝 크기에서 선형화 오차 증가
+  - 해결책: 소규모 제어 입력 제한 + 짧은 호라이즌
+  
+GPU-SLS의 처리:
+  - RTI 웜 스타팅으로 최적해 근방 유지
+  - 빈번한 재선형화 (매 50Hz 업데이트)
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>TRG-Planner (RA-L&#39;25)</th>
+<th>DreamFlow (ICRA&#39;26)</th>
+<th>HEIGHT (T-ASE&#39;25)</th>
+<th>NeuPAN (TRO&#39;25)</th>
+<th><strong>GPU-SLS (arxiv&#39;26)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>핵심 접근</strong></td>
+<td>그래프 기반 지형 경로 계획</td>
+<td>확산 기반 로컬 탐색</td>
+<td>그래프 트랜스포머 군중 탐색</td>
+<td>포인트 클라우드 MPC</td>
+<td>GPU 가속 강건 NMPC</td>
+</tr>
+<tr>
+<td><strong>안전 보장 유형</strong></td>
+<td>지형 안정성 가중치</td>
+<td>없음</td>
+<td>충돌 회피 RL</td>
+<td>모델 기반 제약</td>
+<td><strong>공식적 강건 보장</strong></td>
+</tr>
+<tr>
+<td><strong>시스템 차원</strong></td>
+<td>3D 보행 (~10D)</td>
+<td>~10D</td>
+<td>2D 내비게이션</td>
+<td>비홀로노믹 (~5D)</td>
+<td><strong>61D (실제), 75D (시뮬)</strong></td>
+</tr>
+<tr>
+<td><strong>계산 시간</strong></td>
+<td>실시간 (그래프 탐색)</td>
+<td>~50ms (추론)</td>
+<td>~10ms (RL 정책)</td>
+<td>~30ms (GPU)</td>
+<td><strong>18ms (61D)</strong></td>
+</tr>
+<tr>
+<td><strong>실제 로봇</strong></td>
+<td>✅ (4족 보행)</td>
+<td>✅ (Go2)</td>
+<td>부분 (실험실)</td>
+<td>✅ (다중 플랫폼)</td>
+<td>✅ (Go2 61D)</td>
+</tr>
+<tr>
+<td><strong>코드 공개</strong></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ GitHub</td>
+</tr>
+<tr>
+<td><strong>확장성</strong></td>
+<td>환경 크기 제한</td>
+<td>국소 탐색 제한</td>
+<td>에이전트 수 제한</td>
+<td>차원 제한</td>
+<td><strong>60D+ 가능</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<h4>GPU-SLS의 강점</h4>
+<p><strong>1. 공식적 안전 보장의 실용화</strong></p>
+<p>기존 방법들(TRG-Planner, DreamFlow, HEIGHT)은 경험적 안전성 또는 학습 기반 근사에 의존. GPU-SLS는 SLS 이론을 통해 <strong>수학적으로 증명된 충돌 없음 보장</strong>을 실시간에서 달성.</p>
+<pre><code>DeepReach: 19.4% 충돌률 (학습 근사 오차)
+GPU-SLS: 0% 충돌률 (공식 보장)
+</code></pre>
+<p><strong>2. 고차원 시스템 확장</strong></p>
+<p>NeuPAN (TRO&#39;25)이 ~5D 비홀로노믹 시스템을 다루는 데 반해, GPU-SLS는 61D 쿼드루팹을 실시간으로 제어. 이는 향후 고DOF 조작기, 인간형 로봇에 대한 강건 계획의 기반.</p>
+<p><strong>3. 통합 프레임워크</strong></p>
+<p>TRG-Planner, HEIGHT 등이 경로 계획 + 추적 제어를 분리 처리하는 데 반해, GPU-SLS는 단일 최적화로 통합. 경로-제어 불일치(plan-execute mismatch) 최소화.</p>
+<p><strong>4. 재현 가능성</strong></p>
+<p>코드, 설치 지침, 실험 재현 스크립트 모두 GitHub에 공개 (MIT 라이선스). TRG-Planner에 이어 Planner 트랙에서 두 번째 코드 공개 논문.</p>
+<h4>GPU-SLS의 약점</h4>
+<p><strong>1. 보수성</strong></p>
+<p>SLS 기반 제약 강화는 최악 경우를 가정하므로 실제로 달성 가능한 것보다 넓은 여유 공간 요구:</p>
+<ul>
+<li>좁은 통로 통과 어려움</li>
+<li>에너지 효율 저하 (우회 경로 선호)</li>
+</ul>
+<p>DreamFlow, HEIGHT가 학습 기반으로 훨씬 좁은 공간도 통과 가능한 것과 대조.</p>
+<p><strong>2. 모델 의존성</strong></p>
+<p>정확한 로봇 동역학 모델 f(x, u) 필요:</p>
+<ul>
+<li>미지 환경 적응 어려움</li>
+<li>드리프트, 마모에 따른 모델 오차 처리 미흡</li>
+<li>NeuPAN이 데이터 기반으로 모델 없이 동작하는 것과 대조</li>
+</ul>
+<p><strong>3. 환경 인식 통합 미흡</strong></p>
+<p>GPU-SLS는 순수 MPC 레이어에 집중:</p>
+<ul>
+<li>장애물 인식 (SLAM, 포인트 클라우드 처리) 별도 필요</li>
+<li>전역 경로 계획 레이어와의 통합 방법 미명시</li>
+<li>TRG-Planner가 완전한 인식-계획 파이프라인을 제공하는 것과 대조</li>
+</ul>
+<p><strong>4. 심사 미완료 (Under Review)</strong></p>
+<p>TRG-Planner (RA-L), DreamFlow (ICRA), HEIGHT (T-ASE) 모두 동료 심사 완료. GPU-SLS는 아직 심사 전 프리프린트.</p>
+<h3>9.3 실적용 가능성 평가</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>GPU-SLS</th>
+<th>TRG-Planner</th>
+<th>DreamFlow</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>고DOF 로봇 적용</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐</td>
+<td>61D 실증</td>
+</tr>
+<tr>
+<td>안전 보장 강도</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐</td>
+<td>공식 vs 경험적</td>
+</tr>
+<tr>
+<td>미지 환경 적응</td>
+<td>⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>모델 의존성</td>
+</tr>
+<tr>
+<td>좁은 공간 통과</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>보수성</td>
+</tr>
+<tr>
+<td>배포 편의성</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+<td>코드 공개</td>
+</tr>
+</tbody></table></div>
+<p><strong>총평</strong>: GPU-SLS는 고DOF 조작기 및 인간형 로봇의 <strong>안전 임계 응용</strong>(안전 보장이 필수인 의료/구조 로봇)에 가장 적합. 미지 환경 탐색이나 좁은 공간 기동이 중요한 응용에는 DreamFlow/HEIGHT가 더 적합.</p>
+<h3>9.4 연구 방향성 평가</h3>
+<p><strong>GPU-SLS가 열어가는 연구 방향</strong>:</p>
+<ol>
+<li><p><strong>GPU 병렬 제어 이론</strong>: 결합 스캔 패턴을 다른 최적화 문제(LQR, iLQR, DDP)에도 적용 가능. 제어 이론과 GPU 컴퓨팅의 융합이라는 새로운 방향.</p>
+</li>
+<li><p><strong>실시간 강건 고DOF 제어</strong>: 75D 인간형 로봇에서의 가능성은 향후 인간형 로봇 상용화에 직결. 전신 조작(loco-manipulation)의 핵심 인프라가 될 수 있음.</p>
+</li>
+<li><p><strong>현재 Planner 트랙과의 방향성 차이</strong>:</p>
+<ul>
+<li>TRG-Planner: 지형 표현 혁신 (그래프 + 위험도)</li>
+<li>DreamFlow: 관찰 범위 확장 (생성 모델 활용)</li>
+<li>HEIGHT: 동적 환경 상호작용 모델링</li>
+<li>NeuPAN: 인식-제어 통합 (End-to-End)</li>
+<li><strong>GPU-SLS</strong>: 강건 제어 이론의 계산 가능화 → <strong>완전히 다른 접근 축</strong></li>
+</ul>
+</li>
+<li><p><strong>향후 통합 가능성</strong>: GPU-SLS를 국소 레이어, TRG-Planner를 전역 레이어로 계층적 통합하면 강건하면서도 지형 적응적인 전체 시스템 구현 가능.</p>
+</li>
+</ol>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li>Fang &amp; Chou, &quot;Safe Large-Scale Robust Nonlinear MPC in Milliseconds via Reachability-Constrained System Level Synthesis on the GPU,&quot; arXiv:2604.07644, 2026.</li>
+<li>Anderson et al., &quot;System Level Synthesis,&quot; Annual Reviews in Control, 2019.</li>
+<li>Leeman et al., &quot;Fast System Level Synthesis: Robust Model Predictive Control using Riccati Recursions,&quot; IFAC-PapersOnLine, 2024. arXiv:2401.13762</li>
+<li>Stellato et al., &quot;OSQP: An Operator Splitting Solver for Quadratic Programs,&quot; Mathematical Programming Computation, 2020.</li>
+<li>Frison &amp; Diehl, &quot;HPIPM: a high-performance interior-point method for quadratic programs and model-predictive control,&quot; IFAC-PapersOnLine, 2020.</li>
+<li>Bansal et al., &quot;DeepReach: A Deep Learning Approach for Computing Reachable Sets,&quot; ICRA 2021. arXiv:2011.02082</li>
+<li>Blelloch, &quot;Prefix Sums and Their Applications,&quot; CMU Tech Report, 1990. (결합 스캔의 이론적 배경)</li>
+<li>Lee et al., &quot;TRG-Planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments,&quot; RA-L, 2025.</li>
+<li>Park et al., &quot;DreamFlow: Local Navigation Beyond Observation via Conditional Flow Matching in the Latent Space,&quot; ICRA 2026.</li>
+<li>Liu et al., &quot;HEIGHT: Heterogeneous Interaction Graph Transformer for Robot Navigation,&quot; T-ASE, 2025.</li>
+<li>Han et al., &quot;NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning,&quot; TRO, 2025.</li>
+<li>Liao et al., &quot;GPU Acceleration of ADMM for Large-Scale QP,&quot; arXiv:1912.04263.</li>
+<li>Mayne et al., &quot;Robust model predictive control of constrained linear systems with bounded disturbances,&quot; Automatica, 2005.</li>
+<li>Rawlings &amp; Mayne, &quot;Model Predictive Control: Theory and Design,&quot; Nob Hill Publishing, 2009.</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>혁신성</h3>
+<p>GPU-SLS는 <strong>강건 비선형 MPC의 계산 병목 문제를 GPU 병렬 연산의 패러다임 전환으로 해결</strong>한다는 점에서 근본적 혁신성이 있다. 단순한 엔지니어링 최적화가 아닌, 제어 이론(SLS)의 수학적 구조를 GPU 결합 스캔 패턴과 완벽하게 매핑한 결과물이다.</p>
+<p>특히 주목할 점은:</p>
+<ol>
+<li><strong>237× SLS 가속</strong>으로 이전에는 계산 불가능했던 60D+ 시스템에서의 강건 합성 최초 달성</li>
+<li><strong>0% 충돌률</strong> vs DeepReach의 19.4% 충돌률 — 공식 보장의 실용적 가치 입증</li>
+<li><strong>Unitree Go2 61D 실제 하드웨어 검증</strong> — 이론이 실제로 동작함을 증명</li>
+</ol>
+<h3>실용적 의의</h3>
+<p>현재 로봇공학이 직면한 핵심 도전 중 하나는 고DOF 시스템(인간형 로봇, 고DOF 조작기)의 안전한 실시간 제어다. GPU-SLS는 이 도전에 대한 가장 강력한 이론적-실용적 답변 중 하나를 제시한다.</p>
+<p>MIT 라이선스 코드 공개와 상세한 재현 지침은 커뮤니티 채택을 가속화할 것이며, 향후 인간형 로봇 상용화 시대에 안전 임계 응용의 핵심 인프라가 될 잠재력이 있다.</p>
+<h3>향후 연구 방향</h3>
+<ol>
+<li><strong>인식 레이어 통합</strong>: 포인트 클라우드 기반 장애물 탐지와 GPU-SLS의 파이프라인 통합</li>
+<li><strong>적응형 외란 경계</strong>: 센서 노이즈 수준을 온라인으로 추정하여 보수성 감소</li>
+<li><strong>확률적 SLS</strong>: 최악 경우가 아닌 분포 기반 강건화로 보수성-안전성 트레이드오프 개선</li>
+<li><strong>학습-SLS 하이브리드</strong>: 모델 오차를 잔여 학습으로 보상 (Residual Learning + SLS)</li>
+<li><strong>100D+ 시스템</strong>: 인간형 전신 조작에서의 검증</li>
+<li><strong>에너지 효율 최적화</strong>: 안전 여유를 유지하면서 에너지 소비 최소화</li>
+</ol>
+<p>GPU-SLS는 로봇 강건 제어의 계산 장벽을 허물었으며, 이는 고DOF 로봇 시스템이 실세계 안전 임계 환경에서 동작하는 미래를 향한 중요한 이정표다.</p>
+<hr>
+<h2>12. 심화 기술 분석 (Extended Technical Analysis)</h2>
+<h3>12.1 결합 스캔의 수학적 배경</h3>
+<p>GPU-SLS의 핵심인 병렬 결합 스캔(Parallel Associative Scan)의 이론적 기반:</p>
+<h4>결합 연산자의 정의</h4>
+<p><strong>정의</strong>: 연산 ⊕가 결합적(associative)이면:</p>
+<pre><code>(a ⊕ b) ⊕ c = a ⊕ (b ⊕ c)
+</code></pre>
+<p><strong>예시 (수열 합산)</strong>:</p>
+<pre><code>순차: [1, 2, 3, 4, 5, 6, 7, 8]
+      → 1+2=3 → 3+3=6 → 6+4=10 → ...
+      O(N) 순차 깊이
+
+병렬 (레벨별):
+  레벨 0: [1,  2,  3,  4,  5,  6,  7,  8]
+  레벨 1: [3,  3,  7,  4,  11, 6,  15, 8]  (1+2, -, 3+4, -, 5+6, -, 7+8, -)
+  레벨 2: [3,  3,  10, 4,  11, 6,  26, 8]  (3+7, -, -, -, 11+15, -)
+  레벨 3: [3,  3,  10, 4,  36, 6,  26, 8]  (10+26, -)
+  O(log N) 병렬 깊이
+</code></pre>
+<h4>MPC에서의 결합 연산자</h4>
+<p>ADMM의 δξ 업데이트 단계를 시간 축으로 분해:</p>
+<pre><code>시간 단계별 LQR 하위 문제:
+  min_{δx_k, δu_k} ℓ_k(δx_k, δu_k)
+  s.t. δx_{k+1} = A_k δx_k + B_k δu_k + r_k
+
+값 함수 (backward):
+  V_k(δx_k) = min_{δu_k, ..., δu_N} Σ_{j=k}^N ℓ_j
+  V_k(δx_k) = (1/2) δx_k^T P_k δx_k + p_k^T δx_k + v_k
+
+P_k 재귀 (리카티):
+  P_N = Q_N
+  P_k = Q_k + A_k^T S_k A_k
+  여기서 S_k = P_{k+1} - P_{k+1} B_k (B_k^T P_{k+1} B_k + R_k)^{-1} B_k^T P_{k+1}
+
+결합 연산자 ⊕ 정의 (i→k와 k→j를 결합하여 i→j):
+  (P̃_{i,j}, p̃_{i,j}) = (P̃_{i,k}, p̃_{i,k}) ⊕ (P̃_{k,j}, p̃_{k,j})
+
+수식:
+  M = (I + P̃_{k,j} C̃_{i,k})^{-1}
+  P̃_{i,j} = Ã_{i,k}^T M P̃_{k,j} Ã_{i,k} + P̃_{i,k}
+  p̃_{i,j} = Ã_{i,k}^T M (P̃_{k,j} b̃_{i,k} + p̃_{k,j}) + p̃_{i,k}
+
+결합성 증명:
+  (A ⊕ B) ⊕ C = A ⊕ (B ⊕ C) (리카티 재귀의 합성 성질)
+</code></pre>
+<h4>GPU에서의 병렬 스캔 구현</h4>
+<pre><code>CUDA 커널 구조 (개념적):
+
+__global__ void parallel_backward_scan(
+    MatrixPair* elements,  // (P̃_k, p̃_k) 배열
+    int N
+) {
+    // 레벨 루프 (log N 레벨)
+    for (int stride = 1; stride &lt; N; stride *= 2) {
+        int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
+        int right_idx = thread_idx * 2 * stride + stride - 1;
+        int left_idx = thread_idx * 2 * stride - 1;
+        
+        if (left_idx &gt;= 0 &amp;&amp; right_idx &lt; N) {
+            // 결합 연산: elements[right_idx] ⊕= elements[left_idx]
+            combine_op(elements + right_idx, elements + left_idx);
+        }
+        __syncthreads();
+    }
+}
+
+combine_op (결합 연산):
+    P̃_new = A^T * (I + P̃_right * C_left)^{-1} * P̃_right * A + P̃_left
+    p̃_new = A^T * (I + P̃_right * C_left)^{-1} * (P̃_right * b_left + p̃_right) + p̃_left
+    
+    행렬 역계산: n_x × n_x 역행렬 → GPU에서 병렬 LU 분해
+    (n_x = 20-30 수준에서 효율적)
+</code></pre>
+<h3>12.2 System Level Synthesis의 볼록 최적화 구조</h3>
+<p>SLS가 강건 MPC를 <strong>볼록 문제</strong>로 변환하는 이유:</p>
+<pre><code>전통적 강건 MPC:
+  min_{u_0, ..., u_{N-1}} J(x, u)
+  s.t. h(x_k, u_k) ≤ 0  ∀ w_k ∈ W
+  (모든 외란 실현에 대해 제약 만족)
+  
+→ 무한 차원 제약 (연속 집합 W에 대한 최대화)
+→ Semi-infinite Programming (NP-hard in general)
+
+SLS 재공식화:
+  변수: (Φ^x, Φ^u) = 닫힌 루프 응답
+  
+  원래 비볼록 문제 → 볼록으로 변환:
+  
+  제약: h_k(Φ^x, Φ^u) ≤ 0  (Φ에 대해 선형!)
+  
+  이유: 최악 경우 외란 = ball 경계에서 달성
+  
+  Δh_k = max_{||w|| ≤ W} h(Σ_j Φ^x_{k,j} w_j, Σ_j Φ^u_{k,j} w_j)
+        = W * Σ_j ||C_k Φ^x_{k,j} + D_k Φ^u_{k,j}||_2
+          (삼각 부등식으로 상한 계산)
+  
+  → Δh_k는 Φ에 대해 볼록 함수 (노름의 합)
+  → h_k(x̄_k, ū_k) + Δh_k ≤ 0 는 볼록 제약!
+
+최종 볼록 문제:
+  min_{x̄, ū, Φ^x, Φ^u} J(x̄, ū)
+  s.t. h_k(x̄_k, ū_k) + W*Σ_j ||C_k Φ^x_{k,j} + D_k Φ^u_{k,j}||_2 ≤ 0
+       (Φ^x, Φ^u)이 SLS 가인성(achievability) 조건 만족
+</code></pre>
+<p><strong>공식 안전 보장의 수학적 근거</strong>:</p>
+<pre><code>정리: GPU-SLS가 생성하는 제어 정책 π(x)는
+      모든 ||w_k|| ≤ W인 외란 시퀀스에 대해
+      h(x_k, u_k) ≤ 0를 만족한다.
+
+증명 스케치:
+1. 제약 강화: h(x̄_k, ū_k) ≤ -Δh_k
+2. 외란 재귀: δx_k = Σ_{j&lt;k} Φ^x_{k,j} w_j
+3. 최악 경우 δx_k의 영향:
+   |C_k δx_k + D_k δu_k| ≤ Σ_j ||(C_k Φ^x_{k,j} + D_k Φ^u_{k,j}) w_j||
+                           ≤ W * Σ_j ||C_k Φ^x_{k,j} + D_k Φ^u_{k,j}|| = Δh_k
+4. 따라서:
+   h(x_k, u_k) ≤ h(x̄_k, ū_k) + Δh_k ≤ -Δh_k + Δh_k = 0  ✓
+</code></pre>
+<h3>12.3 JAX 기반 GPU 구현의 최적화 기법</h3>
+<p>GPU-SLS가 JAX를 선택한 이유와 최적화 전략:</p>
+<pre><code class="language-python"># JAX JIT 컴파일 예시
+import jax
+import jax.numpy as jnp
+from functools import partial
+
+@jax.jit
+def solve_admm_step(P_cache, p_cache, G, h, rho, z, lam):
+    &quot;&quot;&quot;
+    ADMM의 δξ 업데이트 단계 (JIT 컴파일로 GPU 커널 생성)
+    
+    인수분해 캐싱: P_cache는 ρ가 변하지 않으면 재사용
+    &quot;&quot;&quot;
+    # 역방향 결합 스캔
+    def combine_fn(left, right):
+        P_l, p_l = left
+        P_r, p_r = right
+        M_inv = jnp.linalg.inv(jnp.eye(P_r.shape[0]) + P_r @ C)
+        P_new = A.T @ M_inv @ P_r @ A + P_l
+        p_new = A.T @ M_inv @ (P_r @ b + p_r) + p_l
+        return P_new, p_new
+    
+    # jax.lax.associative_scan: O(log N) 병렬 깊이
+    P_scan, p_scan = jax.lax.associative_scan(
+        combine_fn, (P_cache, p_cache), reverse=True
+    )
+    
+    # 전방향 스캔으로 최적 δξ 복원
+    delta_xi = forward_scan(P_scan, p_scan, G, h, rho, z, lam)
+    return delta_xi
+
+# vmap으로 N개 리카티 패스 병렬화
+@partial(jax.vmap, in_axes=(0, None, None))
+def riccati_pass_for_disturbance(j, A_list, B_list):
+    &quot;&quot;&quot;j번째 외란에 대한 리카티 역진&quot;&quot;&quot;
+    return riccati_backward(j, A_list, B_list)
+
+# 전체 SLS 합성
+def synthesize_sls_controllers(A_list, B_list, N):
+    # N개 외란 시각에 대해 동시 병렬 실행
+    j_array = jnp.arange(N)
+    Phi_x, Phi_u = riccati_pass_for_disturbance(j_array, A_list, B_list)
+    return Phi_x, Phi_u  # (N, N, n_x) 및 (N, N, n_u)
+</code></pre>
+<p><strong>인수분해 캐싱 전략</strong>:</p>
+<pre><code>ADMM 반복:
+  1회: P + ρG^TG 인수분해 (비용 O(n³))
+  2회: 역행렬 재사용 (비용 O(n²))
+  ...
+  10회: 역행렬 재사용
+
+ρ 변경 시 (적응형 ADMM):
+  새로운 인수분해 필요 (비용 O(n³))
+  → ρ를 가능한 한 고정하는 전략으로 최소화
+
+메모리 vs 계산 트레이드오프:
+  캐시 크기: O(N * n_x²) 행렬 저장
+  N=1000, n_x=20: 1000 * 400 * 4 bytes = 1.6 MB (GPU 메모리 내 유지 가능)
+  N=3000, n_x=20: ~5 MB (여전히 관리 가능)
+</code></pre>
+<h3>12.4 실제 쿼드루팹 실험의 공학적 세부 사항</h3>
+<p>Unitree Go2 EDU 하드웨어 실험의 기술적 상세:</p>
+<pre><code>컴퓨팅 스택:
+  ┌────────────────────────────────────────┐
+  │ NVIDIA RTX 4090 (외장 GPU 팜) OR       │
+  │ NVIDIA Jetson Orin NX (온보드 가능성)  │
+  └────────────────────────────────────────┘
+         ↕ 저지연 UDP 통신
+  ┌────────────────────────────────────────┐
+  │ Unitree Go2 EDU 온보드 컴퓨터          │
+  │ - 상태 추정 (IMU + 관절 인코더)        │
+  │ - 관절 토크 명령 수신                  │
+  └────────────────────────────────────────┘
+  
+통신 지연 고려:
+  GPU 계산: ~18ms
+  UDP 통신: &lt;1ms (로컬 네트워크)
+  토크 적용: &lt;1ms (하드웨어)
+  총 제어 지연: ~20ms (50Hz 루프 유지)
+
+상태 추정 구성:
+  IMU: 선형 가속도, 각속도 → 기저부 속도/자세
+  관절 인코더: 12개 관절 위치, 속도
+  외란 추정: w_hat_k = x_k - x̄_k (이전 예측과의 차이)
+  
+  전체 61D 상태:
+    기저부 위치 (3D) + 쿼터니언 (4D) + 선속도 (3D) + 각속도 (3D) = 13D
+    12 다리 관절 위치 = 12D
+    12 다리 관절 속도 = 12D
+    발 접촉 상태 (4D) = 4D  [일부 구현에서 포함]
+    총: ~41-61D (구현에 따라 다름)
+
+강건성 원천:
+  외란 W 설정:
+    - IMU 노이즈: ~0.01 m/s
+    - 관절 마찰 불확실성: ~0.5 Nm
+    - 지면 불규칙성: ~0.05 m 높이 변화
+    → W ≈ 0.1 (정규화된 외란 경계)
+</code></pre>
+<h3>12.5 다른 안전 계획 방법과의 심층 비교</h3>
+<h4>CBF vs SLS 비교</h4>
+<pre><code>Control Barrier Functions (CBF):
+  h(x) ≥ 0: 안전 집합 정의
+  ḣ(x, u) + α(h(x)) ≥ 0: 안전 유지 조건
+  
+  QP 수정:
+    u* = argmin ||u - u_nom||²
+         s.t. CBF 조건
+  
+  장점: 계산 간단 (QP 1회), 연속 시간 보장
+  단점:
+    - 비선형 시스템에서 h(x) 설계 어려움
+    - 장기 계획 고려 없음 (근시안적)
+    - 고차원 시스템에서 CBF 설계 어려움
+    - GPU-SLS와 달리 장기 호라이즌 최적화 없음
+
+SLS (GPU-SLS):
+  장점:
+    - 장기 호라이즌 최적화 포함 (N 스텝 전망)
+    - 고차원 시스템 (60D+) 자연 처리
+    - 공식적 강건 보장 + 최적성 동시 달성
+  단점:
+    - 모델 의존성 (정확한 동역학 필요)
+    - 비선형성 오차 (1차 근사)
+    
+실용적 추천:
+  낮은 차원 + 빠른 동역학: CBF 적합
+  고차원 + 장기 최적화 필요: SLS/GPU-SLS 적합
+</code></pre>
+<h4>MPC Tube 방법 vs SLS</h4>
+<pre><code>Tube-Based MPC (Mayne et al.):
+  핵심 아이디어: 명목 궤적 주변에 &quot;튜브&quot; (관)를 정의
+  방법:
+    1. 명목 궤적 x̄ 최적화
+    2. 오차 집합 E 미리 계산 (오프라인)
+    3. 강화된 제약: h(x̄_k, ū_k) ≤ -ε (고정 여유)
+    
+  장점: 오프라인 튜브 계산 → 온라인 복잡도 낮음
+  단점:
+    - 고정 E → 보수적 (큰 여유)
+    - 고차원에서 E 계산 어려움
+    - 비선형 시스템 확장 어려움
+
+GPU-SLS:
+  핵심 차이:
+    - E를 오프라인이 아닌 온라인으로 계산
+    - Φ에 따라 동적으로 조정되는 &quot;튜브&quot;
+    - 명목 궤적 최적화와 동시에 수행
+    
+  장점: 적응형 보수성 → 덜 보수적
+  단점: 높은 온라인 계산 비용 (GPU로 해결)
+</code></pre>
+<hr>
+<h2>13. 재현 가이드 및 코드 분석 (Reproduction Guide)</h2>
+<h3>13.1 GitHub 저장소 구조 분석</h3>
+<pre><code class="language-bash"># https://github.com/Jeff300fang/gpu_sls
+
+gpu_sls/
+├── environment.yaml          # Conda 환경 설정
+├── setup.py                  # 패키지 설치
+├── gpu_sls/
+│   ├── admm/
+│   │   ├── solver.py         # GPU ADMM QP 솔버 (핵심)
+│   │   ├── scan.py           # 병렬 결합 스캔 구현
+│   │   └── caching.py        # 인수분해 캐싱
+│   ├── sls/
+│   │   ├── synthesis.py      # SLS 제어기 합성
+│   │   ├── riccati.py        # 병렬 리카티 재귀
+│   │   └── reachability.py   # 도달 가능 집합 계산
+│   ├── mpc/
+│   │   ├── nmpc.py           # 비선형 MPC 프레임워크
+│   │   ├── sqp.py            # SQP 알고리즘
+│   │   └── rti.py            # Real-Time Iteration
+│   └── robots/
+│       ├── go2.py            # Go2 쿼드루팹 인터페이스
+│       └── humanoid.py       # 인간형 로봇 인터페이스
+├── experiments/
+│   ├── pendulum_benchmark.py # 반전 진자 벤치마크
+│   ├── dubins_safety.py      # Dubins Car 안전성 실험
+│   └── go2_realworld.py      # 실제 로봇 실험
+└── tests/
+    ├── test_admm.py
+    └── test_sls.py
+</code></pre>
+<h3>13.2 설치 및 실행 방법</h3>
+<pre><code class="language-bash"># 1. 저장소 클론
+git clone --recurse-submodules https://github.com/Jeff300fang/gpu_sls.git
+cd gpu_sls
+
+# 2. Conda 환경 생성
+conda env create -f environment.yaml
+conda activate gpu_sls
+
+# 3. 패키지 설치
+pip install -e .
+
+# 4. 기본 벤치마크 실행 (반전 진자)
+python experiments/pendulum_benchmark.py \
+    --horizon 1000 \
+    --gpu_id 0 \
+    --compare_baselines
+
+# 5. 안전성 실험 (Dubins Car)
+python experiments/dubins_safety.py \
+    --num_trials 50 \
+    --disturbance_bound 0.1 \
+    --compare_deepreach
+
+# 6. 실제 로봇 실험 (Unitree Go2 필요)
+python experiments/go2_realworld.py \
+    --robot_ip 192.168.1.1 \
+    --horizon 50 \
+    --control_freq 50
+
+# 환경 변수 설정
+export JAX_PLATFORM_NAME=gpu
+export JAX_ENABLE_X64=1  # 64비트 정밀도
+</code></pre>
+<h3>13.3 핵심 코드 동작 원리 설명</h3>
+<pre><code class="language-python"># GPU-SLS 사용 예시 (의사 코드)
+
+from gpu_sls import GPUSLS
+
+# 시스템 정의
+dynamics = {
+    &#39;f&#39;: lambda x, u: nonlinear_dynamics(x, u),   # 비선형 동역학
+    &#39;jac_x&#39;: lambda x, u: jacobian_x(x, u),        # 상태 야코비안
+    &#39;jac_u&#39;: lambda x, u: jacobian_u(x, u),        # 제어 야코비안
+}
+
+# 비용 함수
+cost = {
+    &#39;Q&#39;: np.eye(n_x) * 10,   # 상태 추적 비용
+    &#39;R&#39;: np.eye(n_u) * 1,    # 제어 노력 비용
+    &#39;QN&#39;: np.eye(n_x) * 100  # 종단 비용
+}
+
+# 제약 조건
+constraints = {
+    &#39;obstacle&#39;: lambda x: obstacle_constraint(x),  # 충돌 제약
+    &#39;input_bound&#39;: {&#39;u_min&#39;: u_min, &#39;u_max&#39;: u_max},
+    &#39;state_bound&#39;: {&#39;x_min&#39;: x_min, &#39;x_max&#39;: x_max}
+}
+
+# GPU-SLS 초기화
+controller = GPUSLS(
+    dynamics=dynamics,
+    cost=cost,
+    constraints=constraints,
+    horizon=N,              # 예측 호라이즌
+    disturbance_bound=W,    # 외란 경계
+    dt=0.02,                # 샘플링 시간
+    device=&#39;cuda:0&#39;         # GPU 지정
+)
+
+# 제어 루프 (50Hz)
+while True:
+    # 현재 상태 관측
+    x_current = robot.get_state()  # (61D)
+    
+    # GPU-SLS 풀기 (평균 18ms)
+    u_optimal, sls_info = controller.solve(
+        x0=x_current,
+        reference=target_trajectory,
+        warm_start=True  # 이전 해 재사용
+    )
+    
+    # 제어 입력 적용 (12D 토크)
+    robot.apply_control(u_optimal[0])
+    
+    # 안전 정보 로깅
+    print(f&quot;도달 가능 집합 반경: {sls_info[&#39;reach_radius&#39;]:.3f}&quot;)
+    print(f&quot;안전 마진: {sls_info[&#39;safety_margin&#39;]:.3f}&quot;)
+</code></pre>
+<hr>
+<h2>14. 실제 응용 시나리오 (Real-World Application Scenarios)</h2>
+<h3>14.1 의료 로봇에서의 활용 가능성</h3>
+<pre><code>시나리오: 수술 보조 로봇 (7-DOF 조작기)
+  - 안전 임계: 수술 도구가 특정 영역 절대 침범 금지
+  - 현재 방법: 인간 작업자의 실시간 감독 + 단순 충돌 검출
+  
+GPU-SLS 적용:
+  - 동역학: 7-DOF 조작기 비선형 동역학 모델
+  - 제약: 금지 영역까지의 최소 거리 &gt; 안전 마진
+  - 외란: 환자 호흡 운동, 조직 변형
+  
+공식적 보장의 의미:
+  단순 감지 → 보장
+  &quot;75% 확률로 충돌하지 않음&quot; → &quot;모든 경우에 충돌하지 않음&quot;
+  
+GPU 요구사항:
+  - 7-DOF: 훨씬 낮은 차원 → 더 빠른 처리
+  - 실시간 50Hz 이상 달성 가능
+</code></pre>
+<h3>14.2 재난 구조 로봇에서의 활용</h3>
+<pre><code>시나리오: 지진 피해 건물 수색 구조 로봇 (12-DOF 4족 보행)
+  - 환경: 불규칙적이고 무너지기 쉬운 잔해
+  - 도전: 예측 불가능한 지면 반응력, 빠르게 변화하는 접촉 상태
+  
+GPU-SLS 적용:
+  - 외란 모델: 지면 반응력 불확실성 W = 30N (고 불확실성)
+  - 제약: 로봇 안정성 (ZMP 조건), 관절 토크 한계
+  - 실시간 요구: 20ms (50Hz) 유지 필요
+  
+기존 방법의 한계:
+  - MPC Tube: 잔해 지형에서 튜브 계산 어려움
+  - 학습 기반: 훈련 데이터 없는 극단적 환경
+  
+GPU-SLS 장점:
+  - 모델 기반 → 사전 학습 불필요
+  - 공식 보장 → 높은 외란에서도 안전
+  - 61D 검증 → 실제 4족 보행에 적용 가능
+</code></pre>
+<h3>14.3 인간-로봇 협업에서의 활용</h3>
+<pre><code>시나리오: 공장 자동화 협동 로봇 (Cobot)
+  안전 기준: ISO 10218, ISO/TS 15066 (로봇 안전 표준)
+  요구사항: 인간과의 최소 거리 보장, 충격력 제한
+  
+  GPU-SLS 역할:
+    외란 = 인간 예기치 않은 움직임 (최대 0.5 m/s)
+    제약 = 인간까지의 거리 ≥ 안전 거리 d_safe
+    
+    이익:
+      - &quot;안전성 인증&quot;을 위한 수학적 증명 제공
+      - ISO 표준의 확률적 요구 → 결정론적 보장으로 상향
+      - 인간 근접 시 자동 감속 (제약 강화)
+
+향후 발전:
+  - 인간 움직임 예측 + SLS 외란 모델 통합
+  - 적응형 안전 마진 (인간-로봇 거리에 따른 동적 W)
+  - 다중 인간 동시 존재 시나리오 처리
+</code></pre>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

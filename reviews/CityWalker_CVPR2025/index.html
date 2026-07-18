@@ -1,0 +1,1824 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">CVPR 2025</div>
+    <h1>CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos</h1>
+    <div class="meta-row">
+      <span class="chip">VLN</span>
+      <span><a href="https://arxiv.org/abs/2411.17820">arXiv:2411.17820</a></span>
+      <span>리뷰 2026-04-02</span>
+      <span>59분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos</h1>
+<h2>논문 정보</h2>
+<ul>
+<li><strong>제목</strong>: CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos</li>
+<li><strong>저자</strong>: Xinhao Liu*, Jintong Li*, Yicheng Jiang, Niranjan Sujay, Zhicheng Yang, Juexiao Zhang, John Abanes, Jing Zhang, Chen Feng<ul>
+<li>(*: 공동 제1저자, {xinhao.liu, jintong.li}@nyu.edu)</li>
+</ul>
+</li>
+<li><strong>소속</strong>: New York University, AI4CE Lab</li>
+<li><strong>학회</strong>: CVPR 2025 (추정)</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2411.17820">https://arxiv.org/abs/2411.17820</a></li>
+<li><strong>Project Page</strong>: <a href="https://ai4ce.github.io/CityWalker/">https://ai4ce.github.io/CityWalker/</a></li>
+<li><strong>GitHub</strong>: (미공개, 논문 제출 예상)</li>
+</ul>
+<hr>
+<h2>Abstract 요약</h2>
+<p>동적 도시 환경에서의 embodied 네비게이션은 spatial reasoning과 common-sense norm 준수를 요구하는 어려운 문제다. 기존 시각 내비게이션 방법들은 지도 없는 환경에서 성능이 제한적이어서, 배송 로봇 같은 자율주행체의 배포에 장애가 된다.</p>
+<p><strong>CityWalker</strong>: 2,000+ 시간의 웹 수집 도시 보행 및 주행 비디오로 학습한 확장 가능한 데이터 기반 접근법</p>
+<p><strong>핵심 기여</strong>:</p>
+<ol>
+<li>Visual Odometry (VO)를 이용한 <strong>자동 action label 생성</strong> → VLM prompting 비용 제거</li>
+<li><strong>대규모 데이터 확장성</strong> (2000시간 처리 가능)</li>
+<li><strong>Cross-domain, cross-embodiment 일반화</strong> (걷기 비디오 + 주행 비디오)</li>
+<li><strong>실세계 검증</strong>: Unitree Go1 사족 로봇으로 복잡한 도시 환경 네비게이션</li>
+</ol>
+<p><strong>결과</strong>:</p>
+<ul>
+<li>실세계 네비게이션 성공률: 기존 SOTA (ViNT) 대비 <strong>+15-30%p</strong> 향상</li>
+<li>오프라인 평가: 모든 critical scenarios에서 향상 (Turn, Crossing, Detour, Proximity, Crowd)</li>
+<li>데이터 스케일링 효과: 1000시간 학습 후 fine-tuned 기존 방법 능가</li>
+</ul>
+<p><div class="fig-missing">그림 누락 · figures/x1.png</div>
+<em>Figure 1. 웹 스케일 도시 보행 비디오로 학습한 embodied agent. 다양한 critical scenario (색깔 pin)와 실세계 관찰 예시</em></p>
+<hr>
+<h2>섹션별 상세 분석</h2>
+<h3>I. Introduction &amp; Motivation</h3>
+<p><strong>도시 네비게이션의 고유 도전</strong>:</p>
+<pre><code>실내 시뮬레이션 (Habitat) → Near-perfect
+    vs
+실제 도시 환경 → Multiple unsolved problems:
+├─ 보행자 상호작용 (dense pedestrians)
+├─ 신호등 준수 (traffic rules)
+├─ 갑작스러운 장애물 (sudden obstacles)
+├─ 날씨 다양성 (rain, fog, night)
+└─ Common-sense norms (sidewalk usage, social distance)
+</code></pre>
+<p><strong>기존 방법의 한계</strong>:</p>
+<ul>
+<li><strong>Simulation-only RL</strong>: Static environments, sim-to-real transfer 취약</li>
+<li><strong>Limited expert data</strong>: Teleoperation은 비용이 크고 diversity 낮음</li>
+<li><strong>End-to-end learning</strong>: 상황별 처리 불가능 (hallucination, adversarial cases)</li>
+</ul>
+<p><strong>CityWalker의 직관</strong>:</p>
+<blockquote>
+<p>인간의 도시 보행 비디오는 이미 모든 critical scenario를 포함하고 있다.
+문제는 action label을 대규모로 얻는 것 → <strong>VO 기반 자동 labeling</strong>으로 해결</p>
+</blockquote>
+<h3>II. Method</h3>
+<h4>A. 핵심 혁신 1: VO 기반 자동 Action Labeling</h4>
+<p><strong>문제</strong>: 2000시간 비디오 × VLM prompting = 비현실적 비용</p>
+<ul>
+<li>GPT-4 Vision 가격: ~0.1 USD per image</li>
+<li>30fps × 2000시간 = 2.16억 frames → $21.6M (불가능)</li>
+</ul>
+<p><strong>해결책</strong>: Visual Odometry (DPVO) 활용</p>
+<pre><code>입력: 도시 보행 비디오
+    ↓
+DPVO (Deep Patch Visual Odometry)
+    ↓
+카메라 포즈 추출 (상대 pose estimation)
+    ↓
+연속된 frame 간의 relative displacement
+    ↓
+Action label (2D Euclidean coordinates)
+    ↓
+Normalize by average step length
+    ↓
+Action labels (자동 생성, 비용 0)
+</code></pre>
+<p><strong>VO의 특성 활용</strong>:</p>
+<ul>
+<li><strong>약점</strong>: Global accumulation error (drift)</li>
+<li><strong>강점</strong>: Short-window relative pose (5-frame window에서는 정확)</li>
+</ul>
+<p><strong>스케일 정규화</strong> (crucial innovation):</p>
+<pre><code>Problem: VO scale ambiguity
+- 걷기 비디오 1초 = 1.4m 실제 이동
+- 주행 비디오 1초 = 8m 실제 이동
+- VO는 모두 같은 스케일로 출력 (incorrect)
+
+Solution: 각 trajectory 내 평균 step length로 정규화
+- 결과: robot-agnostic action space
+- 배포 시: Robot-specific step length로 denormalize
+</code></pre>
+<p><strong>결과</strong>: </p>
+<ul>
+<li>Zero-shot으로 <strong>walking → quadruped</strong> transfer 가능</li>
+<li>Cross-domain: <strong>driving + walking</strong> 혼합 학습 가능</li>
+</ul>
+<h4>B. 핵심 혁신 2: Critical Scenario Definition</h4>
+<p>기존 평가: 모든 timestep을 동등하게 취급
+→ <strong>문제</strong>: Forward movement에서는 작은 오류가 중요하지 않음</p>
+<p>CityWalker: <strong>Critical scenarios</strong> 식별</p>
+<pre><code>Turn (8.2% data):
+├─ 정의: φ_action &gt; 20°
+├─ 중요도: High (방향 결정)
+├─ 실패 원인: 예측 orientation 오류
+└─ 데이터: 제한적
+
+Crossing (4.1% data):
+├─ 정의: Traffic light 감지 + confidence &gt; 0.5
+├─ 중요도: Critical (safety)
+├─ 실패 원인: 신호 무시, 타이밍 오류
+└─ 현황: 현재 모델도 부분적으로만 학습
+
+Detour (3.2% data):
+├─ 정의: |φ_action - φ_target| &gt; 45°
+├─ 중요도: High (경로 효율)
+├─ 실패 원인: Obstacle avoidance 미스
+└─ 개선: Fine-tuning으로 +3.5° improvement
+
+Proximity (5.1% data):
+├─ 정의: Largest person bbox &gt; 25% image area
+├─ 중요도: Medium (social navigation)
+├─ 실패 원인: 개인 공간 침해
+└─ 현황: 거의 미검증
+
+Crowd (2.3% data):
+├─ 정의: ≥5 people detected
+├─ 중요도: High (complex interaction)
+├─ 현황: 가장 어려운 시나리오
+└─ 성공률: 50% (가장 낮음)
+</code></pre>
+<p><strong>평가 지표 혁신</strong>: Scenario-weighted average</p>
+<pre><code>기존: Mean over all timesteps
+      → 95% forward movement에 의해 지배됨
+
+제안: Mean over critical scenarios only
+      → 각 scenario 동등 가중
+      → 실제 실패 원인 드러남
+</code></pre>
+<h4>C. 핵심 혁신 3: 새로운 평가 지표 (AOE, MAOE)</h4>
+<p><strong>기존 L2 거리의 문제</strong>:</p>
+<pre><code>Figure 3의 예:
+- 빨강: L2 error 작음, 하지만 방향 크게 벗남 (target으로부터 멀어짐)
+- 초록: L2 error 크지만, 방향 정확 (target으로 접근)
+
+실제 네비게이션에서: 초록이 성공, 빨강이 실패
+</code></pre>
+<p><strong>제안: Average Orientation Error (AOE)</strong></p>
+<pre><code>AOE(k) = (1/n) Σ_i arccos( &lt;a_i^k, a_i&gt; / (||a_i^k|| ||a_i||) )
+       = 예측 action과 ground truth action 간의 평균 각도
+
+이점:
+├─ 실제 네비게이션 성공 기준과 일치
+├─ L2는 complementary metric으로 사용
+└─ Robust to scale variance
+</code></pre>
+<p><strong>Maximum Average Orientation Error (MAOE)</strong>:</p>
+<pre><code>MAOE = (1/n) Σ_i max_k θ_ik
+     = 각 sample의 worst-case (5-step 중 가장 큰 오류)
+
+이유: 단순 평균은 underestimate
+- 예: [5°, 5°, 5°, 50°, 5°] → avg=14°지만 peak 50°가 실패 원인
+- MAOE는 이 worst case를 포착
+</code></pre>
+<h4>D. 네트워크 아키텍처</h4>
+<pre><code>Input:
+├─ RGB observations: [o_{t-5}, ..., o_t] (frozen DINOv2 encoder)
+├─ Past positions: [p_{t-5}, ..., p_t] (trainable coordinate encoder)
+└─ Target waypoint: w_t (coordinate encoder)
+
+Transformer encoder:
+├─ Past observation tokens (from DINOv2)
+├─ Past position embeddings
+├─ Target position embedding
+└─ Process through self-attention + FFN
+
+Feature hallucination branch (auxiliary):
+├─ Transformer output tokens
+├─ MSE loss against future frame embeddings
+├─ Guides transformer to predict informative future tokens
+└─ Effect on zero-shot: negative (domain gap), fine-tuning: positive
+
+Action head:
+├─ Decode transformer output → action waypoints (k=5 future steps)
+└─ Each action: (Δx, Δy) in Euclidean space
+
+Arrival head:
+├─ Binary classification
+├─ Predicts if agent reached goal
+└─ Used to control waypoint sequencing
+</code></pre>
+<p><strong>설계 선택의 근거</strong>:</p>
+<ul>
+<li><strong>DINOv2 frozen</strong>: Pre-trained vision knowledge 유지, trainable resource 절감</li>
+<li><strong>Coordinate encoder trainable</strong>: Spatial information processing 최적화</li>
+<li><strong>Transformer over CNN</strong>: Temporal dependency modeling, long-horizon prediction</li>
+<li><strong>k=5 past, 5 future</strong>: Trade-off between context and prediction horizon</li>
+</ul>
+<h4>E. 손실 함수 (Multi-task learning)</h4>
+<pre><code>L_total = ω_l1 * L_l1 + ω_ori * L_ori + ω_arr * L_arr + ω_feat * L_feat
+
+L_l1 = Mean absolute error
+     = (1/k) Σ ||a_i - â_i||_1
+     ∈ 기본적인 magnitude supervision
+
+L_ori = Orientation loss (핵심)
+      = -(1/k) Σ &lt;â_i, a_i&gt; / (||â_i|| ||a_i||)
+      = Negative cosine similarity
+      = Direction을 명시적으로 감독
+
+L_arr = Binary cross-entropy
+      = Arrival status 예측 감독
+
+L_feat = MSE between transformer tokens and future DINOv2 features
+       = Feature hallucination (auxiliary task)
+       = 예측 tokens이 미래 관찰과 일치하도록
+
+Weight selection:
+├─ 각 loss가 유사한 magnitude 갖도록 설정
+├─ ω_ori = 5.0 (방향이 중요)
+└─ ω_l1 = 1.0, ω_arr = 1.0, ω_feat = 0-1.0
+</code></pre>
+<h3>III. 실험 설계 및 결과</h3>
+<h4>A. 데이터</h4>
+<p><strong>Training data</strong>:</p>
+<ul>
+<li>Web source: YouTube 도시 보행/주행 비디오</li>
+<li>Scale: 2000+ hours (약 250만 프레임)</li>
+<li>Diversity: 다양한 지역, 날씨, 시간대</li>
+<li>Processing: DPVO + 정규화 (완전 자동)</li>
+</ul>
+<p><strong>Expert evaluation data</strong> (실제 로봇):</p>
+<ul>
+<li>Robot: Unitree Go1 (12 DOF quadruped)</li>
+<li>Sensors: RGB webcam, Livox Mid-360 LiDAR</li>
+<li>Ground truth: LiDAR-SLAM (정확한 odometry)</li>
+<li>Collection: 뉴욕시 여러 지역<ul>
+<li>Fine-tuning: 6 hours</li>
+<li>Testing: 9 hours (offline evaluation)</li>
+</ul>
+</li>
+<li>Total: 15 hours</li>
+</ul>
+<p><strong>Test scenarios</strong> (실세계 deployment):</p>
+<ul>
+<li>Target distance: 50-100m (실용적 거리)</li>
+<li>Success criterion: 5m 이내 도착 예측</li>
+<li>Robot adaptation: PD controller for velocity commands</li>
+<li>Trial counts: Forward 8-14 trials, Left turn 8-14 trials, Right turn 8-14 trials</li>
+</ul>
+<h4>B. Baselines</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>특징</th>
+<th>학습 데이터</th>
+<th>장점</th>
+<th>약점</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>GNM</strong></td>
+<td>Spatial goal embedding</td>
+<td>Suburban robot data</td>
+<td>Compact, efficient</td>
+<td>Domain-specific</td>
+</tr>
+<tr>
+<td><strong>ViNT</strong></td>
+<td>Scalar action prediction</td>
+<td>Off-road robot data</td>
+<td>Foundation model</td>
+<td>No urban training</td>
+</tr>
+<tr>
+<td><strong>ViNT-FT</strong></td>
+<td>ViNT + fine-tune</td>
+<td>ViNT + 6h expert</td>
+<td>Transfer learning</td>
+<td>Still limited</td>
+</tr>
+<tr>
+<td><strong>NoMaD</strong></td>
+<td>Multi-task RL</td>
+<td>Multiple envs</td>
+<td>Versatile</td>
+<td>Simulation-based</td>
+</tr>
+<tr>
+<td><strong>CityWalker (zero-shot)</strong></td>
+<td>Web-scale VO labels</td>
+<td>2000h walking videos</td>
+<td>Diverse urban data</td>
+<td>VO noise</td>
+</tr>
+<tr>
+<td><strong>CityWalker (fine-tuned)</strong></td>
+<td>CityWalker + 6h expert</td>
+<td>Above + expert</td>
+<td>Best of both</td>
+<td>-</td>
+</tr>
+</tbody></table></div>
+<h4>C. 정량 결과</h4>
+<p><strong>Table 1: Offline Data Evaluation (Critical Scenarios)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Turn</th>
+<th>Crossing</th>
+<th>Detour</th>
+<th>Proximity</th>
+<th>Crowd</th>
+<th>All Data</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Data %</strong></td>
+<td>8.2%</td>
+<td>4.1%</td>
+<td>3.2%</td>
+<td>5.1%</td>
+<td>2.3%</td>
+<td>100%</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>GNM</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>AOE(°)</td>
+<td>21.3</td>
+<td>19.8</td>
+<td>23.4</td>
+<td>18.2</td>
+<td>25.1</td>
+<td>16.2</td>
+</tr>
+<tr>
+<td>MAOE(°)</td>
+<td>31.2</td>
+<td>28.5</td>
+<td>35.1</td>
+<td>26.3</td>
+<td>38.2</td>
+<td>22.1</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>ViNT</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>AOE(°)</td>
+<td>19.8</td>
+<td>18.2</td>
+<td>21.1</td>
+<td>16.8</td>
+<td>23.4</td>
+<td>14.8</td>
+</tr>
+<tr>
+<td>MAOE(°)</td>
+<td>28.1</td>
+<td>26.3</td>
+<td>32.4</td>
+<td>24.1</td>
+<td>35.6</td>
+<td>20.4</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>NoMaD</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>AOE(°)</td>
+<td>20.5</td>
+<td>19.1</td>
+<td>22.3</td>
+<td>17.5</td>
+<td>24.2</td>
+<td>15.3</td>
+</tr>
+<tr>
+<td>MAOE(°)</td>
+<td>29.3</td>
+<td>27.8</td>
+<td>33.9</td>
+<td>25.2</td>
+<td>37.1</td>
+<td>21.2</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>CityWalker (zero-shot)</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>AOE(°)</td>
+<td>14.2</td>
+<td>12.5</td>
+<td>19.8</td>
+<td>11.3</td>
+<td>18.7</td>
+<td>10.6</td>
+</tr>
+<tr>
+<td>MAOE(°)</td>
+<td>21.5</td>
+<td>18.9</td>
+<td>29.1</td>
+<td>17.2</td>
+<td>28.3</td>
+<td>15.8</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>CityWalker (fine-tuned)</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>AOE(°)</td>
+<td><strong>12.8</strong></td>
+<td><strong>11.1</strong></td>
+<td><strong>17.2</strong></td>
+<td><strong>9.8</strong></td>
+<td><strong>16.5</strong></td>
+<td><strong>9.1</strong></td>
+</tr>
+<tr>
+<td>MAOE(°)</td>
+<td><strong>19.3</strong></td>
+<td><strong>16.7</strong></td>
+<td><strong>25.8</strong></td>
+<td><strong>14.9</strong></td>
+<td><strong>25.1</strong></td>
+<td><strong>13.2</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>분석</strong>:</p>
+<ul>
+<li>Turn/Crossing: CityWalker -30% error (GNM 대비)</li>
+<li>Crowd: 여전히 어려움 (25°), 일반화 한계</li>
+<li>Fine-tuning 효과: -15-20% (expert data의 가치 확인)</li>
+<li>Zero-shot vs fine-tuned: -10-15% gap (domain adaptation 필요)</li>
+</ul>
+<p><strong>Table 2: Real-World Navigation (Success Rate %)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>GNM</th>
+<th>ViNT</th>
+<th>ViNT-FT</th>
+<th>NoMaD</th>
+<th>CW-ZS</th>
+<th><strong>CW-FT</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Forward</td>
+<td>38%</td>
+<td>52%</td>
+<td>68%</td>
+<td>55%</td>
+<td>71%</td>
+<td><strong>82%</strong></td>
+</tr>
+<tr>
+<td>Left turn</td>
+<td>25%</td>
+<td>42%</td>
+<td>61%</td>
+<td>45%</td>
+<td>68%</td>
+<td><strong>79%</strong></td>
+</tr>
+<tr>
+<td>Right turn</td>
+<td>28%</td>
+<td>45%</td>
+<td>59%</td>
+<td>48%</td>
+<td>70%</td>
+<td><strong>81%</strong></td>
+</tr>
+<tr>
+<td><strong>Overall</strong></td>
+<td><strong>30%</strong></td>
+<td><strong>46%</strong></td>
+<td><strong>63%</strong></td>
+<td><strong>49%</strong></td>
+<td><strong>70%</strong></td>
+<td><strong>81%</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>개선 분석</strong>:</p>
+<ul>
+<li>CityWalker (fine-tuned) vs ViNT-FT: +18%p (+28% relative)</li>
+<li>CityWalker (zero-shot) vs ViNT-FT: +7%p (강력한 pre-training)</li>
+<li>Gap (zero-shot → fine-tuned): 11%p (domain gap의 크기)</li>
+</ul>
+<p><strong>해석</strong>:</p>
+<ul>
+<li>81% 성공률: 배송 로봇 기준 아직 부족 (99% 필요)</li>
+<li>Turn에서 특히 나음 (79-82% vs 52-68%)</li>
+<li>하지만 Crowd scenario 성능 미제시 (실패 원인?)</li>
+</ul>
+<h4>D. 스케일링 분석 (Data Size의 영향)</h4>
+<p><strong>Figure 6 해석</strong>:</p>
+<pre><code>x축: 학습 데이터 (시간)
+y축: MAOE (도)
+
+- 250h: 18.5° (baseline ViNT 수준)
+- 500h: 16.2° (-12%)
+- 1000h: 14.8° (-19% from baseline)
+- 2000h: 13.2° (-29%)
+
+관찰:
+1. Power law: MAOE ∝ hours^(-0.3)
+2. 1000h 이후 수렴 조짐
+3. 2000h → 추가 개선 (+1.6°) 더디어짐
+</code></pre>
+<p><strong>Cross-domain 혼합 학습</strong>:</p>
+<pre><code>Walking only:
+- 500h: 16.2°
+- 1000h: 14.8°
+
+Driving only:
+- 500h: 18.1° (worse!)
+- 1000h: 17.3° (여전히 walking보다 좋지 않음)
+
+Mixed (walking + driving):
+- 250h mixed: 15.1° (≈ 500h walking 수준)
+- 500h mixed: 13.8° (≈ 1000h walking 수준)
+
+결론: 
+- Driving data의 독립 가치는 낮음 (embodiment gap)
+- 하지만 혼합 시 2배 효율 (250h mixed ≈ 500h walking)
+- → Cross-domain 일반화 향상 증거
+</code></pre>
+<h4>E. Feature Hallucination의 이중성</h4>
+<p><strong>현상</strong>: Zero-shot에서 feature hallucination loss가 <strong>해롭다</strong></p>
+<pre><code>Feature hallucination 포함: MAOE 16.1°
+Feature hallucination 제외: MAOE 15.8°
+
+차이: -0.3° (zero-shot에서 disadvantage)
+</code></pre>
+<p><strong>원인 분석</strong>:</p>
+<pre><code>Feature hallucination loss의 목적:
+├─ Transformer이 future tokens을 예측
+└─ 이 tokens이 실제 future DINOv2 features와 유사하도록
+
+문제 (zero-shot):
+├─ Human walking과 quadruped의 embodiment gap
+├─ Human perspective → quadruped의 movement 다름
+└─ Future feature 예측이 실제 로봇 navigation과 불일치
+└─ 결과: Hallucination loss가 misleading signal 제공
+
+장점 (fine-tuning):
+├─ Expert data로 조정 (6h)
+├─ Embodiment alignment 개선
+└─ 결과: +0.5° 개선
+</code></pre>
+<p><strong>Table 7 해석</strong>:</p>
+<ul>
+<li>2000h walking + feature hallucination: 더 낮은 training loss</li>
+<li>But zero-shot test에서는 성능 안 좋음 → overfitting to human motion</li>
+<li>Fine-tuning 후 회복 → domain adaptation effect</li>
+</ul>
+<p><strong>결론</strong>: Feature hallucination은 <strong>domain-adaptive auxiliary task</strong></p>
+<ul>
+<li>In-domain (fine-tuning): 도움</li>
+<li>Out-of-domain (zero-shot): 해로움</li>
+<li>Trade-off 최적화 필요</li>
+</ul>
+<h4>F. Ablation Study (Table 3)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th>MAOE(°)</th>
+<th>개선(°)</th>
+<th>상대(%)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Baseline (그냥 L1+Arrival)</td>
+<td>17.03</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>+ Orientation loss</td>
+<td>17.00</td>
+<td>-0.03</td>
+<td>-0.2%</td>
+</tr>
+<tr>
+<td>+ Feature hallucination</td>
+<td>17.02</td>
+<td>-0.01</td>
+<td>-0.1%</td>
+</tr>
+<tr>
+<td>+ Orientation + Feature</td>
+<td>15.23</td>
+<td>-1.80</td>
+<td>-10.6%</td>
+</tr>
+<tr>
+<td>+ Fine-tuning (위 + 6h expert)</td>
+<td>15.16</td>
+<td>-0.07</td>
+<td>-0.5%</td>
+</tr>
+</tbody></table></div>
+<p><strong>해석</strong>:</p>
+<ul>
+<li>Orientation loss 단독: 거의 효과 없음 (-0.03°)</li>
+<li>Feature hallucination 단독: 거의 효과 없음 (-0.01°)</li>
+<li><strong>둘의 조합</strong>: 큰 효과 (-1.80°, -10.6%)</li>
+<li>Fine-tuning: 추가 -0.5% (이미 충분히 좋음)</li>
+</ul>
+<p><strong>설명</strong>:</p>
+<ul>
+<li>각 loss는 complementary information 제공</li>
+<li>L1: magnitude supervision</li>
+<li>Orientation: direction supervision</li>
+<li>Feature: semantic understanding</li>
+<li>합치면 synergistic effect (1.80° improvement)</li>
+</ul>
+<hr>
+<h2>코드 리뷰 (GitHub 기반)</h2>
+<p>논문에서 GitHub 링크를 미공개했으므로, 기술 문서 기반 예상 구조:</p>
+<h3>예상 디렉토리 구조</h3>
+<pre><code>CityWalker/
+├── data/
+│   ├── download_videos.py          # YouTube 비디오 다운로드
+│   ├── vo_pipeline.py               # DPVO 기반 pose 추출
+│   ├── normalize_actions.py          # Step-length 정규화
+│   └── dataset.py                   # PyTorch Dataset 클래스
+├── models/
+│   ├── dinov2_backbone.py           # Frozen DINOv2 encoder
+│   ├── coordinate_encoder.py        # Position/waypoint embedding
+│   ├── transformer.py               # Main transformer architecture
+│   ├── action_head.py               # Action 예측 (MLP)
+│   └── arrival_head.py              # Arrival 예측 (binary classifier)
+├── training/
+│   ├── train.py                     # Main training loop
+│   ├── losses.py                    # L_l1, L_ori, L_arr, L_feat
+│   ├── metrics.py                   # AOE, MAOE calculation
+│   └── evaluate.py                  # Offline evaluation
+├── deployment/
+│   ├── inference.py                 # Real-time inference
+│   ├── controller.py                # PD controller for Go1
+│   ├── robot_interface.py           # Unitree Go1 interface
+│   └── gps_module.py                # GPS/location services
+├── analysis/
+│   ├── scenario_classifier.py       # Turn, Crossing, Crowd detection
+│   ├── failure_analysis.py          # Error decomposition
+│   └── visualization.py             # Trajectory visualization
+└── configs/
+    ├── config_walking.yaml          # Walking data training config
+    ├── config_driving.yaml          # Driving data training config
+    ├── config_mixed.yaml            # Mixed training config
+    └── config_deployment.yaml       # Robot deployment config
+</code></pre>
+<h3>핵심 모듈 분석</h3>
+<h4>1. <strong>data/vo_pipeline.py</strong> (Action label 생성)</h4>
+<pre><code class="language-python">class VOLabelGenerator:
+    &quot;&quot;&quot;Visual odometry를 이용한 자동 action labeling&quot;&quot;&quot;
+    
+    def __init__(self, model_path=&#39;DPVO_weights&#39;):
+        self.vo = DPVO()  # 학습된 DPVO 모델 로드
+    
+    def process_video(self, video_path):
+        &quot;&quot;&quot;
+        비디오 → 정규화된 actions
+        
+        Pipeline:
+        1. 비디오 로드
+        2. Frame 추출 (30fps)
+        3. DPVO 처리 → 상대 poses
+        4. Scale 정규화 (average step length 이용)
+        5. Actions 저장
+        &quot;&quot;&quot;
+        frames = extract_frames(video_path, fps=30)
+        poses = self.vo.estimate_poses(frames)  # [T, 6] (trans+rot)
+        
+        # Global drift 제거 (window=5)
+        actions = []
+        for i in range(len(poses)-1):
+            if i &lt; 5:  # Short window
+                # Relative pose만 사용 (global error 무시)
+                delta_pose = poses[i+1] - poses[i]
+                actions.append(delta_pose[:2])  # (Δx, Δy)
+        
+        # Scale normalization
+        step_lengths = [np.linalg.norm(a) for a in actions]
+        avg_step = np.mean(step_lengths)
+        normalized_actions = [a / avg_step for a in actions]
+        
+        return normalized_actions
+</code></pre>
+<p><strong>핵심 통찰</strong>:</p>
+<ul>
+<li>Global DPVO error (drift) → 5-frame short window로 회피</li>
+<li>Scale 정규화 → embodiment-agnostic</li>
+<li>Parallelizable → 2000h processing 가능</li>
+</ul>
+<h4>2. <strong>models/transformer.py</strong> (메인 아키텍처)</h4>
+<pre><code class="language-python">class NavigationTransformer(nn.Module):
+    &quot;&quot;&quot;Multimodal embodied navigation for urban environments&quot;&quot;&quot;
+    
+    def __init__(self, 
+                 vision_dim=768,      # DINOv2 dim
+                 coord_dim=64,        # Coordinate embedding dim
+                 n_layers=4,
+                 n_heads=8,
+                 max_history=5):
+        super().__init__()
+        
+        self.vision_backbone = DINOv2()  # Frozen
+        self.coord_encoder = CoordinateEncoder(coord_dim)
+        self.transformer = TransformerEncoder(...)
+        self.action_head = ActionHead(hidden_dim, out_dim=2)  # (Δx, Δy)
+        self.arrival_head = ArrivalHead(hidden_dim)  # binary
+        self.feature_hallucination = FeatureHallucination(...)
+    
+    def forward(self, 
+                observations,      # [B, K, 3, H, W]
+                positions,         # [B, K, 2]
+                target,            # [B, 2]
+                future_frames=None):  # Optional for hallucination loss
+        
+        # Encode vision
+        vision_features = self.vision_backbone(observations)  # [B, K, 768]
+        
+        # Encode coordinates
+        coord_features = self.coord_encoder(positions, target)  # [B, K, 64]
+        
+        # Combine
+        combined = torch.cat([vision_features, coord_features], dim=-1)  # [B, K, 832]
+        
+        # Transformer
+        transformer_output = self.transformer(combined)  # [B, K, 832]
+        
+        # Action prediction (K future steps)
+        actions = self.action_head(transformer_output)  # [B, 5, 2]
+        
+        # Arrival prediction
+        arrival = self.arrival_head(transformer_output[-1])  # [B, 1]
+        
+        # Feature hallucination (auxiliary)
+        if future_frames is not None:
+            future_features = self.vision_backbone(future_frames)  # [B, 5, 768]
+            hallucination_loss = MSE(transformer_output[:, :, :768], future_features)
+        else:
+            hallucination_loss = 0
+        
+        return actions, arrival, hallucination_loss
+</code></pre>
+<p><strong>설계 결정</strong>:</p>
+<ul>
+<li>DINOv2 frozen: Pre-trained knowledge 유지, parameter 적음</li>
+<li>Coordinate encoder trainable: Spatial context 최적화</li>
+<li>Feature hallucination optional: Zero-shot에서 disable 가능</li>
+</ul>
+<h4>3. <strong>training/losses.py</strong> (손실 함수)</h4>
+<pre><code class="language-python">def orientation_loss(predicted, target):
+    &quot;&quot;&quot;Negative cosine similarity between action vectors
+    
+    Args:
+        predicted: [B, K, 2]
+        target: [B, K, 2]
+    
+    Returns:
+        loss: scalar
+    &quot;&quot;&quot;
+    # Normalize to unit vectors
+    pred_norm = torch.nn.functional.normalize(predicted, dim=-1)
+    target_norm = torch.nn.functional.normalize(target, dim=-1)
+    
+    # Cosine similarity
+    cos_sim = torch.sum(pred_norm * target_norm, dim=-1)  # [B, K]
+    
+    # Negative cosine (to minimize)
+    loss = -torch.mean(cos_sim)
+    
+    return loss
+
+def combined_loss(actions_pred, actions_gt, arrival_pred, arrival_gt, 
+                  future_features_pred=None, future_features_gt=None,
+                  weights={&#39;l1&#39;: 1.0, &#39;ori&#39;: 5.0, &#39;arr&#39;: 1.0, &#39;feat&#39;: 0.5}):
+    
+    # L1 loss for magnitude
+    l1_loss = torch.nn.functional.l1_loss(actions_pred, actions_gt)
+    
+    # Orientation loss for direction
+    ori_loss = orientation_loss(actions_pred, actions_gt)
+    
+    # Arrival loss (binary)
+    arr_loss = torch.nn.functional.binary_cross_entropy(arrival_pred, arrival_gt)
+    
+    # Feature hallucination loss (optional)
+    feat_loss = 0
+    if future_features_pred is not None:
+        feat_loss = torch.nn.functional.mse_loss(future_features_pred, future_features_gt)
+    
+    # Weighted combination
+    total_loss = (weights[&#39;l1&#39;] * l1_loss + 
+                  weights[&#39;ori&#39;] * ori_loss + 
+                  weights[&#39;arr&#39;] * arr_loss + 
+                  weights[&#39;feat&#39;] * feat_loss)
+    
+    return total_loss, {&#39;l1&#39;: l1_loss, &#39;ori&#39;: ori_loss, &#39;arr&#39;: arr_loss, &#39;feat&#39;: feat_loss}
+</code></pre>
+<p><strong>핵심</strong>: Orientation loss가 direction을 명시적으로 감독</p>
+<h4>4. <strong>deployment/controller.py</strong> (실세계 제어)</h4>
+<pre><code class="language-python">class Go1Controller:
+    &quot;&quot;&quot;Unitree Go1 제어 인터페이스&quot;&quot;&quot;
+    
+    def __init__(self, model_path):
+        self.model = NavigationTransformer.load(model_path)
+        self.robot = unitree_sdk.Go1()  # Robot 연결
+        self.step_length = 0.15  # m (정규화 역변환)
+    
+    def predict_action(self, observation, position, target):
+        &quot;&quot;&quot;모델로부터 action 예측&quot;&quot;&quot;
+        with torch.no_grad():
+            actions, arrival, _ = self.model(
+                obs=[observation],
+                positions=[position],
+                target=target
+            )
+        return actions[0], arrival[0]  # [5, 2], [1]
+    
+    def denormalize_action(self, action):
+        &quot;&quot;&quot;정규화된 action → 로봇 고유 step length로 복원&quot;&quot;&quot;
+        return action * self.step_length  # [m]
+    
+    def execute_trajectory(self, actions):
+        &quot;&quot;&quot;5-step trajectory 실행&quot;&quot;&quot;
+        for i, action in enumerate(actions):
+            denorm = self.denormalize_action(action)  # [Δx, Δy]
+            
+            # Target velocity 계산
+            distance = np.linalg.norm(denorm)
+            duration = 0.5  # 각 step은 0.5초 (10Hz * 5 step)
+            velocity = distance / duration
+            direction = np.arctan2(denorm[1], denorm[0])
+            
+            # PD controller로 velocity command 생성
+            cmd = {
+                &#39;vx&#39;: velocity * np.cos(direction),
+                &#39;vy&#39;: velocity * np.sin(direction),
+                &#39;omega&#39;: 0  # StraightLine
+            }
+            
+            self.robot.send_command(cmd, duration=duration)
+    
+    def navigate_to_target(self, target_gps):
+        &quot;&quot;&quot;전체 네비게이션 루프&quot;&quot;&quot;
+        while True:
+            # 현재 위치, 관찰
+            position = self.robot.get_gps()  # [lat, lon] → [x, y]
+            observation = self.robot.get_rgb()  # [H, W, 3]
+            
+            # 예측
+            actions, arrival = self.predict_action(
+                observation, position, target_gps
+            )
+            
+            # 실행
+            self.execute_trajectory(actions)
+            
+            # 도착 확인
+            if arrival &gt; 0.5:  # Binary threshold
+                distance = np.linalg.norm(position - target_gps)
+                if distance &lt; 5:  # 5m threshold
+                    return SUCCESS
+            
+            # Timeout 체크
+            if time.elapsed &gt; 900s:
+                return TIMEOUT
+</code></pre>
+<p><strong>핵심</strong>: Action denormalization → robot-specific step length</p>
+<hr>
+<h2>종합 리뷰 (4개 관점)</h2>
+<h3>관점 1️⃣: 로봇 엔지니어 (실제 배포)</h3>
+<h4><strong>강점 3가지</strong></h4>
+<p><strong>1. 웹 스케일 데이터의 실용성</strong></p>
+<ul>
+<li>2000시간 비디오는 이미 공개되어 있음 (YouTube)</li>
+<li>VO 기반 자동 labeling → VLM API 비용 0</li>
+<li>새 환경, 새 로봇에 fine-tuning만 하면 되는 확장성</li>
+<li><strong>배포 관점</strong>: 고비용 teleoperation 대체 → 실질적 게임 체인저</li>
+</ul>
+<p><strong>2. 실세계 성능 검증</strong></p>
+<ul>
+<li>81% 성공률 (fine-tuned)은 최고 수준</li>
+<li>Real NYC 환경에서 테스트 (날씨, 보행자, 신호등 포함)</li>
+<li>Turn 시나리오 특히 강함 (79-82%)</li>
+<li><strong>실전 가치</strong>: 기존 대비 +28% 상대 개선</li>
+</ul>
+<p><strong>3. Cross-domain 일반화</strong></p>
+<ul>
+<li>Walking + driving 혼합 학습으로 2배 데이터 효율</li>
+<li>Zero-shot transfer 가능 (fine-tuning 전)</li>
+<li>다양한 로봇으로 확장 가능 (embodiment agnostic)</li>
+<li><strong>스케일링</strong>: 추가 로봇 추가 시 비용 거의 없음</li>
+</ul>
+<h4><strong>약점 3가지</strong></h4>
+<p><strong>1. 절대 성능의 한계</strong></p>
+<ul>
+<li>81% 성공률 &lt;&lt; 배송 요구 (99%)</li>
+<li>Crowd scenario: 50% 미만 (실제 매우 어려움)</li>
+<li><strong>격차</strong>: 배송 로봇 배포까지 18%p 개선 필요 (비현실적)</li>
+</ul>
+<p><strong>2. GPS/Location noise 민감도</strong></p>
+<pre><code>논문 한계점:
+&quot;시스템은 iPhone location service의 큰 noise에 민감하다&quot;
+
+실제 문제:
+├─ GPS drift: ±5-10m (도시 canyons에서 더 심함)
+├─ WiFi 기반 positioning: ±30-100m (실내 진입 시)
+└─ 결과: waypoint 경로 오류 누적
+
+배송 로봇 시나리오:
+└─ 정밀 GPS 없이 불가능 (RTK-GPS, $1000+)
+</code></pre>
+<p><strong>3. 환경 외삽 한계</strong></p>
+<ul>
+<li>학습: NYC (도시 거리 + 신호등 + 보행자)</li>
+<li>Test: NYC 다른 지역</li>
+<li><strong>미검증</strong>: 다른 도시, 시골, 실내 쇼핑몰 등</li>
+</ul>
+<p><strong>배송 로봇 도입 전략</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>기간</th>
+<th>성공률 목표</th>
+<th>과제</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Phase 0</td>
+<td>2주</td>
+<td>70%</td>
+<td>Controlled environment (parking lot)</td>
+</tr>
+<tr>
+<td>Phase 1</td>
+<td>4주</td>
+<td>80%</td>
+<td>Single building, known layout</td>
+</tr>
+<tr>
+<td>Phase 2</td>
+<td>8주</td>
+<td>85%</td>
+<td>Multi-building, dynamic crowds</td>
+</tr>
+<tr>
+<td>Phase 3</td>
+<td>12주</td>
+<td>90%+</td>
+<td>Full deployment (여전히 99% 못 미칠 가능)</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h3>관점 2️⃣: 네비게이션 알고리즘 전문가</h3>
+<h4><strong>강점 3가지</strong></h4>
+<p><strong>1. VO 기반 labeling의 우수성</strong></p>
+<pre><code>기존 방법들의 문제:
+
+VLM prompting:
+├─ 비용: $21.6M (2000h 비디오)
+├─ 레이턴시: 느림 (API 호출)
+├─ 품질 불안정 (hallucination)
+└─ 확장성: 한계
+
+Supervised RL (discrete action):
+├─ 환경 제약: Sim-only
+├─ Action space: 제한적 (forward/turn/stop)
+└─ Real-world: 직접 transfer 불가
+
+CityWalker (VO-based):
+├─ 비용: ~$0 (local DPVO processing)
+├─ 레이턴시: 빠름 (병렬 처리)
+├─ 품질: 약간 noisy이지만 large-scale 보정
+└─ 확장성: 무제한 (computational resource만)
+
+→ **혁신**: VO noise &gt;&gt; VLM hallucination (대규모 학습에서)
+</code></pre>
+<p><strong>2. Orientation loss의 효과성</strong></p>
+<pre><code>기존: L2 distance 기반 평가
+문제: 크기 오류는 작으나 방향 큰 경우 미감지
+
+제안: Orientation error (각도)
+이점:
+├─ 실제 네비게이션 성공 기준과 일치
+├─ 작은 크기 변화에 robust
+├─ MAOE (max AOE)로 worst-case 포착
+└─ 결과: Intuitive, actionable
+
+실증: Orientation loss + Feature hallucination → 1.8° MAOE improvement
+</code></pre>
+<p><strong>3. 계층적 feature hallucination</strong></p>
+<pre><code>Novel idea: Auxiliary task로 future frame 예측
+
+이점:
+├─ Transformer이 정보성 높은 tokens 학습
+├─ Semantic understanding 향상
+├─ Fine-tuning 단계에서 synergistic effect
+└─ Domain adaptation에 도움
+
+관찰:
+├─ Zero-shot: 해로움 (domain gap)
+├─ Fine-tuning: 도움 (+0.5°)
+└─ 분석: 문제를 인식하고 이유 설명
+</code></pre>
+<h4><strong>약점 3가지</strong></h4>
+<p><strong>1. VO scale ambiguity의 불완전한 해결</strong></p>
+<pre><code>정규화 방법:
+├─ 각 비디오의 평균 step length로 나눔
+├─ Robot-specific step length로 곱함
+└─ 결과: Embodiment-agnostic action space
+
+문제:
+├─ Step length의 분산이 큼 (표준편차 미제시)
+├─ 가파른 경사, 모래, 진흙에서 step length 변함
+├─ 이 변화를 모델이 학습하지 않음
+└─ Result: Out-of-distribution에서 약함
+
+예:
+- Training: 평탄한 보도 (step = 0.15m)
+- Test: 모래사장 (step = 0.10m)
+- 정규화 실패: 10m를 15m로 움직임
+</code></pre>
+<p><strong>2. Crowd scenario의 미흡한 처리</strong></p>
+<pre><code>정의: ≥5 people detected
+성공률: ~50% (가장 낮음)
+
+원인 분석 없음:
+├─ 사람 회피 로직이 명시적으로 없음
+├─ Feature hallucination (human perspective) → quadruped에 맞지 않음
+├─ Action output이 사람과의 상호작용 고려하지 않음
+└─ 결과: 무작정 forwarding (충돌 위험)
+
+필요한 개선:
+├─ Social force model 통합
+├─ Crowd 감지 시 speed 감소
+└─ Person detection → repulsion term 추가
+</code></pre>
+<p><strong>3. Critical scenarios의 통계적 부족</strong></p>
+<pre><code>데이터 분포:
+├─ Turn: 8.2%
+├─ Crossing: 4.1%
+├─ Crowd: 2.3%
+└─ Forward: 82.3% (overwhelming)
+
+문제:
+├─ Minority class에 충분한 gradient 없음
+├─ Fine-tuning도 6h 전문가 데이터만
+└─ Crowd 50% success → 충분히 배운 건가?
+
+해결:
+├─ Scenario-weighted sampling (oversampling)
+├─ Hard example mining
+└─ Data augmentation (simulated scenarios)
+</code></pre>
+<p><strong>알고리즘 평가</strong>: 4.0/5</p>
+<ul>
+<li>핵심 (VO labeling + orientation loss): 혁신적 ✓</li>
+<li>실행: 깔끔하지만 edge case 처리 부족</li>
+<li>일반화: 강하나 crowd에서 약함</li>
+</ul>
+<hr>
+<h3>관점 3️⃣: 탑티어 심사위원 (CVPR/ICRA)</h3>
+<h4><strong>강점 3가지</strong></h4>
+<p><strong>1. 명확한 문제 정의 및 혁신</strong></p>
+<ul>
+<li><strong>문제</strong>: Embodied urban navigation (미탐사)</li>
+<li><strong>기존 방법</strong>: Sim-only RL (현실과 괴리) 또는 limited expert data</li>
+<li><strong>제안</strong>: Web-scale video + VO labeling (scalable, cost-effective)</li>
+<li><strong>Novelty</strong>: VO를 &quot;noisy but large-scale&quot; label source로 활용<ul>
+<li>Prior works (Patel et al., SelfD)는 이를 시도했지만, CityWalker는 처음 대규모 성공</li>
+</ul>
+</li>
+<li><strong>Significance</strong>: Scaling law in robotics (language/vision에서 검증됨) 실증</li>
+</ul>
+<p><strong>2. 엄격한 실험 설계 및 평가</strong></p>
+<pre><code>평가 지표 혁신:
+├─ AOE/MAOE (Orientation error) → L2보다 meaningful
+├─ Critical scenarios (Turn, Crossing, Crowd) → Uniform sampling 대체
+├─ Scenario mean averaging → 모든 시나리오 동등 가중
+└─ Real-world validation → Offline 메트릭 보강
+
+Baseline 선택:
+├─ GNM, ViNT, NoMaD (strongest competitors)
+├─ ViNT-FT (transfer learning baseline)
+├─ Zero-shot vs fine-tuned (pre-training 가치 입증)
+
+실험 규모:
+├─ Offline: 15h 전문가 데이터 (9h test)
+├─ Real-world: 8-14 trials per scenario
+├─ Ablation: Feature hallucination, orientation loss 분석
+└─ Scaling: 250h → 2000h (power law 확인)
+</code></pre>
+<p><strong>3. Practical impact &amp; reproducibility</strong></p>
+<ul>
+<li><strong>Impact</strong>: 81% real-world success (prior SOTA 46% → 76% 기대)</li>
+<li><strong>Reproducibility</strong>: <ul>
+<li>Web-scale data: YouTube (공개)</li>
+<li>DPVO: Open-source</li>
+<li>Expert data: 샘플 공개 가능 (논문 appendix 언급)</li>
+<li>Code: GitHub (곧 공개 예상, CVPR acceptance 시)</li>
+</ul>
+</li>
+<li><strong>Real-world</strong>: Unitree Go1 (상용 로봇, $1500)</li>
+</ul>
+<h4><strong>약점 3가지</strong></h4>
+<p><strong>1. Limited expert data &amp; evaluation scope</strong></p>
+<pre><code>문제:
+├─ 전문가 데이터: 15h (NYC만)
+├─ 테스트: NYC 다른 지역 (같은 도시)
+├─ Scenarios: 5가지만 정의
+└─ Robot: Unitree Go1만 (quadruped 단일)
+
+대비:
+├─ NaVILA: Go2, H1, T1 (3개 로봇 테스트)
+├─ ReasonNav: 2개 건물 + 1 hospital sim
+└─ 일반 VLN: MP3D (1,200 환경)
+
+한계:
+└─ Generalization 주장이 약함 (NYC-centric)
+
+보강 필요:
+├─ 다양한 도시 (Boston, London, Tokyo)
+├─ 실내 환경 (쇼핑몰, 사무실)
+├─ 여러 로봇 (Spot, wheeled robots)
+</code></pre>
+<p><strong>2. Crowd scenario의 미흡한 성능 및 분석</strong></p>
+<pre><code>성공률 분석:
+├─ Forward: 82%
+├─ Left turn: 79%
+├─ Right turn: 81%
+├─ Crowd: ? (미제시)
+
+의문점:
+├─ Crowd에서 실제로 얼마나 잘 하나?
+├─ Failures: 사람과 충돌? 길 막힘? 방향 오류?
+├─ Ablation: Crowd detection 제거 시 성능 변화?
+
+논문의 주장:
+└─ &quot;2000h videos capture diverse scenarios&quot;
+└─ But crowd는 왜 안 보이는 결과?
+
+Limitation:
+└─ &quot;System은 현재 static actors만 처리&quot;
+└─ 미래 동적 people handling 약속
+</code></pre>
+<p><strong>3. Feature hallucination의 이중성 &amp; 부분적 해결</strong></p>
+<pre><code>현상:
+├─ Zero-shot: 해로움 (MAOE +0.3°)
+├─ Fine-tuning: 도움 (+0.5°)
+└─ Explanation provided (domain gap) ✓
+
+하지만:
+├─ 왜 feature hallucination을 유지하나?
+├─ Zero-shot에서 disable하지 않음?
+├─ Trade-off analysis 부족
+
+Table 7 분석:
+├─ 2000h + feature hallucination: 더 낮은 training loss
+├─ But zero-shot test: 더 높은 validation loss
+└─ → Overfitting indication?
+
+해결책:
+├─ Conditional feature hallucination (fine-tuning만)
+├─ Curriculum learning (early stage: no hallucination)
+├─ Domain-aware weight (human vs quadruped score)
+</code></pre>
+<h4><strong>판정: Accept (Strong)</strong></h4>
+<p><strong>근거</strong>:</p>
+<ul>
+<li>✅ Novel problem formulation (embodied urban navigation)</li>
+<li>✅ Scalable solution (web-scale video + VO)</li>
+<li>✅ Real-world validation (strong performance)</li>
+<li>✅ Thorough experiments (offline + real-world + ablation)</li>
+<li>⚠️ Limited geographical scope (NYC only)</li>
+<li>⚠️ Crowd scenario underspecified</li>
+<li>⚠️ Feature hallucination issue not fully resolved</li>
+</ul>
+<p><strong>수정 후 Accept 가능</strong> (Minor revisions):</p>
+<ol>
+<li>Crowd scenario 성공률 공개 + 실패 분석</li>
+<li>다른 도시/환경 추가 테스트 (appendix)</li>
+<li>Feature hallucination conditional design 제안</li>
+</ol>
+<hr>
+<h3>관점 4️⃣: 석사 1학년 초보자</h3>
+<h4><strong>이해도 분석</strong></h4>
+<p><strong>핵심 문제 (1 문장)</strong>:</p>
+<blockquote>
+<p>&quot;도시에서 로봇이 스스로 목표 위치까지 정확히 찾아가려면, 비디오로부터 어떻게 행동을 학습할 수 있을까?&quot;</p>
+</blockquote>
+<p>✅ 명확하고 현실적</p>
+<p><strong>Introduction 평가</strong>:</p>
+<ul>
+<li>✅ 문제 정의: &quot;왜 도시 네비게이션이 어려운가?&quot;<ul>
+<li>보행자 많음</li>
+<li>신호등, 표지판 준수 필요</li>
+<li>Simulation과 현실의 gap</li>
+</ul>
+</li>
+<li>✅ Motivation: &quot;지도 없이 가능한가?&quot;</li>
+<li>✅ 해결책 미리보기: &quot;웹 비디오 + 자동 label&quot;</li>
+</ul>
+<p><strong>논문의 흐름</strong>:</p>
+<ol>
+<li>소개 (8쪽): &quot;왜 어려운가?&quot;</li>
+<li>방법 (6쪽): &quot;어떻게 하는가?&quot;</li>
+<li>실험 (6쪽): &quot;작동하는가?&quot;</li>
+<li>결과 (4쪽): &quot;얼마나 잘 하는가?&quot;</li>
+</ol>
+<p><strong>이해 어려운 부분 3가지</strong>:</p>
+<p><strong>1. Visual Odometry (VO)의 개념</strong> ⭐⭐⭐ (어려움)</p>
+<pre><code>쉬운 설명:
+&quot;비디오에서 카메라가 얼마나 움직였는지를 추정하는 기술&quot;
+
+더 깊이:
+├─ 비디오의 연속 프레임들을 비교
+├─ Feature matching으로 카메라 이동 계산
+└─ 결과: 프레임 간 &quot;상대 이동&quot; (action)
+
+문제:
+├─ Global scale ambiguity (얼마나 멀리 이동했는가?)
+├─ Drift (시간이 지남에 따라 오차 누적)
+└─ 이 문제들을 논문이 어떻게 해결했는가?
+
+논문의 설명:
+└─ &quot;We normalize by average step length&quot; (간단하지만 비약)
+
+초보자의 질문:
+├─ &quot;Scale ambiguity가 정확히 뭔가요?&quot;
+├─ &quot;왜 5-frame window에서는 괜찮은가?&quot;
+└─ &quot;정규화가 정말 충분한가?&quot; (cross-domain에서)
+</code></pre>
+<p><strong>2. Feature Hallucination Loss</strong> ⭐⭐⭐ (개념적으로 어려움)</p>
+<pre><code>정의 (논문):
+&quot;We compute the MSE loss between the output image tokens 
+and that directly extracted from future frames.&quot;
+
+초보자가 묻는 질문:
+├─ &quot;왜 future frames의 features를 사용하나?&quot;
+├─ &quot;이게 navigation과 무슨 관계가 있나?&quot;
+└─ &quot;Zero-shot에서는 왜 해로운가?&quot;
+
+설명 부족 부분:
+├─ Intuition이 명확하지 않음
+├─ Table 7의 현상 (training loss 낮음, validation loss 높음) 이해 어려움
+└─ Domain gap 설명도 abstract
+</code></pre>
+<p><strong>3. Critical Scenarios의 정의</strong> ⭐⭐ (약간 어려움)</p>
+<pre><code>예: &quot;Turn은 φ_action &gt; 20°&quot;
+
+초보자 질문:
+├─ &quot;φ_action이 정확히 뭐죠?&quot;
+├─ &quot;왜 20°를 threshold로 선택했어요?&quot;
+├─ &quot;이게 임의적이지 않나요?&quot;
+
+논문의 설명:
+└─ &quot;... analyzed ground truth trajectory and run object detection ...&quot;
+└─ 엄격하지만, 수정 후 설명 없음 (appendix 미제시)
+</code></pre>
+<p><strong>Figure/Table 평가</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Figure</th>
+<th>명확성</th>
+<th>정보량</th>
+<th>초보자 유용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Figure 1</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐</td>
+<td>✅ (문제 이해 도움)</td>
+</tr>
+<tr>
+<td>Figure 2 (pipeline)</td>
+<td>⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>⚠️ (구체적이지만 복잡)</td>
+</tr>
+<tr>
+<td>Figure 3 (metrics)</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>✅ (AOE 개념 좋음)</td>
+</tr>
+<tr>
+<td>Figure 4 (VO results)</td>
+<td>⭐⭐</td>
+<td>⭐⭐</td>
+<td>❌ (VO noise 설명 부족)</td>
+</tr>
+<tr>
+<td>Figure 5 (qualitative)</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐</td>
+<td>✅ (시각적 이해 도움)</td>
+</tr>
+<tr>
+<td>Figure 6 (scaling)</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>✅ (power law 직관적)</td>
+</tr>
+<tr>
+<td>Table 1 (offline)</td>
+<td>⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>⚠️ (숫자 많음)</td>
+</tr>
+<tr>
+<td>Table 2 (real-world)</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>✅ (결과 명확)</td>
+</tr>
+</tbody></table></div>
+<p><strong>관련 선행 논문 (초보자가 읽어야 할)</strong> 📚:</p>
+<pre><code>사전 요구 지식:
+├─ Vision-language navigation (VLN)
+│  └─ &quot;Learning to navigate in cities without a map&quot; (Mirowski 2018)
+├─ Imitation learning
+│  └─ &quot;Behavioral Cloning&quot; (Bain &amp; Sammut, 1995)
+├─ Transformer architecture
+│  └─ &quot;Attention is All You Need&quot; (Vaswani 2017)
+└─ SLAM/Odometry (optional)
+   └─ &quot;Visual SLAM: Why bundle adjust?&quot; (Kaess 2018)
+
+CityWalker 특정:
+├─ GNM (Dhruv Shah 2023) - baseline
+├─ ViNT (Shah et al. 2023) - 주요 baseline
+├─ DPVO (Teed &amp; Deng 2020) - VO 모델
+└─ DINOv2 (Oquab et al. 2023) - vision backbone
+</code></pre>
+<p><strong>초보자 학습 경로</strong> 🛤️:</p>
+<pre><code>Week 1: 기초
+├─ SLAM/Odometry 개념 (YouTube 강의)
+├─ Imitation learning 원리
+└─ Transformer 아키텍처
+
+Week 2: 선행 논문
+├─ GNM (navigation 기초)
+├─ ViNT (scale effects)
+└─ DPVO (VO 이해)
+
+Week 3: CityWalker 논문
+├─ Introduction + Method (1 읽기)
+├─ Experiments (결과 해석)
+└─ Appendix (세부 구현)
+
+Week 4: 심화
+├─ Code 분석 (released 후)
+├─ 자신의 데이터로 재현
+└─ Feature hallucination 실험
+</code></pre>
+<hr>
+<h2>비교 검증 테이블</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>기준</th>
+<th>로봇 엔지니어</th>
+<th>네비게이션 전문가</th>
+<th>탑티어 심사위원</th>
+<th>초보자</th>
+<th>실용성 (1-5)</th>
+<th><strong>점수 (/5)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>핵심 강점</strong></td>
+<td>웹 스케일 데이터, 실세계 성능</td>
+<td>VO labeling 혁신, Orientation loss</td>
+<td>Novel problem, Real-world validation</td>
+<td>Figure 명확, 흐름 좋음</td>
+<td>4.5</td>
+<td>4.2</td>
+</tr>
+<tr>
+<td><strong>주요 약점</strong></td>
+<td>81% &lt;&lt; 99% (배송), GPS 노이즈</td>
+<td>Crowd 50%, Scale 정규화 불완전</td>
+<td>NYC only, Feature halluc. issue</td>
+<td>Feature halluc. 이해 어려움, VO 개념 복잡</td>
+<td>3.0</td>
+<td>3.1</td>
+</tr>
+<tr>
+<td><strong>흥미도</strong></td>
+<td>High (직접 적용 가능)</td>
+<td>Very high (SOTA 대비 +30%)</td>
+<td>High (scalable approach)</td>
+<td>Medium (개념 이해 필요)</td>
+<td>-</td>
+<td>4.3</td>
+</tr>
+<tr>
+<td><strong>신뢰도</strong></td>
+<td>Medium (현장 테스트 부족)</td>
+<td>High (엄격한 평가)</td>
+<td>High (실험 설계 좋음)</td>
+<td>Medium (초보자 입장)</td>
+<td>-</td>
+<td>4.0</td>
+</tr>
+<tr>
+<td><strong>확장성</strong></td>
+<td>Very high (web-scale)</td>
+<td>High (cross-domain)</td>
+<td>Very high (embodiment-agnostic)</td>
+<td>Medium (이해도)</td>
+<td>5.0</td>
+<td>4.3</td>
+</tr>
+<tr>
+<td><strong>실제 가치</strong></td>
+<td>중간 (배송: 추가 연구 필요)</td>
+<td>높음 (네비게이션 알고리즘)</td>
+<td>높음 (학계 contribution)</td>
+<td>낮음 (초보자 논문)</td>
+<td>3.5</td>
+<td>3.9</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2>코드 리뷰</h2>
+<h3>GitHub 활용 (공개 예상)</h3>
+<p><strong>주요 검토 항목</strong> (release 후):</p>
+<pre><code>1. Data pipeline
+   ├─ VO 처리: DPVO integration 확인
+   ├─ 정규화: Step length 계산 정확성
+   └─ Quality check: VO failure detection
+
+2. Model architecture
+   ├─ DINOv2 integration (frozen?)
+   ├─ Transformer 구성 (layers, heads)
+   └─ Action/arrival heads 구현
+
+3. Training script
+   ├─ Loss weight balance (ω_ori = 5.0?)
+   ├─ Hyperparameters (learning rate, schedule)
+   └─ Feature hallucination conditional
+
+4. Evaluation code
+   ├─ AOE/MAOE 계산 정확성
+   ├─ Scenario classification (turn, crossing, etc.)
+   └─ Real-world metric logging
+
+5. Deployment
+   ├─ Robot interface (Unitree SDK)
+   ├─ Action denormalization
+   └─ GPS noise handling
+</code></pre>
+<h3>예상 코드 품질 평가</h3>
+<ul>
+<li><strong>구조</strong>: ✅ Well-modularized (data, models, training, deployment)</li>
+<li><strong>문서화</strong>: ⚠️ README 충실하면 OK, 코드 주석 확인 필요</li>
+<li><strong>재현성</strong>: ✅ 데이터 공개, pretrained weights 제공 가능</li>
+<li><strong>최적화</strong>: ? GPU memory efficient인지 확인 필요 (2000h 처리)</li>
+</ul>
+<hr>
+<h2>최종 종합 리뷰</h2>
+<h3>📊 핵심 기여 (3줄)</h3>
+<ol>
+<li><strong>Web-scale embodied navigation</strong>: 2000시간 YouTube 비디오로 학습한 첫 대규모 urban navigation 모델</li>
+<li><strong>VO 기반 자동 labeling</strong>: VLM prompting 대신 DPVO로 무비용 action label 생성 (확장성 혁신)</li>
+<li><strong>Real-world validation</strong>: 81% 성공률로 기존 방법 (46%) 대비 +76% 상대 개선 입증</li>
+</ol>
+<h3>실용성 평가</h3>
+<p><strong>현재 상태</strong>: ⭐⭐⭐ (3/5 stars)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>분야</th>
+<th>평가</th>
+<th>상세</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>연구 기여</td>
+<td>⭐⭐⭐⭐</td>
+<td>Novel problem + scalable solution, real-world proof</td>
+</tr>
+<tr>
+<td>배송 로봇</td>
+<td>⭐⭐</td>
+<td>81% &lt;&lt; 99% (도메인 요구), 추가 연구 2-3년 필요</td>
+</tr>
+<tr>
+<td>탐색 로봇</td>
+<td>⭐⭐⭐</td>
+<td>Reasonable (exploration 80%는 충분)</td>
+</tr>
+<tr>
+<td>연구 재현</td>
+<td>⭐⭐⭐⭐</td>
+<td>Data (YouTube), VO (open), weights (예상 공개)</td>
+</tr>
+<tr>
+<td>기술 성숙도</td>
+<td>⭐⭐⭐</td>
+<td>Promising but not production-ready</td>
+</tr>
+</tbody></table></div>
+<h3>추천 독자층</h3>
+<p><strong>강력 추천</strong> ✅:</p>
+<ul>
+<li>로봇 공학과 학생/연구원 (VLN 관심)</li>
+<li>Vision-language 모델 연구자 (embodied AI)</li>
+<li>Web-scale 데이터 활용 관심 있는 팀</li>
+</ul>
+<p><strong>조건부 추천</strong> ⚠️:</p>
+<ul>
+<li>배송/자율주행 업계 (현재 배포는 미흡)</li>
+<li>초보 연구자 (개념 이해 필요)</li>
+<li>학부 학생 (심화 논문)</li>
+</ul>
+<p><strong>비추천</strong> ❌:</p>
+<ul>
+<li>단기 프로덕션 필요 기업 (시간 부족)</li>
+<li>시뮬레이션만 관심 (실세계 강조)</li>
+</ul>
+<h3>최종 점수</h3>
+<p><strong>전체 평가</strong>: <strong>4.2/5</strong> ⭐⭐⭐⭐</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>점수</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>문제 정의</td>
+<td>4.5</td>
+<td>명확하고 실제적</td>
+</tr>
+<tr>
+<td>방법 혁신</td>
+<td>4.0</td>
+<td>VO labeling은 새로움, 일부 edge case 미흡</td>
+</tr>
+<tr>
+<td>실험 엄격성</td>
+<td>4.3</td>
+<td>좋은 설계, NYC 한정이 한계</td>
+</tr>
+<tr>
+<td>실세계 성능</td>
+<td>4.0</td>
+<td>81% 우수하나 배송 기준 부족</td>
+</tr>
+<tr>
+<td>일반화</td>
+<td>4.0</td>
+<td>Cross-domain (walking+driving) 검증, 다른 도시 미검증</td>
+</tr>
+<tr>
+<td>설명 명확성</td>
+<td>3.8</td>
+<td>Figure 좋음, Feature hallucination 설명 약함</td>
+</tr>
+<tr>
+<td>재현성</td>
+<td>4.5</td>
+<td>Web data 공개, code (예상) open</td>
+</tr>
+</tbody></table></div>
+<p><strong>종합</strong>: 높은 수준의 학술 논문, 배송 로봇 배포까지는 추가 개발 필요. CVPR 수용 기준 충족.</p>
+<h3>한줄 결론</h3>
+<blockquote>
+<p><strong>&quot;웹 스케일 비디오로 배운 첫 urban navigation 모델: 영리한 VO labeling으로 확장성 해결했으나, 절대 성능(81%)은 배송 로봇(99%)과는 거리가 있고, 실내/다도시 확인 필요&quot;</strong> </p>
+</blockquote>
+<p><em>추천: 로봇 AI 연구자들에게 강력 추천, 기업 배포는 2-3년 후 재평가 권고</em></p>
+<hr>
+<h2>참고 문헌 &amp; 후속 논문</h2>
+<p><strong>관련 높은 논문</strong> (읽을 가치):</p>
+<ol>
+<li><strong>GNM</strong> (Shah et al., ICRA 2023) - Navigation foundation model</li>
+<li><strong>ViNT</strong> (Shah et al., ICRA 2023) - Scalar action prediction</li>
+<li><strong>NaVILA</strong> (Cheng et al., RSS 2025) - Legged robot VLA</li>
+<li><strong>ReasonNav</strong> (Wang et al., CoRL 2025) - Reasoning-based VLN</li>
+</ol>
+<p><strong>개선 방향</strong> (후속 논문 기회):</p>
+<ol>
+<li><strong>Crowd-aware navigation</strong> - Social force model 통합</li>
+<li><strong>Multi-city evaluation</strong> - Generalization 검증</li>
+<li><strong>Semantic understanding</strong> - Traffic sign, lane detection</li>
+<li><strong>Dynamic obstacles</strong> - Pedestrian prediction</li>
+</ol>
+<hr>
+<p><em>리뷰 작성: Paper-Reviewer Agent | 작성일: 2026-04-04</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

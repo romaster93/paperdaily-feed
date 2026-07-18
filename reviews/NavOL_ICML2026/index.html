@@ -1,0 +1,1211 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>NavOL: Navigation Policy with Online Imitation Learning · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">ICML 2026</div>
+    <h1>NavOL: Navigation Policy with Online Imitation Learning</h1>
+    <div class="meta-row">
+      <span class="chip">VLN</span>
+      <span><a href="https://arxiv.org/abs/2605.11762">arXiv:2605.11762</a></span>
+      <span>리뷰 2026-05-13</span>
+      <span>42분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>NavOL: Navigation Policy with Online Imitation Learning — 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: NavOL: Navigation Policy with Online Imitation Learning</li>
+<li><strong>저자 (Authors)</strong>: Xiaofei Wei, Chun Gu, Li Zhang</li>
+<li><strong>소속 (Affiliation)</strong>: Fudan University (School of Data Science); Shanghai Innovation Institute</li>
+<li><strong>발표처 (Published)</strong>: ICML 2026 (International Conference on Machine Learning)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2605.11762">https://doi.org/10.48550/arXiv.2605.11762</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2605.11762">https://arxiv.org/abs/2605.11762</a></li>
+<li><strong>프로젝트 페이지</strong>: <a href="https://logosroboticsgroup.github.io/NavOL/">https://logosroboticsgroup.github.io/NavOL/</a></li>
+<li><strong>GitHub</strong>: <a href="https://github.com/LogosRoboticsGroup/NavOL">https://github.com/LogosRoboticsGroup/NavOL</a> (코드 공개 예정)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>NavOL은 <strong>시각적 실내 네비게이션(Visual Indoor Navigation)</strong>을 위한 새로운 <strong>온라인 모방 학습(Online Imitation Learning)</strong> 패러다임을 제안한다. 핵심 연구 질문은 다음과 같다:</p>
+<blockquote>
+<p>&quot;오프라인 데이터로 학습된 확산 정책(Diffusion Policy)이 분포 이동(Distribution Shift)으로 인해 실제 배포 시 성능이 저하되는 문제를, 시뮬레이션 환경에서의 <strong>온라인 전문가 라벨링</strong>과 <strong>반복적 재학습</strong>으로 어떻게 해결할 수 있는가?&quot;</p>
+</blockquote>
+<p>오프라인 모방 학습의 근본적 한계인 <strong>분포 이동</strong>과 <strong>복합 오차 누적(Compounding Error)</strong> 문제는 로봇 내비게이션 분야의 오랜 과제다. NavOL은 DAgger(Dataset Aggregation) 알고리즘의 핵심 아이디어를 <strong>고차원 생성 모델(확산 정책)</strong> 에 적용하여 이 문제를 해결하며, 결과적으로 NavDP 대비 <strong>26.8%p SR 향상</strong>을 단 <strong>3% 계산 비용</strong>으로 달성한다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 오프라인 모방 학습의 분포 이동 문제</h4>
+<p>오프라인 모방 학습(Offline Imitation Learning, IL)은 전문가(Expert)가 수집한 데이터로 학습하지만, 추론(Rollout) 시 정책이 경험하는 상태 분포는 전문가의 분포와 다르다:</p>
+<pre><code>오프라인 모방 학습의 실패 메커니즘:
+
+학습 시:
+  S^{expert}_0 → S^{expert}_1 → S^{expert}_2 → ... → Goal
+     (전문가가 방문한 상태들의 분포 D^{expert})
+
+추론 시:
+  S^{policy}_0 → S^{policy}_1 → ... (잘못된 방향)
+     (정책이 방문하는 상태 분포 D^{policy} ≠ D^{expert})
+
+오차 누적 (Compounding Error):
+  초기 작은 편차 ε₁ → 더 큰 편차 ε₂ &gt; ε₁ → 돌이킬 수 없는 실패
+  
+  [수학적 표현]
+  E[L(s)] = O(ε T²)  (T: 에피소드 길이, ε: 스텝당 오차율)
+  ↓ T = 100스텝, ε = 0.01이면 오차가 100배 증폭
+</code></pre>
+<p>이 문제는 특히 긴 수평(Long Horizon) 실내 내비게이션에서 치명적이다. 좁은 복도, 문턱, 가구 배치 등에서 발생하는 초기 편차가 기하급수적으로 증폭되어 결국 막힌 구석이나 장애물 충돌로 이어진다.</p>
+<h4>B. 강화학습의 보상 설계 문제</h4>
+<p>강화학습(RL) 기반 내비게이션은 분포 이동 문제를 이론적으로 해결하지만:</p>
+<pre><code>강화학습의 실용적 한계:
+
+1. 보상 함수 설계의 어려움:
+   - 목표 도달 성공은 희소 보상(Sparse Reward)
+   - 중간 보상(Shaping Reward) 설계는 Domain Expertise 필요
+   - 잘못된 보상 설계 → 정책이 예상치 못한 행동 학습 (Reward Hacking)
+
+2. 샘플 비효율성:
+   - 시각적 내비게이션에서 수백만 스텝 필요
+   - DD-PPO의 실패: 복잡한 실내 환경에서 SR ≈ 0% ~ 5%
+
+3. 불안정성:
+   - 하이퍼파라미터에 민감
+   - 탐색(Exploration) vs 활용(Exploitation) 균형 문제
+</code></pre>
+<h4>C. 확산 정책(Diffusion Policy)의 오프라인 학습 한계</h4>
+<p>NavDP(이전 연구)는 확산 정책을 내비게이션에 적용하여 강한 성능을 보였지만, <strong>정적 오프라인 데이터셋</strong>에서만 학습하여 다양한 환경 분포를 커버하는 데 한계가 있다:</p>
+<pre><code>NavDP의 구조적 한계:
+
+학습 데이터:
+  - 3,000개 3D-Front 씬에서 수집된 고정된 전문가 궤적
+  - 특정 씬의 패턴에 과적합(Overfitting) 위험
+  
+추론 시:
+  - 학습 분포 밖의 씬(OOD: Out-of-Distribution)에서 성능 급락
+  - NavDP vs NavOL Benchmark: 42.2% vs 69.0% SR (26.8%p 차이)
+  
+계산 비용:
+  - NavDP 학습: 32× A100 × 32일 = 1,024 GPU-days
+  - 새로운 환경에 적응하려면 전체 재학습 필요
+</code></pre>
+<h3>2.2 핵심 해결책</h3>
+<p>NavOL의 해결책은 세 가지 핵심 통찰에 기반한다:</p>
+<pre><code>NavOL의 세 가지 핵심 통찰:
+
+1. DAgger 원리의 확산 정책 적용:
+   - 정책이 실제 탐색하는 상태에서 전문가 라벨을 수집
+   - 온라인 데이터로 반복적으로 정책 업데이트
+   - → 분포 이동 문제 근본적 해결
+
+2. 특권 전문가 플래너의 온라인 활용:
+   - 시뮬레이션에서는 전역 지도에 접근하는 완벽한 플래너 사용 가능
+   - 정책의 현재 관찰 상태에서 최적 궤적 라벨을 실시간 수집
+   - → 비용 없는 전문가 데이터 자동 생성
+
+3. 확산 정책의 특성 활용:
+   - DDPM의 확률적 샘플링 + 20% 전문가 행동 혼합으로 탐색 유지
+   - NavDP 사전학습 가중치로 초기화 → 계산 효율 극대화
+   - → 32 GPU-days로 69.0% SR 달성 (NavDP의 42.2%)
+</code></pre>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 NavOL 온라인 모방 학습 프레임워크</h3>
+<p>NavOL의 중심은 <strong>롤아웃-업데이트 루프(Rollout-Update Loop)</strong> 이다. 이 루프는 DAgger의 정신을 확산 정책에 맞게 재구성한 것이다:</p>
+<pre><code>NavOL Rollout-Update Loop:
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    ROLLOUT PHASE                                 │
+│                                                                  │
+│  IsaacLab Simulation (256 envs × 50 scenes × 8 GPUs)           │
+│         ↓                                                        │
+│  현재 관찰: o_t = (RGB, Depth) → 정책/전문가 행동 선택          │
+│                                                                  │
+│  확률적 행동 혼합:                                               │
+│  ┌─────────────────────────────────────────────────────┐        │
+│  │  ρ = 0.8 확률: π_θ(o_t, g_t) [정책 행동]           │        │
+│  │  1-ρ = 0.2 확률: π*(p_t, g_t) [전문가 행동]        │        │
+│  └─────────────────────────────────────────────────────┘        │
+│         ↓                                                        │
+│  온라인 버퍼에 (o_t, g_t, a*_t, v&#39;_t) 저장                      │
+│                                                                  │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │  128 스텝/환경
+                           ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                    UPDATE PHASE                                  │
+│                                                                  │
+│  온라인 버퍼에서 배치 샘플링 (batch_size = 2048)                 │
+│         ↓                                                        │
+│  Actor Loss: L_actor = MSE(ε_k, ε_θ(a*_t + ε_k, k))           │
+│  Critic Loss: L_critic = MSE(v&#39;, V_θ(o, a))                    │
+│  Combined: L = L_actor + λ·L_critic                             │
+│         ↓                                                        │
+│  10 에폭 학습, lr = 1e-5                                         │
+│         ↓                                                        │
+│  버퍼 초기화 (이전 이터레이션 데이터 폐기)                        │
+│                                                                  │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+                           ↓ 다음 이터레이션 (~1,000회 반복)
+</code></pre>
+<p><strong>핵심 설계 결정: 버퍼 초기화(Buffer Reset)</strong></p>
+<p>매 이터레이션마다 버퍼를 초기화하는 것은 중요한 설계 결정이다:</p>
+<pre><code>버퍼 초기화의 장단점:
+
+장점:
+  - 현재 정책 분포에 집중 (온-폴리시 학습)
+  - 오래된 데이터의 분포 불일치 방지
+  - 계산 메모리 효율적
+
+단점:
+  - 데이터 효율성 낮음 (각 샘플 1회만 사용)
+  - 희귀한 상황 재방문 보장 불가
+
+→ 256 병렬 환경이 이 단점을 상쇄: 이터레이션당 2,000+ 궤적
+</code></pre>
+<h3>3.2 네비게이션 확산 정책 아키텍처 (NavDP 기반)</h3>
+<p>NavOL은 NavDP의 아키텍처를 사전학습 가중치와 함께 상속한다:</p>
+<pre><code>NavOL 네트워크 아키텍처 전체 구조:
+
+입력층:
+  RGB 스트림:   (H, W, 3)  → DepthAnythingV2 ViT 인코더 → 시각 토큰
+  Depth 스트림: (H, W, 1)  → DepthAnythingV2 ViT 인코더 → 깊이 토큰
+
+특징 융합:
+  [시각 토큰 + 깊이 토큰] → Transformer Decoder → 16개 퓨전 토큰
+
+목표 임베딩:
+  PointNav: (Δx, Δy, Δθ) → MLP → 목표 토큰
+  ImageNav: 목표 이미지 → ViT → 목표 토큰
+  NoGoal:   학습 가능한 Null 토큰
+
+출력층:
+  ┌────────────────────────────────────────────────────────────┐
+  │  궤적 생성기 (Trajectory Generator)                         │
+  │  [퓨전 토큰 + 목표 토큰] → DiT (Diffusion Transformer)     │
+  │  DDPM 스케줄러, 노이즈 제거 → K=24 웨이포인트              │
+  │  출력: {(Δx_i, Δy_i, Δω_i)}_{i=1..24}                     │
+  │                                                            │
+  │  비평 네트워크 (Critic Network)                             │
+  │  [퓨전 토큰 + 궤적 토큰] → 경량 헤드 → 스칼라 안전 점수   │
+  │  (목표 토큰 제외 → 목표 무관(goal-agnostic) 안전 평가)     │
+  └────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4>DepthAnythingV2 ViT 인코더의 역할</h4>
+<pre><code>DepthAnythingV2 선택 이유:
+
+1. 단안(Monocular) 깊이 추정에 특화:
+   - 단일 RGB로 상대적 깊이 추정 가능
+   - 하지만 NavOL은 RGB-D 입력 → 절대 깊이도 활용
+
+2. 두 개의 독립적 ViT 백본:
+   RGB 백본:   색상, 질감, 의미론적 정보 캡처
+   Depth 백본: 기하학적 구조, 장애물 형상 캡처
+   
+   → 융합 시 상호 보완적 정보 제공
+   → 단일 RGB-D 인코더보다 표현력 높음
+
+3. 사전학습 활용:
+   인터넷 규모 데이터로 사전학습된 강력한 시각 표현
+   → 적은 내비게이션 데이터로도 강력한 특징 추출 가능
+</code></pre>
+<h4>DiT (Diffusion Transformer) 기반 궤적 생성</h4>
+<pre><code>DDPM 기반 궤적 생성 과정:
+
+초기화: a_T ~ N(0, I)  [순수 Gaussian 노이즈, T=1000 디퓨전 스텝]
+
+노이즈 제거 루프 (k = T, T-1, ..., 0):
+  ε̂_k = ε_θ(a_k, k, 퓨전토큰, 목표토큰)  [DiT로 노이즈 예측]
+  a_{k-1} = (a_k - β_k·ε̂_k) / √(α_k) + σ_k·z  [역방향 확산]
+  where z ~ N(0, I), α_k = 1-β_k
+
+최종 출력: a_0 = {(Δx_i, Δy_i, Δω_i)}_{i=1..24}
+
+Actor Loss (학습 시):
+  노이즈 추가: a*_k = √(ᾱ_k)·a* + √(1-ᾱ_k)·ε,  ε ~ N(0, I)
+  L_actor = ||ε - ε_θ(a*_k, k, 조건)||²  [원래 노이즈 예측]
+
+확산 정책의 이점:
+  1. 다중 모드(Multi-modal) 분포 표현 가능
+     → 좌우 어느 방향으로도 돌아갈 수 있는 상황에서 양 옵션 모두 유지
+  2. 노이즈 강건성: 센서 노이즈에 덜 민감
+  3. 안정적인 학습: 명시적 행동 회귀보다 학습 안정성 높음
+</code></pre>
+<h3>3.3 특권 전문가 플래너 (Privileged Expert Planner)</h3>
+<p>시뮬레이션의 핵심 장점은 전역 정보에 접근할 수 있는 <strong>특권 플래너(Privileged Planner)</strong> 를 활용할 수 있다는 점이다:</p>
+<pre><code>특권 전문가 플래너 파이프라인:
+
+입력: 전역 점유 격자(Occupancy Grid) + 현재 로봇 위치 + 목표 위치
+처리:
+  Step 1: Navigation Mesh 생성 (장애물 회피 경로 공간)
+  Step 2: A* 또는 Dijkstra 최단 경로 탐색
+  Step 3: 경로 후처리:
+    ├─ 장애물 클리어런스: 0.1m 선탐색(Line-search)으로 안전 간격 확보
+    ├─ 경로 재샘플링: 0.25m 간격으로 균일 샘플링
+    ├─ Cubic Spline 스무딩: 급격한 방향 변화 완화
+    └─ 최소 키포인트: 5개 이상 보장
+출력: {(Δx&#39;_i, Δy&#39;_i, Δω&#39;_i)}_{i=1..24} [24스텝 전문가 궤적]
+
+수학적 표현:
+  a*_t = f&#39;(p_t, g_t) where p_t = 전역 점유 정보 (시뮬에서만 접근 가능)
+</code></pre>
+<p><strong>전문가 플래너의 실용적 가치:</strong></p>
+<pre><code>온라인 데이터 생성 효율:
+
+256 환경 × 50 씬 × 128 스텝/이터레이션 = 1,638,400 스텝/이터레이션
+→ 2,000+ 전문가 궤적/시간 자동 생성
+
+비교:
+  인간 전문가 시연: ~10 궤적/시간 (피로, 일관성 문제)
+  오프라인 데이터 수집: 한 번만 사용, 분포 고정
+  NavOL 온라인: 무한 자동 생성, 현재 정책 분포에 맞춤
+</code></pre>
+<h3>3.4 비평 네트워크 (Critic Network) — 안전 점수 학습</h3>
+<pre><code>안전 점수 설계:
+
+v&#39;_t = -Σ_i 𝕀(d^i_t &lt; d_safe) + α·Σ_i(d^i_{t+1} - d^i_t)
+
+where:
+  d^i_t = i번째 웨이포인트와 가장 가까운 장애물의 거리
+  d_safe = 0.5m (안전 임계 거리)
+  α = 0.1 (스무딩 가중치)
+  𝕀(·) = 지시 함수
+
+의미:
+  첫째 항: 궤적이 장애물에 너무 가까운 웨이포인트 수에 패널티
+  둘째 항: 궤적이 장애물로부터 멀어질수록 보상
+
+Critic Loss:
+  L_critic = MSE(v&#39;, V_θ(o, a))
+  → 관찰 o에서 궤적 a의 안전 점수를 예측
+
+Goal-Agnostic 설계의 이점:
+  목표 정보 없이 순수한 안전성만 평가
+  → 다양한 목표 유형(Point, Image, No-goal)에 범용 적용
+  → 테스트 시 추론 추가 비용 없음 (백본 공유)
+</code></pre>
+<h3>3.5 DAgger vs NavOL: 고차원 확산 정책으로의 확장</h3>
+<p>NavOL이 기존 DAgger를 그대로 적용하지 않고 세 가지 핵심 수정을 도입한 이유:</p>
+<pre><code>표준 DAgger와 NavOL의 차이:
+
+표준 DAgger:
+  매 스텝 전문가 개입: a = a^{expert} (학습 초기), a = a^{policy} (학습 후기)
+  결정론적 정책에 최적화됨
+  
+NavOL 수정 1 — 확률적 혼합:
+  매 스텝: ρ=0.8 확률로 정책, 0.2로 전문가
+  왜?: 확산 정책의 확률적 샘플링과 호환 필요
+       결정론적 전환(DAgger의 β 스케줄)은 확산 모델 학습 불안정 초래
+
+NavOL 수정 2 — 병렬 대규모 시뮬레이션:
+  256 환경 동시 실행 (8 GPU × 32 환경/GPU)
+  왜?: 단일 온라인 쿼리가 느리면 전체 학습 병목
+       대규모 병렬화로 오프라인 데이터 수집 속도와 동등하게 만듦
+
+NavOL 수정 3 — 이전 이터레이션 데이터 폐기:
+  버퍼 매 이터레이션 리셋 (이전 데이터 사용 X)
+  왜?: 확산 정책이 분포 외 행동에 취약
+       오래된 데이터가 현재 정책의 분포와 불일치하면 학습 불안정
+       On-policy 학습이 Off-policy보다 안정적 (확산 모델 특성상)
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인</h3>
+<pre><code>NavOL 전체 시스템 아키텍처:
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                     학습 단계 (Training Phase)                       │
+│                                                                      │
+│  ┌────────────────────────────────────────────────────────────────┐ │
+│  │ IsaacLab Simulator (8× RTX 4090)                               │ │
+│  │                                                                │ │
+│  │  50개 3D-Front 씬 × 256 병렬 환경                             │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐     ┌──────┐                     │ │
+│  │  │ Env1 │ │ Env2 │ │ Env3 │ ... │Env256│                     │ │
+│  │  └──┬───┘ └──┬───┘ └──┬───┘     └──┬───┘                     │ │
+│  │     │        │        │            │                           │ │
+│  │     ↓        ↓        ↓            ↓                           │ │
+│  │  [RGB-D 관찰] → NavOL Policy → 행동 a_t                       │ │
+│  │  [전역 지도]  → Expert Planner → 전문가 궤적 a*_t             │ │
+│  │                                                                │ │
+│  │  80%:20% 혼합으로 실행 → 버퍼에 (o_t, g_t, a*_t, v&#39;_t) 저장  │ │
+│  └────────────────────────┬───────────────────────────────────────┘ │
+│                           │  128 스텝 완료                          │
+│                           ↓                                         │
+│  ┌────────────────────────────────────────────────────────────────┐ │
+│  │ 정책 업데이트 (Policy Update)                                    │ │
+│  │                                                                │ │
+│  │  L = L_actor + λ·L_critic                                     │ │
+│  │  Adam optimizer, lr = 1e-5, 10 에폭                           │ │
+│  │  버퍼 리셋 (이전 데이터 폐기)                                  │ │
+│  └────────────────────────┬───────────────────────────────────────┘ │
+│                           │  ~1,000 이터레이션                      │
+└───────────────────────────┼─────────────────────────────────────────┘
+                            │
+                            ↓
+┌─────────────────────────────────────────────────────────────────────┐
+│                     배포 단계 (Deployment Phase)                     │
+│                                                                      │
+│  실제 로봇: Unitree Go2 (학습 시 Dingo wheeled → 제로샷 전이)       │
+│                                                                      │
+│  센서: RealSense D435i (RGB-D)                                       │
+│  연산: 온보드 GPU                                                    │
+│                                                                      │
+│  추론 파이프라인:                                                    │
+│  RGB-D → ViT 인코더 → 퓨전 토큰 → DiT 디노이징 → 24 웨이포인트    │
+│                              ↓                                       │
+│                         MPC 추적기 → 로봇 제어 명령                  │
+│                                                                      │
+│  테스트 환경: Office (8/10), Gym (7/10), Corridor (10/10)           │
+└─────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 데이터 흐름 상세</h3>
+<pre><code>씬 준비 파이프라인:
+
+3D-Front 데이터셋 (원본 GLB 형식)
+    │
+    ↓ BlenderProc
+재질 텍스처링 (기하학 변경 없음)
+    │
+    ↓ 메시 처리
+법선 보정, 내비게이션 가능성 검증
+    │
+    ↓ 좌표 정규화
+높이 정규화 + 수직 씬 스태킹
+    │
+    ↓ USD 변환
+IsaacLab 호환 형식
+    │
+    ↓ 학습 씬: 50개 (학습용)
+    └── 평가 씬: 8개 (홀드아웃, 완전 미공개)
+
+전문가 궤적 생성 속도:
+  2,000+ 궤적/시간
+  평균 400+ 스텝/궤적
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<p><strong>학습 데이터:</strong></p>
+<ul>
+<li><strong>3D-Front</strong>: 가정용 가구와 인테리어가 포함된 고품질 합성 실내 씬</li>
+<li>학습용 50개 씬 (BlenderProc으로 재질 처리)</li>
+<li>총 경험: 100만 미터 이상의 내비게이션 (온라인 학습 중 누적)</li>
+</ul>
+<p><strong>평가 벤치마크:</strong></p>
+<ol>
+<li><strong>NavDP 벤치마크</strong> (기존): 4개 씬 (Cluttered-Easy, Cluttered-Hard, Intern-Home, Intern-Commercial), 학습 씬과 다른 환경</li>
+<li><strong>NavOL 벤치마크</strong> (신규 제안): 8개 홀드아웃 3D-Front 씬, 씬당 100개 고정 출발-목표 쌍 = 총 800 에피소드</li>
+</ol>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>지표</th>
+<th>의미</th>
+<th>수식</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>SR (Success Rate)</strong></td>
+<td>1m 이내에서 목표 도달 비율</td>
+<td>성공 에피소드 / 전체 에피소드</td>
+</tr>
+<tr>
+<td><strong>SPL (Success weighted by Path Length)</strong></td>
+<td>경로 효율성 가중 성공률</td>
+<td>SR × (최적 경로 / 실제 경로)</td>
+</tr>
+</tbody></table></div>
+<p>SPL은 단순 성공률보다 경로 효율성을 추가로 평가하여, 목표에 도달하더라도 비효율적인 경로를 사용하면 낮은 점수를 받는다.</p>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<h4>NavDP 벤치마크 (Table 1) — 4개 씬 비교</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>C-Easy SR</th>
+<th>C-Easy SPL</th>
+<th>C-Hard SR</th>
+<th>C-Hard SPL</th>
+<th>I-Home SR</th>
+<th>I-Home SPL</th>
+<th>I-Com SR</th>
+<th>I-Com SPL</th>
+<th><strong>mSR</strong></th>
+<th><strong>mSPL</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DD-PPO</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.4</td>
+<td>0.4</td>
+<td>5.3</td>
+<td>5.2</td>
+<td>1.4</td>
+<td>1.4</td>
+</tr>
+<tr>
+<td>iPlanner</td>
+<td>89.4</td>
+<td>88.4</td>
+<td>80.3</td>
+<td>78.8</td>
+<td>43.0</td>
+<td>40.6</td>
+<td>54.6</td>
+<td>52.8</td>
+<td>66.8</td>
+<td>65.1</td>
+</tr>
+<tr>
+<td>ViPlanner</td>
+<td>80.2</td>
+<td>80.1</td>
+<td>64.7</td>
+<td>64.5</td>
+<td>45.0</td>
+<td>43.2</td>
+<td>63.7</td>
+<td>61.9</td>
+<td>63.4</td>
+<td>62.4</td>
+</tr>
+<tr>
+<td>NavDP</td>
+<td>92.3</td>
+<td>90.5</td>
+<td>87.4</td>
+<td>84.9</td>
+<td>60.0</td>
+<td>55.6</td>
+<td>71.4</td>
+<td>68.2</td>
+<td>77.8</td>
+<td>74.8</td>
+</tr>
+<tr>
+<td><strong>NavOL</strong></td>
+<td><strong>95.6</strong></td>
+<td><strong>92.0</strong></td>
+<td><strong>92.0</strong></td>
+<td><strong>87.3</strong></td>
+<td>58.8</td>
+<td>54.9</td>
+<td><strong>75.2</strong></td>
+<td><strong>71.1</strong></td>
+<td><strong>80.4</strong></td>
+<td><strong>76.3</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>Key Observations:</strong></p>
+<ul>
+<li>NavOL은 4개 씬 중 3개에서 NavDP를 초과 (C-Easy: +3.3, C-Hard: +4.6, I-Com: +3.8)</li>
+<li>Intern-Home에서 약간 낮은 성능 (58.8 vs 60.0): 학습 씬 분포 불일치 때문으로 분석</li>
+<li>DD-PPO (RL 기반): 복잡한 실내 환경에서 거의 실패 → RL의 한계 확인</li>
+</ul>
+<h4>NavOL 벤치마크 (Table 2) — 8개 홀드아웃 씬</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th><strong>mSR</strong></th>
+<th><strong>mSPL</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>iPlanner</td>
+<td>18.7</td>
+<td>18.4</td>
+</tr>
+<tr>
+<td>ViPlanner</td>
+<td>33.0</td>
+<td>31.5</td>
+</tr>
+<tr>
+<td>NavDP</td>
+<td>42.2</td>
+<td>37.7</td>
+</tr>
+<tr>
+<td><strong>NavOL</strong></td>
+<td><strong>69.0</strong></td>
+<td><strong>63.7</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>NavOL이 NavDP 대비 +26.8 SR, +26.0 SPL 향상!</strong></p>
+<p>이 벤치마크는 더 다양하고 어려운 환경 분포를 포함하며, NavOL의 온라인 학습이 분포 이동에 얼마나 강인한지를 명확히 보여준다.</p>
+<h4>계산 효율성 비교 (Table 5)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>설정</th>
+<th>계산량</th>
+<th>mSR (NavOL Bench)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NavDP (원본)</td>
+<td>1,024 GPU-days (32× A100 × 32일)</td>
+<td>42.2%</td>
+</tr>
+<tr>
+<td>NavOL from scratch</td>
+<td>16 GPU-days (8× RTX 4090 × 2일)</td>
+<td>48.3%</td>
+</tr>
+<tr>
+<td><strong>NavOL w/ NavDP init</strong></td>
+<td><strong>32 GPU-days 합계</strong></td>
+<td><strong>69.0%</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>NavOL은 NavDP 대비 3% 계산 비용으로 26.8%p 더 높은 성능!</strong></p>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<pre><code>실험 설정:
+  로봇: Unitree Go2 (사족보행 로봇)
+  센서: RealSense D435i (RGB-D)
+  학습 로봇: Dingo (바퀴형) → 완전 제로샷 임체형 전이!
+  평가: 시나리오당 10회 시도
+
+결과 비교:
+  시나리오     NavDP    NavOL    향상
+  ─────────────────────────────────
+  Office      4/10     8/10    +40%p
+  Gym         2/10     7/10    +50%p
+  Corridor    2/10    10/10    +80%p ⭐
+
+총 성공률:
+  NavDP:  8/30 = 26.7%
+  NavOL: 25/30 = 83.3% (+56.7%p)
+</code></pre>
+<p><strong>크로스-임체형(Cross-Embodiment) 일반화:</strong></p>
+<p>학습 로봇(Dingo 바퀴형)과 테스트 로봇(Unitree Go2 사족보행) 사이의 완전한 제로샷 전이는 NavOL의 시각 표현 학습이 로봇 형태에 독립적임을 보여준다. RGB-D 입력만을 사용하기 때문에 로봇 키네마틱스와 무관한 범용적 시각 내비게이션 정책을 학습할 수 있다.</p>
+<h3>5.5 에이블레이션 연구 (Ablation Studies, Table 4)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>설정</th>
+<th>mSR</th>
+<th>mSPL</th>
+<th>분석</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1개 씬 학습</td>
+<td>57.8</td>
+<td>53.4</td>
+<td>씬 다양성 부족으로 급격한 성능 저하</td>
+</tr>
+<tr>
+<td>10개 씬 학습</td>
+<td>64.8</td>
+<td>60.5</td>
+<td>점진적 향상, 50개 씬이 최적</td>
+</tr>
+<tr>
+<td>T=8 롤아웃</td>
+<td>67.9</td>
+<td>63.1</td>
+<td>짧은 롤아웃도 충분히 효과적</td>
+</tr>
+<tr>
+<td>T=32 롤아웃</td>
+<td>68.5</td>
+<td>61.6</td>
+<td>128과 유사한 성능</td>
+</tr>
+<tr>
+<td>ρ=1.0 (전문가 없음)</td>
+<td>43.9</td>
+<td>41.4</td>
+<td><strong>전문가 혼합 제거 시 -25.1%p → 가장 중요한 요소</strong></td>
+</tr>
+<tr>
+<td>사전학습 없음</td>
+<td>48.3</td>
+<td>45.5</td>
+<td>사전학습 초기화 없이 -20.7%p</td>
+</tr>
+<tr>
+<td>경로 후처리 없음</td>
+<td>64.2</td>
+<td>59.2</td>
+<td>스무딩/클리어런스의 기여 확인</td>
+</tr>
+<tr>
+<td>카메라 랜덤화 없음</td>
+<td>66.0</td>
+<td>59.2</td>
+<td>Sim-to-Real 전이에 기여</td>
+</tr>
+<tr>
+<td>비평 없음</td>
+<td>67.1</td>
+<td>61.6</td>
+<td>안전 점수의 소폭 기여</td>
+</tr>
+<tr>
+<td><strong>전체 NavOL</strong></td>
+<td><strong>69.0</strong></td>
+<td><strong>63.7</strong></td>
+<td></td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 통찰:</strong></p>
+<ol>
+<li><strong>전문가 혼합(ρ=0.8/0.2)</strong> 이 가장 중요한 요소 (-25.1%p 없을 시)</li>
+<li><strong>사전학습 초기화</strong> 가 두 번째로 중요 (-20.7%p 없을 시)</li>
+<li><strong>씬 다양성</strong> 이 세 번째로 중요 (1씬: 57.8%, 50씬: 69.0%)</li>
+</ol>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>기여 1: DAgger-확산 정책 통합 (최초 사례)</h3>
+<p>기존 DAgger 연구들은 결정론적 정책(Deterministic Policy)에 초점을 맞췄다. NavOL은 처음으로 <strong>생성 모델(확산 정책)에 DAgger를 성공적으로 적용</strong>한다:</p>
+<pre><code>기여 1의 기술적 세부:
+
+기존 DAgger [Ross et al., 2011]:
+  결정론적 정책 π(s) → 단일 행동
+  β_i 스케줄로 전문가 개입 비율 감소
+  상태 공간이 낮을 때 효과적
+
+NavOL의 확장:
+  확산 정책 π(s): 궤적 분포에서 샘플링 → 24차원 웨이포인트
+  고정 혼합 비율 ρ=0.8 (스케줄 불필요 → 안정성 향상)
+  대규모 병렬 시뮬레이션으로 계산 병목 해결
+  
+핵심 혁신: 확산 모델의 확률적 특성이 탐색-활용 균형을 자연스럽게 제공
+</code></pre>
+<h3>기여 2: 새로운 NavOL 평가 벤치마크</h3>
+<pre><code>8개 홀드아웃 씬의 중요성:
+  - 학습 씬과 완전히 분리된 OOD 평가
+  - 씬당 100개 고정 에피소드 → 재현 가능한 평가
+  - 기존 NavDP 벤치마크(4개 씬)보다 더 다양하고 어려움
+  - 향후 내비게이션 연구의 표준 벤치마크로 제안
+</code></pre>
+<h3>기여 3: 계산 효율성의 극적 개선</h3>
+<pre><code>비용-성능 파레토 프론티어 이동:
+
+              성능(mSR)
+                  ↑
+            70%   |                    ★ NavOL (32 GPU-days)
+                  |
+            45%   |    ○ NavOL from scratch (16 GPU-days)
+                  |
+            42%   |                                  ○ NavDP (1024 GPU-days)
+                  |
+                  └────────────────────────────── 계산 비용
+                        16         32           1024
+
+NavOL은 NavDP 대비 성능 +64%p 향상을 계산 비용 3% 만에 달성
+</code></pre>
+<h3>기여 4: 크로스-임체형 제로샷 전이 증명</h3>
+<p>바퀴형 로봇으로 학습한 정책이 사족보행 로봇에서 제로샷으로 83.3% 성공률 달성. 이는 RGB-D 기반 시각 내비게이션의 <strong>임체 독립성(Embodiment Independence)</strong> 을 실증적으로 증명한다.</p>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 핵심 하이퍼파라미터</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>값</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>웨이포인트 예측 수평 K</td>
+<td>24 스텝</td>
+<td>0.5초 × 24 = 12초 미래 예측</td>
+</tr>
+<tr>
+<td>전문가 혼합 확률 ρ</td>
+<td>0.8</td>
+<td>80% 정책, 20% 전문가</td>
+</tr>
+<tr>
+<td>안전 거리 임계 d_safe</td>
+<td>0.5 m</td>
+<td>장애물 클리어런스 기준</td>
+</tr>
+<tr>
+<td>스무딩 가중치 α</td>
+<td>0.1</td>
+<td>비평 네트워크 궤적 스무딩</td>
+</tr>
+<tr>
+<td>학습 에폭/이터레이션</td>
+<td>10</td>
+<td>과적합 방지를 위한 제한</td>
+</tr>
+<tr>
+<td>배치 크기</td>
+<td>2,048</td>
+<td>대규모 병렬 학습 지원</td>
+</tr>
+<tr>
+<td>학습률</td>
+<td>1e-5</td>
+<td>미세 조정용 소규모 학습률</td>
+</tr>
+<tr>
+<td>롤아웃 스텝 T</td>
+<td>128</td>
+<td>이터레이션당 환경당 스텝 수</td>
+</tr>
+<tr>
+<td>병렬 환경 수</td>
+<td>256</td>
+<td>8 GPU × 32 환경/GPU</td>
+</tr>
+<tr>
+<td>GPU</td>
+<td>8× RTX 4090</td>
+<td>총 16 GPU-days 온라인 학습</td>
+</tr>
+<tr>
+<td>학습 씬 수</td>
+<td>50</td>
+<td>3D-Front 선택 씬</td>
+</tr>
+<tr>
+<td>총 이터레이션</td>
+<td>~1,000</td>
+<td>수렴까지 반복 수</td>
+</tr>
+</tbody></table></div>
+<h3>7.2 씬 준비 파이프라인 상세</h3>
+<pre><code class="language-python"># 씬 준비 의사 코드 (실제 구현 기반)
+
+# 1. 3D-Front 원본 로드
+scene = load_3dfront_scene(scene_id)  # GLB 형식
+
+# 2. BlenderProc으로 재질 처리
+blenderproc.load_and_retexture(scene)
+# ↳ 기하학 구조 변경 없음, 텍스처만 교체
+# ↳ PBR 재질 적용으로 사실적 렌더링
+
+# 3. 내비게이션 가능성 처리
+mesh_fix_normals(scene)  # 법선 벡터 보정
+normalize_height(scene)  # 바닥 높이 = 0으로 정규화
+stack_vertically(scene)  # 여러 씬을 수직 배치
+
+# 4. IsaacLab USD 변환
+export_to_usd(scene, output_path)
+
+# 5. 내비게이션 메시 생성 (전문가 플래너용)
+navmesh = generate_navmesh(scene, 
+    agent_radius=0.25,       # 로봇 반경
+    agent_height=1.5,        # 로봇 높이
+    step_height=0.2)         # 장애물 등반 높이
+</code></pre>
+<h3>7.3 실시간 추론 파이프라인</h3>
+<pre><code>배포 시 추론 과정:
+
+1. RGB-D 입력 전처리:
+   RGB: (H, W, 3) → 정규화 → DepthAnythingV2 ViT
+   Depth: (H, W, 1) → 정규화 → DepthAnythingV2 ViT
+   
+2. 특징 추출 및 융합:
+   [RGB 토큰 + Depth 토큰] → Transformer Decoder → 16 퓨전 토큰
+   
+3. 목표 임베딩:
+   PointNav: (Δx, Δy, Δθ) → MLP → 목표 토큰
+   
+4. DiT 확산 디노이징:
+   a_T ~ N(0, I) [노이즈 초기화]
+   반복 k = T..0: ε̂ = DiT(a_k, k, 퓨전토큰, 목표토큰)
+   최종: a_0 = 24 웨이포인트
+   
+5. MPC 추적:
+   24 웨이포인트 → 속도/각속도 명령 → 로봇 제어
+
+추론 주파수: 실시간 제어 주기 (로봇 제어 루프와 동기화)
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 분석</h3>
+<pre><code>NavOL의 확장 가능성:
+
+1. 씬 다양성 확장:
+   현재: 50개 씬 → 성능: 69.0% mSR
+   이론적 상한: 더 많은 씬 → 더 높은 OOD 일반화
+   
+   에이블레이션 결과:
+   1씬 → 10씬 → 50씬: 57.8% → 64.8% → 69.0%
+   로그 선형 성장 패턴 → 수확 체감 시작
+
+2. 학습 반복 수 확장:
+   1,000 이터레이션에서 수렴 관찰
+   추가 이터레이션의 한계 효용 불명확
+
+3. 병렬 환경 확장:
+   256 → 더 많은 병렬 환경: 선형 데이터 생성 속도 향상
+   GPU 메모리 제약이 실용적 상한
+
+4. 더 강력한 사전학습 모델:
+   NavDP → 더 큰 NavDP (더 많은 씬으로 학습): 더 나은 초기화
+   → NavOL 온라인 학습의 시작점 향상
+</code></pre>
+<h3>8.2 한계점 (Limitations)</h3>
+<pre><code>NavOL의 현재 한계:
+
+1. 씬 준비 파이프라인 복잡성:
+   BlenderProc + IsaacSim 변환이 일회성이지만 복잡
+   새로운 씬 추가 시 전처리 오버헤드 존재
+   
+2. 낮은 장애물 인식 한계:
+   카메라 높이가 낮은 경우 바닥 장애물 놓침
+   실내 케이블, 문지방 등 저고도 장애물에 취약
+   
+3. 씬 경계 패턴 학습:
+   시뮬레이션의 벽/경계를 통로로 인식하는 버그 패턴 확인
+   실세계 일반화에 잠재적 위험
+
+4. 동적 장애물 미지원:
+   현재 구현은 정적 장애물만 고려
+   동적 환경(사람, 움직이는 물체)에서 성능 저하 예상
+
+5. 계산 요구사항:
+   초기 NavDP 사전학습: 1,024 GPU-days (A100)
+   NavOL 온라인: 16 GPU-days (RTX 4090)
+   연구실 수준에서 접근 가능하지만 개인/소규모 팀에는 부담
+
+6. 목표 표현의 제한:
+   PointNav (GPS-like), ImageNav만 지원
+   자연어 지시어(VLN 방식) 직접 지원 없음
+</code></pre>
+<h3>8.3 향후 연구 방향</h3>
+<pre><code>유망한 확장 방향:
+
+1. 언어 지시어 통합:
+   목표 임베딩 레이어를 LLM 출력으로 교체
+   &quot;복도 끝에서 오른쪽으로 돌아서 세 번째 문으로 들어가&quot;
+   → 완전한 VLN 시스템으로 진화
+
+2. 동적 환경 적응:
+   온라인 학습 중 동적 장애물 시나리오 포함
+   → 현실 세계 소셜 내비게이션으로 확장
+
+3. 더 효율적인 온라인 학습:
+   경험 재플레이(Experience Replay)로 데이터 효율성 향상
+   우선 순위 경험 리플레이(PER)로 어려운 케이스 집중
+
+4. 실제 로봇 피드백 통합:
+   순수 시뮬레이션 학습에서 실세계 피드백 루프 추가
+   → Sim-to-Real 갭 추가 감소
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>NavDP (ICRA 2026)</th>
+<th>LoGoPlanner (ICRA 2026)</th>
+<th>StreamVLN (ICRA 2026)</th>
+<th><strong>NavOL (ICML 2026)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>학습 방법</strong></td>
+<td>오프라인 IL</td>
+<td>오프라인 IL + 로컬라이제이션</td>
+<td>오프라인 IL + 스트리밍</td>
+<td><strong>온라인 IL (DAgger)</strong></td>
+</tr>
+<tr>
+<td><strong>분포 이동 대응</strong></td>
+<td>❌ 없음</td>
+<td>⚠️ 기하학 기반 보정</td>
+<td>⚠️ SlowFast 컨텍스트</td>
+<td><strong>✅ 온라인 재학습</strong></td>
+</tr>
+<tr>
+<td><strong>mSR (공통 벤치)</strong></td>
+<td>77.8%</td>
+<td>미공개</td>
+<td>미공개</td>
+<td><strong>80.4%</strong></td>
+</tr>
+<tr>
+<td><strong>mSR (OOD 벤치)</strong></td>
+<td>42.2%</td>
+<td>미공개</td>
+<td>미공개</td>
+<td><strong>69.0% (+26.8%p)</strong></td>
+</tr>
+<tr>
+<td><strong>실세계 검증</strong></td>
+<td>✅ 다중 로봇</td>
+<td>✅ LeKiwi</td>
+<td>❌ 없음</td>
+<td><strong>✅ Unitree Go2</strong></td>
+</tr>
+<tr>
+<td><strong>크로스-임체형</strong></td>
+<td>✅</td>
+<td>⚠️ 제한적</td>
+<td>❌</td>
+<td><strong>✅ 바퀴→사족</strong></td>
+</tr>
+<tr>
+<td><strong>학습 계산 비용</strong></td>
+<td>1,024 GPU-days</td>
+<td>유사</td>
+<td>유사</td>
+<td><strong>32 GPU-days</strong></td>
+</tr>
+<tr>
+<td><strong>코드 공개</strong></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>⚠️ 예정</td>
+</tr>
+<tr>
+<td><strong>언어 지시어</strong></td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td><strong>❌</strong></td>
+</tr>
+<tr>
+<td><strong>학회 수준</strong></td>
+<td>ICRA 2026</td>
+<td>ICRA 2026</td>
+<td>ICRA 2026</td>
+<td><strong>ICML 2026</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>NavOL의 강점:</strong></p>
+<pre><code>강점 1: OOD 일반화 능력
+  - 온라인 학습이 새로운 씬 분포에 자연스럽게 적응
+  - NavDP 대비 +26.8%p (OOD 벤치), NavDP는 42.2%에서 정체
+  
+강점 2: 계산 효율성
+  - 1,024 → 32 GPU-days: 32배 효율 향상
+  - 연구 재현성 대폭 향상 (RTX 4090급으로 가능)
+
+강점 3: 학습 로봇 무관 배포
+  - Dingo 학습 → Go2 배포: 완전한 크로스-임체형 전이
+  - 로봇 종류별 데이터 수집 불필요
+
+강점 4: 이론적 토대
+  - DAgger의 수렴 보장이 확산 정책에도 부분적으로 유효
+  - 온-폴리시 학습의 안정성 이론적 근거 있음
+</code></pre>
+<p><strong>NavOL의 약점:</strong></p>
+<pre><code>약점 1: 시뮬레이션 의존성
+  - 시뮬레이터 접근 필수 (NavDP도 같은 문제지만 한 번만 필요)
+  - 실세계 피드백 루프 없음 (Sim-to-Real 갭 잔존)
+
+약점 2: 자연어 지시어 미지원
+  - StreamVLN, ReasonNav 등 VLN 특화 모델과 달리
+  - 포인트/이미지 목표만 지원
+  - 실제 사용자 인터페이스로서 한계
+
+약점 3: 코드 미공개
+  - 재현 어려움 (공개 예정이지만 현재 접근 불가)
+  - StreamVLN, NavDP는 이미 GitHub 공개
+
+약점 4: 씬 준비 복잡성
+  - BlenderProc + IsaacSim 변환 파이프라인
+  - 새로운 도메인 적용 시 상당한 엔지니어링 노력 필요
+</code></pre>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>실제 로봇 배포 관점에서의 평가:
+
+시나리오 1: 물류 창고 자율 내비게이션
+  NavOL: ✅ 적합 (정적 선반 환경, PointNav 가능)
+  제한: 동적 지게차/사람 회피 불가 → 추가 모듈 필요
+
+시나리오 2: 가정 로봇 서비스
+  NavOL: ⚠️ 부분 적합 (방 탐색은 가능)
+  제한: 언어 지시어 없음 (&quot;부엌에 가줘&quot;를 이해 못함)
+
+시나리오 3: 소방/재난 로봇
+  NavOL: ⚠️ 부분 적합 (사족보행 Zero-Shot 전이 강점)
+  제한: 동적/비정형 환경에서 성능 저하 위험
+
+시나리오 4: 병원 환자 안내 로봇
+  NavOL: ❌ 직접 적용 어려움
+  제한: 사람 인식, 언어 대화, 동적 환경 모두 미지원
+
+가장 적합한 시나리오:
+  반구조적 정적 실내 환경 + 좌표/이미지 기반 목표 설정
+  → 현재 수준으로 상업적 적용 가능 (안전 레이어 추가 전제)
+</code></pre>
+<h3>9.4 연구 방향성 평가</h3>
+<pre><code>NavOL이 제시하는 연구 방향:
+
+패러다임 전환:
+  오프라인 IL (정적 데이터) → 온라인 IL (동적 데이터 생성)
+
+이 방향의 의의:
+  1. 학습 데이터의 무한 확장 가능성
+  2. 현재 정책의 약점을 집중 공략하는 커리큘럼
+  3. 계산 효율성과 성능의 동시 개선
+
+기존 리뷰 논문과의 방향성 비교:
+  NavDP, LoGoPlanner, StreamVLN: 네트워크 아키텍처 혁신에 집중
+  NavOL: **학습 알고리즘 혁신**에 집중 → 상호 보완적
+
+VLN 필드에서의 위치:
+  단순 포인트 내비게이션 → VLN 방향으로 언어 추가가 자연스러운 다음 단계
+  현재 연구는 내비게이션 기반 능력의 강력한 기반을 마련
+</code></pre>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li>Ross, S., Gordon, G., Bagnell, D. (2011). A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning. <em>AISTATS 2011</em>. (DAgger 원논문)</li>
+<li>Ho, J., Jain, A., Abbeel, P. (2020). Denoising Diffusion Probabilistic Models. <em>NeurIPS 2020</em>.</li>
+<li>Cai, W. et al. (2026). Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance. <em>ICRA 2026</em>. (NavDP)</li>
+<li>Peng, J. et al. (2026). Localization Grounded Navigation Policy. <em>ICRA 2026</em>. (LoGoPlanner)</li>
+<li>Yang, J. et al. (2026). StreamVLN: Streaming Vision-and-Language Navigation. <em>ICRA 2026</em>.</li>
+<li>Yang, L. et al. (2024). Depth Anything V2. <em>NeurIPS 2024</em>.</li>
+<li>Peng, Z. et al. (2021). Isaac: The Unity of Simulation and AI. <em>NVIDIA Technical Report</em>.</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p>NavOL은 <strong>오프라인 모방 학습의 분포 이동 문제</strong>를 온라인 DAgger 패러다임을 확산 정책에 적용함으로써 근본적으로 해결하는 중요한 연구다.</p>
+<p><strong>핵심 혁신성:</strong></p>
+<ul>
+<li><strong>최초 DAgger-Diffusion 통합</strong>: 고차원 생성 모델에서 온라인 모방 학습의 실용성 증명</li>
+<li><strong>극적인 계산 효율성</strong>: NavDP 대비 32배 적은 비용으로 26.8%p 높은 성능</li>
+<li><strong>크로스-임체형 제로샷 전이</strong>: 바퀴형 학습 → 사족보행 배포의 완전한 일반화</li>
+</ul>
+<p><strong>실용적 의의:</strong>
+ICML 2026에 게재된 이 연구는 내비게이션 분야에서 머신러닝의 온라인 학습 알고리즘이 도메인 특화 아키텍처만큼 중요함을 보여준다. 특히 32 GPU-days(RTX 4090)라는 접근 가능한 계산 비용은 이 방법론의 재현성과 확산 가능성을 높인다.</p>
+<p><strong>향후 과제:</strong>
+언어 지시어 통합, 동적 환경 지원, 실세계 피드백 루프 추가가 이루어지면 NavOL 프레임워크는 <strong>실용적 실내 로봇 내비게이션의 핵심 학습 패러다임</strong>으로 자리잡을 수 있다. 확산 정책의 다중 모드 분포 표현 능력과 DAgger의 분포 이동 해결 원리의 결합은 향후 로봇 학습 연구의 새로운 방향을 제시한다.</p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

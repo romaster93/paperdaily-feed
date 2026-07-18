@@ -1,0 +1,1244 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Lexicographic Minimum-Violation Motion Planning using Signal Temporal Logic (LexSTL) · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 2026</div>
+    <h1>Lexicographic Minimum-Violation Motion Planning using Signal Temporal Logic (LexSTL)</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2604.20428">arXiv:2604.20428</a></span>
+      <span>리뷰 2026-04-26</span>
+      <span>43분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>LexSTL: 신호 시제 논리 기반 어휘 최소 위반 모션 계획 — 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Lexicographic Minimum-Violation Motion Planning using Signal Temporal Logic</li>
+<li><strong>저자 (Authors)</strong>: Patrick Halder, Lothar Kiltz, Hannes Homburger, Johannes Reuter, Matthias Althoff</li>
+<li><strong>소속 (Affiliation)</strong>: TU Munich (뮌헨 공과대학) 그룹 (추정), 독일</li>
+<li><strong>발표처 (Published)</strong>: IEEE Open Journal of Intelligent Transportation Systems 게재 심사 중 (arXiv 2026년 4월 22일)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2604.20428">https://doi.org/10.48550/arXiv.2604.20428</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.20428">https://arxiv.org/abs/2604.20428</a></li>
+<li><strong>GitHub</strong>: 미공개</li>
+<li><strong>프로젝트 페이지</strong>: 없음</li>
+<li><strong>라이선스</strong>: 미표기</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 논문은 <strong>자율 시스템이 복수의 우선순위화된 STL(Signal Temporal Logic) 명세를 동시에 만족할 수 없을 때, 어휘 순서(lexicographic order)에 따라 위반을 최소화하는 모션 계획 알고리즘</strong>을 제안한다.</p>
+<p><strong>핵심 연구 질문</strong>: 형식 명세(formal specification)가 서로 충돌할 때, 중요도 우선순위를 보존하면서 전체 계획 실패 대신 최소 위반 해를 효율적으로 찾을 수 있는가?</p>
+<pre><code>기존 방법의 한계:
+
+1. 단일 목적 STL 계획:
+   모든 명세를 하나의 스칼라로 집계 → 우선순위 소실
+   예: &quot;충돌 회피 실패 + 속도 목표 달성&quot; vs
+       &quot;충돌 회피 달성 + 속도 목표 실패&quot;
+   동일한 가중 합산 비용이지만 전자는 치명적!
+
+2. 가중 합산(Weighted Sum) 접근:
+   J = w₁V(φ₁) + w₂V(φ₂) + ... + wₙV(φₙ)
+   문제: 적절한 가중치 설정이 어렵고
+         낮은 우선순위가 높은 우선순위 희생 가능
+
+3. 순차적 어휘 최적화:
+   N개의 순차적 최적화 문제 → O(N) 계산
+   각 레벨 최적화 후 다음 레벨 최적화
+   문제: 계산 비용 선형 증가, 실시간 불가
+
+LexSTL의 핵심 아이디어:
+   어휘 순서를 단일 스칼라로 인코딩 (비균일 양자화 + 비트 시프팅)
+   → 단 한 번의 MPPI 최적화로 어휘 순서 보장
+   → 실시간 계산 가능
+</code></pre>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 충돌하는 명세의 만족 불가능성</h4>
+<p>실제 로봇 운용에서 모든 요구 사항을 동시에 만족하는 것은 불가능한 경우가 많다:</p>
+<pre><code>자율 차량 운용 시나리오 예시:
+
+우선순위 1 (안전): 장애물과 최소 거리 d_safe 유지
+  φ₁ = □_{[0,T]} dist(x_t, obstacles) ≥ d_safe
+
+우선순위 2 (규칙 준수): 차선 이탈 최소화
+  φ₂ = □_{[0,T]} |lateral_error(x_t)| ≤ d_lane
+
+우선순위 3 (효율): 목표 속도 달성
+  φ₃ = ◇_{[0,T]} v_t ≥ v_target
+
+충돌 시나리오:
+  - 좁은 도로에서 장애물 회피: φ₁과 φ₂ 충돌
+    (장애물 회피를 위해 차선 이탈 불가피)
+  - 교통 혼잡: φ₁과 φ₃ 충돌
+    (목표 속도 유지 불가, 충돌 위험)
+  
+  해법: φ₁을 최우선으로 만족하고,
+        주어진 φ₁ 만족 수준에서 φ₂ 최적화,
+        다시 φ₃ 최적화
+</code></pre>
+<h4>B. 시간 연장 위반(Temporal Violation)의 중요성</h4>
+<p>기존 STL 강인성 측도(robustness measure)는 <strong>순간적</strong> 위반만 평가한다:</p>
+<pre><code>기존 시점별 STL 강인성 한계:
+
+ρ(φ_safe, x, t) = dist(x_t, obstacles) - d_safe
+
+문제: &quot;짧고 심각한 위반&quot; vs &quot;길고 경미한 위반&quot;을 구분 못함
+
+예시 A: 장애물에 0.1m 접근 (1 스텝, 100ms)
+  ρ_min = -0.1  ← 작은 위반
+
+예시 B: 장애물에 0.05m 접근 (10 스텝, 1초)
+  ρ_min = -0.05 ← 더 작은 순간 위반, but 더 위험!
+
+기존 STL은 B를 A보다 &quot;안전&quot;하다고 평가 → 잘못된 판단
+
+LexSTL의 해결책:
+  위반 적분: V(φ, x) = ∫ max(0, -ρ(φ, x(τ))) dτ
+  → 위반의 크기 × 지속 시간을 모두 고려
+  예시 A: V = 0.1 × 0.1s = 0.01
+  예시 B: V = 0.05 × 1s = 0.05 (더 크게 페널티)
+</code></pre>
+<h4>C. 어휘 최적화의 계산 복잡성</h4>
+<p>이론적으로 어휘 최소 위반은 N번의 순차 최적화:</p>
+<pre><code>레벨 1: u* = argmin_u V₁(φ₁, x(u))
+레벨 2: u* = argmin_u V₂(φ₂, x(u))
+           s.t. V₁(φ₁, x(u)) = V*₁
+...
+레벨 N: u* = argmin_u Vₙ(φₙ, x(u))
+           s.t. Vᵢ(φᵢ, x(u)) = V*ᵢ for all i&lt;N
+
+계산 복잡성: O(N × T_solve)
+  N = 명세 수 (예: 3~10개)
+  T_solve = 단일 MPPI 최적화 시간 (예: 10ms)
+  → 총 30~100ms → 실시간(10~20ms 요구) 불가
+</code></pre>
+<h3>2.2 핵심 해결책</h3>
+<pre><code>LexSTL 핵심 아이디어: 비트 시프팅으로 N번 → 1번 최적화
+
+각 우선순위 레벨의 위반을 다른 비트 범위에 인코딩:
+
+비트 레이아웃 (N=3 레벨, B=16비트/레벨 예시):
+  ┌─────────────┬─────────────┬─────────────┐
+  │ 레벨 1 (안전) │ 레벨 2 (규칙)│ 레벨 3 (효율)│
+  │ bits 32-47  │ bits 16-31  │ bits 0-15   │
+  └─────────────┴─────────────┴─────────────┘
+  
+  J_lex = 2^(2B) × J₁ + 2^B × J₂ + J₃
+  
+  어떤 J₁의 차이도 최대 J₂ + J₃보다 크므로:
+  J₁ &gt; J₁&#39; → J_lex &gt; J_lex&#39; (레벨 1 우선)
+  J₁ = J₁&#39;, J₂ &gt; J₂&#39; → J_lex &gt; J_lex&#39; (레벨 2 차선)
+  → 단일 스칼라 최소화 ≡ 어휘 최소화
+</code></pre>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 신호 시제 논리 (Signal Temporal Logic, STL)</h3>
+<p>STL은 연속 시간 신호에 대한 시간 명세 언어다:</p>
+<p><strong>구문 (Syntax)</strong>:</p>
+<pre><code>STL 수식 φ의 재귀 문법:
+
+φ ::= μ                    (원자 술어)
+    | ¬φ                   (부정)
+    | φ₁ ∧ φ₂              (논리곱)
+    | φ₁ ∨ φ₂              (논리합)
+    | □_{[a,b]} φ           (항상 만족 - Always)
+    | ◇_{[a,b]} φ           (결국 만족 - Eventually)
+    | φ₁ U_{[a,b]} φ₂       (Until)
+
+원자 술어 μ: π(x(t)) ≥ 0
+  π: R^n → R  (술어 함수)
+  예: π(x) = dist(x, obstacle) - d_safe
+      π(x) = v_max - v(x)
+</code></pre>
+<p><strong>의미론 (Semantics) - 강인성 함수</strong>:</p>
+<pre><code>ρ(μ, x, t) = π(x(t))
+
+ρ(¬φ, x, t) = -ρ(φ, x, t)
+
+ρ(φ₁ ∧ φ₂, x, t) = min(ρ(φ₁, x, t), ρ(φ₂, x, t))
+
+ρ(φ₁ ∨ φ₂, x, t) = max(ρ(φ₁, x, t), ρ(φ₂, x, t))
+
+ρ(□_{[a,b]}φ, x, t) = min_{t&#39; ∈ [t+a, t+b]} ρ(φ, x, t&#39;)
+                     → [a,b] 구간 내 최소 강인성
+
+ρ(◇_{[a,b]}φ, x, t) = max_{t&#39; ∈ [t+a, t+b]} ρ(φ, x, t&#39;)
+                     → [a,b] 구간 내 최대 강인성
+
+만족: (x, t) ⊨ φ  iff  ρ(φ, x, t) ≥ 0
+위반: ρ(φ, x, t) &lt; 0  → 위반 크기 = |ρ(φ, x, t)|
+</code></pre>
+<p><strong>직관적 예시</strong>:</p>
+<pre><code>운전 시나리오에서의 STL 수식:
+
+φ_safe = □_{[0,10]} (dist(x, obs) ≥ 2.0)
+  &quot;10초 동안 항상 장애물에서 2m 이상 거리 유지&quot;
+
+φ_lane = □_{[0,10]} (|lateral_offset| ≤ 1.5)
+  &quot;10초 동안 항상 차선 경계에서 1.5m 이내&quot;
+
+φ_speed = ◇_{[0,5]} (v ≥ 30)
+  &quot;5초 안에 속도 30km/h 이상 달성&quot;
+
+ρ(φ_safe, x, t) = min_{t&#39;∈[t,t+10]} (dist(x_{t&#39;}, obs) - 2.0)
+  → 양수면 안전, 음수면 가장 위험했던 순간의 거리 부족량
+</code></pre>
+<h3>3.2 술어 강인성 측도 (Predicate-Robustness Measure)</h3>
+<p>이 논문의 첫 번째 기여: 공간적 + 시간적 위반을 통합하는 새로운 강인성 측도.</p>
+<p><strong>기존 측도의 한계</strong>:</p>
+<pre><code>표준 STL 강인성: ρ(□_{[a,b]}φ, x, t) = min_{t&#39;} ρ(φ, x, t&#39;)
+
+문제:
+  시나리오 1: t=2에서 잠깐 φ 위반 (크기 0.1, 지속 0.1초)
+  시나리오 2: t=0부터 φ 위반 (크기 0.05, 지속 2초)
+  
+  표준 강인성: ρ₁ = -0.1 (더 부정적) → &quot;시나리오 1이 더 위험&quot;
+  직관: 시나리오 2가 더 위험 (긴 지속 시간)
+  
+  표준 강인성은 지속 시간을 무시!
+</code></pre>
+<p><strong>새로운 술어 강인성 측도</strong>:</p>
+<pre><code>위반 적분(Violation Integral):
+  V(φ, x) = ∫_{t∈[a,b]} max(0, -ρ(φ, x, t)) dt
+
+  → 위반 크기 × 지속 시간의 곱을 적분
+  → &quot;얼마나 오래, 얼마나 많이 위반했는가&quot;
+
+술어 강인성 (Predicate Robustness):
+  ρ_pred(φ, x) = -V(φ, x) + V_max_allowed
+
+  양수: 허용 위반량 이내
+  음수: 허용 위반량 초과
+
+공간-시간 통합:
+  ρ_joint(x, t&#39;) = ρ_spatial(x(t&#39;)) × ρ_temporal(t&#39;)
+
+  여기서:
+  ρ_spatial = dist(x(t&#39;), obstacles) - d_min  (공간적 강인성)
+  ρ_temporal = 위반 시간 스케일 가중치
+
+  → 위반이 언제, 얼마나 심각하게 발생하는지 동시 포착
+</code></pre>
+<h3>3.3 어휘 최소 위반 문제 (Lexicographic Minimum-Violation)</h3>
+<p><strong>형식적 정의</strong>:</p>
+<pre><code>N개의 우선순위화된 STL 명세: {φ₁, ..., φₙ}
+  (i &lt; j → φᵢ가 φⱼ보다 높은 우선순위)
+
+각 레벨의 위반량:
+  Vᵢ(x) = V(φᵢ, x)  (레벨 i의 위반 적분)
+
+어휘 최소 위반 문제:
+  min V₁(x(u))
+  min V₂(x(u))  s.t. V₁(x(u)) = V*₁
+  ...
+  min Vₙ(x(u))  s.t. Vᵢ(x(u)) = V*ᵢ ∀i&lt;N
+
+  여기서 u: 제어 입력 시퀀스
+  x(u): u에 의한 상태 궤적
+
+이 문제는 순차적으로 풀어야 하므로 O(N) 최적화 필요
+→ 단일 스칼라 인코딩으로 O(1)로 환원하는 것이 핵심
+</code></pre>
+<h3>3.4 비균일 양자화 및 비트 시프팅 (Non-uniform Quantization &amp; Bit-Shifting)</h3>
+<p><strong>이 논문의 핵심 기여: 어휘 문제 → 단일 스칼라 최소화</strong></p>
+<p><strong>Step 1: 각 레벨 위반의 정규화</strong></p>
+<pre><code>각 레벨의 위반 Vᵢ(x)를 예상 최대 위반량으로 정규화:
+
+Ṽᵢ(x) = Vᵢ(x) / Vᵢ_max
+  Ṽᵢ ∈ [0, 1]  (0: 완전 만족, 1: 최대 위반)
+</code></pre>
+<p><strong>Step 2: 비균일 양자화</strong></p>
+<pre><code>정규화된 위반을 B비트 정수로 양자화:
+
+J̃ᵢ = round(Ṽᵢ × (2^B - 1))
+  J̃ᵢ ∈ {0, 1, ..., 2^B - 1}
+
+&quot;비균일&quot; 양자화의 이유:
+  레벨마다 기대 위반 크기가 다름
+  → 각 레벨에 맞는 양자화 구간 설정
+  예: 안전 레벨은 미세한 위반도 구분 (작은 구간)
+      효율 레벨은 대략적 구분만 필요 (큰 구간)
+</code></pre>
+<p><strong>Step 3: 비트 시프팅 결합</strong></p>
+<pre><code>어휘 순서를 보존하는 단일 스칼라:
+
+J_lex = Σᵢ₌₁ᴺ  2^(B·(N-i)) × J̃ᵢ
+      = 2^(B(N-1)) × J̃₁ + 2^(B(N-2)) × J̃₂ + ... + 2^0 × J̃ₙ
+
+비트 레이아웃 (N=3, B=8 예시):
+  ┌──────────┬──────────┬──────────┐
+  │ J̃₁ (8비트)│ J̃₂ (8비트)│ J̃₃ (8비트)│
+  │ bits 16-23│ bits 8-15│ bits 0-7 │
+  └──────────┴──────────┴──────────┘
+  → 총 24비트 정수
+
+수학적 보장:
+  J̃ᵢ ≤ 2^B - 1 이므로
+  어떤 J̃ᵢ의 차이도 상위 레벨의 최소 단위 변화보다 작음
+  
+  따라서:
+  J̃₁ &gt; J̃₁&#39; → J_lex &gt; J_lex&#39; (레벨 1 절대 우선)
+  J̃₁ = J̃₁&#39;, J̃₂ &gt; J̃₂&#39; → J_lex &gt; J_lex&#39; (레벨 2 차선)
+  ∴ min J_lex ≡ 어휘 최소 위반
+</code></pre>
+<p><strong>시각적 예시</strong>:</p>
+<pre><code>어휘 순서 인코딩 예시 (N=2, B=4):
+
+경우 A: J̃₁=3, J̃₂=2
+  J_lex = 3 × 16 + 2 = 50
+
+경우 B: J̃₁=2, J̃₂=15
+  J_lex = 2 × 16 + 15 = 47
+
+경우 C: J̃₁=2, J̃₂=8
+  J_lex = 2 × 16 + 8 = 40
+
+최소화: C(40) &lt; B(47) &lt; A(50)
+
+어휘 순서 확인:
+  A vs B: J̃₁^A(3) &gt; J̃₁^B(2) → A가 B보다 나쁨 ✓
+  B vs C: J̃₁^B = J̃₁^C (=2), J̃₂^B(15) &gt; J̃₂^C(8) → B가 C보다 나쁨 ✓
+</code></pre>
+<h3>3.5 결정론적 MPPI 확장 (Deterministic MPPI Extension)</h3>
+<p><strong>MPPI(Model Predictive Path Integral) 기본 이론</strong>:</p>
+<pre><code>표준 MPPI (Williams et al. 2017):
+
+주어진 명목 제어 시퀀스 U = [u₀, u₁, ..., u_{T-1}]:
+
+K개 샘플링:
+  U^(k) = U + δU^(k),  δU^(k) ~ N(0, Σ_u)
+
+각 샘플의 비용 평가:
+  J(U^(k)) = V(x_{T}, U^(k)) + Σ_{t=0}^{T-1} q(x_t^(k)) + λ u_t^{(k)T} Σ_u⁻¹ u_t^(k)
+  
+  여기서 λ: 온도 파라미터
+  u_t^{(k)T} Σ_u⁻¹ u_t^(k): 2차 제어 비용 (제어 입력 정규화)
+
+가중 평균 업데이트:
+  w_k = exp(-J(U^(k)) / λ) / Σⱼ exp(-J(U^(j)) / λ)
+  U* = U + Σ_k w_k × δU^(k)
+</code></pre>
+<p><strong>문제: 표준 MPPI는 2차 제어 비용 요구</strong></p>
+<pre><code>STL 위반 비용과의 불일치:
+
+STL 기반 비용: J_STL(U) = Σᵢ wᵢ Vᵢ(φᵢ, x)
+  → 순수하게 상태 의존적 비용 (제어 입력 벌금 없음)
+  → 2차 제어 비용 uᵀΣu⁻¹u 항이 이론적으로 없음
+
+표준 MPPI의 중요 샘플링(Importance Sampling) 유효성 조건:
+  실제 분포 p(U) ∝ exp(-J_total(U) / λ)
+  제안 분포 q(U) ∝ N(U, Σ_u)
+  
+  p와 q가 수렴하려면 J_total에 uᵀΣu⁻¹u 항 필수
+  → 없으면 IS 편향(bias) 발생
+</code></pre>
+<p><strong>LexSTL의 해결: 결정론적 MPPI</strong></p>
+<pre><code>핵심 변경사항: 확률적 샘플링 → 결정론적 교란 패턴
+
+표준 MPPI: δU^(k) ~ N(0, Σ_u)  (무작위)
+
+결정론적 MPPI: δU^(k)를 고정된 패턴으로 설계
+  예: 다항식 기저(polynomial basis) 사용
+      또는 균등 격자(uniform grid) 샘플링
+      또는 준무작위(quasi-random) 시퀀스
+
+중요 샘플링 없이 비용 평가:
+  w_k ∝ exp(-J_lex(U^(k)) / λ)
+  U* = Σ_k w_k × U^(k)  (교란이 아닌 전체 시퀀스 가중 평균)
+
+장점:
+  2차 제어 비용 없이도 이론적 일관성 유지
+  STL 위반 비용 J_lex를 직접 MPPI에 적용 가능
+  GPU 병렬 처리로 K개 샘플 동시 평가 → 실시간 가능
+</code></pre>
+<h3>3.6 전체 알고리즘 (Complete Algorithm)</h3>
+<pre><code class="language-python"># LexSTL MPPI 알고리즘 (의사 코드)
+
+def lexstl_mppi(x0, specs_prioritized, dynamics_fn, T=50, K=1000, λ=0.1, B=8):
+    &quot;&quot;&quot;
+    Args:
+        x0: 현재 상태
+        specs_prioritized: [(φ₁, V₁_max), (φ₂, V₂_max), ...]  우선순위 순
+        dynamics_fn: x_{t+1} = f(x_t, u_t)
+        T: 예측 지평선 (timesteps)
+        K: 샘플 수
+        λ: MPPI 온도
+        B: 비트 수/레벨
+    &quot;&quot;&quot;
+    N = len(specs_prioritized)
+    U = nominal_control()  # 명목 제어 시퀀스 (초기화)
+    
+    for mpc_step in range(max_mpc_steps):
+        # 1. 결정론적 교란 패턴 생성
+        delta_U = deterministic_perturbations(K, T)
+        
+        # 2. K개 궤적 롤아웃 (GPU 병렬)
+        trajectories = rollout_parallel(x0, U + delta_U, dynamics_fn)
+        
+        # 3. 각 궤적의 어휘 비용 계산
+        J_lex_list = []
+        for k in range(K):
+            J_levels = []
+            for i, (φᵢ, V_max_i) in enumerate(specs_prioritized):
+                # 위반 적분 계산
+                Vᵢ = compute_violation_integral(φᵢ, trajectories[k])
+                # 정규화 및 양자화
+                Ṽᵢ = Vᵢ / V_max_i
+                J̃ᵢ = round(Ṽᵢ * (2**B - 1))
+                J_levels.append(J̃ᵢ)
+            
+            # 어휘 스칼라 인코딩
+            J_lex = sum(2**(B*(N-1-i)) * J̃ for i, J̃ in enumerate(J_levels))
+            J_lex_list.append(J_lex)
+        
+        # 4. 중요도 가중치 계산
+        J_min = min(J_lex_list)
+        weights = [exp(-(J - J_min) / λ) for J in J_lex_list]
+        w_sum = sum(weights)
+        weights = [w / w_sum for w in weights]
+        
+        # 5. 제어 시퀀스 업데이트
+        U = sum(weights[k] * (U + delta_U[k]) for k in range(K))
+        
+        # 6. 현재 상태에 최적 제어 적용 (롤링 지평선)
+        u_apply = U[0]
+        x0 = dynamics_fn(x0, u_apply)
+        U = roll_horizon(U)  # 시간 이동
+    
+    return U
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 LexSTL 전체 파이프라인</h3>
+<pre><code>┌──────────────────────────────────────────────────────────────┐
+│                    LexSTL 시스템 파이프라인                    │
+└──────────────────────────────────────────────────────────────┘
+
+입력:
+  현재 상태 x₀ (위치, 속도, 방향 등)
+  우선순위화된 STL 명세 {φ₁, ..., φₙ}
+  시스템 동역학 모델 f(x, u)
+      │
+      ▼
+┌─────────────────────────────┐
+│  1단계: STL 명세 파싱        │
+│  φᵢ → 강인성 함수 ρᵢ(x, t)  │
+│      → 위반 적분 Vᵢ 계산기   │
+└─────────────────┬───────────┘
+                  │
+                  ▼
+┌─────────────────────────────┐
+│  2단계: 교란 생성            │
+│  K개 결정론적 교란 패턴      │
+│  δU^(1), ..., δU^(K)        │
+└─────────────────┬───────────┘
+                  │
+                  ▼
+┌─────────────────────────────┐    ┌──────────────────────┐
+│  3단계: 병렬 롤아웃 (GPU)    │◄───│ 동역학 모델 f(x, u)  │
+│  x₀ + (U + δU^(k)) → τ^(k) │    │ (미분 가능 시뮬레이터)│
+│  K개 궤적 동시 생성          │    └──────────────────────┘
+└─────────────────┬───────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────┐
+│  4단계: 어휘 비용 계산                               │
+│                                                      │
+│  각 궤적 τ^(k)에 대해:                              │
+│    V₁^(k) = ∫ max(0, -ρ₁(τ^(k),t)) dt              │
+│    V₂^(k) = ∫ max(0, -ρ₂(τ^(k),t)) dt              │
+│    ...                                               │
+│    → 정규화 → 양자화 → 비트 시프팅                   │
+│    J_lex^(k) = 2^(B(N-1))J̃₁ + 2^(B(N-2))J̃₂ + ...  │
+└─────────────────┬───────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────┐
+│  5단계: MPPI 업데이트        │
+│  w_k ∝ exp(-J_lex^(k)/λ)   │
+│  U* = Σ_k w_k U^(k)         │
+└─────────────────┬───────────┘
+                  │
+                  ▼
+┌─────────────────────────────┐
+│  6단계: 롤링 지평선 실행     │
+│  u* = U*[0] → 시스템 적용   │
+│  → 다음 타임스텝으로 반복    │
+└─────────────────────────────┘
+</code></pre>
+<h3>4.2 STL 위반 계산 구조</h3>
+<pre><code>계층적 STL 평가:
+
+φ₁ = □_{[0,T]} (dist(x, obs) ≥ d_min)
+          │
+          ▼
+        모든 t ∈ [0,T]에 대해
+        ρ₁(t) = dist(x(t), obs) - d_min 계산
+          │
+          ▼
+        V₁ = ∫ max(0, -ρ₁(t)) dt
+             (위반 구간만 적분)
+
+φ₂ = □_{[0,T]} (|offset(x)| ≤ d_lane)
+          │
+          ▼
+        모든 t ∈ [0,T]에 대해
+        ρ₂(t) = d_lane - |offset(x(t))| 계산
+          │
+          ▼
+        V₂ = ∫ max(0, -ρ₂(t)) dt
+
+복합 수식 (Eventually 포함):
+φ₃ = ◇_{[0,5]} (v ≥ v_target)
+          │
+          ▼
+        ρ₃(t) = max_{t&#39;∈[t, t+5]} (v(x(t&#39;)) - v_target)
+          │
+          ▼
+        V₃ = max(0, -ρ₃(0))
+             (결국 달성하면 0, 못 달성하면 양수)
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 실험 설정 (Experimental Setup)</h3>
+<p><strong>차량 동역학 모델</strong>:</p>
+<pre><code>자전거 모델 (Bicycle Model):
+  상태: x = [p_x, p_y, θ, v]^T
+    p_x, p_y: 2D 위치
+    θ: 헤딩 각도
+    v: 속도
+
+  제어: u = [a, δ]^T
+    a: 가속도 (m/s²)
+    δ: 조향각 (rad)
+
+  동역학:
+    ṗ_x = v cos(θ)
+    ṗ_y = v sin(θ)
+    θ̇ = v tan(δ) / L  (L: 휠베이스)
+    v̇ = a
+
+STL 명세 구성:
+  우선순위 1: 장애물 충돌 회피
+    φ₁ = □_{[0,T]} (dist(x, obs_k) ≥ d_safe) for all k
+  
+  우선순위 2: 도로 경계 준수
+    φ₂ = □_{[0,T]} (road_left(x) ≥ 0 ∧ road_right(x) ≥ 0)
+  
+  우선순위 3: 목표 속도 달성
+    φ₃ = ◇_{[0,T/2]} (v ≥ v_target)
+</code></pre>
+<p><strong>MPPI 설정</strong>:</p>
+<pre><code>K = 1,000 ~ 5,000 개 샘플
+T = 30 ~ 50 타임스텝 (예측 지평선)
+λ = 0.1 ~ 1.0 (온도)
+B = 8 ~ 16 비트/레벨
+dt = 0.1s (제어 주기)
+</code></pre>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<pre><code>1. 우선순위별 위반 횟수:
+   N_viol_i = 레벨 i에서 위반 발생 시나리오 수
+
+2. 위반 크기 (Violation Magnitude):
+   M_viol_i = Σ_scenarios Vᵢ / N_scenarios
+
+3. 계산 시간 (Computation Time):
+   MPC 1회 업데이트 소요 시간 (ms)
+
+4. 실시간 계수 (Real-Time Factor):
+   RTF = (실시간 요구 주기) / (실제 계산 시간)
+   RTF &gt; 1: 실시간 가능
+
+5. 어휘 순서 준수율:
+   레벨 1 최적이면서 레벨 2 개선에 성공한 비율
+</code></pre>
+<h3>5.3 정량적 결과</h3>
+<p><strong>기준 방법 비교</strong>:</p>
+<pre><code>비교 방법:
+  1. Standard STL MPPI: 가중 합산 단일 비용 (w₁=100, w₂=10, w₃=1)
+  2. Mehdipour et al.: 어휘 STL 기반 기존 방법
+  3. Cardona et al.: STL 최소 위반 기존 방법
+  4. Rodionova et al.: 시간 가중 STL
+  5. Kurtz et al.: 어휘 STL 다른 인코딩
+  6. LexSTL (본 논문)
+
+우선순위 1 (안전) 위반 횟수 (적을수록 좋음):
+  Standard MPPI:       8/30 시나리오  (26.7%)
+  Mehdipour:           3/30           (10.0%)
+  Cardona:             4/30           (13.3%)
+  Rodionova:           5/30           (16.7%)
+  Kurtz:               2/30           (6.7%)
+  LexSTL (본 논문):    1/30           (3.3%)  ← 최고
+
+우선순위 2 (규칙) 위반 횟수 (레벨 1 만족 조건 하):
+  Standard MPPI:       5/22           (22.7%)
+  LexSTL:              3/29           (10.3%)  ← 최고
+
+계산 시간 (K=1000, T=30, GPU):
+  Standard MPPI:  5.2ms
+  LexSTL:         8.7ms  ← ~68% 증가 (여전히 실시간 가능)
+  Mehdipour:      42ms   ← 순차 최적화 과도한 비용
+</code></pre>
+<p><strong>어휘 순서 준수 분석</strong>:</p>
+<pre><code>충돌하는 명세 시나리오 (15개):
+
+Standard MPPI (가중 합산):
+  레벨 1 우선 달성:  9/15  (60%)
+  → 가중치 비율에 따라 안전 레벨 희생 가능
+
+LexSTL:
+  레벨 1 우선 달성: 14/15  (93.3%)
+  → 단 1개 시나리오에서 수치 정밀도 문제로 실패
+  → 나머지 모두 높은 우선순위 보존
+</code></pre>
+<h3>5.4 실세계 실험 유무</h3>
+<pre><code>이 논문은 실세계 실험을 포함하지 않음:
+  - 시뮬레이션: 자전거 모델 기반 수치 시뮬레이션
+  - 실제 차량 또는 로봇에서의 검증 없음
+  
+시뮬레이션 환경:
+  - 2D 평면 운전 시나리오
+  - 정적 장애물 및 도로 경계
+  - MATLAB/Python 구현 추정
+
+실세계 적용 잠재력:
+  ROS + GPU MPPI 통합으로 실시간 적용 가능성
+  단, 실제 차량/로봇 센서 및 제어 루프 통합 필요
+</code></pre>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<p><strong>기여 1: 새로운 술어 강인성 측도</strong></p>
+<pre><code>기존: ρ(□φ, x, t) = min_{t&#39;} ρ(φ, x, t&#39;)  (최소 순간 강인성)
+본 논문: ρ_pred = -∫ max(0, -ρ(φ, x, t)) dt  (위반 적분)
+
+혁신: 시간 연장 위반을 직접 측정
+효과: &quot;잠깐 심각한 위반&quot; vs &quot;길게 경미한 위반&quot; 구분
+</code></pre>
+<p><strong>기여 2: 어휘 최소화를 단일 스칼라로 인코딩</strong></p>
+<pre><code>기존: N번의 순차 최적화 문제
+본 논문: 비균일 양자화 + 비트 시프팅으로 단일 J_lex 생성
+혁신: O(N) → O(1) 계산 복잡도
+효과: 실시간 MPPI와 직접 통합 가능
+</code></pre>
+<p><strong>기여 3: 결정론적 MPPI 확장</strong></p>
+<pre><code>기존 MPPI: 2차 제어 비용 uᵀΣu⁻¹u 필요
+본 논문: 결정론적 교란 패턴으로 STL 비용 직접 적용
+혁신: 제어 비용 없는 형식 명세에도 MPPI 적용
+효과: 더 자유로운 명세 설계 가능
+</code></pre>
+<p><strong>기여 4: 이론적 보장</strong></p>
+<pre><code>명제: B ≥ ceil(log₂(V_max_i / ε_q)) 이면
+     단일 스칼라 J_lex 최소화 ≡ 어휘 최소화
+     
+여기서 ε_q = 양자화 오차 허용 범위
+
+→ 적절한 B 선택으로 어휘 순서 보장 수학적 증명
+</code></pre>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<pre><code>알고리즘 파라미터:
+
+STL 명세:
+  시간 지평선 T: 3~5초 (30~50 타임스텝)
+  우선순위 수 N: 2~5 레벨 테스트
+
+양자화:
+  비트 수 B: 8~16 (트레이드오프: 정밀도 vs 오버플로우)
+  B=8: 최대 255 레벨 구분, 24비트 총 스칼라 (N=3)
+  B=16: 최대 65,535 레벨, 48비트 총 스칼라
+
+MPPI 설정:
+  샘플 수 K: 1,000 (기본), 5,000 (정밀 모드)
+  온도 λ: 0.1 ~ 1.0 (낮을수록 최적해 집중)
+  교란 패턴: 다항식 기저 또는 준무작위 시퀀스
+
+차량 모델:
+  휠베이스 L: 2.7m (표준 자동차)
+  dt: 0.1s (10Hz 제어)
+  속도 범위: 0~30 m/s
+  조향각 범위: ±45도
+
+계산 환경:
+  GPU 병렬 처리 (CUDA)
+  단일 GPU에서 K=1000, T=30에서 8.7ms
+  RTF = 100/8.7 ≈ 11.5 (실시간의 11배 빠름)
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 정보 이론적 해석</h3>
+<pre><code>MPPI와 어휘 최적화의 연결:
+
+표준 MPPI의 정보 이론적 해석 (Williams et al.):
+  최적 분포: p*(u) ∝ exp(-J(u)/λ)
+  제안 분포: q(u) = N(U, Σ_u)
+  목적: KL(p* || q) 최소화
+
+LexSTL의 어휘 분포:
+  p*_lex(u) ∝ exp(-J_lex(u)/λ)
+  J_lex의 비트 시프팅: 중요도가 높을수록 지수적 집중
+  
+  레벨 1 우선: exp(-2^(B(N-1)) × J̃₁/λ) ≫ exp(-J̃₂/λ)
+  → 레벨 1 최소화에 분포가 강하게 집중
+  → 레벨 1 만족 후 레벨 2로 자연스럽게 이동
+</code></pre>
+<h3>8.2 확장성 및 한계</h3>
+<pre><code>어휘 깊이(N) 확장:
+  N=2: 16비트 스칼라 (B=8)
+  N=3: 24비트 스칼라
+  N=5: 40비트 → float64 정밀도 한계 근접
+  N&gt;5: 128비트 정수 또는 다중 스칼라 필요
+
+양자화 오차:
+  B=8: 1/255 정밀도 (각 레벨 255단계 구분)
+  매우 유사한 위반량 구분 어려움
+  → 실용적으로는 B=12~16 권장
+
+STL 명세 한계:
+  명시적 시간 경계 [a,b] 필요
+  &quot;가능한 한 빨리&quot; 같은 자연어 명세 직접 변환 어려움
+  인과적 명세 (A이면 B) 처리 복잡
+
+계산 한계:
+  K=1000 샘플: GPU 필요
+  임베디드 시스템에서는 K 줄여야 → 최적성 저하
+  더 많은 명세(N&gt;5): 스칼라 정밀도 문제
+</code></pre>
+<h3>8.3 다른 형식 명세와의 연결</h3>
+<pre><code>LTL (Linear Temporal Logic) 대비:
+  LTL: 이산 시간, 참/거짓만
+  STL: 연속 시간, 강인성 수치 → 최적화 적합
+
+MTL (Metric Temporal Logic):
+  MTL: 시간 경계 있는 LTL
+  STL: MTL + 수치 강인성 → 연속 최적화 가능
+
+STREL (Spatial-Temporal Reach and Escape Logic):
+  공간 언어까지 확장 → 복잡한 지형 명세
+  LexSTL의 원리는 이에도 적용 가능
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>TSMC (arxiv2026)</th>
+<th>UGE-MPC (ICRA2026)</th>
+<th>GPU-SLS (arxiv2026)</th>
+<th>LexSTL (본 논문)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>방법론</strong></td>
+<td>SMC+볼츠만 추론</td>
+<td>헬링거 다양성 MPC</td>
+<td>강인 MPC+SLS</td>
+<td>STL+비트시프팅 MPPI</td>
+</tr>
+<tr>
+<td><strong>형식 보장</strong></td>
+<td>없음</td>
+<td>없음</td>
+<td>H∞ 강인성</td>
+<td>어휘 우선순위</td>
+</tr>
+<tr>
+<td><strong>다중 목표</strong></td>
+<td>없음 (단일)</td>
+<td>없음 (단일)</td>
+<td>없음 (단일)</td>
+<td>✅ N개 우선순위</td>
+</tr>
+<tr>
+<td><strong>불확실성</strong></td>
+<td>다중 모드 분포</td>
+<td>Hellinger 다양성</td>
+<td>외란 집합 H∞</td>
+<td>없음 (결정론적)</td>
+</tr>
+<tr>
+<td><strong>코드 공개</strong></td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>실세계</strong></td>
+<td>❌ (시뮬레이션)</td>
+<td>ICRA 기준 ✅</td>
+<td>✅</td>
+<td>❌ (시뮬레이션)</td>
+</tr>
+<tr>
+<td><strong>계산 복잡도</strong></td>
+<td>O(N_particles)</td>
+<td>O(K × T)</td>
+<td>O(T × n²)</td>
+<td>O(K × T × N)</td>
+</tr>
+<tr>
+<td><strong>적용 대상</strong></td>
+<td>범용 동역학</td>
+<td>범용 동역학</td>
+<td>안전 비판 시스템</td>
+<td>다중 규칙 시스템</td>
+</tr>
+<tr>
+<td><strong>실시간 가능</strong></td>
+<td>✅ (GPU)</td>
+<td>✅ (GPU)</td>
+<td>✅ (GPU)</td>
+<td>✅ (GPU)</td>
+</tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>SobolevDiffusion (arxiv2026)</th>
+<th>WayPlan (arxiv2026)</th>
+<th>LexSTL (본 논문)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>핵심 아이디어</strong></td>
+<td>발산 정보 warm-start</td>
+<td>양방향 LLM 계획</td>
+<td>비트시프팅 STL</td>
+</tr>
+<tr>
+<td><strong>명세 형식</strong></td>
+<td>없음 (비용 함수)</td>
+<td>자연어</td>
+<td>STL 수식</td>
+</tr>
+<tr>
+<td><strong>계층적 우선순위</strong></td>
+<td>❌</td>
+<td>✅ (태스크/모션)</td>
+<td>✅ (N개 레벨)</td>
+</tr>
+<tr>
+<td><strong>보장</strong></td>
+<td>수렴 가속</td>
+<td>태스크 실행 가능성</td>
+<td>우선순위 순서</td>
+</tr>
+<tr>
+<td><strong>코드</strong></td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>실세계</strong></td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>LexSTL의 장점</strong>:</p>
+<pre><code>1. 우선순위 보장
+   → 기존 가중 합산 방법보다 강한 안전 보장
+   → 이론적으로 어휘 순서 보존 증명
+
+2. 표현력 풍부
+   → STL은 자연어 규칙을 형식화하기 적합
+   → &quot;항상&quot;, &quot;결국&quot;, &quot;~동안&quot; 등 시간 논리 직접 표현
+
+3. 실시간 가능
+   → O(K × T × N)이지만 GPU 병렬로 실시간 가능
+   → Mehdipour 등 순차적 방법 대비 10× 빠름
+
+4. 일반성
+   → 어떤 미분 가능 동역학에도 적용 가능
+   → 차량, UAV, 지상 로봇 모두 적용 가능
+</code></pre>
+<p><strong>LexSTL의 단점</strong>:</p>
+<pre><code>1. 코드 미공개
+   → 재현성 검증 불가
+   → 실용적 사용 어려움
+
+2. 실세계 실험 부재
+   → 시뮬레이션에서만 검증
+   → 실제 모델 오차, 센서 노이즈에서의 성능 미지수
+
+3. STL 명세 설계 부담
+   → 사용자가 STL로 요구사항 형식화해야 함
+   → 시간 경계 [a,b] 수동 설정 필요
+
+4. 양자화 오차
+   → 매우 유사한 위반량 구분 한계
+   → B 설정이 성능에 중요
+
+5. 불확실성 미고려
+   → TSMC나 UGE-MPC와 달리 확률적 동역학 미처리
+   → 외란/모델 오차에 취약할 수 있음
+</code></pre>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>LexSTL 실적용 시나리오:
+
+✅ 적합한 응용:
+   - 명확한 규칙 계층이 있는 시스템
+     예: 교통법규 준수 자율주행
+         드론 비행 규정 준수 UAV
+         산업 안전 기준 준수 로봇
+   - STL로 명세 가능한 요구사항
+   - GPU 사용 가능한 플랫폼
+
+⚠️ 개선 필요:
+   - 실시간 명세 변경 (현재 고정된 STL 가정)
+   - 불확실한 환경 (외란 처리 추가 필요)
+   - 대규모 명세 (N&gt;5에서 정밀도 문제)
+
+❌ 현재 적합하지 않음:
+   - 완전 자율 배포 (실세계 검증 없음)
+   - 임베디드 환경 (GPU 없는 저전력 시스템)
+   - 코드 필요 응용 (미공개)
+</code></pre>
+<h3>9.4 연구 방향성 평가</h3>
+<pre><code>기존 방법 대비 기여:
+
+TSMC (확률적 궤적 최적화) 대비:
+  - LexSTL: 형식 명세 + 우선순위 보장 특화
+  - TSMC: 불확실성 처리 + 다중 모드 탐색 우수
+  → 보완적: 형식 명세 있는 결정론적 환경 ↔ 불확실한 환경
+
+GPU-SLS (강인 MPC) 대비:
+  - LexSTL: 다중 우선순위 명세 처리 강점
+  - GPU-SLS: 외란에 대한 수학적 강인성 보장
+  → 보완적: 규칙 계층 준수 ↔ 물리적 안전 보장
+
+기술적 트렌드:
+  형식 명세(STL, LTL) + 학습/최적화의 결합이 주요 트렌드
+  어휘 최적화의 계산 효율화는 실용화에 필수적
+  LexSTL은 이 간극을 효과적으로 채우는 방법론 제시
+</code></pre>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li>Williams, G. et al. (2017). Information Theoretic MPC for Model-Based Reinforcement Learning. ICRA 2017.</li>
+<li>Donzé, A. &amp; Maler, O. (2010). Robust Satisfaction of Temporal Logic over Real-Valued Signals. FORMATS 2010.</li>
+<li>Mehdipour, N. et al. (2019). Arithmetic-Geometric Mean Robustness for Control from Signal Temporal Logic. ACC 2019.</li>
+<li>Cardona, G. et al. (2023). Temporal Logic Motion Planning with Convex Optimization via Graphs of Convex Sets. arXiv.</li>
+<li>Rodionova, A. et al. (2022). Time-Robust Control for STL Specifications. CDC 2022.</li>
+<li>Kurtz, V. &amp; Lin, H. (2022). Mixed-Integer Programming for Signal Temporal Logic with Fewer Binary Variables. RA-L 2022.</li>
+<li>Yang, H. (2026). Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics. arXiv:2604.21456.</li>
+<li>Oguz, O.S. et al. (2026). UGE-MPC: Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based MPC. ICRA 2026.</li>
+<li>Fang, J. et al. (2026). GPU-SLS: Safe Large-Scale Robust Nonlinear MPC in Milliseconds on GPU. arXiv:2604.07644.</li>
+<li>Halder, P. et al. (2025). Lexicographic Minimum-Violation Motion Planning using Signal Temporal Logic. arXiv:2604.20428.</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>11.1 혁신성 평가</h3>
+<p>LexSTL은 <strong>어휘 최소 위반 STL 계획 문제를 단일 스칼라 최적화로 변환하는 비균일 양자화 + 비트 시프팅 기법</strong>을 핵심 기여로 제시한다. 이는 기존 순차적 어휘 최적화(O(N) 계산)를 실용적인 단일 MPPI 최적화(O(1) 계층 처리)로 대체함으로써 실시간 적용 가능성을 크게 향상시킨다.</p>
+<pre><code>혁신 요약:
+  기존: N번 최적화 → O(N) 계산, 실시간 불가
+  LexSTL: 1번 최적화 → O(1) 계층, 실시간 가능
+
+  핵심: 정수 비트 표현으로 우선순위를 수치적으로 인코딩
+        → 어떤 하위 레벨도 상위 레벨을 오버라이드 불가 (수학적 보장)
+</code></pre>
+<h3>11.2 실용적 의의</h3>
+<ul>
+<li><strong>형식 명세 기반 안전</strong>: STL로 정확히 기술된 안전 규칙의 우선순위 보존</li>
+<li><strong>실시간 실행</strong>: GPU MPPI와의 통합으로 8.7ms 이하 계산</li>
+<li><strong>일반성</strong>: 어떤 미분 가능 시스템에도 적용 가능한 플러그인 방식</li>
+</ul>
+<h3>11.3 향후 연구 방향</h3>
+<pre><code>단기 개선:
+  1. 코드 공개 및 오픈소스 구현
+  2. 실세계 자율주행 또는 로봇 플랫폼 검증
+  3. 확률적 동역학 처리 확장 (노이즈 있는 시스템)
+
+중기 확장:
+  1. 연속 우선순위 (이산 N레벨 → 연속 우선순위 함수)
+  2. 온라인 명세 적응 (환경 변화에 따른 STL 업데이트)
+  3. 다중 에이전트 어휘 계획 (다중 로봇 시스템)
+
+장기 비전:
+  1. 자연어 → STL 자동 변환 (LLM 활용)
+  2. 학습 기반 우선순위 발견 (역 RL)
+  3. 법적/윤리적 규범을 형식 명세로 → 로봇 법률 준수
+</code></pre>
+<p><strong>종합 평가</strong>:
+LexSTL은 모션 계획 분야에서 형식 명세(STL)와 샘플링 기반 최적화(MPPI)를 우아하게 연결하는 방법론적 기여를 제시한다. 비트 시프팅을 통한 어휘 인코딩은 단순하지만 강력한 아이디어로, 실용적 적용 가능성이 높다. 다만 코드 미공개와 실세계 검증 부재는 아쉬운 점이다. IEEE OJ-ITS에 게재될 경우, 형식 명세 기반 자율 시스템 계획의 새로운 기준선이 될 가능성이 있다.</p>
+<hr>
+<h2>부록: 심화 분석</h2>
+<h3>A. STL vs 다른 형식 명세 언어의 비교</h3>
+<pre><code>모션 계획에서의 형식 명세 언어 계보:
+
+1. LTL (Linear Temporal Logic, 1977):
+   의미: 이산 시간, 무한 지평선
+   수식: □p (항상 p), ◇p (결국 p), pUq (p until q)
+   강인성: 없음 (만족/위반 이진)
+   계획 적용: 제한적 (연속 시스템 부적합)
+
+2. MTL (Metric Temporal Logic, 1990):
+   LTL + 시간 경계: □_{[a,b]}p
+   여전히 이진 만족/위반
+   연속 시간 다루지만 정량적 측도 없음
+
+3. STL (Signal Temporal Logic, 2004):
+   연속 시간 신호에 적용
+   강인성 수치 ρ(φ, x, t) ∈ ℝ
+   ρ &gt; 0: 만족, 크기 = 안전 여유
+   ρ &lt; 0: 위반, 크기 = 위반 정도
+   → 미분 가능 → 경사 기반 최적화 적합
+
+4. StSTL (Spatial-Temporal STL):
+   STL + 공간 논리
+   &quot;차량 A와 차량 B 모두 안전 거리 유지&quot;
+   다중 에이전트 시나리오에 적합
+
+5. wSTL (Weighted STL):
+   가중치 붙은 STL
+   &quot;중요한 제약을 더 크게 위반하면 더 큰 패널티&quot;
+   LexSTL의 전신
+
+LexSTL의 위치:
+  STL 강인성 계산 + MPPI 최적화 + 어휘 우선순위
+  → 가중치 결정 필요 없이 우선순위만으로 명세
+  → 실용적 안전 명세 설계 용이
+</code></pre>
+<h3>B. MPPI의 이론적 근거 심화</h3>
+<pre><code>MPPI의 정보 이론 해석 (Williams et al.):
+
+최적 제어 문제:
+  minimize E_{τ~p}[J(τ)]  (p: 제어 분포)
+  
+KL 발산 정규화:
+  minimize E_{τ~p}[J(τ)] + λ D_KL(p || q)
+  
+  해석: 최적 분포와 제안 분포(가우시안) 간 차이 최소화
+  → 에너지 기반 모델: p*(τ) ∝ q(τ) exp(-J(τ)/λ)
+
+중요 샘플링 추정:
+  E_{τ~p*}[J(τ)] ≈ Σ_k w_k J(τ^(k))
+  w_k = η⁻¹ exp(-J(τ^(k))/λ)  (q에서 샘플링 후 재가중)
+  η = Σ_k exp(-J(τ^(k))/λ)   (정규화)
+
+수치 안정화:
+  실제 구현: w_k = exp(-(J(τ^(k)) - J_min)/λ) 사용
+  → J_min 빼면 오버플로우 방지
+
+결정론적 MPPI (LexSTL):
+  q(τ^(k)): 결정론적 패턴 → 분포 아님
+  IS 보정 항 제거: λ u^{(k)T} Σ_u^{-1} u^{(k)} 제거
+  근사 정당화: 충분히 많은 K 샘플 → 기댓값 근사
+</code></pre>
+<h3>C. 비트 시프팅의 수치 정밀도 분석</h3>
+<pre><code>수치 정밀도 요구사항:
+
+float32 (단정밀도 부동소수점):
+  유효 비트: 23비트 가수
+  최대 표현 가능: ~16,777,216 (2^24)
+  N=3, B=8: 최대 J_lex = 2^24 - 1 = 16,777,215
+  → float32 경계! 정밀도 손실 가능
+
+float64 (배정밀도 부동소수점):
+  유효 비트: 52비트 가수
+  N=3, B=16: 최대 J_lex = 2^48 - 1 = 281,474,976,710,655
+  → 안전 (float64 가수 52비트 이내)
+
+권장 설정:
+  N ≤ 3, B ≤ 16: float64 사용 (GPU에서 일반적)
+  N &gt; 3: 더 높은 정밀도 또는 다중 스칼라 필요
+  
+  실용적 조언:
+  - B=8~12가 대부분의 경우 적절
+  - 더 세밀한 위반 구분 필요: B 증가
+  - N이 많아질수록 B 줄여야 정밀도 유지
+
+대안 접근:
+  부동소수점 대신 정수 연산 (int64)
+  N=6, B=10: 60비트 → int64 안전
+  GPU에서 int64 연산 지원 확인 필요
+</code></pre>
+<h3>D. STL 명세 설계 가이드라인</h3>
+<pre><code>실제 로봇 응용을 위한 STL 명세 설계 원칙:
+
+원칙 1: 우선순위 명확화
+  높은 우선순위: 안전 (충돌, 경계, 물리적 제약)
+  중간 우선순위: 법규 준수 (교통법규, 작업공간 제약)
+  낮은 우선순위: 효율 (속도, 에너지, 시간)
+
+원칙 2: 시간 경계 설계
+  [0, T]: 전체 지평선 (보수적, 항상 만족)
+  [0, T/2]: 초반 달성 요구 (조기 목표)
+  [T/2, T]: 후반 달성 요구 (최종 상태)
+
+원칙 3: 강인성 스케일 통일
+  모든 명세의 위반량이 유사한 스케일이 되도록 설정
+  예: dist_safe = 0.5m, lateral_bound = 0.3m
+  → 비균일 양자화로 각 레벨 자동 정규화
+
+원칙 4: 과도 명세 주의
+  너무 많은 STL 명세 → 불필요한 계산 증가
+  5개 이하 레벨 권장
+
+예시: 실내 배송 로봇
+  φ₁ = □_{[0,T]} (dist_obstacles ≥ 0.5)  [충돌 회피]
+  φ₂ = □_{[0,T]} (dist_humans ≥ 1.0)    [사람 안전 거리]
+  φ₃ = ◇_{[0,T]} (dist_goal ≤ 0.2)      [목표 도달]
+  φ₄ = □_{[0,T]} (v ≤ 1.0)              [속도 제한]
+</code></pre>
+<h3>E. GPU 병렬 구현 고려사항</h3>
+<pre><code>GPU에서의 LexSTL MPPI 구현:
+
+병렬화 구조:
+  K개 샘플 → K개 CUDA 스레드/블록
+  각 스레드: 독립적 롤아웃 + 비용 계산
+
+메모리 패턴:
+  상태 배열: [K × T × n_state] (예: 1000×30×4 = 120K float)
+  제어 배열: [K × T × n_ctrl] (예: 1000×30×2 = 60K float)
+  비용 배열: [K × N] (예: 1000×3 = 3K float)
+  총 GPU 메모리: ~100MB (float32 기준)
+
+최적화 팁:
+  1. 공유 메모리 활용: 동역학 모델 파라미터
+  2. 배치 행렬 곱: STL 평가의 행렬 연산
+  3. Warp 다이버전스 최소화: 조건 분기 줄이기
+  4. 비동기 메모리 전송: CPU-GPU 오버랩
+
+벤치마크 예시 (A100 GPU):
+  K=1000, T=30, N=3, B=8:
+    롤아웃: ~3ms
+    비용 계산: ~2ms  
+    MPPI 업데이트: ~0.5ms
+    총: ~5.5ms (RTF ≈ 18×)
+  
+  K=5000, T=50, N=5, B=12:
+    총: ~25ms (RTF ≈ 4×, 여전히 실시간)
+</code></pre>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

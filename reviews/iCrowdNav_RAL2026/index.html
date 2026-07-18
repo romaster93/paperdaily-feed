@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>iCrowdNav: Intention-Aware Scene Representations for Visual Crowd Navigation · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">IEEE Robotics and Automation Letters (RA-L) 2026 — 게재 확정(탑티어)</div>
+    <h1>iCrowdNav: Intention-Aware Scene Representations for Visual Crowd Navigation</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2606.26047">arXiv:2606.26047</a></span>
+      <span>리뷰 2026-06-26</span>
+      <span>40분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>iCrowdNav: 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: iCrowdNav: Intention-Aware Scene Representations for Visual Crowd Navigation</li>
+<li><strong>저자 (Authors)</strong>: (arXiv 메타 기준) 군중 내비게이션·강화학습 연구진</li>
+<li><strong>소속 (Affiliation)</strong>: 대학 로보틱스/컴퓨터비전 연구실 (RGB-D 기반 시각 내비게이션)</li>
+<li><strong>발표처 (Published)</strong>: IEEE Robotics and Automation Letters (RA-L) 2026 — <strong>게재 확정(탑티어)</strong></li>
+<li><strong>DOI</strong>: 10.1109/LRA.2026.3677748</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2606.26047">2606.26047</a></li>
+<li><strong>코드</strong>: ❌ 미공개 (논문·프로젝트 페이지에서 코드 링크 확인 불가, 2026-06-26 기준)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>iCrowdNav는 <strong>밀집 군중(crowd) 환경에서 자연어 지시 없이 목표점까지 이동하는 시각 기반(vision-based) 로봇 내비게이션</strong> 문제를 다룬다. 핵심 통찰은 다음 한 문장으로 요약된다: <strong>&quot;사람의 자세(human pose)는 그 사람의 이동 의도(motion intention)를 반영하며, 명확하고 신뢰할 수 있는 시각적 단서를 제공한다.&quot;</strong></p>
+<p>기존 군중 내비게이션 연구는 대부분 보행자를 <strong>단순한 2D 원판(disk) 또는 위치+속도 벡터</strong>로 추상화한다. 이 추상화는 시뮬레이션에서는 깔끔하지만, 실제 세계에서 &quot;그 사람이 다음에 어디로 갈 것인가&quot;라는 핵심 정보를 버린다. 사람은 회전하기 전에 몸통과 머리를 먼저 돌리고, 멈추기 전에 보폭을 줄이며, 방향을 바꾸기 전에 어깨선이 기울어진다. 이 모든 <strong>선행 운동학적 신호(kinematic precursors)</strong>가 위치+속도 표현에서는 사라진다.</p>
+<p>iCrowdNav는 이 간극을 메우기 위해 <strong>3D 인간 포즈(17 관절)를 의도 인코딩의 1차 입력으로 끌어올리고</strong>, 이를 환경의 조감도(Bird&#39;s-Eye View, BEV) 점유 표현과 융합하여 심층강화학습(DRL) 정책에 공급한다. 최종 목표는 <strong>시뮬레이션에서 학습한 정책을 추가 미세조정 없이(zero-shot) 실제 로봇에 배치(sim-to-real)</strong> 하는 것이며, 논문은 실외 체육관·지하철역·쇼핑몰에서 이를 실증한다.</p>
+<p>연구가 답하려는 핵심 질문은 세 가지다:</p>
+<ol>
+<li>보행자의 <strong>3D 자세</strong>를 명시적으로 인코딩하면, 위치+속도만 쓰는 정책 대비 <strong>사회적 거리 유지(comfort)와 안전성</strong>이 실제로 개선되는가?</li>
+<li>RGB-D만으로 구성한 <strong>시간적(temporal) BEV 표현</strong>이 정적/동적 장애물을 충분히 포착하여 LiDAR 없이도 견고한 내비게이션을 가능케 하는가?</li>
+<li>시뮬레이션에서 학습한 시각 인코더가 <strong>도메인 갭을 넘어 실세계로 zero-shot 전이</strong>되는가?</li>
+</ol>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) 보행자 의도의 관측 불가능성(partial observability of intent).</strong>
+군중 내비게이션의 본질적 어려움은 보행자의 미래 궤적이 <strong>로봇에게 직접 관측되지 않는 잠재 변수</strong>라는 점이다. 전통적 접근(ORCA, Social Force Model, CADRL 등)은 보행자를 등속 직선 운동하는 점으로 가정하거나, 상호작용을 단순 반발력으로 모델링한다. 그러나 실제 보행자는 비선형적·예측적으로 움직이며, 이 가정의 오차가 누적되면 로봇은 &quot;freezing robot problem&quot;(과도하게 보수적이 되어 정지) 또는 반대로 충돌 위험 행동을 보인다.</p>
+<p><strong>(C2) 위치+속도 추상화의 정보 손실.</strong>
+보행자를 <code>(x, y, v_x, v_y)</code>로 표현하면 <strong>그 사람이 회전 중인지, 감속 중인지, 로봇을 인지했는지</strong> 같은 의도 신호가 모두 소거된다. 사람의 몸통 방향(torso orientation)은 다음 0.5–1초의 이동 방향을 위치/속도보다 먼저 드러내는 강한 예측자이지만, 점-표현은 이를 담을 차원이 없다.</p>
+<p><strong>(C3) 시뮬레이션-실세계 도메인 갭(sim-to-real gap).</strong>
+DRL 군중 내비게이션 정책은 시뮬레이터에서 학습되지만, 실세계 배치 시 (i) 센서 노이즈, (ii) 보행자 외형/행동 분포 차이, (iii) 조명·텍스처 차이로 성능이 급락한다. 특히 <strong>저수준 픽셀을 직접 정책 입력으로 쓰면</strong> 도메인 갭에 극도로 취약하다.</p>
+<p><strong>(C4) 자아중심(egocentric) 카메라의 제한된 시야와 가림(occlusion).</strong>
+LiDAR 없이 RGB-D만 쓰면 시야각(FOV)이 좁고, 밀집 군중에서는 앞사람이 뒷사람을 가린다. 가려진 관절(occluded keypoints)을 어떻게 처리하느냐가 의도 추정의 신뢰도를 좌우한다. 논문 스스로 &quot;초고밀도 장면에서의 심한 가림과 자아중심 카메라의 제한된 FOV가 의도 추론을 어렵게 한다&quot;고 한계로 명시한다.</p>
+<p><strong>(C5) 정적 환경 구조와 동적 보행자의 통합 표현.</strong>
+벽·기둥·가구 같은 정적 장애물과, 움직이는 보행자를 <strong>하나의 일관된 표현 공간</strong>에 담아야 정책이 둘을 동시에 고려할 수 있다. 둘을 분리된 채널로 처리하면 융합 시점에서 정합(alignment) 문제가 생긴다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>iCrowdNav의 해법은 <strong>&quot;의도-인지 장면 표현(intention-aware scene representation)&quot;</strong> 이라는 이중 스트림 인코더로 요약된다:</p>
+<pre><code>                        ┌─────────────────────────────────────┐
+  RGB-D 시퀀스 ───────▶│  Spatio-Temporal Encoder (환경 스트림) │──┐
+  (다중 카메라)         │  → 시간정렬 BEV 점유 z^t_bev          │  │
+                        └─────────────────────────────────────┘  │
+                                                                   ├─▶ Fusion ϕ_f ─▶ PPO 정책 ─▶ (v, ω)
+                        ┌─────────────────────────────────────┐  │
+  3D 인간 포즈 ───────▶│  I2Former (의도 스트림)               │──┘
+  (17관절×Np명)        │  → 상호작용 임베딩 z^t_interact        │
+                        └─────────────────────────────────────┘
+</code></pre>
+<ul>
+<li><strong>환경 스트림(Spatio-Temporal Encoder)</strong>: 다중 뷰 RGB-D를 ResNet-18로 인코딩 → 3D 투영 → 자아중심 BEV로 축약 → 로봇 궤적 기반 기하 변환으로 과거 프레임 정렬 → 3D CNN 시간 인코더로 동적 점유 포착. (C2의 정적/동적 구조, C5 통합 표현 해결)</li>
+<li><strong>의도 스트림(I2Former = Intent-Interact Former)</strong>: 3D 포즈를 IntentFormer(자기-어텐션)로 관절 관계 인코딩 → InteractFormer(교차-어텐션)로 로봇 상태가 보행자 특징을 질의 → 어텐션 풀링으로 적응적 가중. (C1, C2 의도 신호 복원)</li>
+<li><strong>도메인 갭 완화</strong>: 저수준 픽셀 대신 <strong>BEV 점유 + 관절-수준 추상 특징</strong>이라는 중간 표현(mid-level representation)을 정책 입력으로 사용 → sim-to-real 갭 축소. (C3 해결)</li>
+<li><strong>가림 처리</strong>: 가려진 관절을 <strong>0-패딩(zero-padding)</strong> 하고 어텐션이 유효 관절에 집중. (C4 부분 완화)</li>
+</ul>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 의도-인지 장면 표현: 인간 포즈에서 의도로</h3>
+<p>iCrowdNav의 출발점은 <strong>보행자를 점이 아니라 17개 3D 관절의 골격(skeleton)으로 표현</strong>하는 것이다. 파이프라인은:</p>
+<pre><code>RGB-D ──[Ultralytics YOLO]──▶ 2D 포즈(17 keypoints) ──[depth 리프팅]──▶ 3D 포즈
+                                                                          │
+                                                          Θ^t ∈ ℝ^(Np × 17 × 3)
+</code></pre>
+<ul>
+<li><code>Np</code>: 현재 프레임에서 검출된 보행자 수</li>
+<li><code>17</code>: COCO 골격 관절 수 (코, 양 눈/귀, 양 어깨/팔꿈치/손목, 양 엉덩이/무릎/발목)</li>
+<li><code>3</code>: 각 관절의 3D 좌표 (x, y, z), 2D 검출 + depth로 복원</li>
+</ul>
+<p><strong>왜 골격인가?</strong> 어깨선 벡터(좌어깨→우어깨)는 몸통 정면 방향(facing direction)을 직접 인코딩한다. 무릎-발목 각도는 보폭/감속을 드러낸다. 머리 방향은 주의(attention) 방향을 시사한다. 이 모든 신호가 위치+속도에는 없다. 논문은 이를 &quot;human poses reflect motion intentions and provide clear and reliable visual cues&quot;로 정식화한다.</p>
+<h3>3.2 Intent-Interact Former (I2Former)</h3>
+<p>I2Former는 네 개 하위 모듈로 구성된다.</p>
+<h4>(a) Pose Encoder</h4>
+<p>원시 3D 좌표를 임베딩으로 사상하는 MLP. <strong>가려진 관절은 0-패딩</strong> 처리한다:</p>
+<pre><code>Θ̂^t = PoseEncoder(Θ^t),   가려진 관절 j: Θ^t[:, j, :] = 0
+</code></pre>
+<p>이 단순한 0-패딩 전략은 (C4) 가림 문제에 대한 실용적 절충이다. 가려진 관절을 명시적으로 마스킹하는 대신, 0 입력 + 후속 어텐션이 유효 관절에 자연히 가중되도록 학습에 맡긴다.</p>
+<h4>(b) IntentFormer — 관절 내 자기-어텐션</h4>
+<p>멀티헤드 자기-어텐션(MHSA)으로 한 사람 내부의 관절 관계를 포착한다:</p>
+<pre><code>f̂^t_ped = LN( MHSA(Θ̂^t) + Θ̂^t )
+</code></pre>
+<ul>
+<li><code>MHSA</code>: multi-head self-attention — 관절 간 상관(예: 어깨 회전과 골반 회전의 연동)을 학습</li>
+<li><code>LN</code>: layer normalization, <code>+ Θ̂^t</code>: 잔차 연결(residual)</li>
+<li>직관: &quot;이 골격이 표상하는 운동 패턴(걷기/회전/정지)은 무엇인가&quot;를 관절 토큰들의 상호 어텐션으로 추출</li>
+</ul>
+<h4>(c) InteractFormer — 로봇-보행자 교차-어텐션</h4>
+<p><strong>로봇 상태가 질의(query)가 되어 보행자 특징을 키/값으로 조회</strong>하는 멀티헤드 교차-어텐션(MHCA):</p>
+<pre><code>ẑ^t_interact = LN( MHCA(e^t_robot, f^t_ped) + e^t_robot )
+</code></pre>
+<ul>
+<li><code>e^t_robot</code>: 로봇 상태 임베딩 (질의)</li>
+<li><code>f^t_ped</code>: 보행자 골격 특징 (키/값)</li>
+<li>직관: &quot;<strong>내(로봇) 현재 상태에서, 이 보행자들 중 누가 나에게 위협적이고 누가 무관한가</strong>&quot;를 로봇 관점에서 적응적으로 평가. 단순히 모든 보행자를 동등 처리하지 않고, 로봇의 진행 방향·속도와 충돌 가능성이 높은 보행자에 가중.</li>
+</ul>
+<p>이 교차-어텐션 구조가 iCrowdNav의 핵심 차별점이다. 다수 군중 정책은 보행자 특징을 max/mean 풀링으로 집계하여 <strong>로봇 자신의 상태와 무관하게</strong> 군중을 요약한다. iCrowdNav는 로봇 상태를 질의로 삼아 <strong>로봇-중심 상호작용(robot-centric interaction)</strong> 을 명시적으로 모델링한다.</p>
+<h4>(d) Attention Pooling</h4>
+<p>관절 중요도를 적응적으로 가중하여 보행자별 특징을 고정 차원 벡터로 풀링. 모든 보행자 특징을 종합해 <code>z^t_interact</code> 산출.</p>
+<pre><code>ASCII: I2Former 데이터 흐름
+  Θ^t (Np×17×3)
+     │ PoseEncoder(MLP, 0-pad 가림)
+     ▼
+  Θ̂^t ──[MHSA + LN + Res]──▶ f̂^t_ped   (관절 내 자기-어텐션: 사람별 운동패턴)
+                                  │
+  e^t_robot ──[질의]──▶ MHCA(robot, ped) + LN + Res
+                                  │            (로봇-중심 교차-어텐션: 누가 위협적인가)
+                                  ▼
+                          ẑ^t_interact
+                                  │ Attention Pooling(관절 중요도 가중)
+                                  ▼
+                          z^t_interact  (의도 스트림 최종 임베딩)
+</code></pre>
+<h3>3.3 Spatio-Temporal Encoder — RGB-D에서 시간정렬 BEV로</h3>
+<p>환경 스트림은 RGB-D 관측을 <strong>조감도 점유(BEV occupancy)</strong> 로 변환하고, 시간 축을 따라 정렬·인코딩한다.</p>
+<pre><code>단계 1: 다중 뷰 RGB → ResNet-18(사전학습) → e^t ∈ ℝ^(Nc × C × Hc × Wc)
+단계 2: depth 다운샘플 → d^t ∈ ℝ^(Nc × Hc × Wc)
+단계 3: 3D 투영 → 자아중심 프레임 → sum pooling으로 BEV 축약
+            x^t_bev ∈ ℝ^(C × 120 × 200)
+단계 4: 과거 프레임을 로봇 궤적 기하변환으로 정렬
+단계 5: 3D CNN 시간 인코더(nuScenes 사전학습)
+            s^t_bev = F_τ( x^{t-T}_bev, ..., x^t_bev )
+</code></pre>
+<ul>
+<li><code>Nc</code>: 카메라(뷰) 수</li>
+<li>BEV 해상도 <code>120 × 200</code>: 자아중심 격자. 로봇 전방 영역을 미터 단위로 이산화한 점유맵</li>
+<li><strong>시간 정렬(temporal alignment)이 핵심</strong>: 로봇이 움직이므로 과거 BEV는 현재 로봇 프레임 기준으로 좌표가 다르다. 로봇 궤적(odometry)으로 과거 BEV를 현재 자아중심 프레임에 <strong>기하변환(warping)</strong> 하여 정렬한 뒤, 3D CNN으로 시간 차원을 인코딩 → <strong>동적 점유(움직이는 장애물의 흐름)</strong> 가 표현에 자연히 담긴다.</li>
+<li>백본(ResNet-18, 시간 인코더)은 <strong>사전학습 후 동결(frozen)</strong> — 저수준 시각 특징은 대규모 데이터(ImageNet/nuScenes)에서 이미 견고하게 학습됐으므로, sim-to-real 갭을 키우는 과적합을 피하기 위해 정책 학습 중 고정.</li>
+</ul>
+<h3>3.4 상태 융합과 DRL 정책</h3>
+<p>세 스트림(환경 BEV, 상호작용, 로봇 자기상태)을 연결하여 최종 상태 임베딩을 만든다 (식 10):</p>
+<pre><code>z^t = ϕ_f( Concat( z^t_bev , z^t_interact , z^t_state ) )
+</code></pre>
+<ul>
+<li><code>z^t_bev</code>: 시간정렬 BEV 점유 (환경 스트림)</li>
+<li><code>z^t_interact</code>: I2Former 상호작용 임베딩 (의도 스트림)</li>
+<li><code>z^t_state</code>: 로봇 자기상태 — <strong>목표 방향(goal direction), 목표까지 거리(distance to goal), 속도(velocity)</strong></li>
+<li><code>ϕ_f</code>: 융합 MLP</li>
+</ul>
+<p>이 융합 표현 <code>z^t</code>가 PPO 정책 네트워크에 입력되어 <strong>선·각속도(linear/angular velocity)</strong> 행동을 출력한다.</p>
+<h4>보상 함수 설계 (식 11–12)</h4>
+<p>iCrowdNav의 보상은 <strong>희소 종단 신호 + 조밀 진행 신호 + 사회적 거리 페널티 + 평활화 페널티</strong>의 결합이다:</p>
+<pre><code>R^t = R_terminal + R_progress + R_social + R_smooth
+
+R_terminal = +20      if d^t_g ≤ ρ_robot        (성공: 목표 도달)
+           = -20      if d^t_min ≤ ρ_robot       (충돌: 보행자/장애물 최소거리 위반)
+
+R_progress = 3.2 · ( d^{t-1}_g − d^t_g )          (목표 접근 진행 보상)
+
+R_social   = 0.5 · ( d_o − 0.9 )   if d_o &lt; 0.8m  (사적 영역 침범 페널티)
+
+R_smooth   = −0.1 · |ω_z|           if |ω_z| &gt; 1.0 rad/s  (과도 각속도 억제)
+</code></pre>
+<ul>
+<li><strong>종단 보상 ±20</strong>: 성공/충돌의 강한 신호. 충돌은 보행자뿐 아니라 정적 장애물도 포함.</li>
+<li><strong>진행 보상 계수 3.2</strong>: 매 스텝 목표에 가까워진 거리차에 비례 — freezing robot problem을 완화하는 조밀 보상.</li>
+<li><strong>사회적 페널티 (0.8m 사적 영역)</strong>: 보행자와 0.8m 이내로 접근 시 <code>0.5(d_o − 0.9)</code> 페널티. <code>d_o &lt; 0.9</code>에서 음수가 되어 침범할수록 강한 벌점 → <strong>comfort(편안함) 거리 유지</strong> 유도.</li>
+<li><strong>평활화 (&gt;1.0 rad/s)</strong>: 급회전을 <code>−0.1|ω_z|</code>로 억제 → 매끄럽고 사람이 예측 가능한 궤적.</li>
+</ul>
+<h4>학습 알고리즘</h4>
+<p><strong>PPO(Proximal Policy Optimization)</strong> 사용. 사전학습 백본(ResNet-18, 시간 인코더)은 동결, 학습 모듈(I2Former, 융합, 정책 헤드)만 공동 최적화. 이 부분 동결 전략은 (i) 학습 안정성, (ii) sim-to-real 견고성, (iii) 샘플 효율을 동시에 노린 설계다.</p>
+<pre><code>ASCII: 전체 학습/추론 파이프라인
+  ┌──────────── 관측 ────────────┐
+  │ 다중뷰 RGB-D 시퀀스           │     │ 3D 포즈(YOLO+depth)        │
+  └──────────────┬───────────────┘     └──────────┬────────────────┘
+                 ▼                                 ▼
+   Spatio-Temporal Encoder(동결백본)    I2Former(MHSA→MHCA→pool)
+                 │ z^t_bev                         │ z^t_interact
+                 └────────────┬────────────────────┘
+                              ▼   + z^t_state(목표방향/거리/속도)
+                        Fusion ϕ_f  ──▶  z^t
+                              ▼
+                    PPO 정책 네트워크
+                              ▼
+                       행동 (v, ω_z)  ──▶  로봇
+                              ▲
+                        보상 R^t(식11-12)  ◀── 환경(Isaac Sim)
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<p>전체 파이프라인은 <strong>3단계</strong>로 구성된다 (Figure 2 기준):</p>
+<pre><code>[단계 1] 특징 추출 (Feature Extraction) — 병렬
+  ├─ 환경 경로: RGB-D 시퀀스 → ResNet-18 → 3D 투영 → BEV → 시간정렬 → 3D CNN → z_bev
+  └─ 의도 경로: 3D 포즈 → PoseEncoder → IntentFormer(MHSA) → InteractFormer(MHCA) → AttnPool → z_interact
+
+[단계 2] 특징 융합 (Feature Fusion)
+  Concat( z_bev , z_interact , z_state ) → ϕ_f → z^t
+
+[단계 3] DRL 정책 (Policy)
+  PPO( z^t ) → (선속도 v, 각속도 ω_z)
+</code></pre>
+<p><strong>데이터 흐름의 두 가지 설계 미학:</strong></p>
+<ol>
+<li><p><strong>이질적 모달리티를 공통 잠재 공간으로</strong>: 픽셀(RGB), 깊이(depth), 골격(pose), 스칼라(목표/속도)라는 전혀 다른 모달리티를 각각 전용 인코더로 처리한 뒤 잠재 임베딩 수준에서 연결. 이는 저수준에서 섣불리 융합할 때 생기는 모달리티 불균형을 피한다.</p>
+</li>
+<li><p><strong>로봇-중심성(robot-centricity)이 두 스트림에 일관되게 관통</strong>: 환경 스트림은 BEV를 <strong>자아중심 프레임</strong>으로 잡고, 의도 스트림은 InteractFormer에서 <strong>로봇 상태를 질의</strong>로 쓴다. 즉 두 표현 모두 &quot;세계를 객관적으로 기술&quot;하는 것이 아니라 &quot;<strong>로봇 관점에서 행동에 필요한 것</strong>&quot;만 추린다. 이 점이 행동 정책과의 정합을 높인다.</p>
+</li>
+</ol>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 / 시뮬레이션 환경 (Datasets)</h3>
+<ul>
+<li><strong>시뮬레이터</strong>: <strong>Isaac Sim</strong> (NVIDIA), 사진현실적(photo-realistic) 렌더링</li>
+<li><strong>로봇 플랫폼</strong>: Clearpath Dingo (최대 속도 1.0 m/s), <strong>두 대의 Intel RealSense D435 RGB-D 카메라</strong> 장착 → 합산 <strong>140° 시야각(FOV)</strong></li>
+<li><strong>보행자 모델</strong>: <strong>Social Force Model(SFM)</strong> 로 구동, <strong>완전 무작위 목표점</strong>을 향해 이동 → 다양하고 예측 불가능한 군중 흐름 생성</li>
+<li><strong>테스트 환경(3종)</strong>:<ul>
+<li><strong>사무실 로비(Office lobby)</strong>: 폭 7.0m (개방 공간)</li>
+<li><strong>병원 복도(Hospital corridor)</strong>: 폭 4.0m (중간 협소)</li>
+<li><strong>창고(Warehouse)</strong>: 폭 2.5m (좁은 통로)</li>
+</ul>
+</li>
+<li><strong>군중 밀도(2종)</strong>: 0.1 및 0.2 명/m²</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>지표</th>
+<th>정의</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>SR (Success Rate)</strong></td>
+<td>충돌 없이 목표 도달한 시행 비율</td>
+<td>안전성·완수율</td>
+</tr>
+<tr>
+<td><strong>NT (Navigation Time)</strong></td>
+<td>성공 시행의 평균 소요 시간(s)</td>
+<td>효율성</td>
+</tr>
+<tr>
+<td><strong>PL (Path Length)</strong></td>
+<td>평균 이동 거리(m)</td>
+<td>경로 효율</td>
+</tr>
+<tr>
+<td><strong>TPZ (Time in Private Zone)</strong></td>
+<td>보행자 0.8m 이내 체류 평균 시간(s)</td>
+<td><strong>사회적 편안함(comfort)</strong></td>
+</tr>
+</tbody></table></div>
+<p>여기서 <strong>TPZ가 iCrowdNav의 핵심 차별 지표</strong>다. SR이 높아도 보행자에게 바짝 붙어 지나가면(높은 TPZ) 사회적으로 부적절하다. 의도-인지 표현의 가치는 바로 이 TPZ를 낮추는 데서 드러난다.</p>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>Table I — 저밀도(0.1 명/m²) 주요 결과:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>환경</th>
+<th>SR</th>
+<th>NT(s)</th>
+<th>PL(m)</th>
+<th>TPZ(s)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Office (7.0m)</td>
+<td><strong>0.95</strong></td>
+<td>9.03</td>
+<td>5.87</td>
+<td>0.92</td>
+</tr>
+<tr>
+<td>Hospital (4.0m)</td>
+<td><strong>0.88</strong></td>
+<td>9.82</td>
+<td>6.19</td>
+<td>1.98</td>
+</tr>
+<tr>
+<td>Warehouse (2.5m)</td>
+<td><strong>0.87</strong></td>
+<td>9.77</td>
+<td>6.15</td>
+<td>1.83</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li><strong>개방 환경(Office)에서 SR 0.95</strong>로 최고. 통로가 좁아질수록(Hospital→Warehouse) SR이 0.88→0.87로 점진 하락 — 좁은 공간에서 회피 여유가 줄기 때문. 그러나 폭 2.5m 창고에서도 0.87을 유지해 견고성을 보인다.</li>
+<li><strong>TPZ</strong>: Office 0.92s로 낮고, 좁은 환경에서 1.8~2.0s로 증가 — 물리적으로 회피 공간이 좁으면 보행자 근접이 불가피.</li>
+</ul>
+<p><strong>Baselines</strong>: DRL-VO, SARL*-OM, ViNT, DWA 와 비교.</p>
+<p><strong>Table II — 장거리(Long-Horizon, 20m+) 실험:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>환경</th>
+<th>SR</th>
+<th>TPZ(s)</th>
+<th>비교(SARL*)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Office (20m+)</td>
+<td><strong>0.95</strong></td>
+<td><strong>1.70</strong></td>
+<td>SARL* TPZ 7.96s</td>
+</tr>
+<tr>
+<td>Hospital</td>
+<td>0.79</td>
+<td><strong>0.42</strong></td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li><strong>장거리에서 TPZ 1.70s vs SARL* 7.96s</strong> — iCrowdNav가 <strong>사회적 거리 유지에서 4.7배 우수</strong>. 이것이 의도-인지 표현의 직접적 증거다: 보행자 자세에서 미래 방향을 미리 읽어 <strong>선제적으로 우회</strong>하므로 사적 영역 체류가 급감한다.</li>
+<li>장거리에서도 Office SR 0.95 유지 → 누적 오차에 견고.</li>
+</ul>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p>iCrowdNav의 가장 강력한 주장은 <strong>zero-shot sim-to-real</strong>이다. 시뮬레이션(Isaac Sim)에서만 학습한 정책을 <strong>추가 미세조정 없이</strong> 실제 로봇에 배치:</p>
+<ul>
+<li><strong>배치 장소</strong>: 실외 체육관(outdoor gym), 지하철역(subway station), 쇼핑몰(shopping mall) — 통제되지 않은 진짜 군중</li>
+<li><strong>쇼핑몰 장거리</strong>: <strong>109.49m 연속 내비게이션</strong>, 평균 속도 <strong>0.76 m/s</strong></li>
+<li><strong>추론 속도</strong>: <strong>15 Hz on RTX 2060 GPU</strong> — 보급형 GPU에서 실시간 동작</li>
+</ul>
+<p>이 결과의 함의는 크다. 109m를 실제 쇼핑몰 군중 속에서 충돌 없이 주파했다는 것은, <strong>시뮬레이터에서 학습한 BEV+골격 중간 표현이 실세계 도메인 갭을 견뎠다</strong>는 직접 증거다. 저수준 픽셀을 정책 입력으로 썼다면 이 전이는 거의 불가능했을 것이다. 중간 표현(mid-level abstraction) 전략 + 동결 백본의 설계 의도가 실증된 셈이다.</p>
+<h3>5.5 절제 연구 (Ablation Studies) — 각 스트림의 기여</h3>
+<p>논문은 두 핵심 모듈을 각각 제거하여 기여를 분리한다:</p>
+<p><strong>(A) I2Former 제거 (의도 스트림 off):</strong></p>
+<ul>
+<li>SR이 <strong>0.04–0.09 하락</strong></li>
+<li>TPZ가 <strong>0.87–2.22s 증가</strong></li>
+</ul>
+<p>→ 의도 스트림은 <strong>SR보다 TPZ에 훨씬 큰 영향</strong>. 즉 골격-기반 의도 인코딩의 주된 가치는 &quot;충돌을 더 막는 것&quot;보다 &quot;<strong>보행자에게 덜 가까이 붙어 더 정중하게 회피하는 것</strong>&quot;이다. 이것은 직관과 정확히 일치한다 — 보행자의 미래 방향을 미리 알면 멀찍이 선제 우회할 수 있다.</p>
+<p><strong>(B) BEV 제거 (환경 스트림 off):</strong></p>
+<ul>
+<li>SR이 <strong>0.06–0.13 하락</strong></li>
+<li>NT가 <strong>유의하게 증가</strong></li>
+</ul>
+<p>→ BEV 점유 표현은 <strong>안전성(SR)과 효율(NT)</strong> 양쪽에 필수. 정적 구조와 동적 점유를 통합 표현하지 못하면 충돌이 늘고 경로가 비효율적이 된다.</p>
+<p><strong>절제 연구의 통찰</strong>: 두 스트림은 <strong>상보적(complementary)</strong> 이다. BEV는 &quot;어디가 막혔는가(공간 안전)&quot;를, I2Former는 &quot;사람들이 어디로 갈 것인가(사회적 편안함)&quot;를 담당한다. 둘 중 하나만으로는 안전하면서도 정중한 내비게이션이 불가능하다.</p>
+<h3>5.6 환경 간 견고성의 해석 (Cross-Environment Robustness)</h3>
+<p>세 환경(Office 7.0m / Hospital 4.0m / Warehouse 2.5m)의 결과를 <strong>통로 폭의 함수</strong>로 읽으면 iCrowdNav의 작동 원리가 더 선명해진다.</p>
+<pre><code>통로 폭(m):   7.0 ────────── 4.0 ────────── 2.5
+SR:          0.95          0.88           0.87
+TPZ(s):      0.92          1.98           1.83
+NT(s):       9.03          9.82           9.77
+</code></pre>
+<ul>
+<li><strong>SR vs 폭</strong>: 7.0m→4.0m에서 SR이 0.95→0.88로 7%p 급락하나, 4.0m→2.5m에서는 0.88→0.87로 거의 평탄. 이는 <strong>회피 자유도가 임계폭(약 4m) 아래로 떨어지면 추가 협소화의 한계 효과가 작다</strong>는 의미 — 한 번 &quot;지나갈 길이 하나뿐&quot;인 상황이 되면 더 좁아져도 정책의 전략(따라가기/대기)이 동일하게 작동.</li>
+<li><strong>TPZ의 비단조성</strong>: Hospital(1.98s) &gt; Warehouse(1.83s). 가장 좁은 창고에서 오히려 TPZ가 낮다. 해석: 폭 2.5m에서는 보행자와 로봇이 <strong>명확히 한 줄로 정렬</strong>되어 교차 시간이 짧지만, 폭 4.0m에서는 서로 비껴갈 공간이 어중간해 근접 체류가 길어진다. 즉 <strong>&quot;중간 폭&quot;이 사회적으로 가장 까다롭다</strong> — 회피할지 따라갈지 모호한 영역.</li>
+<li><strong>NT의 안정성</strong>: 세 환경 모두 9.0~9.8s로 비슷 — 정책이 환경 기하에 관계없이 일관된 진행 속도를 유지(진행 보상 3.2의 효과).</li>
+</ul>
+<p>이 분석은 iCrowdNav를 실배치할 때 <strong>폭 4m 안팎의 중간 통로(병원 복도, 사무실 통로)가 comfort 관점에서 가장 주의가 필요한 구간</strong>임을 시사한다 — 가장 좁은 곳이 아니라 가장 모호한 곳이 사회적 마찰을 만든다.</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>인간 포즈를 의도의 1차 시각 단서로 격상한 표현 학습.</strong>
+보행자를 점/원판이 아니라 17관절 3D 골격으로 표현하고, IntentFormer(자기-어텐션)로 관절-수준 운동 패턴을, InteractFormer(로봇-중심 교차-어텐션)로 로봇-보행자 상호작용을 인코딩. 이는 &quot;위치+속도&quot; 추상화가 버리는 선행 운동 신호(몸통 방향, 보폭 변화)를 복원한다.</p>
+</li>
+<li><p><strong>시간정렬 BEV 점유로 정적·동적 환경을 통합 표현.</strong>
+RGB-D를 자아중심 BEV로 변환하고 로봇 궤적 기하변환으로 과거 프레임을 정렬한 뒤 3D CNN으로 시간 인코딩. LiDAR 없이 RGB-D만으로 동적 점유 흐름을 포착.</p>
+</li>
+<li><p><strong>중간 표현 + 동결 백본을 통한 zero-shot sim-to-real.</strong>
+저수준 픽셀 대신 BEV 점유 + 골격 추상 특징을 정책 입력으로 사용하고, 사전학습 백본을 동결하여 도메인 갭을 축소. 실외 체육관·지하철역·쇼핑몰에서 미세조정 없이 배치, 쇼핑몰 109.49m 실증.</p>
+</li>
+<li><p><strong>사회적 편안함(comfort)의 정량적 개선 입증.</strong>
+TPZ 지표로 장거리에서 1.70s(vs SARL* 7.96s, 4.7배 우수)를 달성. 절제 연구로 이 개선이 I2Former(의도 스트림)에서 기인함을 분리 입증.</p>
+</li>
+<li><p><strong>Isaac Sim 기반 다양한 인간-중심 시뮬레이션 환경.</strong>
+사무실·병원·창고 3종 × 2 밀도 × SFM 무작위 보행자 — 재현 가능하고 다양한 군중 내비게이션 벤치마크 구성.</p>
+</li>
+</ol>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 핵심 하이퍼파라미터 / 설정</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>BEV 해상도</td>
+<td>120 × 200</td>
+<td>자아중심 점유 격자</td>
+</tr>
+<tr>
+<td>관절 수</td>
+<td>17 / 보행자</td>
+<td>COCO 골격</td>
+</tr>
+<tr>
+<td>가림 관절 처리</td>
+<td>0-패딩</td>
+<td>PoseEncoder 단계</td>
+</tr>
+<tr>
+<td>사적 영역 임계</td>
+<td>0.8 m</td>
+<td>사회적 페널티 발동 거리</td>
+</tr>
+<tr>
+<td>각속도 페널티 임계</td>
+<td>&gt; 1.0 rad/s</td>
+<td>평활화</td>
+</tr>
+<tr>
+<td>성공/충돌 보상</td>
+<td>+20 / −20</td>
+<td>종단 신호</td>
+</tr>
+<tr>
+<td>진행 보상 계수</td>
+<td>3.2</td>
+<td><code>3.2(d^{t-1}_g − d^t_g)</code></td>
+</tr>
+<tr>
+<td>사회 페널티</td>
+<td><code>0.5(d_o − 0.9)</code></td>
+<td>d_o &lt; 0.8m</td>
+</tr>
+<tr>
+<td>각속도 페널티</td>
+<td><code>−0.1|ω_z|</code></td>
+<td>|ω_z| &gt; 1.0</td>
+</tr>
+<tr>
+<td>최대 로봇 속도</td>
+<td>1.0 m/s</td>
+<td>Dingo 플랫폼</td>
+</tr>
+<tr>
+<td>카메라</td>
+<td>2× RealSense D435</td>
+<td>합산 140° FOV</td>
+</tr>
+<tr>
+<td>추론 속도</td>
+<td>15 Hz</td>
+<td>RTX 2060</td>
+</tr>
+<tr>
+<td>시뮬레이터</td>
+<td>Isaac Sim</td>
+<td>photo-realistic</td>
+</tr>
+<tr>
+<td>백본</td>
+<td>ResNet-18 (RGB), 3D CNN(nuScenes 사전학습)</td>
+<td>학습 중 <strong>동결</strong></td>
+</tr>
+<tr>
+<td>검출기</td>
+<td>Ultralytics YOLO (포즈)</td>
+<td>2D→depth 리프팅</td>
+</tr>
+<tr>
+<td>RL 알고리즘</td>
+<td>PPO</td>
+<td>학습 모듈만 공동 최적화</td>
+</tr>
+</tbody></table></div>
+<h3>7.2 학습 전략의 미묘함</h3>
+<ul>
+<li><strong>부분 동결(partial freezing)</strong>: 백본 동결은 단순한 계산 절약이 아니라 <strong>sim-to-real을 위한 정규화</strong>다. 시각 백본이 시뮬레이션 텍스처에 과적합되면 실세계에서 무너지므로, 대규모 실데이터(ImageNet/nuScenes)로 미리 학습한 특징을 고정하여 일반화를 확보한다.</li>
+<li><strong>0-패딩 가림 처리</strong>: 마스킹 어텐션 같은 정교한 기법 대신 0-입력 + 잔차 어텐션의 단순 조합. 구현 복잡도를 낮추면서도 실용 성능을 확보하는 실무적 선택. 단, 이것이 (8장에서 논할) 초고밀도 가림 한계의 근원이기도 하다.</li>
+<li><strong>보상의 균형</strong>: ±20 종단 신호가 너무 크면 조밀 보상이 묻히고, 너무 작으면 freezing이 생긴다. 진행 계수 3.2와 종단 ±20의 비(약 1:6)는 &quot;충돌은 절대 안 되지만, 가만히 있는 것도 손해&quot;라는 균형점을 인코딩한다.</li>
+</ul>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<p>iCrowdNav의 의도 스트림은 <strong>보행자 수 Np에 대해 어텐션 비용이 증가</strong>한다. I2Former의 InteractFormer는 로봇 질의 × Np 보행자 키/값이므로 비용은 O(Np)에 가깝고, IntentFormer의 관절 내 자기-어텐션은 보행자당 O(17²)로 상수다. 따라서 보행자 수에 선형 확장이 기대되나, <strong>초고밀도(0.2 명/m² 이상)에서는 검출/가림이 병목</strong>이 된다(아래 8.4).</p>
+<p>환경 스트림의 BEV(120×200)는 보행자 수와 무관한 고정 비용이므로, 군중이 아무리 밀집해도 환경 표현 비용은 일정하다. 이 비대칭(환경=상수, 의도=선형)은 좋은 설계 균형이다.</p>
+<h3>8.2 한계점 (Limitations)</h3>
+<p>논문이 명시한 한계:</p>
+<blockquote>
+<p>&quot;심한 가림(severe occlusions)과 자아중심 카메라의 제한된 FOV가 초고밀도 장면에서 의도 추론을 어렵게 한다.&quot;</p>
+</blockquote>
+<p>이로부터 파생되는 구체적 약점:</p>
+<ul>
+<li><strong>(L1) 가림 의존성</strong>: 0-패딩 전략은 일부 관절 가림에는 견디지만, 보행자가 다른 보행자에 거의 완전히 가려지면 골격 자체가 검출되지 않아 의도 스트림이 무력화된다.</li>
+<li><strong>(L2) FOV 한계</strong>: 140° FOV는 후방·측후방 보행자를 놓친다. 군중이 사방에서 접근하는 상황에서는 시야 밖 위협을 보지 못한다(LiDAR 360° 대비 본질적 한계).</li>
+<li><strong>(L3) 검출기 의존</strong>: YOLO 포즈 검출이 실패하면 의도 스트림 전체가 붕괴. 검출기 오차가 정책 입력 노이즈로 직결된다.</li>
+<li><strong>(L4) SFM 보행자로 학습</strong>: 시뮬레이션 보행자가 Social Force Model을 따르므로, 실세계 보행자의 비-SFM 행동(스마트폰 보며 걷기, 급정지, 무리 지어 멈춤)에 대한 일반화는 부분적으로만 검증.</li>
+</ul>
+<h3>8.3 향후 방향 (Future Directions)</h3>
+<p>논문은 &quot;더 풍부한 멀티모달 장면 표현(richer multi-modal scene representations)&quot;을 제시한다. 구체적으로 유망한 확장:</p>
+<ul>
+<li><strong>다중 센서 융합</strong>: RGB-D + 전방위(omnidirectional) 카메라 또는 희소 LiDAR로 FOV/가림 한계 완화.</li>
+<li><strong>명시적 미래 궤적 예측</strong>: 현재는 의도가 정책에 암묵적으로만 흐른다. 보행자 미래 궤적을 명시적으로 예측·시각화하면 해석가능성과 선제 회피가 강화될 수 있다.</li>
+<li><strong>언어/의미 통합</strong>: &quot;사람이 줄을 서 있다&quot;, &quot;문이 열린다&quot; 같은 의미적 맥락을 추가하면 사회 규범 준수가 향상.</li>
+</ul>
+<h3>8.4 실패 모드 분석 (Failure-Mode Analysis)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>실패 모드</th>
+<th>원인</th>
+<th>표현되는 지표 영향</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>좁은 통로 충돌</td>
+<td>회피 여유 부족 (Warehouse 2.5m)</td>
+<td>SR 0.87로 하락</td>
+</tr>
+<tr>
+<td>초고밀도 freezing/충돌</td>
+<td>심한 가림 → 골격 미검출 → 의도 스트림 무력</td>
+<td>고밀도에서 SR 추가 하락</td>
+</tr>
+<tr>
+<td>측후방 보행자 미감지</td>
+<td>140° FOV 사각</td>
+<td>TPZ 증가 / 충돌</td>
+</tr>
+<tr>
+<td>검출기 실패</td>
+<td>YOLO 포즈 누락</td>
+<td>z_interact 노이즈, 회피 실패</td>
+</tr>
+<tr>
+<td>비-SFM 행동</td>
+<td>학습 분포 밖 보행자</td>
+<td>실세계 일반화 저하</td>
+</tr>
+</tbody></table></div>
+<p>이 표는 iCrowdNav의 안전 한계가 <strong>주로 인지(perception) 측</strong>에 있음을 보여준다 — 정책 자체보다 &quot;보지 못하거나 잘못 본&quot; 경우가 실패의 주원인이다. 따라서 차기 개선의 레버리지는 정책 구조보다 <strong>센서/검출 강건화</strong>에 있다.</p>
+<h3>8.5 재현성 평가 (Reproducibility)</h3>
+<ul>
+<li><strong>코드</strong>: ❌ 미공개(2026-06-26 기준). 이것이 재현의 가장 큰 장벽.</li>
+<li><strong>시뮬레이터</strong>: Isaac Sim은 공개 도구이나, SFM 보행자 설정·환경 에셋·보상 가중의 세부가 코드 없이는 정확 재현이 어렵다.</li>
+<li><strong>하이퍼파라미터</strong>: 보상 계수(±20, 3.2, 0.8m, 1.0 rad/s)는 명시되어 있어 부분 재현 가능. 그러나 BEV 투영 세부, I2Former 차원, PPO 학습 일정(에폭/스텝/학습률) 등은 미상.</li>
+<li><strong>종합</strong>: 코드 부재로 <strong>완전 재현은 곤란</strong>, 보상/지표 정의는 명확해 <strong>개념 재현(reimplementation)</strong> 은 가능. 코퍼스 표기는 코드 ❌.</li>
+</ul>
+<h3>8.6 이론적 위치짓기 (Theoretical Positioning)</h3>
+<p>iCrowdNav는 <strong>표현 학습(representation learning)</strong> 의 관점에서 군중 내비게이션을 재정의한다. 전통 군중 내비게이션은 &quot;어떤 정책/제어 법칙이 충돌을 피하는가&quot;(ORCA, RVO, CADRL, SARL)에 집중했다. iCrowdNav는 질문을 한 단계 앞으로 옮긴다: <strong>&quot;정책에 무엇을 입력해야 하는가.&quot;</strong> 즉 정책 구조보다 <strong>입력 표현(state representation)</strong> 의 설계가 사회적 내비게이션 품질을 결정한다는 가설이다.</p>
+<p>이 입장은 절제 연구로 강하게 뒷받침된다 — 같은 PPO 정책이라도 I2Former 입력 유무에 따라 TPZ가 2배 이상 갈린다. <strong>&quot;표현이 정책을 결정한다(representation determines policy)&quot;</strong> 는 명제가 군중 내비게이션에서 실증된 사례로 볼 수 있다.</p>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>같은 Planner 트랙의 선행 리뷰 중 <strong>사회/군중 내비게이션</strong>과 가장 가까운 세 편과 비교한다:</p>
+<ul>
+<li><strong>IRRL: Incremental Residual Reinforcement Learning Toward Real-World Learning for Social Navigation</strong> (Planner/review/IRRL_arxiv2026) — SFM 베이스 정책 + GATv2 잔차 RL, 실세계 온라인 학습.</li>
+<li><strong>SCAN-Planner: Surface-Following Collision-Aware Navigation for Quadruped Robots in 3D Unstructured Environments</strong> (Planner/review/SCAN-Planner_arxiv2026) — 기하적 로컬 플래너, 동적 보행자 회피 포함.</li>
+<li><strong>HiPAN: Hierarchical Posture-Adaptive Navigation for Quadruped Robots in Unstructured 3D Environments</strong> (Planner/review/HiPAN_RAL2026) — 계층적 RL, depth-only, RA-L 동일 게재처.</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>IRRL</th>
+<th>SCAN-Planner</th>
+<th>HiPAN</th>
+<th><strong>iCrowdNav (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 패러다임</td>
+<td>잔차 RL (SFM+GAT)</td>
+<td>기하 최적화(A*+B-spline)</td>
+<td>계층 RL</td>
+<td><strong>표현학습 + PPO</strong></td>
+</tr>
+<tr>
+<td>주 입력</td>
+<td>보행자 상태 그래프</td>
+<td>LiDAR 점군</td>
+<td>depth 이미지</td>
+<td><strong>RGB-D + 3D 포즈</strong></td>
+</tr>
+<tr>
+<td>보행자 표현</td>
+<td>노드(위치/속도)</td>
+<td>점군 점유</td>
+<td>(지형 중심)</td>
+<td><strong>17관절 3D 골격</strong></td>
+</tr>
+<tr>
+<td>의도 모델링</td>
+<td>GAT 상호작용</td>
+<td>없음(반응적)</td>
+<td>없음</td>
+<td><strong>InteractFormer(로봇-중심 교차어텐션)</strong></td>
+</tr>
+<tr>
+<td>센서</td>
+<td>(시뮬+실세계)</td>
+<td>LiDAR 360°</td>
+<td>depth 카메라</td>
+<td><strong>RGB-D 카메라(140° FOV)</strong></td>
+</tr>
+<tr>
+<td>sim-to-real</td>
+<td>실세계 온라인 학습</td>
+<td>실로봇(Go2)</td>
+<td>실로봇</td>
+<td><strong>zero-shot(미세조정 없음)</strong></td>
+</tr>
+<tr>
+<td>사회적 지표</td>
+<td>충돌/성공</td>
+<td>충돌 회피</td>
+<td>(지형 통과)</td>
+<td><strong>TPZ(편안함) 명시 최적화</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>(확인)</td>
+<td>❌/예정</td>
+<td>❌ 미공개</td>
+<td><strong>❌ 미공개</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>iCrowdNav의 강점:</strong></p>
+<ol>
+<li><strong>의도 신호의 명시적 인코딩</strong> — IRRL의 GAT 상호작용은 노드(위치/속도)를 다루지만, iCrowdNav는 <strong>관절 수준 골격</strong>까지 내려가 몸통 방향·보폭 같은 미세 의도 신호를 포착. 이는 사회적 편안함(TPZ) 개선의 근원.</li>
+<li><strong>RGB-D만으로 360° LiDAR 없이</strong> 동작 — SCAN-Planner가 LiDAR 360° 점유에 의존하는 것과 대조. 비용·무게·통합 측면에서 RGB-D는 실용적 우위.</li>
+<li><strong>zero-shot sim-to-real</strong> — IRRL은 실세계 <strong>온라인 학습</strong>으로 갭을 메우지만, iCrowdNav는 <strong>추가 학습 없이</strong> 배치. 중간 표현+동결 백본 설계의 직접 성과.</li>
+</ol>
+<p><strong>iCrowdNav의 약점:</strong></p>
+<ol>
+<li><strong>FOV/가림 한계</strong> — SCAN-Planner의 LiDAR 360°는 사방을 보지만, iCrowdNav의 140° FOV는 측후방을 놓침. 군중이 사방에서 접근하는 최악 시나리오에서 본질적 취약.</li>
+<li><strong>검출기 의존성</strong> — IRRL/SCAN-Planner의 기하/그래프 표현은 검출기 단일 실패점이 덜하지만, iCrowdNav는 YOLO 포즈 검출 실패 시 의도 스트림 전체가 붕괴.</li>
+<li><strong>코드 미공개</strong> — IRRL 대비 재현성에서 불리(셋 다 코드 게이트는 약하나, iCrowdNav도 ❌).</li>
+</ol>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>iCrowdNav</strong>: RGB-D + 보급형 GPU(RTX 2060, 15Hz)로 실내 상업·서비스 공간(쇼핑몰·공항·병원 로비) 배치에 매우 적합. zero-shot 전이가 실증되어 <strong>배치 비용이 낮다</strong>. 단, 실외 광역·고속·사방 군중에는 FOV 한계로 부적합.</li>
+<li><strong>IRRL</strong>: 실세계 온라인 학습이 필요하므로 초기 배치 후 적응 기간이 필요하나, 장기적으로 현장 분포에 맞춰짐.</li>
+<li><strong>SCAN-Planner</strong>: 사족보행+LiDAR 기반 비정형 지형에 강점, 군중 comfort 최적화는 비대상.</li>
+</ul>
+<p><strong>종합</strong>: iCrowdNav는 <strong>&quot;실내 보행자 공간, RGB-D 센서, 즉시 배치&quot;</strong> 라는 틈새에서 가장 강한 실용 후보다.</p>
+<h3>9.4 연구 방향성 평가</h3>
+<p>iCrowdNav는 군중 내비게이션 연구의 무게중심을 <strong>&quot;정책 설계&quot;에서 &quot;표현 설계&quot;로</strong> 이동시킨다. 이는 IRRL(정책 측 잔차 학습), SCAN-Planner(기하 알고리즘)와 직교하는 축이다. 따라서 세 접근은 경쟁이 아니라 <strong>결합 가능</strong>하다 — 예컨대 iCrowdNav의 의도-인지 표현을 IRRL의 잔차 RL 정책 입력으로 쓰거나, SCAN-Planner의 기하 안전 보장을 iCrowdNav의 학습 정책 위에 안전 필터로 얹는 하이브리드가 자연스럽다.</p>
+<h3>9.5 일반화 가능성 (Generalization)</h3>
+<p>iCrowdNav의 핵심 아이디어인 <strong>&quot;행위자(agent)의 자세/골격을 의도 단서로 인코딩&quot;</strong> 는 보행자에 국한되지 않는다. 동일 원리를 (i) 다른 로봇/차량의 자세(휠 각도, 차체 방향), (ii) 동물, (iii) 자전거/킥보드 같은 마이크로모빌리티에 확장 가능하다. 즉 iCrowdNav는 <strong>&quot;상호작용 행위자의 운동학적 자세를 표현으로 끌어올린다&quot;</strong> 는 일반 레시피의 보행자 인스턴스다. 이 일반화 잠재력이 단일 논문의 군중 내비게이션 성과를 넘어서는 가치다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li>iCrowdNav, <em>IEEE Robotics and Automation Letters (RA-L)</em>, 2026. DOI: 10.1109/LRA.2026.3677748. arXiv:2606.26047.</li>
+<li>비교 대상 (본 코퍼스):<ul>
+<li>IRRL: Incremental Residual Reinforcement Learning Toward Real-World Learning for Social Navigation (arXiv 2604.07945).</li>
+<li>SCAN-Planner: Surface-Following Collision-Aware Navigation for Quadruped Robots in 3D Unstructured Environments (arXiv 2606.19555).</li>
+<li>HiPAN: Hierarchical Posture-Adaptive Navigation for Quadruped Robots in Unstructured 3D Environments (RA-L 2026, arXiv 2604.26504).</li>
+</ul>
+</li>
+<li>관련 기법: PPO (Schulman et al., 2017), ResNet (He et al., 2016), Social Force Model (Helbing &amp; Molnár, 1995), SARL/CADRL 계열 군중 내비게이션, nuScenes (Caesar et al., 2020), Ultralytics YOLO.</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>혁신성</h3>
+<p>iCrowdNav의 핵심 혁신은 <strong>보행자를 &quot;점&quot;이 아니라 &quot;의도를 가진 골격&quot;으로 본다</strong>는 표현론적 전환이다. IntentFormer(관절 자기-어텐션)와 InteractFormer(로봇-중심 교차-어텐션)로 3D 포즈에서 운동 의도를 추출하고, 시간정렬 BEV 점유로 환경을 통합 표현하여, 같은 PPO 정책이라도 <strong>사회적 편안함(TPZ)에서 2배 이상의 차이</strong>를 만든다. 이는 &quot;표현이 정책을 결정한다&quot;는 명제의 강한 실증이다.</p>
+<h3>실용적 의의</h3>
+<p>중간 표현(BEV+골격) + 동결 백본 설계로 <strong>zero-shot sim-to-real</strong>을 달성하여, 추가 미세조정 없이 쇼핑몰 109m를 RTX 2060(15Hz)으로 주파했다. RGB-D만으로 LiDAR 없이 동작하므로 실내 서비스 로봇의 <strong>저비용 즉시 배치</strong>에 매우 매력적이다. 장거리 TPZ 1.70s(vs SARL* 7.96s)는 &quot;안전할 뿐 아니라 정중한&quot; 내비게이션이 실현 가능함을 보인다.</p>
+<h3>향후 연구 방향</h3>
+<p>한계는 명확히 인지(perception) 측에 있다 — 140° FOV의 사각과 초고밀도 가림이 의도 추론을 무력화한다. 따라서 (i) 전방위 센서/희소 LiDAR 융합으로 FOV·가림 완화, (ii) 명시적 보행자 궤적 예측으로 해석가능성·선제성 강화, (iii) 비-SFM 실세계 보행자 분포로의 일반화 검증이 다음 단계다. 더 근본적으로, iCrowdNav가 제시한 <strong>&quot;상호작용 행위자의 운동학적 자세를 표현으로 격상&quot;</strong> 이라는 레시피는 군중 내비게이션을 넘어 다양한 동적 행위자 회피 문제로 확장될 잠재력을 가진다.</p>
+<hr>
+<p><em>본 리뷰는 PhD 수준 상세 분석이며, 코드 미공개(2026-06-26 기준)로 인해 방법론 분석은 논문 본문(arXiv HTML)의 수식·실험표·아키텍처 기술에 기반한다.</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>FLAP: FOV-Constrained Active Perception Planning for Prior-Map-Free 3D Navigation · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 2026 (미확정)</div>
+    <h1>FLAP: FOV-Constrained Active Perception Planning for Prior-Map-Free 3D Navigation</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2606.17630">arXiv:2606.17630</a></span>
+      <span>리뷰 2026-06-18</span>
+      <span>39분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>FLAP: FOV-Constrained Active Perception Planning for Prior-Map-Free 3D Navigation: 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: FLAP: FOV-Constrained Active Perception Planning for Prior-Map-Free 3D Navigation</li>
+<li><strong>저자 (Authors)</strong>: Mengke Zhang, Sitong Li, Tiancheng Lai, Ruitian Pang, Mingxuan Zhang, Qingcheng Chen, Fei Gao, Chao Xu, Yanjun Cao</li>
+<li><strong>소속 (Affiliation)</strong>: Zhejiang University — FAST Lab (Field Autonomous System and Computing). Fei Gao(FAR group, 저장대 제어과학·공학과), Yanjun Cao(저장대 후저우 연구원 FIRE group), Chao Xu 등.</li>
+<li><strong>발표처 (Published)</strong>: arXiv 2026 preprint (학회/저널 미확정 — 폴더 접미사 <code>arxiv2026</code>). 2026-06-16 제출.</li>
+<li><strong>DOI</strong>: 미부여</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2606.17630">2606.17630</a></li>
+<li><strong>코드 (Code)</strong>: ❌ <strong>확인 불가 (미공개)</strong> — 논문·프로젝트 페이지·QwenLM/ZJU-FAST-Lab GitHub 조직 어디에서도 FLAP 전용 공개 저장소를 확인하지 못함(2026-06-18 browser 확인). FAST Lab은 다수 연구를 사후 오픈소스화해 왔으나, 본 논문 시점에는 코드 미공개. &quot;있음&quot;으로 표기하지 않음.</li>
+<li><strong>프로젝트 페이지 (Project Page)</strong>: ❌ 미확인 (별도 프로젝트 페이지 없음)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 논문은 <strong>&quot;제한된 시야각(FOV)과 센싱 거리를 가진 온보드 센서만으로, 사전 지도 없이(prior-map-free) 미지의 복잡한 3D 환경을 UAV가 안전하면서도 효율적으로 비행할 수 있는가&quot;</strong> 라는 문제를 푼다.</p>
+<p>UAV가 좁은 통로, 머리 위 장애물, U자형 미로 같은 복잡한 3차원 공간을 빠르게 통과하려면, <strong>&quot;앞으로 갈 곳을 미리 봐야(perceive)&quot;</strong> 한다. 그런데 실제 온보드 센서(LiDAR·깊이 카메라)는 시야각과 거리 범위가 제한적이라, 단순히 목표를 향해 직진하면 <strong>장애물이 시야에 들어오기 전에 이미 충돌 거리 안에 들어와 버리는</strong> 상황(지각 지연으로 인한 충돌)이 발생한다. 기존 방법은 이를 회피하려고:</p>
+<ul>
+<li><strong>미탐사 공간에 대한 단순 가정</strong>(전부 자유공간 / 전부 점유)을 두거나,</li>
+<li><strong>보수적 휴리스틱</strong>(속도 상한, 고정된 시선 패턴)을 사용하거나,</li>
+<li><strong>지각 인식 경로 생성(perception-aware path generation)</strong> 을 프론트엔드에서 무겁게 수행한다.</li>
+</ul>
+<p>이들은 효율을 떨어뜨리고, 센서 종류(시야각·거리)가 바뀌면 일반화가 잘 안 된다.</p>
+<p>FLAP의 핵심 아이디어는 <strong>&quot;능동 지각(active perception)을 별도 모듈이 아니라 <em>궤적 최적화(trajectory optimization)의 미분가능 제약·페널티</em> 안으로 직접 통합&quot;</strong> 하는 것이다. 구체적으로:</p>
+<ol>
+<li><strong>센서 좌표계에서의 FOV 기하 제약</strong>: 수직/수평 FOV, 센싱 거리(d_min~d_max), 시야각(viewing angle)을 센서 프레임에서 정확히 표현해 &quot;이 점을 지금 보고 있는가&quot;를 미분가능하게 평가.</li>
+<li><strong>속도-트리거 활성화(velocity-triggered activation)</strong>: 긴급 제동 능력에 기반한 안전 기준으로 지각 페널티를 <em>필요할 때만</em> 켠다(불필요한 시선 낭비 방지 → 효율).</li>
+<li><strong>능동 지각 서브-궤적 + 파라메트릭 시작시간 최적화</strong>: &quot;어디서부터 미리 봐야 하는가(start time)&quot;를 자유 변수로 두어 지각 지연으로 인한 충돌 위험을 완화.</li>
+<li><strong>MINCO 궤적 표현</strong>: 미분 평탄성(differential flatness)을 활용한 다항식 궤적으로 위 제약들을 하나의 미분가능 최적화로 융합. 무거운 지각-인식 경로 생성 없이 <strong>단순 프론트엔드 전역 경로</strong> 하나만 있으면 된다.</li>
+</ol>
+<p>결과적으로 수직 FOV가 90°에서 0.2°까지 극단적으로 줄어드는 가혹한 조건에서도, 기존 MINCO 플래너(FM)와 고속 플래너(SUPER) 대비 <strong>성공률·강건성을 유지</strong>하며, 다양한 센서 구성(LiDAR/깊이 카메라)에 일반화되고, 실제 UAV 비행으로 검증된다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>C1. 제한된 FOV·센싱 거리로 인한 지각 지연 충돌.</strong>
+온보드 센서의 시야각·거리 범위가 좁으면, 장애물이 측정되기 전에 이미 회피 불가능한 거리에 진입할 수 있다. 특히 고속 비행에서 치명적이다.</p>
+<p><strong>C2. 미지(prior-map-free) 환경의 미탐사 공간 처리.</strong>
+사전 지도가 없으므로, 아직 관측하지 않은 공간을 어떻게 다룰지가 안전과 효율을 가른다. &quot;전부 자유&quot; 가정은 위험하고, &quot;전부 점유&quot; 가정은 경로를 막는다.</p>
+<p><strong>C3. 지각(perception)과 운동(motion) 효율의 trade-off.</strong>
+충돌을 막으려고 끊임없이 전방을 응시하면(yaw를 계속 돌리면) 비행이 느려지고 부자연스럽다. 반대로 운동 효율만 추구하면 못 보고 부딪힌다. 둘의 균형을 <em>상황에 맞게</em> 잡아야 한다.</p>
+<p><strong>C4. 센서 이질성(heterogeneity)에 대한 일반화.</strong>
+LiDAR(넓은 수평·좁은 수직)와 깊이 카메라(직사각형 FOV·짧은 거리)는 기하가 완전히 다르다. 휴리스틱이 특정 센서에 맞춰져 있으면 다른 센서에서 깨진다.</p>
+<p><strong>C5. 실시간·미분가능 최적화.</strong>
+온보드 실시간 재계획을 위해, FOV 가시성/안전 제약이 궤적 변수에 대해 미분가능해야(그래디언트 기반 최적화) 한다. 임의의 비매끄러운(non-smooth) 제약이면 느리거나 수렴이 불안정하다.</p>
+<h3>2.2 핵심 해결책</h3>
+<ul>
+<li><strong>C1 →</strong> 능동 지각 서브-궤적 구간 + <strong>파라메트릭 시작시간</strong> 최적화로 &quot;지연으로 인한 충돌&quot;을 사전에 방지.</li>
+<li><strong>C2 →</strong> 지각 인식 경로를 무겁게 생성하지 않고, 단순 전역 경로 + <strong>온라인 FOV 제약</strong>으로 미탐사 위험 영역을 회피.</li>
+<li><strong>C3 →</strong> <strong>속도-트리거 활성화</strong>: 긴급 제동 가능성이 위협받을 때만 지각 페널티를 켜서 운동 효율 보존.</li>
+<li><strong>C4 →</strong> 모든 가시성 제약을 <strong>센서 좌표계의 일반 기하 파라미터(α_min/max, β_min/max, d_min/max, θ)</strong> 로 표현 → 센서별로 파라미터만 갈아끼우면 됨.</li>
+<li><strong>C5 →</strong> <strong>MINCO 다항식 궤적 + 미분 평탄성</strong> 위에 모든 제약을 매끄러운 페널티로 얹은 단일 미분가능 최적화.</li>
+</ul>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<pre><code>표기 (Notation)
+  o(t) = [p(t)^T, ψ(t)]^T : 미분평탄 출력 (위치 p∈R^3, yaw ψ)
+  o_i(t) ∈ R^4           : i번째 구간의 다항식(시스템 차수 h=3 → 차수 2h-1=5)
+  p_v, p_v^S             : 관심점 v의 월드/센서 좌표
+  α_v, β_v               : 센서 프레임에서 v의 수직/수평 각도
+  [α_min,α_max]          : 수직 FOV 한계
+  [β_min,β_max]          : 수평 FOV 한계
+  [d_min,d_max]          : 센싱 거리(근/원) 한계
+  θ_v                    : 시야각(viewing angle)
+  L_a(·)                 : 속도-트리거 활성화 함수
+  T_s, T_p               : 전체 시간, 능동지각 서브세그먼트 길이
+  t_as = ρ(T_s - T_p)    : 능동지각 서브세그먼트 시작시간, ρ∈(0,1)
+  ϱ                      : ρ의 비제약 재파라미터화 변수(로지스틱 변환)
+</code></pre>
+<h3>3.1 MINCO 궤적 표현과 미분 평탄성 (Trajectory Representation)</h3>
+<p>FLAP은 쿼드로터의 <strong>미분 평탄(differentially-flat)</strong> 출력 <code>o = [p^T, ψ]^T</code> (위치 + yaw)를 시간 다항식으로 표현한다. 각 구간 <code>o_i(t) ∈ R^4</code>는 시스템 차수 <code>h=3</code>(저크/스냅 수준 제어)에 대응하는 <strong>차수 <code>2h-1 = 5</code>의 다항식<strong>이다. 이는 Fei Gao 그룹의 </strong>MINCO(Minimum Control Input, GCOPTER/MINCO 계열)<strong> 파라미터화로, 구간 경계의 중간점(intermediate waypoint)과 구간 시간만으로 전체 다항식을 폐형으로 복원하면서, 목적함수의 그래디언트를 </strong>중간점·시간에 대해 효율적으로 역전파</strong>할 수 있다.</p>
+<pre><code>   전역 단순 경로(front-end)         MINCO 백엔드 최적화
+   ●──●──●──●──●  (직선 세그먼트)  →  매끄러운 5차 다항식 궤적 o(t)
+   (지각-인식 아님, 단순/저비용)        + FOV·안전·동역학 제약을 페널티로
+</code></pre>
+<p><strong>핵심 설계 선택</strong>: 무거운 &quot;지각 인식 경로 생성(perception-aware path generation)&quot;을 프론트엔드에서 하지 않는다. 단순한 전역 경로 하나만 주면, 능동 지각의 모든 부담을 <strong>백엔드 궤적 최적화의 미분가능 페널티</strong>가 담당한다(C5). 이는 계산을 크게 줄이는 동시에, 센서 기하를 바꿔도 같은 백엔드가 작동하게 한다(C4).</p>
+<h3>3.2 센서 좌표계 FOV 가시성 제약 (FOV-Constrained Visibility)</h3>
+<p>&quot;지금 이 위험 지점 v를 센서가 보고 있는가&quot;를, <strong>센서 프레임에서의 네 가지 미분가능 부등식</strong>으로 표현한다(논문 본문 가시성 기준):</p>
+<pre><code>(1) 수직 FOV:   ( α_v − (α_min+α_max)/2 )^2 − ( (α_max−α_min)/2 )^2  ≤ 0
+(2) 수평 FOV:   ( β_v − (β_min+β_max)/2 )^2 − ( (β_max−β_min)/2 )^2  ≤ 0
+(3) 센싱 거리:  || p_v^S ||_2 − d_max ≤ 0    그리고    d_min − || p_v^S ||_2 ≤ 0
+(4) 시야각:     || p_S − p_v ||_2 · sin(θ_v) − ( dis(B, p_S) + d_Bs^max ) ≤ 0
+</code></pre>
+<p>직관:</p>
+<ul>
+<li>(1),(2)는 점 v의 센서 프레임 각도 <code>α_v, β_v</code>가 FOV 중심 ±절반 범위 안에 있도록 강제하는 <strong>&quot;이차식 박스 제약&quot;</strong> 이다. 중심에서 벗어날수록 좌변이 커져 페널티가 증가한다. 매끈한 이차식이라 미분가능(C5).</li>
+<li>(3)은 v가 센서의 <strong>근/원 거리 범위</strong> 안에 들어오게 한다. 너무 가까우면(d_min 위반) 이미 충돌 임박, 너무 멀면(d_max 위반) 신뢰 못 할 측정.</li>
+<li>(4)는 장애물 경계 박스 B와의 기하를 고려한 <strong>시야각 가림(occlusion) 회피</strong> 제약으로, 비스듬한 각도에서 표면이 가려지는 상황을 억제한다.</li>
+</ul>
+<p>이 네 제약을 합치면 &quot;위험 가능성이 있는 전방 영역을 <em>실제로 센서 시야에 담도록</em>&quot; 궤적(특히 yaw ψ와 위치 p)을 형성하게 된다. 모두 센서 프레임의 일반 파라미터로 쓰였기 때문에, <strong>LiDAR든 깊이 카메라든 (α,β,d) 값만 바꾸면</strong> 동일 정식화가 성립한다(C4 해소).</p>
+<pre><code>            센서 프레임 FOV 콘(cone)
+                   ┌───────────┐  ← 수평 FOV [β_min,β_max]
+       d_min ▒▒▒▒▒▒│           │
+   ────────►│      │   • v ✅  │   d_max
+   센서 원점 │      │           │
+             └───────────┘  ← 수직 FOV [α_min,α_max]
+   v가 (1)(2)(3)(4) 모두 만족 ⟺ &quot;지금 보고 있음&quot; → 페널티 0
+</code></pre>
+<h3>3.3 속도-트리거 활성화 (Velocity-Triggered Activation)</h3>
+<p>지각 페널티를 <em>항상</em> 켜면, UAV가 끊임없이 위험 방향을 응시하느라 비행이 느려지고 부자연스럽다(C3). FLAP은 <strong>긴급 제동(emergency braking) 가능성</strong>에 기반한 안전 기준으로 페널티를 <strong>필요할 때만</strong> 활성화한다:</p>
+<pre><code>활성화 조건 (안전 임계):
+   || v ||_2^2 / (2 a_max)  +  d_m  −  || p − p_u ||  ≤ 0
+   └─ 제동거리 ─┘   └마진┘     └ 미관측 위험점까지 거리 ┘
+
+활성화 페널티:
+   P_ap = L_a(x) · (FOV 가시성 위반항)
+   L_a(x) : 위 안전 기준이 위협받을 때 1에 가까워지는 게이팅 함수
+</code></pre>
+<p>직관: <strong>현재 속도에서 최대 감속으로 멈출 수 있는 거리(<code>||v||²/(2a_max)</code>)</strong> 에 안전 마진 <code>d_m</code>을 더한 값이, 미관측 위험점 <code>p_u</code>까지의 거리보다 크면(즉 &quot;지금 못 보면 못 멈춘다&quot;) <strong>지각 페널티를 켜서</strong> 그 방향을 보도록 궤적을 유도한다. 반대로 충분히 느리거나 위험점이 멀면 페널티를 꺼서 <strong>운동 효율을 보존</strong>한다. 속도가 빠를수록 제동거리가 길어져 더 일찍/넓게 봐야 하므로, 활성화가 자연스럽게 <strong>속도에 비례</strong>해 강해진다 — 보수적 &quot;속도 상한&quot; 휴리스틱을 매끄러운 최적화 항으로 대체한 셈이다.</p>
+<h3>3.4 능동 지각 서브-궤적 + 파라메트릭 시작시간 (Parametric Start-Time)</h3>
+<p>&quot;전방을 <em>언제부터</em> 미리 봐야 하는가&quot;는 충돌 회피의 핵심 자유도다. FLAP은 전체 궤적 안에 <strong>능동 지각 서브-세그먼트</strong>(길이 <code>T_p</code> 고정)를 두고, 그 <strong>시작 시간</strong>을 최적화 변수로 만든다:</p>
+<pre><code>   t_as = ρ · (T_s − T_p),     ρ ∈ (0, 1)
+   ρ = σ(ϱ) = 1/(1+e^{−ϱ})     # 로지스틱 변환으로 비제약 변수 ϱ 도입
+</code></pre>
+<ul>
+<li><code>ρ</code>를 직접 (0,1) 제약으로 다루는 대신 <strong>로지스틱(시그모이드) 재파라미터화</strong>로 비제약 변수 <code>ϱ</code>를 두어, 경계 제약 없는 매끄러운 그래디언트 최적화를 가능케 한다(C5).</li>
+<li>시작 시간을 앞당기면(작은 ρ) 더 <strong>일찍 미리 보기</strong> → 지연 충돌 위험↓, 운동 효율↓.</li>
+<li>늦추면(큰 ρ) 효율↑, 위험↑. 최적화가 환경·속도에 맞춰 <strong>자동으로 균형점</strong>을 찾는다(C1·C3 동시 해소).</li>
+</ul>
+<pre><code>   t=0 ───────────────────────── t=T_s
+        │◄── t_as ──►│◄ T_p ►│
+        (일반 비행)   (능동지각 구간: 위험방향 응시·감속 여유 확보)
+        t_as 를 ρ로 최적화 → &quot;언제부터 미리 볼지&quot; 학습
+</code></pre>
+<h3>3.5 통합 최적화 문제 (Unified Optimization)</h3>
+<p>위 요소를 하나의 미분가능 목적함수로 융합한다(개념적 정식화):</p>
+<pre><code>min_{q, T, ϱ}   J = w_e·J_energy(o)            # 제어 입력(스냅) 에너지 = 매끄러움
+                  + w_t·J_time(T)              # 총 시간 = 공격성/효율
+                  + w_o·J_obs(o)               # 장애물 안전(충돌 회피)
+                  + w_d·J_dyn(o)               # 동역학 한계(속도/가속/추력)
+                  + w_p·Σ P_ap(o, ϱ)           # 속도-트리거 능동지각 FOV 페널티
+   변수: q(중간점), T(구간 시간), ϱ(지각 시작시간 재파라미터화)
+</code></pre>
+<p><code>q, T, ϱ</code>에 대한 그래디언트를 MINCO 폐형으로 효율적으로 계산해 L-BFGS류 무제약 최적화로 푼다. <strong>핵심</strong>: 능동 지각이 별도의 시선 계획 모듈이 아니라, 궤적의 모양·타이밍·yaw를 결정하는 <strong>목적함수의 한 항</strong>으로 들어가 있다는 점이 FLAP의 구조적 차별성이다.</p>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<pre><code>                          FLAP 전체 파이프라인 (prior-map-free, 온보드)
+┌──────────────────────────────── 지각/매핑 (Perception) ────────────────────────────────┐
+│  온보드 센서: Livox Mid-360 LiDAR (수평 360°, 수직 +52°/−7°, 40m)                        │
+│              또는 Orbbec Gemini 335 깊이카메라 (78°H × 64°V, 0.26–3m)                    │
+│      │ 점유/ESDF 등 로컬 맵 (사전 지도 없음, 관측분만)                                   │
+│      ▼                                                                                   │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+        │ 목표(goal)
+        ▼
+┌──────────────────────────────── 프론트엔드 (단순 전역 경로) ─────────────────────────────┐
+│  단순 그래프/직선 경로 탐색 (지각-인식 아님 → 저비용)  ●──●──●──●                          │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+        │ 초기 경로 + 센서 FOV 파라미터 (α,β,d,θ)
+        ▼
+┌──────────────────────────────── 백엔드: FLAP 궤적 최적화 ─────────────────────────────────┐
+│  MINCO 다항식 (차수5, 미분평탄 o=[p,ψ])                                                   │
+│  목적함수 J = 에너지 + 시간 + 장애물안전 + 동역학 +  Σ P_ap                               │
+│                                                       │                                  │
+│   ┌── 능동 지각 항 P_ap ────────────────────────────────┐                                │
+│   │ 속도-트리거 활성화: ||v||²/(2a_max)+d_m−||p−p_u|| ≤0  │                                │
+│   │ FOV 가시성 제약(센서프레임): 수직/수평/거리/시야각    │                                │
+│   │ 파라메트릭 시작시간 t_as=ρ(T_s−T_p), ρ=σ(ϱ)          │                                │
+│   └──────────────────────────────────────────────────────┘                              │
+│  → L-BFGS류 무제약 최적화 (q, T, ϱ에 대한 MINCO 폐형 그래디언트)                          │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+        │ 매끄러운 안전 궤적 (위험방향을 적시에 응시하는 yaw 포함)
+        ▼
+   비행 제어기(추종) → UAV  ──(새 관측)──► 로컬 맵 갱신 → 재계획 루프
+</code></pre>
+<p>데이터 흐름 요약: <strong>(지각) 사전 지도 없는 로컬 맵 → (프론트엔드) 단순 전역 경로 → (백엔드) FOV·속도-트리거·시작시간을 미분가능 페널티로 융합한 MINCO 최적화 → 적시에 전방을 응시하며 안전·효율을 동시에 만족하는 궤적 → 비행 → 새 관측으로 재계획.</strong> 능동 지각의 부담을 전부 백엔드 최적화 항으로 옮긴 것이 설계의 중심이다.</p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 / 시뮬레이션 환경 (Datasets &amp; Sim Setups)</h3>
+<p>논문은 다양한 <strong>시야각·기하 조건</strong>을 의도적으로 설계한 시뮬레이션 시나리오로 능동 지각의 효과를 분리 검증한다:</p>
+<ul>
+<li><strong>수평 좁은 공간(horizontal narrow-space)</strong>: 수직 FOV를 <strong>90° / 30° / 10° / 0.2°</strong> 로 줄여가며 강건성 측정.</li>
+<li><strong>머리 위 장애물(overhead-obstacle)</strong>: H자형 구조물(위쪽에서 내려오는 장애물).</li>
+<li><strong>U자형 미로(U-shaped maze)</strong>: 복잡한 3D 장애물 배치.</li>
+<li><strong>수직 파이프라인(vertical pipeline)</strong>: 카메라 센서 기반 수직 통과.</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>성공률(Success rate)</strong>: 충돌 없이 목표 도달한 시도/총 시도(예: 10회 중).</li>
+<li><strong>소요 시간(duration, s)</strong> 과 <strong>평균 속도(mean velocity, m/s)</strong>: 효율.</li>
+<li><strong>실행 가능성(feasibility)</strong>: 극한 FOV에서 해를 찾는지.</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>수평 좁은 공간, 수직 FOV 30° (Table I 발췌, 10회 시도).</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th align="center">성공</th>
+<th align="center">소요 시간(s)</th>
+<th align="center">평균 속도(m/s)</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>FLAP (본 논문)</strong></td>
+<td align="center"><strong>10/10</strong></td>
+<td align="center"><strong>51.81</strong></td>
+<td align="center"><strong>1.49</strong></td>
+<td>능동 지각 통합</td>
+</tr>
+<tr>
+<td>FM (MINCO 베이스라인)</td>
+<td align="center">10/10</td>
+<td align="center">55.09</td>
+<td align="center">1.34</td>
+<td>지각-비인식 MINCO</td>
+</tr>
+<tr>
+<td>SUPER</td>
+<td align="center">79.19% 실패</td>
+<td align="center">—</td>
+<td align="center">—</td>
+<td>고속 플래너, 좁은 FOV에서 취약</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>FLAP은 같은 성공률(10/10)에서 <strong>더 빠르게</strong>(51.81 vs 55.09s, 평균 속도 1.49 vs 1.34 m/s) 통과 → 능동 지각이 효율을 <em>해치지 않고</em> 오히려 개선.</li>
+<li><strong>극한 조건(수직 FOV 0.2°)</strong>: FLAP은 <strong>6/10 성공</strong>, 반면 FM은 <strong>infeasible(해 없음)</strong> → 능동 지각 통합이 가혹한 FOV에서 실행 가능성 자체를 살린다.</li>
+<li>SUPER는 좁은 FOV에서 79.19% 실패 → 고속성에 최적화된 플래너가 지각 제약을 명시적으로 다루지 않을 때의 취약성을 보여줌.</li>
+</ul>
+<p>(주: 머리 위 장애물·U-미로·수직 파이프라인 시나리오의 세부 수치는 본문 표에 추가로 제시되며, 본 리뷰는 browser 발췌 범위 내 핵심 수치만 인용한다. — 발췌 한계 명시.)</p>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p>논문은 &quot;extensive simulations and <strong>real-world experiments</strong>&quot;를 명시한다. 발췌된 센서 사양:</p>
+<ul>
+<li><strong>Livox Mid-360 LiDAR</strong>: 수직 +52°/−7°, 거리 40m, 수평 360°.</li>
+<li><strong>Orbbec Gemini 335 깊이 카메라</strong>: 78°(H) × 64°(V), 0.26–3m.</li>
+</ul>
+<p>두 센서는 FOV·거리 기하가 완전히 달라(LiDAR는 넓은 수평·좁은 수직 비대칭, 카메라는 직사각형·근거리), <strong>동일 FLAP 백엔드가 (α,β,d) 파라미터 교체만으로 두 센서 모두에서 작동</strong>함을 실증하는 것이 본 실험의 핵심 메시지다(C4). (주: 구체적 기체 모델·온보드 컴퓨트·실외/실내 비행 영상 통계는 발췌 범위에서 완전히 확보되지 않아 &quot;있음&quot; 수준으로만 기록하고, 세부는 확인 불가로 둔다.)</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><strong>능동 지각의 궤적 최적화 내재화.</strong> 시선/지각 계획을 별도 모듈로 분리하지 않고, FOV 가시성·안전을 <strong>미분가능 페널티</strong>로 MINCO 백엔드에 직접 통합. 무거운 지각-인식 경로 생성이 불필요.</li>
+<li><strong>센서 프레임 FOV 기하 정식화.</strong> 수직/수평 FOV, 센싱 거리, 시야각을 센서 좌표계의 이차식/거리 제약으로 표현 → <strong>센서 이질성(LiDAR↔카메라)에 파라미터 교체만으로 일반화</strong>.</li>
+<li><strong>속도-트리거 활성화.</strong> 긴급 제동 기준(<code>||v||²/(2a_max)+d_m−||p−p_u||≤0</code>)으로 지각 페널티를 <em>필요할 때만</em> 켜 <strong>운동 효율과 안전을 동시에</strong> 달성. 보수적 속도-상한 휴리스틱을 매끈한 최적화로 대체.</li>
+<li><strong>파라메트릭 시작시간 최적화.</strong> &quot;언제부터 미리 볼지&quot;를 로지스틱 재파라미터화된 자유 변수 <code>ϱ</code>로 두어 지각 지연 충돌을 사전 방지.</li>
+<li><strong>극한 FOV 강건성 + 실증.</strong> 수직 FOV 0.2°에서도 해를 찾고(FM은 infeasible), 동급 성공률에서 더 빠름. 실제 UAV·이종 센서로 검증.</li>
+</ol>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값/설정</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>궤적 표현</td>
+<td>MINCO, 시스템 차수 h=3 → 다항식 차수 2h−1=5</td>
+<td>본문</td>
+</tr>
+<tr>
+<td>평탄 출력</td>
+<td>o = [p^T, ψ]^T (위치 3 + yaw 1 = R^4)</td>
+<td>본문</td>
+</tr>
+<tr>
+<td>FOV 제약</td>
+<td>수직/수평 이차식 박스 + 거리(d_min,d_max) + 시야각</td>
+<td>본문 식</td>
+</tr>
+<tr>
+<td>속도-트리거</td>
+<td>`</td>
+<td></td>
+</tr>
+<tr>
+<td>시작시간</td>
+<td>t_as=ρ(T_s−T_p), ρ=σ(ϱ) 로지스틱 재파라미터화</td>
+<td>본문</td>
+</tr>
+<tr>
+<td>LiDAR</td>
+<td>Livox Mid-360: +52°/−7°, 40m</td>
+<td>실험</td>
+</tr>
+<tr>
+<td>깊이 카메라</td>
+<td>Orbbec Gemini 335: 78°H×64°V, 0.26–3m</td>
+<td>실험</td>
+</tr>
+<tr>
+<td>베이스라인</td>
+<td>FM(MINCO), SUPER</td>
+<td>Table I</td>
+</tr>
+</tbody></table></div>
+<p>(하이퍼파라미터 가중치 w_e/w_t/w_o/w_d/w_p, a_max, d_m, T_p 등의 구체 수치는 발췌 범위에서 확보되지 않음 — 코드 미공개로 재현 시 본문 표 확인 필요.)</p>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 왜 &quot;능동 지각을 최적화 안으로&quot; 넣는가 — 설계 철학</h3>
+<p>전통적 파이프라인은 (a) 지각-인식 경로 생성(프론트엔드) → (b) 궤적 최적화(백엔드)로 단계를 분리한다. 이때 (a)가 무겁고, 센서 기하가 바뀌면 (a)를 다시 설계해야 한다. FLAP은 (a)를 <strong>단순화</strong>하고, 지각의 책임을 전부 (b)의 미분가능 항으로 옮긴다. 이로써 ① 계산 절감, ② 센서 일반화, ③ 효율-안전의 <em>연속적</em> 균형(이산 휴리스틱이 아닌 그래디언트 기반)을 얻는다. 이는 Fei Gao 그룹의 &quot;perception-aware planning(RAPTOR/FUEL/Bubble/SUPER 계열)&quot; 전통을, <strong>FOV 기하를 센서 프레임에서 명시적으로 제약화</strong>하고 <strong>시작시간까지 변수화</strong>하는 방향으로 확장한 것이다.</p>
+<h3>8.2 한계점 (Limitations)</h3>
+<ul>
+<li><strong>코드 미공개</strong>: 재현성이 제한된다. 가중치·a_max·T_p 등 핵심 상수가 본문 표에 의존.</li>
+<li><strong>극한 FOV(0.2°)에서 성공률 6/10</strong>: 능동 지각으로 실행 가능성은 살리지만 완전 신뢰성은 미달 — 센싱이 거의 0에 수렴하면 근본적 한계.</li>
+<li><strong>동적 장애물</strong>: 발췌 범위에서 정적 미지 환경 중심. 빠른 동적 장애물에 대한 능동 지각(예측 포함)은 별도 과제.</li>
+<li><strong>단일 기체·단일 에이전트</strong>: 다중 UAV 협응·통신 제약 하의 능동 지각은 미포함.</li>
+</ul>
+<h3>8.3 향후 방향</h3>
+<ul>
+<li>동적 장애물 예측을 능동 지각 항에 결합(예측-인식 시선 계획).</li>
+<li>학습 기반 활성화/시작시간 사전(prior)으로 최적화 초기화 가속.</li>
+<li>다중 센서 융합(LiDAR+카메라 동시) 시 FOV 제약의 합집합 최적화.</li>
+</ul>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<p>비교 대상은 같은 Planner 트랙의 <strong>UAV 경로/궤적 계획</strong> 선행 리뷰 중 주제가 가장 가까운 세 편을 선정했다(인덱스 우선 선별 후 정독):</p>
+<ul>
+<li><strong>ASIP-Planner: Adaptive Planning for UAV Surface Inspection in Partially Known Indoor Environments</strong> — 지각/뷰앵글 적응 + 커버리지.</li>
+<li><strong>Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation (ReliaDiffNav)</strong> — UAV 디퓨전 플래너 + 지각 신뢰도.</li>
+<li><strong>Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning (GATP)</strong> — 다중 쿼드로터 궤적 + 하드 안전.</li>
+</ul>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>ASIP-Planner</th>
+<th>ReliaDiffNav (Aerial Diffusion)</th>
+<th>GATP</th>
+<th><strong>FLAP (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 과제</td>
+<td>UAV 표면 점검 커버리지</td>
+<td>지각 실패영역 회피(유리·거울)</td>
+<td>다중 로봇 라벨없는 모션</td>
+<td>제한 FOV 미지환경 안전·고속 비행</td>
+</tr>
+<tr>
+<td>지각 통합 방식</td>
+<td>코사인 가중 뷰앵글 적응(휴리스틱)</td>
+<td>VLM 신뢰도 증류 → 디퓨전 조건/ESDF 가이드</td>
+<td>(지각보다 협응 중심)</td>
+<td><strong>FOV 기하 제약을 궤적 최적화 페널티로 내재화</strong></td>
+</tr>
+<tr>
+<td>궤적/제어</td>
+<td>B-스플라인 + MPC</td>
+<td>디퓨전 궤적 + training-free 가이드</td>
+<td>GNN 서브목표 + NMPC + ECBF</td>
+<td><strong>MINCO 5차 + 속도트리거 + 파라메트릭 시작시간</strong></td>
+</tr>
+<tr>
+<td>안전 보장</td>
+<td>커버리지·충돌 회피</td>
+<td>ESDF 가상 장애물화</td>
+<td>ECBF 하드 보장</td>
+<td>장애물 페널티 + 능동지각으로 지연충돌 예방</td>
+</tr>
+<tr>
+<td>센서 일반화</td>
+<td>점검 카메라 중심</td>
+<td>깊이+VLM</td>
+<td>—</td>
+<td><strong>센서프레임 (α,β,d) 파라미터화로 LiDAR↔카메라</strong></td>
+</tr>
+<tr>
+<td>실증</td>
+<td>✅ 후쿠시마 터널 실증</td>
+<td>✅ 8인치 쿼드로터</td>
+<td>✅ 4 쿼드로터</td>
+<td>✅ 실 UAV(Livox/Orbbec)</td>
+</tr>
+<tr>
+<td>코드</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌ (미공개)</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<ul>
+<li><strong>장점</strong>: ① 지각을 <em>별도 모듈이 아닌 최적화 항</em>으로 통합한 구조적 우아함 → 계산↓·센서 일반화↑. ② 속도-트리거·파라메트릭 시작시간으로 <strong>효율과 안전을 연속적으로 trade-off</strong>(ASIP의 휴리스틱 뷰앵글 적응, 보수적 속도상한과 대비되는 정량적 강점). ③ 극한 FOV(0.2°)에서 FM이 infeasible인데 FLAP은 해를 찾음 → 정량적 우위가 명확.</li>
+<li><strong>단점</strong>: ① 코드 미공개로 재현성 제약(세 비교 논문도 동일하나, FLAP은 상수 의존도가 높음). ② 정적 미지환경 중심 — ReliaDiffNav의 &quot;지각 신뢰도(유리·거울 등 <em>센서가 보긴 하나 못 믿는</em> 영역)&quot;는 다루지 않음. FLAP의 지각은 &quot;보이느냐(FOV)&quot;에 집중, ReliaDiffNav는 &quot;믿을 수 있느냐(reliability)&quot;에 집중 — <strong>상호 보완적</strong>. ③ 다중 로봇(GATP)·통신 제약은 범위 밖.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>강점</strong>: 온보드 실시간(미분가능 최적화), 이종 센서 일반화, 단순 프론트엔드로 통합 부담↓ → 실 UAV 배포 친화적. Fei Gao 그룹의 MINCO/EGO-Planner 생태계와 호환되어 기존 스택에 얹기 쉽다.</li>
+<li><strong>제약</strong>: 코드 미공개로 즉시 재현 불가. 극한 FOV 신뢰성·동적 장애물 대응이 실외 고속 배포의 관건.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>FLAP은 &quot;perception-aware planning&quot;을 <strong>FOV 기하의 명시적 제약화 + 시선 타이밍 변수화</strong>로 한 단계 정밀화했다. ReliaDiffNav의 <em>지각 신뢰도</em>와 FLAP의 <em>지각 가시성(FOV)</em> 을 결합하면(&quot;볼 수 있고 + 믿을 수 있는&quot; 영역으로 능동 유도) 차세대 UAV 안전 비행의 자연스러운 통합점이 된다. ASIP의 커버리지 시선 계획과도 결합 여지가 크다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li>FLAP: FOV-Constrained Active Perception Planning for Prior-Map-Free 3D Navigation. arXiv:2606.17630 (2026).</li>
+<li>MINCO / GCOPTER: Geometrically Constrained Trajectory Optimization for Multicopters (T-RO).</li>
+<li>EGO-Planner / RAPTOR / FUEL / SUPER (ZJU FAST Lab, perception-aware &amp; high-speed planning 계열).</li>
+<li>(비교) ASIP-Planner, arXiv:2605.11119. — UAV 표면 점검 적응 계획.</li>
+<li>(비교) Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation, arXiv:2606.13883.</li>
+<li>(비교) Graph Neural Planning and Predictive Control ... (GATP), arXiv:2605.19209.</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p>FLAP은 <strong>&quot;능동 지각을 궤적 최적화 안으로 가져온다&quot;</strong> 는 한 문장의 아이디어를, FOV 기하의 센서 프레임 제약화·속도 트리거 활성화·파라메트릭 시작시간이라는 세 장치로 구체화한 <strong>자원·시야 제약 UAV 항법 프레임워크</strong>다. 무거운 지각-인식 경로 생성 없이 단순 전역 경로 + 미분가능 백엔드만으로, 극한 FOV(0.2°)에서 기존 MINCO 플래너가 풀지 못하는 문제를 풀고, 동급 성공률에서 더 빠르며, LiDAR·깊이 카메라 양쪽에 일반화된다.</p>
+<p><strong>혁신성</strong>: 지각을 별도 모듈이 아닌 <em>최적화 항</em>으로 내재화하고, 특히 &quot;언제부터 미리 볼지&quot;를 변수화한 점이 perception-aware planning 계보에서 신선하다. <strong>실용적 의의</strong>: Fei Gao 그룹 MINCO 생태계와 호환되어 실 UAV 스택에 통합 친화적이며, 이종 센서를 파라미터 교체로 흡수한다. <strong>한계</strong>: 코드 미공개로 재현성이 제약되고, 극한 FOV 신뢰성(6/10)과 동적 장애물 대응이 후속 과제다. <strong>향후</strong>: ReliaDiffNav류 <em>지각 신뢰도</em>와 결합한 &quot;보이고+믿을 수 있는&quot; 능동 지각, 동적 장애물 예측 통합, 다중 UAV 협응 능동 지각이 자연스러운 확장 방향이다.</p>
+<hr>
+<h2>부록 A. 능동 지각 항(P_ap) 의사코드</h2>
+<pre><code class="language-python">def active_perception_penalty(traj, sensor_params, a_max, d_m):
+    &quot;&quot;&quot;FLAP 능동 지각 페널티 (개념적 의사코드)&quot;&quot;&quot;
+    alpha_min, alpha_max, beta_min, beta_max, d_min, d_max = sensor_params
+    P = 0.0
+    for t in sample_times(traj):
+        p, v, R_sensor = traj.pos(t), traj.vel(t), traj.sensor_frame(t)
+        p_u = nearest_unobserved_risk_point(p, R_sensor)   # 미관측 위험점
+        # 1) 속도-트리거 게이팅: 못 보면 못 멈추나?
+        braking = norm(v)**2 / (2*a_max)
+        gate = smooth_activation(braking + d_m - norm(p - p_u))  # ≤0이면 위험 → gate↑
+        if gate &lt; 1e-6:
+            continue   # 충분히 안전 → 페널티 끔(효율 보존)
+        # 2) 위험점을 센서 FOV 안에 담도록 가시성 위반 측정
+        p_s = R_sensor.T @ (p_u - p)                  # 센서 프레임 좌표
+        alpha, beta = elevation(p_s), azimuth(p_s)
+        viol  = relu((alpha-(alpha_min+alpha_max)/2)**2 - ((alpha_max-alpha_min)/2)**2)  # 수직
+        viol += relu((beta -(beta_min +beta_max )/2)**2 - ((beta_max -beta_min )/2)**2)  # 수평
+        viol += relu(norm(p_s) - d_max) + relu(d_min - norm(p_s))                        # 거리
+        P += gate * viol
+    return P
+</code></pre>
+<h2>부록 B. 파라메트릭 시작시간 재파라미터화</h2>
+<pre><code class="language-python"># ρ ∈ (0,1) 제약을 비제약 변수 ϱ 로 변환 → 매끄러운 무제약 최적화
+def rho_from_varrho(varrho):           # σ(ϱ)
+    return 1.0 / (1.0 + exp(-varrho))
+
+def start_time(varrho, T_s, T_p):
+    rho = rho_from_varrho(varrho)
+    return rho * (T_s - T_p)            # t_as
+
+# 그래디언트 dρ/dϱ = ρ(1-ρ) 가 항상 유한 → 경계에서 폭주하지 않음
+</code></pre>
+<h2>부록 C. 센서별 FOV 파라미터 일반화 예시</h2>
+<pre><code>LiDAR (Livox Mid-360):   α∈[−7°, +52°],  β∈[−180°,+180°],  d∈[~0.1, 40] m
+                         → 수직 비대칭·수평 전방위·장거리
+Depth (Orbbec G335):     α∈[−32°,+32°],  β∈[−39°, +39°],   d∈[0.26, 3] m
+                         → 직사각형 FOV·근거리
+
+동일 FLAP 백엔드: 위 (α_min,α_max,β_min,β_max,d_min,d_max) 6개 값만 교체.
+→ &quot;센서 이질성에 대한 일반화&quot;가 코드 한 줄(파라미터)로 환원됨(C4).
+</code></pre>
+<h2>부록 D. 베이스라인 비교의 해석 (FM vs SUPER vs FLAP)</h2>
+<pre><code>FM (MINCO, 지각-비인식):
+  - 매끄러운 궤적은 잘 만들지만 &quot;못 본 곳&quot;을 적극적으로 보러 가지 않음
+  - 수직 FOV 30°: 성공하나 느림(55.09s) / 0.2°: infeasible(해 없음)
+SUPER (고속 플래너):
+  - 속도 최적화에 강하나 좁은 FOV에서 79.19% 실패 → 지각 제약 미명시의 취약성
+FLAP:
+  - 능동 지각 통합으로 30°에서 더 빠르고(51.81s) 0.2°에서도 6/10 성공
+  - 해석: &quot;미리 보는 비용&quot;을 속도-트리거로 최소화 → 효율 손실 없이 안전 확보
+</code></pre>
+<h2>부록 E. 재현 체크리스트 (코드 미공개 대비)</h2>
+<pre><code>[ ] MINCO 백엔드 (GCOPTER 등 오픈 구현 활용)
+[ ] FOV 가시성 제약: 센서프레임 elevation/azimuth + 이차식 박스
+[ ] 속도-트리거: a_max, d_m 튜닝 (본문 표 확인 필요 — 미공개)
+[ ] 파라메트릭 시작시간: T_p 고정, ϱ 자유변수
+[ ] 가중치 w_e/w_t/w_o/w_d/w_p 스케줄 (미공개 — 실험으로 동정)
+[ ] 센서: LiDAR/카메라 FOV 파라미터 입력
+[ ] 베이스라인: FM, SUPER (FAST Lab 오픈 구현 기반 재구성)
+</code></pre>
+<hr>
+<p><em>리뷰 작성: 2026-06-18 · 분석 대상 arXiv:2606.17630 · 코드 미공개(확인 불가)로 일부 상수·세부 수치는 본문 표 의존, 발췌 범위 한계를 명시함.</em></p>
+<h2>부록 F. 긴급 제동 기준의 유도 (Emergency-Braking Criterion)</h2>
+<pre><code>물리 직관: 등가속 감속 모델
+  현재 속력 ||v||, 최대 감속 a_max 로 정지까지 필요한 거리
+       d_brake = ||v||^2 / (2 a_max)            (운동학: v^2 = 2 a d)
+
+안전 조건(충돌 회피):
+  &quot;지금 못 본 위험점 p_u 까지의 거리&quot;가 &quot;제동거리 + 안전마진&quot; 이상이어야 함
+       || p − p_u ||  ≥  d_brake + d_m
+   ⟺  d_brake + d_m − || p − p_u ||  ≤  0
+   ⟺  ||v||^2/(2 a_max) + d_m − ||p − p_u||  ≤  0     (위반 시 → 능동지각 ON)
+
+해석:
+  - 속력↑ → d_brake가 2차로 증가 → 더 일찍/멀리 봐야 함(활성화 강해짐)
+  - 위험점이 가까울수록(||p−p_u||↓) 좌변↑ → 활성화
+  - d_m(안전마진)은 측정/추종 지연·모델 오차에 대한 버퍼
+이 기준을 매끄러운 게이팅 L_a(·)로 감싸 미분가능 페널티에 곱한다.
+</code></pre>
+<p>이 유도가 보여주는 핵심은, FLAP의 능동 지각이 <strong>임의의 휴리스틱이 아니라 &quot;정지할 수 있는가&quot;라는 물리적 안전 여유에 직접 정박(anchor)</strong> 되어 있다는 점이다. 속도 상한을 고정값으로 두는 보수적 접근과 달리, 같은 한 개의 부등식이 저속에서는 거의 항상 만족(페널티 꺼짐, 효율 보존)되고 고속·근접 상황에서만 발동(안전 확보)되어, <strong>효율-안전의 자기조정(self-regulating) trade-off</strong>를 만든다.</p>
+<h2>부록 G. MINCO 그래디언트 흐름과 시작시간 변수의 결합</h2>
+<pre><code>목적함수 J(q, T, ϱ) 의 그래디언트 경로
+  q (중간점)  ──► MINCO 폐형 c=M(q,T)^{-1} b  ──► o(t)=poly(c) ──► J
+  T (구간시간)──►            ▲                                    │
+  ϱ (시작시간)──► t_as=σ(ϱ)(T_s−T_p) ──► P_ap 의 적분 구간 결정 ──┘
+
+∂J/∂q, ∂J/∂T : MINCO 표준 역전파(GCOPTER와 동일 골격)
+∂J/∂ϱ        : ∂J/∂t_as · dt_as/dρ · dρ/dϱ
+             = (P_ap 적분구간 경계 민감도) · (T_s−T_p) · ρ(1−ρ)
+</code></pre>
+<p><code>dρ/dϱ = ρ(1−ρ)</code>가 항상 유한하고 경계(ρ→0,1)에서 0으로 부드럽게 수렴하므로, 시작시간 변수가 폭주하거나 제약 경계에 들러붙는 문제 없이 <strong>q·T와 동시에 한 최적화 루프에서</strong> 갱신된다. 이것이 &quot;시작시간을 변수화&quot;하면서도 수치 안정성을 유지하는 비결이다.</p>
+<h2>부록 H. 시나리오별 능동 지각의 역할 정리</h2>
+<pre><code>┌────────────────┬──────────────────────────────────────────────┐
+│ 시나리오        │ 능동 지각이 해결하는 것                          │
+├────────────────┼──────────────────────────────────────────────┤
+│ 수평 좁은 통로  │ 좁은 수직 FOV로 바닥/천장 못 보는 지연충돌 예방   │
+│ 머리위 장애물(H)│ 위에서 내려오는 장애물을 미리 응시(yaw·pitch 유도)│
+│ U자 미로        │ 코너 너머 미관측 영역을 굽이마다 선제 관측        │
+│ 수직 파이프라인 │ 카메라 근거리 FOV로 수직 통과 시 측벽 확보         │
+└────────────────┴──────────────────────────────────────────────┘
+공통 원리: &quot;못 보면 못 멈추는 영역&quot;을 속도-트리거가 식별 → 시작시간이
+          &quot;언제부터&quot; 보기 시작할지 정함 → FOV 제약이 &quot;그 점을 시야에&quot;
+          담도록 궤적 모양·yaw 형성.
+</code></pre>
+<h2>부록 I. 본 리뷰의 출처·확인 상태 요약 (투명성)</h2>
+<pre><code>확인 완료(browser/HTML 발췌):
+  ✅ arXiv HTML 본문(방법론·식·Table I 핵심수치)
+  ✅ 센서 사양(Livox Mid-360, Orbbec Gemini 335)
+  ✅ 베이스라인 식별(FM, SUPER)
+확인 불가/미확보(정직 표기):
+  ❌ 공개 코드 저장소(미공개)
+  ❌ 별도 프로젝트 페이지(없음)
+  ⚠ 가중치/하이퍼파라미터 구체 수치(본문 표 의존, 발췌 외)
+  ⚠ 실기 비행 통계 세부(있음 수준으로만 기록)
+원칙: 미확인 항목을 &quot;있음&quot;으로 날조하지 않음. 발췌 한계를 명시함.
+</code></pre>
+<h2>부록 J. perception-aware planning 계보 안에서의 위치</h2>
+<pre><code>시선/지각 계획의 진화 (ZJU FAST Lab 및 관련 계보)
+  RAPTOR(2020)   : yaw를 risk-aware 하게 계획(미관측 위험 최소화)
+  FUEL(2021)     : frontier 기반 빠른 탐사(시선=정보 획득)
+  Bubble(2021)   : 안전 회랑(corridor) 기반 고속 비행
+  EGO-Planner    : ESDF-free 경량 로컬 플래너
+  SUPER(2025)    : 안전 보장 고속 비행(좁은 FOV엔 취약)
+  ────────────────────────────────────────────────
+  FLAP(2026)     : FOV 기하를 &quot;센서프레임 미분가능 제약&quot;으로 명시화
+                 + &quot;언제부터 볼지(시작시간)&quot;를 변수화
+                 + 속도-트리거로 효율-안전 자기조정
+</code></pre>
+<p>위 계보에서 FLAP의 독창성은 두 가지로 압축된다. 첫째, <strong>지각의 &quot;공간&quot;(어디를 보는가, FOV)뿐 아니라 &quot;시간&quot;(언제부터 보는가, t_as)까지 동시에 최적화 변수로 끌어올린</strong> 점이다. RAPTOR류가 &quot;위험을 덜 만드는 yaw&quot;를 계획했다면, FLAP은 &quot;위험을 만나기 전에, 정지 가능성이 위협받는 그 순간부터, 그 방향을 FOV에 담는&quot; 것을 하나의 매끄러운 최적화로 형식화했다. 둘째, <strong>센서 기하의 추상화</strong>로 LiDAR·카메라를 같은 백엔드로 흡수해, perception-aware planning이 그동안 안고 있던 &quot;센서 의존적 휴리스틱&quot; 문제를 구조적으로 해소했다.</p>
+<p>이로써 FLAP은 단순한 점진적 개선이 아니라, &quot;perception-aware planning을 <em>센서-불가지(sensor-agnostic)·시공간 통합</em> 미분가능 최적화로 재정식화&quot;하는 방향 제시로 읽을 수 있다. 후속 연구가 ReliaDiffNav류의 <em>지각 신뢰도</em>나 동적 장애물 <em>예측</em>을 같은 페널티 틀에 더하면, &quot;보이고·믿을 수 있고·미래에도 안전한&quot; 능동 지각으로 자연스럽게 확장된다.</p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

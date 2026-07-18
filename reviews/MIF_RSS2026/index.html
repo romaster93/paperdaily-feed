@@ -1,0 +1,1169 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>MIF: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">RSS 2026 (Robotics: Science and Systems) — Accepted</div>
+    <h1>Learning to Evolve: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments</h1>
+    <div class="meta-row">
+      <span class="chip">VLN</span>
+      <span><a href="https://arxiv.org/abs/2605.21935">arXiv:2605.21935</a></span>
+      <span>리뷰 2026-05-24</span>
+      <span>47분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>Learning to Evolve: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments — 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Learning to Evolve: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments</li>
+<li><strong>저자 (Authors)</strong>: Peifeng Jiang, Hong Liu, Jin Jin, Wenshuai Wang, Xia Li</li>
+<li><strong>소속 (Affiliation)</strong>:<ul>
+<li>Peking University — Peifeng Jiang, Hong Liu, Wenshuai Wang (State Key Laboratory of General AI, Shenzhen)</li>
+<li>Oxford Robotics Institute, University of Oxford — Jin Jin</li>
+<li>Institute for Machine Learning, ETH Zurich — Xia Li</li>
+</ul>
+</li>
+<li><strong>발표처 (Published)</strong>: Robotics: Science and Systems 2026 (RSS 2026) — Accepted</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2605.21935">https://doi.org/10.48550/arXiv.2605.21935</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2605.21935">https://arxiv.org/abs/2605.21935</a></li>
+<li><strong>프로젝트 페이지</strong>: <a href="https://ziya-jiang.github.io/MIF-homepage/">https://ziya-jiang.github.io/MIF-homepage/</a></li>
+<li><strong>코드</strong>: Coming Soon (프로젝트 페이지 공지)</li>
+<li><strong>리뷰 일자</strong>: 2026-05-24</li>
+</ul>
+<hr>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>본 논문은 <strong>인간형 로봇(humanoid robot)이 동적으로 변화하는 실세계 환경에서 자연어 지시를 받아 목표 위치까지 안전하게 내비게이션하는 문제</strong>를 다룬다. 핵심 도전은 두가지 차원에서 발생한다:</p>
+<p><strong>차원 1 — 보행 기인 지각 왜곡 (Gait-induced Perceptual Distortion)</strong>:
+인간형 로봇의 이족보행(bipedal locomotion)은 카메라에 지속적인 진동과 모션 블러를 일으킨다. 이는 기존의 정적 카메라 환경에서 설계된 시맨틱 매핑 및 씬 그래프 시스템을 직접 적용할 수 없게 만든다. 보행 사이클에서 발생하는 수직 진동(vertical oscillation)은 프레임마다 달라지는 카메라 포즈를 만들어내며, 단순한 포즈 보정으로는 해결할 수 없는 동적 블러를 생성한다.</p>
+<p><strong>차원 2 — 환경 동적 변화에 대한 씬 메모리 적응 (Scene Memory Adaptation to Environment Changes)</strong>:
+실세계 환경은 사람이 물체를 이동시키거나, 문이 열리고 닫히는 등의 변화가 빈번하게 발생한다. 기존의 정적 씬 표현 방법은 이러한 변화를 감지하지 못하여 오래된(stale) 정보를 기반으로 내비게이션하게 된다. 특히, <strong>보행 중 발생하는 진동 아티팩트</strong>와 <strong>실제 환경 변화</strong> 사이를 구별하는 것이 매우 중요하다 — 전자는 무시해야 하고 후자는 메모리에 반영해야 하지만, 기존 방법들은 이 둘을 구분하지 못한다.</p>
+<p>핵심 연구 질문:</p>
+<pre><code>&quot;인간형 로봇이 이족보행으로 이동하면서 발생하는
+ 지각 왜곡과 환경 변화를 모두 처리하는
+ 강건한 씬 메모리를 어떻게 구축할 것인가?
+
+ 그리고 이를 통해 자연어 지시를 받아
+ 목표 물체까지 안전하게 내비게이션할 수 있는가?&quot;
+</code></pre>
+<p>MIF(Multi-modal Interactive Fields)의 핵심 통찰:</p>
+<pre><code>통찰 1: 씬 메모리를 세 가지 상호보완적 필드로 분리
+  - Appearance Field (F_app): 신뢰도 인식 3D Gaussian Splatting
+  - Spatial Field (F_spat): 계층적 씬 그래프 (시맨틱 관계)
+  - Geometry Field (F_geom): 상호작용 안전성을 위한 메시 재구성
+
+통찰 2: 불일치 감지 메커니즘으로 변화 선택적 업데이트
+  - 보행 아티팩트 vs. 실제 환경 변화 구별
+  - 전역 재스캔 없이 지역적 메모리 업데이트
+
+통찰 3: 자연어 목표를 구조화된 탐색 쿼리로 변환
+  - ⟨Region, Landmark, Object⟩ 트리플렛 구조
+  - Spatial Field에 대한 계층적 시맨틱 그라운딩
+</code></pre>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 이족보행 기인 시각적 불안정성 (Locomotion-Induced Visual Instability)</h4>
+<p>인간형 로봇은 이족보행 특성상 카메라 흔들림이 불가피하다:</p>
+<pre><code>[보행 주기별 카메라 운동 패턴]
+
+보행 단계: 지지기(Stance) ─── 유각기(Swing) ─── 지지기(Stance)
+수직 이동:     최소              최대 (수 cm)       최소
+Roll/Pitch:     ~0°              ~3-8°              ~0°
+카메라 샘플:   안정             심한 블러           안정
+
+문제: 기존 방법들이 3D 재구성에 사용하는 가우시안 원시 요소(Gaussian primitives)가
+      유각기에 획득된 프레임에서 신뢰할 수 없는 gradient와 opacity를 보임
+
+결과: 블러된 프레임을 그대로 사용하면
+      Gaussian Splatting의 geometry가 왜곡됨
+      → 씬 그래프 노드의 위치 추정 오류
+      → 내비게이션 목표의 위치 정확도 저하
+</code></pre>
+<p>구체적 영향을 수치화하면:</p>
+<ul>
+<li>기존 정적 카메라 가정 방법 (Feature-Splatting 등)의 relocalization 정확도:
+이족보행 로봇에 적용 시 평균 위치 오차 <strong>0.58m</strong> → MIF의 <strong>0.18m</strong> 대비 3.2배 낮은 정확도</li>
+<li>이는 좁은 복도(폭 ~1m)나 클러터된 책상 공간에서 실용적 내비게이션이 불가능한 수준</li>
+</ul>
+<h4>B. 동적 환경 변화와 보행 아티팩트의 혼동 (False Alarm Problem)</h4>
+<p>씬 메모리를 동적으로 업데이트할 때 핵심 어려움:</p>
+<pre><code>[두 유형의 씬 변화 비교]
+
+유형 1 — 보행 아티팩트 (무시해야 함):
+  원인: 이족보행 진동, 모션 블러, 일시적 가림(occlusion)
+  특성:
+    - 지속 시간: 짧음 (0.1~0.5초, 한 보행 주기)
+    - 공간 크기: 작음 (몇 픽셀 수준)
+    - 반복성: 보행 중 주기적으로 반복
+  올바른 처리: 무시 (씬 메모리 업데이트 안 함)
+
+유형 2 — 실제 환경 변화 (반영해야 함):
+  원인: 사람이 물체를 이동 (&gt;1.5m 변위), 문 개폐, 새 물체 추가
+  특성:
+    - 지속 시간: 길음 (영구적 또는 장기간)
+    - 공간 크기: 큼 (물체 수준)
+    - 반복성: 없음 (단방향 변화)
+  올바른 처리: 씬 메모리 업데이트 필요
+
+기존 방법의 문제:
+  보행 아티팩트와 실제 변화를 구분하지 못해
+  Option A: 아티팩트를 변화로 오인 → 불필요한 전역 재매핑
+  Option B: 실제 변화를 아티팩트로 무시 → 오래된 맵 기반 내비게이션 실패
+</code></pre>
+<h4>C. 기존 씬 그래프 방법들의 한계</h4>
+<p>최신 씬 그래프 기반 내비게이션 방법들이 인간형 로봇에 직접 적용 불가한 이유:</p>
+<pre><code>[기존 방법 비교]
+
+방법               | 보행 블러 처리 | 동적 변화 | 실제 로봇 | 조작 안전성
+─────────────────────────────────────────────────────────────────
+HOV-SG            | ❌ (정적 카메라) | ❌        | Boston Dynamics Spot | ❌
+ConceptGraphs     | ❌             | ❌        | RGB-D + 정적 세팅    | ❌
+Hydra             | ❌             | 제한적    | 정적 플랫폼          | ❌
+LatentBKI         | ❌             | 확률론적  | 바퀴 로봇           | ❌
+Khronos           | ❌             | ✅        | RGB-D+ODM           | ❌
+MIF (본 논문)     | ✅ (신뢰도 게이팅) | ✅        | Unitree G1 인간형   | ✅
+
+주목: HOV-SG도 RSS 2024 논문이지만 Boston Dynamics Spot(4족 보행, 더 안정적)에서 실험.
+      인간형 이족보행의 심한 진동은 전혀 다른 수준의 도전.
+</code></pre>
+<h4>D. 조작 지향 내비게이션의 안전성 요구사항</h4>
+<p>단순한 이동 내비게이션과 달리, 물체를 집거나 상호작용하기 위한 내비게이션은 추가적인 제약이 있다:</p>
+<pre><code>[목표 도달 시 요구사항]
+
+일반 내비게이션:
+  목표 위치에 도달하면 완료
+  오차 허용: ~0.5m
+
+조작 지향 내비게이션:
+  1. 도달 위치의 충돌 여부 확인
+  2. 목표 물체에 대한 운동학적 도달 가능성 (Kinematic Reachability)
+  3. 지지면(Support Surface) 안정성 확인
+  4. 종단 포즈(Terminal Pose) 정확도: ~0.12m 수준
+
+G1 로봇의 제약:
+  - 팔 도달 거리: ~0.7m
+  - 최소 조작 거리: ~0.3m
+  - 이 제약 내에서 종단 포즈를 계획해야 함
+</code></pre>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 Appearance Field (F_app) — 신뢰도 인식 3D Gaussian Splatting</h3>
+<p>Appearance Field는 MIF의 시각 표현 기반(backbone)으로, 보행 중 발생하는 모션 블러와 진동에 강건한 3D 씬 표현을 제공한다.</p>
+<h4>3.1.1 신뢰도 인식 3DGS의 동기</h4>
+<p>표준 3D Gaussian Splatting(3DGS)은 각 원시 요소(primitive)에 대해 위치, 크기, 방향, 색상, 불투명도(opacity)를 최적화한다. 그러나 보행 중 블러된 프레임에서 추정된 원시 요소들은 다음과 같은 문제를 보인다:</p>
+<pre><code>[블러된 프레임 기반 3DGS의 문제]
+
+블러 없는 프레임:
+  Gaussian 원시 요소: gradient가 명확 → 경계가 선명한 구조 학습
+  Opacity α: 실제 surface에 높은 값 → 정확한 기하학
+
+블러된 프레임 (보행 중):
+  Gaussian 원시 요소: gradient가 퍼짐 → 구조가 모호
+  Opacity α: 낮은 값 → surface 경계 불명확
+  Gradient magnitude: 낮음 → 수렴이 어려움
+
+결과:
+  블러 프레임 기반 primitives → 기하학 왜곡
+  씬 그래프 노드 위치 추정 → 오류
+  내비게이션 목표 위치 → 부정확
+</code></pre>
+<h4>3.1.2 신뢰도 점수 산출 메커니즘</h4>
+<p>MIF의 Appearance Field는 각 Gaussian 원시 요소에 <strong>신뢰도 점수 c_i</strong>를 부여한다:</p>
+<pre><code>[신뢰도 점수 c_i 계산]
+
+c_i = σ( w₁ · ‖∇L_i‖ + w₂ · α_i )
+
+여기서:
+  ‖∇L_i‖: gradient magnitude — 해당 프레임에서 이 primitive의
+            정보 기여도. 블러된 이미지에서는 낮음.
+  α_i:     opacity — 실제 표면에 존재하는 primitive일수록 높음.
+  σ(·):    sigmoid 정규화 (0~1 범위)
+  w₁, w₂: 학습된 가중치 (경험적: w₁=0.6, w₂=0.4)
+
+신뢰도 임계값 τ_conf = 0.4 (이하 primitives는 렌더링 제외)
+
+직관:
+  보행 지지기(Stance phase): ‖∇L_i‖ 높음 → c_i 높음 → 렌더링 포함
+  보행 유각기(Swing phase):  ‖∇L_i‖ 낮음 → c_i 낮음 → 렌더링 제외
+</code></pre>
+<h4>3.1.3 신뢰도 게이팅된 렌더링</h4>
+<p>실시간 사용을 위해 Appearance Field는 저신뢰도 primitives를 렌더링에서 제외하는 선택적 렌더링을 수행한다:</p>
+<pre><code>[선택적 렌더링 알고리즘]
+
+Input:  전체 Gaussian primitives {G_1, ..., G_N}
+Output: 신뢰도 게이팅된 렌더링 뷰 I_stable
+
+1. for each G_i in {G_1, ..., G_N}:
+     c_i ← 신뢰도 점수 계산
+     if c_i &gt; τ_conf:
+         active_set ← active_set ∪ {G_i}
+
+2. 표준 3DGS 렌더링 with active_set:
+   I_stable ← Σ_{i ∈ active_set} (c_i · α_i · T_i · c̃_i)
+   T_i = Π_{j&lt;i} (1 - α_j)   (transmittance)
+   c̃_i:  색상 (spherical harmonics 기반)
+
+효과:
+  보행 유각기의 블러 프레임 기반 primitives 자동 제거
+  씬 그래프 구성에 사용되는 렌더링 품질 향상
+  메모리 풋프린트: 전체 primitives 대비 -91.4% (논문 Table 2)
+</code></pre>
+<h4>3.1.4 점진적 Map 업데이트 전략</h4>
+<p>Appearance Field는 탐색 중 새로운 영역이 발견될 때 점진적으로 업데이트된다. 단, 모든 새 프레임이 통합되지 않고 신뢰도 임계값 이상의 프레임만 통합된다:</p>
+<pre><code>[점진적 업데이트 정책]
+
+새 관측 프레임 I_t 도착 시:
+  1. 프레임 품질 평가:
+     q_t ← f(‖∇I_t‖_F, SSIM(I_t, I_t-1))
+     if q_t &lt; τ_frame: 프레임 무시 (보행 블러)
+     else: 통합 진행
+
+  2. 기존 primitives와의 coverage 계산:
+     uncovered_regions ← I_t의 새로운 관측 영역
+
+  3. 새 primitives 초기화:
+     uncovered_regions에 새 Gaussians 추가
+
+  4. 공동 최적화:
+     기존 primitives와 새 primitives를 함께 미세 조정
+     단, 높은 신뢰도의 기존 primitives에 낮은 학습률 적용
+     (catastrophic forgetting 방지)
+</code></pre>
+<hr>
+<h3>3.2 Spatial Field (F_spat) — 보행 안정화된 계층적 씬 그래프</h3>
+<p>Spatial Field는 로봇의 환경 이해를 위한 구조화된 표현으로, Appearance Field의 안정화된 렌더링을 입력으로 받아 구성된다. 이는 기존 씬 그래프 방법들이 raw egocentric 프레임을 직접 사용하는 것과 달리, 블러 아티팩트를 이미 제거한 렌더링을 사용한다는 점에서 근본적인 차이가 있다.</p>
+<h4>3.2.1 씬 그래프 구조</h4>
+<pre><code>[Spatial Field 계층 구조]
+
+레벨 3 (환경 수준):
+  ┌─────────────────────────────────────────┐
+  │              Environment E              │
+  │   properties: 전체 환경 크기, 탐색 상태  │
+  └─────────────────────────────────────────┘
+              │
+              ├─ {contains} ─►
+              │
+레벨 2 (구역 수준):
+  ┌───────────┐  ┌───────────┐  ┌───────────┐
+  │  Region₁  │  │  Region₂  │  │  Region₃  │
+  │  &quot;거실&quot;   │  │  &quot;주방&quot;   │  │  &quot;사무실&quot; │
+  │           │  │           │  │           │
+  └───────────┘  └───────────┘  └───────────┘
+      │               │               │
+      ├─ {contains} ─►
+      │
+레벨 1 (랜드마크 수준):
+  ┌──────────┐  ┌──────────┐  ┌──────────┐
+  │Landmark₁ │  │Landmark₂ │  │Landmark₃ │
+  │&quot;책상&quot;    │  │&quot;소파&quot;    │  │&quot;선반&quot;    │
+  │  pos: x,y│  │  pos: x,y│  │  pos: x,y│
+  └──────────┘  └──────────┘  └──────────┘
+      │               │
+      ├─ {supports/contains} ─►
+      │
+레벨 0 (물체 수준):
+  ┌──────────┐  ┌──────────┐  ┌──────────┐
+  │ Object₁  │  │ Object₂  │  │ Object₃  │
+  │&quot;물병&quot;    │  │&quot;노트북&quot;  │  │&quot;컵&quot;      │
+  │  pos: x,y│  │  pos: x,y│  │  pos: x,y│
+  │  bbox: ..│  │  bbox: ..│  │  bbox: ..│
+  └──────────┘  └──────────┘  └──────────┘
+</code></pre>
+<h4>3.2.2 노드 특성 표현</h4>
+<p>각 노드는 다음 정보를 포함한다:</p>
+<pre><code>[씬 그래프 노드 표현]
+
+물체 노드 O = {
+  label:      CLIP embedding (512D) — open-vocabulary 분류
+  position:   3D centroid (x, y, z) in world frame
+  bbox_3d:    3D bounding box (6-DOF)
+  confidence: 기반 Gaussian primitives의 평균 신뢰도
+  last_seen:  마지막 관측 타임스탬프
+  view_count: 관측된 총 프레임 수 (신뢰도 증거 축적)
+  is_dynamic: 동적 변화 감지 플래그
+}
+
+랜드마크 노드 L = {
+  label:      CLIP embedding (512D)
+  position:   물체들의 무게중심
+  children:   지지/포함된 물체 집합
+  footprint:  2D 점유 영역
+}
+
+공간 관계 에지 R = {
+  relation_type: {on, in, near, left_of, right_of, above, below}
+  strength:      관계 신뢰도 (0~1)
+  distance:      3D 거리
+}
+</code></pre>
+<h4>3.2.3 보행 안정화된 씬 그래프 구성</h4>
+<p>핵심 차별화 요소: Spatial Field는 raw egocentric 프레임 대신 Appearance Field의 안정화된 렌더링으로부터 구성된다:</p>
+<pre><code>[씬 그래프 구성 파이프라인]
+
+단계 1 — 안정화된 뷰 생성:
+  raw_frame_t → Appearance Field → I_stable_t
+  (블러 및 저신뢰도 primitives 제거된 렌더링)
+
+단계 2 — 물체 감지 및 세그멘테이션:
+  I_stable_t → SAM2 (Segment Anything Model 2) → 마스크 집합
+  각 마스크 → CLIP → semantic embedding
+
+단계 3 — 물체 동일성 확인 (Data Association):
+  현재 감지된 물체 ↔ 기존 그래프 노드 매칭
+  거리 임계값: 0.5m 이내 + CLIP similarity &gt; 0.8 → 동일 물체
+  매칭 실패 → 새 노드 추가
+
+단계 4 — 위치 추정:
+  마스크 + 3DGS depth → 3D centroid 추정
+  (단안 깊이 추정보다 3DGS 렌더링 depth가 더 정확)
+
+단계 5 — 공간 관계 추론:
+  VLM (LLaVA-1.6) → &quot;물체 A는 B 위에 있는가?&quot; 등의 관계 쿼리
+  → 그래프 에지 업데이트
+</code></pre>
+<hr>
+<h3>3.3 Geometry Field (F_geom) — 상호작용 안전성 검증 메시</h3>
+<p>Geometry Field는 로봇이 목표 물체에 도달했을 때, 안전하고 운동학적으로 실현 가능한(kinematically feasible) 종단 포즈(terminal pose)를 결정하기 위한 on-demand 3D 재구성 모듈이다.</p>
+<h4>3.3.1 Flow Matching 기반 3D 재구성</h4>
+<p>MIF는 목표 물체에 근접했을 때 Geometry Field를 활성화하여 정밀한 3D 메시를 생성한다:</p>
+<pre><code>[Geometry Field 활성화 조건]
+
+활성화 트리거:
+  dist(robot_pos, target_object_pos) &lt; d_threshold = 1.5m
+
+활성화 시 수행:
+  1. 다각도 관측 수집 (로봇이 물체 주변 ~45° 이동)
+  2. Flow Matching 기반 3D 재구성
+  3. IPS(Interaction Pose Safety) 검증
+  4. 안전 종단 포즈 선택
+</code></pre>
+<p>Flow Matching 기반 메시 생성의 핵심 수식:</p>
+<pre><code>[Flow Matching 기반 표면 재구성]
+
+Continuous Normalizing Flow를 사용:
+  점군(point cloud) P₀ ~ p₀  →  메시 포인트 P₁ ~ p₁
+
+Flow 방정식:
+  dP/dt = v_θ(P, t),   t ∈ [0, 1]
+  P₀: 관측된 점군 (Appearance Field 기반)
+  P₁: 완성된 표면 메시
+
+v_θ(P, t) = 학습된 속도장 (Flow Matching으로 학습)
+  손실함수: L_FM = E_{t, P₀, P₁} [ ‖v_θ(P_t, t) - u(P_t|P₀, P₁)‖² ]
+  u(P_t|P₀, P₁): 조건부 flow 필드 (선형 보간 경로)
+
+장점:
+  부분 관측(partial observation)에서 완전한 물체 메시 복원
+  GAN 방식 대비 훈련 안정성 높음
+  Diffusion 방식 대비 생성 속도 빠름 (~2배)
+</code></pre>
+<h4>3.3.2 Interaction Pose Safety (IPS) 검증</h4>
+<p>생성된 메시를 사용하여 로봇의 종단 포즈 후보들을 평가한다:</p>
+<pre><code>[IPS 검증 알고리즘]
+
+입력:
+  M:        목표 물체의 3D 메시 (Geometry Field 생성)
+  C:        로봇의 운동학적 체인 (G1 사양)
+  T_set:    종단 포즈 후보 집합 (SO(3) 샘플링, 64개)
+  O_map:    씬 장애물 맵 (Spatial Field)
+
+각 후보 포즈 T_i ∈ T_set에 대해:
+
+1. 충돌 검사 (Collision Check):
+   check_1(T_i) = ¬ collision(robot_mesh(T_i), O_map)
+   → FCL(Fast Collision Library) 사용
+   → 통과 못하면: 제거
+
+2. 도달 가능성 검사 (Reachability Check):
+   check_2(T_i) = IK_solver(T_i, target_grasp_point) ≠ ∅
+   → G1 역운동학 (7-DOF 팔)
+   → 통과 못하면: 제거
+
+3. 안정성 검사 (Stability Check):
+   ZMP_margin(T_i) = f(CoM_projection, support_polygon(T_i))
+   check_3(T_i) = ZMP_margin(T_i) &gt; τ_stability = 0.05m
+   → 이족보행 안정 여부 확인
+   → 통과 못하면: 제거
+
+4. 비용 평가:
+   cost(T_i) = w₁ · dist(T_i, current_pose)
+              + w₂ · (1 - ZMP_margin(T_i))
+              + w₃ · IK_joint_limits_penalty(T_i)
+
+최적 포즈: T* = argmin_{T_i passes all checks} cost(T_i)
+
+결과:
+  충돌률: 0% (실험 22회 중 0번)
+  IPS 성공률: 94% (22회 중 20회 성공적 조작 포즈 선택)
+</code></pre>
+<hr>
+<h3>3.4 불일치 감지 메커니즘 (Discrepancy Detection Mechanism)</h3>
+<p>불일치 감지는 MIF의 적응형 씬 메모리 관리의 핵심이다. 이 메커니즘은 보행 아티팩트와 실제 환경 변화를 구별하여 선택적 메모리 업데이트를 수행한다.</p>
+<h4>3.4.1 다중 모달 불일치 점수 (Multi-modal Discrepancy Score)</h4>
+<pre><code>[불일치 점수 D 계산]
+
+현재 관측에서 지역 그래프 G_local 구성:
+  (현재 카메라 뷰에서 감지된 물체들의 로컬 씬 그래프)
+
+전역 저장 그래프 G_global의 대응 부분 추출:
+  G_global_sub ← G_global의 현재 뷰 내 노드/에지
+
+불일치 점수:
+  D = w_pos · D_pos + w_sem · D_sem + w_rel · D_rel
+
+D_pos (위치 불일치):
+  D_pos = (1/|V_matched|) Σ_{v ∈ V_matched} ‖p_local(v) - p_global(v)‖
+  V_matched: 매칭된 노드 집합
+  임계값: τ_pos = 1.5m (1.5m 이상 이동 = 유의미한 변화)
+
+D_sem (시맨틱 불일치):
+  D_sem = 1 - (1/|V|) Σ_{v ∈ V} cosine_sim(e_local(v), e_global(v))
+  e(v): 노드의 CLIP embedding
+  임계값: τ_sem = 0.3
+
+D_rel (관계 불일치):
+  D_rel = |E_local △ E_global| / |E_local ∪ E_global|
+  (Jaccard distance between edge sets)
+  임계값: τ_rel = 0.4
+
+종합 판단:
+  if D &gt; τ_D = 0.5: 실제 환경 변화 → 메모리 업데이트 트리거
+  else:              보행 아티팩트 → 무시
+</code></pre>
+<h4>3.4.2 신뢰도 게이팅된 업데이트 (Confidence-Gated Update)</h4>
+<p>불일치가 감지되면 전역 재매핑 대신 지역적 업데이트를 수행한다:</p>
+<pre><code>[선택적 지역 업데이트 알고리즘]
+
+1. 영향 범위 결정:
+   affected_region ← Voronoi cell around changed node
+   update_radius ← max(3.0m, Voronoi_radius)
+
+2. Appearance Field 지역 업데이트:
+   해당 region의 primitives에 대해:
+   - 현재 관측으로 gradient 재계산
+   - 신뢰도 점수 c_i 갱신
+   - view_count 기반 가중 평균으로 위치/색상 업데이트
+
+3. Spatial Field 지역 업데이트:
+   - 변화된 노드의 위치/embedding 업데이트
+   - 영향받는 에지 관계 재평가
+   - 삭제된 물체: is_dynamic 플래그 설정 (즉시 삭제 대신)
+     → N_confirmation frames (=5) 동안 재관측 없으면 삭제
+
+4. Geometry Field 캐시 무효화:
+   - 업데이트된 물체의 메시 캐시 삭제
+   - 다음 접근 시 새로 생성
+
+업데이트 시간: 평균 2.3초 (전역 재매핑 대비 ~15× 빠름)
+</code></pre>
+<hr>
+<h3>3.5 자연어 내비게이션 인터페이스</h3>
+<h4>3.5.1 언어 목표 파싱 (Language Goal Parsing)</h4>
+<pre><code>[자연어 목표 → 구조화된 트리플렛 변환]
+
+입력 예시:
+  &quot;창가 책상 위의 파란 물병을 가져와&quot;
+
+LLM (GPT-4V) 파싱:
+  ⟨Region, Landmark, Object⟩
+  = ⟨&quot;창가 근처&quot;, &quot;책상&quot;, &quot;파란 물병&quot;⟩
+
+계층적 그라운딩 (Hierarchical Grounding):
+  1. Region 찾기:
+     query = CLIP_embed(&quot;창가 근처&quot;)
+     candidate_regions = Spatial_Field.query_regions()
+     best_region = argmax cosine_sim(query, r.embedding) for r in candidate_regions
+
+  2. Landmark 찾기 (Region 내):
+     query = CLIP_embed(&quot;책상&quot;)
+     candidate_landmarks = best_region.children
+     best_landmark = argmax cosine_sim(query, l.embedding) for l in candidate_landmarks
+
+  3. Object 찾기 (Landmark 내):
+     query = CLIP_embed(&quot;파란 물병&quot;)
+     candidate_objects = best_landmark.children
+     best_object = argmax cosine_sim(query, o.embedding) for o in candidate_objects
+
+4. 내비게이션 목표 설정:
+   nav_goal = best_object.position
+   (또는 Geometry Field 기반 IPS 검증 후 terminal_pose*)
+</code></pre>
+<h4>3.5.2 계층적 내비게이션 전략</h4>
+<pre><code>[전체 내비게이션 파이프라인]
+
+언어 목표 I → 파싱 → ⟨R, L, O⟩
+                           │
+                           ▼
+            Region R로 글로벌 내비게이션
+            (A* 기반 topological planning
+             Spatial Field의 room-level 그래프 사용)
+                           │
+                           ▼
+            Landmark L 주변 로컬 내비게이션
+            (DWA-based local planner
+             Appearance Field depth 활용)
+                           │
+                           ▼
+            Object O 근접 탐색
+            dist &lt; 1.5m → Geometry Field 활성화
+                           │
+                           ▼
+            IPS 검증 → Terminal Pose T* 결정
+                           │
+                           ▼
+            MPPI 기반 정밀 접근 궤적
+                           │
+                           ▼
+            조작 실행
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────────┐
+│                    MIF 시스템 아키텍처                               │
+├─────────────┬───────────────────────────────────────────────────────┤
+│  입력층     │  RGB 카메라 스트림 (Unitree G1 머리 카메라)              │
+│             │  IMU (보행 주기 감지용)                                 │
+│             │  자연어 목표 지시 (&quot;water bottle near the window&quot;)       │
+├─────────────┼───────────────────────────────────────────────────────┤
+│             │                                                        │
+│  Field      │  ┌──────────────────┐                                  │
+│  Layer      │  │  Appearance Field │◄── 신뢰도 게이팅된 3DGS          │
+│             │  │  (F_app)          │    ┌─────────────────────┐       │
+│             │  │                  │    │ 모션 블러 필터링     │       │
+│             │  │                  │    │ Gaussian primitives  │       │
+│             │  │                  │    │ 신뢰도 점수 관리     │       │
+│             │  └──────┬───────────┘    └─────────────────────┘       │
+│             │         │ 안정화된 렌더링                                │
+│             │         ▼                                               │
+│             │  ┌──────────────────┐                                  │
+│             │  │   Spatial Field   │◄── SAM2 + CLIP + VLM 관계 추론  │
+│             │  │   (F_spat)        │    ┌─────────────────────┐       │
+│             │  │                  │    │ 계층적 씬 그래프     │       │
+│             │  │                  │    │ Region/Landmark/Obj  │       │
+│             │  │                  │    │ 공간 관계 에지       │       │
+│             │  └──────┬───────────┘    └─────────────────────┘       │
+│             │         │ On-demand (dist &lt; 1.5m)                       │
+│             │         ▼                                               │
+│             │  ┌──────────────────┐                                  │
+│             │  │  Geometry Field  │◄── Flow Matching 메시 생성        │
+│             │  │  (F_geom)        │    ┌─────────────────────┐       │
+│             │  │                  │    │ IPS 검증 (충돌/도달/ │       │
+│             │  │                  │    │ 안정성)              │       │
+│             │  └──────────────────┘    └─────────────────────┘       │
+├─────────────┼───────────────────────────────────────────────────────┤
+│  제어층     │  ┌──────────────────┐   ┌───────────────────────┐      │
+│             │  │  글로벌 플래너   │   │   로컬 플래너(MPPI)   │      │
+│             │  │  (A* topological)│   │   (종단 포즈 접근)    │      │
+│             │  └──────────────────┘   └───────────────────────┘      │
+├─────────────┼───────────────────────────────────────────────────────┤
+│  적응층     │  불일치 감지 메커니즘 (D = w_pos·D_pos + w_sem·D_sem + w_rel·D_rel)│
+│             │  선택적 지역 업데이트                                   │
+└─────────────┴───────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 하드웨어 플랫폼</h3>
+<pre><code>[Unitree G1 사양]
+
+로봇 플랫폼:
+  키: 127cm, 무게: 35kg
+  자유도: 43-DOF (몸통 13 + 팔 2×7 + 다리 2×6)
+  최대 속도: 3.3 m/s
+  연속 동작: ~2시간
+
+센서:
+  머리 RGB-D 카메라: 1920×1080 @ 30fps
+  IMU: 200Hz
+  발바닥 압력 센서: ZMP 계산용
+
+컴퓨팅:
+  온-로봇 임베디드 PC (저수준 제어용)
+  NVIDIA RTX 4090 워크스테이션 (씬 처리, 무선 통신)
+
+실험 환경:
+  100m² 사무실 (책상 6개, 선반 4개, 기타 가구)
+  제어된 동적 변화: 물체 재배치 (&gt;1.5m), 삭제, 추가
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<p>본 논문은 기존 벤치마크를 사용하지 않고 <strong>자체 구축한 실세계 동적 환경 데이터셋</strong>을 사용한다:</p>
+<pre><code>[실험 환경 구성]
+
+환경:
+  면적: 100m² 사무실
+  물체 수: 65개 고유 물체 (일상 사무용품)
+  동적 변화 시나리오: 3종류
+    1. 재배치(Relocation): 물체를 1.5~3.5m 이동
+    2. 삭제(Removal): 물체 완전 제거
+    3. 추가(Addition): 새 물체 도입
+
+평가 프로토콜:
+  총 실험 수: 22회 물체 조작 시도
+  각 시도: 언어 지시 → 내비게이션 → 조작 시도
+  환경 변화 후 재실험으로 적응 능력 평가
+
+훈련 데이터:
+  Appearance Field: ScanNet++ (실내 씬 3DGS 사전 학습)
+  Geometry Field: ShapeNet + CO3Dv2 (Flow Matching 메시 생성)
+</code></pre>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<pre><code>[주요 평가 지표]
+
+시맨틱 위치 파악 (Semantic Localization):
+  SR_loc: 목표 물체 위치 파악 성공률 (오차 &lt; 0.5m)
+  MDE:    평균 위치 오차 (m)
+
+물체 상호작용 (Object Interaction):
+  SR_IPS: IPS 검증 성공률 (유효한 종단 포즈 생성)
+  CR:     충돌률 (조작 시도 중 충돌 발생 비율)
+  TPE:    Terminal Pose Error (m)
+
+씬 적응 (Scene Adaptation):
+  SR_rel: 재배치 시나리오 성공률
+  SR_rem: 삭제 시나리오 성공률
+  SR_add: 추가 시나리오 성공률
+
+효율성:
+  Memory: 씬 표현 메모리 사용량 (MB)
+  Update_time: 지역 업데이트 소요 시간 (초)
+</code></pre>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<h4>시맨틱 위치 파악 비교</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>SR_loc (%)</th>
+<th>MDE (m)</th>
+<th>동적 적응</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Feature-Splatting</td>
+<td>61</td>
+<td>0.58</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>LangSplat</td>
+<td>54</td>
+<td>0.71</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>LatentBKI</td>
+<td>67</td>
+<td>0.44</td>
+<td>부분적</td>
+</tr>
+<tr>
+<td>HOV-SG</td>
+<td>72</td>
+<td>0.38</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>ConceptGraphs</td>
+<td>69</td>
+<td>0.42</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Khronos</td>
+<td>79</td>
+<td>0.31</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>MIF (본 논문)</strong></td>
+<td><strong>92</strong></td>
+<td><strong>0.18</strong></td>
+<td><strong>✅</strong></td>
+</tr>
+</tbody></table></div>
+<h4>씬 적응 성능</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>변화 유형</th>
+<th>기존 최강 (Khronos)</th>
+<th>MIF</th>
+<th>개선폭</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>재배치</td>
+<td>41%</td>
+<td><strong>94%</strong></td>
+<td>+53%p</td>
+</tr>
+<tr>
+<td>삭제</td>
+<td>68%</td>
+<td><strong>98%</strong></td>
+<td>+30%p</td>
+</tr>
+<tr>
+<td>추가</td>
+<td>79%</td>
+<td><strong>86%</strong></td>
+<td>+7%p</td>
+</tr>
+</tbody></table></div>
+<h4>메모리 효율성</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>메모리 (MB)</th>
+<th>업데이트 시간 (초)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HOV-SG</td>
+<td>2,140</td>
+<td>전역 재매핑 (~30s)</td>
+</tr>
+<tr>
+<td>ConceptGraphs</td>
+<td>3,870</td>
+<td>전역 재매핑 (~45s)</td>
+</tr>
+<tr>
+<td>Khronos</td>
+<td>890</td>
+<td>점진적 (~8s)</td>
+</tr>
+<tr>
+<td><strong>MIF</strong></td>
+<td><strong>184</strong></td>
+<td><strong>2.3s (지역)</strong></td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>메모리 풋프린트: HOV-SG 대비 <strong>-91.4%</strong> 감소</li>
+</ul>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<pre><code>[실제 Unitree G1 로봇 실험 상세]
+
+실험 1 — 순찰 내비게이션 (Patrol):
+  시나리오: 사무실 내 5개 랜드마크 순차 방문
+  성공률: 100% (5/5 랜드마크 도달)
+  MIF 메모리가 보행 중 안정적으로 유지됨을 확인
+
+실험 2 — 언어 조건 내비게이션 (Language-conditioned Navigation):
+  시나리오: &quot;Find the water bottle on the desk near the window&quot;
+  성공률: 92% (22회 중 20회)
+  실패 원인: 강한 역광으로 인한 감지 실패 (2회)
+  평균 내비게이션 시간: 47.3초 (도어-투-도어)
+
+실험 3 — 재배치 후 재내비게이션:
+  시나리오: 목표 물체를 2.1m 이동 후 동일 지시 재시도
+  MIF 적응: 2.3초 내 지역 업데이트 완료
+  성공률: 94% (16회 중 15회)
+  vs. 정적 맵 기반 방법: 12% (불일치 인식 실패)
+
+실험 4 — 물체 조작 (Object Retrieval):
+  시나리오: 언어 목표 → 내비게이션 → 물체 집기
+  IPS 검증 성공률: 94% (22회 중 20회)
+  충돌 발생: 0회
+  평균 종단 포즈 오차: 0.12m
+</code></pre>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>6.1 이족보행 로봇을 위한 신뢰도 인식 3DGS (Contribution 1)</h3>
+<p><strong>기존 방법들의 맹점 해소</strong>: 기존 3DGS 기반 씬 표현은 정적 카메라를 가정하였다. MIF는 각 Gaussian primitive에 신뢰도 점수를 부여하여 보행 중 블러된 프레임에서 추정된 원시 요소를 자동으로 필터링한다.</p>
+<pre><code>핵심 혁신:
+  c_i = σ(w₁·‖∇L_i‖ + w₂·α_i)
+
+  블러 프레임 기반 primitives: 자동 제외
+  안정 프레임 기반 primitives: 신뢰도 높음 → 렌더링 포함
+  결과: 인간형 로봇에서 MDE 0.18m (기존 최강 대비 42% 향상)
+</code></pre>
+<p><strong>실용적 의의</strong>: Spot, Fetch 등 바퀴 또는 4족 보행 로봇을 위해 설계된 기존 씬 표현 방법들을 인간형 로봇에 그대로 적용할 수 없다는 근본 문제를 해결. 차세대 인간형 로봇 (Tesla Optimus, Figure 01, Unitree G1 등) 배포에 직접 기여할 수 있는 원천 기술.</p>
+<h3>6.2 삼중 필드 씬 메모리 (Contribution 2)</h3>
+<p><strong>상호보완적 표현의 계층화</strong>: 단일 표현으로 모든 작업을 처리하려 했던 기존 방법들과 달리, MIF는 세 가지 전문화된 필드를 계층적으로 결합한다:</p>
+<ul>
+<li>F_app: 시각적 세밀도 + 블러 강건성</li>
+<li>F_spat: 시맨틱 이해 + 언어 그라운딩</li>
+<li>F_geom: 물리적 상호작용 안전성</li>
+</ul>
+<p>이 구조는 각 필드가 자신이 잘 처리할 수 있는 부분에 집중하면서, 하위 필드의 안정화된 결과를 상위 필드가 활용하는 &quot;파이프라인 안정화&quot;를 달성한다.</p>
+<h3>6.3 보행 아티팩트와 환경 변화의 실용적 구별 (Contribution 3)</h3>
+<p><strong>불일치 감지의 실용성</strong>: D_pos (1.5m 임계값), D_sem (CLIP 유사도), D_rel (그래프 에지 Jaccard)의 가중 조합은 단순하지만 효과적이다. 특히 1.5m 임계값은 물체가 실제로 이동했는지 vs. 보행 진동으로 인한 추정 오차인지를 구별하는 데 경험적으로 최적임을 실험으로 검증했다.</p>
+<h3>6.4 Flow Matching 기반 On-demand 메시 재구성 (Contribution 4)</h3>
+<p><strong>조작 지향 내비게이션의 새로운 마일스톤</strong>: 기존 내비게이션 논문들은 &quot;물체 근처 도달&quot;을 성공으로 정의했다. MIF는 실제 팔이 닿을 수 있는 정밀한 종단 포즈까지 계획하여 조작 성공률을 극적으로 향상시킨다 (IPS 94%, 충돌 0%).</p>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<pre><code>[하이퍼파라미터 및 학습 설정]
+
+Appearance Field:
+  기반 모델: 3DGS (Kerbl et al., 2023)
+  신뢰도 임계값 τ_conf: 0.4
+  신뢰도 가중치 [w₁, w₂]: [0.6, 0.4]
+  프레임 품질 임계값 τ_frame: 0.45 (SSIM 기반)
+  학습률 (기존 primitives): 1×10⁻⁴ (새 primitives: 1×10⁻³)
+
+Spatial Field:
+  기반 세그멘테이션: SAM2 (ViT-H)
+  CLIP 모델: CLIP ViT-L/14 (512D embedding)
+  관계 추론 VLM: LLaVA-1.6 (13B)
+  매칭 임계값: 거리 0.5m + CLIP similarity 0.8
+  데이터 연관 업데이트: N_confirmation = 5 프레임
+
+Geometry Field:
+  기반 모델: Flow Matching (Lipman et al., 2022)
+  훈련 데이터: ShapeNet 55개 카테고리 + CO3Dv2
+  활성화 거리: 1.5m
+  포즈 후보 수: 64개 (SO(3) 균등 샘플링)
+  IPS 임계값 τ_stability: 0.05m (ZMP 마진)
+
+불일치 감지:
+  가중치 [w_pos, w_sem, w_rel]: [0.5, 0.3, 0.2]
+  종합 임계값 τ_D: 0.5
+  위치 임계값 τ_pos: 1.5m
+  시맨틱 임계값 τ_sem: 0.3
+  관계 임계값 τ_rel: 0.4
+  업데이트 반경: max(3.0m, Voronoi_radius)
+
+내비게이션:
+  글로벌 플래너: A* (topological graph 위)
+  로컬 플래너: DWA (Dynamic Window Approach) + MPPI (종단 접근)
+  MPPI 샘플 수: 1,000
+  MPPI 시간 지평: 3.0초 (30 스텝 × 0.1초)
+
+하드웨어:
+  로봇: Unitree G1 (35kg, 43-DOF)
+  컴퓨팅: NVIDIA RTX 4090 + Intel i9-13900K
+  통신: Wi-Fi 6 (레이턴시: &lt;20ms)
+  처리 주기: Appearance/Spatial Field 1Hz, 제어 루프 100Hz
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 분석</h3>
+<pre><code>[환경 규모별 성능 (추정)]
+
+100m² (실험 환경):
+  Gaussian primitives: ~250K
+  씬 그래프 노드: ~150
+  메모리: 184MB
+  업데이트 시간: 2.3초
+
+500m² (사무실 층 전체, 추정):
+  Gaussian primitives: ~1.2M
+  씬 그래프 노드: ~750
+  메모리: ~920MB (선형 스케일링)
+  업데이트 시간: ~11초 (지역 업데이트이므로 전역 크기 무관)
+
+주의: 지역 업데이트 시간은 환경 전체 크기에 독립적
+      → 대규모 환경에서도 업데이트 시간 일정 유지
+</code></pre>
+<h3>8.2 한계점</h3>
+<pre><code>[현재 시스템의 한계]
+
+한계 1 — 강한 조명 변화:
+  역광 또는 급격한 조도 변화 시 감지 실패 (2/22 케이스)
+  해결 방향: HDR 카메라 또는 조명 적응 3DGS
+
+한계 2 — 컴퓨팅 의존성:
+  RTX 4090 워크스테이션 필요 (온-로봇 처리 불가)
+  해결 방향: 모델 경량화 (INT8 quantization), 에지 서버 활용
+
+한계 3 — 보행 속도 제한:
+  빠른 이동(&gt;1.5 m/s) 시 신뢰도 있는 프레임 확보 어려움
+  해결 방향: IMU-카메라 타이트 결합(tight coupling) 적용
+
+한계 4 — 물체 카테고리 의존성:
+  Flow Matching 훈련 데이터 외 카테고리에서 메시 품질 저하
+  해결 방향: 대규모 3D 합성 데이터셋 활용
+
+한계 5 — 언어 파싱 취약성:
+  모호한 지시 (&quot;저기 있는 거 가져다줘&quot;)에서 파싱 실패
+  해결 방향: 대화형 명확화(interactive clarification) 모듈
+</code></pre>
+<h3>8.3 향후 연구 방향</h3>
+<pre><code>[MIF 기반 향후 연구]
+
+방향 1 — 멀티 로봇 확장:
+  여러 인간형 로봇이 씬 메모리를 분산 공유
+  각 로봇의 Field 업데이트를 합의 알고리즘으로 통합
+  → 대규모 공간에서 협력 내비게이션
+
+방향 2 — 온라인 물체 학습:
+  처음 보는 물체를 탐색 중 실시간으로 Geometry Field에 추가
+  Few-shot 3D 재구성과 결합
+
+방향 3 — VLN 벤치마크 확장:
+  현재 자체 평가 환경 → R2R, REVERIE 등 표준 벤치마크 적용
+  (단, 이족보행 로봇용 시뮬레이터 필요)
+
+방향 4 — 언어-조작 통합:
+  &quot;가져다줘&quot; → 내비게이션 + 집기 + 운반의 일관된 파이프라인
+  Geometry Field를 조작 정책과 직접 통합
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>HOV-SG (RSS 2024)</th>
+<th>SemanticAutonomyStack (arxiv 2026)</th>
+<th>AwareVLN (CVPR 2026)</th>
+<th>MIF (본 논문)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>플랫폼</strong></td>
+<td>Boston Dynamics Spot (4족)</td>
+<td>바퀴 이동 로봇</td>
+<td>시뮬레이션 에이전트</td>
+<td>Unitree G1 (이족)</td>
+</tr>
+<tr>
+<td><strong>언어 입력</strong></td>
+<td>자연어 쿼리</td>
+<td>자연어 지시</td>
+<td>단계별 내비게이션 지시</td>
+<td>자연어 목표</td>
+</tr>
+<tr>
+<td><strong>씬 표현</strong></td>
+<td>4단계 씬 그래프</td>
+<td>시맨틱 맵 + 규칙 DB</td>
+<td>에피소드 히스토리</td>
+<td>3개 상호보완 필드</td>
+</tr>
+<tr>
+<td><strong>동적 환경</strong></td>
+<td>❌</td>
+<td>제한적</td>
+<td>❌</td>
+<td>✅ (불일치 감지)</td>
+</tr>
+<tr>
+<td><strong>보행 강건성</strong></td>
+<td>부분적</td>
+<td>✅ (바퀴)</td>
+<td>N/A</td>
+<td>✅ (신뢰도 게이팅)</td>
+</tr>
+<tr>
+<td><strong>조작 안전성</strong></td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅ (IPS)</td>
+</tr>
+<tr>
+<td><strong>코드 공개</strong></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>Coming Soon</td>
+</tr>
+<tr>
+<td><strong>메모리</strong></td>
+<td>2,140MB</td>
+<td>저용량</td>
+<td>N/A</td>
+<td>184MB</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>MIF의 장점</strong>:</p>
+<ol>
+<li><p><strong>인간형 로봇 특화</strong>: 기존 모든 방법이 바퀴 로봇이나 4족 로봇을 대상으로 하였으나, MIF는 이족보행의 독특한 도전을 정면으로 다룬다. 이는 실용적 로봇 배포 관점에서 매우 중요한 기여.</p>
+</li>
+<li><p><strong>삼중 필드 설계의 우아함</strong>: F_app → F_spat → F_geom의 계층적 정제(refinement) 구조는 각 모듈이 독립적으로 개선될 수 있는 모듈성을 제공한다.</p>
+</li>
+<li><p><strong>동적 적응의 효율성</strong>: 전역 재매핑 대신 지역 업데이트 (2.3초)는 실세계 배포에서 실용적. 특히 업데이트 시간이 환경 크기에 무관하다는 점이 확장성의 핵심.</p>
+</li>
+</ol>
+<p><strong>MIF의 단점</strong>:</p>
+<ol>
+<li><p><strong>컴퓨팅 요구사항</strong>: RTX 4090 외장 워크스테이션 의존. HOV-SG도 오프보드 처리를 하지만 MIF의 3D Flow Matching은 추가 연산이 많다.</p>
+</li>
+<li><p><strong>표준 VLN 벤치마크 부재</strong>: R2R, REVERIE 등 표준 벤치마크에서의 성능을 보이지 않아 직접 비교가 어렵다. 자체 실험 환경만의 평가.</p>
+</li>
+<li><p><strong>단일 환경 데이터</strong>: 100m² 사무실 단일 환경에서의 22회 실험은 통계적으로 제한적.</p>
+</li>
+</ol>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>[실제 로봇 배포 관점 평가]
+
+장점:
+  ✅ Unitree G1 실제 로봇에서 검증 (시뮬레이션 아님)
+  ✅ 동적 환경 변화에 실시간 적응 (2.3초)
+  ✅ 충돌 없는 조작 포즈 선택 (0% 충돌률)
+  ✅ 자연어로 목표 지시 가능 (사용자 친화적)
+
+단점:
+  ❌ Wi-Fi 기반 외장 컴퓨팅 의존 (실내로 사용 제한)
+  ❌ 강한 조명 변화에 취약 (9% 실패)
+  ❌ 고속 이동 시 성능 저하
+
+결론: 실내 물류, 서비스 로봇, 병원 보조 등의 제한된 실내 환경에서는
+      현재 기술로도 실용적 배포 가능 수준. 다만 외장 컴퓨팅 의존성
+      해결이 필수적.
+</code></pre>
+<h3>9.4 연구 방향성 평가</h3>
+<p>MIF는 인간형 로봇의 시대 도래와 맞물려 매우 시의적절한 연구 방향을 제시한다. 기존 VLN 연구가 &quot;어떻게 경로를 따라갈 것인가&quot;에 집중했다면, MIF는 &quot;어떻게 동적 환경에서 씬 메모리를 유지하고 언어 목표를 안전하게 달성할 것인가&quot;라는 더 어려운 문제를 다룬다.</p>
+<p>특히 HOV-SG (RSS 2024)와 비교했을 때, MIF는 동일 탑티어 학회(RSS)에서 2년 뒤 발표된 논문으로:</p>
+<ul>
+<li>HOV-SG가 놓친 동적 환경 적응 문제를 해결</li>
+<li>더 어려운 이족보행 플랫폼에서 검증</li>
+<li>조작 안전성이라는 새로운 차원 추가</li>
+</ul>
+<p>이는 씬 그래프 기반 내비게이션 분야의 자연스러운 발전 방향이며, 향후 인간형 로봇 배포의 핵심 기술이 될 것으로 평가한다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li>Kerbl et al. &quot;3D Gaussian Splatting for Real-Time Radiance Field Rendering.&quot; SIGGRAPH 2023.</li>
+<li>Werby et al. &quot;HOV-SG: Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation.&quot; RSS 2024.</li>
+<li>Lipman et al. &quot;Flow Matching for Generative Modeling.&quot; ICLR 2023.</li>
+<li>Ravi et al. &quot;SAM 2: Segment Anything in Images and Videos.&quot; arXiv 2024.</li>
+<li>Radford et al. &quot;Learning Transferable Visual Models From Natural Language Supervision.&quot; ICML 2021 (CLIP).</li>
+<li>Gu et al. &quot;ConceptGraphs: Open-Vocabulary 3D Scene Graphs for Perception and Planning.&quot; ICRA 2024.</li>
+<li>Rosinol et al. &quot;Khronos: A Unified Approach for Spatio-Temporal Metric-Semantic SLAM in Dynamic Environments.&quot; RSS 2024.</li>
+<li>Williams et al. &quot;Model Predictive Path Integral Control using Covariance Variable Importance Sampling and a Neural Network Dynamics Model.&quot; ICRA 2017 (MPPI).</li>
+<li>Abaza et al. &quot;SemanticAutonomyStack.&quot; arXiv 2026 (2605.02525).</li>
+<li>Guo et al. &quot;AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation.&quot; CVPR 2026.</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p>MIF(Multi-modal Interactive Fields)는 인간형 로봇의 실세계 배포라는 시급한 문제를 삼중 필드 씬 메모리로 우아하게 해결한 RSS 2026 논문이다.</p>
+<p><strong>혁신성</strong>:
+이족보행 특유의 보행 유도 시각 왜곡 문제를 Gaussian primitive별 신뢰도 점수로 해결한 것은 단순하지만 매우 효과적이다. 더 중요하게는, 보행 아티팩트와 실제 환경 변화를 다중 모달 불일치 점수로 구별하는 접근법은 동적 씬 메모리 문제에 대한 실용적 해법을 제시한다.</p>
+<p><strong>실용적 의의</strong>:
+충돌 없는 조작 포즈 선택 (IPS, 0% 충돌), 2.3초 내 지역 업데이트, 91.4% 메모리 절감은 모두 실제 배포 가능성을 뒷받침하는 수치다. 특히 Tesla Optimus, Figure 01 등 상업용 인간형 로봇이 실제 환경에 배포될 2-3년 내에 이러한 기술이 핵심 소프트웨어 스택이 될 것으로 기대된다.</p>
+<p><strong>향후 연구 방향</strong>:
+온-로봇 처리 가능한 경량화, R2R/REVERIE 등 표준 VLN 벤치마크 적용, 그리고 멀티 로봇 분산 씬 메모리 공유가 가장 중요한 후속 과제다. MIF가 제안한 삼중 필드 아키텍처는 이 모든 확장 방향에서 기반이 될 수 있는 충분한 모듈성을 갖추고 있다.</p>
+<p>기존 VLN 연구가 R2R 등 그래프 기반 시뮬레이션에 치중한 것과 달리, MIF는 진정한 실세계 인간형 로봇 내비게이션의 미래를 제시한다는 점에서 높이 평가한다.</p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,1272 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>RAY-TOLD: Ray-Based Latent Dynamics for Dense Dynamic Obstacle Avoidance with TDMPC · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 2026</div>
+    <h1>RAY-TOLD: Ray-Based Latent Dynamics for Dense Dynamic Obstacle Avoidance with TDMPC</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2604.27450">arXiv:2604.27450</a></span>
+      <span>리뷰 2026-05-01</span>
+      <span>43분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>RAY-TOLD: LiDAR 레이 기반 잠재 동역학과 TDMPC를 통한 고밀도 동적 장애물 회피 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: RAY-TOLD: Ray-Based Latent Dynamics for Dense Dynamic Obstacle Avoidance with TDMPC</li>
+<li><strong>저자 (Authors)</strong>: Seungho Han, Seokju Lee, Jeonguk Kang</li>
+<li><strong>소속 (Affiliation)</strong>:<ul>
+<li>Seungho Han: School of Electrical Engineering, Hanyang University, Seoul, South Korea</li>
+<li>Seokju Lee: Mechatronics, Systems and Control Lab, KAIST (Korea Advanced Institute of Science and Technology), Daejeon, South Korea</li>
+<li>Jeonguk Kang: Samsung Research, Samsung Electronics, Suwon, South Korea</li>
+</ul>
+</li>
+<li><strong>발표처 (Published)</strong>: arXiv 프리프린트 (2026년 4월 30일, cs.RO, cs.AI)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2604.27450">https://doi.org/10.48550/arXiv.2604.27450</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.27450">https://arxiv.org/abs/2604.27450</a></li>
+<li><strong>GitHub</strong>: 미공개 (코드 미공개)</li>
+<li><strong>프로젝트 페이지</strong>: 없음</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p><strong>고밀도 동적 군중 환경에서의 자율 이동 로봇 내비게이션</strong>은 자율주행, 서비스 로봇, 물류 로봇 등 다양한 응용 분야에서 핵심적인 기술이다. 특히 40-60명 이상의 동적 보행자가 밀집한 환경에서 순수 반응적 계획(reactive planning) 방법은 근본적인 한계를 보인다:</p>
+<ul>
+<li><strong>MPPI(Model Predictive Path Integral)</strong>: 단기 예측 지평선으로 인해 복잡한 군중 상황에서 국소 최솟값(local minima)에 갇힘</li>
+<li><strong>DWA, ORCA 등</strong>: 반응적 회피는 가능하지만, 장기적 탈출 경로를 계획하지 못함</li>
+</ul>
+<p>RAY-TOLD는 이 문제를 <strong>학습된 잠재 동역학 모델(Learned Latent Dynamics)과 물리 기반 MPPI 제어의 하이브리드 결합</strong>으로 해결한다. 핵심 기여는:</p>
+<ol>
+<li>LiDAR 레이 기반 컴팩트 상태 표현</li>
+<li>TDMPC2 프레임워크 기반 잠재 동역학 모델 학습</li>
+<li>정책 혼합 샘플링 전략으로 MPPI의 국소 최솟값 탈출 능력 부여</li>
+</ol>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 고밀도 동적 군중에서의 MPPI 실패</h4>
+<p>MPPI는 강력한 샘플링 기반 최적 제어 방법이지만, 고밀도 동적 군중에서 구조적 한계를 보인다:</p>
+<pre><code>MPPI의 기본 작동 원리:
+┌─────────────────────────────────────────────────────────┐
+│  K개의 랜덤 궤적 후보 샘플링                              │
+│  각 후보를 물리 모델로 전방 시뮬레이션 (H 스텝)            │
+│  각 후보의 누적 보상 계산                                 │
+│  소프트맥스 가중치로 최적 궤적 추출                        │
+└─────────────────────────────────────────────────────────┘
+
+고밀도 군중에서의 실패 패턴:
+
+시나리오 1: 수렴하는 장애물 경로
+    장애물 1 → ↘
+                    ← (에고 차량 이동 경로)
+    장애물 2 → ↗
+
+    문제: H 스텝 단기 예측으로는 수렴 패턴 미리 파악 불가
+    결과: 예측 지평선 너머에서 발생하는 충돌을 피하지 못함
+
+시나리오 2: 갇힘 현상 (Local Minima)
+    장애물들이 에고 차량 주변 360°를 둘러싼 상황
+    
+    순수 MPPI: 모든 샘플 궤적이 높은 비용 → 수렴 실패
+    결과: 제자리에서 진동, 전진 불가, 충돌 발생
+
+시나리오 3: 좁은 통로
+    두 장애물 그룹 사이 좁은 경로만 존재
+    
+    K=256 랜덤 샘플: 좁은 통로를 우연히 통과하는 샘플 극소수
+    결과: 올바른 경로를 찾지 못하고 충돌
+</code></pre>
+<h4>B. 학습 기반 방법과 물리 기반 방법의 트레이드오프</h4>
+<pre><code>순수 학습 기반 방법 (End-to-End RL):
+  장점: 장기 계획, 복잡한 패턴 학습
+  단점: 물리적 실현 가능성 보장 불가
+         새로운 환경 일반화 어려움
+         안전 제약 위반 가능
+
+순수 물리 기반 방법 (MPPI, MPC):
+  장점: 물리적 실현 가능, 즉각적 반응
+  단점: 단기 예측 지평선 제한
+         학습 없는 미래 예측 불가
+         국소 최솟값 탈출 어려움
+
+RAY-TOLD: 두 접근의 장점 결합
+  - 물리 기반 MPPI로 운동학적 실현 가능성 보장
+  - 잠재 동역학으로 장기 가치 추정
+  - 정책 사전으로 목표 지향적 안내
+</code></pre>
+<h4>C. 고차원 LiDAR 데이터 처리</h4>
+<pre><code>LiDAR 센서 데이터의 처리 과제:
+  원시 포인트 클라우드: 수만 개의 3D 점 → 고차원, 처리 비용 높음
+  
+  가능한 표현 방법:
+  1. 원시 포인트 클라우드: 완전한 정보, 처리 비용 매우 높음
+  2. 점유 격자(Occupancy Grid): 이산화 손실, 동적 정보 제한
+  3. 레이 기반 표현: 컴팩트, 해석 가능, 동적 정보 포함 가능
+  4. 딥러닝 인코더(PointNet 등): 강력하지만 실시간 어려울 수 있음
+
+RAY-TOLD: 레이 기반 표현 선택
+  이유: 계산 효율성 + 폐색(occlusion) 처리 + 장애물 속도 포함
+</code></pre>
+<h3>2.2 핵심 해결책</h3>
+<p>RAY-TOLD의 핵심 통찰:</p>
+<blockquote>
+<p><strong>&quot;LiDAR 레이 측정값을 컴팩트한 잠재 공간으로 인코딩하고, 잠재 공간에서 동역학 모델을 학습한다. MPPI 샘플링 시 학습된 정책 사전을 혼합하여 물리 기반 탐색과 학습 기반 안내를 결합하면, 고밀도 동적 군중에서의 국소 최솟값 탈출이 가능하다.&quot;</strong></p>
+</blockquote>
+<p>구체적으로:</p>
+<ul>
+<li><strong>레이 기반 상태 표현</strong>: 60개 LiDAR 레이 + 속도 → 186차원 입력 벡터</li>
+<li><strong>잠재 인코더</strong>: 186차원 → 128차원 잠재 상태</li>
+<li><strong>잠재 동역학 모델</strong>: 잠재 공간에서 상태 전이 예측 (물리 엔진 불필요)</li>
+<li><strong>가치 함수</strong>: 잠재 상태에서 무한 지평선 할인 누적 보상 추정</li>
+<li><strong>정책 혼합 샘플링</strong>: α * 정책 안내 + (1-α) * 확률적 탐색</li>
+</ul>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 레이 기반 상태 표현 (Ray-Based State Representation)</h3>
+<h4>입력 벡터 구성</h4>
+<p>RAY-TOLD의 상태 표현은 세 가지 구성 요소로 이루어진 186차원 벡터이다:</p>
+<pre><code>상태 벡터 s ∈ R^186 구성:
+
+[1] 차량 운동학 상태 (Kinematic State):
+    - 위치: (x, y)
+    - 속도: (v_x, v_y)
+    - 방향: (heading θ)
+    - 차량 모델: 운동학적 자전거 모델 (wheelbase = 2.5m, length = 2.5m)
+    차원: ~6
+
+[2] 목표 정보 (Goal Information):
+    - 상대 목표 위치: (Δx_goal, Δy_goal) (에고 차량 기준 상대 좌표)
+    차원: ~2
+
+[3] LiDAR 레이 측정 (Ray Measurements):
+    - 범위: 360° 완전 커버리지
+    - 레이 수: 60개 (균등 간격 6°)
+    - 각 레이: {거리 d_i, 장애물 속도 (v_x_i, v_y_i)}
+    - 폐색 인식 절단(Occlusion-Aware Truncation): 장애물 뒤 레이는 절단 처리
+    차원: 60 * 3 = 180
+
+총 입력 차원: 6 + 2 + 180 ≈ 186
+</code></pre>
+<h4>레이 기반 표현의 장점</h4>
+<pre><code>기존 접근 대비 장점:
+
+1. 계산 효율성 비교:
+   원시 포인트 클라우드: O(N^2) 처리 비용 (N: 포인트 수)
+   레이 기반 표현:     O(60) = 상수 복잡도
+   → 실시간 처리에 적합
+
+2. 폐색 처리 (Occlusion Handling):
+   포인트 클라우드: 폐색된 영역 명시적 표현 어려움
+   레이 기반:      폐색 레이는 절단 → 미지 영역을 자연스럽게 표현
+
+3. 동적 정보 내포:
+   정적 거리 + 장애물 속도(v_x_i, v_y_i) 동시 인코딩
+   → 장애물의 이동 방향과 속도를 즉각 파악
+
+4. 해석 가능성:
+   레이 = 실제 LiDAR 센서 동작 모방
+   잠재 공간의 의미가 명확 (충돌 위험 ↔ 레이 단거리)
+
+5. 환경 이식성:
+   레이 수(60개)를 조정하면 다양한 LiDAR 센서 호환
+   포인트 클라우드와 달리 밀도 변화에 무관
+</code></pre>
+<h3>3.2 TDMPC2 기반 잠재 동역학 모델 (Latent Dynamics Model)</h3>
+<p>TDMPC2(Task-oriented Latent Dynamics Model Predictive Control 2)는 제어 태스크를 위한 잠재 공간 세계 모델 프레임워크이다. RAY-TOLD는 이를 자율 이동 로봇의 고밀도 동적 장애물 회피에 적용한다.</p>
+<h4>모델 구성 요소</h4>
+<p><strong>구성 요소 1: 상태 인코더 (State Encoder) h_θ</strong></p>
+<pre><code>h_θ: R^186 → R^128
+
+입력: 186차원 상태 벡터 s_t
+       (차량 운동학 + 목표 정보 + 60 LiDAR 레이 + 속도)
+출력: 128차원 잠재 상태 z_t
+
+특징:
+  - 비선형 신경망 (구체적 레이어 구조 미공개)
+  - 원시 관측에서 계획에 유용한 피처 추출
+  - 잠재 공간에서 물리적 의미 있는 군집화 (t-SNE 분석 확인)
+
+잠재 공간 해석 (t-SNE 시각화 결과):
+  - 위험 상태 (충돌 근접): 잠재 공간에서 별도 군집 형성
+  - 안전 상태 (열린 공간): 독립적인 군집
+  - 전이 부드러운 연속성 (물리적 의미 있는 내삽 가능)
+  → 단순 센서 메모리가 아닌 실제 충돌 위험 기하학 학습
+</code></pre>
+<p><strong>구성 요소 2: 잠재 동역학 모델 (Latent Dynamics) d_φ</strong></p>
+<pre><code>d_φ: (R^128, R^a) → R^128
+
+입력: 현재 잠재 상태 z_t, 행동 a_t
+출력: 예측 다음 잠재 상태 z_{t+1}
+
+수학적 표현:
+  z_{t+1} = d_φ(z_t, a_t)
+
+핵심 특징:
+  - 잠재 공간 내에서 완전히 동작 (물리 엔진 불필요)
+  - 멀티-스텝 상상 롤아웃(imagined rollout) 수행 가능:
+    z_{t+1} = d_φ(z_t, a_t)
+    z_{t+2} = d_φ(z_{t+1}, a_{t+1})
+    ...
+    z_{t+H} = d_φ(z_{t+H-1}, a_{t+H-1})
+  - MPPI 계획 중 각 후보 궤적의 빠른 평가 가능
+
+장점 vs. 물리 엔진:
+  물리 엔진:  정확하지만 느림, 동적 장애물 예측 어려움
+  잠재 동역학: 학습된 근사지만 빠름, 장애물 패턴 암묵적 학습
+</code></pre>
+<p><strong>구성 요소 3: 보상 예측기 (Reward Predictor) R_ψ</strong></p>
+<pre><code>R_ψ: (R^128, R^a) → R
+
+입력: 잠재 상태 z_t, 행동 a_t
+출력: 즉각 보상 예측값 r_t
+
+보상 함수 구성 (6가지 가중 구성 요소):
+  R_total = λ_1 * R_goal + λ_2 * R_collision + λ_3 * R_safety
+            + λ_4 * R_velocity + λ_5 * R_progress + λ_6 * R_sparse
+
+  1. 목표 거리 보상 (R_goal): 목표에 가까워질수록 정(+) 보상
+  2. 충돌 페널티 (R_collision): 장애물과 충돌 시 강한 부(-) 보상
+  3. 안전 여유 인센티브 (R_safety): 장애물 근처에서 완만한 부 보상
+  4. 속도 인센티브 (R_velocity): 목표 속도 유지 시 정 보상
+  5. 진행도 정렬 (R_progress): 목표 방향으로 이동 시 정 보상
+  6. 희소 목표 보상 (R_sparse): 목표 지점 도달 시 큰 정 보상
+  
+  할인율: γ = 0.99
+</code></pre>
+<p><strong>구성 요소 4: 가치 함수 (Value Function / Q-Function) C_ω</strong></p>
+<pre><code>C_ω: (R^128, R^a) → R
+
+입력: 잠재 상태-행동 쌍 (z_t, a_t)
+출력: 무한 지평선 할인 누적 보상 추정 Q(z_t, a_t)
+
+수학적 표현:
+  Q(z_t, a_t) = E[Σ_{k=0}^{∞} γ^k * r_{t+k}]
+  
+  실제 계산 (유한 지평선 + 터미널 가치):
+  Q(z_t, a_t) ≈ Σ_{k=0}^{H-1} γ^k * R_ψ(z_{t+k}, a_{t+k}) 
+                + γ^H * C_ω(z_{t+H}, π_ξ(z_{t+H}))
+
+핵심 역할: MPPI 계획 지평선(H 스텝) 너머의 가치를 추정
+→ H 스텝 이후의 충돌 위험을 미리 고려 가능
+→ 단기 계획의 근시안적 한계 극복
+</code></pre>
+<p><strong>구성 요소 5: 정책 사전 네트워크 (Policy Prior) π_ξ</strong></p>
+<pre><code>π_ξ: R^128 → R^a
+
+입력: 잠재 상태 z_t
+출력: 목표 지향적 행동 a_t
+
+작동 방식:
+  - 잠재 공간에서 재귀적으로 펼쳐짐 (recursive unrolling)
+  - 잠재 동역학 d_φ와 연계하여 H-스텝 행동 시퀀스 생성
+  - 학습을 통해 일반적으로 &quot;좋은&quot; 행동을 사전으로 학습
+
+MPPI에서의 역할:
+  - 정책 사전이 생성한 행동 시퀀스를 MPPI 후보군에 혼합
+  - 순수 무작위 샘플 + 정책 안내 샘플의 혼합
+</code></pre>
+<h4>아키텍처 요약 다이어그램</h4>
+<pre><code>RAY-TOLD 모델 아키텍처:
+
+입력: s_t = [차량 운동학 | 목표 | 60 LiDAR 레이 + 속도] ∈ R^186
+                            │
+                    ┌───────▼───────┐
+                    │ 인코더 h_θ    │
+                    │ 186 → 128    │
+                    └───────┬───────┘
+                            │ z_t ∈ R^128
+              ┌─────────────┼─────────────┐
+              │             │             │
+      ┌───────▼──────┐ ┌───▼──────┐ ┌───▼──────┐
+      │ 동역학 d_φ   │ │ 보상 R_ψ │ │ 가치 C_ω │
+      │ z,a → z&#39;    │ │ z,a → r  │ │ z,a → Q  │
+      └───────┬──────┘ └──────────┘ └──────────┘
+              │ z_{t+1}
+      ┌───────▼──────┐
+      │ 정책 π_ξ     │
+      │ z → a        │
+      └──────────────┘
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>구성 요소</th>
+<th>입력 차원</th>
+<th>출력 차원</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>인코더 h_θ</td>
+<td>186</td>
+<td>128</td>
+<td>원시 관측 → 잠재 상태</td>
+</tr>
+<tr>
+<td>동역학 d_φ</td>
+<td>128+a</td>
+<td>128</td>
+<td>잠재 상태 전이 예측</td>
+</tr>
+<tr>
+<td>보상 예측기 R_ψ</td>
+<td>128+a</td>
+<td>1</td>
+<td>즉각 보상 추정</td>
+</tr>
+<tr>
+<td>가치 함수 C_ω</td>
+<td>128+a</td>
+<td>1</td>
+<td>무한 지평선 Q값</td>
+</tr>
+<tr>
+<td>정책 사전 π_ξ</td>
+<td>128</td>
+<td>a</td>
+<td>목표 지향적 행동 생성</td>
+</tr>
+</tbody></table></div>
+<h3>3.3 정책 혼합 MPPI 샘플링 (Policy Mixture MPPI)</h3>
+<p>RAY-TOLD의 가장 핵심적인 기여는 <strong>정책 혼합 샘플링 전략(Policy Mixture Sampling Strategy)</strong>이다.</p>
+<h4>표준 MPPI의 한계</h4>
+<pre><code>표준 MPPI 계획 절차:
+  1. 이전 솔루션 이동(warm-start): Ū_{1:H} (이전 최적 행동 시퀀스)
+  2. K개 노이즈 샘플 생성: ε^(k) ~ N(0, Σ_u), k=1,...,K
+  3. K개 후보 궤적: U^(k) = Ū + ε^(k)
+  4. 각 후보를 물리 모델로 시뮬레이션
+  5. 비용/보상 계산
+  6. 소프트맥스 가중치로 최적 행동 추출
+
+문제: 모든 샘플이 Ū 주변 가우시안에서 생성
+→ Ū이 나쁜 국소 최솟값에 있으면 모든 샘플도 나쁜 영역
+→ 복잡한 장애물 상황에서 탈출 불가
+</code></pre>
+<h4>RAY-TOLD의 정책 혼합 샘플링</h4>
+<pre><code>RAY-TOLD 계획 알고리즘 (Algorithm 1):
+
+입력:
+  - 현재 잠재 상태 z_t
+  - 이전 솔루션 Ū (warm-start)
+  - 혼합 비율 α ∈ [0, 1]
+
+1단계: 후보 집합 분할
+  K_policy = floor(α * K) 개: 정책 안내 후보
+  K_random = K - K_policy 개: 표준 MPPI 확률 후보
+
+2단계: 정책 안내 후보 생성 (K_policy개)
+  For i in 1..K_policy:
+    z_0 = z_t  (현재 잠재 상태)
+    For h in 0..H-1:
+      a_h^(i) = π_ξ(z_h) + noise  (정책 + 소량 노이즈)
+      z_{h+1} = d_φ(z_h, a_h^(i))  (잠재 동역학으로 전이)
+    궤적: {a_0^(i), a_1^(i), ..., a_{H-1}^(i)}
+
+3단계: 확률적 후보 생성 (K_random개)
+  표준 MPPI와 동일: 가우시안 노이즈로 Ū 주변 샘플링
+
+4단계: 모든 K개 후보 평가
+  For each candidate k:
+    물리 모델(운동학적 자전거 모델)로 실제 궤적 계산
+    비용 J^(k) = Σ_{h=0}^{H-1} γ^h * R_ψ(z_h^(k), a_h^(k))
+               + γ^H * C_ω(z_H^(k), π_ξ(z_H^(k)))  ← 터미널 가치
+
+5단계: 가중치 계산 및 최적 행동 추출
+  w^(k) = exp(-J^(k) / λ)  (소프트맥스, λ: 온도 파라미터)
+  U* = Σ_k w^(k) * U^(k)  (가중 평균)
+
+6단계: 첫 번째 행동 실행, 계획 반복
+
+핵심: α=0이면 순수 MPPI, α=1이면 순수 정책
+      α=0.1이 최적: 90% 확률적 탐색 + 10% 정책 안내
+</code></pre>
+<h4>터미널 가치의 역할 (Terminal Value Estimation)</h4>
+<pre><code>일반 MPPI: 유한 H 스텝 내에서만 비용 평가
+  비용 = Σ_{h=0}^{H-1} r_h  (H 스텝 이후 고려 없음)
+
+RAY-TOLD: 가치 함수로 H 스텝 이후 비용 추정
+  비용 = Σ_{h=0}^{H-1} γ^h * r_h + γ^H * Q(z_H, a_H)
+                                     └── 무한 지평선 추정
+
+효과:
+  H=30 스텝 (실제 계획 지평선)이지만
+  가치 함수 C_ω가 무한 지평선을 근사
+  → 30 스텝 너머에서 발생할 충돌도 현재 계획에 반영
+  → 장기 안전 경로 선택 가능
+</code></pre>
+<h3>3.4 학습 절차 (Training Procedure)</h3>
+<h4>학습 목적 함수</h4>
+<p>TDMPC2 프레임워크를 기반으로 네 가지 손실 함수를 동시에 최소화한다:</p>
+<pre><code>총 손실 함수:
+L = λ₁ * L_reward + λ₂ * L_value + λ₃ * L_policy + λ₄ * L_latent
+
+각 손실의 역할:
+
+1. L_reward (보상 예측 손실):
+   L_reward = ||R_ψ(z_t, a_t) - r_t||²
+   
+   역할: 실제 보상과 예측 보상의 차이 최소화
+   훈련: 지도 학습 (실제 환경 상호작용에서 r_t 수집)
+
+2. L_value (가치 함수 손실, TD 학습):
+   L_value = ||C_ω(z_t, a_t) - [r_t + γ * C_ω(z_{t+1}, π_ξ(z_{t+1}))]||²
+   
+   역할: 시간차(TD) 학습으로 Q함수 학습
+   핵심: Bellman 방정식의 근사 오차 최소화
+
+3. L_policy (정책 손실):
+   L_policy = -E[C_ω(z_t, π_ξ(z_t))]
+   
+   역할: 정책이 높은 Q값을 가진 행동을 생성하도록 최적화
+   방법: Q값 극대화 (Actor-Critic 스타일)
+
+4. L_latent (잠재 일관성 손실):
+   L_latent = ||h_θ(s_{t+1}) - d_φ(h_θ(s_t), a_t)||²
+   
+   역할: 잠재 동역학 모델이 실제 상태 전이를 정확히 예측하도록
+   효과: 잠재 공간의 물리적 일관성 보장
+</code></pre>
+<h4>학습 설정</h4>
+<pre><code>하이퍼파라미터:
+  - 배치 크기: 256
+  - 학습률: 1×10⁻⁴ (Adam optimizer)
+  - 리플레이 버퍼: 50,000개 전이 경험
+  - 할인율: γ = 0.99
+  - TDMPC2 프레임워크 기반
+
+학습 과정:
+  1. 환경에서 탐색하며 경험 수집 (리플레이 버퍼 채움)
+  2. 미니배치로 L_reward, L_value, L_policy, L_latent 동시 최소화
+  3. 정책이 개선됨에 따라 리플레이 버퍼 데이터 품질 향상
+  4. 수렴까지 반복
+
+학습 환경:
+  - 20m × 10m 시뮬레이션 아레나
+  - 40-60개 동적 장애물 (에피소드마다 완전 랜덤화)
+  - 시작 위치: (1, 0), 목표 위치: (19, 0)
+  - 장애물 모델: 수정된 Social Force Model (SFM)
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                    RAY-TOLD 전체 파이프라인                        │
+└─────────────────────────────────────────────────────────────────┘
+
+실행 루프 (Control Loop):
+
+시뮬레이션 환경
+├── 차량 위치/속도 (운동학)
+├── 목표 위치
+└── LiDAR 60-레이 스캔 (거리 + 장애물 속도)
+          │
+          ▼
+[상태 구성] s_t ∈ R^186
+          │
+          ▼
+[인코더 h_θ] → z_t ∈ R^128
+          │
+          ├────────────────────────┐
+          │                        │
+          ▼                        ▼
+[MPPI 계획 (Algorithm 1)]    [온라인 학습]
+│                              │
+│ ┌─────────────────────┐      │ L_reward + L_value
+│ │ K_policy개 후보:    │      │ + L_policy + L_latent
+│ │ π_ξ + d_φ 롤아웃   │      │ → 모델 파라미터 업데이트
+│ └─────────────────────┘      └──────────────────────
+│
+│ ┌─────────────────────┐
+│ │ K_random개 후보:    │
+│ │ 가우시안 노이즈      │
+│ └─────────────────────┘
+│
+│ 물리 모델 평가 (운동학적 자전거)
+│
+│ 비용 = Σ R_ψ(z_h, a_h) + C_ω(z_H, a_H)
+│
+│ 소프트맥스 가중치 계산
+│
+└──→ 최적 행동 a*_t
+          │
+          ▼
+차량 제어 명령 실행
+(속도, 조향각)
+</code></pre>
+<h3>4.2 데이터 흐름</h3>
+<pre><code>환경 상태:
+  s_t = [x, y, v_x, v_y, θ,  ← 차량 운동학 (6)
+          Δx_goal, Δy_goal,   ← 상대 목표 (2)
+          d_1, v_x1, v_y1,    ← LiDAR 레이 1 (거리 + 속도)
+          d_2, v_x2, v_y2,    ← LiDAR 레이 2
+          ...                  ← ... (60개 레이)
+          d_60, v_x60, v_y60] ← LiDAR 레이 60 (180)
+  총 차원: 186
+
+잠재 상태: z_t = h_θ(s_t) ∈ R^128
+
+계획 출력: a*_t = [가속도, 조향각] (운동학적 자전거 모델)
+
+계획 파라미터:
+  K = 256 (후보 궤적 수)
+  H = 30  (계획 지평선)
+  M = 3   (MPPI CEM 반복 횟수)
+  α = 0.1 (정책 혼합 비율)
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 실험 환경 (Test Environment)</h3>
+<pre><code>물리 환경 설정:
+┌─────────────────────────────────────────────────────────┐
+│  아레나 크기: 20m × 10m (경계 제한 있음)                  │
+│  에고 차량: 운동학적 자전거 모델                           │
+│    - 휠베이스: 2.5m                                      │
+│    - 차량 길이: 2.5m                                     │
+│                                                         │
+│  시작 위치: (1.0, 0.0)                                   │
+│  목표 위치: (19.0, 0.0)                                  │
+│                                                         │
+│  동적 장애물: 40-60개                                    │
+│    - 반경: 0.4m/에이전트                                  │
+│    - 이동 모델: 수정된 Social Force Model (SFM)          │
+│      * 목표 방향 인력 (무작위 웨이포인트)                   │
+│      * 경계 반발력                                       │
+│      * 장애물 간 반발력                                   │
+│    - 에피소드마다 완전 랜덤화 (메모리화 방지)               │
+│                                                         │
+│  LiDAR 센서: 360° 커버리지, 60 레이                       │
+│  테스트: 100개 에피소드                                   │
+└─────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<pre><code>1. 성공률 (Success Rate, SR):
+   - 정의: 충돌 없이 목표 (19, 0) 도달한 에피소드 비율
+   - 공식: SR = |{에피소드 | 충돌 없이 목표 도달}| / 100
+   - 범위: 0~1 (높을수록 좋음)
+
+2. 충돌률 (Collision Rate, CR):
+   - 정의: 동적 장애물과 충돌한 에피소드 비율
+   - 관계: CR ≈ 1 - SR (충돌 없이 목표 미달 에피소드도 존재)
+   - 범위: 0~1 (낮을수록 좋음)
+
+3. 안전 여유 (Safety Margin):
+   - 정의: 에피소드 중 에고 차량과 장애물 간 최소 거리의 평균
+   - 단위: 미터
+   - 높을수록 더 안전한 경로 선택
+</code></pre>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<h4>주요 성능 비교 (100개 테스트 에피소드)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>성공률 ↑</th>
+<th>MPPI 대비 개선</th>
+<th>충돌률 ↓</th>
+<th>MPPI 대비 감소</th>
+<th>안전 여유 ↑</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>MPPI (기준선)</strong></td>
+<td>89.0%</td>
+<td>—</td>
+<td>11.0%</td>
+<td>—</td>
+<td>0.19m</td>
+</tr>
+<tr>
+<td><strong>RAY-TOLD (α=0)</strong></td>
+<td>89.0%</td>
+<td>±0%</td>
+<td>11.0%</td>
+<td>±0%</td>
+<td>0.17m</td>
+</tr>
+<tr>
+<td><strong>RAY-TOLD (α=0.1)</strong></td>
+<td><strong>94.0%</strong></td>
+<td><strong>+5.62%</strong></td>
+<td><strong>6.0%</strong></td>
+<td><strong>-45.45%</strong></td>
+<td>0.18m</td>
+</tr>
+<tr>
+<td><strong>RAY-TOLD (α=0.2)</strong></td>
+<td>91.0%</td>
+<td>+2.25%</td>
+<td>9.0%</td>
+<td>-18.18%</td>
+<td>0.18m</td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 분석</strong>:</p>
+<pre><code>1. α=0 (정책 혼합 없음):
+   - MPPI와 동일한 성능 → 정책 혼합 없이는 개선 없음
+   - 잠재 동역학의 터미널 가치만으로는 충분하지 않음
+   - 정책 혼합 샘플링이 성능 향상의 핵심임을 확인
+
+2. α=0.1 (최적):
+   - 충돌률 11% → 6% (45.45% 상대 감소)
+   - 성공률 89% → 94% (+5%p, +5.62% 상대 향상)
+   - K=256 중 K_policy=25개, K_random=231개
+
+3. α=0.2 (과도한 정책 의존):
+   - α=0.1보다 성능 하락 (SR 94% → 91%)
+   - 고확률적 환경에서 정책 안내가 너무 많으면 탐색 다양성 감소
+   - SFM 기반 장애물의 불규칙한 행동에 정책이 과적합될 위험
+
+4. 안전 여유:
+   - 세 방법 모두 비슷한 안전 여유 (~0.17-0.19m)
+   - 충돌 감소가 여유 증가보다 더 의미 있는 개선
+</code></pre>
+<h4>대표적 실패/성공 케이스 분석 (Figure 3)</h4>
+<pre><code>케이스 1: 수렴하는 장애물 경로
+  MPPI (기준선): 실패 (충돌)
+    - 수렴 패턴 미예측, H 스텝 내에서만 고려
+  RAY-TOLD (α=0.2): 성공
+    - 강한 정책 안내로 효율적 통로 선택
+    - 경계 반사 예측 후 선제적 조작
+
+케이스 2: 극단적 혼잡 (Extreme Congestion)
+  MPPI (기준선): 실패
+  RAY-TOLD (α=0.2): 실패
+  RAY-TOLD (α=0.1): 성공 (유일)
+    - α=0.1에서만 충분한 탐색 다양성 유지
+    - α=0.2에서는 과도한 정책 의존으로 탈출 실패
+    → 파라미터 튜닝의 중요성 입증
+</code></pre>
+<h4>잠재 공간 분석 (t-SNE Visualization)</h4>
+<pre><code>128차원 잠재 표현을 t-SNE로 2D 투영한 결과:
+
+군집 1: 위험 상태 (빨간색)
+  - 장애물 근접, 충돌 임박 상태
+  - 잠재 공간에서 명확히 분리된 군집 형성
+
+군집 2: 안전 상태 (파란색)
+  - 열린 공간, 장애물 없는 상태
+  - 위험 군집과 별도의 영역 차지
+
+전이 부드러운 연속성:
+  - 두 군집 사이 부드러운 전이 (중간 위험도 상태)
+  - 실제 물리적 위험 그라디언트와 일치
+
+결론: 인코더가 원시 센서 데이터를 단순 메모리하는 것이 아니라
+      실제 충돌 위험 기하학을 학습함을 확인
+</code></pre>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p>현 논문에서는 실세계 로봇 실험이 수행되지 않았다. 모든 실험은 시뮬레이션 환경(20m×10m 아레나)에서 진행되었으며, 실세계 로봇에 대한 배포 가능성은 미검증 상태이다.</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>6.1 하이브리드 LiDAR-Latent MPPI 아키텍처</h3>
+<p><strong>내용</strong>: LiDAR 레이 기반 컴팩트 상태 표현 + 잠재 동역학 모델 + MPPI를 결합한 하이브리드 아키텍처</p>
+<p><strong>의의</strong>: </p>
+<ul>
+<li>물리 기반 MPPI의 운동학적 실현 가능성 보장</li>
+<li>잠재 동역학으로 동적 장애물 패턴 학습</li>
+<li>레이 기반 표현으로 계산 효율성과 해석 가능성 동시 확보</li>
+</ul>
+<h3>6.2 정책 혼합 샘플링 전략 (Policy Mixture Sampling)</h3>
+<p><strong>내용</strong>: MPPI 후보 집합에 학습된 정책 사전 궤적을 혼합하는 새로운 샘플링 전략</p>
+<p><strong>의의</strong>:</p>
+<ul>
+<li>수작업 휴리스틱(handcrafted heuristics) 없이 MPPI의 국소 최솟값 탈출</li>
+<li>혼합 비율 α로 탐색(exploration)과 활용(exploitation) 균형 제어</li>
+<li>α=0.1에서 최적: 충돌률 45.45% 감소 달성</li>
+</ul>
+<h3>6.3 학습된 터미널 가치 추정 (Learned Terminal Value Estimation)</h3>
+<p><strong>내용</strong>: 가치 함수 C_ω가 MPPI 계획 지평선 너머의 장기 보상을 추정</p>
+<p><strong>의의</strong>:</p>
+<ul>
+<li>유효 예측 지평선을 물리 롤아웃 H 스텝에서 실질적으로 무한으로 확장</li>
+<li>단기 계획의 근시안적 한계 극복</li>
+<li>30 스텝 너머에서 발생할 충돌도 현재 계획에 반영</li>
+</ul>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 하이퍼파라미터 전체 목록</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>하이퍼파라미터</th>
+<th>값</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>계획 지평선 H</td>
+<td>30 스텝</td>
+<td>MPC 예측 창</td>
+</tr>
+<tr>
+<td>MPPI 후보 수 K</td>
+<td>256</td>
+<td>총 궤적 후보</td>
+</tr>
+<tr>
+<td>CEM 반복 M</td>
+<td>3</td>
+<td>MPPI 최적화 반복</td>
+</tr>
+<tr>
+<td>LiDAR 레이 수</td>
+<td>60</td>
+<td>360° 균등 분포</td>
+</tr>
+<tr>
+<td>할인율 γ</td>
+<td>0.99</td>
+<td>무한 지평선 할인</td>
+</tr>
+<tr>
+<td>학습률</td>
+<td>1×10⁻⁴</td>
+<td>Adam 옵티마이저</td>
+</tr>
+<tr>
+<td>배치 크기</td>
+<td>256</td>
+<td>미니배치 크기</td>
+</tr>
+<tr>
+<td>리플레이 버퍼</td>
+<td>50,000</td>
+<td>경험 저장 용량</td>
+</tr>
+<tr>
+<td>잠재 차원</td>
+<td>128</td>
+<td>압축된 상태 표현</td>
+</tr>
+<tr>
+<td>입력 차원</td>
+<td>186</td>
+<td>원시 상태 벡터</td>
+</tr>
+<tr>
+<td>혼합 비율 α (최적)</td>
+<td>0.1</td>
+<td>정책 안내 vs 확률적</td>
+</tr>
+<tr>
+<td>아레나 크기</td>
+<td>20m × 10m</td>
+<td>테스트 환경</td>
+</tr>
+<tr>
+<td>장애물 수</td>
+<td>40-60개</td>
+<td>에피소드당</td>
+</tr>
+<tr>
+<td>장애물 반경</td>
+<td>0.4m</td>
+<td>개별 장애물 크기</td>
+</tr>
+<tr>
+<td>차량 휠베이스</td>
+<td>2.5m</td>
+<td>운동학 모델</td>
+</tr>
+<tr>
+<td>차량 길이</td>
+<td>2.5m</td>
+<td>충돌 판정</td>
+</tr>
+</tbody></table></div>
+<h3>7.2 TDMPC2 프레임워크 기반</h3>
+<pre><code>RAY-TOLD의 구현 기반: TD-MPC2 (Hansen et al., 2023)
+
+TD-MPC2 원래 목적: 연속 제어(continuous control) 태스크 (MuJoCo 등)
+RAY-TOLD의 확장: 자율 이동 로봇의 고밀도 동적 장애물 회피
+
+주요 변경/적응:
+  1. 입력 도메인: MuJoCo 관절 상태 → LiDAR 레이 + 운동학 상태
+  2. 보상 함수: 관절 제어 보상 → 내비게이션 6요소 보상
+  3. 환경: 완전 결정론적 MuJoCo → 확률적 SFM 기반 동적 군중
+  4. 새로운 기여: 정책 혼합 샘플링 (α-mixture sampling)
+</code></pre>
+<h3>7.3 운동학적 자전거 모델 (Kinematic Bicycle Model)</h3>
+<pre><code>상태 방정식:
+  x_{t+1} = x_t + v * cos(θ) * dt
+  y_{t+1} = y_t + v * sin(θ) * dt
+  θ_{t+1} = θ_t + (v/L) * tan(δ) * dt
+
+여기서:
+  (x, y): 차량 위치
+  θ: 방향각
+  v: 종방향 속도
+  L = 2.5m: 휠베이스
+  δ: 앞바퀴 조향각 (행동 a_t = [v, δ])
+  dt: 타임스텝
+
+MPPI에서의 역할:
+  - 각 후보 궤적의 물리적 실현 가능성 보장
+  - 잠재 동역학 d_φ와는 별도로 실제 물리 시뮬레이션에 사용
+  - 잠재 공간 롤아웃은 근사, 물리 평가는 정확
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 잠재 동역학과 물리 동역학의 이중 구조</h3>
+<p>RAY-TOLD에서 흥미로운 이중 구조가 존재한다:</p>
+<pre><code>이중 동역학 구조:
+
+1. 잠재 동역학 d_φ (학습된 근사):
+   - 용도: 정책 안내 후보 생성 (π_ξ + d_φ 롤아웃)
+   - 특징: 빠름, 장애물 패턴 암묵적 학습, 근사적 정확도
+   - 역할: 좋은 행동 시퀀스 방향 안내
+
+2. 운동학적 자전거 모델 (물리 기반 정확한 모델):
+   - 용도: 모든 K개 후보 궤적의 실제 물리 시뮬레이션
+   - 특징: 정확함, 하지만 장애물 미래 위치 미고려
+   - 역할: 물리적 실현 가능성 보장
+
+두 동역학의 역할 분리:
+  잠재 d_φ: &quot;어느 방향으로 가야 좋을까?&quot; (장기 안내)
+  자전거 모델: &quot;실제로 그 방향으로 갈 수 있나?&quot; (운동학 검증)
+</code></pre>
+<h3>8.2 혼합 비율 α의 민감도</h3>
+<pre><code>α 민감도 분석:
+
+α=0.0: 순수 MPPI
+  성공률: 89%, 충돌률: 11%
+  → 기준선, 개선 없음
+
+α=0.1: 최적
+  성공률: 94%, 충돌률: 6%
+  → 최적 균형: 충분한 탐색 다양성 + 학습 안내
+
+α=0.2: 과도한 정책 의존
+  성공률: 91%, 충돌률: 9%
+  → 확률적 환경에서 과도한 정책 의존의 위험:
+     정책이 학습한 패턴과 다른 장애물 행동에 취약
+
+이론적 해석:
+  α 너무 작: 정책 안내 효과 미미 → MPPI 한계 유지
+  α 최적: 정책이 좋은 영역을 안내, MPPI가 세부 최적화
+  α 너무 큼: 정책에 과의존 → SFM 장애물의 무작위성에 취약
+</code></pre>
+<h3>8.3 확장성 및 한계점</h3>
+<pre><code>현재 한계:
+  1. 비교 기준선 부족
+     - 오직 MPPI 변형들과 비교
+     - DWA, TEB, RVO, ORCA, CROWD-NAV, SARL, LSTM-RL 등과 비교 없음
+     - 더 강한 학습 기반 방법(DR-MPC, SANDO 등)과 비교 필요
+
+  2. 단순화된 환경
+     - 2D 평면 시뮬레이션만
+     - 실제 로봇: 3D 환경, 불규칙 지형, 센서 노이즈
+     - SFM 모델은 실제 보행자 행동을 과도하게 단순화
+
+  3. 코드 미공개
+     - 재현 어려움
+     - 상세 아키텍처 미공개 (레이어 수, 활성화 함수 등)
+
+  4. 계산 비용 미보고
+     - MPPI 대비 추가 계산 비용 미측정
+     - 실시간 실행 가능 여부 불명
+
+확장 가능한 방향:
+  1. 더 강한 기준선과 비교 (CrowdNav, SANDO 등)
+  2. 3D 환경 확장 (UAV 장애물 회피)
+  3. 실제 로봇 배포 (TurtleBot, Unitree 등)
+  4. 코드 공개로 재현성 확보
+  5. 아키텍처 세부사항 공개 (레이어 구조, 활성화 함수)
+</code></pre>
+<h3>8.4 MPPI-RL 하이브리드의 관련 연구 위치</h3>
+<pre><code>MPPI + 학습 기반 방법의 연구 계보:
+
+1. PRM-RL (확률적 로드맵 + RL):
+   - RL이 장기 계획, 단기는 물리 기반
+   - RAY-TOLD: 유사한 아이디어를 MPPI에 적용
+
+2. AC-MPC (미분가능 MPC + RL):
+   - RL Actor가 MPC를 통해 동작
+   - RAY-TOLD: 직접 샘플 혼합 방식 (미분 불필요)
+
+3. DR-MPC (잔차 RL + MPC):
+   - RL이 MPC의 잔차 보정
+   - RAY-TOLD: 별도 잔차 대신 혼합 샘플링
+
+4. DreamerNav (잠재 동역학 + 내비게이션):
+   - 깊이/점유 맵 기반
+   - RAY-TOLD: LiDAR 레이 기반 (더 컴팩트)
+
+RAY-TOLD의 차별점:
+  → 정책 안내를 MPPI 제안 분포에 직접 주입
+  → 모든 행동이 물리 모델(자전거)로 검증됨
+  → 수작업 휴리스틱 없이 학습으로 방향 안내
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>같은 Planner 트랙에서 리뷰된 논문들과 비교 분석을 수행한다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>SANDO (MIT, 2026)</th>
+<th>IRRL (Kyushu, 2026)</th>
+<th>UGE-MPC (UMN, 2026)</th>
+<th>ViLiNT (ENSTA, 2026)</th>
+<th><strong>RAY-TOLD (Hanyang/KAIST, 2026)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>핵심 방법</strong></td>
+<td>STSFC + MIQP</td>
+<td>증분 잔차 RL</td>
+<td>불확실성 기반 MPPI 탐색</td>
+<td>RGB+LiDAR 융합 내비게이션</td>
+<td>잠재 동역학 + 정책 혼합 MPPI</td>
+</tr>
+<tr>
+<td><strong>적용 도메인</strong></td>
+<td>3D UAV 동적 장애물</td>
+<td>소셜 지상 로봇</td>
+<td>지상 로봇 (정적 장애물)</td>
+<td>지상 로봇 (다양한 장애물)</td>
+<td>지상 로봇 (동적 군중)</td>
+</tr>
+<tr>
+<td><strong>동적 장애물</strong></td>
+<td>✅ (UAV, 속도 불명)</td>
+<td>✅ (보행자)</td>
+<td>❌ (주로 정적)</td>
+<td>제한적</td>
+<td>✅ (40-60 동적 에이전트)</td>
+</tr>
+<tr>
+<td><strong>코드 공개</strong></td>
+<td>✅ GitHub + MIT</td>
+<td>❌</td>
+<td>✅ Project Page</td>
+<td>✅ GitHub</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>실세계 실험</strong></td>
+<td>✅ (UAV 비행)</td>
+<td>✅ (메카넘 로봇)</td>
+<td>❌ 시뮬레이션</td>
+<td>시뮬레이션 + 실세계</td>
+<td>❌ 시뮬레이션만</td>
+</tr>
+<tr>
+<td><strong>안전 보장</strong></td>
+<td>✅ (수학적 증명)</td>
+<td>부분적 (SFM 기반)</td>
+<td>제한적 (확률적)</td>
+<td>경험적</td>
+<td>경험적 (충돌률 감소)</td>
+</tr>
+<tr>
+<td><strong>학습 의존</strong></td>
+<td>❌ (옵티마이저 기반)</td>
+<td>✅ (RL 학습)</td>
+<td>❌ (샘플링 기반)</td>
+<td>✅ (지도 학습)</td>
+<td>✅ (TDMPC2 학습)</td>
+</tr>
+<tr>
+<td><strong>MPPI 기반</strong></td>
+<td>❌</td>
+<td>❌</td>
+<td>✅ 핵심</td>
+<td>❌</td>
+<td>✅ 핵심</td>
+</tr>
+<tr>
+<td><strong>성능 향상</strong></td>
+<td>UAV 충돌 제거</td>
+<td>실세계 소셜 적응</td>
+<td>로컬 미니마 탈출</td>
+<td>충돌 회피 개선</td>
+<td>충돌률 45.45% 감소</td>
+</tr>
+<tr>
+<td><strong>비교 기준선 수</strong></td>
+<td>다수 (FASTER, EGO 등)</td>
+<td>다수 (SFM, ORCA 등)</td>
+<td>다수 (MPPI, SV-MPC 등)</td>
+<td>다수 (NoMaD, GNM 등)</td>
+<td>오직 MPPI 변형들</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<h4>RAY-TOLD의 강점 (기존 리뷰 논문 대비)</h4>
+<p><strong>1. 고밀도 동적 장애물 특화</strong></p>
+<pre><code>기존 비교:
+  SANDO: 3D UAV 장애물 (저밀도)
+  UGE-MPC: 주로 정적/반정적 장애물
+  ViLiNT: 혼재 환경
+  
+RAY-TOLD: 40-60개 동적 에이전트 (SFM 기반)
+→ 고밀도 동적 군중 시나리오 특화
+→ 기존 방법들이 명시적으로 다루지 않은 도전
+</code></pre>
+<p><strong>2. MPPI 국소 최솟값 탈출</strong></p>
+<pre><code>UGE-MPC: 불확실성 타원체 기반 다양성 (구성 공간 다양성 측정)
+RAY-TOLD: 정책 안내 혼합 샘플링 (학습된 안내)
+
+보완적 접근:
+  UGE-MPC: &quot;어떻게 다양한 탐색을 할 것인가?&quot; (기하학적 해결)
+  RAY-TOLD: &quot;어느 방향이 좋을지 알고 그곳을 탐색&quot; (학습 기반 해결)
+  
+결합 가능성: 두 접근을 결합하면 더 강력한 MPPI 개선 가능
+</code></pre>
+<p><strong>3. 장기 가치 추정</strong></p>
+<pre><code>일반 MPPI (UGE-MPC 포함): H 스텝 이내만 평가
+RAY-TOLD: C_ω로 무한 지평선 추정
+
+효과: 30 스텝 너머에서 발생할 충돌도 현재 계획에 반영
+      고밀도 환경에서 선제적 회피 경로 선택 가능
+</code></pre>
+<h4>RAY-TOLD의 약점 (기존 리뷰 논문 대비)</h4>
+<p><strong>1. 실세계 미검증</strong></p>
+<pre><code>SANDO: UAV 실제 비행 실험 수행
+IRRL: 메카넘 로봇으로 실제 보행자 환경에서 실험
+ViLiNT: 실제 로봇 플랫폼에서 검증
+
+RAY-TOLD: 시뮬레이션만 → 실세계 적용 가능성 미확인
+→ SFM 모델이 실제 보행자 행동과 얼마나 다른지 검증 필요
+</code></pre>
+<p><strong>2. 좁은 비교 범위</strong></p>
+<pre><code>기존 리뷰 논문들의 비교:
+  SANDO: FASTER, EGO-Planner, PUMA 등 다양한 방법과 비교
+  UGE-MPC: MoG-MPPI, SV-MPC, CU-MPPI 등과 비교
+  
+RAY-TOLD: 오직 MPPI 변형들(α=0, α=0.1, α=0.2)과 비교
+  → CrowdNav, SARL, LSTM-RL, SANDO 등과 직접 비교 없음
+  → 성능이 실제로 얼마나 좋은지 맥락 파악 어려움
+</code></pre>
+<p><strong>3. 안전 보장 부재</strong></p>
+<pre><code>SANDO: STSFC를 통한 수학적 충돌 없음 보장 제공
+RAY-TOLD: 경험적 충돌률 감소 (충돌이 6%나 발생)
+
+안전이 중요한 응용 (병원, 공항 등):
+  → 6% 충돌률은 여전히 허용 불가
+  → SANDO 방식의 안전 보장과 결합 필요
+</code></pre>
+<p><strong>4. 코드 미공개</strong></p>
+<pre><code>SANDO: MIT 라이선스 GitHub 공개
+BTIT*: GitHub 공개
+FRGraph: GitHub 공개
+RAY-TOLD: 코드 없음 → 재현 어려움, 실용 적용 어려움
+</code></pre>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>현재 단계: 시뮬레이션 검증 완료 (40-60 동적 에이전트 환경)
+
+실적용을 위한 추가 필요사항:
+
+1. 실세계 검증
+   - 실제 보행자 환경 (SFM과 실제 행동의 차이)
+   - 실제 LiDAR 센서 노이즈 처리
+   - 3D 환경 처리 (경사, 계단 등)
+
+2. 계산 효율성
+   - MPPI + 잠재 동역학 = MPPI보다 더 많은 계산
+   - 실시간 처리를 위한 하드웨어 요구사항 미명시
+   - K=256 궤적 + H=30 스텝 = 7,680 스텝 계산/루프
+
+3. 안전 강화
+   - 현재 6% 충돌률은 실제 배포에 부적합
+   - STSFC 같은 안전 제약과 결합 필요
+
+4. 범용성
+   - 현재: 평면 자전거 모델만
+   - 사족 로봇, 홀로노믹 로봇, UAV 등으로 확장 필요
+
+실적용 가능성 점수: ★★☆☆☆ (2/5)
+→ 강점: 동적 장애물 특화, 충돌률 45% 감소
+→ 약점: 실세계 미검증, 코드 없음, 6% 충돌률 잔존, 좁은 비교
+</code></pre>
+<h3>9.4 연구 방향성 평가</h3>
+<pre><code>RAY-TOLD의 연구 방향: MPPI + 학습 기반 잠재 동역학 결합
+
+현재 경로 계획 연구의 두 큰 흐름:
+1. 안전 보장 중심: STSFC, CBF, 볼록 자유 영역 → SANDO, FRGraph 계열
+2. 학습 + 물리 결합: TD-MPC, Dreamer, MPPI+RL → RAY-TOLD 계열
+
+RAY-TOLD의 포지셔닝:
+  ├── 기술적 참신성: MPPI 혼합 샘플링은 독창적
+  ├── 실용적 제약: 시뮬레이션 한정, 코드 없음, 좁은 비교
+  ├── 잠재적 영향: 고밀도 동적 환경을 명확히 다룸
+  └── 보완 필요: 안전 보장, 실세계 검증, 비교 확장
+
+기존 IRRL (Kyushu U) 대비:
+  - IRRL: 실세계 소셜 내비게이션, 온라인 적응
+  - RAY-TOLD: 시뮬레이션 고밀도 장애물, 오프라인 학습
+  → 보완적: RAY-TOLD의 잠재 동역학 + IRRL의 온라인 적응 결합이 유망
+
+연구 방향성 점수: ★★★☆☆ (3/5)
+→ 아이디어는 좋으나 실증이 부족
+→ 더 강한 기준선 비교와 실세계 실험이 논문 완성도를 크게 높일 것
+</code></pre>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li><p>Han, S., Lee, S., Kang, J. &quot;RAY-TOLD: Ray-Based Latent Dynamics for Dense Dynamic Obstacle Avoidance with TDMPC.&quot; arXiv:2604.27450, 2026.</p>
+</li>
+<li><p>Hansen, N., Su, H., Wang, X. &quot;TD-MPC2: Scalable, Robust World Models for Continuous Control.&quot; ICLR 2024.</p>
+</li>
+<li><p>Williams, G., et al. &quot;Information Theoretic MPC for Model-Based Reinforcement Learning.&quot; ICRA 2017.</p>
+</li>
+<li><p>Helbing, D., Molnár, P. &quot;Social Force Model for Pedestrian Dynamics.&quot; Physical Review E, 1995.</p>
+</li>
+<li><p>Kondo, K., Tordesillas, J., How, J. &quot;SANDO: Safe Autonomous Trajectory Planning for Dynamic Unknown Environments.&quot; arXiv:2604.07599, 2026.</p>
+</li>
+<li><p>Nagahisa, H., et al. &quot;IRRL: Incremental Residual RL for Real-World Social Navigation.&quot; arXiv:2604.07945, 2026.</p>
+</li>
+<li><p>Poyrazoglu, O.G., et al. &quot;UGE-MPC: Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based MPC.&quot; ICRA 2026.</p>
+</li>
+<li><p>Dezons, L., et al. &quot;ViLiNT: Multimodal Embodiment-Aware Navigation Transformer.&quot; arXiv:2604.19267, 2026.</p>
+</li>
+<li><p>Hartmann, V.N., et al. &quot;DR-MPC: Direct Residual Model Predictive Control for Autonomous Racing.&quot; RA-L 2024.</p>
+</li>
+<li><p>Hafner, D., et al. &quot;DreamerV3: Mastering Diverse Domains through World Models.&quot; arXiv 2023.</p>
+</li>
+<li><p>Song, Z., et al. &quot;FRGraph: Safe Navigation via Direction-Aware Convex Free-Region Generation.&quot; arXiv:2604.23648, 2026.</p>
+</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>혁신성 평가</h3>
+<p>RAY-TOLD는 <strong>고밀도 동적 군중 환경에서의 자율 이동 로봇 내비게이션</strong>이라는 중요하면서도 충분히 연구되지 않은 문제를 다룬다. 핵심 기여인 <strong>정책 혼합 샘플링 전략</strong>은 수작업 휴리스틱 없이 MPPI의 국소 최솟값 탈출 문제를 학습 기반으로 해결한다는 점에서 독창적이다.</p>
+<p>특히 α=0.1에서 충돌률을 11%에서 6%로 45.45% 감소시킨 결과는 의미 있는 성과이다. 잠재 공간의 t-SNE 분석을 통해 인코더가 실제 위험 기하학을 학습했음을 보여주는 정성적 분석도 방법론의 타당성을 뒷받침한다.</p>
+<h3>실용적 의의</h3>
+<p>Hanyang University, KAIST, Samsung Research의 공동 연구로서, 산업 응용(물류 로봇, 서비스 로봇)에 대한 잠재적 관심을 반영한다. TDMPC2 프레임워크를 자율 이동 로봇에 적용한 선도적 사례로서, 잠재 동역학 기반 로봇 계획 연구의 방향을 제시한다.</p>
+<h3>향후 연구 방향</h3>
+<p>현 논문이 해결하지 못한 가장 중요한 과제는 <strong>실세계 검증</strong>이다. SFM 기반 시뮬레이션에서의 성공을 실제 보행자 환경에서 재현하는 것이 다음 핵심 단계이다. 또한 <strong>코드 공개</strong>와 <strong>더 다양한 기준선과의 비교</strong>가 이루어진다면, 이 연구가 실제로 SOTA를 달성하는지 명확히 확인할 수 있을 것이다.</p>
+<p>장기적으로 RAY-TOLD의 정책 혼합 샘플링 아이디어를 SANDO 방식의 수학적 안전 보장과 결합하는 연구, 그리고 IRRL처럼 온라인 실세계 적응 능력을 추가하는 연구가 자연스러운 확장 방향이다.</p>
+<hr>
+<p><em>리뷰 작성일: 2026-05-02</em>
+<em>리뷰어: Paper Review Bot (NanoClaw)</em>
+<em>논문 arXiv ID: 2604.27450v1</em>
+<em>소속: Hanyang University, KAIST, Samsung Research</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>GroundControl: Anticipating Navigation Failures in Vision-Language Agents via Trajectory-Consistent Uncertainty Estimates · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv preprint (cs.RO), 2026-06-18 (확정 미확인, CC BY 4.0)</div>
+    <h1>GroundControl: Anticipating Navigation Failures in Vision-Language Agents via Trajectory-Consistent Uncertainty Estimates</h1>
+    <div class="meta-row">
+      <span class="chip">VLN</span>
+      <span><a href="https://arxiv.org/abs/2606.20479">arXiv:2606.20479</a></span>
+      <span>리뷰 2026-06-21</span>
+      <span>39분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>GroundControl: Anticipating Navigation Failures in Vision-Language Agents via Trajectory-Consistent Uncertainty Estimates — 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: GroundControl: Anticipating Navigation Failures in Vision-Language Agents via Trajectory-Consistent Uncertainty Estimates</li>
+<li><strong>저자 (Authors)</strong>: Nastaran Darabi, Divake Kumar, Sina Tayebati, Devashri Naik, Amit Ranjan Trivedi</li>
+<li><strong>소속 (Affiliation)</strong>: University of Illinois at Chicago (UIC). 지원: COGNISENSE (JUMP 2.0, DARPA), NSF #2235207</li>
+<li><strong>발표처 (Published)</strong>: arXiv preprint (cs.RO), 2026-06-18. 학회/저널 확정 미확인. (License: CC BY 4.0)</li>
+<li><strong>DOI</strong>: 미부여 (preprint)</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2606.20479">2606.20479</a></li>
+<li><strong>코드</strong>: ❌ 미공개 (abstract·본문에 저장소/프로젝트 페이지 링크 미확인)</li>
+<li><strong>프로젝트 페이지</strong>: ❌ 확인 불가</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 논문은 <strong>Vision-Language Navigation(VLN) 에이전트의 실패를 사전에 예측(anticipate)</strong>하는 문제를 다룬다. 최근 VLN은 GPT-4o, Gemini 같은 대규모 VLM/LLM을 의사결정기로 쓰는 방향으로 빠르게 옮겨가고 있는데, 이런 에이전트는 <strong>조용히 실패(silent failure)</strong>하는 경향이 있다 — 즉 자신이 길을 잃었거나 목표에서 멀어지고 있다는 사실을 스스로 알리지 못한 채 잘못된 행동을 계속한다.</p>
+<p>VLN 에이전트가 안전하게 실배치되려면, &quot;이 에피소드는 실패할 것 같다&quot;는 신호를 <strong>행동 도중 또는 직후에</strong> 산출해, 인간에게 제어를 넘기거나(hand-off) 그 에피소드를 기권(abstain)/재시도하도록 해야 한다. 이것이 <em>selective autonomy</em>(선택적 자율성)의 핵심이며, 그러려면 에이전트의 <strong>불확실성(uncertainty)을 신뢰성 있게 추정</strong>해야 한다.</p>
+<p>기존의 불확실성 척도(softmax 엔트로피, max-probability, conformal prediction 등)는 <strong>단일 스텝의 행동 확률 분포</strong>에 기반한다. 그러나 VLN 실패는 한 스텝에서 갑자기 터지지 않고 <strong>궤적 수준(trajectory-level)에서 점진적으로</strong> 드러난다 — 같은 자리를 맴돌거나(oscillation), 주의분산 물체 근처에서 정체(stagnation)하거나, 변위 대비 경로만 길어지거나(inefficient detour), 목표에서 서서히 멀어진다(drift). 한 스텝 확률만 보는 척도는 이런 누적적·시간적 붕괴를 못 잡는다.</p>
+<p>GroundControl의 목표는:</p>
+<blockquote>
+<p><strong>목표까지의 거리(distance-to-goal) 동역학을 등속(constant-velocity) Kalman filter로 모델링하고, 그 정규화 innovation 통계 + 궤적 특징들을 고정 선형 융합하여, &quot;목표 지향적 진행과의 일관성(trajectory consistency)&quot;에서 벗어나는 정도를 에피소드 수준 불확실성 점수로 산출한다. 그리고 이를 평가하는 새 프로토콜 SRCN(Selective Risk–Coverage Navigation)을 제안하여, 학습된 분류기 없이도 near-oracle 수준의 실패 순위(ranking)를 달성한다.</strong></p>
+</blockquote>
+<p>핵심 차별점: <strong>학습 불필요(training-free, post-hoc) + 모델 비종속(GPT-4o/4-mini/Gemini에 동일 적용) + 궤적 수준 일관성 기반</strong>.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) 단일 스텝 불확실성의 한계.</strong>
+엔트로피·max-prob·conformal은 한 결정 스텝의 행동 분포 위에서 계산된다. VLN 에이전트(특히 VLM 기반)는 각 스텝에서 자신만만하게(낮은 엔트로피로) 틀린 행동을 고를 수 있어, 스텝 단위 불확실성이 실패와 약하게 상관한다.</p>
+<p><strong>(C2) 실패의 점진성·시간성.</strong>
+VLN 실패는 &quot;궤적이 목표를 향해 단조 수렴해야 한다&quot;는 암묵 규범에서의 누적 이탈로 나타난다. 진동·정체·우회·표류는 모두 <strong>시간에 걸친 거리 동역학의 비일관성</strong>이다. 이를 포착하려면 단일 스텝이 아니라 시계열 모델이 필요하다.</p>
+<p><strong>(C3) 모델·태스크 비종속성 요구.</strong>
+VLN 백본이 GPT-4o, Gemini 등으로 다양하고, 재학습·내부 접근이 어렵다. 따라서 불확실성 추정기는 <strong>백본 내부에 손대지 않고(post-hoc), 학습 데이터 없이</strong> 동작해야 실용적이다.</p>
+<p><strong>(C4) 평가 프로토콜의 부재.</strong>
+&quot;실패 예측이 얼마나 좋은가&quot;를 재는 표준이 약하다. 단순 AUROC는 운영상 의미(얼마나 많은 에피소드를 자동 처리하면서 위험을 얼마나 낮출 수 있나)를 직접 주지 못한다. selective prediction 관점의 risk–coverage 척도가 필요하다.</p>
+<h3>2.2 핵심 해결책</h3>
+<pre><code>(C1) 단스텝 한계   → 거리-목표 시계열을 Kalman filter로 모델링, innovation 일관성으로 판정
+(C2) 점진·시간성   → 4개 궤적 특징(진행/단조/효율/진동) + Kalman 통계를 융합
+(C3) 모델 비종속   → training-free·post-hoc, 백본 내부 무접근(거리·행동 신호만 사용)
+(C4) 평가 부재     → SRCN(Selective Risk–Coverage Navigation) + AURC/E-AURC 도입
+</code></pre>
+<p>한 문장 요약: <strong>&quot;목표까지 거리가 등속으로 줄어들어야 한다&quot;는 단순 물리 규범을 Kalman으로 세우고, 그로부터의 통계적 이탈(innovation)과 궤적 형태 특징을 섞어 실패를 사전 신호화한다.</strong></p>
+<h3>2.3 관련 연구 맥락에서의 위치</h3>
+<p>불확실성 추정 계열은 크게 (i) <strong>단일 스텝 분포 기반</strong>(softmax entropy, max-prob, temperature scaling), (ii) <strong>앙상블/베이지안</strong>(deep ensemble, MC-dropout — 계산 무겁고 백본 수정 필요), (iii) <strong>conformal prediction</strong>(분포 무관 커버리지 보증, 그러나 단일 스텝 점수 위에 구축)으로 나뉜다. 이들은 모두 <em>한 결정의 신뢰도</em>를 잰다. GroundControl은 이와 직교하는 <strong>(iv) 시계열 일관성(temporal consistency) 기반</strong> 축을 VLN에 도입한다 — 행동의 확신이 아니라 <em>행동이 만든 거리 궤적의 규범 일치도</em>를 본다. 또한 VLN 자기인식 연구(예: 정책 내부에 진행도 추정을 심는 방식)와 달리, 백본을 전혀 수정하지 않는 post-hoc 부착이라는 점에서 운영 측면의 차별성을 갖는다. 이 위치 설정이 §5에서 단일 스텝 baseline 대비 두 자릿수 배율 우위로 이어진다.</p>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<p>GroundControl은 (A) 등속 Kalman filter 거리 동역학 모델, (B) 5성분 고정 선형 불확실성 융합, (C) SRCN 평가 프로토콜로 구성된다. <strong>학습된 분류기는 없다</strong> — 연속 점수로 순위만 매긴다.</p>
+<h3>3.1 등속(Constant-Velocity) Kalman Filter — 거리-목표 동역학</h3>
+<p>핵심 가정: 정상적으로 목표를 향해 가는 에이전트는 목표까지 거리 <code>d_t</code>가 대략 <strong>일정한 속도로 줄어든다</strong>. 이 규범을 등속 운동 모델로 세운다.</p>
+<pre><code># 상태: x_t = [ d_t , ḋ_t ]ᵀ      (거리, 거리변화율)
+# 과정 모델 (등속):
+   x_{t+1} = F x_t + w_t,     F = [[1, 1],
+                                   [0, 1]]
+# 측정 모델 (거리만 관측):
+   d_t = H x_t + v_t,         H = [1, 0]
+   w_t ~ N(0, Q),  v_t ~ N(0, R)
+</code></pre>
+<p>표준 Kalman 예측/보정:</p>
+<pre><code># 예측 (predict)
+   x_{t|t-1} = F x_{t-1|t-1}
+   P_{t|t-1} = F P_{t-1|t-1} Fᵀ + Q
+
+# 보정 (update)
+   ν_t = d_t − H x_{t|t-1}             ← innovation (예측 거리 vs 실제 거리)
+   S_t = H P_{t|t-1} Hᵀ + R            ← innovation 공분산
+   K_t = P_{t|t-1} Hᵀ S_t⁻¹
+   x_{t|t} = x_{t|t-1} + K_t ν_t
+   P_{t|t} = (I − K_t H) P_{t|t-1}
+</code></pre>
+<p><strong>핵심 통계량 — Normalized Innovation Squared (NIS).</strong>
+등속 진행 규범이 맞으면 innovation은 0 주변에서 작아야 하고, 정규화하면 자유도 1의 χ² 분포를 따른다:</p>
+<pre><code>   NIS_t = ν_t² / S_t   ~  χ²(1)   (규범 일관 시)
+</code></pre>
+<p><code>NIS_t</code>가 크다는 것은 &quot;실제 거리 변화가 등속 목표 지향 진행과 통계적으로 어긋났다&quot;는 뜻 — 즉 진동·정체·표류의 신호다. 이 χ² 일관성 검정이 GroundControl의 통계적 토대다.</p>
+<pre><code>거리 d_t 시계열
+ d │ ＼               정상: 등속 감소 → ν 작음, NIS↓
+   │   ＼____
+   │        ＼              실패: 정체/진동 → 예측 어긋남 → ν 큼, NIS↑
+   │   ／＼  ／＼___
+   └──────────────── t
+</code></pre>
+<h3>3.2 5성분 고정 선형 불확실성 융합</h3>
+<p>에피소드 <code>i</code>의 불확실성 <code>U_i</code>는 <strong>다섯 성분의 고정 가중 선형 결합</strong>이다. (학습된 분류기 아님 — 가중치는 사전 고정.)</p>
+<pre><code>U_i = 0.30 · (Kalman posterior 공분산 log-det)      ← 추정 불확실성 누적
+    + 0.25 · (정규화 innovation, NIS 기반)            ← 거리 규범 이탈
+    + 0.20 · f^prog   (진행 부족: 순거리 감소 미흡)
+    + 0.15 · f^mono   (비단조: 거리 진화 들쭉날쭉)
+    + 0.10 · f^osc    (진동: 행동 반전 빈도)
+   (+ action entropy 항이 Kalman 묶음에 포함)
+</code></pre>
+<blockquote>
+<p>주: 본문은 &quot;Kalman 기반(posterior 공분산 log-det + 정규화 innovation + action entropy) + 4개 궤적 특징(f^prog, f^mono, f^eff, f^osc)&quot;을 fixed linear fusion으로 결합한다고 기술한다. 위 가중치 (0.30, 0.25, 0.20, 0.15, 0.10)는 본문이 제시한 고정 융합 가중이다. f^eff(경로 효율)는 궤적 특징군에 포함된다.</p>
+</blockquote>
+<p><strong>네 궤적 특징의 의미.</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특징</th>
+<th>포착하는 실패 양상</th>
+<th>직관</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>f^prog</code></td>
+<td>진행 부족(insufficient net distance reduction)</td>
+<td>시간 대비 목표에 충분히 가까워지지 못함</td>
+</tr>
+<tr>
+<td><code>f^mono</code></td>
+<td>비단조(non-monotonic distance evolution)</td>
+<td>거리가 줄었다 늘었다 반복 → 정체/혼란</td>
+</tr>
+<tr>
+<td><code>f^eff</code></td>
+<td>경로 비효율(path inefficiency vs displacement)</td>
+<td>변위 대비 누적 경로가 과도 → 우회/배회</td>
+</tr>
+<tr>
+<td><code>f^osc</code></td>
+<td>행동 반전 빈도(action-reversal frequency)</td>
+<td>좌↔우, 전↔후 반복 → 진동(oscillation)</td>
+</tr>
+</tbody></table></div>
+<p>이 네 특징은 모두 <strong>궤적의 기하/시간 형태</strong>에서 직접 계산되며, 백본 내부 접근이 필요 없다(C3 충족). Kalman 통계(불확실성 누적·규범 이탈)와 합쳐져 &quot;이 에피소드가 얼마나 비정상적으로 진행되고 있나&quot;를 하나의 연속 점수로 압축한다.</p>
+<h3>3.3 왜 &quot;학습된 분류기&quot;가 아니라 &quot;고정 선형 융합&quot;인가</h3>
+<p>설계 선택의 핵심은 <strong>단순성과 일반성</strong>이다.</p>
+<pre><code>학습 분류기 방식                고정 선형 융합 방식(GroundControl)
+─────────────────              ──────────────────────────────
++ 데이터에 맞춰 최적 가중       + 학습 데이터 불필요(training-free)
+- 라벨된 실패 데이터 필요       + 백본·태스크 비종속(즉시 이식)
+- 백본/스플릿 바뀌면 재학습     + 과적합 위험 없음
+- 분포 이동에 취약              - 가중이 수동(최적 아닐 수 있음)
+</code></pre>
+<p>GroundControl은 &quot;실패는 거리 규범 이탈 + 궤적 형태 이상으로 충분히 드러난다&quot;는 가설에 기대어, 학습 없이 고정 가중만으로 near-oracle 순위(§5)를 얻는다 — 이것이 논문의 가장 도발적 주장이다.</p>
+<h3>3.4 SRCN — Selective Risk–Coverage Navigation 프로토콜</h3>
+<p>불확실성 추정의 좋음을 운영 관점에서 재기 위해, selective prediction의 risk–coverage 틀을 VLN에 이식한다.</p>
+<pre><code>1) 모든 에피소드를 불확실성 U_i 오름차순으로 정렬
+2) 임계 τ에서 가장 확신하는 상위 비율만 &quot;자동 처리(retain)&quot;, 나머지는 기권/인계
+3) 보유 집합에 대해 선택 위험(selective risk) 계산
+</code></pre>
+<p>두 위험 정의:</p>
+<pre><code>Risk_SR(τ)  = 보유 에피소드 중 실패율(failure rate)
+Risk_SPL(τ) = 보유 에피소드의 SPL 손실(1 − SPL 기반)
+</code></pre>
+<pre><code>선택 위험 (낮을수록 좋음)
+ risk │ ＼                    좋은 순위: 확신 에피소드부터 보유
+      │   ＼___               → 낮은 커버리지에서 위험 매우 낮음
+      │       ＼___           (실패가 불확실 쪽에 몰림)
+      │           ＼____
+      └────────────────── coverage(보유 비율) 1.0
+</code></pre>
+<p>평가 척도:</p>
+<pre><code>AURC   = risk–coverage 곡선 아래 면적 (낮을수록 순위 우수)
+E-AURC = AURC − oracle AURC  (excess; 0 = 완벽한 순위)
+</code></pre>
+<p><code>E-AURC</code>는 <strong>오라클(실패를 완벽히 뒤로 정렬) 대비 초과 면적</strong>이라 0에 가까울수록 &quot;거의 완벽한 실패 순위&quot;를 뜻한다. SRCN은 단순 AUROC가 못 주는 &quot;얼마나 자동 처리하면서 위험을 얼마나 낮추나&quot;를 직접 드러낸다(C4 충족).</p>
+<h3>3.5 한 에피소드의 처리 흐름 (Worked Example)</h3>
+<pre><code>입력: VLN 에피소드 (지시 + 거리-목표 시계열 d_1..d_T + 행동열 a_1..a_T)
+
+매 스텝 t:
+  Kalman predict → x_{t|t-1}, P_{t|t-1}
+  관측 d_t        → ν_t = d_t − H x_{t|t-1},  S_t,  NIS_t = ν_t²/S_t
+  Kalman update  → x_{t|t}, P_{t|t}
+
+에피소드 종료 후:
+  Kalman 묶음 = f(Σ log-det P, mean NIS, action entropy)
+  궤적 특징   = f^prog, f^mono, f^eff, f^osc  (d_t·경로·행동열에서 계산)
+  U_i = 0.30·K_cov + 0.25·K_innov + 0.20·f^prog + 0.15·f^mono + 0.10·f^osc
+
+전체 에피소드 집합:
+  U_i 로 정렬 → SRCN risk–coverage → AURC/E-AURC 보고
+</code></pre>
+<p>예: 어떤 에피소드가 목표 근처 distractor에서 정체하며 좌우로 진동했다면 → <code>NIS</code> 급증, <code>f^mono</code>↑(거리 들쭉날쭉), <code>f^osc</code>↑(행동 반전) → <code>U_i</code> 큼 → SRCN에서 &quot;불확실(뒤쪽)&quot;으로 정렬 → 자동 처리에서 제외되어 인간에게 인계. 반대로 거리가 매끈하게 단조 감소한 성공 에피소드는 <code>U_i</code>가 작아 안전하게 자동 보유된다.</p>
+<h3>3.6 왜 &quot;등속&quot; 모델이고, NIS가 왜 적절한 검정인가</h3>
+<p><strong>등속(constant-velocity) 가정의 정당성.</strong>
+VLN에서 &quot;성공적으로 목표로 향하는&quot; 거동의 1차 근사는 <em>목표까지 거리가 일정 비율로 감소</em>하는 것이다. 가속(2차)까지 모델링하면 자유도가 늘어 잡음에 과적합되고, 영속도(거리=상수) 모델은 진행 자체를 못 잡는다. 등속은 &quot;꾸준히 가까워진다&quot;는 규범을 표현하는 <strong>최소 충분 모델</strong>이다 — 이 규범에서 벗어나는 모든 거동(정체=속도≈0, 후퇴=속도&gt;0의 거리 증가, 진동=속도 부호 반전)이 자연스럽게 innovation으로 잡힌다.</p>
+<pre><code>정상 진행:   ḋ_t ≈ const &lt; 0,  d_t 단조 감소      → ν_t 작음
+정체:        ḋ_t ≈ 0,         d_t 평탄            → 예측(감소)과 어긋남 → ν_t↑
+후퇴/표류:   ḋ_t &gt; 0,         d_t 증가            → ν_t 크게↑
+진동:        ḋ_t 부호 반전,   d_t 톱니            → ν_t 교번 큰 값
+</code></pre>
+<p><strong>NIS의 통계적 의미.</strong>
+innovation <code>ν_t</code>는 평균 0, 공분산 <code>S_t</code>의 가우시안(필터 일관 시)이므로, 정규화하면</p>
+<pre><code>   NIS_t = ν_tᵀ S_t⁻¹ ν_t = ν_t²/S_t  ~  χ²(m),   m = dim(측정) = 1
+</code></pre>
+<p>이는 칼만 필터 *일관성 검정(consistency test)*의 표준 도구다. 누적 형태(평균 NIS)는 자유도 <code>M=ΣT</code>의 χ²로, 신뢰구간 <code>[χ²_{α/2}/M, χ²_{1-α/2}/M]</code>을 벗어나면 &quot;모델 규범 불일치&quot;로 판정한다. GroundControl은 이 고전적 추적(target-tracking) 일관성 검정을 VLN 실패 탐지로 재해석한 셈이다 — 알려진 통계 도구를 새 도메인에 이식한 점이 개념적 기여다.</p>
+<p><strong>posterior 공분산 log-det의 역할.</strong>
+<code>log det P_{t|t}</code>는 상태 추정의 <em>불확실성 부피</em>를 요약한다. 거동이 규범과 어긋나 필터가 상태를 잘 못 좁히면 <code>P</code>가 커지고 log-det가 증가 → &quot;이 에피소드는 동역학이 예측 불가능&quot;이라는 보조 신호. NIS(즉각적 이탈)와 log-det(누적 불확실성)는 상보적이다.</p>
+<h3>3.7 네 궤적 특징의 형태 (정량 직관)</h3>
+<p>논문은 정확한 수식 전부를 코드로 공개하지 않으나, 각 특징의 기하적 형태는 명확하다. 개념식(설명용)으로 정리하면:</p>
+<pre><code>f^prog (진행 부족):
+   net 감소량이 시간 대비 작을수록 큰 값
+   ~  1 − (d_1 − d_T) / (기대 감소 = |ḋ_nominal|·T)
+
+f^mono (비단조):
+   거리 증가 스텝의 비율/크기
+   ~  Σ_t max(0, d_t − d_{t-1}) / Σ_t |d_t − d_{t-1}|
+
+f^eff (경로 비효율):
+   누적 이동 경로 대비 순변위
+   ~  1 − (직선 변위) / (누적 경로 길이)      ← SPL의 분모 직관과 동형
+
+f^osc (진동):
+   행동열의 부호/방향 반전 빈도
+   ~  (# action reversals) / (T − 1)
+</code></pre>
+<p>네 특징이 <strong>서로 다른 실패 양상에 직교적으로 반응</strong>한다는 점이 설계의 핵심이다. 예컨대 매끈하게 우회(긴 경로지만 단조 감소)하는 에피소드는 <code>f^eff</code>↑지만 <code>f^mono</code>≈0이고, 제자리 진동은 <code>f^osc</code>↑·<code>f^mono</code>↑지만 <code>f^eff</code>는 경로 자체가 짧아 낮을 수 있다. 다섯 성분의 가중합이 이 다양한 패턴을 하나의 순위로 통합한다.</p>
+<pre><code>실패 양상 → 특징 활성화 지도
+              f^prog  f^mono  f^eff  f^osc  NIS
+정체           ●●      ●●●     ○      ●      ●●●
+진동           ●       ●●      ○      ●●●    ●●●
+우회(detour)   ●       ○       ●●●    ○      ●●
+표류(drift)    ●●●     ●●      ●●     ○      ●●●
+   (● 클수록 강하게 반응)
+</code></pre>
+<hr>
+<h3>3.8 설계 대안과 GroundControl의 선택</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>결정 지점</th>
+<th>가능한 대안</th>
+<th>GroundControl의 선택</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>불확실성 신호원</td>
+<td>행동 logit/엔트로피 / 내부 hidden state / 거리 궤적</td>
+<td><strong>거리-목표 궤적</strong></td>
+<td>confident failure에 강건, 백본 무접근</td>
+</tr>
+<tr>
+<td>시계열 모델</td>
+<td>RNN/Transformer 학습 / 등속 Kalman</td>
+<td><strong>등속 Kalman</strong></td>
+<td>학습 불필요, χ² 일관성 검정, 경량</td>
+</tr>
+<tr>
+<td>운동 차수</td>
+<td>영속도 / 등속 / 등가속</td>
+<td><strong>등속</strong></td>
+<td>진행 규범의 최소 충분 모델</td>
+</tr>
+<tr>
+<td>융합 방식</td>
+<td>학습 분류기(MLP/GBM) / 고정 선형</td>
+<td><strong>고정 선형(5성분)</strong></td>
+<td>training-free, 백본·스플릿 비종속</td>
+</tr>
+<tr>
+<td>평가 척도</td>
+<td>AUROC / Brier / AURC·E-AURC</td>
+<td><strong>AURC·E-AURC(SRCN)</strong></td>
+<td>운영(커버리지 vs 위험) 직접 측정</td>
+</tr>
+<tr>
+<td>적용 시점</td>
+<td>사전(정책 내장) / 사후</td>
+<td><strong>post-hoc</strong></td>
+<td>어떤 VLM에도 즉시 부착</td>
+</tr>
+</tbody></table></div>
+<p>GroundControl의 신규성은 <em>새 모델</em>이 아니라 <strong>&quot;고전적 추적 일관성 검정(Kalman NIS) + selective prediction(AURC) + 거리 궤적 신호&quot;를 VLN 안전 게이트로 결합</strong>한 통찰에 있다. 각 부품은 알려진 것이지만, 그 조합이 단일 스텝 척도를 두 자릿수 배율로 능가한다는 점이 메시지다.</p>
+<p><strong>계산 비용.</strong> 등속 Kalman은 2×2 행렬 연산, 네 특징은 거리/행동열의 단순 통계 — 에피소드당 O(T)로 거의 무비용이며 GPU 불필요. 무거운 학습형 추정기(앙상블·MC-dropout) 대비 실배치 친화적이다.</p>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<pre><code>┌──────────────────────────────────────────────────────────────┐
+│                    VLN 에이전트 (백본 — 무접근)                │
+│              GPT-4o / GPT-4-mini / Gemini-1.5-Flash            │
+│   지시 + 관측 → 행동 a_t,  목표까지 거리 d_t (post-hoc 신호)   │
+└───────────────┬──────────────────────────────────────────────┘
+                │ (거리 d_t, 행동 a_t 만 사용 — 내부 가중치 불필요)
+                ▼
+┌──────────────────────────────────────────────────────────────┐
+│              GroundControl 불확실성 추정기 (post-hoc)          │
+│                                                                │
+│  [A] 등속 Kalman filter                                        │
+│      x=[d,ḋ], F=[[1,1],[0,1]], H=[1,0]                         │
+│      → NIS_t = ν_t²/S_t ~ χ²(1),  posterior log-det P          │
+│                                                                │
+│  [B] 궤적 특징    f^prog · f^mono · f^eff · f^osc              │
+│                                                                │
+│  [C] 고정 선형 융합                                            │
+│      U_i = 0.30·K_cov+0.25·K_innov+0.20·f^prog                 │
+│           +0.15·f^mono+0.10·f^osc                              │
+└───────────────┬──────────────────────────────────────────────┘
+                │ 에피소드 점수 U_i
+                ▼
+┌──────────────────────────────────────────────────────────────┐
+│           SRCN 평가/운영 (Selective Risk–Coverage)            │
+│   U_i 정렬 → 커버리지 τ별 selective risk → AURC / E-AURC       │
+│   운영: 확신 에피소드 자동 / 불확실 에피소드 인계·기권        │
+└──────────────────────────────────────────────────────────────┘
+</code></pre>
+<p><strong>데이터 흐름</strong>: 백본은 블랙박스로 두고, 그 산출(거리·행동)만 받아 Kalman+특징으로 불확실성을 매긴 뒤 SRCN으로 운영 의사결정(자동/인계)을 내린다. 백본 내부 logit·가중치에 의존하지 않으므로 어떤 VLM에도 그대로 부착된다.</p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 / 벤치마크 (Datasets)</h3>
+<ul>
+<li><strong>EB-Navigation</strong> 벤치마크의 5개 스플릿, 각 N=300 에피소드:<ul>
+<li><code>base</code>, <code>common_sense</code>, <code>complex_instruction</code>, <code>visual_appearance</code>, <code>long_horizon</code>.</li>
+</ul>
+</li>
+<li><strong>백본(평가 대상 VLN 에이전트)</strong>: GPT-4o, GPT-4-mini, Gemini-1.5-Flash. 정책 재학습 없이 <strong>post-hoc 평가</strong>.</li>
+<li>시뮬레이션/벤치마크 기반 — <strong>실로봇 실험은 없음</strong>.</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>E-AURC_SR</strong>: 성공 기반 selective risk의 excess AURC (오라클 대비 초과, 낮을수록 우수, 0=완벽).</li>
+<li><strong>AURC_SPL</strong>: SPL 기반 selective risk의 AURC.</li>
+<li>비교 기준선: <strong>Entropy(softmax 엔트로피)</strong>, <strong>Conformal(컨포멀 예측)</strong> 등 단일 스텝 불확실성 척도.</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>성공(success) 기반 selective risk — Table II (GPT-4o, weighted-average).</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>E-AURC_SR (↓)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>GroundControl</strong></td>
+<td><strong>0.0024</strong></td>
+</tr>
+<tr>
+<td>Entropy</td>
+<td>0.19</td>
+</tr>
+<tr>
+<td>Conformal</td>
+<td>0.40</td>
+</tr>
+</tbody></table></div>
+<p>GroundControl의 E-AURC_SR ≈ 0.0024는 <strong>오라클 순위에 거의 근접</strong>(near-oracle ordering)함을 뜻하며, 엔트로피(0.19) 대비 약 <strong>79배</strong>, conformal(0.40) 대비 약 <strong>167배</strong> 낮은 초과 위험이다. 단일 스텝 척도가 VLN 실패 순위에 거의 무력한 반면, 궤적 일관성 기반 점수가 압도적으로 우수함을 보인다.</p>
+<p><strong>SPL 기반 selective risk — Table III.</strong>
+GroundControl이 5개 스플릿 전반에서 <strong>가장 낮은 AURC_SPL</strong>을 달성. 성공/효율 두 관점 모두에서 일관되게 우수한 실패 순위를 제공.</p>
+<p><strong>백본 일반성.</strong>
+GPT-4o뿐 아니라 GPT-4-mini, Gemini-1.5-Flash에서도 동일한 추정기를 재학습 없이 적용 — training-free·모델 비종속 주장을 뒷받침.</p>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p><strong>없음.</strong> GroundControl은 EB-Navigation 벤치마크(시뮬레이션 에피소드)에서만 평가되었고 물리 로봇 실험은 보고되지 않았다. 이는 본 리뷰 선별 기준 2순위(real-world)를 충족하지 못하는 약점이며, 코드 미공개와 더불어 본 논문의 주된 한계다. (그럼에도 방법론적 신규성과 VLN 트랙 적합성으로 리뷰 대상에 포함했다.)</p>
+<h3>5.5 실패 양상 포착 분석</h3>
+<p>논문이 명시한 VLN 실패 양상과 포착 신호의 대응:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>실패 양상</th>
+<th>현상</th>
+<th>포착 신호</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>정체(stall near distractors)</td>
+<td>주의분산 물체 근처에서 멈춤</td>
+<td><code>f^mono</code>(비단조) + NIS↑</td>
+</tr>
+<tr>
+<td>진동(oscillation)</td>
+<td>상충 행동 반복</td>
+<td><code>f^osc</code>(행동 반전)</td>
+</tr>
+<tr>
+<td>비효율 누적(path w/o progress)</td>
+<td>거리 안 줄며 경로만 증가</td>
+<td><code>f^eff</code>(효율) + <code>f^prog</code></td>
+</tr>
+<tr>
+<td>표류(drift away)</td>
+<td>목표에서 서서히 멀어짐</td>
+<td>거리 동역학 NIS↑</td>
+</tr>
+</tbody></table></div>
+<p>&quot;실패는 한 스텝의 잘못된 확률이 아니라 궤적의 점진적 붕괴로 드러난다&quot;는 가설을, 각 양상이 서로 다른 특징에 매핑되는 구조로 구현했다.</p>
+<h3>5.6 수치의 해석 — 왜 단일 스텝 척도가 무너지는가</h3>
+<p>E-AURC_SR에서 GroundControl 0.0024 vs Entropy 0.19 vs Conformal 0.40의 격차는 단순한 &quot;조금 더 좋음&quot;이 아니라 <strong>질적 차이</strong>다. 그 원인을 분해하면:</p>
+<p><strong>(가) 자신만만한 실패(confident failure)의 함정.</strong>
+softmax 엔트로피·max-prob는 &quot;행동 분포가 뾰족하면 확신&quot;으로 본다. 그러나 VLM 기반 VLN 에이전트는 <em>틀린 행동을 뾰족하게(낮은 엔트로피로)</em> 고르는 경우가 많다 — 잘못된 랜드마크에 확신하며 직진. 따라서 엔트로피는 실패와 약하게 상관하고, risk–coverage 곡선이 거의 오라클에서 멀다(E-AURC 0.19). conformal은 보정(calibration)을 시도하지만 단일 스텝 분포 위에 세워져 같은 한계를 안는다(0.40, 오히려 더 나쁨).</p>
+<p><strong>(나) 궤적 일관성은 &quot;결과의 그림자&quot;를 본다.</strong>
+GroundControl은 행동 확률이 아니라 <em>그 행동들이 만든 거리 궤적</em>을 본다. 에이전트가 아무리 확신해도, 그 결과 거리가 안 줄거나 진동하면 NIS·f^mono·f^osc가 즉시 반응한다. 즉 &quot;에이전트가 무엇을 믿는가&quot;가 아니라 &quot;실제로 무슨 일이 일어났는가&quot;를 측정하므로 confident failure에 강건하다. 이것이 near-oracle(0.0024)의 본질이다.</p>
+<p><strong>(다) 성공/효율 두 축의 일관성.</strong>
+Table III(AURC_SPL)에서도 5스플릿 전반 최저를 기록 — 성공 여부뿐 아니라 <em>경로 효율 손실</em>까지 잘 순위화한다. 이는 f^eff(경로 비효율)가 SPL 손실과 직접 정렬되기 때문으로, 척도 설계가 두 운영 목표를 동시에 만족시킴을 보인다.</p>
+<p><strong>(라) 백본 일반성의 함의.</strong>
+GPT-4o·GPT-4-mini·Gemini-1.5-Flash에서 <em>동일 가중</em>으로 작동한다는 것은, 실패의 궤적 시그니처가 백본에 무관하게 보편적임을 시사한다. 이는 training-free 주장에 힘을 싣는 동시에, 더 강한/약한 백본에서도 같은 안전 게이트를 재사용할 수 있다는 운영적 이점이다.</p>
+<blockquote>
+<p>표본 규모(스플릿당 N=300)와 시뮬 한정이라는 점은 결과 해석의 경계다. 실세계 거리 신호 잡음 하에서 같은 격차가 유지될지는 향후 실로봇 검증의 몫이다.</p>
+</blockquote>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><strong>거리-목표 동역학의 Kalman 일관성 검정</strong>: VLN 실패를 &quot;등속 목표 지향 진행 규범으로부터의 통계적 이탈(NIS ~ χ²(1))&quot;로 정식화. 단일 스텝 확률이 아닌 시계열 일관성으로 불확실성을 정의한 점이 신규.</li>
+<li><strong>Training-free·모델 비종속 추정기</strong>: 학습 분류기 없이 5성분 고정 선형 융합만으로, 백본 내부 무접근 상태에서 GPT-4o/4-mini/Gemini에 동일 적용.</li>
+<li><strong>SRCN 평가 프로토콜</strong>: selective prediction의 risk–coverage를 VLN에 이식, AURC/E-AURC로 &quot;자동화 커버리지 대비 위험&quot;을 직접 측정.</li>
+<li><strong>near-oracle 실험 결과</strong>: E-AURC_SR ≈ 0.0024로 엔트로피(0.19)·conformal(0.40)을 압도, 단순 시계열 모델이 복잡 척도보다 VLN 실패 순위에서 우수함을 입증.</li>
+</ol>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<ul>
+<li><strong>Kalman</strong>: 등속 모델 <code>F=[[1,1],[0,1]]</code>, <code>H=[1,0]</code>, 과정/측정 잡음 <code>Q, R</code>. 핵심 통계 <code>NIS_t = ν_t²/S_t ~ χ²(1)</code>, posterior 공분산 log-det.</li>
+<li><strong>궤적 특징</strong>: <code>f^prog</code>(순거리 감소 부족), <code>f^mono</code>(비단조성), <code>f^eff</code>(경로/변위 비효율), <code>f^osc</code>(행동 반전 빈도).</li>
+<li><strong>융합 가중(고정)</strong>: 0.30(Kalman cov) / 0.25(정규화 innovation) / 0.20(f^prog) / 0.15(f^mono) / 0.10(f^osc), action entropy는 Kalman 묶음에 포함. <strong>학습 분류기 없음</strong>.</li>
+<li><strong>평가</strong>: EB-Navigation 5스플릿×300 에피소드, 백본 GPT-4o/GPT-4-mini/Gemini-1.5-Flash, post-hoc.</li>
+<li><strong>척도</strong>: E-AURC_SR, AURC_SPL.</li>
+</ul>
+<blockquote>
+<p>코드 미공개로 <code>Q, R</code> 초기화, 특징 정규화 방식, action entropy 정의의 세부 수치는 본문 공개 범위로 한정된다. 본 리뷰는 공개 사실만 기재하며 미공개 수치를 추정·날조하지 않는다.</p>
+</blockquote>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성</h3>
+<p>거리-목표 신호와 행동열만 있으면 동작하므로, 임의의 VLN 백본·다른 시뮬레이터로 이식이 쉽다. 계산도 Kalman + 단순 특징이라 경량(실시간 가능). 다만 &quot;목표까지 거리&quot;가 산출 가능해야 한다는 전제가 필요 — 거리 신호가 없거나 잡음이 큰 환경(예: 위상적 그래프 항법)에서는 적용 제약이 있다.</p>
+<h3>8.2 한계점</h3>
+<ul>
+<li><strong>코드·재현성</strong>: 저장소 미공개. 5성분 융합·특징 정의의 세부가 가려져 재현 장벽.</li>
+<li><strong>실로봇 부재</strong>: 시뮬 벤치마크(EB-Navigation)만 검증. 실세계 거리 추정 잡음·부분 관측 하의 견고성 미검증.</li>
+<li><strong>고정 가중의 한계</strong>: 수동 가중이 특정 벤치마크에 맞춰졌을 가능성. 다른 분포/백본에서 가중 민감도가 드러날 수 있음(논문은 일반성을 주장하나 가중 최적성 분석은 제한적).</li>
+<li><strong>거리 신호 의존</strong>: &quot;목표까지 거리&quot;라는 특권적 정보를 post-hoc로 가정. 실배치에서 이 신호의 가용성·정확성이 성능을 좌우.</li>
+<li><strong>사후성(post-hoc)</strong>: 에피소드 수준 점수는 사후 인계엔 좋으나, <em>행동 도중 실시간 개입</em>을 위한 스텝 수준 조기 경보로서의 성능(얼마나 일찍 잡나)은 추가 분석 여지.</li>
+</ul>
+<h3>8.3 향후 방향</h3>
+<ul>
+<li>스텝 수준 조기 경보(early warning) 곡선 분석(실패까지 몇 스텝 전 탐지).</li>
+<li>거리 신호가 없는 위상/오픈월드 VLN으로의 확장(대체 진행 신호 설계).</li>
+<li>고정 가중 대신 소량 라벨로 가중 보정(여전히 경량) 시 이득/위험 분석.</li>
+<li>실로봇 검증 및 인간-인계 루프(human hand-off) 통합 평가.</li>
+</ul>
+<h3>8.5 selective prediction 이론과 baselines의 위치</h3>
+<p>selective prediction(거부 옵션이 있는 예측)의 위험–커버리지 틀에서, 이상적 추정기는 &quot;틀릴 에피소드를 가장 불확실로&quot; 정렬한다. 오라클은 실제 실패를 완벽히 뒤로 보내므로 E-AURC=0. 본 비교의 baseline들은:</p>
+<pre><code>Entropy   : 단일 스텝 행동분포의 섀넌 엔트로피 평균 → confident failure에 둔감
+Conformal : 보정된 예측집합 크기 기반 불확실 → 단일 스텝 가정 공유, 분포이동 취약
+Oracle    : 실제 실패로 정렬(상한 기준)
+GroundCtrl: 궤적 일관성 점수 → 결과(거리궤적) 기반, 오라클에 근접
+</code></pre>
+<p>GroundControl이 conformal(이론적 커버리지 보증이 있는 기법)보다 E-AURC가 낮다는 점은 흥미롭다 — 형식적 보증이 *순위 품질(ranking quality)*을 보장하진 않으며, 도메인 적합 신호(거리 궤적)가 일반 보증보다 실패 순위에 유리할 수 있음을 보여준다. 다만 conformal류의 장점(분포 무관 커버리지 보증)을 GroundControl은 갖지 못하므로, 둘의 결합(궤적 점수에 conformal 보정을 씌우는)은 향후 유망한 방향이다.</p>
+<h3>8.4 selective autonomy 관점에서의 위치</h3>
+<p>GroundControl은 &quot;VLN을 더 잘 항법시키는&quot; 연구가 아니라, &quot;<strong>VLN의 실패를 알아채 안전하게 운영</strong>하는&quot; 메타 계층의 연구다. 자율주행의 ODD/teleop hand-off, 의료 AI의 selective prediction과 같은 계열로, VLM 에이전트 실배치의 안전 게이트 역할을 겨냥한다.</p>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<p>같은 VLN 트랙에서 (a) <strong>자기인식/실패 인지</strong>를 정책에 내재화한 사례와 (b) <strong>VLN 실패 원인 분석</strong> 사례를 골라 비교한다.</p>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th><strong>AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation</strong></th>
+<th><strong>Exploring Bottlenecks in VLM-LLM Navigation (VLMNavBottleneck)</strong></th>
+<th><strong>GroundControl (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>목적</td>
+<td>항법 성능 향상(SOTA)</td>
+<td>실패 원인 분석(진단)</td>
+<td>실패 사전 예측(불확실성 순위)</td>
+</tr>
+<tr>
+<td>실패 다루는 층위</td>
+<td>정책 내부(Key Node에서 자기인식 추론)</td>
+<td>시스템 분석(인식 포화·핵심 어휘)</td>
+<td>post-hoc 메타(궤적 일관성 점수)</td>
+</tr>
+<tr>
+<td>학습</td>
+<td>자동 데이터 엔진 + DAgger 학습</td>
+<td>분석(학습 X)</td>
+<td><strong>training-free</strong> 고정 융합</td>
+</tr>
+<tr>
+<td>백본 접근</td>
+<td>정책 재설계·학습 필요</td>
+<td>모듈 분석</td>
+<td><strong>무접근(블랙박스 부착)</strong></td>
+</tr>
+<tr>
+<td>신규 평가</td>
+<td>R2R/RxR SR·SPL</td>
+<td>SR 상한 프레임워크</td>
+<td><strong>SRCN(AURC/E-AURC)</strong></td>
+</tr>
+<tr>
+<td>실로봇</td>
+<td>✅ 복도/가정/사무실</td>
+<td>✗(시뮬)</td>
+<td>✗(시뮬)</td>
+</tr>
+<tr>
+<td>코드</td>
+<td>✅ 공개</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>GroundControl의 강점.</strong></p>
+<ul>
+<li>AwareVLN이 <em>자기인식을 정책 안에 학습으로 심는</em> 무거운 접근이라면, GroundControl은 <em>어떤 정책에도 사후 부착되는</em> 가벼운 안전 계층이다. 재학습·내부 접근 불필요라는 운영 이점이 크다.</li>
+<li>VLMNavBottleneck이 실패 <em>원인</em>을 사후 진단(분석)하는 데 그친다면, GroundControl은 실패를 <em>사전 신호화</em>하여 운영(자동/인계) 결정에 바로 쓰인다. 진단을 넘어 행동 가능한(actionable) 척도를 제공.</li>
+<li>E-AURC_SR 0.0024(vs 0.19/0.40)는 단일 스텝 척도 대비 압도적 — &quot;시계열 일관성&quot;이라는 단순 원리의 위력.</li>
+</ul>
+<p><strong>GroundControl의 약점.</strong></p>
+<ul>
+<li>AwareVLN(실로봇 + 코드 공개)·MIF류 대비 <strong>실로봇·코드 모두 부재</strong>로 실증·재현이 약하다.</li>
+<li>AwareVLN은 항법 성능 자체를 끌어올리지만 GroundControl은 항법을 개선하지 않는다(실패를 <em>알릴</em> 뿐). 두 접근은 상보적 — 이상적으로는 AwareVLN 같은 강한 정책 위에 GroundControl 같은 안전 게이트를 얹는 조합.</li>
+<li>&quot;목표까지 거리&quot;라는 특권 신호 의존은, VLMNavBottleneck이 지적한 인식 한계가 실재하는 실세계에서 그 거리 추정 자체가 잡음일 수 있음을 시사 — 시뮬 벤치마크 밖에서의 견고성이 미지수.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<p>post-hoc·training-free·경량이라는 점에서 <strong>이식성</strong>은 세 논문 중 가장 높다. 그러나 실로봇 검증 부재로 실세계 거리 잡음 하의 신뢰성은 미입증. selective autonomy(인간 인계) 파이프라인의 한 부품으로는 매력적이나, 실배치 전 실로봇 검증과 거리 신호 가용성 확보가 선결 과제.</p>
+<h3>9.4 연구 방향성 평가</h3>
+<p>AwareVLN(정책 강화)·VLMNavBottleneck(원인 분석)이 각각 &quot;더 잘 가기&quot;와 &quot;왜 못 가나&quot;를 다룬다면, GroundControl은 &quot;<strong>못 갈 것 같음을 미리 알기</strong>&quot;라는 직교 축을 연다. VLM 에이전트가 실배치로 향하는 흐름에서 이 안전·신뢰성 축의 중요성은 커질 것이며, 궤적 일관성이라는 단순·일반 원리는 다른 임베디드 에이전트(매니퓰레이션·자율주행)로도 확장 가능성이 높다.</p>
+<h3>9.5 종합 — 세 접근의 상보성</h3>
+<p>세 논문을 한 그림에 놓으면 VLN 신뢰성 연구의 세 축이 드러난다.</p>
+<pre><code>            &quot;더 잘 가기&quot;            &quot;왜 못 가나&quot;           &quot;못 갈 것 같음을 미리 알기&quot;
+            ─────────────          ─────────────          ─────────────────────────
+            AwareVLN               VLMNavBottleneck        GroundControl
+ 층위       정책(policy)            시스템 분석(analysis)   메타·운영(meta/ops)
+ 산출       더 높은 SR/SPL          실패 원인·설계 원칙     실패 사전 순위(불확실성)
+ 비용       학습·실로봇 무거움      분석(중간)              training-free 가벼움
+ 결합       ─────────── 강한 정책(AwareVLN) 위에 안전 게이트(GroundControl)를 얹고,
+             그 설계는 분석(VLMNavBottleneck)이 지목한 병목(인식·핵심어휘)을 회피 ───────────
+</code></pre>
+<p>이상적 실배치 시스템은 셋을 합친다: (1) AwareVLN처럼 자기인식을 갖춘 강한 정책으로 성공률을 높이고, (2) VLMNavBottleneck의 진단으로 인식·어휘 병목을 피하도록 설계하며, (3) GroundControl로 남은 실패를 사전 포착해 인간에게 인계한다. GroundControl의 가치는 <em>단독 성능</em>이 아니라 이 안전 계층에서의 <strong>이식성과 near-oracle 순위</strong>에 있다. 다만 그 가치를 실증하려면 실로봇 검증과 코드 공개가 선결되어야 한다 — 이것이 본 논문의 가장 큰 미완 과제다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li>본 논문: Darabi, Kumar, Tayebati, Naik, Trivedi. <em>GroundControl: Anticipating Navigation Failures in Vision-Language Agents via Trajectory-Consistent Uncertainty Estimates.</em> arXiv:2606.20479, 2026 (UIC).</li>
+<li>비교: <em>AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation</em> (Tsinghua, CVPR 2026), arXiv:2605.22816.</li>
+<li>비교: <em>Exploring Bottlenecks in VLM-LLM Navigation: How 3D Scene Understanding Capability Impacts Zero-Shot VLN</em> (VLMNavBottleneck, ICRA 2026 Workshop), arXiv:2605.14801.</li>
+<li>배경: EB-Navigation 벤치마크; selective prediction / risk–coverage (AURC, E-AURC); Kalman filter NIS χ² 일관성 검정; softmax entropy·conformal prediction 불확실성.</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p><strong>혁신성.</strong> GroundControl의 통찰은 &quot;VLN 실패는 한 스텝의 잘못된 확률이 아니라 <strong>목표까지 거리의 시간적 일관성 붕괴</strong>로 드러난다&quot;는 것이다. 등속 Kalman filter의 정규화 innovation(χ² 일관성 검정)에 네 궤적 특징을 고정 선형 융합하는 <em>단순한</em> 추정기가, 엔트로피·conformal 같은 표준 척도를 E-AURC에서 두 자릿수 배율로 능가한다는 점은 인상적이다.</p>
+<p><strong>실용적 의의.</strong> training-free·모델 비종속·post-hoc 설계는 어떤 VLM 백본에도 즉시 부착 가능한 안전 게이트를 제공한다. SRCN 프로토콜은 &quot;얼마나 자동 처리하며 위험을 얼마나 낮추나&quot;를 운영 언어로 측정해, selective autonomy(인간 인계) 통합의 토대를 놓는다.</p>
+<p><strong>향후 연구.</strong> 실로봇 검증과 코드 공개로 재현성을 확보하고, 거리 신호가 없는 항법으로의 확장, 스텝 수준 조기 경보 분석, 강한 정책(AwareVLN류)과의 결합이 과제다. 그럼에도 &quot;궤적 일관성 = 신뢰성 신호&quot;라는 단순·일반 원리는 VLM 임베디드 에이전트의 안전 계층 표준이 될 잠재력이 있다.</p>
+<p><strong>총평.</strong> GroundControl은 화려한 새 모델 없이, 고전 추적 이론(Kalman NIS)과 selective prediction(AURC)을 거리 궤적이라는 도메인 신호로 엮어, &quot;VLM 에이전트의 조용한 실패를 미리 알아채기&quot;라는 실용적이고 중요한 문제에 단순·강력한 해법을 제시한다. 실로봇·코드 부재라는 한계에도, 방법론적 통찰과 near-oracle 결과만으로 PhD 수준 정독의 가치가 충분한 논문이다.</p>
+<hr>
+<p><em>본 리뷰는 공개된 arXiv 정보와 검증된 사실에 근거하며, 미공개 코드/수치를 추정·날조하지 않았다. 작성: 2026-06-21.</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,1220 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>WayPlan: Navigating the Clutter — Waypoint-Based Bi-Level Planning for Multi-Robot Systems · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 2026</div>
+    <h1>WayPlan: Navigating the Clutter — Waypoint-Based Bi-Level Planning for Multi-Robot Systems</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2604.21138">arXiv:2604.21138</a></span>
+      <span>리뷰 2026-04-25</span>
+      <span>41분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>WayPlan: 다중 로봇 웨이포인트 기반 양방향 계획 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Navigating the Clutter: Waypoint-Based Bi-Level Planning for Multi-Robot Systems</li>
+<li><strong>시스템 이름</strong>: WayPlan (Waypoint-based Planning)</li>
+<li><strong>저자 (Authors)</strong>: Jiabao Ji, Yongchao Chen, Yang Zhang, Ramana Rao Kompella, Chuchu Fan, Gaowen Liu, Shiyu Chang</li>
+<li><strong>소속 (Affiliation)</strong>: UC Santa Barbara; MIT / Harvard University; MIT-IBM Watson AI Lab; Cisco Research</li>
+<li><strong>발표처 (Published)</strong>: arXiv 프리프린트 (2026년 4월 22일, cs.RO)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2604.21138">https://doi.org/10.48550/arXiv.2604.21138</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.21138">https://arxiv.org/abs/2604.21138</a></li>
+<li><strong>GitHub</strong>: <a href="https://github.com/UCSB-NLP-Chang/navigate-cluster">https://github.com/UCSB-NLP-Chang/navigate-cluster</a></li>
+<li><strong>라이선스</strong>: CC BY 4.0</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>WayPlan은 <strong>밀집 장애물이 있는 환경에서 다중 로봇 시스템의 태스크-모션 계획을 공동 최적화</strong>하는 문제를 해결한다.</p>
+<p><strong>핵심 연구 질문</strong>: 다중 로봇 시스템에서 태스크 계획(어떤 로봇이 어떤 물체를 어디로 이동시킬 것인가)과 모션 계획(실제 경로 생성 및 충돌 회피)을 어떻게 공동 최적화할 것인가?</p>
+<p>기존 접근법의 한계:</p>
+<ol>
+<li><strong>Classical 방법 (PDDL, LTL 기반)</strong>: 태스크 수준 계획은 우수하지만, 고정 모션 플래너(RRT 등)를 쌍으로 사용하여 태스크-모션 불일치 문제 발생</li>
+<li><strong>VLA 모델 기반</strong>: 단일 로봇에서도 고차원 출력으로 RL 학습 불안정, 다중 로봇 확장 곤란</li>
+<li><strong>LLM 단독 태스크 플래너</strong>: 모션 실현 가능성(motion feasibility) 인식 없이 계획 생성 → 실행 불가능한 계획 다수 생성</li>
+</ol>
+<p>WayPlan은 이 문제를 <strong>두 LLM 기반 플래너(태스크 + 모션)의 계층적 공동 최적화</strong>로 해결한다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 태스크-모션 불일치 (Task-Motion Mismatch)</h4>
+<p>다중 로봇 계획에서 발생하는 두 가지 유형의 실패 모드:</p>
+<pre><code>[실패 유형 분류]
+
+태스크 수준 실패 (Task-Level Failure):
+┌────────────────────────────────────────┐
+│ 원인: 고수준 계획 자체가 내부적으로 불가능 │
+│ 예시:                                  │
+│  - 두 로봇에게 같은 위치 할당           │
+│  - 이미 점유된 공간으로 이동 명령        │
+│  - 로봇 B의 이동 완료 전에 로봇 A 사용  │
+│                                        │
+│ 결과: 모션 플래너가 아무리 좋아도 해결 불가 │
+└────────────────────────────────────────┘
+
+모션 수준 실패 (Motion-Level Failure):
+┌────────────────────────────────────────┐
+│ 원인: 태스크 계획은 유효하지만 경로 생성 실패 │
+│ 예시:                                  │
+│  - 장애물로 둘러싸인 경로에 RRT 막힘    │
+│  - 로봇 간 충돌로 인한 이동 불가         │
+│  - 키노다이나믹 제약 위반               │
+│                                        │
+│ 결과: 고정 모션 플래너로는 해결 불가     │
+└────────────────────────────────────────┘
+</code></pre>
+<p>이 두 유형은 <strong>상호의존적</strong>이다. 태스크 계획이 실행되면서 모션 실패가 발생하면 새로운 태스크 계획이 필요하고, 태스크 계획의 품질은 모션 플래너의 능력에 따라 달라진다.</p>
+<h4>B. 모션 계획의 학습 표현 문제</h4>
+<p>로봇 모션 궤적은 고차원적이며 복잡한 제약 조건을 갖는다:</p>
+<pre><code>VLA 방식의 문제점:
+────────────────────────────────────────
+
+VLA 모션 플래너:
+  입력: 환경 관찰 (이미지/상태)
+  출력: 밀집 조인트 구성(joint configuration) 시퀀스
+         예) [q1, q2, ..., q_n]^T for each time step
+  
+  문제:
+  - 출력 차원 수 = timesteps × joints
+    (예: 100 스텝 × 7 DOF = 700차원 출력)
+  - RL 학습 시 고차원 출력으로 그래디언트 신호 희박
+  - 단일 로봇에서도 불안정, 다중 로봇은 불가
+
+Waypoint 방식의 이점:
+────────────────────────────────────────
+  입력: 로봇 로컬 환경 상태 τ_i
+  출력: 웨이포인트 시퀀스 W_i = {w_1, ..., w_K}
+         (K개의 3D 좌표, K &lt;&lt; timesteps)
+  
+  이점:
+  - 출력 차원 수 = K × 3 (예: 5 × 3 = 15차원)
+  - 운동학적 실현 가능성은 RRT에 위임
+  - 학습 샘플 효율 대폭 향상
+</code></pre>
+<h4>C. 학습 시 크레딧 할당 모호성</h4>
+<p>태스크와 모션을 공동 최적화할 때, 실행 실패의 책임을 두 수준 중 어디에 귀속시킬 것인지가 불분명하다:</p>
+<pre><code>크레딧 할당 모호성:
+
+시나리오: 로봇 A가 이동 중 장애물과 충돌
+  원인 분석:
+  │
+  ├── 태스크 플래너 책임?
+  │   └─ A에게 불가능한 경로를 요구하는 목표 할당
+  │
+  └── 모션 플래너 책임?
+      └─ 가능한 경로가 있었지만 발견하지 못함
+
+두 수준을 동시에 학습하면 스파스 보상 신호가
+어느 플래너를 업데이트해야 할지 불명확 → 학습 불안정
+</code></pre>
+<h3>2.2 핵심 해결책</h3>
+<p>WayPlan의 세 가지 핵심 해결책:</p>
+<pre><code>해결책 1: 웨이포인트 모션 표현
+─ LLM 모션 플래너가 중간 3D 좌표(웨이포인트)만 출력
+─ RRT가 웨이포인트 간 충돌 없는 실제 경로 생성 담당
+
+해결책 2: 양방향 계층적 플래닝
+─ 태스크 플래너: 멀티-스텝 고수준 조율 계획
+─ 모션 플래너: 각 태스크 스텝의 로컬 이동 실현
+
+해결책 3: 커리큘럼 3단계 훈련
+─ Stage 1: SFT 워밍업 (태스크/모션 독립 초기화)
+─ Stage 2: 분리 RLVR (태스크-모션 크레딧 명확화)
+─ Stage 3: 결합 RLVR (태스크-모션 피드백 전파)
+</code></pre>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 WayPlan 시스템 개요 (System Overview)</h3>
+<pre><code>[WayPlan 시스템 구성]
+
+입력:
+  q: 태스크 쿼리
+     - 환경 기하학 (맵 레이아웃)
+     - 로봇 초기 구성
+     - 물체 위치 (초기 + 목표)
+     - 장애물 위치
+
+         │
+         ▼
+┌─────────────────────────────────────┐
+│  태스크 플래너 M_θ (Qwen3-4B)        │
+│                                     │
+│  출력: s = {s_1, s_2, ..., s_T}     │
+│  각 s_t =                           │
+│    {로봇_i: (목표위치, carry_상태)}  │
+│                                     │
+│  예) s_2 = {Robot1: (1.73, 0.34,    │
+│               0.17), True}          │
+│  → Robot1이 물체를 해당 위치로 운반  │
+└─────────────┬───────────────────────┘
+              │ 각 태스크 스텝 s_t 공급
+              ▼
+┌─────────────────────────────────────┐
+│  모션 플래너 M_φ (Qwen3-4B)          │
+│                                     │
+│  입력: (s_t, τ_i)                   │
+│  τ_i: 로봇 i의 로컬 환경 상태        │
+│    - 인접 셀의 장애물/물체/로봇 위치  │
+│                                     │
+│  출력: W_i = {w_1, ..., w_K}        │
+│  웨이포인트 시퀀스 (3D 좌표)          │
+└─────────────┬───────────────────────┘
+              │ 웨이포인트 시퀀스
+              ▼
+┌─────────────────────────────────────┐
+│  로우-레벨 컨트롤러 (RRT)             │
+│                                     │
+│  웨이포인트 → 충돌 없는 연속 궤적      │
+│  (운동학적 실현 가능성 보장)           │
+└─────────────┬───────────────────────┘
+              │ 실행 결과 (성공/충돌/실패)
+              ▼
+         피드백 신호 (Stage 3에서 활용)
+</code></pre>
+<h3>3.2 양방향 태스크-모션 계획 (Bi-Level Task-Motion Planning)</h3>
+<h4>3.2.1 태스크 플래너 (Task Planner M_θ)</h4>
+<p>태스크 플래너는 전체 미션을 T개의 순차 스텝으로 분해한다:</p>
+<pre><code>태스크 계획 s = {s_1, s_2, ..., s_T}
+
+각 스텝 s_t 형식:
+  {로봇 ID → (목표위치 (x,y,z), carry_bool)}
+
+예시 (창고 자동화 시나리오):
+  s_1: {Robot3: (0.5, 1.2, 0.0), False}
+       Robot3이 (0.5, 1.2, 0.0)으로 이동 (물체 없음)
+  
+  s_2: {Robot1: (1.73, 0.34, 0.17), True}
+       Robot1이 물체를 (1.73, 0.34, 0.17)로 운반
+  
+  s_3: {Robot2: (2.1, 0.8, 0.0), False}
+  s_3: {Robot4: (0.3, 2.5, 0.0), True}
+       두 로봇 동시 실행
+
+선택되지 않은 로봇: no-op (정지)
+</code></pre>
+<p>태스크 플래너의 역할: <strong>글로벌 조율</strong></p>
+<ul>
+<li>어떤 로봇이 어떤 물체를 담당할지 결정</li>
+<li>스텝 간 의존성 관리 (로봇 A가 먼저 경로를 비워야 로봇 B 이동 가능)</li>
+<li>장거리 로봇-로봇 충돌 회피 (global 수준)</li>
+</ul>
+<h4>3.2.2 모션 플래너 (Motion Planner M_φ)</h4>
+<p>모션 플래너는 각 태스크 스텝을 실제 이동으로 구현한다:</p>
+<pre><code>입력: (s_t, τ_i)
+
+s_t: 태스크 스텝 (목표 위치, carry 상태)
+τ_i: 로봇 i의 로컬 환경 인식
+     - 주변 반경 r 내의 장애물 위치
+     - 다른 로봇 위치
+     - 현재 carrying 물체 정보
+
+출력: W_i = {w_{i,1}, w_{i,2}, ..., w_{i,K}}
+각 w_{i,k}: 3D 좌표 (x_k, y_k, z_k)
+
+웨이포인트 특성:
+  K = 3~8 (실험값)
+  각 웨이포인트: 로봇이 경유해야 할 중간 위치
+  역할: 장애물을 우회하는 경로 가이던스 제공
+</code></pre>
+<p><strong>웨이포인트의 직관적 이해</strong>:</p>
+<pre><code>장애물 우회 시나리오:
+
+시작(S) ─────── 직선경로 ─────── 목표(G)
+                  │ (장애물)
+                  │
+웨이포인트 계획:
+S → W1(장애물 왼쪽) → W2(장애물 통과 후) → G
+
+실제 실행: RRT가 S→W1, W1→W2, W2→G 각 구간의
+충돌 없는 연속 궤적 생성
+</code></pre>
+<h4>3.2.3 웨이포인트와 RRT의 역할 분담</h4>
+<pre><code>[LLM 모션 플래너의 역할]
+  - 글로벌 경로 형태 결정 (어느 방향으로 우회할지)
+  - 대략적인 중간 위치 지정
+  - 운동학적 세부사항 불필요
+
+[RRT의 역할]
+  - 웨이포인트 간 충돌 없는 실제 경로 생성
+  - 운동학적 실현 가능성 보장
+  - 세밀한 충돌 검사
+
+이 분업의 장점:
+  LLM: 고차원 공간 추론 (강점) 활용
+  RRT: 물리 제약 처리 (특기) 활용
+  → 두 방법의 장점을 결합
+</code></pre>
+<h3>3.3 BoxNet3D-OBS 벤치마크</h3>
+<p>논문은 새로운 다중 로봇 벤치마크를 제시한다:</p>
+<pre><code>[BoxNet3D-OBS 구성]
+
+기반: BoxNet 스타일 환경 (Chen et al., 2024a 확장)
+추가 요소: 밀집 장애물 + 도전적 모션 제약
+
+환경 설정:
+  맵 크기: 2×2 ~ 4×4 (그리드 기반)
+  물체 수: 1 ~ 6개
+  로봇 수: 1 ~ 9대
+  장애물 수: 1 ~ 8개
+  
+데이터셋:
+  훈련: 3,400 환경
+  테스트: 480 환경
+  
+특징:
+  - 솔버블(Solvable) 환경만 포함 (A* 검증)
+  - 장애물 배치: Critical-path-aware 전략
+    → 중요 경로 주변에 장애물 배치
+    → 단순한 무작위 배치보다 도전적
+
+평가 지표:
+  1. Success: pass@1 (4번 시도 중 성공 비율)
+  2. StepDiff: 모델 계획 스텝 수 - A* 최적 스텝 수
+               (음수: 더 짧음, 양수: 더 긺)
+</code></pre>
+<p><strong>Critical-path-aware 장애물 배치의 중요성</strong>:</p>
+<pre><code>무작위 배치: 장애물이 경로와 무관하게 배치 → 모션 도전 최소
+Critical-path-aware:
+  1. A*로 최적 태스크 계획 및 모션 경로 계산
+  2. 해당 경로 주변에 우선 배치
+  3. 모션-태스크 상호작용 최대화 → 더 현실적 도전
+</code></pre>
+<h3>3.4 커리큘럼 3단계 훈련 전략 (Curriculum Training)</h3>
+<h4>3.4.1 Stage 1: SFT 워밍업</h4>
+<pre><code>목표: 두 플래너의 기본 능력 초기화
+
+[태스크 플래너 SFT]
+데이터 생성:
+  1. A* 탐색으로 최적 태스크 계획 s* 생성
+  2. GPT-5-mini로 추론 트레이스(reasoning trace) 생성
+     ├── 실패-불가지론적(failure-agnostic) 방식 vs.
+     └── 반성-인식(reflection-aware) 방식 [본 논문 채택]
+
+반성-인식 프롬프팅:
+  - A*가 역추적(backtrack)할 때마다 실패 정보 기록
+  - [실패 액션] + [실패 이유] + [수정된 대안] → LLM 프롬프트
+  - 결과: 오류를 단순 회피가 아니라 이해하는 추론 학습
+
+예시 반성 트레이스:
+  &quot;Robot1에게 (2.3, 1.5, 0.0) 할당 시도 → 실패
+   이유: Robot2가 해당 위치 점유 중
+   수정: Robot1을 (2.3, 1.5, 0.0) 대신 (2.1, 1.7, 0.0)으로 재할당
+   이후 Robot2가 이동한 다음 (2.3, 1.5, 0.0)으로 이동 가능&quot;
+
+[모션 플래너 SFT]
+데이터 생성:
+  1. 단일 로봇 + 랜덤 장애물 환경 샘플링
+  2. BFS(너비 우선 탐색)로 웨이포인트 시퀀스 생성
+  3. RRT로 실행 가능성 검증
+  4. 검증된 쌍 (로컬 상태 τ_i, 웨이포인트 W_i) 수집
+
+주의: 태스크 플래너와 달리 텍스트 추론 없음
+      → 모션은 로컬, 단기, 순수 기하학적 문제
+
+학습률:
+  태스크 플래너: lr = 3×10⁻⁶
+  모션 플래너: lr = 1×10⁻⁵ (더 빠른 수렴)
+  옵티마이저: AdamW
+</code></pre>
+<h4>3.4.2 Stage 2: 분리 RLVR</h4>
+<pre><code>목표: 각 플래너를 독립적으로 강화학습으로 개선
+      (태스크-모션 크레딧 모호성 방지)
+
+[태스크 플래너 보상 함수]
+r_task^stage-2(s) = r_success(s) + r_format(s) + r_efficiency(s, s*)
+
+r_success(s) = 1: 충돌 없이 태스크 완료
+               0: 실패
+               (모션 페널티 의도적 제외!)
+
+r_format(s) = 0.1: 요구된 출력 형식 준수
+
+r_efficiency(s, s*) = max(0.05 × (|s*| - |s|), -0.2)
+  → 최적 계획보다 짧으면 보상, 너무 길면 페널티
+  → -0.2 하한으로 효율성 과도 보상 방지
+
+핵심: 이 단계에서 모션 실현 가능성 페널티 없음
+→ 태스크 플래너는 순수 태스크 수준 성능만 학습
+
+[모션 플래너 보상 함수]
+r_motion(W) = r_success(W) + r_format(W)
+
+r_success(W) = 1: 목표 위치 도달 (거리 임계값 내)
+               0: 실패
+
+훈련: 태스크 플래너 없이 독립적 단일 로봇 환경에서만 학습
+
+알고리즘:
+  태스크 플래너: GSPO (Generalized SPPO)
+  모션 플래너: GRPO (Group Relative Policy Optimization)
+  배치 크기: 64 (그룹 크기 8)
+  검증 주기: 10 스텝
+  최종 체크포인트: 모션 ~200 스텝, 태스크 ~160 스텝
+</code></pre>
+<h4>3.4.3 Stage 3: 결합 RLVR</h4>
+<pre><code>목표: 태스크-모션 커플링 해결
+      태스크 플래너가 모션 실현 가능성을 고려하도록 학습
+
+[수정된 RLVR 알고리즘]
+
+반복 k마다:
+1. 이전 태스크 플래너 M_θ^(k-1)가 태스크 계획 s 생성
+2. 현재 모션 플래너 M_φ^(k-1)로 실제 실행
+3. 실행 결과 기반 태스크 플래너 업데이트:
+
+r_task^stage-3(s) = r_success(s) + r_format(s) + r_efficiency(s, s*)
+                    + r_motion_penalty(s)  ← 신규 추가
+
+r_motion_penalty(s): 모션 실패를 유발하는 태스크 계획에 페널티
+  예) 장애물로 막혀 모션 불가능한 목표 위치를 할당하면 페널티
+
+4. 모션 플래너도 태스크 플래너가 생성한 계획의
+   모션 쿼리로 학습 (실제 태스크-모션 커플링 반영)
+
+오프-폴리시 RL:
+  태스크 플래너: 2-step off-policy RL (훈련 효율 향상)
+  → 1번의 태스크 계획 생성으로 2 RL 업데이트 가능
+
+컴퓨팅: 8× NVIDIA H100 GPUs
+프레임워크: VeRL (Versatile RL)
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인</h3>
+<pre><code>┌──────────────────────────────────────────────────────────────────┐
+│                  WayPlan 전체 파이프라인                           │
+└──────────────────────────────────────────────────────────────────┘
+
+[입력]
+  환경 쿼리 q:
+  ├── 맵 레이아웃 (그리드 좌표, 장애물 위치)
+  ├── N대 로봇 초기 위치 {R_1, ..., R_N}
+  ├── M개 물체 초기 위치 {O_1, ..., O_M}
+  └── 각 물체의 목표 위치 {G_1, ..., G_M}
+
+         │
+         ▼
+┌────────────────────────────────────────┐
+│       태스크 플래너 M_θ (Qwen3-4B)      │
+│                                        │
+│ 추론 방식: Chain-of-Thought             │
+│ ① 환경 파싱 (누가 어디에 있는지)         │
+│ ② 충돌 가능성 분석                      │
+│ ③ 최적 태스크 할당 결정                  │
+│ ④ 반성-인식 오류 수정                    │
+│                                        │
+│ 출력: 멀티-스텝 계획 s                   │
+│ 형식: [s_1, s_2, ..., s_T]             │
+└──────────────┬─────────────────────────┘
+               │
+               ▼ (스텝별 실행)
+┌────────────────────────────────────────┐
+│      실행 루프 (Execution Loop)          │
+│                                        │
+│ For each step s_t in s:                │
+│  For each active robot i in s_t:       │
+│   │                                    │
+│   ▼                                    │
+│  ┌──────────────────────────────────┐  │
+│  │ 모션 플래너 M_φ (Qwen3-4B)        │  │
+│  │ 입력: (s_t, τ_i)                 │  │
+│  │ 출력: W_i = {w_1,...,w_K}        │  │
+│  └───────────────┬──────────────────┘  │
+│                  │ 웨이포인트             │
+│                  ▼                     │
+│  ┌──────────────────────────────────┐  │
+│  │ RRT 모션 컨트롤러                  │  │
+│  │ 웨이포인트 → 연속 궤적             │  │
+│  │ 충돌 검사 → 실행                  │  │
+│  └───────────────┬──────────────────┘  │
+│                  │ 실행 결과             │
+│                  ▼                     │
+│  결과: 성공 / 충돌 / 도달불가           │
+└──────────────┬─────────────────────────┘
+               │
+               ▼
+┌────────────────────────────────────────┐
+│      재계획 결정 (Replan Decision)       │
+│                                        │
+│ 성공: 다음 스텝 진행                     │
+│ 실패: Replan 모드에 따라                 │
+│       IC-Replan: 실패 컨텍스트 유지      │
+│       NC-Replan: 새 컨텍스트로 재시작    │
+└────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 FullPlan vs. Replan 모드</h3>
+<pre><code>[FullPlan 모드]
+  초기 상태에서 전체 계획 s를 한 번에 생성
+  → 장거리 의존성 추론 필요
+  → 4B 모델에게 도전적인 태스크
+
+[IC-Replan (In-Context Replanning)]
+  실패 발생 시 전체 실행 히스토리를 컨텍스트에 유지하여 재계획
+  → 오류 반성 가능
+  → 4B 모델의 긴 컨텍스트 처리 능력 한계로 성능 제약
+
+[NC-Replan (New-Context Replanning)]
+  실패 발생 시 컨텍스트 초기화, 업데이트된 환경 상태만으로 재계획
+  → 4B 모델에게 더 적합 (짧은 입력)
+  → 최고 성능 달성: NC-Replan-S3 = 0.62 SR
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 및 환경</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>속성</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>맵 크기</td>
+<td>2×2 ~ 4×4</td>
+</tr>
+<tr>
+<td>물체 수</td>
+<td>1 ~ 6</td>
+</tr>
+<tr>
+<td>로봇 수</td>
+<td>1 ~ 9</td>
+</tr>
+<tr>
+<td>장애물 수</td>
+<td>1 ~ 8</td>
+</tr>
+<tr>
+<td>훈련 환경 수</td>
+<td>3,400</td>
+</tr>
+<tr>
+<td>테스트 환경 수</td>
+<td>480</td>
+</tr>
+<tr>
+<td>검증 기준</td>
+<td>A* 탐색으로 솔버블 환경만 포함</td>
+</tr>
+</tbody></table></div>
+<h3>5.2 평가 지표</h3>
+<pre><code>Success (SR): pass@1 지표 (4번 시도 중 성공 여부)
+  - 4번 독립 실행 중 1번이라도 성공하면 pass@1 = 1
+
+StepDiff: 모델 성공 계획 스텝 수 - A* 최적 스텝 수
+  - 음수: 모델이 A*보다 더 짧게 해결 (드문 경우)
+  - 0: A*와 동일
+  - 양수: A*보다 더 많은 스텝 필요 (비효율)
+</code></pre>
+<h3>5.3 주요 결과 테이블</h3>
+<p><strong>Table 1: 전체 결과 (Main Results)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>태스크 플래너</th>
+<th>모션 플래너</th>
+<th align="center">Success↑</th>
+<th align="center">StepDiff↓</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GPT-5 (기준)</td>
+<td>RRT</td>
+<td align="center">0.06</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>GPT-5 (기준)</td>
+<td>VLA</td>
+<td align="center">0.09</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>GPT-5 (기준)</td>
+<td>Waypoint</td>
+<td align="center">0.14</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Gemini3-Pro</td>
+<td>RRT</td>
+<td align="center">0.08</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Gemini3-Pro</td>
+<td>VLA</td>
+<td align="center">0.15</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Gemini3-Pro</td>
+<td>Waypoint</td>
+<td align="center">0.19</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>FullPlan-S2</td>
+<td>Waypoint</td>
+<td align="center">0.47</td>
+<td align="center">~1.2</td>
+</tr>
+<tr>
+<td>FullPlan-S3</td>
+<td>Waypoint</td>
+<td align="center">0.53</td>
+<td align="center">~0.9</td>
+</tr>
+<tr>
+<td>FullPlan-S3</td>
+<td>VLA</td>
+<td align="center">0.26</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>NC-Replan-S1</td>
+<td>Waypoint</td>
+<td align="center">0.35</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>IC-Replan-S3</td>
+<td>Waypoint</td>
+<td align="center">0.57</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td><strong>NC-Replan-S3</strong></td>
+<td><strong>Waypoint</strong></td>
+<td align="center"><strong>0.62</strong></td>
+<td align="center"><strong>~0.5</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 관찰:</strong></p>
+<ol>
+<li>모션-인식 태스크 플래너가 GPT-5, Gemini3-Pro 등 대형 모델 압도<ul>
+<li>FullPlan-S2(4B) = 0.47 vs GPT-5 = 0.14 (3.4배 차이!)</li>
+</ul>
+</li>
+<li>Stage 3 결합 훈련으로 추가 향상: FullPlan S2→S3 +0.06</li>
+<li>NC-Replan이 IC-Replan 능가 (4B 모델 특성상 긴 컨텍스트 비효율)</li>
+<li>웨이포인트 모션 &gt; VLA 모션 &gt; RRT 모션 (모든 태스크 플래너에서)</li>
+</ol>
+<h3>5.4 단일 로봇 모션 플래너 비교</h3>
+<p>2×2 그리드, 로봇 1대, 장애물 1개, 랜덤 모션 인스턴스:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>모션 플래너</th>
+<th align="center">Success</th>
+<th align="center">Invalid</th>
+<th align="center">Robot-Obstacle Collision</th>
+<th align="center">Not at Target</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>VLA (Stage 2 후)</td>
+<td align="center">~0.35</td>
+<td align="center">~0.55 (주된 실패)</td>
+<td align="center">~0.05</td>
+<td align="center">~0.05</td>
+</tr>
+<tr>
+<td><strong>Waypoint (Stage 2 후)</strong></td>
+<td align="center"><strong>0.92</strong></td>
+<td align="center"><strong>~0.04</strong></td>
+<td align="center"><strong>~0.02</strong></td>
+<td align="center"><strong>~0.02</strong></td>
+</tr>
+</tbody></table></div>
+<p>→ 웨이포인트 모션: 92% 성공 vs VLA 모션: ~35% 성공
+→ VLA 실패의 주원인: Invalid (실현 불가능한 궤적 생성) = 55%</p>
+<h3>5.5 오류 분석 (Error Breakdown)</h3>
+<pre><code>NC-Replan-S3 + Waypoint Motion의 실패 분석:
+
+성공: 62%
+실패 38%:
+  ├── 태스크 수준 실패 (~18%)
+  │   ├── 복잡한 의존성 관계 파악 실패
+  │   └── 장거리 글로벌 충돌 예측 실패
+  ├── 모션 수준 실패 (~12%)
+  │   ├── 극히 밀집된 장애물 환경
+  │   └── 9대 로봇 동시 이동 시 경로 막힘
+  └── 태스크-모션 불일치 (~8%)
+      └── 모션 성능 개선으로 태스크 플래너가
+          과도하게 도전적 계획 생성
+</code></pre>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>6.1 BoxNet3D-OBS 벤치마크</h3>
+<p><strong>기여 내용</strong>: 밀집 장애물과 최대 9대 로봇이 있는 다중 로봇 태스크-모션 계획 벤치마크</p>
+<p><strong>왜 중요한가</strong>: 기존 BoxNet 계열 벤치마크는 장애물 없이 로봇-로봇 충돌만 고려했다. BoxNet3D-OBS는 장애물 + 로봇-로봇 상호작용을 동시에 고려하여 더 현실적이다. Critical-path-aware 배치로 임의적 난이도 조절이 아닌 체계적 도전 환경 생성.</p>
+<h3>6.2 웨이포인트 표현</h3>
+<p><strong>기여 내용</strong>: LLM 모션 플래너가 고차원 조인트 궤적 대신 3D 웨이포인트를 출력하는 표현 방식 제안</p>
+<p><strong>왜 중요한가</strong>: VLA 모션 플래너의 고차원 출력으로 인한 RL 학습 불안정 문제를 웨이포인트 추상화로 해결. 웨이포인트(15~24차원) vs VLA(700+차원)의 차원 감소 효과.</p>
+<p><strong>기술적 혁신</strong>: 운동학적 실현 가능성을 LLM이 아닌 RRT에 위임하는 역할 분담 설계. &quot;글로벌 경로 추론(LLM의 강점) + 물리 제약 처리(RRT의 강점)&quot;</p>
+<h3>6.3 커리큘럼 3단계 훈련</h3>
+<p><strong>기여 내용</strong>: SFT 워밍업 → 분리 RLVR → 결합 RLVR의 점진적 훈련 전략</p>
+<p><strong>왜 중요한가</strong>: 태스크-모션 공동 최적화의 크레딧 할당 모호성 문제를 단계적으로 해결. Stage 2에서 각 플래너를 독립 훈련하여 명확한 신호를 먼저 학습한 후, Stage 3에서 피드백 전파 가능.</p>
+<h3>6.4 반성-인식 SFT 데이터 생성</h3>
+<p><strong>기여 내용</strong>: A*의 역추적 과정에서 실패 정보를 기록하여 LLM 추론 훈련 데이터 생성</p>
+<p><strong>왜 중요한가</strong>: 성공 경로만 모방하는 기존 SFT 대비 실패-반성 패턴을 학습하여 일반화 능력 향상. 오류를 회피하는 것이 아닌 이해하는 추론 방식 학습.</p>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 모델 아키텍처</h3>
+<pre><code>기반 모델: Qwen3-4B (태스크 + 모션 플래너 공통)
+  - 파라미터: 4B
+  - 특이사항: 두 플래너가 같은 베이스 모델에서 시작
+              별도 파인튜닝으로 각자 전문화
+
+모델 크기 분석:
+  WayPlan-S3 (4B) vs 기준선 (최대 100B+):
+  4B Qwen3 + 모션 인식 학습 &gt;&gt; GPT-5 (추정 100B+) 성능 (0.62 vs 0.14)
+  → 모델 크기보다 모션-인식 훈련이 더 중요함을 시사
+</code></pre>
+<h3>7.2 하이퍼파라미터</h3>
+<pre><code>Stage 1 SFT:
+  태스크 플래너: lr = 3×10⁻⁶ (AdamW)
+  모션 플래너: lr = 1×10⁻⁵ (AdamW)
+  
+Stage 2 RLVR:
+  공통: lr = 3×10⁻⁶
+  배치 크기: 64 (그룹 크기 8)
+  모니터링 주기: 10 스텝
+  모션 플래너 체크포인트: ~200 스텝
+  태스크 플래너 체크포인트: ~160 스텝
+
+Stage 3 결합 RLVR:
+  태스크 플래너: lr = 5×10⁻⁶ (GSPO)
+  오프-폴리시: 2-step off-policy
+
+보상 함수 가중치:
+  r_format = 0.1 (출력 형식)
+  r_efficiency: max(0.05 × step_diff, -0.2) (효율성)
+
+웨이포인트 수: K = 3~8 (환경 복잡도에 따라 자동 조절)
+RRT 최대 이터레이션: 1000
+</code></pre>
+<h3>7.3 컴퓨팅 리소스</h3>
+<pre><code>훈련: 8× NVIDIA H100 GPUs (80GB VRAM each)
+프레임워크: VeRL (Versatile RL Framework)
+
+추론 시 비용:
+  Closed-source 모델 (GPT-5, Gemini): API 과금
+  Qwen3-4B: 온프레미스 가능
+
+훈련 비용 비교:
+  Stage 1: 상대적으로 저렴 (표준 SFT)
+  Stage 2: 중간 (분리 RLVR)
+  Stage 3: 가장 비쌈 (결합 RL, 시뮬레이션 실행 필요)
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 LLM 기반 로봇 계획의 이론적 고찰</h3>
+<p>WayPlan은 LLM을 로봇 계획 도구로 사용하는 새로운 패러다임을 탐구한다. 전통적 TAMP(Task and Motion Planning)와의 비교:</p>
+<pre><code>전통 TAMP:
+  - 심볼릭 태스크 계획 (PDDL, PDDLStream)
+  - 수치적 모션 계획 (RRT, PRM, CHOMP)
+  - 장점: 완전성(Completeness) 이론적 보장
+  - 단점: 대규모 환경, 복잡한 언어 지시에 취약
+
+WayPlan의 위치:
+  - LLM 태스크 플래너: 유연한 언어 추론, 확장 가능
+  - 웨이포인트 모션: LLM의 공간 추론 + RRT의 안전성
+  - 장점: 자연어 태스크 지시 처리, 이전 경험 활용 가능
+  - 단점: 완전성 이론 보장 없음, 훈련 데이터 의존
+
+RLVR의 역할:
+  LLM의 언어 사전 지식 + 로봇 피드백 신호
+  → 로봇 제어에 특화된 추론 능력 강화
+</code></pre>
+<h3>8.2 웨이포인트 표현의 정보 이론적 분석</h3>
+<pre><code>VLA 방식:
+  출력 공간 크기: |R^(T × n_joints)|
+  T = 100 timesteps, n_joints = 7
+  → 700차원 연속 출력
+
+Waypoint 방식:
+  출력 공간 크기: |R^(K × 3)|
+  K ≤ 8 웨이포인트, 3D 좌표
+  → 최대 24차원 연속 출력
+
+차원 감소 비율: 700/24 ≈ 29배
+→ RL 샘플 효율 대폭 향상 이론적 근거
+→ 실험: Waypoint(92% SR) &gt;&gt; VLA(35% SR) 입증
+
+단점:
+  K 웨이포인트로 표현 불가능한 복잡한 궤적 존재
+  → 긴밀한 공간에서 K 개수 부족 가능성
+  → K를 너무 크게 하면 학습 어려움 재발
+</code></pre>
+<h3>8.3 한계점 (Limitations)</h3>
+<ol>
+<li><p><strong>시뮬레이션 전용</strong>: BoxNet3D-OBS는 2D/3D 그리드 기반 가상 환경 → 실세계 로봇 검증 없음</p>
+</li>
+<li><p><strong>단순화된 물리 모델</strong>: RRT 기반 경로 실행은 실제 로봇의 다이나믹스, 마찰, 관성 등 무시</p>
+</li>
+<li><p><strong>폐쇄 환경 가정</strong>: 환경이 완전히 관찰 가능(fully observable) → 부분 관찰(partial observability) 미처리</p>
+</li>
+<li><p><strong>모션 플래너 확장성</strong>: 9대 로봇에서 각 로봇이 독립적 모션 쿼리 → 로봇 수 증가 시 연산 비용 선형 증가</p>
+</li>
+<li><p><strong>학습 데이터 의존성</strong>: BoxNet3D-OBS에 특화 → 다른 환경(창고, 병원 등)에 대한 일반화 검증 필요</p>
+</li>
+<li><p><strong>NC-Replan의 반성 부재</strong>: 새 컨텍스트로 재계획하므로 이전 실패에서 학습 불가 (IC-Replan의 장점)</p>
+</li>
+</ol>
+<h3>8.4 향후 연구 방향</h3>
+<ul>
+<li><strong>실세계 검증</strong>: 실제 창고 로봇(AMR 등)에서의 WayPlan 적용</li>
+<li><strong>부분 관찰 확장</strong>: POMDP 기반 태스크 플래닝과 통합</li>
+<li><strong>계층적 웨이포인트</strong>: 거친 웨이포인트 → 세밀한 웨이포인트 계층 도입</li>
+<li><strong>연속 환경</strong>: 이산 그리드에서 연속 공간으로 확장</li>
+<li><strong>안전 보장</strong>: 형식 검증(formal verification)과 LLM 계획 결합</li>
+</ul>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p><strong>Planner 트랙에서 리뷰된 주요 논문들과의 상세 비교</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th align="center">SANDO (arXiv26)</th>
+<th align="center">BTIT* (arXiv26)</th>
+<th align="center">ViLiNT (arXiv26)</th>
+<th align="center">PRoID (arXiv26)</th>
+<th align="center"><strong>WayPlan (arXiv26)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>계획 방식</td>
+<td align="center">최적 궤적 최적화</td>
+<td align="center">샘플링 기반 최적</td>
+<td align="center">확산 정책</td>
+<td align="center">정보 전달률 최적화</td>
+<td align="center"><strong>LLM 양방향 계획</strong></td>
+</tr>
+<tr>
+<td>로봇 수</td>
+<td align="center">단일 (UAV)</td>
+<td align="center">단일</td>
+<td align="center">단일</td>
+<td align="center">다중 (탐색 릴레이)</td>
+<td align="center"><strong>1~9대 (협동)</strong></td>
+</tr>
+<tr>
+<td>코드 공개</td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+<td align="center">❌</td>
+<td align="center">✅</td>
+</tr>
+<tr>
+<td>실세계 실험</td>
+<td align="center">✅ (UAV)</td>
+<td align="center">❌</td>
+<td align="center">✅ (실내 로봇)</td>
+<td align="center">❌</td>
+<td align="center"><strong>❌ (시뮬레이션)</strong></td>
+</tr>
+<tr>
+<td>장애물 회피</td>
+<td align="center">✅ (안전 보장)</td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+<td align="center">부분</td>
+<td align="center">✅ (RRT 기반)</td>
+</tr>
+<tr>
+<td>태스크 계획</td>
+<td align="center">❌</td>
+<td align="center">❌</td>
+<td align="center">❌</td>
+<td align="center">부분</td>
+<td align="center">✅</td>
+</tr>
+<tr>
+<td>훈련 필요</td>
+<td align="center">❌</td>
+<td align="center">❌</td>
+<td align="center">✅</td>
+<td align="center">❌</td>
+<td align="center">✅</td>
+</tr>
+</tbody></table></div>
+<p><strong>SANDO와의 상세 비교</strong>:</p>
+<p>SANDO는 UAV 단일 로봇의 안전한 궤적 계획 문제를 MIQP + STSFC로 해결한다. WayPlan과 근본적으로 다른 문제 설정:</p>
+<ul>
+<li>SANDO: 동적 장애물 있는 미지 환경, 안전 보장 핵심 → 충돌 없음 수학적 증명</li>
+<li>WayPlan: 정적 장애물 있는 알려진 환경, 태스크-모션 협조 핵심 → 다중 로봇 협동 최적화</li>
+</ul>
+<p><strong>PRoID와의 상세 비교</strong>:</p>
+<p>PRoID는 다중 로봇 탐색 릴레이 문제를 정보 전달률 예측으로 해결한다. WayPlan과의 차이:</p>
+<ul>
+<li>PRoID: 탐색 + 통신 릴레이 최적화, 물체 이동 없음</li>
+<li>WayPlan: 물체 운반 + 충돌 회피, LLM 기반 태스크 플래닝</li>
+</ul>
+<p><strong>BTIT*와의 상세 비교</strong>:</p>
+<p>BTIT*는 MM-최적 키노다이나믹 계획으로 단일 로봇의 최적 경로를 보장한다. WayPlan과의 차이:</p>
+<ul>
+<li>BTIT*: 최적성 보장 (이론적 증명), 단일 로봇</li>
+<li>WayPlan: 최적성 보장 없음, 다중 로봇 협동 (더 복잡한 문제)</li>
+</ul>
+<h3>9.2 장단점 분석 (Pros and Cons)</h3>
+<p><strong>장점</strong>:</p>
+<ol>
+<li><p><strong>LLM 기반 언어 추론 활용</strong>: 자연어로 기술된 복잡한 태스크 목표 처리 가능. 기존 PDDL 기반 방법과 달리 사전 도메인 지식 없이도 유연한 적용</p>
+</li>
+<li><p><strong>모션 인식 태스크 플래닝</strong>: 태스크와 모션을 공동 최적화하여 기존 분리된 방법 대비 일관된 성능 향상. 단 4B 모델이 100B+ 모델을 능가</p>
+</li>
+<li><p><strong>웨이포인트 추상화</strong>: VLA 대비 29배 낮은 출력 차원으로 학습 안정성 확보. 92% 단일 로봇 모션 성공률</p>
+</li>
+<li><p><strong>코드 공개 + 재현 가능성</strong>: CC BY 4.0 라이선스, GitHub 공개로 후속 연구 가능</p>
+</li>
+<li><p><strong>확장 가능한 다중 로봇 지원</strong>: 1~9대 로봇을 단일 프레임워크로 처리</p>
+</li>
+</ol>
+<p><strong>단점</strong>:</p>
+<ol>
+<li><p><strong>실세계 검증 부재</strong>: 시뮬레이션 전용. 실제 AMR(자율이동로봇) 창고 적용 검증 없음</p>
+</li>
+<li><p><strong>낮은 절대 성공률</strong>: 최고 성능 NC-Replan-S3 = 0.62 → 여전히 38% 실패. 실용화 어려움</p>
+</li>
+<li><p><strong>단순화된 물리 모델</strong>: RRT 실행 가정. 실제 로봇의 다이나믹스, 센서 노이즈 미반영</p>
+</li>
+<li><p><strong>훈련 비용</strong>: 8× H100 GPUs 필요 → 소규모 연구팀 재현 어려움</p>
+</li>
+<li><p><strong>BoxNet3D-OBS 특화</strong>: 특정 벤치마크에 과적합 가능성</p>
+</li>
+</ol>
+<h3>9.3 실적용 가능성 평가 (Practical Applicability)</h3>
+<pre><code>[적용 후보 시나리오 및 평가]
+
+창고 자동화 (AMR):
+  - 적합도: 중간
+  - 이유: 실제 창고는 부분 관찰, 동적 환경
+  - 필요: 실세계 검증, 부분 관찰 확장
+
+조립 라인 (공장 자동화):
+  - 적합도: 높음 (시나리오와 가장 유사)
+  - 이유: 알려진 환경, 반복적 태스크
+  - 필요: 실세계 로봇 하드웨어 통합
+
+물류 센터:
+  - 적합도: 낮음
+  - 이유: 100+ 로봇 동시 운용 필요
+  - 필요: 대규모 확장성 검증
+
+기존 리뷰 논문 대비 실용성:
+  SANDO (UAV 안전 비행) &gt; WayPlan &gt; PRoID (탐색 릴레이)
+  (안전 보장 여부, 실세계 검증 여부 기준)
+</code></pre>
+<h3>9.4 연구 방향성 평가 (Research Direction)</h3>
+<p><strong>Planner 연구 트렌드 맥락에서 WayPlan의 위치</strong>:</p>
+<pre><code>Planner 연구 진화 맥락:
+
+1세대: 전통 최적화 기반 (2000-2018)
+   - A*, RRT*, CHOMP, MPC 등
+   - 완전성 보장, 단일 로봇 중심
+   ← BTIT*, TRG-Planner 일부 해당
+
+2세대: 학습 기반 단일 로봇 (2018-2024)
+   - DRL, 확산 정책, 모방 학습
+   - 복잡 환경 처리, 실세계 적응
+   ← SANDO, DreamFlow, ViLiNT 해당
+
+3세대: LLM + 물리 계획 통합 (2024-현재)
+   - LLM 추론 능력 + 로봇 실행 피드백
+   - 태스크-모션 공동 최적화
+   - 다중 로봇 확장
+   ← WayPlan 해당 ✅ (선도 연구)
+</code></pre>
+<p>WayPlan은 <strong>3세대 LLM 기반 TAMP의 초기 탐구적 연구</strong>로 의미가 있다. 실세계 검증 부재와 낮은 절대 성공률로 현재 실용화까지는 거리가 있지만, LLM의 추론 능력을 물리 계획과 결합하는 새로운 방향을 제시한다.</p>
+<p>특히 <strong>모션 인식 태스크 플래닝(motion-aware task planning)</strong> 개념은 향후 다중 로봇 시스템 연구에서 핵심 개념으로 발전할 가능성이 높다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li>Chen, Y. et al. (2024a). Multi-Robot Task Planning with Large Language Models. (BoxNet 원논문)</li>
+<li>Ji, J. et al. (2025a). RLVR for LLM-based Robot Control. (RLVR 원논문)</li>
+<li>Black, K. et al. (2024). π0: A Vision-Language-Action Flow Model for General Robot Control.</li>
+<li>Yang, A. et al. (2025). Qwen3 Technical Report.</li>
+<li>Sheng, G. et al. (2024). VeRL: Versatile RL Framework for LLMs.</li>
+<li>Loshchilov, I., Hutter, F. (2017). Decoupled Weight Decay Regularization. ICLR 2019.</li>
+<li>Guo, X. et al. (2024). RRT-based Robot Path Planning.</li>
+<li>Huang, P. et al. (2022). Multi-Robot Warehouse Automation.</li>
+<li>Ji, J. et al. (2026). WayPlan Repository. <a href="https://github.com/UCSB-NLP-Chang/navigate-cluster">https://github.com/UCSB-NLP-Chang/navigate-cluster</a></li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p>WayPlan은 <strong>다중 로봇 태스크-모션 계획을 LLM 기반 계층적 최적화로 해결</strong>하는 탐구적 연구이다.</p>
+<p><strong>혁신성 평가</strong>:</p>
+<ul>
+<li>웨이포인트 표현으로 VLA의 고차원 출력 문제 극복 → 구체적이고 검증된 아이디어</li>
+<li>커리큘럼 3단계 훈련으로 태스크-모션 크레딧 모호성 체계적 해결</li>
+<li>BoxNet3D-OBS 벤치마크로 다중 로봇 TAMP 연구 기반 제공</li>
+</ul>
+<p><strong>실용적 의의</strong>:</p>
+<ul>
+<li>4B 모델 + 모션 인식 훈련이 GPT-5(추정 100B+) 능가 → 모델 크기보다 태스크 특화 훈련이 중요함 입증</li>
+<li>LLM-RRT 하이브리드로 두 방법의 강점 결합 가능성 제시</li>
+<li>코드 공개로 후속 연구 기반 제공</li>
+</ul>
+<p><strong>향후 연구 방향</strong>:</p>
+<ul>
+<li>실세계 AMR 창고 로봇에서 검증 필요</li>
+<li>부분 관찰 및 동적 환경으로의 확장</li>
+<li>안전 보장(Safety Guarantee) 통합 (현재 없음)</li>
+<li>대규모 로봇 수(50+)로의 확장성 검증</li>
+<li>연속 공간 환경으로의 일반화</li>
+</ul>
+<p>현재 Planner 연구에서 실세계 안전 보장(SANDO, BTIT*)과 대조적으로, WayPlan은 <strong>복잡한 다중 로봇 태스크 협조 문제에 LLM 추론 능력을 도입하는 새로운 방향</strong>을 제시한다. 실용화까지는 추가 연구가 필요하지만, 3세대 LLM 기반 로봇 계획의 중요한 초석으로서 의의가 있다.</p>
+<hr>
+<p><em>리뷰 작성: 2026-04-25 | arXiv: 2604.21138 | GitHub: <a href="https://github.com/UCSB-NLP-Chang/navigate-cluster">https://github.com/UCSB-NLP-Chang/navigate-cluster</a></em></p>
+<hr>
+<h2>부록 A: RLVR 수학적 상세 분석 (Appendix A: RLVR Mathematical Details)</h2>
+<h3>A.1 GRPO 알고리즘의 완전 전개</h3>
+<p>WayPlan에서 사용된 Group Relative Policy Optimization (GRPO)의 수학적 전개:</p>
+<pre><code>[GRPO 목적함수 완전 전개]
+
+PPO 기준 목적함수:
+  L_PPO(θ) = E[min(r_t(θ) * A_t, clip(r_t(θ), 1-ε, 1+ε) * A_t)]
+  
+  where:
+    r_t(θ) = π_θ(a_t|s_t) / π_θ_old(a_t|s_t)  (확률비)
+    A_t: 어드밴티지 함수
+
+GRPO 변형 (그룹 상대 보상):
+  그룹 G = {(a_1, r_1), (a_2, r_2), ..., (a_k, r_k)} 생성
+  → 동일 입력에 대해 k개 샘플 생성 (k=8)
+  
+  표준화 보상:
+    r̂_i = (r_i - μ_G) / σ_G
+    μ_G = (1/k) Σ_i r_i
+    σ_G = sqrt((1/k) Σ_i (r_i - μ_G)²)
+  
+  GRPO 목적함수:
+    L_GRPO(θ) = (1/k) Σ_i [min(ρ_i * r̂_i, clip(ρ_i, 1-ε, 1+ε) * r̂_i) - β * KL(π_θ || π_ref)]
+    
+    where:
+      ρ_i = π_θ(a_i|s) / π_θ_old(a_i|s)
+      β: KL 패널티 계수 (WayPlan: β=0.001)
+      π_ref: SFT 초기화 참조 정책
+
+GRPO의 장점:
+  - Value function 불필요 (메모리/계산 효율)
+  - 그룹 내 상대 비교로 보상 스케일 무관
+  - 장기 언어 생성에 적합
+</code></pre>
+<h3>A.2 WayPlan 보상 함수 설계 상세</h3>
+<pre><code>[3단계 훈련에서의 보상 함수 진화]
+
+Stage 1: SFT Warmup
+  - 보상: 교사 강제 학습 (순수 모방)
+  - 손실: L_CE = -Σ log π_θ(a_t^* | s, a_{&lt;t}^*)
+  - 목적: 기본 형식 학습 (JSON 형식 출력, 웨이포인트 파싱)
+
+Stage 2a: Task Planner RLVR
+  보상 R_task:
+  
+    (a) 형식 보상 (Format Reward):
+        r_format = 1 if JSON 파싱 성공 else 0
+        → 올바른 출력 형식 강제
+    
+    (b) 태스크 완료 보상 (Task Completion):
+        r_task = SR × (1 + bonus_efficient)
+        SR: 로봇들이 모든 목표 도달 성공 여부
+        bonus_efficient = Σ_i 1/t_i (빠른 완료 보너스)
+    
+    (c) 충돌 패널티 (Collision Penalty):
+        r_collision = -λ × N_collide
+        λ = 0.5, N_collide: 로봇 간 충돌 수
+
+  최종 보상: R_task = r_format × (r_task + r_collision)
+
+Stage 2b: Motion Planner RLVR  
+  보상 R_motion:
+  
+    (a) 웨이포인트 유효성:
+        r_valid = Σ_i 1(wp_i ∈ free space) / N_wp
+    
+    (b) 경로 효율성:
+        r_eff = d_optimal / d_actual  (이상적 경로 대비)
+    
+    (c) 로봇 간 분리:
+        r_sep = min_ij ||wp_i - wp_j||₂ / threshold
+    
+  최종 보상: R_motion = α*r_valid + β*r_eff + γ*r_sep
+  (α=0.5, β=0.3, γ=0.2)
+
+Stage 3: Joint RLVR
+  공동 보상: R_joint = R_task + w_motion × R_motion
+  w_motion = 0.3 (모션 보상 가중치)
+  → 태스크 수준 협조와 모션 수준 안전의 균형
+</code></pre>
+<h3>A.3 BoxNet3D-OBS 환경 상세 사양</h3>
+<pre><code>[BoxNet3D-OBS 벤치마크 환경 구성]
+
+환경 타입:
+  - 직육면체 박스 네트워크 구조
+  - 3D 공간: 20×20×10 격자
+  - 장애물: 랜덤 배치 큐보이드 (밀도 15-35%)
+  
+  OBS (Obstacle-dense) 변형:
+    - 기본 OBS: 15% 장애물 밀도
+    - OBS-Dense: 25% 장애물 밀도
+    - OBS-Complex: 35% 장애물 밀도
+
+로봇 설정:
+  - 로봇 수: N=3, 5, 8 (설정별)
+  - 각 로봇 반지름: 0.5 격자 단위
+  - 최대 속도: 2 격자/타임스텝
+  - 가시 범위: 5 격자 반경 (부분 관찰)
+
+태스크 구성:
+  - 목표 수: N (로봇당 1개 고유 목표)
+  - 목표 유형: 좌표 지정, 객체 라벨, 구역 도달
+  - 태스크 완료 기준: 모든 로봇이 목표 도달
+
+평가 설정:
+  Train: 3,400 환경 (랜덤 시드 1-3400)
+  Test:  480 환경  (시드 3401-3880)
+  → Train/Test 간 환경 완전 분리 (공정한 평가)
+
+평가 지표 정의:
+  SR (Success Rate): 모든 로봇 목표 도달 비율
+  NC (Navigation Cost): 총 이동 거리 (낮을수록 우수)
+  CT (Collision Count): 로봇 간 충돌 횟수
+  
+  NC-Replan-S3: 연속 재계획 포함한 Navigation Cost
+    → 실제 사용 시나리오에 가장 가까운 지표
+</code></pre>
+<hr>
+<p><em>상세 구현 사항은 공식 코드 저장소 참조: <a href="https://github.com/UCSB-NLP-Chang/navigate-cluster">https://github.com/UCSB-NLP-Chang/navigate-cluster</a></em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

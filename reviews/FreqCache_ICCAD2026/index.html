@@ -1,0 +1,1057 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>FreqCache: Accelerating Embodied VLN Models with Adaptive Frequency-Guided Token Caching · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">ICCAD 2026 (IEEE/ACM International Conference on Computer-Aided Design)</div>
+    <h1>FreqCache: Accelerating Embodied VLN Models with Adaptive Frequency-Guided Token Caching</h1>
+    <div class="meta-row">
+      <span class="chip">VLN</span>
+      <span><a href="https://arxiv.org/abs/2604.24391">arXiv:2604.24391</a></span>
+      <span>리뷰 2026-04-29</span>
+      <span>44분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>FreqCache: Accelerating Embodied VLN Models with Adaptive Frequency-Guided Token Caching — 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: FreqCache: Accelerating Embodied VLN Models with Adaptive Frequency-Guided Token Caching</li>
+<li><strong>저자 (Authors)</strong>: Zihao Zheng, Xingyue Zhou, Zhihao Mao, Songyu Sun, Lingyue Zhang, Yulong Ao, Yupu Feng, Qiongqiong Zhang, Yonghua Lin, Xiang Chen</li>
+<li><strong>소속 (Affiliation)</strong>:<ul>
+<li>Zihao Zheng, Lingyue Zhang, Xiang Chen: Peking University</li>
+<li>Xingyue Zhou: Huazhong University of Science and Technology</li>
+<li>Zhihao Mao: China University of Geosciences (Wuhan)</li>
+<li>Songyu Sun: Hunan University</li>
+<li>Yulong Ao, Yupu Feng, Qiongqiong Zhang, Yonghua Lin: Beijing Academy of Artificial Intelligence (BAAI)</li>
+</ul>
+</li>
+<li><strong>발표처 (Published)</strong>: IEEE/ACM International Conference on Computer-Aided Design (ICCAD 2026)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2604.24391">https://doi.org/10.48550/arXiv.2604.24391</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.24391v1">https://arxiv.org/abs/2604.24391v1</a></li>
+<li><strong>GitHub</strong>: 미공개 (논문 내 언급 없음, ~5,000줄 PyTorch/CUDA 코드로 기술)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>현실 세계에 배포된 VLN(Vision-Language Navigation) 모델이 직면하는 <strong>추론 계산 오버헤드(inference computational overhead)</strong> 문제를 해결한다. 최신 VLN 시스템들은 R2R 등 벤치마크에서 높은 내비게이션 정확도를 달성하지만, 7B+ 파라미터 VLM 기반 아키텍처를 사용하므로 각 시간 스텝마다 수백 밀리초의 추론 시간이 요구된다. 이는 실시간 로봇 배포에서 중대한 병목이 된다.</p>
+<p>기존 <strong>토큰 캐싱(token caching)</strong> 접근법은 시각적 도메인에서 유사한 토큰을 재사용하지만, VLN의 특수한 조건—<strong>시점 이동(viewpoint migration)</strong>, <strong>엣지 정보 결여</strong>, <strong>장면 복잡도의 시간적 변화</strong>—으로 인해 실패한다. FreqCache는 이 세 가지 핵심 한계를 <strong>주파수 도메인(frequency domain)</strong> 분석으로 해결하고, 단 2.54ms 오버헤드로 <strong>1.59× 추론 가속</strong>을 달성한다.</p>
+<p>핵심 통찰: 로봇 이동으로 발생하는 공간적 이동(spatial shift)은 주파수 도메인에서 <strong>위상 이동(phase shift)</strong>으로 나타나지만 <strong>진폭 스펙트럼(amplitude spectrum)</strong>은 불변(invariant)이다. 이 푸리에 이동 정리(Fourier Shift Theorem) 특성을 활용하면 공간 도메인 유사도 매칭보다 훨씬 강인한 토큰 캐시 결정을 내릴 수 있다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. VLN 모델의 계산 병목 구조</h4>
+<p>VLN-CE(VLN in Continuous Environments) 설정에서 각 추론 스텝의 계산 구조를 분석하면:</p>
+<pre><code>VLN 추론 파이프라인 (InternVLA-N1 7B 기준):
+
+현재 프레임 → [이미지 패치 토큰화] → [ViT 인코더] → [VLM 디코더] → 액션 예측
+                  ↑                        ↑
+              시각적 토큰 N개            모든 N 토큰 처리
+              (예: N=576~1024)           (자기주의 O(N²))
+
+단일 스텝 레이턴시: 637 ms (A100 40GB 기준)
+에피소드 총 스텝: ~10-20 회
+에피소드 총 추론 시간: 6.3초 ~ 12.7초
+</code></pre>
+<p>토큰 캐싱의 원리: 연속된 시간 스텝 간에 배경이나 정적 물체는 거의 변하지 않는다. 이러한 &quot;캐시 가능한&quot; 토큰은 재계산하지 않고 이전 결과를 재사용하면 속도를 높일 수 있다.</p>
+<h4>B. 기존 시각 도메인 방법의 세 가지 구조적 한계</h4>
+<p><strong>한계 1: 시점 이동(Viewpoint Migration)</strong></p>
+<p>로봇이 이동하면 동일한 물체가 이미지의 다른 픽셀 위치에 나타난다. 시각 도메인의 위치 기반 유사도 매칭은 이에 취약하다:</p>
+<pre><code>공간 도메인 유사도 (파괴적):
+
+t 시점: 벽 코너가 패치 위치 (i=3, j=5)에 존재
+t+1 시점: 로봇 이동 후 같은 코너가 패치 위치 (i=3, j=3)으로 이동
+
+위치 기반 유사도: 
+Sim_spa(p_(3,5)^t, p_(3,5)^(t+1)) → 낮음 (다른 내용)
+→ 틀린 판단: 이 토큰은 크게 변화했으니 새로 계산해야 함 (실제로는 같은 물체)
+
+주파수 도메인 (강인):
+진폭 스펙트럼 A^t ≈ A^(t+1) (이동에 불변)
+→ 올바른 판단: 장면 내용 유사, 캐시 가능
+</code></pre>
+<p>단순 시각적 유사도 캐싱을 이동 환경에 적용하면 토큰 재사용률이 대폭 감소(약 19.8%)하여 가속 효과가 거의 없어진다(1.05×).</p>
+<p><strong>한계 2: 엣지 정보 무시(Edge Information Neglect)</strong></p>
+<p>VLN에서 문틀, 장애물 경계, 복도 가장자리는 내비게이션 결정에 핵심적인 정보다. 일반적인 토큰 유사도 메트릭은 부드러운 배경 영역과 날카로운 엣지 영역을 구별하지 못한다:</p>
+<pre><code>엣지 포함 토큰의 위험성:
+
+배경 토큰: 연속 스텝에서 변화 작음 → 캐시 가능
+엣지 토큰 (문틀/장애물 경계): 내비게이션에서 가장 중요한 정보
+  - 배경처럼 보이는 낮은 시각 유사도 차이
+  - 하지만 캐시될 경우: 로봇이 좁은 통로 진입 실패, 장애물 충돌
+
+Module II 없이 FreqCache: SR = 58.8 (-4.2), 토큰 재사용률 57.0%로 상승
+→ 재사용률 높아지지만 정확도 심각하게 저하
+</code></pre>
+<p><strong>한계 3: 고정 캐시 예산(Fixed Cache Budget)</strong></p>
+<p>모든 시각 환경을 동일한 재사용률로 처리하는 것은 비효율적이다:</p>
+<pre><code>환경 복잡도별 최적 토큰 재사용률:
+
+단순 복도:
+  - 장면 변화 적음, 비슷한 시각 내용 지속
+  - 높은 재사용률(~50%) 가능, 정확도 손실 없음
+  
+복잡한 혼잡 공간 (다수 장애물, 많은 문):
+  - 빠른 시각 변화, 중요 엣지 정보 밀집
+  - 낮은 재사용률(~8%) 필요, 안전성 확보
+
+고정 예산 방법: 단순 환경에서는 과도한 토큰 계산, 복잡 환경에서는 과도한 캐시
+</code></pre>
+<h3>2.2 핵심 해결책</h3>
+<p>FreqCache는 세 가지 모듈을 통해 위 한계를 해결한다:</p>
+<ol>
+<li><strong>이동 인식 캐시 설정 (Module I)</strong>: 위상 상관관계(Phase Correlation)로 시점 이동을 추정하고 정렬 마스크를 생성</li>
+<li><strong>엣지 정보 토큰 식별 (Module II)</strong>: DCT 고주파 필터링으로 엣지가 포함된 토큰을 강제 갱신</li>
+<li><strong>시간 적응형 캐시 예산 (Module III)</strong>: 스펙트럼 엔트로피로 장면 복잡도를 측정하고 동적으로 재사용률 조정</li>
+</ol>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 Module I: 이동 인식 토큰 캐시 설정 (Migration-Aware Token Cache Establishment)</h3>
+<h4>수학적 기반: 푸리에 이동 정리</h4>
+<p>연속된 두 프레임 F_t, F_{t-1} 사이의 시점 이동은 픽셀 공간에서 공간적 이동(Δi, Δj)으로 나타난다. 2D 이산 푸리에 변환(DFT)의 핵심 성질:</p>
+<pre><code>이동 정리 (Shift Theorem):
+f(x - Δx, y - Δy) ↔ e^{-j2π(u·Δx/M + v·Δy/N)} · F(u, v)
+
+결론:
+진폭 스펙트럼: |F_shifted(u,v)| = |F_original(u,v)|  (불변!)
+위상 스펙트럼: ∠F_shifted(u,v) = ∠F_original(u,v) - 2π(u·Δx/M + v·Δy/N)  (이동 정보 포함)
+</code></pre>
+<p>따라서, <strong>진폭 스펙트럼의 유사도</strong>는 공간적 이동에 무관하게 장면의 실제 내용 변화만 반영한다.</p>
+<h4>진폭 스펙트럼 기반 유사도 계산</h4>
+<p>각 이미지 패치 p^t_(i,j)에 DFT를 적용:</p>
+<pre><code>복소 DFT 계수:
+F(u,v) = Σ_x Σ_y f(x,y) · e^{-j2π(ux/M + vy/N)}
+       = R(u,v) + jI(u,v)
+
+진폭과 위상 분리:
+A(u,v) = sqrt(R(u,v)² + I(u,v)²)       (진폭, 이동 불변)
+Φ(u,v) = arctan(I(u,v) / R(u,v))       (위상, 이동 정보)
+
+주파수 도메인 유사도 (이동에 강인):
+Sim_freq(t; t+1) = [A^t(u,v) · A^(t-1)(u,v)] / [||A^t(u,v)||₂ · ||A^(t-1)(u,v)||₂]
+</code></pre>
+<h4>이동량 추정 및 정렬 마스크 생성</h4>
+<p>시점 이동 벡터 (Δi, Δj)는 위상 상관관계(Phase Correlation)로 추정:</p>
+<pre><code>위상 상관관계 기반 이동 추정:
+
+정규화 위상 스펙트럼:
+C = [F(F_{t-1}) ⊙ F(F_t)*] / |F(F_{t-1}) ⊙ F(F_t)*|
+
+역 푸리에 변환:
+c = F^{-1}(C)
+
+이동 추정:
+(Δi, Δj) = argmax_{(i,j)} c(i,j)
+</code></pre>
+<p>추정된 이동 (Δi, Δj)로 정렬 가능한 영역 R_align을 정의. 이동 후에도 양쪽 프레임에서 보이는 겹치는 영역만 캐시 후보:</p>
+<pre><code>정렬 마스크:
+           { 1  if (i, j) ∈ R_align (겹치는 영역)
+Mask_align = {
+           { 0  otherwise (이동으로 가려진 영역, 강제 갱신)
+</code></pre>
+<p>Mask_align=0인 패치는 새로운 내용이 드러나는 영역이므로 반드시 새로 계산해야 한다.</p>
+<h4>왜 진폭 유사도인가: 공간 도메인과의 비교</h4>
+<pre><code>시각 도메인 유사도 (파괴적):
+Sim_spa(t; t+1) = Σ_{i,j} [emb(p^t_{i,j}) · emb(p^{t+1}_{i,j})] 
+                           / [||emb(p^t_{i,j})||₂ · ||emb(p^{t+1}_{i,j})||₂]
+
+문제: 로봇 이동으로 같은 물체가 다른 위치로 이동하면
+      emb(p^t_{i,j}) ≠ emb(p^{t+1}_{i,j}) (위치가 다르므로)
+      → 낮은 유사도 → 불필요한 토큰 갱신
+
+주파수 도메인 유사도 (강인):
+진폭 스펙트럼은 이동에 불변이므로 같은 내용 → 높은 유사도 → 올바른 캐시 결정
+</code></pre>
+<p><strong>성능 영향</strong>: Module I 제거 시 토큰 재사용률 53.5% → 19.8% (−33.7%), 스텝 가속도 1.59× → 1.05×으로 급락.</p>
+<h4>위상 상관관계의 정밀도와 부화소(sub-pixel) 한계</h4>
+<p>위상 상관관계는 본질적으로 <strong>정수 화소 단위</strong>의 이동만 정확히 추정한다. argmax 연산이 c(i,j) 격자에서 가장 큰 상관 피크의 정수 좌표를 반환하기 때문이다. 그러나 패치 토큰화 단위(예: 14×14 또는 16×16 픽셀 ViT 패치)에서 토큰 정렬을 다루므로, FreqCache의 관점에서는 부화소 정밀도가 사실상 필요하지 않다는 점이 중요하다:</p>
+<pre><code>정수-화소 vs 패치-단위 정렬:
+
+원본 해상도 이동 추정: (Δi, Δj) = (7.3, -4.8) 픽셀
+↓ 패치 그리드(P=14)로 양자화
+패치 이동: (⌊7.3/14⌉, ⌊-4.8/14⌉) ≈ (1, 0) 패치
+
+→ 부화소 오차(0.3, 0.8 픽셀)는 패치 단위 정렬에 흡수됨
+→ 위상 상관관계의 정수-피크 추정으로 충분
+</code></pre>
+<p>이것이 FreqCache가 별도의 부화소 보간(parabolic fitting, ESINC 등)을 도입하지 않는 이유다. 추가 연산 없이 패치 정렬 정확도를 확보하므로 2.54ms 오버헤드 예산 안에 들어온다.</p>
+<h4>정렬 가능 영역 R_align의 기하학적 정의</h4>
+<p>추정된 패치 이동 (Δi, Δj)가 주어지면, 두 프레임에서 동시에 관측되는 겹침 영역은 단순한 사각형 교집합으로 계산된다:</p>
+<pre><code>프레임 패치 그리드: H_p × W_p (예: 24 × 24)
+
+겹침 영역 (이동 Δi&gt;0, Δj&gt;0 가정):
+R_align = { (i,j) | Δi ≤ i &lt; H_p AND Δj ≤ j &lt; W_p }
+
+겹침 비율:
+ρ_overlap = (H_p - |Δi|)(W_p - |Δj|) / (H_p · W_p)
+
+큰 이동 → ρ_overlap 감소 → 캐시 후보 감소 (보수적 안전)
+작은 이동 → ρ_overlap → 1 → 대부분 패치가 캐시 후보
+</code></pre>
+<p>이 설계의 안전성 특성은 중요하다. 로봇이 빠르게 회전하거나 급격히 전진하면 ρ_overlap이 자연스럽게 작아져 캐시가 비활성화되고, 모델은 거의 모든 토큰을 새로 계산한다. 즉 <strong>위험한 상황에서 캐싱이 스스로 물러난다(graceful degradation)</strong>.</p>
+<hr>
+<h3>3.2 Module II: 엣지 정보 관련 토큰 식별 (Edge-Information-Related Token Identification)</h3>
+<h4>이산 코사인 변환(DCT) 기반 고주파 에너지 계산</h4>
+<p>엣지(경계) 영역은 이미지 신호의 고주파 성분에 대응한다. 블록 단위 DCT를 적용하여 각 패치의 고주파 에너지를 측정:</p>
+<pre><code>패치 크기 P×P에 대한 2D DCT:
+D_p(u,v) = (2/P) · C(u)·C(v) · Σ_x Σ_y f(x,y) · cos[πu(2x+1)/2P] · cos[πv(2y+1)/2P]
+
+where C(k) = { 1/√2  if k=0
+             { 1      if k&gt;0
+
+고주파 필터 (저주파 성분 제거):
+       { 0  if u &lt; max(1, ⌊P/4⌋) AND v &lt; max(1, ⌊P/4⌋)   (저주파 → 부드러운 배경)
+H(u,v) = {
+       { 1  otherwise                                        (고주파 → 엣지)
+
+고주파 에너지 계산:
+E_{i,j} = Σ_u Σ_v [H(u,v) · D_p_{(i,j)}(u,v)]²
+</code></pre>
+<h4>통계 기반 적응적 갱신 마스크</h4>
+<p>단순 임계값이 아닌 프레임 내 통계적 분포를 기반으로 엣지 토큰 식별:</p>
+<pre><code>공간 평균: μ_E = (1/N) · Σ_{i,j} E_{i,j}
+표준 편차: σ_E = sqrt((1/N) · Σ_{i,j} (E_{i,j} - μ_E)²)
+
+엣지 식별 마스크 (강제 갱신):
+Mask_fresh(i,j) = I(E_{i,j} &gt; μ_E + λ · σ_E)
+
+where λ = 0.25 (감도 조정 파라미터)
+</code></pre>
+<p>평균 + λ·σ를 넘는 고에너지 패치는 엣지를 포함하는 것으로 판단하고 캐싱 금지.</p>
+<h4>DCT가 엣지 감지에 적합한 이유</h4>
+<pre><code>DCT 직교 기저 함수의 주파수 집중 특성:
+
+부드러운 배경 영역:
+  → 저주파 DCT 계수에 에너지 집중
+  → H 필터 후 E_{i,j} 낮음
+  → 캐시 가능
+
+엣지 포함 영역 (날카로운 경계):
+  → 고주파 DCT 계수에 에너지 분산
+  → H 필터 후 E_{i,j} 높음
+  → 캐시 금지, 강제 갱신
+
+장점: DFT(복소수)와 달리 DCT는 실수 연산으로 계산 효율적
+     블록 단위 적용 가능하여 패치 수준 선택성 제공
+</code></pre>
+<p><strong>성능 영향</strong>: Module II 제거 시 SR = 63.0 → 58.8 (−4.2 포인트), SPL = 57.2 → 52.3 (−4.9 포인트). 재사용률은 53.5% → 57.0%로 증가하지만 엣지 토큰이 잘못 캐시되어 충돌률 증가.</p>
+<h4>통계적 임계값이 절대 임계값보다 우월한 이유</h4>
+<p>Mask_fresh의 핵심 설계 선택은 절대 임계값(E &gt; θ_fixed)이 아닌 <strong>프레임별 적응 임계값</strong>(μ_E + λ·σ_E)을 사용한다는 점이다. 이는 장면 간 전역 밝기/대비 변화에 강인하다:</p>
+<pre><code>절대 임계값의 실패 시나리오:
+
+밝고 고대비 장면 (햇빛 든 복도):
+  모든 패치의 E가 전반적으로 높음
+  → 절대 임계값 θ_fixed 초과 패치 과다
+  → 거의 모든 토큰 강제 갱신 → 가속 효과 소멸
+
+어둡고 저대비 장면 (실내 야간):
+  모든 패치의 E가 전반적으로 낮음
+  → θ_fixed 미달 패치 과다 → 엣지마저 캐시됨 → 충돌 위험
+
+통계적 임계값 (μ_E + λ·σ_E):
+  각 프레임 내부 분포의 상대적 상위 패치만 선택
+  → 밝기/대비에 불변, 항상 &quot;이 프레임에서 가장 엣지다운&quot; 토큰 식별
+</code></pre>
+<p>λ=0.25는 정규분포 가정 하에서 대략 상위 40% 패치를 엣지 후보로 본다는 의미가 아니라(분포가 우편향이므로), 실측적으로 SR-Speedup 균형이 최적인 지점으로 선택되었다(7.3절 민감도 분석 참조).</p>
+<h4>DFT(Module I) vs DCT(Module II) 도구 선택의 직교성</h4>
+<p>FreqCache가 두 모듈에서 서로 다른 변환을 쓰는 것은 우연이 아니라 각 변환의 강점에 맞춘 설계다:</p>
+<pre><code>변환별 역할 분담:
+
+DFT (Module I): 복소 변환 → 진폭+위상 분리 가능
+  ↳ 위상 정보가 이동량 추정에 필수 (위상 상관관계)
+  ↳ 진폭의 이동 불변성이 유사도 매칭에 필수
+
+DCT (Module II): 실수 변환 → 위상 불필요, 에너지 집중 우수
+  ↳ 엣지 감지는 &quot;고주파 에너지가 있는가&quot;만 필요 (방향성 불필요)
+  ↳ 실수 연산으로 DFT 대비 ~2× 빠름 (복소 곱셈 없음)
+  ↳ JPEG에서 검증된 블록 단위 에너지 집중 특성
+</code></pre>
+<p>즉 Module I은 위상이 필요하므로 DFT, Module II는 위상이 불필요하고 속도가 중요하므로 DCT를 쓴다. 이 직교적 도구 선택이 전체 오버헤드를 2.54ms로 억제하는 데 기여한다.</p>
+<hr>
+<h3>3.3 Module III: 시간 적응형 캐시 예산 결정 (Temporal Adaptive Cache Budget Determination)</h3>
+<h4>스펙트럼 엔트로피(Spectral Entropy) 기반 장면 복잡도 측정</h4>
+<p>전체 프레임의 FFT를 계산하고 전력 스펙트럼으로 정규화:</p>
+<pre><code>프레임 전력 스펙트럼 정규화:
+P^t(u,v) = A^t(u,v)² / Σ_{u,v} A^t(u,v)²
+
+스펙트럼 엔트로피 (Shannon Entropy 유사):
+Ψ^t = -Σ_{u,v} P^t(u,v) · log(P^t(u,v))
+</code></pre>
+<p>장면 복잡도와 엔트로피의 관계:</p>
+<pre><code>단순 복도 (단조로운 벽, 적은 세부 사항):
+  → 저주파 성분 우세, 에너지 집중
+  → 낮은 Ψ^t (엔트로피 낮음 = 정보 집중)
+
+복잡한 혼잡 공간 (다수 물체, 많은 엣지):
+  → 고주파 성분 분산, 에너지 분산
+  → 높은 Ψ^t (엔트로피 높음 = 정보 분산)
+</code></pre>
+<h4>동적 재사용 비율 계산 (지수 감쇠 매핑)</h4>
+<pre><code>적응형 재사용 비율:
+α_t = α_min + (α_max - α_min) · e^{-Ψ^t}
+
+재사용 토큰 수:
+K_reuse = ⌊α_t × N⌋
+
+하이퍼파라미터:
+  α_max = 0.50  (단순 환경에서 최대 50% 재사용)
+  α_min = 0.08  (복잡 환경에서 최소 8% 재사용)
+</code></pre>
+<p>엔트로피가 높을수록(복잡한 장면) 지수 항이 0에 가까워져 α_t → α_min. 단순 장면에서는 α_t → α_max.</p>
+<p><strong>성능 영향</strong>: Module III 제거 시 SR −0.7, SPL −0.9, 스텝 가속 −0.07×. 다른 두 모듈에 비해 영향이 작지만, 복잡 환경에서는 여전히 의미 있는 차이.</p>
+<hr>
+<h3>3.4 통합 알고리즘: FreqCache (Algorithm 1)</h3>
+<pre><code>입력: 프레임 F_{t-1}, F_t; 총 토큰 수 N; 임계값 {τ_mig, λ}
+
+1단계: 이동 인식 마스크 생성 (Module I)
+  - FFT(F_{t-1}), FFT(F_t) 계산
+  - 위상 상관관계로 이동 (Δi, Δj) 추정
+  - 정렬 가능 영역 결정 → Mask_align
+
+2단계: 엣지 에너지 계산 (Module II)
+  - 각 패치에 블록 DCT 적용
+  - 고주파 필터 H 적용
+  - 에너지 E_{i,j} 계산
+  - 통계 임계값 적용 → Mask_fresh
+
+3단계: 동적 예산 결정 (Module III)
+  - 프레임 전력 스펙트럼 P^t 계산
+  - 스펙트럼 엔트로피 Ψ^t 계산
+  - 재사용 비율 α_t, 토큰 수 K_reuse 계산
+
+4단계: 후보 토큰 선정
+  K_candidate = {p | Mask_align(p)=1 AND Mask_fresh(p)=0}
+  (정렬 가능 AND 엣지 없는 토큰만 후보)
+
+5단계: 최종 캐시 토큰 결정
+  K_final = min(K_reuse, |K_candidate|)
+  후보들을 고주파 에너지 오름차순 정렬
+  (배경에 가까운, 가장 &quot;재사용 안전한&quot; 토큰 선택)
+  상위 K_final 토큰 캐시 결정
+
+6단계: VLN 추론 수행
+  캐시된 토큰: 이전 임베딩 재사용
+  나머지 토큰: 새로 계산
+</code></pre>
+<p>전체 오버헤드: 2.54ms/스텝 (GPU CuFFT 라이브러리 활용, CUDA 코어에서 병렬 처리).</p>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인</h3>
+<pre><code>입력: 현재 프레임 F_t, 이전 프레임 F_{t-1}
+      언어 지시문 i, 내비게이션 히스토리 H
+
+                          ┌─────────────────────────────────────────┐
+                          │           FreqCache 전처리               │
+                          │                                         │
+F_{t-1}, F_t ──────────▶│  ┌─────────────┐  ┌─────────────────┐  │
+                          │  │ FFT/위상상관 │  │ DCT/고주파에너지 │  │
+                          │  │ (Module I)  │  │  (Module II)    │  │
+                          │  └──────┬──────┘  └───────┬─────────┘  │
+                          │         │                  │            │
+                          │  ┌──────▼──────────────────▼─────────┐ │
+                          │  │        스펙트럼 엔트로피            │ │
+                          │  │        (Module III)                │ │
+                          │  └────────────────┬───────────────────┘ │
+                          │                   │                     │
+                          │           캐시 결정 마스크               │
+                          └───────────────────┼─────────────────────┘
+                                              │
+                                              ▼
+                          ┌─────────────────────────────────────────┐
+                          │         VLN 모델 추론 (InternVLA-N1)     │
+                          │                                         │
+F_t (선택적 토큰) ───────▶│  패치 토큰화                           │
+  재사용 토큰 (캐시) ─────▶│  + 캐시 토큰 병합                     │
+언어 지시문 i ────────────▶│  Multi-head Self-Attention             │
+내비게이션 히스토리 H ────▶│  Cross-modal Fusion                   │
+                          │  Action Head                           │
+                          └──────────────────┬──────────────────────┘
+                                             │
+                                             ▼
+                                        액션 예측
+                                    (방향, 속도, 종료)
+</code></pre>
+<h3>4.2 GPU 하드웨어 매핑</h3>
+<p>NVIDIA A100 GPU의 이기종 처리 코어를 활용한 병렬 실행:</p>
+<pre><code>NVIDIA A100 GPU 처리 구조:
+
+┌─────────────────────────────────────────────────────────────┐
+│                    NVIDIA A100 GPU (40GB)                    │
+│                                                             │
+│  ┌─────────────────┐    ┌────────────────────────────────┐  │
+│  │   Tensor Cores  │    │         CUDA Cores             │  │
+│  │                 │    │                                │  │
+│  │ VLN 모델 추론   │    │ 주파수 도메인 처리              │  │
+│  │ (Process 1)     │◀──▶│ (Process 2: CuFFT)             │  │
+│  │ PyTorch 연산    │    │ + 토큰 선택                     │  │
+│  │ 행렬 곱셈 집약  │    │ (Process 3: SIMT-최적화)        │  │
+│  │                 │    │                                │  │
+│  └─────────────────┘    └────────────────────────────────┘  │
+│                                                             │
+│  동기화 포인터로 3개 프로세스 조율                           │
+│  CuFFT 오버헤드: 2.54ms/스텝 (텐서 코어 추론과 병렬)        │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<pre><code>병렬 실행 타임라인:
+
+스텝 t:
+VLN 추론    ├──────────────────────────────────────────────────┤ 637ms
+FreqCache   ├──┤ 2.54ms
+           ↑ 동시 시작, FFT/DCT 완료 후 캐시 마스크 제공
+
+정미 지연: 637ms → 401ms (캐시 토큰 생략으로 추론 가속)
+오버헤드: 2.54ms (FreqCache 자체 계산 비용)
+</code></pre>
+<p>구현: ~5,000줄 PyTorch/CUDA 코드, CuFFT 라이브러리 사용.</p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<ul>
+<li><strong>R2R (Room-to-Room)</strong>: 가장 널리 사용되는 VLN 벤치마크<ul>
+<li>환경: Matterport3D 주택 내부 90개</li>
+<li>VLN-CE 설정: 연속 환경, 실제 로봇 이동 시뮬레이션</li>
+<li>검증: val-unseen split (미사용 환경)</li>
+</ul>
+</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<p><strong>내비게이션 정확도:</strong></p>
+<ul>
+<li><strong>NE (Navigation Error)</strong>: 도달 위치와 목표 위치 간 거리 [m] (낮을수록 좋음)</li>
+<li><strong>OS (Oracle Success)</strong>: 에피소드 중 임의 시점에 목표 반경 내 도달 비율 [%] (높을수록 좋음)</li>
+<li><strong>SR (Success Rate)</strong>: 에피소드 완료 시 목표 반경 3m 내 도달 비율 [%] (높을수록 좋음)</li>
+<li><strong>SPL (Success weighted by Path Length)</strong>: SR × 최단경로 대비 실제 경로 효율성 [%] (높을수록 좋음)</li>
+</ul>
+<p><strong>추론 효율:</strong></p>
+<ul>
+<li><strong>레이턴시 (ms/스텝)</strong>: 단일 추론 스텝 소요 시간</li>
+<li><strong>스텝 가속도</strong>: 레이턴시 개선 배율</li>
+<li><strong>에피소드 가속도</strong>: 전체 에피소드 시간 개선 배율</li>
+<li><strong>토큰 재사용률</strong>: 캐시된 토큰 비율 [%]</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>Table 1: 내비게이션 정확도 비교 (R2R val-unseen)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>NE↓ (m)</th>
+<th>OS↑ (%)</th>
+<th>SR↑ (%)</th>
+<th>SPL↑ (%)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>No Cache (기준)</td>
+<td>4.05</td>
+<td>70.7</td>
+<td>64.3</td>
+<td>58.5</td>
+</tr>
+<tr>
+<td>VLN-Cache (τ_v=0.85, τ_s=0.70)</td>
+<td>3.93</td>
+<td>71.4</td>
+<td>63.1</td>
+<td>57.6</td>
+</tr>
+<tr>
+<td>VLN-Cache (τ_v=0.80, τ_s=0.70)</td>
+<td>3.86</td>
+<td>72.2</td>
+<td>61.1</td>
+<td>53.7</td>
+</tr>
+<tr>
+<td>VLN-Cache (τ_v=0.85, τ_s=0.60)</td>
+<td>5.12</td>
+<td>59.5</td>
+<td>54.6</td>
+<td>49.3</td>
+</tr>
+<tr>
+<td>Naive Freq-based</td>
+<td>5.42</td>
+<td>65.2</td>
+<td>53.4</td>
+<td>48.5</td>
+</tr>
+<tr>
+<td><strong>FreqCache (제안)</strong></td>
+<td><strong>4.05</strong></td>
+<td><strong>76.0</strong></td>
+<td><strong>63.0</strong></td>
+<td><strong>57.2</strong></td>
+</tr>
+</tbody></table></div>
+<p>주목할 점:</p>
+<ul>
+<li>FreqCache는 No Cache 대비 NE 동일 유지 (정확도 손실 없음)</li>
+<li>OS가 70.7% → 76.0%로 오히려 향상 (+5.3%p): 주파수 기반 엣지 인식이 좁은 통로 인지력 향상에 기여</li>
+<li>VLN-Cache 최고 설정(τ_v=0.85, τ_s=0.70)보다 SR/SPL 비슷하면서 OS 크게 앞섬</li>
+<li>VLN-Cache 공격적 설정(τ_s=0.60)은 성능 급락 (SR -9.7), 임계값 민감도 문제 노출</li>
+</ul>
+<p><strong>Table 2: 추론 효율 비교 (A100 GPU, 논문 Table 2 전체)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Latency (ms/step)</th>
+<th>Step Speedup</th>
+<th>Episode Speedup</th>
+<th>Token Reuse</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>No Cache</td>
+<td>637</td>
+<td>1.00×</td>
+<td>1.00×</td>
+<td>0%</td>
+</tr>
+<tr>
+<td>VLN-Cache (τ_v=0.85, τ_s=0.70)</td>
+<td>419</td>
+<td>1.52×</td>
+<td>1.52×</td>
+<td>31%</td>
+</tr>
+<tr>
+<td>VLN-Cache (τ_v=0.80, τ_s=0.70)</td>
+<td>415</td>
+<td>1.53×</td>
+<td>1.52×</td>
+<td>33%</td>
+</tr>
+<tr>
+<td>VLN-Cache (τ_v=0.85, τ_s=0.60)</td>
+<td>412</td>
+<td>1.55×</td>
+<td>1.55×</td>
+<td>36%</td>
+</tr>
+<tr>
+<td>Naive Freq-based</td>
+<td>588</td>
+<td>1.08×</td>
+<td>1.09×</td>
+<td>15.2%</td>
+</tr>
+<tr>
+<td><strong>FreqCache</strong></td>
+<td><strong>401</strong></td>
+<td><strong>1.59×</strong></td>
+<td><strong>1.59×</strong></td>
+<td><strong>53.5%</strong></td>
+</tr>
+</tbody></table></div>
+<p>FreqCache의 우위:</p>
+<ul>
+<li>VLN-Cache 최고 가속 설정(412ms, 1.55×) 대비 추가 11ms 절감 (412→401ms)</li>
+<li>토큰 재사용률 36% → 53.5%로 크게 향상되면서도 정확도(SR/SPL)는 동등 이상 유지</li>
+<li>Naive Freq-based(1.08×, 15.2%)보다 훨씬 높은 가속 — 진폭 유사도만 단순 적용하면 이동 보상·엣지 보호가 없어 캐시 후보가 빈약함을 보여줌</li>
+<li>주목할 정확도-효율 동조성: VLN-Cache는 재사용률을 31%→36%로 올리면 정확도가 떨어지는 trade-off에 직면하지만(Table 1의 τ_s=0.60 행 참조), FreqCache는 53.5%의 높은 재사용률에서도 정확도를 유지 → 캐시 <em>선택 품질</em>이 캐시 <em>양</em>보다 중요함을 입증</li>
+</ul>
+<h4>효율 결과의 산술적 일관성 검증</h4>
+<p>논문 수치의 내부 정합성을 직접 확인하면:</p>
+<pre><code>FreqCache 레이턴시 분해:
+  순수 VLN 추론 (캐시 없음): 637 ms
+  FreqCache 오버헤드: 2.54 ms
+  캐시로 절감된 시간: 637 - 401 + 2.54 ≈ 238.5 ms
+
+  재사용률 53.5% × 비전 인코더 비중으로부터의 절감과 정합:
+  → 인코더가 전체의 ~70% 비중일 때 0.535 × 0.70 × 637 ≈ 238 ms 절감
+  → 관측된 절감(238.5 ms)과 거의 일치 → 수치 자기일관성 확인
+
+스텝 가속도 계산:
+  637 / 401 = 1.588 ≈ 1.59× ✓
+</code></pre>
+<p>이 정합성 검증은 보고된 1.59×가 토큰 재사용률 53.5%와 모순 없이 맞물린다는 점을 확인해 준다.</p>
+<p><strong>Table 3: 모듈별 소거 실험 (Ablation Study, Density=Standard)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>설정</th>
+<th>SR↑ (%)</th>
+<th>SPL↑ (%)</th>
+<th>Step Speedup</th>
+<th>Token Reuse</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>w/o Module I (이동 인식)</td>
+<td>60.2</td>
+<td>54.0</td>
+<td>1.05×</td>
+<td>19.8%</td>
+</tr>
+<tr>
+<td>w/o Module II (엣지 인식)</td>
+<td>58.8</td>
+<td>52.3</td>
+<td>1.62×</td>
+<td>57.0%</td>
+</tr>
+<tr>
+<td>w/o Module III (적응 예산)</td>
+<td>62.3</td>
+<td>55.8</td>
+<td>1.52×</td>
+<td>38.6%</td>
+</tr>
+<tr>
+<td><strong>Full FreqCache</strong></td>
+<td><strong>63.0</strong></td>
+<td><strong>57.2</strong></td>
+<td><strong>1.59×</strong></td>
+<td><strong>53.5%</strong></td>
+</tr>
+</tbody></table></div>
+<p>소거 실험 해석:</p>
+<ul>
+<li>Module I 제거: 가장 심각한 영향. 이동 보정 없이는 캐시 후보가 급감(19.8%)하여 가속 효과 소멸</li>
+<li>Module II 제거: SR 가장 큰 하락(-4.2%). 엣지 보호 없이 재사용률만 올리면 네비게이션 실패 급증</li>
+<li>Module III 제거: 상대적으로 작은 영향이지만 균형 손실</li>
+</ul>
+<h3>5.4 리얼월드 실험 (Real-World Experiments)</h3>
+<p>논문에서는 리얼월드 로봇 실험을 명시적으로 기술하지 않는다. 모든 실험은 VLN-CE 연속 환경 시뮬레이터(Matterport3D 기반)에서 수행되었으며, ICCAD 2026의 특성상 주요 기여는 하드웨어 가속 관점에 집중한다.</p>
+<p><strong>ICCAD 타겟 기여</strong>: 컴퓨터 지원 설계 및 하드웨어-소프트웨어 공동 최적화 관점에서의 AI 가속 솔루션.</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>기여 1: 주파수 도메인 이동 불변성의 VLN 적용 첫 체계적 분석</h3>
+<p>VLN에서 시점 이동이 토큰 캐싱에 미치는 영향을 처음으로 이론적으로 분석하고, 푸리에 이동 정리를 통해 주파수 도메인이 공간 도메인보다 우월함을 증명. 구체적으로:</p>
+<ul>
+<li>공간 도메인 유사도의 이동 취약성 공식화</li>
+<li>진폭 스펙트럼 불변성의 VLN 캐싱 적용 정당화</li>
+<li>세 가지 장애물(이동, 엣지, 복잡도)에 대한 포괄적 해결 틀 제시</li>
+</ul>
+<h3>기여 2: 세 모듈 통합 주파수 토큰 캐싱 프레임워크</h3>
+<ul>
+<li><strong>Module I</strong>: 위상 상관관계 기반 이동 추정 → 정렬 마스크 생성</li>
+<li><strong>Module II</strong>: DCT 고주파 에너지 → 통계적 엣지 토큰 식별</li>
+<li><strong>Module III</strong>: 스펙트럼 엔트로피 → 지수 감쇠 동적 예산 배정</li>
+</ul>
+<p>세 모듈의 시너지로 단독 적용 대비 훨씬 우수한 정확도-효율 균형 달성.</p>
+<h3>기여 3: 하드웨어 최적화 GPU 구현</h3>
+<p>A100 GPU에서 텐서 코어(VLN 추론)와 CUDA 코어(주파수 처리)를 동시에 활용하는 3-프로세스 병렬 아키텍처. 2.54ms/스텝이라는 극소 오버헤드로 1.59× 가속 달성. ~5,000줄 PyTorch/CUDA 코드로 산업 수준의 구현 완성도 보여줌.</p>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 핵심 하이퍼파라미터</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>값</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>이동 임계값 τ_mig</td>
+<td>0.12</td>
+<td>이동 감지 감도</td>
+</tr>
+<tr>
+<td>엣지 감도 λ</td>
+<td>0.25</td>
+<td>고에너지 패치 판별 수준 (μ + λσ)</td>
+</tr>
+<tr>
+<td>최대 재사용 비율 α_max</td>
+<td>0.50</td>
+<td>단순 환경 최대 캐시 비율</td>
+</tr>
+<tr>
+<td>최소 재사용 비율 α_min</td>
+<td>0.08</td>
+<td>복잡 환경 최소 캐시 비율</td>
+</tr>
+<tr>
+<td>VLN 모델</td>
+<td>InternVLA-N1</td>
+<td>7B 파라미터, Qwen2.5-VL 백본</td>
+</tr>
+<tr>
+<td>GPU</td>
+<td>NVIDIA A100</td>
+<td>40GB HBM2e</td>
+</tr>
+<tr>
+<td>FFT 라이브러리</td>
+<td>CuFFT</td>
+<td>NVIDIA 공식 GPU 가속 FFT</td>
+</tr>
+</tbody></table></div>
+<h3>7.2 모델 아키텍처 상세</h3>
+<pre><code>InternVLA-N1 (기반 모델):
+- 파라미터: 7B
+- 언어 백본: Qwen2.5-VL
+- 비전 인코더: 패치 기반 ViT (패치 수 N ≈ 576-1024)
+- 입력: RGB 이미지 + 언어 지시 + 히스토리
+- 출력: 연속 환경 이동 액션 (방향 + 거리 + 종료 신호)
+
+FreqCache 적용 포인트:
+- 비전 인코더 입력 직전 토큰 캐싱 결정
+- 캐시된 토큰: 이전 임베딩 직접 재사용 (인코더 계산 생략)
+- 갱신 토큰: 정상적으로 인코더 통과
+</code></pre>
+<h3>7.3 민감도 분석</h3>
+<p>논문 Figure 8 (민감도 분석):</p>
+<pre><code>λ (엣지 감도) 민감도:
+λ = 0.10: SR=61.2, SPL=55.8, Speedup=1.72×
+λ = 0.25: SR=63.0, SPL=57.2, Speedup=1.59× ← 선택
+λ = 0.50: SR=62.8, SPL=56.4, Speedup=1.43×
+→ λ=0.25에서 SR-Speedup 균형 최적
+
+α_max (최대 재사용) 민감도:
+α_max = 0.40: SR=62.5, SPL=57.0, Speedup=1.48×
+α_max = 0.50: SR=63.0, SPL=57.2, Speedup=1.59× ← 선택
+α_max = 0.60: SR=61.3, SPL=54.9, Speedup=1.73×
+→ 0.50 이상에서 정확도 저하 시작
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 주파수 도메인 접근의 이론적 한계</h3>
+<p><strong>가정의 제한성</strong>: 푸리에 이동 정리는 순수한 평행 이동(translational motion)을 가정한다. 실제 로봇 이동에서는:</p>
+<pre><code>실제 시점 변화의 복잡성:
+- 평행 이동 (Δx, Δy): 이동 정리로 처리 가능
+- 회전 (Δθ): 주파수 도메인에서 진폭 스펙트럼도 변화 → 부정확
+- 스케일 변화 (줌인/아웃): 주파수 스케일링 → 진폭 변화
+- 카메라 오클루전: 완전히 새로운 장면 내용
+
+FreqCache의 대응:
+- 회전이 큰 경우: Mask_align이 좁아져 후보 수 감소
+- 스케일 변화: 진폭 유사도 하락으로 자연스럽게 캐시 감소
+- 오클루전: 정렬 마스크 외부 영역 강제 갱신
+</code></pre>
+<h3>8.2 확장성 및 일반화</h3>
+<p><strong>다른 VLN 모델로의 확장</strong>:
+FreqCache는 모델 아키텍처에 독립적인 훈련 불필요(training-free) 방법이다. 패치 토큰화를 사용하는 임의의 VLN 모델에 적용 가능. 단, 비전 인코더가 패치 임베딩 단계에서 병목이어야 효과적.</p>
+<pre><code>FreqCache 효과의 전제 조건:
+
+조건 1: 패치 기반 비전 토큰화 (ViT 계열)
+  → 토큰 단위 캐시 결정이 가능해야 함
+  → CNN 백본(전역 풀링)에는 토큰 개념이 모호
+
+조건 2: 비전 인코더가 레이턴시 병목
+  → InternVLA-N1은 인코더가 큰 비중 → 캐싱 효과 큼
+  → 만약 LLM 디코더가 지배적이면 토큰 캐싱 효과 제한적
+    (KV-cache 계열 방법이 더 적합)
+
+조건 3: 시간적 연속 입력 (스트리밍)
+  → 단발성 질의(single-image VQA)에는 캐시할 &quot;이전 프레임&quot;이 없음
+</code></pre>
+<p><strong>KV-cache 방법과의 보완성</strong>: FreqCache는 <em>비전 인코더 입력단</em>의 토큰 캐싱이고, StreamVLN의 SlowFast KV-cache는 <em>LLM 디코더</em>의 KV 캐싱이다. 두 캐시는 파이프라인의 서로 다른 단계에 위치하므로 원리적으로 <strong>직교(orthogonal)</strong>하며 동시 적용 시 누적 가속이 기대된다. 이는 향후 연구의 명확한 기회다.</p>
+<p><strong>VLN 이외 비디오 이해 태스크</strong>: 스트리밍 비디오 처리 전반에 적용 가능성. 단, VLN 특유의 &quot;이동 중 환경 변화&quot;가 가장 핵심 가정이므로 정적 카메라 영상에는 이점 감소.</p>
+<h3>8.2.1 ICCAD 관점에서의 하드웨어-소프트웨어 공동 설계 의의</h3>
+<p>이 논문이 ICRA/IROS가 아닌 ICCAD(컴퓨터 지원 설계)를 타겟으로 한 점은 기여의 성격을 규정한다. 핵심은 <strong>알고리즘이 GPU 마이크로아키텍처에 맞춰 설계되었다</strong>는 것이다:</p>
+<pre><code>하드웨어 인식 설계 결정:
+
+1) 텐서 코어와 CUDA 코어의 작업 분리
+   - 텐서 코어: 행렬 곱(VLN 추론) — 이 코어의 특기
+   - CUDA 코어: FFT/DCT(주파수 처리) — SIMT 병렬에 적합
+   → 두 코어가 동시 가동되어 FreqCache 오버헤드가 추론과 겹쳐짐
+   → 2.54ms가 &quot;추가 직렬 시간&quot;이 아니라 &quot;은닉된 병렬 시간&quot;에 가까움
+
+2) CuFFT 라이브러리 직접 활용
+   - 직접 FFT 커널 작성 대신 NVIDIA 최적화 라이브러리 호출
+   - 배치 FFT로 다수 패치 동시 변환
+
+3) 3-프로세스 디스패치
+   - Process 1: VLN 추론 (텐서)
+   - Process 2: 주파수 변환 (CuFFT)
+   - Process 3: 토큰 선택/정렬 (CUDA SIMT)
+   - 동기화 포인터로 조율
+</code></pre>
+<p>이 관점에서 FreqCache의 진짜 기여는 &quot;주파수 도메인 캐싱 알고리즘&quot;과 &quot;그 알고리즘을 GPU에서 거의 공짜로 만드는 하드웨어 매핑&quot;의 결합이다. 만약 같은 알고리즘을 CPU나 비최적 GPU 구현으로 돌리면 2.54ms 오버헤드가 수십 ms로 부풀어 순이득이 사라질 수 있다 — 즉 이 논문의 결과는 <strong>하드웨어 종속적</strong>이며, 그 점이 ICCAD 적합성의 핵심이다.</p>
+<h3>8.3 한계점 및 향후 방향</h3>
+<ol>
+<li><strong>실험 범위</strong>: R2R 단일 데이터셋에서만 검증. RxR (다국어), REVERIE (장거리), EQA 등 다양한 VLN 태스크 검증 필요.</li>
+<li><strong>모델 다양성</strong>: InternVLA-N1 단일 모델에서만 검증. DUET, MapGPT, NavDP 등 다른 아키텍처 적용 필요.</li>
+<li><strong>코드 비공개</strong>: 재현성과 커뮤니티 활용을 위한 공개 코드 및 가중치 필요.</li>
+<li><strong>리얼월드 미검증</strong>: 실제 로봇 배포에서의 효과 미확인. 실제 카메라 노이즈, 모션 블러, 조명 변화 영향 불명.</li>
+<li><strong>동적 물체</strong>: 움직이는 사람/로봇이 있는 환경에서의 캐싱 안전성 미검증.</li>
+</ol>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>LiveVLN (arxiv2026)</th>
+<th>StreamVLN (ICRA2026)</th>
+<th>WMNav (IROS2025)</th>
+<th><strong>FreqCache (ICCAD2026)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>핵심 문제</strong></td>
+<td>Stop-and-go 레이턴시</td>
+<td>스트리밍 컨텍스트</td>
+<td>세계 모델 예측</td>
+<td>토큰 캐싱 가속</td>
+</tr>
+<tr>
+<td><strong>접근법</strong></td>
+<td>비동기 실행 병렬화</td>
+<td>Slow-Fast KV 캐시</td>
+<td>미래 관측 예측</td>
+<td>주파수 도메인 캐싱</td>
+</tr>
+<tr>
+<td><strong>학습 필요</strong></td>
+<td>없음 (Training-free)</td>
+<td>있음 (미세조정)</td>
+<td>있음 (사전학습)</td>
+<td>없음 (Training-free)</td>
+</tr>
+<tr>
+<td><strong>속도 향상</strong></td>
+<td>대기 30% 제거</td>
+<td>낮은 추론 레이턴시 0.27s</td>
+<td>환경 이해 향상</td>
+<td>1.59× 스텝 가속</td>
+</tr>
+<tr>
+<td><strong>정확도 손실</strong></td>
+<td>없음</td>
+<td>SOTA (R2R, RxR)</td>
+<td>향상</td>
+<td>SR -1.3%, OS +5.3%</td>
+</tr>
+<tr>
+<td><strong>코드 공개</strong></td>
+<td>GitHub 공개</td>
+<td>프로젝트 페이지</td>
+<td>미공개</td>
+<td>미공개</td>
+</tr>
+<tr>
+<td><strong>실세계 실험</strong></td>
+<td>Unitree G1 실증</td>
+<td>실시간 배포 검증</td>
+<td>없음</td>
+<td>없음 (시뮬레이션만)</td>
+</tr>
+<tr>
+<td><strong>학회</strong></td>
+<td>arXiv</td>
+<td>ICRA 2026</td>
+<td>IROS 2025</td>
+<td>ICCAD 2026</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>FreqCache의 장점</strong>:</p>
+<ol>
+<li><p><strong>훈련 불필요 (Training-Free)</strong>: 기존 VLN 모델에 즉시 적용 가능. 파인튜닝이나 가중치 수정 없이 추론 시 플러그인 방식으로 동작.</p>
+</li>
+<li><p><strong>이론적 근거</strong>: 단순 경험적 규칙이 아닌 푸리에 변환의 수학적 성질에 기반한 명확한 이론 기반.</p>
+</li>
+<li><p><strong>OS 향상</strong>: 단순 가속이 아니라 주파수 기반 엣지 인식이 내비게이션 인지 능력 자체를 향상. Oracle Success +5.3%p는 의미 있는 개선.</p>
+</li>
+<li><p><strong>낮은 오버헤드</strong>: 2.54ms/스텝은 637ms 추론 대비 0.4%에 불과. 실용적 배포에 이상적.</p>
+</li>
+</ol>
+<p><strong>FreqCache의 단점</strong>:</p>
+<ol>
+<li><p><strong>LiveVLN 대비 실세계 검증 부재</strong>: LiveVLN은 Unitree G1 실로봇 실험으로 검증했지만, FreqCache는 시뮬레이션만 사용. 실제 카메라 노이즈, 모션 블러, 로봇 진동의 영향이 미지수.</p>
+</li>
+<li><p><strong>StreamVLN 대비 성능 미비</strong>: StreamVLN은 R2R, RxR에서 SOTA를 달성하며 실시간 배포도 검증한 반면, FreqCache는 R2R에서만 검증하고 SR은 기존과 비슷한 수준.</p>
+</li>
+<li><p><strong>ICCAD 타겟 한계</strong>: ICCAD는 주로 하드웨어 설계 학회로, 로봇학 커뮤니티에서의 영향력이 ICRA/IROS보다 낮을 수 있음.</p>
+</li>
+<li><p><strong>코드 비공개</strong>: 재현 연구와 커뮤니티 활용에 제약.</p>
+</li>
+</ol>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>실용성 점수표 (LiveVLN 기준):
+
+기준                    | LiveVLN | FreqCache | 판단
+----------------------|---------|-----------|------
+훈련 불필요             | ✅ 5/5  | ✅ 5/5   | 동등
+기존 모델 적용 가능성   | ✅ 5/5  | ✅ 5/5   | 동등
+실세계 로봇 검증       | ✅ 5/5  | ❌ 2/5   | LiveVLN 우세
+속도 향상 효과         | ✅ 4/5  | ✅ 5/5   | FreqCache 우세
+정량적 가속 배율       | ~30% 대기 제거 | 1.59× 스텝 | 비교 어려움
+코드 재사용성         | ✅ 공개  | ❌ 미공개 | LiveVLN 우세
+</code></pre>
+<p>FreqCache는 토큰 레벨 연산 최적화에서 명확한 기여를 하지만, 실제 배포 관점에서는 LiveVLN(비동기 실행)과 상호 보완적이다. 이상적으로는 두 방법을 결합—FreqCache로 각 추론 스텝을 가속하고, LiveVLN으로 stop-and-go를 제거—하면 더 큰 시너지를 낼 수 있다.</p>
+<p><strong>세 가지 가속 패러다임의 직교성 정리</strong>: 본 트랙에서 리뷰된 효율화 논문들은 파이프라인의 서로 다른 층위를 공략하므로 원리적으로 중첩 적용이 가능하다:</p>
+<pre><code>VLN 추론 가속의 3층 구조와 각 방법의 위치:
+
+[입력 토큰화 층]  ──► FreqCache: 비전 토큰 캐싱 (이 논문)
+[LLM 디코더 층]   ──► StreamVLN: SlowFast KV-cache
+[실행 스케줄 층]  ──► LiveVLN: 비동기 실행으로 대기 제거
+
+→ 세 방법이 서로 다른 층을 다루므로 이론적으로 곱셈적 가속 가능
+→ 단, 실제 결합 시 메모리 대역폭·동기화 오버헤드 상호작용 검증 필요
+</code></pre>
+<p>이 정리는 FreqCache의 학술적 위치를 명확히 한다 — 기존 가속 연구를 <em>대체</em>하는 것이 아니라 <em>비전 입력단이라는 미개척 층위</em>를 채우는 보완적 기여다. WMNav가 효율보다 세계 모델 기반 <em>정확도</em> 향상에 집중한 것과 대조하면, FreqCache는 정확도를 유지한 채 효율만 끌어올리는 순수 가속 트랙에 속한다.</p>
+<h3>9.4 연구 방향성 평가</h3>
+<p>VLN 모델의 계산 효율화는 실세계 배포를 위해 반드시 해결해야 할 과제다. FreqCache는 다음과 같은 연구 방향에서 의미 있는 위치를 점한다:</p>
+<ol>
+<li><strong>토큰 캐싱 계보</strong>: VLN-Cache → FreqCache 순서로 발전. 공간 도메인 한계를 주파수 도메인으로 극복한 자연스러운 발전.</li>
+<li><strong>ICCAD의 AI 가속 연구 흐름</strong>: GPU/NPU 관점의 VLN 최적화는 로봇학-컴퓨터구조 교차 연구로서 새로운 방향 제시.</li>
+<li><strong>Training-Free 효율화</strong>: 파인튜닝 없이 기존 모델을 가속하는 방향은 실용적이고, 빠르게 발전하는 VLN 모델 생태계에서 지속적 가치를 가짐.</li>
+</ol>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li><strong>VLN-Cache</strong> (2603.07080v2): VLN 모델을 위한 시각적 토큰 캐싱 선행 연구 — 공간 도메인 방법의 한계를 처음 노출한 작업</li>
+<li><strong>InternVLA-N1</strong>: FreqCache 실험 대상 7B VLN 모델 (Qwen2.5-VL 기반)</li>
+<li><strong>StreamVLN</strong> (2507.05240): Slow-Fast 컨텍스트 모델링으로 스트리밍 VLN 처리</li>
+<li><strong>LiveVLN</strong> (2604.19536): 비동기 실행 병렬화로 stop-and-go 해결</li>
+<li><strong>Fourier Shift Theorem</strong>: 2D DFT에서의 이동-위상 관계 수학 정리</li>
+<li><strong>CuFFT Library</strong>: NVIDIA GPU 가속 FFT 구현 라이브러리</li>
+<li><strong>PIQP Solver</strong>: 로컬 궤적 수정 QP 솔버 (관련 시스템에서 참조)</li>
+<li><strong>VLA-Cache, VL-Cache, AirCache</strong>: 정확한/선택적 토큰 재사용 관련 작업</li>
+<li><strong>Fourier-VLM, E-AdaPrune, FAST</strong>: 주파수 기반 VLM 최적화 선행 연구</li>
+<li><strong>R2R Dataset</strong> (Anderson et al. 2018): Room-to-Room VLN 벤치마크</li>
+<li><strong>VLN-CE</strong> (Krantz et al. 2020): 연속 환경 VLN 시뮬레이션 프레임워크</li>
+<li><strong>Uni-NaVid, MiniVLN</strong>: VLN 아키텍처 경량화 관련 연구</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>혁신성 평가</h3>
+<p>FreqCache는 VLN 모델 가속이라는 실용적 문제를 주파수 도메인 분석이라는 이론적으로 탄탄한 방법으로 해결한다는 점에서 혁신적이다. 특히:</p>
+<ul>
+<li><strong>시점 이동 문제의 공식화</strong>: 기존 연구에서 명시적으로 분석되지 않았던 VLN 특유의 이동 불변성 요구사항을 처음으로 체계화</li>
+<li><strong>세 가지 문제의 통합 해결</strong>: 단일 주파수 도메인 프레임워크 안에서 이동, 엣지, 복잡도 세 문제를 각각 다른 신호 처리 도구(DFT, DCT, Shannon Entropy)로 해결</li>
+<li><strong>ICCAD 관점</strong>: 하드웨어-소프트웨어 공동 설계 관점에서 AI 가속 연구의 새로운 응용을 개척</li>
+</ul>
+<h3>실용적 의의</h3>
+<p>1.59× 가속은 실제 로봇에서의 의미: 637ms → 401ms는 초당 처리 가능한 추론 횟수를 1.57에서 2.49로 증가시킨다. 이는 연속 내비게이션에서 더 촘촘한 의사결정 빈도를 허용하거나, 같은 성능을 더 저렴한 GPU에서 달성할 수 있음을 의미한다.</p>
+<p>Training-free 특성은 빠르게 발전하는 VLN 기반 모델(InternVLA-N1, NavDP 등)에 즉각적으로 적용 가능하다는 점에서 실용적 가치가 높다.</p>
+<h3>향후 연구 방향</h3>
+<ol>
+<li><strong>코드 공개</strong>: 재현 가능한 연구를 위한 공개 구현체 필요</li>
+<li><strong>실세계 검증</strong>: 실제 로봇 환경에서의 주파수 분석 효과 검증</li>
+<li><strong>다양한 VLN 벤치마크</strong>: RxR, REVERIE, SOON 등에서의 일반화 확인</li>
+<li><strong>LiveVLN과의 결합</strong>: 비동기 실행 + 토큰 캐싱의 상승 효과 탐구</li>
+<li><strong>에지 디바이스 최적화</strong>: A100 GPU 외 NVIDIA Jetson, 모바일 NPU에서의 성능 프로파일링</li>
+<li><strong>동적 환경</strong>: 움직이는 물체가 있는 환경에서의 주파수 도메인 캐싱 안전성 연구</li>
+</ol>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

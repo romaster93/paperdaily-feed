@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>GRATE: a Graph transformer-based deep Reinforcement learning Approach for Time-efficient autonomous robot Exploration · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">IROS 2025</div>
+    <h1>GRATE: a Graph transformer-based deep Reinforcement learning Approach for Time-efficient autonomous robot Exploration</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2509.12863">arXiv:2509.12863</a></span>
+      <span>리뷰 2026-06-29</span>
+      <span>40분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>GRATE: 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: GRATE: a Graph transformer-based deep Reinforcement learning Approach for Time-efficient autonomous robot Exploration</li>
+<li><strong>저자 (Authors)</strong>: Haozhan Ni, Jingsong Liang, Chenyu He, Yuhong Cao† (교신저자), Guillaume Sartoretti</li>
+<li><strong>소속 (Affiliation)</strong>:<ul>
+<li>Haozhan Ni, Jingsong Liang, Yuhong Cao, Guillaume Sartoretti: Department of Mechanical Engineering, National University of Singapore (NUS, MARMot Lab)</li>
+<li>Chenyu He: School of Automotive Studies, Tongji University, Shanghai, China</li>
+</ul>
+</li>
+<li><strong>발표처 (Published)</strong>: IEEE/RSJ International Conference on Intelligent Robots and Systems (<strong>IROS 2025</strong>) — 탑티어 학회</li>
+<li><strong>DOI</strong>: (IROS 2025 게재 예정)</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2509.12863">2509.12863</a></li>
+<li><strong>코드 (Code)</strong>: ❌ <strong>미공개</strong> — arXiv 본문·초록·프로젝트 페이지 어디에도 공개 GitHub/프로젝트 URL이 명시되지 않음. (저자 그룹 NUS MARMot Lab은 선행작 ARiADNE의 코드를 공개한 전력이 있어 향후 공개 가능성은 있으나, <strong>현재 시점 확인 가능한 공개 코드는 없음</strong>. &quot;있음&quot;으로 날조하지 않는다.)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>GRATE는 <strong>자율 로봇 탐색(Autonomous Robot Exploration, ARE)</strong> 문제, 즉 사전 지도가 없는 미지 환경을 로봇이 스스로 주행하며 완전한 지도를 만드는 과제를 다룬다. 핵심 목표는 단순히 &quot;주행 거리&quot;를 줄이는 것이 아니라 <strong>탐색을 완료하는 데 걸리는 실제 시간(time-efficiency)</strong> 을 줄이는 것이다. 이 둘은 같지 않다 — 거리가 짧아도 잦은 정지·회전·가속이 누적되면 시간은 길어진다.</p>
+<p>논문은 기존 학습 기반 탐색 플래너(특히 같은 연구실의 선행작 ARiADNE)가 가진 <strong>두 가지 근본 한계</strong>를 정조준한다:</p>
+<ol>
+<li><p><strong>그래프 구조 추론 능력의 한계</strong> — 충돌 없는 정보 그래프(collision-free informative graph) 위에서 순차적 의사결정을 수행할 때, 기존 어텐션 기반 정책은 마스킹된(masked) 어텐션으로 이웃 노드만 보아 멀리 떨어진 노드 사이의 장거리 의존성(long-range dependency)을 제대로 포착하지 못한다(over-squashing). 큰 그래프일수록 이 정보 손실이 누적된다.</p>
+</li>
+<li><p><strong>로봇 운동학(kinematics)의 미반영</strong> — 기존 방법은 그래프 노드 사이를 &quot;즉시 이동&quot;하는 것으로 모델링하여 거리 최소화만 학습한다. 그 결과 정책이 만들어내는 웨이포인트 시퀀스가 지그재그가 되어 실제 로봇이 따라가려면 매번 감속·회전·가속을 반복해야 하고, 이것이 시간 비용으로 직결된다.</p>
+</li>
+</ol>
+<p>GRATE의 핵심 통찰은 두 갈래다. 첫째, <strong>Graph Transformer</strong>(메시지 패싱 GNN의 로컬 구조 인코딩 + 멀티헤드 셀프어텐션의 글로벌 문맥)를 결합해 정보 그래프에 대한 추론 능력을 강화한다. 둘째, <strong>칼만 필터(Kalman filter)</strong> 를 추론 시(inference-time) 후처리로 도입해, 정책이 고른 웨이포인트를 로봇의 추정 속도·위치 분포로 평활화(smoothing)함으로써 <strong>kinodynamically feasible</strong>(동역학적으로 추종 가능한)한 경로를 생성한다.</p>
+<p>연구가 답하려는 질문:</p>
+<ul>
+<li>마스킹 어텐션 대신 <strong>GNN+Transformer 하이브리드</strong>가 정보 그래프 추론에서 실제로 더 나은 탐색 정책을 내는가?</li>
+<li>명시적 운동 제약을 학습에 넣지 않고도, <strong>추론 시 칼만 평활화</strong>만으로 거리뿐 아니라 시간 효율을 개선할 수 있는가?</li>
+<li>추상적 2D 시뮬레이션에서 학습한 정책이 고충실도 Gazebo 및 <strong>실로봇</strong>으로 전이되는가?</li>
+</ul>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) 부분 관측 하의 비근시안(non-myopic) 의사결정.</strong>
+탐색은 본질적으로 탐사(exploration)와 활용(exploitation)의 균형 문제다. 로봇은 매 순간 부분적 믿음 지도(belief map)만 가지며, 지금 어디로 갈지가 미래에 무엇을 관측할지를 바꾼다. 프론티어 기반(frontier-based) 고전 방법은 &quot;지금 가장 가까운/정보 이득 큰 경계&quot;를 고르는 탐욕적 결정이라 근시안적이고, 전역적으로 효율적인 순회(tour)를 보장하지 못한다.</p>
+<p><strong>(C2) 그래프 구조 데이터에 대한 추론의 한계 (over-squashing).</strong>
+정보 그래프는 노드가 후보 웨이포인트, 엣지가 충돌 없는 이동 가능성을 나타낸다. 그런데 ARiADNE류가 쓰는 GAT(Graph Attention Network)의 마스킹 어텐션은 수용 영역(receptive field)을 직접 이웃에 제한한다. 멀리 떨어진 노드의 정보는 여러 GNN 레이어를 거치며 고정 크기 특징으로 압축되어 손실된다(over-squashing). 레이어를 더 쌓으면 완화되지만 큰 그래프에서는 비효율적이고 over-smoothing의 위험이 생긴다.</p>
+<p><strong>(C3) 운동학을 무시한 거리 최적화 → 시간 비효율.</strong>
+학습 환경에서 로봇이 노드 사이를 즉시 이동한다고 가정하면, 정책은 방향·속도·가속도를 전혀 고려하지 않은 채 &quot;총 이동 거리&quot;만 최소화하도록 수렴한다. 실제 로봇은:</p>
+<ul>
+<li>순간 재방향(instantaneous reorientation)이 불가능 → 회전 시간 발생</li>
+<li>웨이포인트마다 감속 → 정지 → 가속 → 속도 손실</li>
+<li>결과적으로 거리는 짧아도 <strong>평균 속도가 낮아 총 시간이 길어진다.</strong></li>
+</ul>
+<p><strong>(C4) Sim-to-Real 전이.</strong>
+추상적 2D 던전에서 학습한 정책이 고충실도 물리 시뮬(Gazebo)과 실제 LiDAR·SLAM 파이프라인에서 그래프 품질 변화, 센서 노이즈, 동역학을 견디고 동작해야 가치가 있다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>GRATE의 해법은 <strong>&quot;하이브리드 그래프 인코더 + 칼만 후처리&quot;</strong> 의 결합이다:</p>
+<pre><code>┌──────────────────────────────────────────────────────────────────┐
+│  (C2) Graph Transformer 인코더                                     │
+│    ├─ 로컬: 메시지 패싱 GNN (ResGatedGCN, n=2) → 구조 패턴         │
+│    └─ 글로벌: 멀티헤드 셀프어텐션 (m=1) → 전(全)노드쌍 장거리 의존  │
+│    융합: X^(ℓ+1) = (1-α)·X_attn + α·X_gnn,  α=0.8                  │
+└──────────────────────────────────────────────────────────────────┘
+                 ▼ (마스킹) 포인터 네트워크 디코더 → 다음 웨이포인트 확률
+┌──────────────────────────────────────────────────────────────────┐
+│  (C3) 칼만 필터 (추론 시에만)                                       │
+│    역사적 웨이포인트를 관측으로 → 위치·속도 분포 추정              │
+│    π&#39;(a|o) = π(a|o) + 정규화된 칼만 확률밀도 → 평활 궤적           │
+└──────────────────────────────────────────────────────────────────┘
+</code></pre>
+<ul>
+<li><strong>Graph Transformer (C2)</strong>: 마스킹 없이 모든 노드쌍에 어텐션을 허용해 over-squashing을 우회하고, 동시에 GNN으로 로컬 그래프 구조를 보존한다.</li>
+<li><strong>칼만 평활화 (C3)</strong>: 학습은 그대로 두고, 추론 시 정책의 확률 출력에 로봇의 추정 운동 상태를 결합해 지그재그를 줄여 시간 효율을 끌어올린다. <strong>추가 학습 비용이 0</strong>이라는 점이 실용적 강점이다.</li>
+<li><strong>SAC 학습 + Ray 병렬 (C1)</strong>: 최대 엔트로피 강화학습으로 탐사-활용 균형을 직접 최적화하며 16 에이전트 병렬로 수렴을 가속한다.</li>
+<li><strong>3단계 검증 (C4)</strong>: 추상 2D 던전 → 고충실도 Gazebo(4개 규모) → 실로봇(AgileX Scout mini)으로 전이성을 입증한다.</li>
+</ul>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 로봇 믿음의 그래프 표현 (Graph Representation of Robot Belief)</h3>
+<p>탐색을 그래프 위의 순차적 의사결정으로 환원하기 위해, 매 결정 스텝마다 현재 믿음 지도 <code>B_t</code>로부터 정보 그래프 <code>(V_t, A_t)</code>를 추출한다.</p>
+<p><strong>환경 표현:</strong></p>
+<pre><code>Ground truth map :  G  ∈ {0, 1}^(W×H)          # 0=free, 1=obstacle
+Belief map       :  B_t ∈ {0, 0.5, 1}^(W×H)    # 0=free, 0.5=unknown, 1=occupied
+탐색 완료 조건   :  점유(occupied) 경계가 자유(free) 영역을 폐합(closed)
+</code></pre>
+<p><strong>노드 특징 (4차원):</strong></p>
+<pre><code>v_i = [ x_i,  y_i,  u_i,  g_i ]
+
+  x_i, y_i : 후보 웨이포인트의 2D 좌표  (전역 정규화 → [0,1])
+  u_i      : utility — 그 노드에서 새로 관측 가능한 frontier 개수 (정보 이득)
+  g_i      : guidepost — 이전 방문 여부 (이진 지시자)
+</code></pre>
+<p>utility <code>u_i</code>는 &quot;여기 가면 얼마나 새 영역을 볼 수 있나&quot;를 정량화한 정보 이득이며, guidepost <code>g_i</code>는 이미 지나온 경로를 표시해 중복 탐색을 억제한다. 이 4차원 특징을 <code>[0,1]</code>로 정규화한 점이 sim-to-real 전이에서 중요하다 — 환경 절대 크기가 달라도 정책이 상대적 구조를 보게 된다.</p>
+<p><strong>엣지 생성 (희소 충돌 없는 그래프):</strong></p>
+<pre><code>각 노드 v_i 를 k-최근접 이웃(k = 25)과 직선 연결
+  → 장애물 또는 unknown 영역을 가로지르는 엣지는 제거(line-intersection check)
+  → 결과: sparse collision-free graph (인접행렬 A_t)
+</code></pre>
+<p>즉 인접행렬 <code>A_t</code>의 0/1은 &quot;두 노드 사이를 충돌 없이 직선 이동할 수 있는가&quot;를 인코딩한다. 이 그래프가 디코더 마스킹의 기반이 된다.</p>
+<h3>3.2 Graph Transformer 인코더 (Encoder)</h3>
+<p>인코더는 노드 특징 <code>V_t ∈ ℝ^(N×4)</code>와 인접행렬 <code>A_t ∈ ℝ^(N×N)</code>를 받아 <code>L=3</code>개의 동일 레이어를 통과시킨다. 각 레이어는 <strong>두 경로</strong>를 병렬로 계산해 가중 합한다.</p>
+<p><strong>경로 1 — 글로벌 멀티헤드 셀프어텐션 (m=1 레이어).</strong>
+모든 노드쌍에 대해 마스킹 없이 어텐션을 계산한다(unrestricted all-pair attention):</p>
+<pre><code>q_i = W^Q h_i ,   k_j = W^K h_j ,   v_j = W^V h_j
+
+u_ij = (q_i · k_jᵀ) / √d
+w_ij = exp(u_ij) / Σ_j exp(u_ij)
+h_i&#39; = Σ_j  w_ij · v_j
+</code></pre>
+<p>여기서 ARiADNE의 마스킹 어텐션(<code>A_ij=0</code>인 이웃에만 어텐션)과 결정적으로 다르다 — GRATE는 인접하지 않은 먼 노드에도 직접 어텐션을 허용한다. 어텐션 거리가 <code>O(1)</code>이 되어 over-squashing을 우회하고, 전역 탐색 문맥(예: 멀리 남은 미탐색 영역)을 한 레이어에서 포착한다.</p>
+<p><strong>경로 2 — 메시지 패싱 GNN (ResGatedGCN, n=2 레이어).</strong>
+로컬 그래프 구조는 게이트형 잔차 GCN으로 인코딩한다:</p>
+<pre><code>h_i^(ℓ+1) = W_1 h_i^ℓ  +  Σ_{j ∈ N(i)}  η_ij ⊙ ( W_2 h_j^ℓ )
+
+η_ij = σ( W_3 h_i^ℓ + W_4 h_j^ℓ )          # 엣지별 게이트 (LSTM류 게이팅)
+</code></pre>
+<p><code>η_ij</code>는 이웃 <code>j</code>의 메시지를 얼마나 받아들일지 결정하는 시그모이드 게이트이고, <code>W_1 h_i</code>의 잔차 연결이 깊은 전파에서 정보 소실을 막는다. 이로써 &quot;어떤 이웃 방향이 충돌 없이 열려 있는가&quot; 같은 로컬 구조 패턴이 보존된다.</p>
+<p><strong>융합 (Fusion, α=0.8):</strong></p>
+<pre><code>X_A^(ℓ+m) = MLP^ℓ( Attn^ℓ( X^ℓ ) )           # 글로벌 경로 출력 (m=1)
+X_G^(ℓ+n) = MLP^ℓ( GNN^ℓ( X^ℓ, A_t ) )        # 로컬 경로 출력 (n=2)
+
+X^(ℓ+1) = (1 − α)·X_A^(ℓ+m)  +  α·X_G^(ℓ+n) ,   α = 0.8
+</code></pre>
+<p><code>α=0.8</code>은 GNN(로컬 구조)에 80%, 어텐션(글로벌 문맥)에 20%의 비중을 둔다는 뜻이다. 설계 철학상 &quot;그래프의 충돌 없는 골격(로컬)을 주(主)로 보되, 멀리 남은 탐색 목표(글로벌)를 보조적으로 반영&quot;한다. (단, 이 0.8 값에 대한 ablation은 논문에 제시되지 않아 §8·§9에서 비판적으로 다룬다.)</p>
+<pre><code>ASCII: 한 인코더 레이어
+        X^ℓ (N×d)
+        ├──────────────┬──────────────────┐
+        ▼              ▼                   │
+  [Multi-head Attn]  [ResGatedGCN ×2]      │  (각 경로 뒤 MLP)
+   전(全)노드쌍       로컬 이웃 집계        │
+        ▼              ▼                   │
+     X_A           X_G                     │
+        └──── (1-α)·X_A + α·X_G ───────────┘
+                     ▼
+                   X^(ℓ+1)
+</code></pre>
+<h3>3.3 포인터 네트워크 디코더 (Decoder)</h3>
+<p>디코더는 현재 노드의 강화된(enhanced) 특징을 쿼리로, 이웃 노드들을 키/값으로 삼는 <strong>단일 헤드 마스킹 어텐션</strong>으로 다음 웨이포인트 확률 분포를 낸다:</p>
+<pre><code>u_ij = tanh( q_i · k_jᵀ / √d )   if A_ij = 0   (충돌 없는 이웃)
+     = −∞ (마스킹)                if A_ij = 1   (막힘)
+
+w_ij = exp(u_ij) / Σ_j exp(u_ij)     →  다음 노드 선택 확률
+</code></pre>
+<p>인코더는 멀티헤드·다중 레이어로 풍부하게 추론하지만, 디코더는 단일 헤드로 단순화하여 &quot;충돌 없는 이웃 중 하나&quot;라는 행동 공간에 직접 매핑한다. 마스킹이 안전성을 구조적으로 보장한다 — 정책은 결코 충돌 엣지를 선택할 수 없다.</p>
+<h3>3.4 강화학습 학습 (SAC)</h3>
+<p><strong>알고리즘</strong>: Soft Actor-Critic (SAC) — off-policy, 최대 엔트로피 원리. 탐사-활용 균형이 핵심인 탐색 문제에 엔트로피 정규화가 잘 맞는다.</p>
+<p><strong>보상 함수:</strong></p>
+<pre><code>r_t(o_t, a_t) = a · r_o  +  b · r_c  +  r_f
+
+  r_o = F_o(s_{t+1})                 # 새로 관측한 frontier 개수 (정보 이득, +)
+  r_c = − F_c(s_t, s_{t+1})          # 이동 거리 패널티 (−)
+  r_f = 20                           # 탐색 완료 시 종단 보상
+  a = 1/64 ,  b = 1/50               # 스케일링 계수
+</code></pre>
+<p><strong>SAC 목적·손실:</strong></p>
+<pre><code>π* = argmax_π  E_π[ Σ_t γ^(t-1) ( r_t + α·H(π(·|o_t)) ) ]
+
+Soft value :  V(o_t) = E_{a_t}[ Q_φ(o_t,a_t) − α·log π_θ(a_t|o_t) ]
+Critic     :  J(φ)   = E[ ½ ( Q_φ(o_t,a_t) − (r_t + γ·V(o_{t+1})) )² ]
+Policy     :  J_π(θ) = E[ α·log π_θ(a_t|o_t) − Q_φ(o_t,a_t) ]
+Temp(자동) :  J(α)   = E[ −α ( log π_θ(a_t|o_t) + H̄ ) ]
+Target ent :  H̄ = 0.05 · log(k)      # k = 현재 충돌 없는 이웃 수
+</code></pre>
+<p>목표 엔트로피 <code>H̄</code>를 이웃 수 <code>k</code>에 비례시킨 점이 영리하다 — 선택지가 많은 개활지에서는 더 탐험적으로, 통로처럼 선택지가 적은 곳에서는 덜 탐험적으로 정책을 유도한다.</p>
+<p><strong>주요 학습 설정:</strong></p>
+<pre><code>환경        : 랜덤 던전 생성기로 만든 추상 2D 미로
+에피소드    : 최대 128 결정 스텝
+할인율 γ    : 1.0 (할인 없음 — 완전 horizon 신뢰)
+배치 크기   : 128 ,  리플레이 버퍼 : 10,000 (학습 시작 임계 ~2,000)
+옵티마이저  : Adam ,  lr = 5×10⁻⁵ (policy/critic), 10⁻⁴ (temperature)
+타깃 갱신   : 64 step마다 ,  에피소드당 학습 iteration : 8
+병렬        : Ray 16 에이전트 동시
+수렴        : ~12,000 episodes (약 36시간)
+하드웨어    : Intel i5-14600KF / NVIDIA RTX 4070Ti Super
+</code></pre>
+<h3>3.5 칼만 필터 궤적 평활화 (Kalman Filter Smoothing)</h3>
+<p><strong>왜 필요한가.</strong> 학습 환경에서 로봇은 노드 간 즉시 이동으로 모델링되므로 정책은 운동학을 모른 채 거리만 최적화한다. 그 결과 웨이포인트가 지그재그가 되어 실로봇이 매번 감속·회전·가속을 반복 → 시간 손실. GRATE는 이를 <strong>재학습 없이 추론 시 후처리</strong>로 교정한다.</p>
+<p><strong>2D 선형 칼만 필터.</strong> 역사적으로 선택된 웨이포인트를 관측(<code>z</code>)으로 보고, 로봇의 위치·속도 상태를 추정한다:</p>
+<pre><code>상태       : x_k = [ x_k, y_k, v_{x,k}, v_{y,k} ]ᵀ ∈ ℝ⁴
+동역학      : x_k = F·x_{k-1} + w_{k-1} ,   w ~ N(0, Q)
+관측(위치만): z_k = H·x_k + v_k ,           v ~ N(0, R)
+
+[예측]
+  x̂_k⁻ = F·x̂_{k-1}
+  P_k⁻ = F·P_{k-1}·Fᵀ + Q
+
+[갱신]
+  K_k  = P_k⁻·Hᵀ ( H·P_k⁻·Hᵀ + R )⁻¹
+  x̂_k  = x̂_k⁻ + K_k ( z_k − H·x̂_k⁻ )
+  P_k  = ( I − K_k·H )·P_k⁻
+</code></pre>
+<p>추정된 위치는 가우시안 분포를 이루고, 그 확률 밀도는:</p>
+<pre><code>x_k^pos = [x_k, y_k]ᵀ ~ N( x̂_k[:2], P_k[:2,:2] )
+
+f(p) = 1/(2π|P|^½) · exp( −½ (p−μ)ᵀ P⁻¹ (p−μ) )
+</code></pre>
+<p><strong>RL 정책과 칼만의 융합.</strong> 최종 정책은 RL 확률 출력에 정규화된 칼만 밀도를 더한다:</p>
+<pre><code>π&#39;(a_t | o_t) = π(a_t | o_t) + f(s_{t+1} | s_t, a_t) / Σ_{a_t ∈ A} f(s_{t+1} | s_t, a_t)
+</code></pre>
+<p>직관: 로봇의 현재 속도/관성이 향하는 방향(칼만 예측)과 일치하는 웨이포인트에 가중을 더해, 급격한 방향 전환을 억제하고 부드럽고 빠른 경로를 만든다. (§8·§9에서 보듯 이 정의는 <code>π&#39;</code>의 정규화 보장이 명확치 않다는 비판 지점이기도 하다.)</p>
+<pre><code>ASCII: 지그재그 → 평활화
+  RL 단독:   ●→●  ●     ●        (꺾임 많음 → 감속/회전 반복)
+              ↘  ↗ ↘   ↗
+               ●    ● ●
+  +Kalman:   ●→─→─→─→─→●         (관성 방향 가중 → 부드럽고 빠름)
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<pre><code>┌─────────────────────────────────────────────────────────────────────┐
+│                        매 결정 스텝 t                                 │
+└─────────────────────────────────────────────────────────────────────┘
+
+[Belief Map B_t]
+      │  (LiDAR → SLAM → Octomap → 2D occupancy grid)
+      ▼
+[Graph Extraction]
+   노드 v_i = [x,y,u,g] ,  엣지 = k=25 NN ∩ collision-free
+   → V_t (N×4) , A_t (N×N)
+      ▼
+┌───────────────────────────────────────────────┐
+│ Graph Transformer Encoder  (L=3 layers)         │
+│   ┌─ Global  : Multi-head Self-Attn (m=1)       │
+│   └─ Local   : ResGatedGCN message-pass (n=2)   │
+│   Fuse: (1-α)·Attn + α·GNN ,  α=0.8             │
+└───────────────────────────────────────────────┘
+      ▼  enhanced node features
+[Pointer Network Decoder]  (single-head, masked by A_t)
+      ▼  P(next waypoint | neighbors)
+┌───────────────────────────────────────────────┐
+│ Kalman Filter  (inference only)                 │
+│   상태 추정 [x,y,vx,vy] → 밀도 f(·)             │
+│   π&#39;(a|o) = π(a|o) + norm. Kalman density        │
+└───────────────────────────────────────────────┘
+      ▼  smoothed waypoint
+[Local Motion Controller] → 차체 속도/조향 명령 → 이동·관측 → B_{t+1}
+      │
+      └──────────── 탐색 완료까지 반복 ───────────────┘
+</code></pre>
+<p><strong>데이터 흐름 요약</strong>: 센서가 믿음 지도를 갱신하면, 매 스텝 정보 그래프를 새로 추출한다(증분 맵 개선 반영). 인코더가 로컬·글로벌 추론으로 노드 특징을 강화하고, 디코더가 충돌 없는 이웃 중 다음 웨이포인트의 확률 분포를 낸다. 추론 시에는 칼만 필터가 로봇의 관성 방향과 정합되도록 이 분포를 조정한 뒤, 로컬 컨트롤러가 실제 차체 명령으로 변환한다. 학습 시에는 칼만 단계를 건너뛰고 SAC가 정책·크리틱을 갱신한다.</p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 / 환경 (Datasets &amp; Environments)</h3>
+<p><strong>1) 학습 환경 (추상 2D).</strong>
+랜덤 던전 생성기로 만든 추상 2D 미로. 로봇은 그래프 노드로 표현되고 이웃 노드로 즉시 이동한다고 가정. 최대 128 결정 스텝.</p>
+<p><strong>2) 고충실도 Gazebo 시뮬레이션 (4개 규모).</strong>
+물리 기반 센서 모델(Velodyne 16라인 3D LiDAR), 4륜 차동구동 로봇(최대 2 m/s), 실시간 SLAM(odometry+mapping), Octomap→2D occupancy grid 변환.</p>
+<pre><code>Large-scale forest  : 150 m × 150 m
+Large-scale indoor  : 130 m × 100 m
+Medium-scale indoor :  85 m ×  64 m
+Small-scale indoor  :  35 m ×  25 m
+</code></pre>
+<p><strong>3) 실세계 검증.</strong></p>
+<pre><code>로봇       : AgileX Scout mini (이동 로봇)
+LiDAR      : Ouster 32-line 3D
+환경       : 60 m × 10 m 실내 실험실 (어수선한 가구)
+최대 속도  : 0.75 m/s
+센서 범위  : 20 m ,  Octomap 해상도 : 0.2 m ,  그래프 노드 해상도 : 0.8 m
+</code></pre>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>Distance (m)</strong>: 탐색 완료까지 총 이동 거리 — &quot;얼마나 효율적인 경로인가&quot;.</li>
+<li><strong>Time (s)</strong>: 탐색 완료까지 총 소요 시간 — 본 논문의 핵심 지표(거리와 별개).</li>
+<li><strong>Velocity (m/s)</strong>: 평균 주행 속도 — 시간 효율의 직접 원인(지그재그가 적을수록 높음).</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>Table I — 학습 환경 (200개 미관측 2D 던전 시나리오):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Distance (mm)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Nearest</td>
+<td>490 ± 180</td>
+</tr>
+<tr>
+<td>Utility</td>
+<td>442 ± 163</td>
+</tr>
+<tr>
+<td>NBVP</td>
+<td>504 ± 201</td>
+</tr>
+<tr>
+<td>TARE Local</td>
+<td>382 ± 156</td>
+</tr>
+<tr>
+<td>ARiADNE</td>
+<td>402 ± 201</td>
+</tr>
+<tr>
+<td><strong>GRATE (Ours)</strong></td>
+<td><strong>372 ± 166</strong></td>
+</tr>
+</tbody></table></div>
+<p>→ GRATE가 모든 baseline 최상위. ARiADNE 대비 <strong>7.5% 거리 감소</strong>.</p>
+<p><strong>Table II — 고충실도 Gazebo (각 규모별 최강 고전 baseline + 학습 baseline ARiADNE 대비):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Method</th>
+<th>Distance (m)</th>
+<th>Time (s)</th>
+<th>Velocity (m/s)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Large forest (150×150)</td>
+<td>TARE</td>
+<td>1368</td>
+<td>720</td>
+<td>1.90</td>
+</tr>
+<tr>
+<td></td>
+<td>ARiADNE</td>
+<td>1158</td>
+<td>675</td>
+<td>1.72</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>GRATE</strong></td>
+<td><strong>1074</strong></td>
+<td><strong>577</strong></td>
+<td><strong>1.86</strong></td>
+</tr>
+<tr>
+<td>Large indoor (130×100)</td>
+<td>TARE</td>
+<td>1178</td>
+<td>644</td>
+<td>1.83</td>
+</tr>
+<tr>
+<td></td>
+<td>ARiADNE</td>
+<td>1042</td>
+<td>602</td>
+<td>1.73</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>GRATE</strong></td>
+<td><strong>980</strong></td>
+<td><strong>542</strong></td>
+<td><strong>1.81</strong></td>
+</tr>
+<tr>
+<td>Medium indoor (85×64)</td>
+<td>FAEL</td>
+<td>592</td>
+<td>365</td>
+<td>1.62</td>
+</tr>
+<tr>
+<td></td>
+<td>ARiADNE</td>
+<td>540</td>
+<td>328</td>
+<td>1.69</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>GRATE</strong></td>
+<td><strong>548</strong></td>
+<td><strong>303</strong></td>
+<td><strong>1.81</strong></td>
+</tr>
+<tr>
+<td>Small indoor (35×25)</td>
+<td>HPHS</td>
+<td>136</td>
+<td>122</td>
+<td>1.11</td>
+</tr>
+<tr>
+<td></td>
+<td>ARiADNE</td>
+<td>129</td>
+<td>105</td>
+<td>1.23</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>GRATE</strong></td>
+<td><strong>125</strong></td>
+<td><strong>96</strong></td>
+<td><strong>1.30</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>개선 폭 요약:</strong></p>
+<pre><code>vs TARE   (large forest) : 거리 −21.5% , 시간 −19.9%
+vs ARiADNE(large forest) : 거리 −7.3%  , 시간 −14.5%
+vs ARiADNE(large indoor) : 거리 −6.0%  , 시간 −10.0%  (대략)
+vs FAEL   (medium)       : 시간 −17.0%
+vs ARiADNE(medium)       : 시간 −7.6%
+vs HPHS   (small)        : 시간 −21.3%
+vs ARiADNE(small)        : 시간 −8.6%
+</code></pre>
+<p><strong>핵심 관찰</strong>: GRATE의 <strong>시간 개선폭(−14<del>21%)이 거리 개선폭(−6</del>21%)보다 일관되게 크다.</strong> 특히 medium indoor에서는 거리가 ARiADNE보다 오히려 약간 길지만(548 vs 540 m) 시간은 더 짧다(303 vs 328 s). 이는 <strong>평균 속도 상승</strong>(1.69→1.81 m/s) 때문이며, 곧 칼만 평활화가 &quot;거리가 아니라 시간&quot;을 줄였다는 본 논문의 주장과 정확히 일치한다. 작은 규모일수록 속도 차가 두드러진다(small: ARiADNE 1.23 → GRATE 1.30, HPHS 1.11).</p>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p>AgileX Scout mini + Ouster 32라인으로 <strong>60 m × 10 m 어수선한 실내 실험실</strong>에서 검증.</p>
+<pre><code>결과: 67 m 이동 / 167 s 소요 (최대 속도 0.75 m/s 설정)
+</code></pre>
+<ul>
+<li>좁은(narrow) 구간에서 baseline은 벽에 충돌(시각 결과의 빨간 마커)하는 반면 GRATE는 충돌 없이 통과.</li>
+<li>어수선한(cluttered) 구간에서 GRATE가 선제적으로 회피.</li>
+<li>추상 2D 던전에서 학습한 정책이 추가 미세조정 없이 실 LiDAR·SLAM 파이프라인으로 동작 → <strong>sim-to-real 전이 가능성</strong> 입증.</li>
+</ul>
+<p>다만 실세계는 단일 환경 1회 성공 보고에 그쳐, 성공률·반복성 통계는 부재하다(§8 한계 참조).</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>Graph Transformer 기반 탐색 정책</strong>
+메시지 패싱 GNN(로컬 구조)과 마스킹 없는 멀티헤드 셀프어텐션(글로벌 문맥)을 <code>α=0.8</code> 융합으로 결합. ARiADNE의 마스킹 어텐션이 겪는 over-squashing을 우회해 큰 정보 그래프에서 장거리 의존성을 포착, 더 비근시안적인 탐색 결정을 가능케 했다. 학습 환경에서 ARiADNE 대비 7.5%, Gazebo에서 최대 21.5% 거리 개선.</p>
+</li>
+<li><p><strong>칼만 필터 기반 궤적 평활화 (시간 효율의 핵심)</strong>
+학습 정책을 손대지 않고 <strong>추론 시 후처리</strong>로 로봇의 위치·속도 분포를 추정해 웨이포인트를 평활화. 명시적 운동 제약을 학습에 넣는 복잡한 대안 대신, 추가 학습 비용 0의 칼만 필터만으로 평균 속도를 높여 <strong>거리보다 시간을 더 크게(−14~21%) 줄였다.</strong> 이것이 논문 제목의 &quot;time-efficient&quot;를 실현하는 메커니즘이다.</p>
+</li>
+<li><p><strong>3단계 포괄 검증 + sim-to-real</strong>
+추상 2D 던전(200 시나리오) → 고충실도 Gazebo(4개 규모) → 실로봇(AgileX Scout mini + Ouster 32). 고전(Nearest/Utility/NBVP/TARE/FAEL/HPHS)·학습(ARiADNE) baseline 전반에 대해 거리·시간·속도 우위를 보이고, 추상 학습 정책의 실세계 충돌 없는 전이를 입증했다.</p>
+</li>
+</ol>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>값</th>
+<th>역할/의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>노드 특징 차원</td>
+<td>4 (<code>x,y,u,g</code>)</td>
+<td>좌표·utility·guidepost</td>
+</tr>
+<tr>
+<td>k-최근접 이웃</td>
+<td>25</td>
+<td>그래프 연결도</td>
+</tr>
+<tr>
+<td>인코더 레이어 수 (L)</td>
+<td>3</td>
+<td>Graph Transformer 깊이</td>
+</tr>
+<tr>
+<td>어텐션 헤드</td>
+<td>멀티헤드</td>
+<td>글로벌 self-attention</td>
+</tr>
+<tr>
+<td>인코더당 attention 레이어 (m)</td>
+<td>1</td>
+<td>글로벌 경로 깊이</td>
+</tr>
+<tr>
+<td>인코더당 GNN 레이어 (n)</td>
+<td>2</td>
+<td>로컬 메시지 패싱 깊이</td>
+</tr>
+<tr>
+<td>융합 가중 α</td>
+<td>0.8</td>
+<td>(1−α)·Attn + α·GNN</td>
+</tr>
+<tr>
+<td>보상 스케일 a</td>
+<td>1/64</td>
+<td>frontier 보상 가중</td>
+</tr>
+<tr>
+<td>보상 스케일 b</td>
+<td>1/50</td>
+<td>거리 패널티 가중</td>
+</tr>
+<tr>
+<td>종단 보상 r_f</td>
+<td>20</td>
+<td>탐색 완료 보너스</td>
+</tr>
+<tr>
+<td>목표 엔트로피 H̄</td>
+<td>0.05·log(k)</td>
+<td>k=이웃 수에 비례</td>
+</tr>
+<tr>
+<td>할인율 γ</td>
+<td>1.0</td>
+<td>할인 없음 (완전 horizon)</td>
+</tr>
+<tr>
+<td>학습률 (policy/critic)</td>
+<td>5×10⁻⁵</td>
+<td>SAC 최적화</td>
+</tr>
+<tr>
+<td>학습률 (temperature)</td>
+<td>10⁻⁴</td>
+<td>엔트로피 자동 튜닝</td>
+</tr>
+<tr>
+<td>배치 크기</td>
+<td>128</td>
+<td></td>
+</tr>
+<tr>
+<td>리플레이 버퍼</td>
+<td>10,000</td>
+<td>학습 시작 임계 ~2,000</td>
+</tr>
+<tr>
+<td>타깃 네트워크 갱신</td>
+<td>64 step마다</td>
+<td></td>
+</tr>
+<tr>
+<td>에피소드당 학습 iteration</td>
+<td>8</td>
+<td></td>
+</tr>
+<tr>
+<td>에피소드 길이</td>
+<td>128 결정 스텝</td>
+<td></td>
+</tr>
+<tr>
+<td>병렬 에이전트 (Ray)</td>
+<td>16</td>
+<td></td>
+</tr>
+<tr>
+<td>수렴</td>
+<td>~12,000 episodes (≈36h)</td>
+<td></td>
+</tr>
+<tr>
+<td>하드웨어</td>
+<td>i5-14600KF / RTX 4070Ti Super</td>
+<td></td>
+</tr>
+</tbody></table></div>
+<p><strong>관찰 포인트</strong>: 보상 스케일 <code>a=1/64</code>(frontier) vs <code>b=1/50</code>(거리)는 비율상 정보 이득에 더 큰 가중을 둔다. 또 <code>γ=1.0</code>(할인 없음)은 탐색 완료까지의 전체 horizon을 신뢰하겠다는 설계이며, episodic·유한 horizon(128 step)이라 발산하지 않는다.</p>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 계산 복잡도와 그래프 스케일링</h3>
+<p>인코더 복잡도는 대략 <code>O(L · (m·N² + n·E))</code>이다. 글로벌 어텐션은 노드 수 <code>N</code>에 대해 <code>O(N²)</code>로 제곱이지만, GNN은 엣지 수 <code>E</code>에 선형(희소 그래프에서 <code>E≈25N</code>)이다. 즉 <strong>대규모 그래프에서는 어텐션이 지배적 비용</strong>이 된다. 논문은 sparse graph extraction(노드 해상도 0.8 m 등)으로 <code>N</code>을 억제해 이를 완화하지만, 매우 고해상도/광역 환경(<code>N</code>&gt;수천)에서는 메모리·지연 병목이 우려된다. 또한 <strong>논문이 결정 스텝당 추론 시간을 보고하지 않아</strong> 실시간성의 정량 근거가 약하다 — 향후 sparse/local attention이나 계층적 그래프 추상화가 자연스러운 보강이다.</p>
+<h3>8.2 칼만 융합 식의 형식적 문제</h3>
+<p>최종 정책 <code>π&#39;(a|o) = π(a|o) + 정규화 칼만 밀도</code>는 두 분포의 <strong>합</strong>이다. 각각이 합 1이라면 합산 결과의 총합은 2가 되어 그대로는 확률 분포가 아니다. 재정규화나 가중 혼합(<code>λ·π + (1−λ)·KF</code>)이 암묵적으로 필요해 보이나 본문에 명시되지 않았다. 결과가 잘 동작하는 것은 argmax(또는 재정규화된 softmax) 선택 단계가 뒤따르기 때문으로 추정되지만, 형식적 정의는 보완이 필요하다.</p>
+<h3>8.3 칼만의 선형성 가정</h3>
+<p>칼만 필터는 선형 동역학(<code>ẋ = v</code>, 가속도 무한대 가능)을 가정한다. 실제 차동구동/비홀로노믹 로봇은 회전 반경·가속 한계 같은 비선형 제약이 있어, 고속·급선회 구간에서 선형 속도 추정이 부정확할 수 있다. EKF/UKF로 비선형 모델을 도입하거나, 운동 제약을 정책 학습에 직접 통합하는 end-to-end 대안이 가능하나 추가 튜닝 비용이 든다. 또한 프로세스/관측 잡음 행렬 <code>Q, R</code>의 설정값과 칼만 게인 민감도가 본문에 명시되지 않아 이식성 평가가 어렵다.</p>
+<h3>8.4 학습 설계의 미해명 지점</h3>
+<ul>
+<li><strong>α=0.8의 정당화 부재</strong>: GNN 80% vs 어텐션 20%의 근거나 ablation이 없다. α=0.5/0.8/0.95 비교가 있었다면 하이브리드 설계의 기여를 분해할 수 있었을 것.</li>
+<li><strong>칼만 단독 기여 ablation 부재</strong>: &quot;Graph Transformer only&quot; vs &quot;+Kalman&quot;의 분리 측정이 없어, 시간 개선이 인코더 덕인지 칼만 덕인지 정량 분해가 어렵다(다만 medium indoor의 &quot;거리는 비슷한데 시간만 단축&quot;은 칼만 기여의 정황 증거다).</li>
+<li><strong>추상→Gazebo 갭 브리징 방식</strong>: 추상 2D 던전과 고충실도 Gazebo 사이 도메인 갭을 zero-shot으로 넘은 것인지, 도메인 랜덤화/미세조정을 했는지 명시가 약하다.</li>
+</ul>
+<h3>8.5 확장 방향</h3>
+<p>정적 환경 가정, 단일 로봇 한정이 또 다른 한계다. (i) 시간 그래프(temporal graph)로 동적 장애물 인코딩, (ii) 멀티 에이전트 Graph Transformer로 협업 탐색 확장, (iii) 다양한 실세계 환경에서 10~20회 반복으로 성공률 통계 확보가 자연스러운 후속이다.</p>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<p>본 코퍼스 Planner 트랙에서 <strong>탐색/경로 계획 과업이 가장 가까운 두 선행 리뷰</strong>와 비교한다:</p>
+<ul>
+<li><strong>FPAS</strong> — <em>Frontier-Based Path Planning with Adaptive Sampling for Large-Scale Unknown Environments</em> (IROS 2026, arXiv 2606.22838): 미지 환경 목표 도달 + 프론티어 기반 + 대규모라는 점에서 GRATE와 직접 동류(同類)다.</li>
+<li><strong>SCAN-Planner</strong> — <em>yaw-aware twin-cylinder 풋프린트 기반 사족보행 로컬 플래너</em> (arXiv 2606.19555): 3D 비정형 환경에서 충돌 회피 로컬 플래닝 + 실로봇(Go2) 검증이라는 점에서 &quot;실로봇 전이&quot;·&quot;로컬 경로 품질&quot; 축을 비교한다.</li>
+</ul>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>FPAS (IROS 2026)</th>
+<th>SCAN-Planner (arXiv 2026)</th>
+<th><strong>GRATE (본 논문, IROS 2025)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>과업</td>
+<td>대규모 미지환경 목표 도달 계획</td>
+<td>3D 비정형 로컬 회피 플래닝</td>
+<td><strong>미지환경 자율 탐색(ARE)</strong></td>
+</tr>
+<tr>
+<td>핵심 패러다임</td>
+<td>순수 기하(개방도 기반 적응 샘플링)</td>
+<td>기하(twin-cylinder + 투영 A* + B-스플라인)</td>
+<td><strong>학습(Graph Transformer + SAC)</strong></td>
+</tr>
+<tr>
+<td>장거리 추론</td>
+<td>Dijkstra 전역 백트래킹</td>
+<td>슬라이딩 맵 + 경계 fallback</td>
+<td><strong>all-pair attention(over-squashing 우회)</strong></td>
+</tr>
+<tr>
+<td>운동학/평활화</td>
+<td>명시 안 함(노드 밀도 조절)</td>
+<td>3차 B-스플라인 최적화</td>
+<td><strong>칼만 필터 후처리(시간 효율)</strong></td>
+</tr>
+<tr>
+<td>최적 지표</td>
+<td>처리시간·이동거리</td>
+<td>추종성·안전(충돌검사 2점)</td>
+<td><strong>탐색 시간(거리 아님)</strong></td>
+</tr>
+<tr>
+<td>실로봇</td>
+<td>(시뮬 중심)</td>
+<td>✅ Unitree Go2 다층 횡단</td>
+<td>✅ AgileX Scout mini(1회)</td>
+</tr>
+<tr>
+<td>코드</td>
+<td>(확인 필요)</td>
+<td>(확인 필요)</td>
+<td>❌ <strong>미공개</strong></td>
+</tr>
+<tr>
+<td>학회</td>
+<td>IROS 2026</td>
+<td>arXiv 2026</td>
+<td><strong>IROS 2025(탑티어)</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>GRATE의 강점:</strong></p>
+<ol>
+<li><strong>&quot;시간&quot;을 직접 최적화한 드문 탐색 플래너</strong> — FPAS는 처리시간·거리를, SCAN-Planner는 추종성·안전을 다루지만, GRATE는 <em>탐색 완료 시간</em>을 1차 지표로 삼고 칼만 평활화로 평균 속도를 끌어올려 거리 개선폭을 넘는 시간 개선(−14~21%)을 달성했다. medium indoor에서 &quot;거리는 ARiADNE보다 길어도 시간은 짧다&quot;는 결과가 이 철학의 명확한 증거다.</li>
+<li><strong>학습 기반의 비근시안 추론</strong> — FPAS의 기하 개방도 휴리스틱·SCAN의 투영 A*는 모두 수작업 휴리스틱인 반면, GRATE는 Graph Transformer로 장거리 의존성을 학습해 전역적으로 더 나은 순회를 만든다. all-pair attention은 FPAS의 Dijkstra 백트래킹과 달리 학습된 정책 안에 전역 문맥을 내재화한다.</li>
+<li><strong>탑티어 학회 + sim-to-real</strong> — IROS 2025 채택, 추상 학습 정책의 실 LiDAR 전이 입증.</li>
+</ol>
+<p><strong>GRATE의 약점:</strong></p>
+<ol>
+<li><strong>코드 미공개</strong> — FPAS·SCAN-Planner의 재현성 상황과 별개로, GRATE는 현재 공개 코드 링크가 없어 <strong>재현성이 본 비교군에서 가장 불리</strong>하다. (BOWConnect 같은 코드 공개 Planner 대비 명확한 약점.)</li>
+<li><strong>순수 기하 대비 학습 비용·도메인 갭</strong> — FPAS는 학습·의미론 없이 CPU만으로 동작해 이식성이 높다. GRATE는 36시간 학습 + GPU가 필요하고, 추상→실세계 도메인 갭 브리징 방식이 불명확하다.</li>
+<li><strong>운동 모델의 정밀도</strong> — SCAN-Planner의 3차 B-스플라인은 동역학을 명시적으로 최적화하는 반면, GRATE의 선형 칼만은 비선형 제약(회전 반경·가속)을 근사만 한다. 고속·급선회에서 SCAN류의 명시적 최적화가 더 정밀할 수 있다.</li>
+<li><strong>실로봇 검증의 얕음</strong> — SCAN-Planner는 Go2 다층 횡단·옥외 주행을 온보드 실증한 반면, GRATE는 단일 실내 환경 1회 성공에 그쳐 성공률 통계가 없다.</li>
+</ol>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>GRATE</strong>: 대규모 실내(창고·캠퍼스 건물) <strong>자율 탐색·매핑</strong> 임무에 강하다. 21.5% 거리·21.3% 시간 절감은 곧 배터리/임무 시간 절감으로 직결돼 ROI가 높다. 단 (i) 코드 미공개로 재구현 부담, (ii) 동적 보행자 미대응, (iii) SLAM 품질 저하 시 그래프 추출 실패 위험이 실배치의 병목이다.</li>
+<li><strong>FPAS</strong>: 학습 불요·CPU-only로 <strong>광역 실외 미지 환경 탐사</strong>에 즉시 투입하기 쉽다. kinodynamic 정밀·시간 최적화는 약하다.</li>
+<li><strong>SCAN-Planner</strong>: 계단·다층 같은 <strong>3D 비정형 지형의 로컬 회피</strong>에 특화. 전역 탐색 전략(어디를 먼저 볼지)은 GRATE의 영역이고, SCAN은 &quot;그 경로를 어떻게 안전히 밟을지&quot;의 로컬 영역이라 <strong>상호 보완적</strong>이다.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>GRATE는 학습 기반 탐색의 무게중심을 <strong>&quot;거리 최소화 → 시간 최소화&quot;</strong> 로, 그리고 그래프 추론을 <strong>&quot;마스킹 어텐션 → GNN+Transformer 하이브리드&quot;</strong> 로 옮긴다. 이는 FPAS(샘플 밀도 적응)·SCAN(로컬 추종 정밀화)과 <strong>직교하는 축</strong>이라 결합이 자연스럽다 — 예컨대 GRATE의 Graph Transformer 전역 정책으로 &quot;어느 프론티어를 먼저&quot;를 정하고, SCAN-Planner의 투영 A*+B-스플라인으로 &quot;그 사이를 어떻게 안전·정밀하게&quot;를 채우는 계층 구조가 가능하다. 또 FPAS의 개방도 지표를 GRATE의 그래프 노드 밀도 조절에 도입하면 <code>O(N²)</code> 어텐션 병목을 환경 구조별로 완화할 수 있다. 더 근본적으로, 칼만 평활화가 &quot;재학습 없이 시간 효율을 산 후처리&quot;라는 점은, 거리만 보던 다른 학습 플래너에도 이식 가능한 일반 레시피다.</p>
+<h3>9.5 일반화 가능성</h3>
+<p>GRATE의 핵심 설계 — &quot;로컬 GNN + 글로벌 어텐션의 가중 융합으로 그래프 위 순차 결정을 추론하고, 운동학은 추론 시 베이지안 추정(칼만)으로 사후 정합&quot;하는 패턴 — 은 탐색에 국한되지 않는다. 동일 골격은 멀티 에이전트 탐색, 정보 수집(informative path planning), 순찰(patrolling) 등 <strong>그래프 위 비근시안 의사결정</strong> 전반으로 확장 가능하다. 즉 GRATE는 &quot;그래프 RL 정책 + 추론 시 운동 평활화&quot;라는 일반 패턴의 단일 로봇 탐색 인스턴스로 볼 수 있다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li><strong>본 논문</strong>: GRATE: a Graph transformer-based deep Reinforcement learning Approach for Time-efficient autonomous robot Exploration. <em>IROS 2025</em>. arXiv:2509.12863. (Ni, Liang, He, Cao†, Sartoretti — NUS MARMot Lab / Tongji Univ.)</li>
+<li><strong>비교 대상 (본 코퍼스 Planner 트랙)</strong>:<ul>
+<li>FPAS: <em>Frontier-Based Path Planning with Adaptive Sampling for Large-Scale Unknown Environments</em> (IROS 2026, arXiv:2606.22838).</li>
+<li>SCAN-Planner: <em>yaw-aware twin-cylinder footprint 기반 사족보행 로컬 플래너</em> (arXiv:2606.19555).</li>
+</ul>
+</li>
+<li><strong>관련 선행/baseline</strong>:<ul>
+<li>ARiADNE: Attention-based DRL for autonomous exploration (ICRA 2023, 동 연구실 선행작).</li>
+<li>TARE: Hierarchical exploration planner (TSP 글로벌 + sampling 로컬).</li>
+<li>FAEL / HPHS: 고전 frontier sampling·hierarchical 탐색 플래너.</li>
+<li>NBVP: Next-Best-View Planner (sampling-based, RRT).</li>
+<li>기법: Soft Actor-Critic (Haarnoja et al., 2018), ResGatedGCN (Bresson &amp; Laurent, 2017), Pointer Network (Vinyals et al., 2015), GraphGPS/SGFormer (Graph Transformer 계열), Kalman Filter (Kalman, 1960).</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>혁신성</h3>
+<p>GRATE의 핵심 혁신은 두 축의 결합이다. 첫째, <strong>마스킹 어텐션의 over-squashing을 우회하는 Graph Transformer 하이브리드</strong>(<code>(1−α)·Attn + α·GNN, α=0.8</code>)로 정보 그래프의 로컬 구조와 글로벌 문맥을 함께 추론한다. 둘째, <strong>추론 시 칼만 평활화</strong>(<code>π&#39;=π+정규화 칼만 밀도</code>)로 학습을 손대지 않고 웨이포인트를 로봇 관성에 정합시켜, 거리 최소화에 갇혀 있던 학습 탐색을 <strong>시간 최소화</strong>로 끌어올린다. 이 둘이 결합해 Gazebo에서 TARE 대비 거리 21.5%·시간 19.9%, ARiADNE 대비 시간 최대 14.5% 단축을 달성했다.</p>
+<h3>실용적 의의</h3>
+<p>가장 인상적인 결과는 medium indoor에서 &quot;거리는 ARiADNE보다 길어도 시간은 짧다&quot;는 점이다 — 이는 GRATE가 단순히 짧은 경로가 아니라 <strong>빠른 경로(높은 평균 속도)</strong> 를 만든다는 직접 증거이며, 칼만 평활화가 명시적 운동 제약 학습 없이도 그 역할을 했음을 보인다. 추상 2D 던전에서 학습한 정책이 실 LiDAR·SLAM의 AgileX Scout mini로 충돌 없이 전이된 점도 실용성의 신호다. 대규모 실내 탐색·매핑 임무에서 시간/배터리 절감 ROI가 분명하다.</p>
+<h3>향후 연구 방향</h3>
+<p>한계는 (i) <strong>공개 코드 부재로 인한 재현성 약점</strong>, (ii) 칼만 융합식의 형식적 정규화 미명시, (iii) 칼만 선형성 가정(비선형 EKF/UKF 여지), (iv) α·칼만 단독 기여 ablation 부재, (v) <code>O(N²)</code> 어텐션의 대규모 그래프 병목과 추론 시간 미보고, (vi) 정적·단일 로봇 가정, (vii) 실세계 1회 검증에 그친 성공률 통계 부재다. 따라서 <strong>코드 공개·재현 실험, 비선형 운동 모델, 계층적/희소 어텐션, 동적 장애물 대응 시간 그래프, 멀티 에이전트 확장, 다회 실세계 통계</strong>가 자연스러운 다음 단계다.</p>
+<h3>종합 평가</h3>
+<p>GRATE는 학습 기반 자율 탐색에서 오래 간과돼 온 &quot;거리 ≠ 시간&quot;의 간극을, <strong>그래프 추론 강화(Graph Transformer)</strong> 와 <strong>재학습 없는 운동 평활화(칼만)</strong> 라는 저비용 조합으로 정면 돌파한다. 시간 개선폭이 거리 개선폭을 일관되게 앞서고, medium indoor의 &quot;거리↑ 시간↓&quot; 사례가 그 메커니즘을 깔끔히 입증한다는 점이 본질적 기여다. 평가도 추상 학습 → 4규모 Gazebo → 실로봇의 3단계로 견고하다. 다만 <strong>공개 코드의 부재</strong>, α·칼만에 대한 ablation 결여, 실세계 통계의 얕음, 칼만 융합식의 형식적 모호함은 후속 연구가 메워야 할 빈칸이다. 그럼에도 &quot;그래프 RL 정책 + 추론 시 운동 평활화로 탐색 시간을 줄인다&quot;는 명료한 레시피와 IROS 2025 채택은, 본 논문을 2025년 학습 기반 탐색 흐름에서 주목할 가치가 높은 결과로 만든다.</p>
+<hr>
+<p><em>본 리뷰는 PhD 수준 상세 분석이며, arXiv:2509.12863 본문(초록·방법론 수식·실험 표 Table I/II·실로봇 기술)에 기반한다. 공개 코드 링크는 현재 확인되지 않아 코드 항목을 ❌(미공개)로 표기했으며, 코드 존재를 날조하지 않았다.</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

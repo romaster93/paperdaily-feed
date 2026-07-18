@@ -1,0 +1,1167 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">ICUAS 2026 (제출 중)</div>
+    <h1>AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2604.08009">arXiv:2604.08009</a></span>
+      <span>리뷰 2026-04-14</span>
+      <span>44분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>AgiPIX: 시뮬레이션-현실 간 제로샷 전이를 위한 실내 항공 자율 시스템 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection</li>
+<li><strong>저자 (Authors)</strong>: Sasanka Kuruppu Arachchige, Juan Jose Garcia, Changda Tian, Lauri Suomela, Panos Trahanias, Adriana Tapus, Joni-Kristian Kämäräinen</li>
+<li><strong>소속 (Affiliation)</strong>: Tampere University (Finland), ENSTA Paris (U2IS, France), FORTH — Institute of Computer Science (Heraklion, Greece)</li>
+<li><strong>발표처 (Published)</strong>: ICUAS 2026 (International Conference on Unmanned Aircraft Systems) 제출 (심사 중), 9 페이지</li>
+<li><strong>DOI</strong>: 미확인 (심사 중)</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.08009">https://arxiv.org/abs/2604.08009</a></li>
+<li><strong>프로젝트 페이지</strong>: <a href="https://sasakuruppuarachchi.github.io/agipix/">https://sasakuruppuarachchi.github.io/agipix/</a></li>
+<li><strong>GitHub</strong>: <a href="https://github.com/SasaKuruppuarachchi/agi%5C_logger">https://github.com/SasaKuruppuarachchi/agi\_logger</a></li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>AgiPIX는 <strong>실내 항공 자율 비행 및 산업 시설 점검</strong>이라는 두 가지 실용적 목표를 위한 공개 하드웨어-소프트웨어 통합 플랫폼을 제안한다. 핵심 연구 질문은:</p>
+<blockquote>
+<p>&quot;어떻게 하면 연구실에서 개발한 자율 비행 알고리즘을 실제 산업 환경의 UAV에 <strong>제로샷(zero-shot)</strong>으로 전이할 수 있는가?&quot;</p>
+</blockquote>
+<p>이 문제는 실내 항공 자율화 연구의 근본적 병목이다. 연구자들은 시뮬레이터에서 알고리즘을 개발하지만, 현실 UAV에 배포할 때마다:</p>
+<pre><code>현재 문제:
+  1. 하드웨어 플랫폼마다 ROS 인터페이스 재작성 필요
+  2. 물리 엔진 차이로 인한 훈련-배포 성능 격차
+  3. 고품질 산업 시설 디지털 트윈 부재
+  4. 재현 불가능한 플랫폼 설정 (논문마다 다른 센서 조합)
+</code></pre>
+<p>AgiPIX는 이를 <strong>컨테이너화된 ROS 2 자율화 스택 + 포토리얼리스틱 디지털 트윈 + 표준화된 하드웨어 플랫폼</strong>으로 해결한다. 특히 <strong>ENRICH 2025 유럽 로보틱스 해커톤</strong>(오스트리아 핵발전소 Zwentendorf)에서 실제 방사선 점검 임무를 수행하며 현실 검증을 달성한 점이 중요한 기여다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 실내 항공 자율화의 독특한 제약</h4>
+<p>실내 환경은 실외 드론과 다른 근본적 제약을 가진다:</p>
+<pre><code>실외 UAV:
+  ✓ GPS 활용 가능 (절대 위치 파악)
+  ✓ 광활한 공간 (충돌 여유)
+  ✓ 표준화된 공역 규정
+
+실내 UAV:
+  ✗ GPS 불가 (실내 신호 차단)
+  ✗ 좁은 공간, 빈번한 충돌 위험
+  ✗ 복잡한 구조물 (배관, 기둥, 설비)
+  ✗ 산업 시설의 열/전자기 잡음
+</code></pre>
+<p>실내 항공 자율화를 위해서는 SLAM(동시 위치추정 및 지도작성), 충돌 회피 경로 계획, 정밀 자세 제어가 모두 온보드 컴퓨팅으로 처리되어야 한다.</p>
+<h4>B. 시뮬레이션-현실 갭 (Sim-to-Real Gap)</h4>
+<pre><code>문제의 깊이:
+  물리 엔진 차이:
+    - 시뮬레이터 공기 저항 모델 ≠ 실제 공기 역학
+    - 로터 워시 효과 시뮬레이션 부정확
+    - 센서 노이즈 모델 (LiDAR 반사율, IMU 드리프트) 불완전
+
+  비주얼 갭:
+    - Matterport/Habitat의 사진 현실감 ≠ 산업 시설 재질
+    - 형광등 조명의 스펙트럼 특성 미재현
+    - 금속 표면 반사/간섭 패턴 부재
+
+  동역학 갭:
+    - 시뮬레이터의 이상화된 모터 응답
+    - 배터리 소모에 따른 성능 저하 미고려
+    - 열 영향에 의한 IMU 편차 누적
+</code></pre>
+<p>기존 연구들은 이 갭을 도메인 적응, 시스템 ID, 또는 광범위한 도메인 랜덤화로 해결하려 했으나, AgiPIX는 <strong>컨테이너화된 자율화 스택의 직접 이식</strong>으로 접근한다.</p>
+<h4>C. 재현 불가능한 연구 플랫폼</h4>
+<pre><code>현재 실내 항공 연구의 재현성 문제:
+  - 각 연구실마다 독자적 하드웨어 조합
+  - 소프트웨어 의존성 충돌 (ROS1 vs ROS2, Python 버전 등)
+  - 독점적 시뮬레이터 사용 (라이선스 제한)
+  - 클로즈드 소스 펌웨어 (상용 드론 플랫폼)
+  
+결과:
+  - 다른 연구실에서 알고리즘 재현 시 3-6개월 소요
+  - 하드웨어 획득 비용 ($5K-$50K)
+  - 안전 인증 취득 비용 추가
+</code></pre>
+<p>AgiPIX는 모든 하드웨어 설계, 시뮬레이션 자산, 소프트웨어를 오픈소스로 공개하여 이 재현성 위기를 해결한다.</p>
+<h3>2.2 핵심 해결책</h3>
+<pre><code>AgiPIX의 세 가지 핵심 기여:
+
+1. AgiREAL 플랫폼:
+   - 표준화된 오픈 하드웨어 UAV 설계
+   - 하드웨어 동기화 능동 감지 (Livox MID-360 LiDAR + IMU)
+   - 온보드 GPU 컴퓨팅 (NVIDIA Jetson Orin NX)
+
+2. AgiSIM 디지털 트윈:
+   - Unreal Engine 기반 포토리얼리스틱 시뮬레이터
+   - AgiREAL 하드웨어의 정밀 모사
+   - 믿을 수 있는 신뢰할 수 있는 UI 포함
+
+3. AgiSTACK 자율화 스택:
+   - ROS 2 기반 컨테이너화 모듈
+   - 시뮬-현실 제로샷 이식 가능
+   - SLAM, 경로 계획, 학습 기반 내비게이션 통합
+</code></pre>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 AgiREAL — 표준화된 하드웨어 플랫폼</h3>
+<h4>플랫폼 아키텍처</h4>
+<pre><code>AgiREAL 시스템 다이어그램:
+
+┌────────────────────────────────────────────────┐
+│                AgiREAL UAV                      │
+│                                                 │
+│  ┌──────────┐     ┌─────────────────────────┐  │
+│  │ 로터/모터  │     │    NVIDIA Jetson         │  │
+│  │ (4축)    │     │    Orin NX / Super       │  │
+│  └──────────┘     │    (온보드 GPU)           │  │
+│                   └──────────┬──────────────┘  │
+│  ┌──────────┐                │                 │
+│  │Livox     │                │ USB/CAN         │
+│  │MID-360   ├────────────────┘                 │
+│  │LiDAR     │                                  │
+│  └──────────┘                                  │
+│                                                 │
+│  ┌──────────┐     ┌──────────────────────┐     │
+│  │IMU/      │     │  HEATS 프레임워크    │     │
+│  │Barometer │─────│  (LiDAR SLAM + ESDF) │     │
+│  └──────────┘     └──────────────────────┘     │
+│                                                 │
+│           ↓↓↓ 타임스탬프 동기화 ↓↓↓             │
+└────────────────────────────────────────────────┘
+</code></pre>
+<h4>핵심 하드웨어 구성 요소</h4>
+<p><strong>1. Livox MID-360 LiDAR (능동 감지)</strong></p>
+<pre><code>특성:
+  - 비균일 스캔 패턴 (꽃잎 형태)
+  - 근거리 밀집 포인트 클라우드 생성
+  - 360° FOV (방위각) × +7°/-52° (앙각)
+  - 정밀도: ±2cm @ 20m
+  - 무게: 265g (소형 UAV에 적합)
+
+왜 Livox MID-360인가:
+  - 기존 회전식 LiDAR (Velodyne 등) 대비 소형/경량
+  - 실내 좁은 공간에서의 밀집 포인트 클라우드
+  - 금속 인프라의 반사율 처리 능력
+  - HEATS SLAM과의 통합 최적화
+</code></pre>
+<p><strong>2. NVIDIA Jetson Orin NX (온보드 컴퓨팅)</strong></p>
+<pre><code>사양:
+  - CPU: 8코어 ARM Cortex-A78AE
+  - GPU: 1024 CUDA 코어 (Ampere)
+  - 메모리: 16GB LPDDR5
+  - 전력: 10-25W (동적 조절)
+  - 무게: 45g (모듈 단독)
+
+성능:
+  - 추론 지연: 120ms (FAINT 내비게이션 정책)
+  - CPU 부하: 41% 평균 (자율화 스택 가동 중)
+  - GPU 부하: 37% 평균
+  - 실시간 SLAM + 경로 계획 + 학습 정책 동시 실행
+</code></pre>
+<p><strong>3. 하드웨어 타임스탬프 동기화</strong></p>
+<pre><code class="language-python"># 동기화 메커니즘 (개념 코드)
+class HardwareSyncManager:
+    &quot;&quot;&quot;
+    LiDAR와 IMU의 하드웨어 수준 타임스탬프 동기화
+    소프트웨어 동기화 대비 지연 분산 99% 감소
+    &quot;&quot;&quot;
+    def sync_lidar_imu(self, lidar_packet, imu_packet):
+        # 하드웨어 트리거 신호로 동기화 (PPS)
+        # 타임스탬프 편차 &lt; 1μs
+        aligned_packet = TimestampAligner(
+            ref=lidar_packet.hardware_timestamp,
+            target=imu_packet.hardware_timestamp
+        )
+        return aligned_packet
+
+    def publish_synced_pointcloud(self, synced_data):
+        # 동기화된 LiDAR + IMU 데이터 → HEATS SLAM 입력
+        self.slam_input_pub.publish(synced_data)
+</code></pre>
+<p>소프트웨어 동기화 대비 하드웨어 동기화의 장점:</p>
+<ul>
+<li>운영 체제 스케줄링 지연으로 인한 타임스탬프 편차 제거</li>
+<li>LiDAR-IMU 정합(calibration) 품질 향상</li>
+<li>고속 비행 중 동적 환경에서의 SLAM 정확도 향상</li>
+</ul>
+<h3>3.2 AgiSIM — 포토리얼리스틱 디지털 트윈</h3>
+<h4>시뮬레이터 설계 철학</h4>
+<pre><code>기존 시뮬레이터의 한계:
+  Gazebo/PyBullet: 물리 정확하나 비주얼 낮음
+  Habitat/Matterport: 비주얼 좋으나 물리 제한적
+  RotorS/AirSim: UAV 특화이나 산업 환경 자산 부족
+
+AgiSIM의 접근:
+  Unreal Engine 5 기반:
+    - 나노이트(Nanite) 기반 포토그래메트리 메시
+    - Lumen 글로벌 조명 시스템
+    - 금속 표면, 배관, 콘크리트 재질의 PBR 렌더링
+  
+  AgiREAL 정밀 모사:
+    - 로터 워시 물리 시뮬레이션
+    - Livox MID-360 센서 모델 (비균일 스캔 패턴)
+    - Jetson 기반 컴퓨팅 지연 에뮬레이션
+</code></pre>
+<h4>디지털 트윈 구축 파이프라인</h4>
+<pre><code>1. 3D 재구성 (포토그래메트리/LiDAR):
+   실제 산업 시설 → 구조형 광/LiDAR 스캔 → 고밀도 포인트 클라우드
+   
+2. 메시 처리:
+   포인트 클라우드 → Reality Capture / Metashape → 텍스처드 메시
+
+3. UE5 임포트:
+   메시 → Nanite 최적화 → PBR 재질 적용 → 조명 베이킹
+
+4. 센서 통합:
+   AgiREAL 센서 파라미터 → UE5 센서 플러그인 설정
+   (FOV, 노이즈 모델, 타임스탬프 에뮬레이션)
+
+5. ROS 2 브리지:
+   UE5 ↔ ROS 2 topic (AgiSTACK과 동일한 인터페이스)
+</code></pre>
+<p><strong>점유 지도 정확도 평가</strong>:</p>
+<pre><code>평가 지표: IoU (Intersection over Union) vs. 기준 지도
+결과: IoU = 0.96 (96% 정합도)
+
+물리적 의미:
+  - 실제 환경의 장애물/자유 공간 구조를 96% 정확도로 재현
+  - 경로 계획 알고리즘이 시뮬 환경에서 학습한 내용이
+    실제 환경에서 유효함을 보장
+</code></pre>
+<h3>3.3 AgiSTACK — 컨테이너화된 자율화 스택</h3>
+<h4>컨테이너화 전략</h4>
+<pre><code>기존 접근:
+  ROS 2 패키지 직접 설치 → 환경 의존성 충돌
+  하드웨어마다 다른 드라이버 → 이식 불가
+
+AgiSTACK 접근:
+  Docker 컨테이너 기반:
+    ┌─────────────────────────────────────┐
+    │      Container: AgiSTACK           │
+    │  ┌────────┐  ┌─────────┐           │
+    │  │ SLAM   │  │ Planner │ ← 모듈    │
+    │  │(HEATS) │  │(PX4+   │            │
+    │  └────────┘  │ RRT*)  │            │
+    │              └─────────┘           │
+    │  ┌────────┐  ┌─────────┐           │
+    │  │ FAINT  │  │ Logger  │           │
+    │  │ Policy │  │(agi_    │           │
+    │  └────────┘  │ logger) │           │
+    │              └─────────┘           │
+    │       ROS 2 DDS 통신               │
+    └─────────────────────────────────────┘
+         ↕ 동일한 Docker 이미지
+    ┌─────────────────────────────────────┐
+    │      AgiSIM (UE5)                  │
+    └─────────────────────────────────────┘
+    ┌─────────────────────────────────────┐
+    │      AgiREAL (실제 UAV)            │
+    └─────────────────────────────────────┘
+
+제로샷 전이:
+  동일한 Docker 이미지 → 시뮬/현실 모두 배포 가능
+  환경 변수만 변경하여 플랫폼 전환
+</code></pre>
+<h4>HEATS 기반 SLAM 및 ESDF 생성</h4>
+<pre><code>HEATS (HEATs spatial mapping framework):
+  입력: Livox MID-360 포인트 클라우드 + IMU
+  출력: 
+    - 3D 점유 맵 (Occupied/Free/Unknown)
+    - ESDF (Euclidean Signed Distance Field)
+
+ESDF 활용:
+  D(p) = signed distance to nearest obstacle surface
+  D(p) &gt; 0: 자유 공간 (양수 = 장애물에서 떨어짐)
+  D(p) &lt; 0: 점유 공간 (음수 = 장애물 내부)
+  D(p) = 0: 장애물 경계면
+
+경로 계획에서의 ESDF 사용:
+  비용 함수: c(p) = λ_esdf * f(D(p)) + λ_dist * dist_to_goal
+  
+  f(D(p)) = {
+    0             if D(p) &gt; d_safe (안전 거리)
+    1/D(p)        if 0 &lt; D(p) ≤ d_safe
+    ∞             if D(p) ≤ 0 (장애물 내부)
+  }
+  
+  d_safe = 0.5m (실내 환경 기준)
+</code></pre>
+<h4>학습 기반 내비게이션 (FAINT Policy)</h4>
+<pre><code class="language-python"># FAINT (학습된 내비게이션 정책) 배포 흐름
+class FAINTPolicy:
+    &quot;&quot;&quot;
+    학습된 UAV 내비게이션 정책
+    입력: 센서 관측 → 출력: 속도 명령
+    &quot;&quot;&quot;
+    def __init__(self, model_path: str):
+        # TensorRT 최적화된 모델 (Jetson GPU 실행)
+        self.model = TRTModel(model_path)
+        self.inference_time = 120  # ms (Jetson Orin NX 기준)
+    
+    def predict(self, obs: dict) -&gt; VelocityCommand:
+        &quot;&quot;&quot;
+        obs = {
+            &#39;lidar&#39;: np.array,       # 포인트 클라우드
+            &#39;pose&#39;: SE3,             # 현재 자세 (SLAM 출력)
+            &#39;goal&#39;: np.array,        # 목표 위치
+            &#39;esdf&#39;: np.array,        # ESDF 맵
+        }
+        &quot;&quot;&quot;
+        # 센서 융합 → 상태 표현
+        state = self.encode_state(obs)
+        
+        # TensorRT 추론 (GPU 가속)
+        with torch.cuda.stream(self.cuda_stream):
+            velocity_cmd = self.model(state)
+        
+        return velocity_cmd  # (vx, vy, vz, yaw_rate)
+
+    def encode_state(self, obs):
+        # LiDAR 포인트 클라우드 → 주변 밀도 특징
+        lidar_feat = self.lidar_encoder(obs[&#39;lidar&#39;])
+        # 목표 방향 벡터
+        goal_vec = obs[&#39;goal&#39;] - obs[&#39;pose&#39;].translation()
+        # 상태 연결
+        return torch.cat([lidar_feat, goal_vec, obs[&#39;esdf&#39;]])
+</code></pre>
+<p>FAINT 정책 배포 결과:</p>
+<pre><code>일반 궤적 추적 RMSE: 1.07m
+챌린지 궤적 추적 RMSE: 1.42m
+추론 지연: 120ms (실시간 비행 제어 가능 수준)
+</code></pre>
+<h3>3.4 RRT* 기반 경로 계획</h3>
+<p>AgiSTACK의 전역 경로 계획기로 ESDF 인식 RRT*를 사용:</p>
+<pre><code>알고리즘: ESDF-aware RRT* (Rapidly-exploring Random Tree Star)
+
+입력:
+  - 현재 UAV 위치 p_start ∈ R^3
+  - 목표 위치 p_goal ∈ R^3
+  - ESDF 맵 D(·)
+
+RRT* 핵심 절차:
+  1. 랜덤 샘플링: p_rand ~ Uniform(MapBounds)
+  2. 최근접 노드: p_near = NearestNode(tree, p_rand)
+  3. 조종: p_new = Steer(p_near, p_rand, δ=0.5m)
+  4. 충돌 검사: IsCollisionFree(p_near, p_new, D) using ESDF
+     - 경로 상 모든 점에서 D(p) &gt; d_safe
+  5. 비용 재배선: 부모 노드 최적화 (최소 누적 비용)
+  6. 비용 전파: 자손 노드 비용 업데이트
+
+비용 함수:
+  cost(p_near → p_new) = ||p_new - p_near|| * (1 + α/D(p_new))
+  여기서 α: 장애물 근접 페널티 가중치 (α=2.0)
+
+목표 편향 샘플링:
+  p_rand = p_goal   with probability 0.1 (수렴 가속)
+  p_rand ~ Uniform  with probability 0.9
+
+출력:
+  - 경유점 시퀀스: [p_0, p_1, ..., p_K] (충돌 없는 경로)
+  - 각 경유점은 FAINT 로컬 정책의 목표로 사용
+</code></pre>
+<p>실험적 경로 계획 성능:</p>
+<pre><code>궤적 추적 ATE RMSE (Absolute Trajectory Error):
+                | Simulation | Real-World |
+Lemniscate      |  0.0637m   |  0.1404m   |
+Up-Down Spiral  |  0.0368m   |  0.1049m   |
+
+시뮬-현실 갭:
+  Lemniscate:    0.0637 → 0.1404m (+120% 오차)
+  Up-Down Spiral: 0.0368 → 0.1049m (+185% 오차)
+  
+  갭 분석:
+    - 실제 기류 효과 (로터 워시, 주변 바람)
+    - 배관/금속 구조물 근처의 LiDAR 간섭
+    - IMU 열 드리프트 누적
+    - 모터 토크 비선형성
+</code></pre>
+<h3>3.5 탐색 정책 (Exploration Policy)</h3>
+<p>실내 미지 환경에서의 자율 탐색을 위한 프론티어 기반 탐색:</p>
+<pre><code>Frontier-based Exploration:
+  1. HEATS SLAM으로 3D 점유 맵 실시간 구축
+  2. Frontier 감지: Known Free ↔ Unknown 경계 추출
+  3. Frontier 선택: 정보 이득 기반 (탐색 미지 영역 최대화)
+  4. 경로 계획: RRT*로 선택된 Frontier까지 경로 생성
+  5. 탐색 완료: Frontier 없을 때 (맵 완성)
+
+정보 이득 추정:
+  IG(f) = |UnknownVoxels(f, r_sensor)| 
+  # f: 프론티어 위치, r_sensor: 센서 범위
+
+ENRICH 2025 탐색 결과:
+  - 계획된 비행 거리 대비 완료율: 72%
+  - 실제 핵발전소 환경에서의 자율 내비게이션 성공
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                    AgiPIX 전체 아키텍처                      │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────┐         ┌──────────────────────────┐
+│      AgiSIM          │         │       AgiREAL              │
+│  (Unreal Engine 5)  │         │   (물리 UAV 플랫폼)         │
+│                     │         │                            │
+│  - 포토리얼리스틱   │ 동일한   │  - Livox MID-360 LiDAR   │
+│    디지털 트윈      │ 인터페이스│  - NVIDIA Jetson Orin NX │
+│  - 센서 에뮬레이션  │◄────────►│  - 하드웨어 타임스탬프   │
+│  - 물리 시뮬레이션  │ (ROS 2  │    동기화                │
+│  - UI 대시보드      │  topics) │  - 4축 로터 시스템       │
+└─────────────────────┘         └──────────────────────────┘
+          ↕ 동일한 Docker 이미지            ↕
+┌─────────────────────────────────────────────────────────────┐
+│                      AgiSTACK                               │
+│   (컨테이너화된 ROS 2 자율화 스택)                          │
+│                                                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│  │ HEATS SLAM   │  │  경로 계획   │  │  FAINT Policy    │  │
+│  │ LiDAR + IMU  │→│  (RRT* +     │→│  (학습 기반       │  │
+│  │ → 3D 맵 +   │  │   ESDF)      │  │   내비게이션)    │  │
+│  │   ESDF       │  │              │  │   120ms 추론     │  │
+│  └──────────────┘  └──────────────┘  └──────────────────┘  │
+│                                                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│  │ 탐색 정책    │  │  자세 제어   │  │  데이터 로거     │  │
+│  │ (Frontier    │  │  (PX4 FW)   │  │  (agi_logger)    │  │
+│  │  기반)       │  │              │  │  GitHub 공개     │  │
+│  └──────────────┘  └──────────────┘  └──────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                    ↑
+              제로샷 전이: 동일 컨테이너 → AgiSIM/AgiREAL 모두 배포
+</code></pre>
+<h3>데이터 흐름 설명</h3>
+<ol>
+<li><strong>감지 레이어</strong>: Livox MID-360 포인트 클라우드 + IMU → 하드웨어 타임스탬프 동기화</li>
+<li><strong>SLAM 레이어</strong>: HEATS 프레임워크 → 3D 점유 맵 + ESDF (실시간)</li>
+<li><strong>계획 레이어</strong>: ESDF-aware RRT* → 충돌 없는 경유점 시퀀스</li>
+<li><strong>제어 레이어</strong>: FAINT 정책 (학습 기반) + PX4 저수준 제어기</li>
+<li><strong>로깅 레이어</strong>: agi_logger → ROS 2 bag 파일 + 텔레메트리 데이터</li>
+<li><strong>UI 레이어</strong>: 실시간 3D 시각화 + 비행 상태 모니터링</li>
+</ol>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 및 테스트 환경</h3>
+<pre><code>테스트 환경 1: Tampere University 연구실
+  - 6m × 8m × 3m 실내 공간
+  - 표준화된 장애물 배치
+  - Motion Capture System (Vicon) 기준 위치
+
+테스트 환경 2: ENRICH 2025 챌린지 현장
+  - AKW Zwentendorf, 오스트리아 (폐기된 핵발전소)
+  - 실제 산업 인프라 (배관, 밸브, 계기판)
+  - 방사선 점검 임무 시나리오
+  - 비구조화된 실내 환경 (수십 미터 규모)
+</code></pre>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<pre><code>궤적 추적 정확도:
+  ATE RMSE: Absolute Trajectory Error (위치 오차 평균)
+  
+탐색 완료율:
+  계획된 비행 거리 대비 실제 완료 비율
+
+시스템 부하:
+  CPU/GPU 사용률 (실시간 자율화 실현 가능성)
+
+점유 맵 정확도:
+  IoU: 생성된 점유 맵 vs. 기준 맵의 교집합/합집합
+
+FAINT 추론 성능:
+  정책 추론 지연시간 (ms)
+</code></pre>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<h4>궤적 추적 성능:</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>궤적 유형</th>
+<th>시뮬레이션 ATE (m)</th>
+<th>현실 ATE (m)</th>
+<th>시뮬-현실 갭</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>레무니스케이트</td>
+<td>0.0637</td>
+<td>0.1404</td>
+<td>+120%</td>
+</tr>
+<tr>
+<td>상하 나선형</td>
+<td>0.0368</td>
+<td>0.1049</td>
+<td>+185%</td>
+</tr>
+</tbody></table></div>
+<h4>FAINT 정책 성능:</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>궤적 복잡도</th>
+<th>RMSE (m)</th>
+<th>추론 지연 (ms)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>일반</td>
+<td>1.07</td>
+<td>120</td>
+</tr>
+<tr>
+<td>챌린지</td>
+<td>1.42</td>
+<td>120</td>
+</tr>
+</tbody></table></div>
+<h4>시스템 리소스 사용:</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>리소스</th>
+<th>평균 사용률</th>
+<th>피크 사용률</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CPU (Jetson Orin NX Super 16GB)</td>
+<td>41%</td>
+<td>~72%</td>
+</tr>
+<tr>
+<td>GPU</td>
+<td>37%</td>
+<td>~65%</td>
+</tr>
+</tbody></table></div>
+<h4>점유 맵 정확도:</h4>
+<pre><code>IoU = 0.96 (기준 맵 대비 96% 일치)
+→ 시뮬레이터에서 학습한 경로 계획이
+  실제 환경에서도 유효함을 보장
+</code></pre>
+<h3>5.4 리얼월드 실험 (Real-World Experiments)</h3>
+<h4>ENRICH 2025 — 핵발전소 현장 실험</h4>
+<p>ENRICH(European Robotics Hackathon)는 실제 산업 시설에서 로봇을 평가하는 챌린지로, 2025년 오스트리아 Zwentendorf 핵발전소(폐기됨)에서 개최되었다.</p>
+<pre><code>임무 시나리오:
+  1. 방사선 감지 장비를 탑재한 AgiREAL UAV 배포
+  2. 핵발전소 내부 인프라 자율 탐색 및 점검
+  3. 계기판, 밸브, 배관 등의 시각적 점검 데이터 수집
+  4. 온보드 컴퓨팅만으로 실시간 SLAM + 경로 계획
+
+결과:
+  - 계획된 비행 거리의 72% 완료 ✅
+  - 온보드 자율 내비게이션 (외부 인프라 없음)
+  - AgiSTACK의 제로샷 배포 성공 (시뮬 → 현실 이식)
+  - 실시간 3D 맵 구축 및 시각화 성공
+
+28% 미완료 원인 분석:
+  - 배관 밀집 구역에서 LiDAR 반사 간섭
+  - 배터리 소모 제한 (비행 시간 ≈ 15분)
+  - 일부 구역의 금속 구조물 전자기 간섭
+</code></pre>
+<pre><code>┌─────────────────────────────────────────────────┐
+│    ENRICH 2025 실험 타임라인                     │
+│                                                  │
+│  T+0:00  AgiREAL 이륙 (자율)                   │
+│  T+1:30  복도 구역 SLAM 구축 완료               │
+│  T+4:00  Frontier 탐색으로 기계실 진입         │
+│  T+8:00  계기판 구역 점검 데이터 수집           │
+│  T+11:00 배관 구역 (LiDAR 간섭 발생)          │
+│  T+13:00 경로 재계획, 대체 경로 탐색           │
+│  T+15:00 배터리 경고 → 귀환 경로 실행         │
+│                                                  │
+│  최종: 계획 비행거리 100% 중 72% 완료 ✅       │
+└─────────────────────────────────────────────────┘
+</code></pre>
+<p>이 결과는 AgiPIX의 제로샷 전이 능력을 강력하게 검증한다. 시뮬레이터에서 개발한 자율화 스택이 실제 핵발전소의 극한 산업 환경에서 재훈련 없이 작동했다는 것은 매우 의미 있는 성과다.</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>기여 1: 완전 오픈소스 재현 가능 플랫폼</h3>
+<pre><code>공개 내용:
+  하드웨어:
+    - PCB 설계 파일 (KiCad 형식)
+    - 기계 CAD 파일 (SolidWorks/STEP)
+    - BOM (부품 목록, 예상 비용 포함)
+    - 조립 매뉴얼
+  
+  소프트웨어:
+    - Docker 이미지 (AgiSTACK)
+    - ROS 2 패키지 소스 코드
+    - AgiSIM 시뮬레이터 자산
+    - FAINT 정책 모델 가중치
+    - agi_logger (데이터 수집 도구)
+  
+  문서:
+    - 단계별 복제 가이드
+    - API 문서
+    - 튜토리얼 영상
+</code></pre>
+<p>기존 연구들이 &quot;우리 시스템으로 실험했다&quot;고만 서술하는 것과 달리, AgiPIX는 다른 연구자가 <strong>동일한 플랫폼을 처음부터 구축</strong>할 수 있도록 모든 것을 공개한다. 이는 실내 항공 자율화 연구의 재현성 위기 해결에 직접 기여한다.</p>
+<h3>기여 2: 제로샷 시뮬-현실 전이</h3>
+<pre><code>제로샷 전이의 의미:
+  기존: 시뮬 → 현실 시 도메인 적응 훈련 필요 (수 일~수 주)
+  AgiPIX: 시뮬 → 현실 직접 이식 (재훈련 없음)
+
+실현 방법:
+  1. 포토리얼리스틱 디지털 트윈 (시각적 갭 최소화)
+  2. 정밀 물리 시뮬레이션 (동역학 갭 최소화)
+  3. 컨테이너화된 동일 소프트웨어 스택 (인터페이스 갭 제거)
+  4. 하드웨어 동기화 (타이밍 갭 최소화)
+
+검증:
+  ENRICH 2025 현장에서 시뮬 개발 스택 직접 배포 성공
+</code></pre>
+<h3>기여 3: 실제 산업 환경 검증</h3>
+<p>ENRICH 2025 챌린지 참가는 학술 논문에서 흔히 볼 수 없는 수준의 현실 검증이다:</p>
+<pre><code>현실 검증의 가치:
+  실험실 환경 (대부분의 논문):
+    - 통제된 조명, 깨끗한 표면
+    - 단순한 장애물 (상자, 기둥)
+    - 사전 매핑된 환경
+  
+  ENRICH 2025 (AgiPIX):
+    - 실제 핵산업 인프라 (극한 환경)
+    - 복잡한 금속 구조물, 배관 미로
+    - 완전 미지 환경 (사전 맵 없음)
+    - 방사선 존재 (실제 운영 조건)
+</code></pre>
+<h3>기여 4: 모듈식 자율화 스택</h3>
+<pre><code>기존 접근: 단일 시스템 → 수정 어려움, 특정 하드웨어 종속
+AgiSTACK: 모듈식 ROS 2 컨테이너
+
+독립 업그레이드 가능 모듈:
+  ┌─────────────────────────────────────────────────┐
+  │ SLAM 모듈    │ 교체 가능: HEATS → FAST-LIO2 등  │
+  │ 계획 모듈    │ 교체 가능: RRT* → MPPI, EGO-PL.  │
+  │ 정책 모듈    │ 교체 가능: FAINT → SAC, PPO 등    │
+  │ 제어 모듈    │ 교체 가능: PX4 → Betaflight 등    │
+  └─────────────────────────────────────────────────┘
+  각 모듈은 표준 ROS 2 인터페이스로 연결
+</code></pre>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 하드웨어 사양</h3>
+<pre><code>AgiREAL UAV 사양:
+  축간거리: 250mm (소형, 실내 기동성)
+  최대 이륙 중량: 1.2kg
+  비행 시간: ~15분 (3S 2200mAh LiPo)
+  최대 속도: 3m/s (실내 안전 제한)
+  
+  컴퓨팅:
+    - Jetson Orin NX 16GB (기본형)
+    - Jetson Orin NX Super 16GB (성능형)
+    - PX4 비행 컨트롤러 (저수준 자세 제어)
+  
+  센서:
+    - Livox MID-360 (LiDAR, 주 센서)
+    - ICM-42688-P (IMU, 6축)
+    - FPV 카메라 (시각 점검)
+  
+  통신:
+    - WiFi 6 (원격 모니터링)
+    - USB-C (Jetson ↔ PX4)
+    - UART (PX4 ↔ Livox 동기화 트리거)
+</code></pre>
+<h3>7.2 소프트웨어 환경</h3>
+<pre><code class="language-yaml"># AgiSTACK Docker Compose (개념 구조)
+version: &#39;3.8&#39;
+services:
+  heats_slam:
+    image: agipix/heats:v1.2
+    environment:
+      - SENSOR_TYPE=livox_mid360
+      - MAP_RESOLUTION=0.1  # 10cm 복셀 해상도
+    volumes:
+      - /dev/livox:/dev/livox
+    
+  path_planner:
+    image: agipix/planner:v1.2
+    environment:
+      - PLANNER_TYPE=rrt_star
+      - D_SAFE=0.5  # 안전 거리 50cm
+      - ALPHA=2.0   # 장애물 근접 페널티
+    
+  faint_policy:
+    image: agipix/faint:v1.0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    
+  agi_logger:
+    image: agipix/logger:v1.1
+    # github.com/SasaKuruppuarachchi/agi_logger
+</code></pre>
+<h3>7.3 HEATS SLAM 파라미터</h3>
+<pre><code class="language-python"># HEATS SLAM 핵심 설정
+heats_config = {
+    # 포인트 클라우드 처리
+    &quot;voxel_size&quot;: 0.1,        # 10cm 복셀 크기
+    &quot;max_range&quot;: 15.0,         # LiDAR 최대 범위 (m)
+    &quot;min_range&quot;: 0.1,          # 최소 범위 (로터 자기반사 제거)
+    
+    # ESDF 계산
+    &quot;esdf_trunc_dist&quot;: 1.5,    # ESDF 절단 거리 (m)
+    &quot;esdf_update_freq&quot;: 10.0,  # Hz (충분한 실시간성)
+    
+    # 지도 관리
+    &quot;map_size&quot;: [50, 50, 5],   # 50m × 50m × 5m
+    &quot;sliding_window&quot;: True,    # 이동 윈도우 (메모리 효율)
+    
+    # IMU 통합
+    &quot;imu_freq&quot;: 400,           # Hz
+    &quot;lidar_freq&quot;: 10,          # Hz (Livox MID-360)
+}
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 분석</h3>
+<pre><code>현재 AgiPIX 시스템의 확장 가능성:
+
+단일 UAV → 다중 UAV 편대:
+  필요 추가 작업:
+    - 분산 SLAM (각 UAV가 맵 공유)
+    - 충돌 회피 (UAV 간 거리 유지)
+    - 통신 프로토콜 (WiFi ↔ Mesh 네트워크)
+  아키텍처 적합성:
+    - ROS 2 DDS → 멀티 노드 확장 용이 ★★★★★
+    - HEATS SLAM → 분산 버전 연구 중 ★★★☆☆
+
+실내 → 실외 확장:
+  주요 변경 사항:
+    - GPS 통합 (실외 절대 위치)
+    - 날씨 강건성 (방수 케이스 추가)
+    - 확장된 맵 크기 (메모리 제한)
+  아키텍처 적합성: ★★★★☆
+
+산업 시설 → 일반 실내 건물:
+  - 거의 변경 없이 적용 가능 ★★★★★
+  - 창고, 사무실, 의료시설 점검에 즉시 활용
+</code></pre>
+<h3>8.2 한계점 (Limitations)</h3>
+<h4>A. 배터리 제한</h4>
+<pre><code>현재: ~15분 비행 시간 (소형 LiPo 배터리)
+대형 산업 시설 점검: 수십 분~수 시간 필요
+
+해결 방안:
+  1. 교체식 배터리 모듈 (착륙 스테이션)
+  2. 케이블 급전 (특정 구역 집중 점검)
+  3. 연료 전지 통합 (고에너지 밀도)
+</code></pre>
+<h4>B. LiDAR 간섭</h4>
+<pre><code>금속 표면, 유리, 투명 물체:
+  - Livox MID-360이 ENRICH에서 경험한 반사 간섭
+  - 특히 스테인리스 배관, 금속 저장 탱크에서 발생
+  - 포인트 클라우드 오염 → SLAM 품질 저하
+
+해결 방안:
+  1. 강도(intensity) 기반 이상치 제거 필터
+  2. 다중 반사 모델링 (GPU 가속)
+  3. 보조 RGB-D 카메라 통합
+</code></pre>
+<h4>C. 좁은 공간 기동성</h4>
+<pre><code>현재 축간거리: 250mm
+좁은 배관 통로 (직경 &lt; 500mm):
+  - 로터 워시로 인한 자세 불안정
+  - 최소 안전 거리 제약 (d_safe=0.5m)
+  - 실제 핵발전소 일부 구역 진입 불가
+
+해결 방안:
+  1. 더 소형 플랫폼 (150mm급, 터널 드론)
+  2. 변형 구조 (접이식 암)
+  3. 뱀 형태 로봇으로 대체 (좁은 공간)
+</code></pre>
+<h3>8.3 향후 연구 방향</h3>
+<pre><code>단기 (2026):
+  1. 다중 UAV 협력 탐색 (편대 시스템)
+  2. RGB 카메라 통합 (시각적 결함 감지)
+  3. 방사선 센서 데이터 맵 융합
+
+중기 (2027):
+  4. 대형 언어 모델 기반 점검 보고서 자동 생성
+  5. 디지털 트윈 실시간 업데이트 (Live Digital Twin)
+  6. 강화학습 기반 자동 임무 계획
+
+장기 (2028+):
+  7. 산업 표준 인증 (IEC 61508 안전 수준)
+  8. 규제 당국 협력 (EASA 드론 규제 적용)
+  9. 상용화 (핵발전소, 정유시설, 화학공장 대상)
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>AgiPIX는 <strong>실내 항공 자율 탐색 + 산업 시설 점검</strong>에 특화된 오픈소스 플랫폼으로, 기존 Planner 트랙 리뷰 논문들과 다른 독특한 위치를 차지한다:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>TRG-Planner (RA-L 2025)</th>
+<th>HEIGHT (T-ASE 2025)</th>
+<th>SANDO (arXiv 2026)</th>
+<th>GPU-SLS (arXiv 2026)</th>
+<th>GRATE (IROS 2025)</th>
+<th><strong>AgiPIX (ICUAS 2026)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>로봇 유형</td>
+<td>사족보행</td>
+<td>지상</td>
+<td>UAV</td>
+<td>지상/UAV</td>
+<td>지상</td>
+<td><strong>UAV (실내)</strong></td>
+</tr>
+<tr>
+<td>계획 방식</td>
+<td>그래프 기반</td>
+<td>DRL</td>
+<td>MIQP 최적화</td>
+<td>GPU 비선형 MPC</td>
+<td>Transformer RL</td>
+<td><strong>RRT* + ESDF</strong></td>
+</tr>
+<tr>
+<td>환경 유형</td>
+<td>비정형 실외</td>
+<td>혼잡 실내</td>
+<td>동적 실외</td>
+<td>대규모 실외</td>
+<td>미지 실내</td>
+<td><strong>산업 실내</strong></td>
+</tr>
+<tr>
+<td>코드 공개</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td><strong>✅ (하드웨어까지)</strong></td>
+</tr>
+<tr>
+<td>실세계 실험</td>
+<td>✅ (사족보행)</td>
+<td>✅ (Turtlebot)</td>
+<td>✅ (UAV)</td>
+<td>❌</td>
+<td>❌</td>
+<td><strong>✅ (핵발전소)</strong></td>
+</tr>
+<tr>
+<td>플랫폼 공개</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td><strong>✅ (완전 오픈)</strong></td>
+</tr>
+<tr>
+<td>학회/저널</td>
+<td>RA-L 2025</td>
+<td>T-ASE 2025</td>
+<td>arXiv 2026</td>
+<td>arXiv 2026</td>
+<td>IROS 2025</td>
+<td><strong>ICUAS 2026</strong></td>
+</tr>
+<tr>
+<td>탐색 전략</td>
+<td>없음</td>
+<td>없음</td>
+<td>AEKF 추적</td>
+<td>MPC</td>
+<td>그래프 RL</td>
+<td><strong>Frontier 기반</strong></td>
+</tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>NeuPAN (RA-L)</th>
+<th>DreamFlow (ICRA 2026)</th>
+<th>IRRL (arXiv 2026)</th>
+<th><strong>AgiPIX</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 혁신</td>
+<td>E2E 점 내비게이션</td>
+<td>조건부 플로우 매칭</td>
+<td>점진적 잔차 RL</td>
+<td><strong>오픈 플랫폼 + 제로샷</strong></td>
+</tr>
+<tr>
+<td>실세계</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td><strong>✅ (산업 시설)</strong></td>
+</tr>
+<tr>
+<td>재현 가능성</td>
+<td>보통</td>
+<td>낮음</td>
+<td>낮음</td>
+<td><strong>높음 (완전 오픈)</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<h4>장점 (Strengths)</h4>
+<p><strong>1. 재현성의 혁명적 향상</strong></p>
+<p>기존 Planner 논문들이 알고리즘만 공개하는 것과 달리, AgiPIX는 <strong>하드웨어 설계까지 포함한 완전한 시스템</strong>을 공개한다:</p>
+<pre><code>재현 비용 비교:
+  기존 실내 UAV 연구 재현:
+    - 하드웨어 구입: $10K-$30K (상용 연구용 드론)
+    - 소프트웨어 통합: 2-6개월
+    - 전문 인력 필요: 임베디드 + ROS + 항공 엔지니어
+
+  AgiPIX 복제:
+    - 하드웨어 부품: ~$800-1500 (BOM 공개)
+    - 소프트웨어 설치: 1-2주 (Docker 기반)
+    - 문서화된 절차: 단계별 가이드
+</code></pre>
+<p><strong>2. 실제 산업 환경 검증의 희소성</strong></p>
+<p>SANDO(UAV 실험 있음)도 실외 열린 공간에서 테스트한 반면, AgiPIX는 <strong>실제 핵발전소 내부</strong>에서 테스트했다:</p>
+<pre><code>SANDO 실험: 옥외 환경 (GPS 보조 가능, 열린 공간)
+AgiPIX 실험: 핵발전소 실내 (GPS 없음, 복잡한 금속 구조물)
+
+난이도 차이:
+  - 비구조화된 금속 인프라 → LiDAR 반사 어려움
+  - GPS 불가 → 순수 LiDAR SLAM으로 자기 위치 추정
+  - 방사선 환경 → 전자 기기 내방사선 요구
+  - 좁은 통로 → 정밀 비행 제어 필수
+</code></pre>
+<p><strong>3. 제로샷 전이의 실용적 가치</strong></p>
+<p>GRATE(미지 환경 탐색)가 알고리즘 수준에서만 다뤘다면, AgiPIX는 <strong>시스템 수준에서 제로샷 전이</strong>를 구현하고 검증했다.</p>
+<h4>단점 (Weaknesses)</h4>
+<p><strong>1. 경로 계획 알고리즘의 참신성 부족</strong></p>
+<pre><code>사용된 계획 알고리즘:
+  RRT*: 1998년 제안 (Lavalle), 2011년 점근 최적성 증명
+  ESDF: 2017년 EDF, 2019년 ESDF-based 계획 대중화
+  Frontier 탐색: 1997년 Yamauchi
+
+AgiPIX의 기여: 이 알고리즘들의 통합 + 플랫폼
+→ 알고리즘 자체의 혁신이 아닌 시스템 통합 기여
+</code></pre>
+<p>플래닝 알고리즘 측면에서 TRG-Planner(방향별 위험도 그래프), GPU-SLS(GPU 가속 비선형 MPC), SANDO(MIQP + STSFC) 등에 비해 알고리즘적 혁신성은 낮다.</p>
+<p><strong>2. ICUAS 수준의 학회</strong></p>
+<pre><code>투고 학회: ICUAS 2026 (International Conference on Unmanned Aircraft Systems)
+임팩트: ICRA, IROS, RA-L 대비 낮음
+
+플래너 트랙 기존 리뷰:
+  TRG-Planner: RA-L (탑 저널)
+  HEIGHT: T-ASE (탑 저널)
+  SANDO: arXiv (강력한 MIT ACL 연구실)
+  
+AgiPIX: ICUAS (상대적으로 낮은 임팩트)
+→ 논문의 학술적 기여보다 오픈소스 기여가 더 큼
+</code></pre>
+<p><strong>3. 단일 환경 유형 특화</strong></p>
+<p>현재 AgiPIX는 실내 산업 시설에 특화되어 있어, 다음 환경으로의 일반화가 미검증:</p>
+<ul>
+<li>연기/연무가 있는 화재 현장</li>
+<li>수중 환경 (해양 시설 점검)</li>
+<li>반지하 환경 (지하철 터널)</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>핵발전소/원자력 시설 점검:
+  적합도: ★★★★★ (5/5) ← ENRICH 2025에서 이미 검증
+  이유: 실제 핵발전소 환경 테스트 완료
+  필요 추가 작업: 방사선 센서 통합, 장시간 운영
+
+화학 공장/정유 시설:
+  적합도: ★★★★☆ (4/5)
+  이유: 유사한 금속 인프라 환경
+  필요 추가 작업: ATEX 방폭 인증, 가스 감지 통합
+
+창고/물류 센터:
+  적합도: ★★★★★ (5/5)
+  이유: 환경이 단순하고 목표 명확 (재고 확인)
+  필요 추가 작업: 카메라 기반 인식 통합
+
+건축 현장 점검:
+  적합도: ★★★☆☆ (3/5)
+  이유: 야외+실내 하이브리드, GPS 필요
+  필요 추가 작업: GPS/LiDAR 융합
+
+연구용 플랫폼:
+  적합도: ★★★★★ (5/5)
+  이유: 완전 오픈소스, 낮은 복제 비용, 풍부한 문서
+</code></pre>
+<h3>9.4 연구 방향성 평가</h3>
+<p>AgiPIX가 제시하는 <strong>&quot;재현 가능한 오픈 플랫폼&quot;</strong> 연구 방향은 로보틱스 분야의 중요한 공백을 채운다. 알고리즘 논문이 넘쳐나는 반면, 다른 연구자가 실제로 사용할 수 있는 플랫폼 논문은 드물다.</p>
+<p>기존 리뷰 논문들이 알고리즘 혁신에 집중한 것과 달리, AgiPIX는 <strong>플랫폼 생태계 구축</strong>이라는 다른 차원의 기여를 한다. 이는 OpenAI Gym이 RL 연구를 민주화했듯, AgiPIX가 실내 항공 자율화 연구를 민주화할 수 있는 잠재력을 가진다.</p>
+<p>단, 알고리즘적 참신성이 낮고 ICUAS라는 상대적으로 낮은 임팩트 학회를 대상으로 한다는 점에서, 순수 알고리즘 기여를 중시하는 관점에서는 한계가 있다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li>AgiPIX paper: arXiv:2604.08009v1 (2026), ICUAS 2026 제출</li>
+<li>HEATS: LiDAR-based SLAM framework for indoor environments</li>
+<li>FAINT: 학습 기반 항공 내비게이션 정책 (AgiPIX에서 활용)</li>
+<li>Livox MID-360 Datasheet: <a href="https://www.livoxtech.com/mid-360">https://www.livoxtech.com/mid-360</a></li>
+<li>NVIDIA Jetson Orin NX Technical Reference: NVIDIA Developer</li>
+<li>RRT*: Karaman &amp; Frazzoli, &quot;Sampling-based Algorithms for Optimal Motion Planning,&quot; IJRR (2011)</li>
+<li>ESDF 기반 경로 계획: Oleynikova et al., &quot;Voxblox: Incremental 3D Euclidean Signed Distance Fields,&quot; IROS (2017)</li>
+<li>Frontier 탐색: Yamauchi, &quot;A Frontier-based Approach for Autonomous Exploration,&quot; CIRA (1997)</li>
+<li>PX4 Autopilot: <a href="https://px4.io/">https://px4.io/</a> (오픈소스 비행 컨트롤러)</li>
+<li>ROS 2: <a href="https://ros.org/">https://ros.org/</a></li>
+<li>TRG-Planner: arXiv:2501.01806 (RA-L 2025) — 리뷰 완료</li>
+<li>HEIGHT: arXiv:2411.12150 (T-ASE 2025) — 리뷰 완료</li>
+<li>SANDO: arXiv:2604.07599 (arXiv 2026) — 리뷰 완료</li>
+<li>GPU-SLS: arXiv:2604.07644 (arXiv 2026) — 리뷰 완료</li>
+<li>GRATE: arXiv:2509.12863 (IROS 2025) — 리뷰 완료</li>
+<li>IRRL: arXiv:2604.07945 (arXiv 2026) — 리뷰 완료</li>
+<li>DreamFlow: arXiv:2603.02976 (ICRA 2026) — 리뷰 완료</li>
+<li>NeuPAN: arXiv:2403.06828 (RA-L) — 리뷰 완료</li>
+<li>ENRICH 2025: European Robotics Hackathon, Zwentendorf, Austria, 2025</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>혁신성 평가</h3>
+<p>AgiPIX의 혁신성은 알고리즘보다 <strong>시스템 통합과 오픈소스 생태계</strong>에 있다. RRT*, ESDF, Frontier 탐색이라는 검증된 알고리즘들을 <strong>재현 가능한 하드웨어 + 컨테이너화된 소프트웨어 + 포토리얼리스틱 시뮬레이터</strong>로 통합하여, 실내 항공 자율화 연구의 진입 장벽을 획기적으로 낮춘다.</p>
+<p>특히 ENRICH 2025 핵발전소 현장 실험은 논문의 실용적 가치를 크게 높인다. 대부분의 Planner 논문이 시뮬레이션이나 연구실 환경에 머무는 반면, AgiPIX는 실제 산업 현장에서 자율 비행을 검증했다.</p>
+<h3>실용적 의의</h3>
+<p>AgiPIX는 다음 실용적 응용 분야에서 즉각적인 활용 가능성을 가진다:</p>
+<ol>
+<li><strong>산업 시설 정기 점검</strong>: 핵발전소, 정유 시설, 화학 공장</li>
+<li><strong>재난 현장 탐색</strong>: 건물 붕괴, 화재 현장의 사전 정찰</li>
+<li><strong>창고/물류 센터 재고 관리</strong>: 자동화된 재고 스캐닝</li>
+<li><strong>연구 플랫폼</strong>: 실내 항공 자율화 알고리즘 개발의 표준 테스트베드</li>
+</ol>
+<h3>향후 연구 방향</h3>
+<p>가장 시급한 개선은 (1) 더 긴 비행 시간(케이블 급전 또는 교체 배터리), (2) 강화된 금속 환경 LiDAR 처리, (3) 다중 UAV 협력 탐색이다. 장기적으로 AgiPIX가 실내 항공 자율화 연구의 <strong>표준 플랫폼</strong>으로 자리잡는다면, 이는 학계와 산업계 모두에 큰 기여가 될 것이다.</p>
+<p>현재 존재하는 알고리즘-플랫폼 갭(뛰어난 알고리즘 논문은 많지만 실제 사용 가능한 시스템은 드문)을 메우려는 AgiPIX의 시도는 올바른 방향이다. ENRICH 2025의 현실 검증이 이를 뒷받침한다.</p>
+<hr>
+<p><em>리뷰 작성: 2026-04-14</em>
+<em>리뷰어: NanoClaw Paper Bot</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,1124 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Task-Conditioned Uncertainty Costmaps for Legged Locomotion · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 2026</div>
+    <h1>Task-Conditioned Uncertainty Costmaps for Legged Locomotion</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2605.00261">arXiv:2605.00261</a></span>
+      <span>리뷰 2026-05-04</span>
+      <span>41분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>Task-Conditioned Uncertainty Costmaps for Legged Locomotion: 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Task-Conditioned Uncertainty Costmaps for Legged Locomotion</li>
+<li><strong>저자 (Authors)</strong>: Kartikeya Singh, Christo Aluckal, Romeo Orsolino, Karthik Dantu</li>
+<li><strong>소속 (Affiliation)</strong>: University at Buffalo (SUNY), Department of Computer Science and Engineering</li>
+<li><strong>발표처 (Published)</strong>: arXiv 프리프린트 (2026-04-30)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2605.00261">https://doi.org/10.48550/arXiv.2605.00261</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2605.00261">https://arxiv.org/abs/2605.00261</a></li>
+<li><strong>코드</strong>: 미공개 (논문 제출 중)</li>
+</ul>
+<hr>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>사족보행 로봇(legged robot)이 <strong>비정형 지형(unstructured terrain)</strong>을 탐색할 때 발생하는 핵심 문제는, 기하학적 거칠기(geometric roughness)만으로는 <strong>실제 운동 실현 가능성(locomotion feasibility)</strong>을 정확히 예측할 수 없다는 점이다. 동일한 지형이라도 로봇의 보행 속도, 방향, 보행 패턴(gait)에 따라 발판(foothold) 가능 여부가 달라지기 때문이다.</p>
+<p>이 논문은 다음을 달성하고자 한다:</p>
+<ol>
+<li><strong>과제 조건부 불확실성 모델링</strong>: 지형 관찰과 운동 명령을 함께 입력받아, 학습 데이터 커버리지 외부(Out-Of-Distribution, OOD) 영역을 인식적 불확실성(epistemic uncertainty)으로 정량화</li>
+<li><strong>불확실성 통합 비용 지도</strong>: 예측된 발판 불확실성을 코스트맵(costmap)으로 변환하여 경로 계획기에 통합</li>
+<li><strong>실세계 검증</strong>: Unitree Go1 사족보행 로봇 실험으로 시뮬레이션-현실 격차 검증</li>
+</ol>
+<p>핵심 통찰: &quot;로봇이 <strong>모르는 것이 무엇인지</strong>를 알면, 알지 못하는 지형을 피할 수 있다.&quot;</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>도전과제 1: 기하학 기반 코스트맵의 불충분성</h4>
+<p>기존 사족보행 내비게이션 시스템은 주로 고도 지도(elevation map)나 표면 거칠기(surface roughness)를 기반으로 코스트맵을 생성한다:</p>
+<pre><code>기존 접근법:
+  cost(x,y) = f(elevation_gradient(x,y))   [경사 기반]
+           또는 = f(surface_roughness(x,y)) [거칠기 기반]
+
+문제점:
+  ① 운동 명령 무시: v=0.5m/s로 걷는 것과 v=0.1m/s로 걷는 것은
+     동일한 지형에서도 발판 가능성이 다름
+  ② OOD 지형 미인식: 훈련 데이터에 없던 지형에서 잘못된 저비용
+     경로로 안내 → 실패 위험
+  ③ 불확실성 무시: 예측 신뢰도를 반영하지 않음 → 예측이 틀렸을 때
+     대안 없음
+</code></pre>
+<h4>도전과제 2: 발판 예측 학습의 어려움</h4>
+<p>발판 예측 모델(foothold prediction model)을 학습하려면:</p>
+<ul>
+<li>지형 관찰(고도 스캔) + 운동 명령 → 미래 발판 위치 예측</li>
+<li>그러나 비정형 지형의 다양성은 무한하며, 한정된 훈련 데이터로 모든 지형을 커버 불가</li>
+<li>특히 훈련 분포 외 지형(wavy surfaces, spikes, stepped terrain)에서 예측 오차 급증</li>
+</ul>
+<pre><code>발판 예측의 수학적 표현:
+  입력: h ∈ ℝ^(6×17) (고도 격자, 0.6m×1.6m, 0.1m 해상도)
+  운동: v = (v_x, v_y, ω) (속도 명령)
+  출력: f̂ = {(x̂ᵢ, ŷᵢ, ẑᵢ)} for i=1..4 (4발 예측 발판)
+
+문제: 실제 발판 f과 예측 발판 f̂의 오차가 클수록 
+     이동 불안정성(instability) 증가
+</code></pre>
+<h4>도전과제 3: 인식적 불확실성 추정의 계산 비용</h4>
+<p>베이지안 딥러닝 기반 불확실성 추정(예: 가우시안 프로세스, 베이지안 신경망)은 계산 비용이 크다. 실시간 로봇 제어를 위해서는 경량화된 불확실성 추정이 필요하다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>Task-Conditioned Uncertainty Costmaps의 핵심 해결책:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>문제</th>
+<th>해결책</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>기하학 기반 비용의 한계</td>
+<td>발판 예측 모델 기반 태스크 조건부 비용</td>
+</tr>
+<tr>
+<td>OOD 지형 미인식</td>
+<td>앙상블 + MC 드롭아웃 기반 인식적 불확실성 추정</td>
+</tr>
+<tr>
+<td>불확실성 → 비용 변환</td>
+<td>가우시안 블롭 기반 공간 비용 맵 생성</td>
+</tr>
+<tr>
+<td>실시간 요구사항</td>
+<td>3 앙상블 × 20 MC 샘플 = 60회 순전파로 효율적 추정</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 발판 예측 모델 (Foothold Prediction Model)</h3>
+<p><strong>입력 표현:</strong></p>
+<pre><code>지형 관찰 h:
+  - LiDAR 고도 격자 (6×17 = 102 셀)
+  - 0.6m × 1.6m 전방 영역
+  - 0.1m 해상도
+  - 풀링: 102차원 → 12차원 지형 디스크립터
+
+운동 명령 v:
+  - (v_x, v_y, ω): 선속도 × 2 + 각속도
+  - 연속 값 (훈련 시 정적 속도 분포에서 샘플링)
+
+최종 입력: x = [h_pool; v] ∈ ℝ^15
+</code></pre>
+<p><strong>모델 구조:</strong></p>
+<pre><code>모델 아키텍처: MLP (Multi-Layer Perceptron)
+  입력: 15차원 (12차원 지형 + 3차원 속도)
+  은닉층: [64, 128, 64] (선택적)
+  출력: 4×3 = 12차원 (4발 × (x,y,z) 발판 좌표)
+
+앙상블: 3개 독립 모델 학습
+   M₁, M₂, M₃ 각자 독립 랜덤 초기화 + 독립 학습
+
+MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
+   N_MC = 20 순전파 → 예측 분포 획득
+</code></pre>
+<p><strong>학습 데이터:</strong></p>
+<pre><code>시뮬레이터: IsaacSim (Unitree Go1)
+훈련 지형: 평탄 지형 (in-distribution 기준)
+평가 지형: Wavy, Stepped, Spike-rough (OOD)
+속도: 상수 속도 (훈련 분포 일치)
+</code></pre>
+<h3>3.2 인식적 불확실성 추정 (Epistemic Uncertainty Estimation)</h3>
+<p>불확실성 추정은 앙상블과 MC 드롭아웃의 결합으로 이루어진다:</p>
+<pre><code>총 예측 수: K = N_ens × N_MC = 3 × 20 = 60회 순전파
+
+앙상블 예측 평균: μ̄ₜ = (1/K) Σ μₖ,ₜ
+
+인식적 분산 (Epistemic Variance):
+  σ²ₑ,ₜ = (1/K) Σ (μₖ,ₜ - μ̄ₜ)²
+
+                앙상블 분산   +   MC 내부 분산
+  σ²ₑ,ₜ ≈   Var_ens(μₖ,ₜ)  +   E_ens[Var_MC(μₖ,ₜ)]
+</code></pre>
+<p><strong>손실 함수:</strong></p>
+<p>학습에는 세 가지 손실 항이 사용된다:</p>
+<pre><code>1. 예측 손실 (Prediction Loss):
+   L_pred = (1/N) Σ ||f̂ₜ - fₜ||²₂  (MSE)
+
+2. 인식적 손실 (Epistemic Loss):
+   L_epi = -log(σ²ₑ,ₜ + ε)
+   → 불확실성 과대 추정 방지 (페널티)
+
+3. 교정 손실 (Calibration Loss):
+   L_cal = ||1 - ρ(σ²ₑ,ₜ, |f̂ₜ - fₜ|)||²
+   ρ: 피어슨 상관계수
+   → 불확실성 ↔ 예측 오차 선형 정렬 강제
+
+총 손실:
+   L = L_pred + λ_epi × L_epi + λ_cal × L_cal
+</code></pre>
+<p><strong>교정 손실의 핵심 역할:</strong></p>
+<pre><code>목표: σ²ₑ,ₜ ∝ |f̂ₜ - fₜ|  (불확실성이 실제 오차를 예측)
+
+직관:
+  OOD 지형에서:   σ²ₑ → 높음, |error| → 높음 ✓
+  ID 지형에서:    σ²ₑ → 낮음,  |error| → 낮음 ✓
+
+교정 없이:
+  모델이 ID 지형에서도 높은 불확실성을 유지 (과대 추정)
+  또는 OOD에서도 낮은 불확실성 (과소 추정)
+  → 코스트맵 신뢰도 저하
+</code></pre>
+<h3>3.3 불확실성 코스트맵 생성 (Uncertainty Costmap Generation)</h3>
+<p>예측된 발판 불확실성을 2D 비용 지도로 변환하는 과정:</p>
+<pre><code>단계 1: 발당 불확실성 비용 계산
+  cᵢ = min(100, α × σ̄²ₑ,ᵢ)
+  여기서:
+    σ̄²ₑ,ᵢ: i번째 발의 평균 인식적 분산 (x,y,z 성분 평균)
+    α: 스케일링 계수 (하이퍼파라미터)
+    min(100, ...): 최대 비용 클리핑
+
+단계 2: 가우시안 블롭 공간 확산
+  C(x,y) = maxᵢ [cᵢ × exp(-||[x,y] - [xᵢ,yᵢ]||² / (2σ²ᵦ))]
+  여기서:
+    (xᵢ,yᵢ): 예측 발판 i의 XY 위치
+    σᵦ: 가우시안 블롭 반경 (발 크기 기반 설정)
+    max 연산: 다리 간 비용 중첩 처리
+
+단계 3: 경로 계획기 통합
+  시뮬레이션: MPPI (Model Predictive Path Integral) 플래너
+  실세계: NAV2 스택 (ROS2 기반 내비게이션)
+
+  통합 비용: J_total = J_goal + w_unc × C(trajectory)
+  → 불확실성 높은 영역을 우회하는 경로 선택
+</code></pre>
+<p><strong>시스템 아키텍처 다이어그램:</strong></p>
+<pre><code>                Task-Conditioned Uncertainty Costmap 시스템
+┌──────────────────────────────────────────────────────────────────┐
+│                                                                    │
+│  ┌─────────────┐   h ∈ ℝ^(6×17)    ┌─────────────────────────┐  │
+│  │  LiDAR      │──────────────────► │  지형 디스크립터 풀링     │  │
+│  │  고도 스캔   │                    │  6×17 → 12차원          │  │
+│  └─────────────┘                    └────────────┬────────────┘  │
+│                                                  │ h_pool         │
+│  ┌─────────────┐   v ∈ ℝ³           ┌────────────▼────────────┐  │
+│  │  로코모션   │──────────────────► │   입력 결합: [h;v] ∈ ℝ¹⁵│  │
+│  │  정책 명령  │                    └────────────┬────────────┘  │
+│  └─────────────┘                                │                │
+│                                                  ▼                │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │            앙상블 + MC 드롭아웃 발판 예측                     │ │
+│  │  M₁ × 20MC + M₂ × 20MC + M₃ × 20MC = 60 예측              │ │
+│  │                                                              │ │
+│  │  μ̄ₜ (평균 발판)   +   σ²ₑ,ₜ (인식적 분산)                  │ │
+│  └─────────────────────┬───────────────┬───────────────────────┘ │
+│                        │               │                          │
+│                        ▼               ▼                          │
+│  ┌──────────────────────────────────────────────────────────────┐│
+│  │              불확실성 코스트맵 생성                             ││
+│  │  cᵢ = min(100, α×σ²ₑ,ᵢ)   →  가우시안 블롭  →  2D C(x,y)   ││
+│  └──────────────────────────────────┬───────────────────────────┘│
+│                                     │                             │
+│  ┌──────────────────────────────────▼───────────────────────────┐│
+│  │           경로 계획기 통합                                      ││
+│  │  시뮬레이션: MPPI  |  실세계: NAV2 (ROS2)                     ││
+│  │  J = J_goal + w_unc × C(trajectory)                          ││
+│  └───────────────────────────────────────────────────────────────┘│
+└──────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>3.4 실현 가능성 평가 (Feasibility Evaluation)</h3>
+<p>경로 계획 품질 평가를 위한 정량적 지표:</p>
+<pre><code>반복 투영(IP) 안정성 여유:
+  mᵗᵖʳᵉᵈ: 예측 발판에 대한 안정성 여유
+  mᵗᵃᶜᵗᵘᵃˡ: 실제 발판에 대한 안정성 여유
+
+  실현 가능성 비용 = f(m):
+    m ≤ 0: 불안정 (페널티 크게)
+    m &gt; 0: 안정적 (페널티 없음)
+
+평가 지표: 평균 실현 가능성 오차 (Mean Feasibility Error)
+  FE = E[|mᵗᵖʳᵉᵈ - mᵗᵃᶜᵗᵘᵃˡ|]
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<p><img src="figures/fig_08_01.jpeg" alt="모델 아키텍처 개요" loading="lazy"></p>
+<p>전체 파이프라인은 세 레이어로 구성된다:</p>
+<pre><code>레이어 1: 지각 (Perception)
+  하향 LiDAR → 고도 격자 h (6×17)
+  로코모션 정책 → 운동 명령 v = (v_x, v_y, ω)
+
+레이어 2: 예측 + 불확실성 (Prediction + Uncertainty)
+  [h_pool; v] → 앙상블 MLP (3개 모델 × 20 MC 드롭아웃)
+  출력: {μ̄ₜ, σ²ₑ,ₜ} for 4발
+
+레이어 3: 계획 (Planning)
+  σ²ₑ,ₜ → 가우시안 블롭 코스트맵 C(x,y)
+  C(x,y) → MPPI/NAV2 비용 함수 통합
+  → 불확실성 회피 경로 생성
+</code></pre>
+<p><strong>데이터 흐름:</strong></p>
+<pre><code>로봇 탑재 센서
+       │
+       ├─ 하향 LiDAR 포인트클라우드
+       │        │
+       │        ▼
+       │  고도 격자 추출 (6×17, 0.6m×1.6m)
+       │        │ 풀링
+       │        ▼
+       │   h_pool ∈ ℝ¹²
+       │
+       └─ 로코모션 정책 명령
+                │
+                ▼
+           v = (v_x, v_y, ω) ∈ ℝ³
+                │
+                │ (실시간, 60Hz)
+                ▼
+        앙상블 발판 예측기
+        M₁, M₂, M₃ (각 MLP)
+        × 20 MC 드롭아웃 샘플
+        = 60회 병렬 순전파
+                │
+                ▼
+        {μ̄ₜ, σ²ₑ,ₜ} for FL,FR,RL,RR
+                │
+                ▼ 가우시안 블롭 확산
+        2D 코스트맵 C(x,y)
+                │
+                ▼
+        MPPI / NAV2 플래너
+                │
+                ▼
+        안전 경로 →  로코모션 실행
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<pre><code>훈련 환경: IsaacSim (Unitree Go1)
+  - 훈련 지형: 평탄 지형 (flat terrain)
+  - 훈련 속도: 상수 속도 세트
+
+평가 지형 (시뮬레이션):
+  1. Wavy Surfaces: 파형 굴곡 지형
+  2. Stepped Terrain: 계단형 지형
+  3. Spike-Rough: 스파이크 형태 거친 지형
+  × 3개 설정 × 3회 실행 = 27개 실험 조건
+
+평가 지형 (실세계):
+  1. 5cm 보드 위 (raised platform 5cm)
+  2. 10cm 보드 위 (raised platform 10cm)
+  3. 가변 경사 램프 (0~15cm 경사)
+  × Unitree Go1 실제 로봇 실험
+</code></pre>
+<p><img src="figures/fig_09_01.jpeg" alt="실험 환경 설정" loading="lazy"></p>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>지표</th>
+<th>설명</th>
+<th>범위</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>평균 실현 가능성 오차 (FE)</strong></td>
+<td>예측 vs 실제 안정성 여유 차이</td>
+<td>낮을수록 좋음</td>
+</tr>
+<tr>
+<td><strong>OOD 감지율</strong></td>
+<td>ID vs OOD 지형 구분 정확도</td>
+<td>높을수록 좋음</td>
+</tr>
+<tr>
+<td><strong>목표 도달 진행도 (GP)</strong></td>
+<td>목표까지의 진행 비율</td>
+<td>높을수록 좋음</td>
+</tr>
+<tr>
+<td><strong>KDE 분산</strong></td>
+<td>MPPI 20회 실행 간 성능 안정성</td>
+<td>낮을수록 좋음</td>
+</tr>
+</tbody></table></div>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>OOD 감지 성능 (불확실성 캘리브레이션):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>지형 유형</th>
+<th>ID 불확실성</th>
+<th>OOD 불확실성</th>
+<th>감지 가능 여부</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Wavy</td>
+<td>17cm</td>
+<td>21cm</td>
+<td>✅ (+4cm 차이)</td>
+</tr>
+<tr>
+<td>Stepped</td>
+<td>17cm</td>
+<td>21cm</td>
+<td>✅ (+4cm 차이)</td>
+</tr>
+<tr>
+<td>Spiked</td>
+<td>17cm</td>
+<td>19~27cm</td>
+<td>✅ (가변적)</td>
+</tr>
+<tr>
+<td><strong>기준선 (장애물만)</strong></td>
+<td>17cm</td>
+<td>~17cm</td>
+<td>❌ (구분 불가)</td>
+</tr>
+</tbody></table></div>
+<p><strong>실현 가능성 오차 감소 (시뮬레이션):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>혼합 지형 평균 FE</th>
+<th>개선율</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>장애물 전용 코스트맵</td>
+<td>15.9 ~ 81.18</td>
+<td>기준선</td>
+</tr>
+<tr>
+<td>거칠기 전용 코스트맵</td>
+<td>12.0 ~ 75.3</td>
+<td>부분 개선</td>
+</tr>
+<tr>
+<td><strong>제안 방법 (불확실성)</strong></td>
+<td><strong>12.7 ~ 20.7</strong></td>
+<td><strong>37% 감소</strong></td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p><strong>37% 개선의 상세:</strong>
+비교 기준선(obstacle-only) 최악 케이스 81.18 → 제안 방법 최악 케이스 20.7로 감소 (절대 감소: ~60.5)
+또는 중앙값 기준 15.9 → 12.7로 감소 (20% 개선), 분산 대폭 감소 (14배)</p>
+</blockquote>
+<p><strong>목표 도달 성능 (MPPI 20회, 시뮬레이션):</strong></p>
+<pre><code>MPPI 20회 실행 KDE 분포 (Figure 5):
+  ┌─────────────────────────────────────────────┐
+  │ 제안 방법:  ████████ (높은 중앙값, 좁은 분포) │
+  │ 거칠기 전용: ██████   (유사하나 과보수적)     │
+  │ 장애물 전용: ████     (위험 지름길 선택)      │
+  └─────────────────────────────────────────────┘
+→ 제안 방법: 최고 중앙 진행도 + 최소 분산 (가장 안정적)
+</code></pre>
+<p><img src="figures/fig_09_02.jpeg" alt="MPPI 계획 결과 비교" loading="lazy"></p>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p><img src="figures/fig_07_01.jpeg" alt="실세계 실험 결과" loading="lazy"></p>
+<p>실세계 실험은 <strong>Unitree Go1</strong> 사족보행 로봇으로 수행되었다:</p>
+<pre><code>실험 구성:
+  - 하향 LiDAR (기존 전방 LiDAR를 하향으로 교체)
+  - NAV2 스택과 제안 코스트맵 통합
+  - 시뮬레이션 학습 모델을 Zero-Shot으로 전이
+
+실험 1: 5cm 보드 배치
+  → 로봇 경로 상에 5cm 높이 보드 배치
+  → 제안 방법: 보드 위치에서 국소 불확실성 급등 감지 ✅
+  → 장애물/거칠기 기준선: 감지 실패 (낮은 기하학적 특징) ❌
+
+실험 2: 10cm 보드 배치
+  → 더 높은 장애물, 더 명확한 OOD 신호
+  → 제안 방법: 우회 경로 성공적 선택 ✅
+
+실험 3: 가변 경사 램프 (0~15cm)
+  → 점진적 높이 변화, 속도 명령 일정 유지
+  → 제안 방법: 경사 시작점에서 불확실성 증가 감지
+  → OOD 감지 임계가 학습 시 미노출 경사 감지
+</code></pre>
+<p><strong>Sim-to-Real 전이 결과:</strong></p>
+<pre><code>전이 방법: 직접 배포 (Zero-Shot, 도메인 적응 없음)
+결과:
+  ✅ 불확실성 패턴이 시뮬레이션과 실세계에서 일관성 유지
+  ✅ 5cm 장애물 (기하학적으로 낮아 기존 코스트맵에 미감지) 탐지
+  ✅ 실시간 동작 가능 (60Hz 로코모션 정책 주기 내)
+</code></pre>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>기여 1: 태스크 조건부 불확실성 모델링</h3>
+<p>기존 불확실성 기반 코스트맵과의 차별점:</p>
+<pre><code>기존 접근법:
+  uncertainty(terrain) = f(geometry only)
+  → 로봇의 현재 태스크(속도, 방향) 무시
+
+제안 방법:
+  uncertainty(terrain, task) = f(h, v)
+  → 동일한 지형이라도 빠른 속도 명령 시 더 높은 불확실성
+  → 로봇의 현재 운동 상태에 의존적인 위험도 평가 가능
+</code></pre>
+<p>이 접근법은 &quot;<strong>지형이 아니라 이 지형에서 이 속도로 이 방향으로 걷는 것</strong>&quot;의 위험도를 평가한다는 점에서 이전 연구들과 근본적으로 다르다.</p>
+<h3>기여 2: 앙상블 + MC 드롭아웃 조합 불확실성 추정</h3>
+<pre><code>방법의 이점:
+  앙상블 (3개): 모델 수준 다양성 포착
+  MC 드롭아웃 (20회): 파라미터 수준 다양성 포착
+
+  K = 3 × 20 = 60 → 충분한 샘플 수로 안정적 분산 추정
+  동시에 베이지안 신경망보다 훨씬 효율적 (변분 추론 불필요)
+
+구현 효율성:
+  배치 처리: 60회 순전파를 병렬 배치로 처리
+  경량 MLP: GP나 BNN 대비 추론 속도 우수
+</code></pre>
+<h3>기여 3: 교정 손실 (Calibration Loss)으로 불확실성-오차 정렬</h3>
+<p>피어슨 상관계수 기반 교정 손실은 모델이 &quot;<strong>불확실성이 높을 때 실제로 오차가 크다</strong>&quot;는 관계를 학습하게 강제한다:</p>
+<pre><code class="language-python">def calibration_loss(sigma_epistemic, prediction_error):
+    &quot;&quot;&quot;
+    불확실성과 예측 오차의 피어슨 상관계수를 최대화
+    &quot;&quot;&quot;
+    # 목표: corr(σ²ₑ, |error|) → 1.0
+    rho = pearson_correlation(sigma_epistemic, prediction_error)
+    loss = (1.0 - rho) ** 2
+    return loss
+</code></pre>
+<p>이 손실이 없으면 모델은 OOD 지형에서도 낮은 불확실성을 유지하는 경향이 있어 코스트맵 신뢰도가 저하된다.</p>
+<h3>기여 4: Zero-Shot Sim-to-Real 전이 가능한 경량 모델</h3>
+<p>훈련은 IsaacSim에서만 이루어지고 실세계에서는 추가 훈련 없이 직접 배포 가능하다. 이는 경량 MLP 구조와 교정된 불확실성 추정 덕분에 가능하며, 실제 로봇 연구에서의 실용성을 높인다.</p>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 모델 하이퍼파라미터</h3>
+<pre><code>앙상블 크기: N_ens = 3
+MC 드롭아웃 샘플: N_MC = 20
+드롭아웃 비율: p = 0.1
+
+MLP 구조 (발판 예측기):
+  입력: 15차원 (12차원 지형 + 3차원 속도)
+  은닉층: [64, 128, 64]
+  출력: 12차원 (4발 × 3좌표)
+  활성화: ReLU
+
+최적화:
+  옵티마이저: Adam
+  학습률: 1e-3
+  배치 크기: 256
+  에포크: 100
+
+손실 가중치:
+  λ_epi = 0.1
+  λ_cal = 1.0
+</code></pre>
+<h3>7.2 코스트맵 파라미터</h3>
+<pre><code>불확실성 스케일링: α = 10.0
+최대 비용 클리핑: C_max = 100
+가우시안 블롭 반경: σᵦ = 0.05m (발 크기 기반)
+
+MPPI 통합:
+  샘플 수: 1000
+  불확실성 가중치: w_unc = 5.0
+  온도: λ = 0.01
+</code></pre>
+<h3>7.3 LiDAR 설정 (실세계)</h3>
+<pre><code>시뮬레이션: 전방 LiDAR (고도 격자 직접 생성)
+실세계: 하향 LiDAR로 교체 (발판 근처 고도 스캔)
+  → 전방-하향 변환: 좌표 변환만으로 동일 입력 표현 생성
+</code></pre>
+<h3>7.4 로봇 플랫폼</h3>
+<pre><code>시뮬레이션: IsaacSim + Unitree Go1 URDF
+실세계: Unitree Go1 (12 DOF 사족보행 로봇)
+  무게: ~12kg
+  속도: 최대 3.7m/s (보행 속도 기준 0.5m/s)
+  센서 추가: 하향 LiDAR
+
+로코모션 정책: 사전 훈련된 정책 (논문 고정, 재훈련 없음)
+내비게이션 스택 (실세계): ROS2 NAV2
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 인식적 불확실성 vs 우연적 불확실성</h3>
+<p>이 논문은 <strong>인식적 불확실성(epistemic uncertainty)</strong> 만을 모델링한다:</p>
+<pre><code>인식적 불확실성 (Epistemic):
+  - 모델이 아직 학습하지 못한 것에 대한 불확실성
+  - 더 많은 데이터로 감소 가능
+  - OOD 탐지에 적합
+  → 이 논문의 대상
+
+우연적 불확실성 (Aleatoric):
+  - 데이터 자체의 노이즈나 내재적 랜덤성
+  - 더 많은 데이터로도 감소 불가
+  - 센서 노이즈, 환경 랜덤성
+  → 이 논문에서 제외
+
+이유: OOD 지형 탐지는 인식적 불확실성이 핵심이며,
+     우연적 불확실성 혼합 시 ID 지형에서도 높은 불확실성 발생
+</code></pre>
+<h3>8.2 한계점 및 향후 방향</h3>
+<p><strong>현재 한계:</strong></p>
+<ol>
+<li><strong>단일 보행 패턴</strong>: 동일한 4비트 발판 예측 시퀀스를 가정 (보행 패턴 다양화 미지원)</li>
+<li><strong>정적 속도 훈련</strong>: 훈련 시 상수 속도만 사용 → 급격한 속도 변화에 취약</li>
+<li><strong>로컬 코스트맵</strong>: 전방 1.6m 범위만 평가 → 장거리 경로에서 여러 번 재계산 필요</li>
+<li><strong>코드 미공개</strong>: 실험 재현에 구현 세부사항 필요</li>
+</ol>
+<p><strong>향후 방향:</strong></p>
+<ol>
+<li>다중 보행 패턴 지원 (trot, walk, crawl)</li>
+<li>동적 속도 명령 조건부 모델</li>
+<li>전역 경로 계획 통합 (로컬 코스트맵 → 전역 위험 지도)</li>
+<li>온라인 불확실성 업데이트 (지속적 학습)</li>
+</ol>
+<h3>8.3 다른 로봇 플랫폼으로의 일반화 가능성</h3>
+<pre><code>핵심 설계 요소의 이식성:
+  ✅ 앙상블 + MC 드롭아웃: 모든 MLP 기반 모델에 적용 가능
+  ✅ 교정 손실: 발판 예측 외 다른 예측 과제에도 적용 가능
+  ✅ 가우시안 블롭 코스트맵: 발 수에 관계없이 확장 가능 (6발, 2발)
+
+재훈련 필요 사항:
+  → 새로운 로봇의 운동학적 특성에 맞는 훈련 데이터 수집
+  → 발판 예측 모델 재학습 (같은 파이프라인 사용 가능)
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>HiPAN (RA-L2026)</th>
+<th>RAY-TOLD (arxiv2026)</th>
+<th>AmelPred (arxiv2026)</th>
+<th><strong>TaskCondUncertainty (arxiv2026)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>로봇 유형</strong></td>
+<td>사족보행</td>
+<td>차륜 이동</td>
+<td>UAV (Crazyflie)</td>
+<td><strong>사족보행 (Unitree Go1)</strong></td>
+</tr>
+<tr>
+<td><strong>계획 방법</strong></td>
+<td>계층적 학습 정책</td>
+<td>MPPI + 잠재 동역학</td>
+<td>DRL (SPR)</td>
+<td><strong>MPPI + 불확실성 코스트맵</strong></td>
+</tr>
+<tr>
+<td><strong>불확실성 모델링</strong></td>
+<td>❌</td>
+<td>❌</td>
+<td>내재적 (SPR 표현)</td>
+<td><strong>✅ 명시적 인식적 불확실성</strong></td>
+</tr>
+<tr>
+<td><strong>OOD 감지</strong></td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td><strong>✅ (훈련 분포 외 지형)</strong></td>
+</tr>
+<tr>
+<td><strong>Sim-to-Real</strong></td>
+<td>✅ (DAgger 증류)</td>
+<td>❌ (시뮬레이션)</td>
+<td>✅ (Zero-shot)</td>
+<td><strong>✅ (Zero-shot)</strong></td>
+</tr>
+<tr>
+<td><strong>실세계 실험</strong></td>
+<td>✅ (실외 포함)</td>
+<td>❌</td>
+<td>✅ (Crazyflie)</td>
+<td><strong>✅ (실내 Unitree Go1)</strong></td>
+</tr>
+<tr>
+<td><strong>코드 공개</strong></td>
+<td>❌</td>
+<td>❌</td>
+<td>✅ (GitHub)</td>
+<td><strong>❌</strong></td>
+</tr>
+<tr>
+<td><strong>탑티어 학회</strong></td>
+<td>✅ (RA-L)</td>
+<td>❌</td>
+<td>✅ (T-RO)</td>
+<td><strong>❌ (프리프린트)</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>장점:</strong></p>
+<ol>
+<li><strong>명시적 불확실성 기반 안전 내비게이션</strong>: 기존 리뷰된 사족보행 논문(HiPAN)이 기하학 기반 비용 함수를 사용하는 것과 달리, 제안 방법은 모델이 &quot;모르는 것&quot;을 직접 비용으로 활용</li>
+<li><strong>태스크 의존적 위험 평가</strong>: 동일 지형에서도 속도 명령에 따라 다른 위험도를 계산 — 차동 구동 기반 RAY-TOLD와 달리 로봇의 운동학적 제약을 직접 반영</li>
+<li><strong>경량 실시간 아키텍처</strong>: 60Hz 로코모션 정책 주기에 맞는 경량 MLP + 병렬 배치 추론</li>
+<li><strong>보수적 경로 선택의 정량적 근거 제공</strong>: &quot;왜 이 경로를 선택했는가&quot;를 불확실성 지도로 설명 가능</li>
+</ol>
+<p><strong>단점:</strong></p>
+<ol>
+<li><strong>기존 리뷰 대비 낮은 학회 수준</strong>: HiPAN (RA-L), AmelPred (T-RO)와 달리 현재 프리프린트 상태 — 동료 심사 검증 미완료</li>
+<li><strong>제한된 지형 다양성</strong>: 훈련이 평탄 지형에만 이루어져 매우 다양한 비정형 지형에서의 성능 불확실</li>
+<li><strong>로컬 계획만</strong>: HiPAN처럼 전역 계획과 로컬 계획을 결합하는 계층적 구조 없음</li>
+<li><strong>코드 미공개</strong>: AmelPred와 달리 실험 재현 불가</li>
+</ol>
+<h3>9.3 실적용 가능성 평가</h3>
+<p><strong>실적용 가능성: 높음 (★★★★☆)</strong></p>
+<pre><code>강점:
+  ✅ 실세계 Unitree Go1 실험 완료
+  ✅ Zero-Shot Sim-to-Real 전이 성공
+  ✅ ROS2 NAV2 통합으로 기존 내비게이션 스택과 호환
+  ✅ 경량 모델로 온보드 컴퓨터 실행 가능
+
+약점:
+  ⚠️ 정적 훈련 속도 → 동적 속도 변화 시 성능 저하 가능
+  ⚠️ 실세계 실험이 제한된 환경 (보드, 램프)에 국한
+  ⚠️ 코드 미공개 → 즉시 적용 불가
+</code></pre>
+<p>HiPAN이 계층적 정책으로 더 복잡한 환경을 다루는 반면, Task-Conditioned Uncertainty Costmaps는 <strong>기존 로코모션 정책을 그대로 유지하면서</strong> 경로 계획기에만 불확실성 정보를 추가한다. 이 모듈식 설계는 다양한 기존 시스템에 쉽게 플러그인할 수 있는 실용적 강점이다.</p>
+<h3>9.4 연구 방향성 평가</h3>
+<p><strong>연구 방향성: 높음 (★★★★☆)</strong></p>
+<p>불확실성 인식 경로 계획(uncertainty-aware path planning)은 로봇 안전성 연구의 중요한 방향이다. 기존 리뷰 논문들(HiPAN, RAY-TOLD, AmelPred)이 모두 결정론적(deterministic) 계획 방법을 사용하는 반면, 이 논문은 학습된 예측 모델의 신뢰도를 명시적으로 경로 계획에 반영하는 접근법을 제시한다.</p>
+<p>특히 이 연구의 핵심 통찰 — &quot;지형이 아니라 현재 태스크에서 이 지형의 위험도&quot; — 는 사족보행 내비게이션 연구에서 아직 충분히 탐구되지 않은 방향으로, 향후 안전 크리티컬 응용(의료, 재난 구조)에서 중요성이 높아질 연구 주제이다.</p>
+<p>다만 학회 발표 미완료 상태이므로 동료 심사를 통한 추가 검증이 필요하며, 더 다양한 지형과 로봇 플랫폼에서의 성능 검증이 향후 과제로 남는다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li>Crespo et al., &quot;Probabilistic costmaps for robot navigation,&quot; RA-L 2023</li>
+<li>Farshidian et al., &quot;Deep value function networks for large footstep planning,&quot; ICRA 2017</li>
+<li>Wellhausen et al., &quot;Rough terrain navigation for legged robots using reachability planning and template learning,&quot; RA-L 2021</li>
+<li>Jeong et al., &quot;HiPAN: Hierarchical Posture-Adaptive Navigation for Quadruped Robots,&quot; RA-L 2026</li>
+<li>Han et al., &quot;RAY-TOLD: Ray-Based Latent Dynamics for Dense Dynamic Obstacle Avoidance with TDMPC,&quot; arXiv 2026</li>
+<li>Ayala et al., &quot;AmelPred: Self-Predictive Representation for Autonomous UAV Object-Goal Navigation,&quot; T-RO 2026</li>
+<li>Unitree Go1: <a href="https://www.unitree.com/go1/">https://www.unitree.com/go1/</a></li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p>Task-Conditioned Uncertainty Costmaps는 사족보행 로봇 경로 계획에서 <strong>학습 기반 불확실성 인식</strong>의 실용적 가능성을 보여주는 연구이다.</p>
+<p><strong>핵심 혁신:</strong></p>
+<ol>
+<li><strong>태스크 조건부 인식적 불확실성</strong>: 지형과 운동 명령을 함께 고려하는 발판 불확실성 추정</li>
+<li><strong>교정 손실</strong>: 불확실성이 실제 예측 오차와 일치하도록 강제 — 코스트맵의 신뢰도 보장</li>
+<li><strong>모듈식 설계</strong>: 기존 로코모션 정책 변경 없이 경로 계획기 수준에서 안전성 향상</li>
+</ol>
+<p><strong>실용적 의의:</strong> 로봇이 훈련 데이터 분포 밖의 지형을 만났을 때 &quot;모른다&quot;는 신호를 내비게이션에 활용할 수 있도록 한다. 이는 실세계 배포에서 발생하는 Long-tail 환경 변화에 대한 강건성을 높이는 중요한 메커니즘이다.</p>
+<p>HiPAN이 더 풍부한 지형 환경에서 더 복잡한 정책을 다루는 반면, 이 연구는 기존 시스템에 최소한의 변경으로 불확실성 인식 경로 계획을 추가하는 실용적 접근법을 제시한다. 코드 공개와 학회 발표를 통해 검증된다면, 안전 크리티컬 사족보행 내비게이션 연구에 표준 구성 요소가 될 잠재력이 있다.</p>
+<hr>
+<h2>12. 심화 분석: 불확실성 기반 안전 내비게이션의 이론적 배경 (Deep Dive: Theoretical Background)</h2>
+<h3>12.1 베이지안 딥러닝 불확실성 추정 기법 비교</h3>
+<p>Task-Conditioned Uncertainty Costmaps의 핵심 기술인 앙상블 + MC 드롭아웃 불확실성 추정을 기존 방법들과 비교한다:</p>
+<pre><code>방법론 비교표:
+
+┌─────────────────────────────────────────────────────────────────┐
+│                  불확실성 추정 방법론 비교                        │
+├──────────────────┬──────────┬──────────┬──────────┬────────────┤
+│ 방법              │ 계산 비용 │ 정확도   │ 구현 용이 │ Scalability│
+├──────────────────┼──────────┼──────────┼──────────┼────────────┤
+│ 가우시안 프로세스 │ O(n³)    │ 높음     │ 어려움   │ 낮음       │
+│ 변분 베이즈 BNN  │ 중간     │ 높음     │ 어려움   │ 중간       │
+│ MC 드롭아웃 (단독)│ 낮음     │ 중간     │ 쉬움     │ 높음       │
+│ 앙상블 (단독)    │ N × 낮음 │ 높음     │ 중간     │ 높음       │
+│ 앙상블+MC(제안)  │ N×K 배   │ 높음     │ 중간     │ 높음       │
+│ 깊이 앙상블      │ N 배      │ 매우 높음│ 중간     │ 중간       │
+└──────────────────┴──────────┴──────────┴──────────┴────────────┘
+  N: 앙상블 크기 (제안=3)
+  K: MC 샘플 수 (제안=20)
+</code></pre>
+<p><strong>MC 드롭아웃의 베이지안 해석:</strong></p>
+<p>Gal &amp; Ghahramani (2016)에 의해 MC 드롭아웃이 베이지안 신경망의 근사임이 증명되었다:</p>
+<pre><code>드롭아웃 비율 p, 가중치 W에 대해:
+  q_θ(W) ≈ 베르누이 분포로 근사된 가중치 사후 분포
+
+MC 추론:
+  p(y|x) ≈ (1/K) Σ_k p(y|x, W_k)  where W_k ~ q_θ
+
+불확실성:
+  Var[y|x] ≈ (1/K) Σ_k (f_Wk(x))² - ((1/K) Σ_k f_Wk(x))²
+</code></pre>
+<p>이 논문은 이를 앙상블과 결합하여 불확실성 추정의 신뢰도를 향상시킨다.</p>
+<h3>12.2 교정 불확실성 (Calibrated Uncertainty)의 중요성</h3>
+<p>교정 손실(Calibration Loss)의 수학적 의미를 더 깊이 분석한다:</p>
+<pre><code>목표: P(correct | σ²ₑ = s) = s  (신뢰도-정확도 일치)
+
+직관:
+  σ²ₑ = 0.1 → 예측 오차 작음 (자신감 있는 영역)
+  σ²ₑ = 0.9 → 예측 오차 큼 (불확실한 영역)
+
+피어슨 상관계수 기반 교정:
+  ρ(σ²ₑ,ₜ, |f̂ₜ - fₜ|) → 1.0
+
+  ρ = 0: 불확실성과 오차 무관계 (최악 — 교정 안 됨)
+  ρ = 1: 완벽한 선형 양의 상관관계 (최선 — 완벽 교정)
+
+왜 피어슨 상관인가?
+  - 선형 정렬을 강제: σ²ₑ ∝ |error|
+  - 단조증가 함수: 불확실성이 높을수록 오차가 크다
+  - 정규화: [-1, 1] 범위로 안정적 학습
+</code></pre>
+<p><strong>교정 없이 발생하는 문제 (Over/Under Confidence):</strong></p>
+<pre><code>과자신감 (Over-confidence, ρ → 0):
+  OOD 지형: 높은 오차 + 낮은 불확실성
+  → 코스트맵이 OOD 지형을 안전하다고 판단
+  → 로봇이 OOD 지형으로 진입 → 실패 위험
+
+과불확실 (Under-confidence, ρ → -1):
+  ID 지형: 낮은 오차 + 높은 불확실성
+  → 코스트맵이 안전한 지형도 위험하다고 판단
+  → 로봇이 지나치게 보수적 경로 선택 → 목표 도달 실패
+</code></pre>
+<h3>12.3 MPPI와 코스트맵 통합의 수학적 분석</h3>
+<p>Model Predictive Path Integral (MPPI) 플래너와 불확실성 코스트맵의 통합:</p>
+<pre><code>MPPI 기본 공식:
+  u* = (1/η) ∫ τ exp(-S(τ)/λ) dτ
+  여기서:
+    S(τ): 궤적 τ의 비용 함수
+    λ: 온도 파라미터 (exploration vs exploitation)
+    η: 정규화 상수
+
+비용 함수 정의:
+  S(τ) = Σ_t [c_goal(x_t) + w_obs × c_obs(x_t) + w_unc × C(x_t)]
+  여기서:
+    c_goal: 목표까지의 거리 비용
+    c_obs: 장애물 회피 비용 (기하학 기반)
+    C(x_t): 불확실성 코스트맵 값
+
+불확실성 가중치 w_unc의 역할:
+  w_unc = 0: 완전히 기하학 기반 (기준선)
+  w_unc = 5: 제안 방법 (불확실성 중간 가중)
+  w_unc → ∞: 불확실성만 고려 (지나치게 보수적)
+
+최적 궤적:
+  τ* = argmin_τ ∫₀ᵀ [c_goal + w_obs × c_obs + w_unc × C] dt
+</code></pre>
+<p><strong>가우시안 블롭의 수학적 역할:</strong></p>
+<pre><code>발판 불확실성 cᵢ를 공간으로 확산:
+  C(x,y) = max_i [cᵢ × exp(-||[x,y]-[xᵢ,yᵢ]||² / (2σ²ᵦ))]
+
+이 공식의 의의:
+  1. 발판 불확실성의 영향이 주변으로 퍼짐 (로봇 크기 반영)
+  2. σᵦ = 0.05m로 발 크기와 일치 → 발판 영역만 비용 증가
+  3. max 연산: 4발 중 가장 불확실한 발판이 지배적 비용
+     (worst-case 안전 보장)
+
+대안 연산자 (논의):
+  평균: (c₁+c₂+c₃+c₄)/4 → 모든 발 위험 평균
+  합산: c₁+c₂+c₃+c₄ → 전체 위험 누적
+  max (채택): worst-case 발판 기준 → 보수적 안전 보장
+</code></pre>
+<h3>12.4 OOD 감지의 정보 이론적 관점</h3>
+<p>제안 방법의 OOD 감지 능력을 정보 이론으로 해석한다:</p>
+<pre><code>인식적 불확실성의 정보 이론적 해석:
+  σ²ₑ ∝ KL(q_θ(W) || p(W|D))
+
+  ID 지형: 학습 데이터 분포에서 → KL 작음 → σ²ₑ 낮음
+  OOD 지형: 분포 밖 → KL 큼 → σ²ₑ 높음
+
+OOD 탐지 임계값 설정:
+  τ = E_ID[σ²ₑ] + k × Std_ID[σ²ₑ]
+  여기서 k: 위양성률 조절 파라미터
+
+실험 결과:
+  ID 평균 불확실성: 17cm
+  Wavy OOD: 21cm (+24% 증가)
+  Stepped OOD: 21cm (+24% 증가)
+  Spiked OOD: 19-27cm (가변, +12~59% 증가)
+
+→ 명확한 분포 분리로 신뢰도 높은 OOD 탐지 가능
+</code></pre>
+<h3>12.5 다른 Planner 방법들과의 심층 비교</h3>
+<p>기존 리뷰된 Planner 논문들과의 상세 비교:</p>
+<pre><code>HiPAN (RA-L 2026) vs 제안 방법:
+  ┌─────────────────────────────────────────────────────────┐
+  │ HiPAN:                                                    │
+  │   레벨: 고수준 정책 (어디로 갈 것인가) + 저수준 제어     │
+  │   불확실성: 없음 (결정론적 학습)                         │
+  │   안전: 커리큘럼 학습으로 안전한 경로 간접 학습          │
+  │   실세계: ✅ 실외 포함 다양한 환경                        │
+  │                                                           │
+  │ 제안 방법:                                                │
+  │   레벨: 경로 계획기 레벨 (코스트맵)                      │
+  │   불확실성: ✅ 명시적 인식적 불확실성                    │
+  │   안전: 불확실 영역을 명시적으로 회피                    │
+  │   실세계: ✅ 제한된 환경 (보드, 램프)                     │
+  │                                                           │
+  │ 상호 보완: HiPAN의 계층적 정책 + 제안 불확실성 코스트맵  │
+  │ → 더 안전한 계층적 사족보행 내비게이션 가능               │
+  └─────────────────────────────────────────────────────────┘
+
+RAY-TOLD (arxiv 2026) vs 제안 방법:
+  ┌─────────────────────────────────────────────────────────┐
+  │ RAY-TOLD:                                                 │
+  │   과제: 동적 군중 장애물 회피                             │
+  │   로봇: 차동 구동 (wheeled)                              │
+  │   방법: 잠재 동역학 + MPPI 정책 혼합                    │
+  │   불확실성: 없음 (결정론적)                              │
+  │                                                           │
+  │ 제안 방법:                                                │
+  │   과제: 정적 비정형 지형 탐색                             │
+  │   로봇: 사족보행 (legged)                                 │
+  │   방법: 불확실성 코스트맵 + MPPI                        │
+  │   불확실성: ✅ 명시적 추정                               │
+  │                                                           │
+  │ 차이: 동적 환경 vs 정적 OOD 환경, 다른 로봇 유형         │
+  └─────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>12.6 실세계 배포를 위한 공학적 고려사항</h3>
+<p>Unitree Go1 실세계 배포 시 고려해야 하는 실용적 사항들:</p>
+<pre><code>1. 컴퓨팅 자원:
+   - 모델 추론: 60 × 15차원 입력 × MLP → 빠름 (&lt; 1ms)
+   - 병렬 배치로 60 순전파 → 10ms 이하 예상
+   - ROS2 NAV2 코스트맵 업데이트: 5Hz 충분
+   - 총 오버헤드: 로코모션 60Hz에 영향 없음
+
+2. 센서 교체:
+   - 전방 LiDAR → 하향 LiDAR 교체
+   - 코스트: 추가 LiDAR 마운팅 브래킷 필요
+   - 데이터 변환: 좌표 변환만으로 동일 입력 재구성
+
+3. 고도 격자 계산:
+   - 하향 LiDAR 포인트클라우드 → 고도 격자 투영
+   - 이동 평균 필터: 노이즈 감소
+   - 로봇 속도 적분: 격자 위치 보정
+
+4. 안전 장치:
+   - 불확실성 임계 초과 시: 감속 + 경고
+   - 코스트맵 업데이트 실패 시: 기하학 기반 폴백
+   - 비상 정지: 최대 불확실성 도달 시 자동 정지
+</code></pre>
+<h3>12.7 향후 연구: 동적 지형 + 동적 속도 적응</h3>
+<p>현재 모델의 가장 큰 한계인 &quot;훈련 시 상수 속도&quot; 문제의 해결 방향:</p>
+<pre><code>현재 한계:
+  훈련: v = {v₁, v₂, ...} (상수 속도 세트)
+  배포: 동일한 속도 → 분포 내 (ID)
+  
+  문제: 로봇이 속도를 변경하면 OOD 상황 발생
+        → 불확실성 급증 (실제 위험 없는데 경고)
+
+해결 방향 1: 연속 속도 커버리지 확장
+  훈련 데이터에 v ∈ [0, v_max] 연속 속도 커버
+  → 더 넓은 분포에서 학습 → 속도 변화에 강건
+
+해결 방향 2: 속도 조건부 불확실성 임계 적응
+  τ(v) = τ_base × (1 + β × ||v - v_nominal||)
+  → 속도가 훈련 범위를 벗어날수록 임계 완화
+
+해결 방향 3: 온라인 적응
+  새로운 지형에서 수집된 데이터로 모델 업데이트
+  → 탐색하면서 점진적 OOD 감소
+
+해결 방향 4: Meta-Learning 기반
+  MAML 등으로 빠른 지형 적응 학습
+  → 새 지형 몇 번 방문으로 불확실성 신속 감소
+</code></pre>
+<hr>
+<h2>13. 한국어 키워드 및 용어 정리</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>영어 용어</th>
+<th>한국어 번역</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Epistemic Uncertainty</td>
+<td>인식적 불확실성</td>
+<td>모델이 학습하지 못한 것에 대한 불확실성</td>
+</tr>
+<tr>
+<td>Aleatoric Uncertainty</td>
+<td>우연적 불확실성</td>
+<td>데이터 자체의 내재적 노이즈나 랜덤성</td>
+</tr>
+<tr>
+<td>Ensemble</td>
+<td>앙상블</td>
+<td>여러 독립 모델의 예측을 결합하는 방법</td>
+</tr>
+<tr>
+<td>MC Dropout</td>
+<td>MC 드롭아웃</td>
+<td>추론 시 드롭아웃을 활성화하여 불확실성 추정</td>
+</tr>
+<tr>
+<td>Calibration</td>
+<td>교정</td>
+<td>불확실성 추정값이 실제 오차와 일치하도록 조정</td>
+</tr>
+<tr>
+<td>Costmap</td>
+<td>코스트맵</td>
+<td>경로 계획에 사용되는 2D 비용 지도</td>
+</tr>
+<tr>
+<td>Foothold</td>
+<td>발판</td>
+<td>사족보행 로봇의 발이 닿는 지형 포인트</td>
+</tr>
+<tr>
+<td>Feasibility</td>
+<td>실현 가능성</td>
+<td>특정 발판이 로봇 안정성을 유지할 수 있는지 여부</td>
+</tr>
+<tr>
+<td>Stability Margin</td>
+<td>안정성 여유</td>
+<td>로봇이 균형을 잃기까지의 여유 정도</td>
+</tr>
+<tr>
+<td>MPPI</td>
+<td>MPPI</td>
+<td>Model Predictive Path Integral — 샘플 기반 MPC</td>
+</tr>
+<tr>
+<td>OOD (Out-Of-Distribution)</td>
+<td>분포 외</td>
+<td>훈련 데이터 분포를 벗어난 입력</td>
+</tr>
+<tr>
+<td>Zero-Shot Sim-to-Real</td>
+<td>제로샷 시뮬-현실 전이</td>
+<td>추가 학습 없이 시뮬 모델을 실세계에 직접 적용</td>
+</tr>
+<tr>
+<td>Gaussian Blob</td>
+<td>가우시안 블롭</td>
+<td>발판 불확실성을 공간으로 확산하는 가우시안 커널</td>
+</tr>
+<tr>
+<td>Quadruped</td>
+<td>사족보행 로봇</td>
+<td>4개의 다리로 이동하는 로봇 (예: Unitree Go1, Boston Dynamics Spot)</td>
+</tr>
+<tr>
+<td>Pearson Correlation</td>
+<td>피어슨 상관계수</td>
+<td>두 변수 간의 선형 상관 관계를 측정하는 지표</td>
+</tr>
+</tbody></table></div>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

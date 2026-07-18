@@ -1,0 +1,891 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">ICRA 2026</div>
+    <h1>LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry</h1>
+    <div class="meta-row">
+      <span class="chip">VLN</span>
+      <span><a href="https://arxiv.org/abs/2512.19629">arXiv:2512.19629</a></span>
+      <span>리뷰 2026-06-29</span>
+      <span>42분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry — 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry</li>
+<li><strong>저자 (Authors)</strong>: Jiaqi Peng, Wenzhe Cai, Yuqiang Yang, Tai Wang, Yuan Shen, Jiangmiao Pang</li>
+<li><strong>소속 (Affiliation)</strong>: Tsinghua University, Shanghai AI Laboratory (InternRobotics)</li>
+<li><strong>발표처 (Published)</strong>: ICRA 2026 (arXiv 제출 2025-12-22, 개정 2025-12-23; cs.RO / cs.CV)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2512.19629">https://doi.org/10.48550/arXiv.2512.19629</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2512.19629">https://arxiv.org/abs/2512.19629</a></li>
+<li><strong>GitHub (Code)</strong>: <a href="https://github.com/InternRobotics/NavDP/tree/master/baselines/logoplanner">https://github.com/InternRobotics/NavDP/tree/master/baselines/logoplanner</a> — <strong>✅ 실제 코드 공개</strong> (geometry_model.py, policy_network.py, policy_backbone.py, policy_agent.py, logoplanner_server.py, logoplanner_realworld_server.py, lekiwi_logoplanner_host.py + Pi3/depth_anything/deployment/assets 디렉토리, 설정·배포 README 포함)</li>
+<li><strong>프로젝트 페이지 (Project Page)</strong>: <a href="https://steinate.github.io/logoplanner.github.io/">https://steinate.github.io/logoplanner.github.io/</a></li>
+<li><strong>데이터셋</strong>: InternData-N1 (<a href="https://huggingface.co/datasets/InternRobotics/InternData-N1/">https://huggingface.co/datasets/InternRobotics/InternData-N1/</a>)</li>
+<li><strong>리뷰 일자</strong>: 2026-06-29</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>LoGoPlanner는 <strong>비정형 환경(unstructured environment)에서 이동 로봇의 점-목표 내비게이션(point-goal navigation)을 위한 종단간(end-to-end) 로컬 플래너</strong>로, 별도의 로컬라이제이션 모듈에 대한 의존을 제거하는 것을 핵심 목표로 한다. 본 리뷰는 corpus 일관성을 위해 VLN 디렉토리에 배치되어 있으나(파일 경로 유지), 논문 본문의 실제 기여는 <strong>자연어 지시를 다루지 않는 Robot Path Planning(Local Planner) 영역</strong>이다. 비교 대상 베이스라인(iPlanner, ViPlanner, DD-PPO)도 모두 학습 기반 로컬 플래너이며, 트랙 분류상으로는 Planner 계열에 더 가깝다.</p>
+<p>핵심 연구 질문:</p>
+<pre><code>&quot;학습 기반 내비게이션 정책이 외부 로컬라이제이션(odometry/SLAM)에 의존하지 않고,
+ 단일 RGB-D 카메라로부터 절대 메트릭 스케일(absolute metric scale)의 기하학을
+ 암시적으로 추정하여, 교차 임바디먼트(cross-embodiment)·교차 환경에서
+ 강인하게 일반화할 수 있는가?&quot;
+</code></pre>
+<p>기존 학습 기반 로컬 플래너가 갖는 두 가지 대표적 약점을 동시에 극복한다:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>패러다임</th>
+<th>대표 방법</th>
+<th>한계</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>모듈러 파이프라인</strong></td>
+<td>SLAM + 매핑 + 플래닝</td>
+<td>지각→로컬라이제이션→매핑→계획 단계 간 오차 전파와 지연 누적; 정확한 센서 캘리브레이션 필요</td>
+</tr>
+<tr>
+<td><strong>외부 로컬라이제이션 의존 학습 플래너</strong></td>
+<td>iPlanner, ViPlanner</td>
+<td>정책 입력으로 odometry/외부 pose를 가정 → 로컬라이제이션이 부정확하면 성능 붕괴; 임바디먼트마다 캘리브레이션·재튜닝 필요</td>
+</tr>
+</tbody></table></div>
+<p>LoGoPlanner는 <strong>메트릭 인식 비주얼 지오메트리(metric-aware visual geometry)</strong>를 통해 로봇의 상태(pose)를 정책 내부에서 암시적으로 추정(implicit state estimation)하고, 이를 정책 조건화에 사용함으로써 외부 로컬라이제이션 없이도 시뮬레이션 Home SR을 ViPlanner(외부 로컬라이제이션 포함) 대비 <strong>+27.3%p</strong>(45.0% → 57.3%) 끌어올린다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 모듈러 파이프라인의 오차 전파와 캘리브레이션 부담</h4>
+<p>전통적 내비게이션 스택은 다음과 같이 분리된 단계로 구성된다:</p>
+<pre><code>[전통적 모듈러 파이프라인]
+
+RGB-D ──► Perception ──► Localization(SLAM/Odometry) ──► Mapping ──► Planning ──► Control
+            │                  │                            │            │
+            오차               오차                          오차 축적     누적
+
+문제 1: 단계 경계마다 오차가 전파되고 지연이 쌓인다.
+문제 2: Localization은 정확한 센서 외부 파라미터(extrinsic) 캘리브레이션을 요구한다.
+        → 카메라 높이·피치가 로봇마다 다르면 매번 재캘리브레이션 필요.
+문제 3: 교차 임바디먼트 전이가 어렵다.
+        → TurtleBot(저고도)에서 학습한 정책이 Unitree G1(고고도)로 옮겨가지 않음.
+</code></pre>
+<h4>B. 외부 로컬라이제이션 의존의 본질적 취약성</h4>
+<p>iPlanner, ViPlanner 같은 학습 기반 로컬 플래너는 충돌 회피와 경로 생성을 신경망으로 학습하지만, <strong>목표를 로봇 좌표계로 변환하기 위해 외부 로컬라이제이션(odometry)을 입력으로 가정</strong>한다:</p>
+<pre><code>[외부 로컬라이제이션 의존의 문제]
+
+정책 입력: (관측 O_t, 로봇 좌표계 목표 g^robot_t)
+
+g^robot_t 를 얻으려면:
+  g^robot_t = T^{-1}_{world→robot}(t) · g^world
+
+여기서 T_{world→robot}(t) 는 외부 로컬라이제이션이 제공.
+→ 로컬라이제이션이 drift 하면 g^robot_t 가 틀림
+→ 정책은 &quot;올바른 행동&quot;을 학습했어도 &quot;틀린 목표&quot;로 향함
+
+실제로 본 논문 Table I:
+  iPlanner/ViPlanner 는 외부 로컬라이제이션(✓)이 있어도
+  Home SR 이 각각 43.0% / 45.0% 에 그침.
+</code></pre>
+<h4>C. 단안/비디오 깊이의 스케일 모호성</h4>
+<p>종단간 정책이 외부 로컬라이제이션을 버리려면, 정책이 스스로 &quot;내가 어디에 있는가&quot;와 &quot;장애물이 몇 미터 앞인가&quot;를 알아야 한다. 그러나:</p>
+<pre><code>[메트릭 스케일 모호성]
+
+문제: 비디오 지오메트리 모델(VGGT 등)은 상대 스케일(up-to-scale)의
+      3D 구조는 잘 복원하지만, &quot;1미터 = 몇 단위&quot;인 절대 메트릭 스케일은
+      이미지만으로 결정 불가능(scale ambiguity).
+
+결과: 스케일을 모르면
+  - 장애물까지 거리를 미터로 환산할 수 없음
+  - 목표(미터 단위)와 정책 내부 좌표계가 불일치
+  - 충돌 회피·정지 판단 실패
+
+→ &quot;비주얼 지오메트리를 메트릭 스케일에 grounding 하는 것&quot;이 핵심 난제.
+</code></pre>
+<h3>2.2 핵심 해결책</h3>
+<p>LoGoPlanner의 세 가지 핵심 혁신:</p>
+<pre><code>[LoGoPlanner의 혁신 요소 3가지]
+
+혁신 1: 메트릭 인식 비주얼 지오메트리 (Metric-aware Visual Geometry)
+  VGGT(DINOv2 기반 비디오 지오메트리 트랜스포머)를 깊이 맵 스케일 prior로
+  파인튠하여, 절대 메트릭 스케일의 3D 토큰을 산출 → 암시적 상태 추정.
+
+혁신 2: 장면 지오메트리 재구성 (Scene Geometry Reconstruction)
+  역사적 관측으로부터 로컬 포인트·카메라 포즈·월드 포인트를 보조 과제로
+  예측하여 환경의 3D 인식을 형성 → 장애물 회피 단서 제공.
+
+혁신 3: 로컬라이제이션 그라운디드 정책 (Localization Grounded Policy)
+  추정된 (암시적) 기하학·상태 표현을 query-based cross-attention 으로
+  추출하고, 디퓨전 정책 헤드로 action chunk 를 생성 → 외부 로컬라이제이션 불필요.
+</code></pre>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<p>LoGoPlanner는 (3.1) 메트릭 인식 비주얼 지오메트리 학습, (3.2) 보조 기하 예측을 통한 장면 재구성, (3.3) 디커플드 포즈 추정, (3.4) query 기반 디퓨전 정책 헤드의 네 부분으로 구성된다.</p>
+<h3>3.1 메트릭 인식 비주얼 지오메트리 학습 (Metric-aware Visual Geometry Learning)</h3>
+<p>LoGoPlanner의 백본은 <strong>VGGT(Video Geometry Transformer)</strong>로, DINOv2 비전 트랜스포머를 사용하여 각 입력 이미지를 K개의 초기 패치 토큰으로 patchify 한다. 핵심은 이 사전학습 백본을 <strong>깊이 맵에서 추출한 스케일 prior를 주입(inject)</strong>하여 <em>절대 메트릭 스케일</em>의 장면 재구성이 가능하도록 파인튠하는 것이다.</p>
+<pre><code>[스케일 prior 주입 메커니즘]
+
+입력 이미지 I_i ──► DINOv2 ViT ──► 시맨틱 토큰 t^I_i  (K개)
+입력 깊이 D_i  ──► 경량 ViT 변형 ──► 기하 토큰   t^D_i  (K개)
+
+두 토큰을 패치 수준(patch level)에서 융합 → 메트릭 인식 토큰:
+
+  t^metric_i = Attention( RoPE( (t^I_i, t^D_i), pos ) )
+
+여기서:
+  - (t^I_i, t^D_i) : 시맨틱·기하 토큰의 결합(concatenation/병합)
+  - RoPE          : 2D 좌표 pos 를 이용한 회전 위치 인코딩
+                    (position-dependent rotation; 토큰에 공간 위치 부여)
+  - Attention     : 셀프 어텐션으로 두 모달리티 간 정보 교환
+</code></pre>
+<p><strong>RoPE를 쓰는 이유</strong>: 이미지의 패치 토큰은 본질적으로 2D 격자 위의 위치를 가진다. RoPE는 토큰의 절대/상대 위치를 회전 행렬로 인코딩하여, 융합된 메트릭 토큰이 &quot;이 패치가 화면의 어디에 있는가&quot;를 보존하도록 한다. 시맨틱 토큰(무엇)과 기하 토큰(얼마나 멀리)을 같은 위치 좌표계에서 정렬해야 메트릭 스케일이 공간적으로 일관되게 grounding 되기 때문이다.</p>
+<p>이렇게 얻은 <code>t^metric_i</code>는 다음 절의 세 가지 보조 예측 헤드(로컬 포인트, 카메라 포즈, 월드 포인트)의 공통 입력이 된다. 즉 메트릭 스케일 학습은 그 자체로 끝나는 것이 아니라, <strong>장면 기하 재구성이라는 보조 과제를 통해 자기지도(self-supervised)적으로 정착</strong>된다.</p>
+<h3>3.2 장면 지오메트리 재구성 — 보조 기하 예측 (Scene Geometry Reconstruction)</h3>
+<p>메트릭 토큰을 세 갈래로 디코딩하여 정책에 필요한 기하 표현을 형성한다.</p>
+<h4>(1) 로컬 포인트 예측 (Local Point Prediction)</h4>
+<pre><code>[Eq. 2–3] 로컬 포인트
+
+  h^p_i = φ_p( t^metric_i )           # 포인트 헤드 특징
+  P̂^local_i = f_p( h^p_i )            # 카메라 좌표계 3D 포인트 예측
+
+지도(supervision): 핀홀 카메라 모델로 GT 로컬 포인트 생성
+
+  p_cam,i(u,v) = D_i(u,v) · K^{-1} [u  v  1]^T
+
+  여기서:
+    D_i(u,v) : (u,v) 픽셀의 깊이
+    K        : 카메라 내부 파라미터(intrinsic)
+    [u v 1]^T: 동차 픽셀 좌표
+</code></pre>
+<p>즉 깊이 맵과 intrinsic으로 역투영(back-projection)한 카메라 좌표계 포인트가 GT가 되고, 정책 백본은 이를 RGB(+D)로부터 회귀하도록 학습된다. 이 과정에서 백본은 &quot;픽셀 → 미터&quot;의 메트릭 매핑을 내재화한다.</p>
+<h4>(2) 카메라 포즈 예측 (Camera Pose Prediction)</h4>
+<pre><code>[Eq. 4] 카메라 포즈
+
+  h^c_i = φ_c( t^metric_i )
+  T̂_c,i = f_c( h^c_i )                # i번째 프레임 카메라 SE(3) 포즈
+
+월드 좌표계 정의:
+  마지막 타임스텝의 섀시(chassis) 프레임을 원점으로 하는 로봇 중심 좌표계.
+  → 절대 글로벌 좌표가 아니라 &quot;현재 로봇 기준&quot; 상대 좌표계이므로
+    외부 로컬라이제이션 없이도 자기완결적(self-contained).
+</code></pre>
+<h4>(3) 월드 포인트 예측 (World Point Prediction)</h4>
+<pre><code>[Eq. 5–6] 월드 포인트
+
+  h^w_i = A( [ h^p_i , h^c_i ] )       # 포인트·포즈 특징 결합 + 어텐션 A
+  z_i   = ψ( h^w_i )                   # 중간 스칼라/벡터 표현
+
+  P̂^world_i = sign(z_i) · ( exp(|z_i|) − 1 )
+
+지수 변환의 목적:
+  큰 좌표값(먼 거리)의 표현력을 키우면서 포화(saturation)를 방지.
+  - |z| 이 작을 때: exp(|z|)−1 ≈ |z| (거의 선형, 근거리 정밀)
+  - |z| 이 클 때 : 지수적으로 확장 (원거리도 표현 가능)
+  - sign(z)      : 부호 보존 (좌/우, 전/후 방향)
+</code></pre>
+<p>이 <code>sign·(exp−1)</code> 변환은 거리 회귀에서 자주 쓰이는 트릭으로, 근거리에서는 선형에 가까워 정밀하고 원거리에서는 단일 출력으로도 넓은 동적 범위를 표현한다. 로컬 포인트(카메라계)와 카메라 포즈(로봇계)를 융합하여 월드(로봇 중심) 포인트로 변환하는 이 구조가, 외부 변환 행렬 없이 &quot;장면을 로봇 좌표계에 메트릭으로 박아 넣는&quot; 핵심이다.</p>
+<pre><code>[3개 보조 헤드의 역할 요약]
+
+t^metric_i ─┬─► φ_p ─► P̂^local_i  (카메라계 3D, 핀홀 모델 지도)
+            ├─► φ_c ─► T̂_c,i      (카메라 SE(3) 포즈)
+            └─► A(h^p,h^c) ─► ψ ─► P̂^world_i (로봇 중심 월드 포인트)
+
+  → 세 헤드가 모두 &quot;메트릭 스케일&quot;을 공유하도록 강제
+  → 정책은 이 표현을 &#39;암시적 로컬라이제이션&#39;으로 활용
+</code></pre>
+<h3>3.3 디커플드 포즈 추정 (Decoupled Pose Estimation)</h3>
+<p>LoGoPlanner는 <strong>카메라 포즈와 섀시(차체) 포즈를 분리</strong>하여 추정한다. 카메라는 로봇 위에 높이·피치를 가지고 장착되므로, 이 둘을 구분해야 다양한 임바디먼트(높이 0.25–1.25m, 피치 0–30°)에 일반화할 수 있다.</p>
+<pre><code>[디커플드 포즈]
+
+  T̂_b,i = f_b( h^c_i )        # 섀시(body) 포즈
+  ĝ_i   = f_g( h^c_i , g )    # 목표 g 를 현재 상태로 grounding 한 임베딩
+
+카메라–섀시 관계:
+  T_b,i = T_c,i · T_ext
+
+  여기서 T_ext : 카메라의 섀시 대비 외부 파라미터
+                (카메라 높이 + 피치) — 임바디먼트 특성을 캡슐화.
+
+핵심: T_ext 를 데이터(높이/피치 랜덤화)로부터 정책이 추정·흡수하므로,
+      배포 시 수동 extrinsic 캘리브레이션이 불필요.
+</code></pre>
+<p>이 디커플링은 본 논문이 캘리브레이션-프리(calibration-free)·교차 임바디먼트 일반화를 달성하는 메커니즘이다. 카메라 포즈 특징 <code>h^c_i</code> 하나에서 섀시 포즈와 목표 grounding을 모두 도출함으로써, 정책은 &quot;내 카메라가 지금 어떤 높이·각도로 세상을 보고 있는가&quot;를 추론하고 이를 차체 운동으로 변환한다.</p>
+<h3>3.4 Query 기반 디퓨전 정책 헤드 (Localization Grounded Navigation Policy)</h3>
+<p>상태·기하 특징을 cross-attention 쿼리로 추출하고, 디퓨전 정책으로 action chunk를 생성한다.</p>
+<pre><code>[Query 기반 특징 추출]
+
+  Q_S = CrossAttn( Q_s , h^c )    # 상태(state) 쿼리 → 카메라/포즈 특징에서 추출
+  Q_G = CrossAttn( Q_g , h^p )    # 기하(geometry) 쿼리 → 로컬 포인트 특징에서 추출
+
+  Q_P = [ Q_S , Q_G , emb(goal) ] # 플래닝 컨텍스트 = 상태 + 기하 + 목표 임베딩
+</code></pre>
+<p><code>Q_S</code>는 &quot;나는 어디에 있는가&quot;(암시적 로컬라이제이션), <code>Q_G</code>는 &quot;내 주변 장애물 기하&quot;를 담당하며, 목표 임베딩과 합쳐져 디퓨전 헤드의 조건 <code>Q_P</code>가 된다.</p>
+<pre><code>[디퓨전 정책 헤드]
+
+행동 청크(action chunk):
+  { a_t = (Δx_t, Δy_t, Δθ_t) }_{t=1..T}   # 상대 변위 + 회전 (차체 좌표계)
+
+역확산(denoising) 갱신:
+  a^{k-1} = α ( a^k − γ · ε_θ(Q_P, a^k, k) + N(0, σ² I) )
+
+  여기서:
+    k        : 디노이징 스텝 인덱스
+    ε_θ      : 노이즈 예측 네트워크 (플래닝 컨텍스트 Q_P 로 조건화)
+    α, γ, σ  : 디퓨전 스케줄 계수
+    N(0,σ²I) : 가우시안 노이즈
+</code></pre>
+<p>디퓨전 정책(Diffusion Policy)을 채택한 이유는 <strong>다봉성(multimodality)</strong> 때문이다. 장애물을 좌/우 어느 쪽으로 우회할지처럼 동등하게 유효한 다중 경로가 존재할 때, 단일 회귀(MSE) 정책은 평균(=충돌)으로 붕괴하지만 디퓨전은 여러 모드를 보존한다. action chunk 형태로 T스텝을 한 번에 생성하므로 고주파 재계획 없이도 일관된 단기 경로를 산출한다.</p>
+<pre><code>[3장 전체 파이프라인 흐름]
+
+RGB(+D) 시퀀스
+   │
+   ▼  (3.1) 시맨틱·기하 토큰 융합 + RoPE
+ t^metric_i  ──── 메트릭 스케일 grounding
+   │
+   ├─►(3.2) P̂^local / T̂_c / P̂^world  (보조 기하 재구성, self-supervised)
+   │
+   ├─►(3.3) T̂_b (섀시) , ĝ (목표 grounding) , T_ext 흡수
+   │
+   ▼  (3.4) CrossAttn → Q_S, Q_G + goal → Q_P
+ 디퓨전 헤드 ε_θ → action chunk (Δx,Δy,Δθ)_{1..T}
+   │
+   ▼
+ 차체 속도 명령 (외부 로컬라이제이션 불필요)
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<pre><code>┌──────────────────────────────────────────────────────────────────────┐
+│                        LoGoPlanner 전체 아키텍처                          │
+└──────────────────────────────────────────────────────────────────────┘
+
+ [센서]            RGB-D 카메라 (차체 상단 장착, 높이/피치 가변)
+   │
+   ▼
+ ┌──────────────────────────────────────────────┐
+ │ Metric-aware Visual Geometry Backbone (VGGT)   │
+ │  - DINOv2 ViT : RGB → 시맨틱 토큰 t^I          │
+ │  - 경량 ViT   : Depth → 기하 토큰 t^D          │
+ │  - RoPE Attention 융합 → t^metric              │
+ │  - 스케일 prior 주입(depth)으로 절대 메트릭화    │
+ └──────────────────────────────────────────────┘
+   │
+   ├──────────────┬───────────────┬──────────────────┐
+   ▼              ▼               ▼                  ▼
+ [φ_p 헤드]     [φ_c 헤드]      [World 헤드 A,ψ]     (보조 기하 재구성)
+ P̂^local       T̂_c            P̂^world             ← self-supervised
+ (핀홀 지도)    (카메라 SE3)    (sign·exp 변환)        장면 인식 형성
+   │              │
+   │              ├─► f_b → T̂_b (섀시 포즈)   ┐
+   │              └─► f_g → ĝ  (목표 grounding)│ (3.3) 디커플드 포즈
+   ▼              ▼                            ┘
+ [CrossAttn]   [CrossAttn]
+ Q_G=CA(Q_g,h^p)  Q_S=CA(Q_s,h^c)
+   │              │
+   └──────┬───────┘
+          ▼
+   Q_P = [ Q_S , Q_G , emb(goal) ]   ◄──── 목표 g (월드/로봇계)
+          │
+          ▼
+ ┌──────────────────────────────┐
+ │  Diffusion Policy Head ε_θ    │   K-step denoising
+ │  a^{k-1}=α(a^k−γε_θ+N(0,σ²))   │
+ └──────────────────────────────┘
+          │
+          ▼
+   Action chunk { (Δx,Δy,Δθ)_t }_{t=1..T}
+          │
+          ▼
+   [차체 컨트롤러] → 선속도/각속도
+
+배포 형태(코드):
+  logoplanner_server.py / logoplanner_realworld_server.py (추론 서버, 클라우드 GPU)
+        ▲   HTTP
+        │
+  lekiwi_logoplanner_host.py (로봇측 클라이언트, 관측 송신·행동 수신)
+</code></pre>
+<p><strong>데이터 흐름 설명</strong>: 로봇의 RGB-D 관측은 백본을 통해 메트릭 토큰으로 변환되고, 보조 헤드들이 이를 로컬/월드 포인트와 카메라·섀시 포즈로 디코딩한다. 이 표현이 &quot;암시적 로컬라이제이션&quot;으로 작동하여, cross-attention 쿼리가 상태·기하 컨텍스트를 추출하고 디퓨전 헤드가 단기 action chunk를 생성한다. 실배포는 추론 서버(GPU)와 로봇측 호스트(LeKiwi 등)를 HTTP로 분리하는 client-server 구조를 취한다.</p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<p><strong>학습 데이터</strong>: 다양한 3D 환경에서 렌더링한 대규모 내비게이션 데이터셋으로, <strong>20만(200k) 이상의 궤적과 약 1,000만(10M) 장의 렌더링 이미지</strong>를 포함한다(InternData-N1 계열). 임바디먼트 다양성을 위해 다음을 랜덤화한다:</p>
+<pre><code>[임바디먼트 랜덤화]
+  - 카메라 높이      : 0.25 m ~ 1.25 m
+  - 카메라 피치 각   : 0° ~ 30°
+  - 구동계           : 차동 구동(differential-drive) 2륜
+  - 센서             : 차체 상단 RGB-D 카메라 1대
+</code></pre>
+<p><strong>시뮬레이션 평가 환경</strong>: <strong>InternScenes</strong> 데이터셋의 40개 장면(가정 home 20개 + 상업 commercial 20개). 장면당 100개의 시작–목표 쌍, 목표 거리 4–10 m.</p>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<pre><code>SR  (Success Rate)               : 목표 도달 성공률 ↑
+SPL (Success weighted by Path Length): 경로 효율 가중 성공률 ↑
+NE  (Navigation Error)           : 종료 위치–목표 유클리드 거리 ↓
+PE  (Planning Error)             : 계획된 궤적 종점–목표 거리 ↓
+</code></pre>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<h4>Table I — 시뮬레이션 (외부 로컬라이제이션 유무 ×/✓)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Planner</th>
+<th align="center">Loc.</th>
+<th align="right">Home SR↑</th>
+<th align="right">Home SPL↑</th>
+<th align="right">Comm. SR↑</th>
+<th align="right">Comm. SPL↑</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DD-PPO</td>
+<td align="center">✓</td>
+<td align="right">0.4</td>
+<td align="right">0.4</td>
+<td align="right">5.3</td>
+<td align="right">5.2</td>
+</tr>
+<tr>
+<td>iPlanner</td>
+<td align="center">×</td>
+<td align="right">41.7</td>
+<td align="right">40.2</td>
+<td align="right">53.1</td>
+<td align="right">51.8</td>
+</tr>
+<tr>
+<td>iPlanner</td>
+<td align="center">✓</td>
+<td align="right">43.0</td>
+<td align="right">40.6</td>
+<td align="right">54.6</td>
+<td align="right">52.8</td>
+</tr>
+<tr>
+<td>ViPlanner</td>
+<td align="center">×</td>
+<td align="right">44.0</td>
+<td align="right">42.8</td>
+<td align="right">61.3</td>
+<td align="right">60.1</td>
+</tr>
+<tr>
+<td>ViPlanner</td>
+<td align="center">✓</td>
+<td align="right">45.0</td>
+<td align="right">43.2</td>
+<td align="right">63.7</td>
+<td align="right">61.9</td>
+</tr>
+<tr>
+<td><strong>LoGoPlanner</strong></td>
+<td align="center"><strong>×</strong></td>
+<td align="right"><strong>57.3</strong></td>
+<td align="right"><strong>52.4</strong></td>
+<td align="right"><strong>67.1</strong></td>
+<td align="right"><strong>63.9</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 관찰</strong>:</p>
+<ul>
+<li><strong>+27.3%p</strong>: LoGoPlanner(외부 로컬라이제이션 없음, Home SR 57.3%)는 ViPlanner(외부 로컬라이제이션 포함, 45.0%)를 27.3%p 능가한다 — <em>외부 로컬라이제이션을 쓰지 않고도 쓰는 베이스라인을 이김</em>.</li>
+<li>DD-PPO는 사실상 실패(Home SR 0.4%)로, 강화학습 단독 정책이 이 세팅에서 무력함을 보여준다.</li>
+<li>상업 환경(67.1%)이 가정 환경(57.3%)보다 SR이 높은데, 가정 환경의 좁고 복잡한 가구 배치가 더 어려움을 시사한다.</li>
+</ul>
+<h4>Table IV — 백본 비교 (메트릭 스케일의 효과)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Backbone</th>
+<th align="right">Home SR↑</th>
+<th align="right">Home SPL↑</th>
+<th align="right">Home NE↓</th>
+<th align="right">Home PE↓</th>
+<th align="right">Comm. SR↑</th>
+<th align="right">Comm. SPL↑</th>
+<th align="right">Comm. NE↓</th>
+<th align="right">Comm. PE↓</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DepthAnything</td>
+<td align="right">49.9</td>
+<td align="right">47.1</td>
+<td align="right">2.51</td>
+<td align="right">1.48</td>
+<td align="right">59.9</td>
+<td align="right">57.4</td>
+<td align="right">2.49</td>
+<td align="right">1.49</td>
+</tr>
+<tr>
+<td>Video DepthAnything</td>
+<td align="right">51.5</td>
+<td align="right">48.2</td>
+<td align="right">2.43</td>
+<td align="right">1.08</td>
+<td align="right">61.4</td>
+<td align="right">58.8</td>
+<td align="right">2.15</td>
+<td align="right">1.08</td>
+</tr>
+<tr>
+<td>VGGT (no scale)</td>
+<td align="right">54.9</td>
+<td align="right">50.4</td>
+<td align="right">2.35</td>
+<td align="right">0.87</td>
+<td align="right">62.4</td>
+<td align="right">57.7</td>
+<td align="right">2.31</td>
+<td align="right">1.18</td>
+</tr>
+<tr>
+<td><strong>VGGT (metric)</strong></td>
+<td align="right"><strong>57.3</strong></td>
+<td align="right"><strong>52.4</strong></td>
+<td align="right"><strong>2.24</strong></td>
+<td align="right"><strong>0.55</strong></td>
+<td align="right"><strong>67.1</strong></td>
+<td align="right"><strong>63.9</strong></td>
+<td align="right"><strong>2.07</strong></td>
+<td align="right"><strong>0.59</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 관찰</strong>:</p>
+<ul>
+<li><strong>메트릭 스케일 주입이 PE(Planning Error)를 극적으로 낮춘다</strong>: VGGT(no scale) PE 0.87 → VGGT(metric) PE 0.55 (가정), 1.18 → 0.59 (상업). 즉 절대 스케일을 알아야 계획 종점이 목표에 정확히 도달한다.</li>
+<li>단순 단안(DepthAnything)·비디오 깊이(Video DepthAnything)보다 비디오 지오메트리 트랜스포머(VGGT)가 일관되게 우수 → 다중 프레임 기하 일관성이 중요.</li>
+</ul>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p>LoGoPlanner는 <strong>세 가지 서로 다른 로봇 플랫폼</strong>에서 각 20개 궤적으로 검증되었으며, 추론은 RTX 4090 GPU 클라우드 인퍼런스로 수행되었다.</p>
+<h4>Table II — 실로봇 성공률 (성공/시도)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Planner</th>
+<th align="center">Office TurtleBot SR↑</th>
+<th align="center">Home Unitree Go2 SR↑</th>
+<th align="center">Industrial Unitree G1 SR↑</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>iPlanner</td>
+<td align="center">10 (2/20)</td>
+<td align="center">15 (3/20)</td>
+<td align="center">0 (0/20)</td>
+</tr>
+<tr>
+<td>ViPlanner</td>
+<td align="center">50 (10/20)</td>
+<td align="center">45 (9/20)</td>
+<td align="center">0 (0/20)</td>
+</tr>
+<tr>
+<td><strong>LoGoPlanner</strong></td>
+<td align="center"><strong>85 (17/20)</strong></td>
+<td align="center"><strong>70 (14/20)</strong></td>
+<td align="center"><strong>50 (10/20)</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 관찰</strong>:</p>
+<ul>
+<li><strong>교차 임바디먼트 일반화의 결정적 증거</strong>: TurtleBot(저고도 바퀴형) → Unitree Go2(사족보행) → Unitree G1(휴머노이드, 고고도)로 갈수록 카메라 높이·운동 특성이 급변한다. 베이스라인들은 <strong>산업용 G1에서 전부 0%</strong>로 붕괴하지만, LoGoPlanner는 <strong>50%(10/20)</strong>를 달성한다. 디커플드 포즈 추정(T_ext 흡수)이 임바디먼트 변화를 견딘 것으로 해석된다.</li>
+<li>TurtleBot(구조화된 사무실 장애물)에서 85%로 가장 높고, 가정(Go2, 어수선한 환경) 70%, 산업(G1, 도로 차단형 장애물) 50% 순으로, 환경 난이도가 올라갈수록 성능은 내려가지만 베이스라인 대비 상대 우위는 유지된다.</li>
+</ul>
+<h4>Ablation — Table III (입력 구성요소 기여)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th align="center">Odometry</th>
+<th align="center">Goal</th>
+<th align="center">Point Cloud</th>
+<th align="right">Home SR↑</th>
+<th align="right">Home SPL↑</th>
+<th align="right">Comm. SR↑</th>
+<th align="right">Comm. SPL↑</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">×</td>
+<td align="center">×</td>
+<td align="center">×</td>
+<td align="right">49.5</td>
+<td align="right">47.0</td>
+<td align="right">59.4</td>
+<td align="right">57.0</td>
+</tr>
+<tr>
+<td align="center">✓</td>
+<td align="center">×</td>
+<td align="center">×</td>
+<td align="right">51.3</td>
+<td align="right">49.7</td>
+<td align="right">61.2</td>
+<td align="right">59.2</td>
+</tr>
+<tr>
+<td align="center">✓</td>
+<td align="center">✓</td>
+<td align="center">×</td>
+<td align="right">52.4</td>
+<td align="right">50.1</td>
+<td align="right">63.3</td>
+<td align="right">60.3</td>
+</tr>
+<tr>
+<td align="center">✓</td>
+<td align="center">✓</td>
+<td align="center">✓</td>
+<td align="right"><strong>57.3</strong></td>
+<td align="right"><strong>52.4</strong></td>
+<td align="right"><strong>67.1</strong></td>
+<td align="right"><strong>63.9</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 관찰</strong>:</p>
+<ul>
+<li><strong>Point Cloud(월드 포인트 지도) 감독이 가장 큰 단일 이득</strong>을 준다: +5.0%p SR(가정 52.4→57.3), +3.8%p SR(상업 63.3→67.1). 장면 기하 재구성이 충돌 회피·경로 품질에 직접 기여함을 입증.</li>
+<li>Goal·Odometry grounding도 점진적으로 기여하나, 기하 재구성(Point Cloud) 없이는 SR이 52% 수준에 머문다.</li>
+</ul>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>메트릭 인식 비주얼 지오메트리(Metric-aware Visual Geometry)</strong>: 사전학습 VGGT에 깊이 스케일 prior를 주입(RoPE 융합 어텐션)하여, 이미지로부터 <em>절대 메트릭 스케일</em>의 3D 표현을 산출하는 백본을 제안. 이는 정책 내부의 <em>암시적 로컬라이제이션</em>으로 작동하여 외부 odometry 의존을 제거한다.</p>
+</li>
+<li><p><strong>로컬라이제이션 그라운디드 정책(Localization Grounded Policy)</strong>: 카메라/섀시 포즈를 디커플하여 추정하고(<code>T_b = T_c · T_ext</code>), query 기반 cross-attention으로 상태·기하 컨텍스트를 추출한 뒤 디퓨전 헤드로 다봉 action chunk를 생성. 외부 로컬라이제이션 입력이 전혀 없는 종단간 구조.</p>
+</li>
+<li><p><strong>장면 지오메트리 재구성을 통한 self-supervision</strong>: 로컬 포인트(핀홀 모델 지도)·카메라 포즈·월드 포인트(<code>sign·exp</code> 변환) 세 보조 과제로 백본을 정칙화하여, 메트릭 스케일이 기하적으로 일관되게 정착하도록 강제. Ablation에서 Point Cloud 감독이 최대 단일 이득(+5%p SR)을 줌을 검증.</p>
+</li>
+<li><p><strong>외부 로컬라이제이션 없이 SOTA</strong>: 시뮬레이션에서 외부 로컬라이제이션을 쓰는 ViPlanner를 +27.3%p(Home SR)로 능가하고, <strong>세 임바디먼트(TurtleBot·Unitree Go2·Unitree G1) 실로봇</strong>에서 베이스라인이 0%로 무너지는 산업 환경(G1)에서도 50% 성공률을 달성.</p>
+</li>
+<li><p><strong>완전 공개 구현</strong>: 백본·정책·서버·실로봇 호스트(LeKiwi) 코드를 InternRobotics/NavDP 저장소에 공개하여 재현성을 확보.</p>
+</li>
+</ol>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 백본·정책 구성</h3>
+<pre><code>[모델 구성]
+  비주얼 지오메트리 백본 : VGGT (DINOv2 ViT 기반 비디오 지오메트리 트랜스포머)
+  깊이 인코더            : 동일 ViT의 경량 변형 (depth → 기하 토큰)
+  토큰 융합             : RoPE 위치 인코딩 + 셀프 어텐션
+  보조 헤드             : φ_p(로컬 포인트), φ_c(카메라 포즈), A·ψ(월드 포인트)
+  포즈 디커플           : f_b(섀시), f_g(목표 grounding)
+  쿼리 추출             : Q_S=CrossAttn(Q_s,h^c), Q_G=CrossAttn(Q_g,h^p)
+  정책 헤드             : 디퓨전(K-step denoising), action chunk (Δx,Δy,Δθ)×T
+</code></pre>
+<h3>7.2 2단계 학습 (Two-Stage Training)</h3>
+<pre><code>[Stage 1] 디코더·과제별 헤드 파인튠
+  - 깊이 기반 스케일 prior 주입
+  - 배치 크기 : 12
+  - 학습 기간 : 약 24시간
+
+[Stage 2] 디퓨전 헤드 + 과제별 헤드 공동 학습
+  - 백본 디코더 동결(frozen)
+  - 배치 크기 : 32
+  - 학습 기간 : 약 3일
+</code></pre>
+<p>2단계 분리 학습의 의도는 명확하다: 먼저 기하 표현(메트릭 스케일·포인트·포즈)을 안정화한 뒤, 그 표현을 <em>동결</em>하고 정책 디퓨전 헤드를 학습함으로써, 정책 학습이 기하 표현을 망가뜨리는 것을 방지한다(표현–정책 디커플링).</p>
+<h3>7.3 데이터·평가 설정</h3>
+<pre><code>[데이터]   200k+ 궤적 / ~10M 렌더 이미지
+           임바디먼트 랜덤화(높이 0.25–1.25m, 피치 0–30°)
+[시뮬]     InternScenes 40개 장면(home 20 + commercial 20)
+           장면당 100 시작–목표 쌍, 거리 4–10m
+[실로봇]   TurtleBot(office) / Unitree Go2(home) / Unitree G1(industrial)
+           각 20궤적, RTX 4090 클라우드 인퍼런스
+</code></pre>
+<h3>7.4 코드 검증 (GitHub)</h3>
+<p>본 리뷰는 <a href="https://github.com/InternRobotics/NavDP/tree/master/baselines/logoplanner">https://github.com/InternRobotics/NavDP/tree/master/baselines/logoplanner</a> 를 직접 확인했다. <strong>실제 소스 코드가 공개</strong>되어 있다(placeholder 아님):</p>
+<pre><code>NavDP/baselines/logoplanner/
+├── geometry_model.py                 # 메트릭 인식 비주얼 지오메트리(백본)
+├── policy_backbone.py                # 정책 백본
+├── policy_network.py                 # 디퓨전 정책 네트워크
+├── policy_agent.py                   # 에이전트(추론 루프)
+├── logoplanner_server.py             # 시뮬레이션 추론 서버
+├── logoplanner_realworld_server.py   # 실로봇 추론 서버
+├── lekiwi_logoplanner_host.py        # LeKiwi 로봇측 호스트(클라이언트)
+├── Pi3/  depth_anything/             # 보조 깊이/지오메트리 모듈
+├── deployment/  assets/              # 배포 스크립트·데모 에셋
+└── README.md                         # 설정·시뮬 평가·실로봇 배포 절차
+</code></pre>
+<p>README는 시뮬레이션 평가 커맨드와 LeKiwi 플랫폼 실로봇 배포 절차를 구체적으로 제공한다. 코드 상태 표기: <strong>✅ (실제 코드 공개)</strong>.</p>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 분석 (Scalability)</h3>
+<p><strong>교차 임바디먼트 확장</strong>: LoGoPlanner의 가장 강력한 확장성은 임바디먼트 일반화다. 디커플드 포즈(<code>T_b = T_c · T_ext</code>)에서 <code>T_ext</code>(카메라 높이·피치)를 데이터로부터 학습·흡수하므로, 학습 분포(높이 0.25–1.25m, 피치 0–30°) 안의 새 로봇에 캘리브레이션 없이 적용 가능하다. 실제로 학습 시 보지 못한 Unitree G1(휴머노이드)에서 50% 성공은 이 일반화의 직접 증거다.</p>
+<p><strong>데이터 스케일링</strong>: 200k 궤적·10M 이미지라는 대규모 합성 데이터가 일반화의 토대다. 이는 &quot;더 많은 임바디먼트·장면을 데이터에 넣으면 분포가 넓어진다&quot;는 스케일링 가설을 시사하지만, 동시에 <em>실세계 장면 부족</em>이 약점으로 남는다(§8.2).</p>
+<p><strong>클라우드–로봇 분리 배포</strong>: 추론을 RTX 4090 클라우드 서버에서 수행하고 로봇은 관측 송신·행동 수신만 담당하는 client-server 구조는, 저전력 로봇(LeKiwi, Raspberry Pi 급)에도 무거운 VGGT 백본을 사용할 수 있게 한다. 다만 네트워크 지연·연결성에 의존한다.</p>
+<h3>8.2 한계점 (Limitations)</h3>
+<p><strong>한계 1 — 실세계 장면 부족으로 인한 재구성 품질 저하 (저자 명시)</strong>:
+저자들은 직접 다음을 인정한다 — <em>&quot;사용 가능한 내비게이션 장면 수가 제한적(~2k)이어서 실세계 환경의 재구성 성능이 아직 만족스럽지 못하다. 실배포 성능 향상을 위해 현재 실세계 데이터셋을 메트릭 스케일로 학습 중이다.&quot;</em> 즉 메트릭 지오메트리 재구성이 합성 데이터에 강하게 의존하며, 실세계 sim-to-real 간극이 남는다.</p>
+<p><strong>한계 2 — 디퓨전 추론 비용·지연</strong>:
+디퓨전 정책은 K-step denoising을 요구하여 단일 회귀 정책보다 느리다. 본 논문은 RTX 4090 클라우드 인퍼런스를 사용하는데, 이는 <strong>온보드 실시간성</strong>(특히 저전력 로봇 온디바이스)이 아직 입증되지 않았음을 의미한다. 추론 FPS·지연이 명시되지 않은 점도 한계다.</p>
+<p><strong>한계 3 — 외부 로컬라이제이션 제거의 대가, 글로벌 일관성 부재</strong>:
+월드 좌표계를 &quot;마지막 타임스텝 섀시 프레임&quot; 기준 상대 좌표로 정의하므로, 장거리 누적 drift나 글로벌 맵 일관성은 다루지 않는다. 단기 action chunk·로컬 플래닝에는 충분하나, 대규모 맵·장거리 목표에는 별도 글로벌 플래너가 필요하다.</p>
+<p><strong>한계 4 — 베이스라인 범위</strong>:
+비교는 학습 기반 로컬 플래너(iPlanner, ViPlanner, DD-PPO)에 집중되어 있고, 고전적 SLAM+모듈러 플래너나 LiDAR 기반 강건 플래너와의 직접 비교는 제한적이다.</p>
+<h3>8.3 향후 연구 방향</h3>
+<pre><code>[향후 방향]
+방향 1: 실세계 메트릭 데이터 확장 (저자 진행 중)
+        ~2k 실세계 장면 → 대규모 실세계 메트릭 데이터로 재구성 품질 향상
+방향 2: 온디바이스 경량화
+        디퓨전 step 축소(distillation/consistency model)로 온보드 실시간화
+방향 3: 글로벌 일관성 통합
+        로컬 암시적 로컬라이제이션 + 토폴로지/글로벌 맵 결합으로 장거리 일반화
+방향 4: 동적 장애물 처리
+        현재 정적 기하 재구성 중심 → 시간적 예측(동적 객체) 결합
+방향 5: 멀티모달 센서 융합
+        RGB-D + LiDAR(ViLiNT식) 토큰 융합으로 분포 변화 강건성 강화
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<p>LoGoPlanner는 학습 기반 로컬/내비게이션 플래너 계열이므로, 같은 Planner 트랙의 선행 리뷰 중 <strong>(a) 임바디먼트 인식 비전 내비게이션 트랜스포머인 &quot;Multimodal Embodiment-Aware Navigation Transformer (ViLiNT)&quot;</strong>, <strong>(b) 종단간 디퓨전 플래너인 &quot;Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation (ReliaDiffNav)&quot;</strong>, <strong>(c) 사족보행 실로봇 로컬 플래너인 &quot;SCAN-Planner: Surface-Following Collision-Aware Navigation for Quadruped Robots in 3D Unstructured Environments&quot;</strong> 와 비교한다.</p>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>ViLiNT (arxiv2026)</th>
+<th>ReliaDiffNav (arxiv2026)</th>
+<th>SCAN-Planner (arxiv2026)</th>
+<th><strong>LoGoPlanner (ICRA2026)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 과제</td>
+<td>분포변화 강건 충돌회피</td>
+<td>지각-신뢰도 인식 비행</td>
+<td>사족 3D 지면추종 로컬플래닝</td>
+<td>로컬라이제이션-프리 메트릭 내비</td>
+</tr>
+<tr>
+<td>입력 센서</td>
+<td>RGB + 3D LiDAR</td>
+<td>RGB-D(+VLM 증류)</td>
+<td>LiDAR/3D 점유맵</td>
+<td>RGB-D 단일 카메라</td>
+</tr>
+<tr>
+<td>정책 형태</td>
+<td>트랜스포머 waypoint 회귀</td>
+<td>디퓨전(신뢰도 조건)</td>
+<td>A* 전단 + B-스플라인 최적화</td>
+<td>디퓨전 action chunk</td>
+</tr>
+<tr>
+<td>로컬라이제이션</td>
+<td>외부 가정</td>
+<td>외부/ESDF</td>
+<td>슬라이딩 점유맵</td>
+<td><strong>암시적(메트릭 지오메트리)</strong></td>
+</tr>
+<tr>
+<td>메트릭 스케일</td>
+<td>LiDAR로 확보</td>
+<td>깊이/ESDF</td>
+<td>LiDAR로 확보</td>
+<td><strong>이미지에서 학습(VGGT-metric)</strong></td>
+</tr>
+<tr>
+<td>임바디먼트 인식</td>
+<td>✅ 로봇 크기 토큰</td>
+<td>❌</td>
+<td>사족 전용(twin-cylinder)</td>
+<td><strong>✅ 디커플드 포즈(높이/피치)</strong></td>
+</tr>
+<tr>
+<td>실로봇</td>
+<td>지상 로봇</td>
+<td>쿼드로터</td>
+<td>Unitree Go2</td>
+<td><strong>TurtleBot+Go2+G1 (3종)</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>✅</td>
+<td>❌ 미공개</td>
+<td>예정(Coming Soon)</td>
+<td><strong>✅ 공개</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>LoGoPlanner의 장점</strong>:</p>
+<ol>
+<li><strong>로컬라이제이션-프리</strong>: ViLiNT·SCAN-Planner가 LiDAR/외부 로컬라이제이션으로 메트릭 스케일을 <em>센서에서</em> 얻는 반면, LoGoPlanner는 <em>이미지에서 학습</em>하여 외부 odometry 없이 동작. 가장 본질적 차별점.</li>
+<li><strong>교차 임바디먼트 일반화의 실증 폭</strong>: ViLiNT는 로봇 크기 토큰으로 임바디먼트를 인식하나 실험은 지상 로봇 위주다. LoGoPlanner는 바퀴형(TurtleBot)·사족(Go2)·휴머노이드(G1) 3종에서 검증하여 일반화 범위가 가장 넓다.</li>
+<li><strong>다봉성 처리</strong>: ReliaDiffNav와 마찬가지로 디퓨전을 채택해 다중 경로 모드를 보존. 단 ReliaDiffNav는 신뢰도 히트맵 조건화가 목적이고, LoGoPlanner는 메트릭 기하 조건화가 목적이다.</li>
+</ol>
+<p><strong>LoGoPlanner의 단점</strong>:</p>
+<ol>
+<li><strong>실세계 재구성 품질</strong>: SCAN-Planner는 실제 LiDAR 점유맵으로 정확한 3D 충돌을 모델링하지만, LoGoPlanner는 학습된 메트릭 기하에 의존하여 저자 스스로 &quot;실세계 재구성이 아직 불만족(~2k 장면)&quot;이라 인정. 안전이 극도로 중요한 사족 비정형 지형에서는 SCAN-Planner류의 명시적 3D 모델이 더 신뢰적일 수 있다.</li>
+<li><strong>온보드 실시간성 미입증</strong>: SCAN-Planner는 Jetson Orin NX 급 온보드 실시간을 목표로 설계됐으나, LoGoPlanner는 RTX 4090 클라우드 인퍼런스로 평가 → 디퓨전·VGGT의 온디바이스 비용이 약점.</li>
+<li><strong>글로벌 일관성 부재</strong>: 세 비교 논문 모두 로컬 플래닝에 집중하지만, LoGoPlanner의 &quot;마지막 섀시 프레임 기준 상대 좌표&quot;는 장거리 글로벌 일관성을 명시적으로 다루지 않는다.</li>
+</ol>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>[배포 시나리오별 적합도]
+
+✅ 매우 적합:
+   - 다양한 로봇 플랫폼에 빠르게 이식해야 하는 경우(캘리브레이션-프리)
+   - 외부 로컬라이제이션/odometry가 부정확·불가용한 환경
+   - 클라우드 GPU 인퍼런스가 가능한 client-server 배포
+
+⚠️ 조건부:
+   - 저전력 온보드 단독 실시간(디퓨전 step 경량화 필요)
+   - 안전 임계 사족 비정형 지형(SCAN-Planner류 명시적 3D 병행 권장)
+
+❌ 부적합:
+   - 장거리·글로벌 맵 일관성이 필수인 대규모 내비게이션(글로벌 플래너 필요)
+   - 동적 장애물이 지배적인 군중 환경(시간적 예측 부재)
+</code></pre>
+<h3>9.4 연구 방향성 평가</h3>
+<p>LoGoPlanner는 &quot;비주얼 지오메트리 파운데이션 모델(VGGT)을 메트릭 스케일에 grounding 하여 정책의 암시적 로컬라이제이션으로 쓴다&quot;는 점에서, <em>지각–로컬라이제이션–계획의 경계를 표현 학습으로 융합</em>하는 최신 흐름의 대표 사례다. ViLiNT가 임바디먼트 인식을, ReliaDiffNav가 신뢰도 인식을, SCAN-Planner가 형상 인식을 각각 정교화했다면, LoGoPlanner는 <strong>로컬라이제이션 자체를 정책 내부로 흡수</strong>한다는 점에서 가장 급진적이다. 다음 단계는 이 암시적 로컬라이제이션을 (1) 실세계 메트릭 데이터로 강화하고, (2) 글로벌 맵·동적 예측과 결합하며, (3) 온디바이스로 경량화하는 것이다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li>Peng, J., Cai, W., Yang, Y., Wang, T., Shen, Y., Pang, J. <em>LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry.</em> arXiv:2512.19629, 2025 (ICRA 2026).</li>
+<li>VGGT: <em>Visual Geometry Grounded Transformer</em> (DINOv2 기반 비디오 지오메트리 모델) — 백본.</li>
+<li>Oquab et al. <em>DINOv2: Learning Robust Visual Features without Supervision.</em> — ViT 백본.</li>
+<li>Yang et al. <em>Depth Anything / Video Depth Anything.</em> — 백본 비교(Table IV).</li>
+<li>iPlanner / ViPlanner — 학습 기반 로컬 플래너 베이스라인.</li>
+<li>DD-PPO — 분산 강화학습 내비게이션 베이스라인.</li>
+<li>Chi et al. <em>Diffusion Policy.</em> — 정책 헤드의 기반.</li>
+<li>Su et al. <em>RoFormer (RoPE).</em> — 회전 위치 인코딩.</li>
+<li>InternScenes / InternData-N1 (InternRobotics) — 평가·학습 데이터셋.</li>
+<li>LeKiwi (SIGRobotics-UIUC), LeRobot (HuggingFace) — 실로봇 배포 플랫폼.</li>
+<li>비교 리뷰 corpus: <em>Multimodal Embodiment-Aware Navigation Transformer (ViLiNT)</em>; <em>Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation (ReliaDiffNav)</em>; <em>SCAN-Planner: Surface-Following Collision-Aware Navigation for Quadruped Robots in 3D Unstructured Environments</em>.</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p>LoGoPlanner는 <strong>&quot;학습 기반 내비게이션 정책이 외부 로컬라이제이션 없이 단일 RGB-D로 절대 메트릭 스케일을 추정하고 이를 암시적 상태 추정으로 활용할 수 있는가&quot;</strong>라는 질문에 강한 긍정으로 답한다. 핵심은 사전학습 비주얼 지오메트리 백본(VGGT)에 깊이 스케일 prior를 주입하여 메트릭 기하 표현을 만들고, 로컬/카메라/월드 기하 재구성을 보조 과제로 정칙화한 뒤, 디커플드 포즈 추정과 query 기반 디퓨전 정책으로 다봉 action chunk를 생성하는 종단간 설계다.</p>
+<p><strong>혁신성</strong>: 로컬라이제이션을 별도 모듈이 아니라 정책 내부의 표현으로 흡수하고, 이미지로부터 절대 메트릭 스케일을 학습한다는 점에서 기존 학습 플래너(외부 odometry 가정)와 본질적으로 다르다. Table IV의 PE(계획 오차) 급감(0.87→0.55)은 메트릭 스케일 grounding이 단순한 표현 개선이 아니라 <em>계획 정확도</em>에 직접 기여함을 보여준다.</p>
+<p><strong>실용적 의의</strong>: 캘리브레이션-프리·교차 임바디먼트 일반화는 실로봇 배포의 큰 장벽을 낮춘다. 베이스라인이 0%로 붕괴하는 산업용 Unitree G1에서 50% 성공을 달성한 것, 그리고 바퀴형·사족·휴머노이드 3종 실로봇 검증은 이 방법이 단일 플랫폼 과적합이 아님을 입증한다. 코드 전면 공개는 재현성과 커뮤니티 확산 측면에서 가치가 크다.</p>
+<p><strong>향후 연구 방향</strong>: 저자 스스로 인정한 실세계 장면 부족(~2k)에 따른 재구성 품질 한계가 가장 시급한 과제이며, 실세계 메트릭 데이터 확장이 진행 중이다. 더불어 (1) 디퓨전·VGGT의 온디바이스 경량화로 온보드 실시간성 확보, (2) 글로벌 맵 일관성·장거리 일반화, (3) 동적 장애물에 대한 시간적 예측 통합이 핵심 후속 과제다. 종합적으로 LoGoPlanner는 비주얼 지오메트리 파운데이션 모델 시대의 &quot;로컬라이제이션-프리 내비게이션&quot;이라는 방향을 설득력 있게 개척한 연구로 평가된다.</p>
+<hr>
+<p><strong>리뷰 작성일</strong>: 2026-06-29
+<strong>상태</strong>: ✅ 풀 리뷰 완료
+<strong>트랙 주의</strong>: 파일 경로는 VLN/review/에 유지되어 있으나, 논문의 실제 주제는 자연어 지시를 다루지 않는 <strong>Robot Path Planning(Local Planner)</strong> 으로, 트랙 분류상 Planner 계열에 더 부합함.</p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

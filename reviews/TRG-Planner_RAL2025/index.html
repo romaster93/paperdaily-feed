@@ -1,0 +1,964 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">RA-L 2025</div>
+    <h1>TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2501.01806">arXiv:2501.01806</a></span>
+      <span>리뷰 2026-06-29</span>
+      <span>49분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>TRG-planner: 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation</li>
+<li><strong>저자 (Authors)</strong>: Dongkyu Lee, I Made Aswin Nahrendra, Minho Oh, Byeongho Yu, Hyun Myung</li>
+<li><strong>소속 (Affiliation)</strong>: Urban Robotics Lab (URL), School of Electrical Engineering, KAIST (한국과학기술원)</li>
+<li><strong>발표처 (Published)</strong>: <strong>IEEE Robotics and Automation Letters (RA-L) 2025</strong>, Vol. 10, No. 2, pp. 1736–1743 — <strong>탑티어 저널(확정 게재)</strong></li>
+<li><strong>DOI</strong>: 10.1109/LRA.2024.3524910 (IEEE Xplore 문서번호 10819646)</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2501.01806">2501.01806</a></li>
+<li><strong>코드 (Code)</strong>: <strong>❌ 미공개 (확인 불가)</strong> — 프로젝트 페이지(<a href="https://trg-planner.github.io/)%EC%99%80">https://trg-planner.github.io/)와</a> url-kaist GitHub 조직(<a href="https://github.com/orgs/url-kaist/repositories">https://github.com/orgs/url-kaist/repositories</a>) 양쪽을 검증한 결과, <em>TRG-planner 자체의 소스 저장소는 공개되어 있지 않다</em>. 프로젝트 페이지의 GitHub 링크는 전부 (i) 저자 개인 프로필(Dongkyu Lee, I Made Aswin Nahrendra, Minho Oh) 또는 (ii) 웹사이트 템플릿(nerfies.github.io)으로만 연결되며, 코드 저장소 버튼은 존재하지 않는다. 따라서 <strong>본 리뷰의 &quot;코드&quot;는 공개 구현체가 아니라 논문 본문의 수식·의사논리·아키텍처 기술에 근거</strong>하며, 실제 코드 스니펫은 인용하지 않는다(날조 금지).</li>
+<li><strong>프로젝트 페이지 (Project Page)</strong>: ✅ <a href="https://trg-planner.github.io/">https://trg-planner.github.io/</a> (실/시뮬 실험 영상·그림 포함, abstract 리다이렉트 아님 — 독립 페이지로 확인)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>TRG-planner는 <strong>산악·동굴·재난 현장 같은 비정형 지형(unstructured terrain)에서 지상 로봇(특히 사족보행 로봇)이 안전하면서도 거리 효율적인 전역 경로를 실시간으로 계획하는 문제</strong>를 다룬다. 핵심 통찰은 &quot;지형의 횡단성(traversability)을 그래프의 <strong>노드 유효성</strong>과 <strong>방향성 엣지 위험도(directional edge traversal risk)</strong> 로 동시에 인코딩한다&quot;는 것이다.</p>
+<p>기존 비정형 지형 플래너는 두 갈래로 나뉜다. 한쪽은 grid/voxel 위에 traversability cost를 깔고 그 위에서 탐색하는 방식으로, 해상도를 올릴수록 메모리·연산이 폭증하고 대규모 환경에서 실시간성이 무너진다. 다른 쪽은 PRM*/RRT* 같은 샘플링 그래프지만, 엣지에 지형 위험도를 충분히 반영하지 못해 &quot;통과 가능 여부&quot;는 알아도 &quot;어느 방향으로 들어가야 안전한가&quot;를 표현하지 못한다.</p>
+<p>TRG-planner는 이 둘의 간극을 메운다. 핵심 질문은:</p>
+<ul>
+<li>지형 위험도를 <strong>이동 방향(종방향 lon / 횡방향 lat)으로 분해</strong>하여 그래프 엣지에 직접 실으면, 같은 경사면이라도 진입 방향에 따라 다른 위험도를 부여할 수 있는가?</li>
+<li>전역 그리드를 다 채우지 않고 <strong>wavefront 전파</strong>로 &quot;갈 수 있는 영역만&quot; 점진적으로 그래프화하면, 대규모 환경에서도 ms 단위 실시간 계획이 가능한가?</li>
+<li>안전 계수 <code>Γ</code> 하나로 &quot;최단 경로 ↔ 최대 안전&quot;의 트레이드오프를 직관적으로 조절하면서, 실제 사족보행 로봇(Unitree Go1)으로 전이되는가?</li>
+</ul>
+<p>논문은 이 셋 모두에 긍정으로 답하며, 그 정점으로 <strong>ICRA 2023 Quadruped Robot Challenge(QRC) 우승 팀(DreamSTEP)의 전역 경로 계획기</strong>로 채택된 실증을 든다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) 해상도-연산량 트레이드오프 (Grid 기반의 근본 한계).</strong>
+2.5D elevation map이나 3D voxel 위에 traversability를 계산하면, 안전한 계획을 위해 고해상도가 필요하지만 해상도를 올릴수록 셀 수가 제곱/세제곱으로 늘어 탐색 비용이 폭증한다. 83m×151m급 산악 환경을 0.05m 해상도로 풀 그리드 A*로 풀면 수 초~수십 초가 걸려 실시간 재계획 루프에 들어갈 수 없다(논문 Table 3에서 Vanilla A*가 Long 시나리오 2980ms를 기록).</p>
+<p><strong>(C2) 방향 무관 위험도 (Direction-agnostic traversability).</strong>
+대부분의 traversability 맵은 각 셀에 <em>스칼라</em> 위험도(경사·거칠기 등)를 부여한다. 그러나 실제 사족보행 로봇은 <strong>경사면을 정면으로 오를 때는 안정적이지만, 옆구리로(횡방향) 가로지르면 전복(roll-over) 위험이 급증</strong>한다. 동일 지형이라도 진입 방향에 따라 위험도가 달라지는데, 스칼라 셀 비용은 이를 표현하지 못한다.</p>
+<p><strong>(C3) 도달 가능성과 안정성의 분리 평가.</strong>
+&quot;로봇이 서 있을 수 있는 안정적 지점(stability)&quot;과 &quot;현재 위치에서 실제로 갈 수 있는 지점(reachability)&quot;은 다른 개념이다. 안정적이어도 고립된 섬(island)이면 무의미하다. 기존 방법은 이 둘을 통합 평가하지 못해, 도달 불가능한 영역을 경로 후보로 잘못 포함하는 사고가 생긴다.</p>
+<p><strong>(C4) 대규모 환경의 실시간 갱신.</strong>
+로봇이 이동하며 새 센서 데이터로 지형을 갱신할 때, 전역 그래프를 매번 재구성하면 비용이 감당 불가다. 로컬 변화만 효율적으로 반영해 전역 그래프에 통합하는 <strong>계층적 관리(hierarchical management)</strong> 가 필요하다.</p>
+<p><strong>(C5) 안전-효율 트레이드오프의 직관적 제어.</strong>
+&quot;얼마나 보수적으로 안전을 우선할 것인가&quot;는 응용마다 다르다(정찰 vs 구조). 이 트레이드오프를 <em>단일하고 해석 가능한 파라미터</em> 로 노출해야 현장 적용성이 높아진다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>TRG-planner의 해법은 <strong>&quot;방향성 위험 그래프(TRG) + wavefront 구성 + 계층적 관리 + 위험 인지 A*&quot;</strong> 의 4중 결합이다:</p>
+<pre><code>                         ┌───────────────────────────────────────────────┐
+ Elevation Map ─────────▶│ TRG 구성                                       │
+ (LiDAR/포인트클라우드)   │  • 노드: stability g(c) ∧ reachability r(E)    │
+                         │  • 엣지: PCA 타원평면 → 방향위험 R_lon,R_lat   │
+                         │           w_ij = γ·R_lon + (1−γ)·R_lat         │
+                         │  • wavefront 전파로 &quot;갈 수 있는 영역만&quot; 확장   │
+                         └───────────────────────────────────────────────┘
+                                     │ (계층적: 로컬↔전역 통합)
+                                     ▼
+                         ┌───────────────────────────────────────────────┐
+                         │ Risk-Aware A*                                  │
+                         │  C(v_{i+1}) = C(v_i) + d·(Γ·w + 1)             │
+                         │  Γ 하나로 안전↔거리 트레이드오프 조절          │
+                         └───────────────────────────────────────────────┘
+                                     ▼
+                          안전·거리효율 전역 경로 → Pure Pursuit 추종
+</code></pre>
+<ul>
+<li><strong>방향성 위험 엣지(C2 해결)</strong>: PCA로 엣지 영역을 타원 평면으로 근사하고, 종/횡 고유벡터와 중력벡터의 내적으로 방향별 위험도를 산출 → 같은 경사라도 진입 방향에 따라 비대칭 위험 부여.</li>
+<li><strong>stability ∧ reachability 노드(C3 해결)</strong>: 두 이진 조건을 동시 만족할 때만 노드 valid.</li>
+<li><strong>wavefront 구성(C1 해결)</strong>: 전역 그리드 대신 로봇 주변에서 파면처럼 확장 → 탐색 가능 영역만 그래프화하여 ms 단위 계획.</li>
+<li><strong>계층적 관리(C4 해결)</strong>: 로컬 그래프 갱신 → 전역 그래프 통합.</li>
+<li><strong>안전 계수 Γ(C5 해결)</strong>: Γ=1(낙관)/3(균형)/10(보수)으로 단일 파라미터 트레이드오프.</li>
+</ul>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 TRG 노드 정의 — 안정성과 도달 가능성</h3>
+<p>TRG의 각 노드 <code>v_i = (p_i, s_i, E_i)</code> 는 로봇이 발을 디딜 수 있는 지형 영역을 나타낸다. <code>p_i</code>는 3D 위치, <code>s_i</code>는 상태(valid/invalid), <code>E_i</code>는 연결된 엣지 집합이다. 노드의 유효성은 <strong>두 이진 지표의 논리곱</strong>으로 판정된다.</p>
+<h4>기하 안정성 (Geometric Stability)</h4>
+<p>노드 중심 <code>c_i</code> 주변(로봇 내접원 반경 <code>r_robot</code> 내) elevation map 높이들이 중앙값 <code>h_mid</code>로부터 임계값 <code>h_max</code> 이내에 머무는지 확인:</p>
+<pre><code>g(c_i) = 𝟙{ ∀ h(x_k, y_k) ∈ N(c_i) :  | h(x_k, y_k) − h_mid | &lt; h_max }
+</code></pre>
+<ul>
+<li><code>𝟙{·}</code>: 지시함수(indicator) — 조건 만족 시 1, 아니면 0.</li>
+<li>직관: 로봇 발판 영역의 높이 변동(거칠기·단차)이 <code>h_max</code>(=0.16m, 로봇이 극복 가능한 최대 높이)를 넘으면 그 지점은 불안정 → 노드 무효.</li>
+</ul>
+<h4>도달 가능성 (Reachability)</h4>
+<pre><code>r(E_i) = 𝟙{ n(E_i) &gt; 0 }
+</code></pre>
+<ul>
+<li><code>n(E_i)</code>: 노드 <code>i</code>에 연결된 <em>유효 엣지</em> 의 개수.</li>
+<li>직관: 안정적이어도 어떤 valid 엣지로도 닿을 수 없으면(고립 섬) 도달 불가 → 노드 무효. 이것이 stability만으로는 잡지 못하는 &quot;갈 수 있는가&quot;를 보장한다.</li>
+</ul>
+<h4>노드 상태 분류</h4>
+<pre><code>s_i = { valid,    if g(c_i) ∧ r(E_i)
+      { invalid,  otherwise
+</code></pre>
+<p>이 <strong>이중 게이팅(stability ∧ reachability)</strong> 이 C3을 해결한다. &quot;안전하게 설 수 있고(stability) + 실제로 닿을 수 있는(reachability)&quot; 지점만 경로 후보가 된다.</p>
+<pre><code>ASCII: 노드 유효성 판정
+  elevation map N(c_i)
+        │ 높이 편차 검사 (|h − h_mid| &lt; h_max ?)
+        ▼
+   g(c_i) ──┐
+            ├── AND ──▶ s_i = valid / invalid
+   r(E_i) ──┘
+        ▲
+   연결 엣지 수 n(E_i) &gt; 0 ?
+</code></pre>
+<h3>3.2 방향성 엣지 위험도 — PCA 타원 평면과 중력 내적</h3>
+<p>TRG의 <strong>가장 핵심적인 기여</strong>는 엣지 위험도를 <em>이동 방향으로 분해</em> 하는 것이다. 두 노드 <code>i, j</code>를 잇는 엣지 영역(elevation map 상의 직사각형 띠)을 <strong>PCA로 타원 평면 <code>ξ</code> 에 근사</strong>한다.</p>
+<h4>PCA 타원 평면 근사</h4>
+<p>엣지 영역 내 elevation 포인트들의 공분산을 PCA로 분해하면, 그 영역의 지배적 기하 방향을 주는 고유벡터들이 나온다. 정규화된 두 주방향:</p>
+<ul>
+<li><code>ê^ξ_lon</code>: <strong>종방향(longitudinal)</strong> 단위 고유벡터 — 엣지를 따라 <em>이동하는 방향</em>.</li>
+<li><code>ê^ξ_lat</code>: <strong>횡방향(lateral)</strong> 단위 고유벡터 — 이동 방향에 <em>직교</em> 하는 방향.</li>
+</ul>
+<h4>방향별 위험도 (중력 내적)</h4>
+<p>위험도는 각 주방향 고유벡터와 <strong>중력 벡터 <code>g = [0, 0, −1]</code></strong> 의 음의 내적으로 정의된다:</p>
+<pre><code>R^ξ_dir = − ê^ξ_dir · g ,     dir ∈ { lon, lat }
+</code></pre>
+<ul>
+<li>직관(기하적 의미): 고유벡터가 <em>수평</em> 이면(평지) <code>ê·g ≈ 0</code> → 위험도 ≈ 0. 고유벡터가 <em>기울어질수록</em> 중력 성분이 커져 위험도가 커진다. 즉 <strong><code>R_dir</code>는 해당 방향의 경사 가파름을 직접 정량화</strong>한다.</li>
+<li>&quot;기운 경로일수록 로봇이 넘어질 가능성이 크다&quot;는 물리 직관을 내적 한 번으로 인코딩.</li>
+</ul>
+<h4>결합 엣지 가중치</h4>
+<pre><code>w_ij = γ · R^ξ_lon + (1 − γ) · R^ξ_lat ,     γ ∈ [0, 1]
+</code></pre>
+<ul>
+<li><code>γ = 0.2</code> (논문 Table 1): <strong>종방향에 0.2, 횡방향에 0.8 가중</strong>. 이는 &quot;횡방향 경사가 종방향보다 훨씬 위험하다&quot;는 사족보행 로봇의 물리적 현실을 반영한다. 로봇이 경사를 <em>정면으로</em> 오를 땐 안정적이지만, <em>옆으로</em> 가로지르면 전복 위험이 크기 때문이다.</li>
+<li>이 비대칭이 바로 C2의 해법이다: 동일 지형이라도 진입 방향(엣지 방향)에 따라 <code>R_lon</code>/<code>R_lat</code> 비율이 달라져 <strong>방향 의존적 위험도</strong> 가 나온다.</li>
+</ul>
+<pre><code>ASCII: 경사면 진입 방향에 따른 위험도 비대칭
+        경사면 (15° 기울기)
+   ┌────────────────────┐
+   │ ↑ 정면 등반        │  R_lon 지배 → γ=0.2 가중 → 낮은 w
+   │ (종방향)           │
+   │ ───────────────▶   │  횡단(횡방향) → R_lat 지배 → (1−γ)=0.8 가중 → 높은 w
+   └────────────────────┘
+   같은 경사라도: 정면 진입(안전) vs 옆구리 횡단(위험) 구분
+</code></pre>
+<h4>엣지 유효 조건</h4>
+<p>엣지가 그래프에 추가되려면 세 조건을 모두 만족해야 한다:</p>
+<ol>
+<li>엣지 영역 내 elevation 포인트 ≥ 3개 (PCA 평면 정의 최소 조건),</li>
+<li>모든 높이 편차 &lt; <code>h_max</code>,</li>
+<li>경사각 제약:</li>
+</ol>
+<pre><code>tan⁻¹( | p_i(z) − p_j(z) | / ‖ p_i(x,y) − p_j(x,y) ‖ )  &lt;  tan⁻¹( h_max / r_robot )
+</code></pre>
+<p>즉 두 노드를 잇는 직선의 경사가, 로봇이 극복 가능한 한계 경사(<code>h_max</code>를 내접원 반경 <code>r_robot</code>에 걸쳐 올라가는 각도) 미만일 때만 엣지가 유효하다.</p>
+<h3>3.3 Wavefront Propagation — &quot;갈 수 있는 영역만&quot; 점진 구성</h3>
+<p>전역 그리드를 다 채우는 대신, TRG는 <strong>파면(wavefront)이 퍼지듯</strong> 로봇 현재 위치에서 바깥으로 노드를 점진 샘플링한다. 이것이 C1(해상도-연산량 폭증)의 해법이다.</p>
+<pre><code>ASCII: Wavefront 전파
+   기준노드 v_ref 중심, 반경 r_exp 원 위에 균일 샘플
+        v_ref ──● ──● ──●   (반경 r_exp = 0.6m)
+              ●        ●
+              ● ──● ──●
+   각 샘플 처리:
+     ┌─ stability/traversability 실패 → 폐기(discard)
+     ├─ 기존 노드와 r_robot 이내 → 병합(merge)
+     └─ 통과 → 그래프·확장큐에 추가(add) + r_exp 내 엣지 연결
+   확장큐의 프론티어 노드를 새 v_ref로 → 큐가 빌 때까지 반복
+</code></pre>
+<p>각 샘플 노드에 대해 세 가지 결과가 발생한다:</p>
+<ol>
+<li><strong>폐기(Discard)</strong>: 안정성/횡단성 검사 실패 시.</li>
+<li><strong>병합(Merge)</strong>: 기존 노드의 <code>r_robot</code> 반경 내면 중복으로 보고 병합(노드 밀도 제어).</li>
+<li><strong>추가(Add)</strong>: 통과 시 그래프와 확장 큐에 추가하고, <code>r_exp</code> 내 인접 노드들과 엣지를 연결.</li>
+</ol>
+<p>이 과정은 프론티어 노드를 새 기준점 <code>v_ref</code>로 삼아 큐가 빌 때까지 반복된다. 결과적으로 <strong>로봇이 실제로 도달 가능한 영역만 그래프에 포함</strong> 되어, 전역 그리드 대비 노드 수가 극적으로 줄고 ms 단위 계획이 가능해진다(Table 3의 ~1000배 속도 우위의 근원).</p>
+<h3>3.4 계층적 관리 (Hierarchical Local-Global Management)</h3>
+<p>대규모 환경에서 매 갱신마다 전역 그래프를 재구성하면 비용이 감당 불가다(C4). TRG는 <strong>로컬 갱신 → 전역 통합</strong> 의 계층 구조로 이를 해결한다.</p>
+<h4>로컬 그래프 추출과 프론티어 식별</h4>
+<p>로봇 위치 주변에서 전역 그래프 <code>G</code>의 부분집합 <code>V_l</code>(로컬 노드)을 추출한다. 그중 <strong>프론티어 노드(아직 탐색 안 된 경계)</strong> 를 식별:</p>
+<pre><code>V_f = ⋃_{v_i ∈ V_l} { v_i  |  s_i = valid  ∧  u_i ∉ Q_G }
+
+여기서  u_i = p_i + 2·r_robot · (p_i − p_cur) / ‖ p_i − p_cur ‖
+</code></pre>
+<ul>
+<li><code>u_i</code>: 노드 <code>i</code>에서 <strong>로봇 반대 방향으로 <code>2·r_robot</code> 만큼 뻗은 확장점</strong>.</li>
+<li><code>Q_G</code>: 이미 탐색된 전역 영역(점유 셀 집합).</li>
+<li>직관: 확장점 <code>u_i</code>가 아직 탐색되지 않은 영역(<code>∉ Q_G</code>)에 떨어지면, 그 노드는 탐색 경계 = 프론티어 → 추가 확장 필요.</li>
+</ul>
+<h4>전역 통합</h4>
+<p>로컬에서 갱신된 노드·엣지를 전역 그래프에 병합:</p>
+<pre><code>V ← V ∪ V_l
+E ← E ∪ { e_ij | v_i, v_j ∈ V_l }
+</code></pre>
+<p>이로써 로봇이 이동하며 새로 관측한 지형만 점진적으로 전역 그래프에 누적되어, <strong>재구성 없이 증분(incremental) 확장</strong> 이 이뤄진다. 경로가 무효화되면(예: 이전에 valid였던 엣지가 새 관측으로 invalid가 됨) 재계획이 트리거된다.</p>
+<h3>3.5 Risk-Aware A* — 안전 계수 Γ로 트레이드오프 제어</h3>
+<p>구성된 TRG 위에서 <strong>위험 인지 비용함수를 가진 수정 A*</strong> 로 경로를 탐색한다. 누적 비용과 평가함수:</p>
+<pre><code>C(v_{i+1}) = C(v_i) + d_{i+1,i} · ( Γ · w_{i+1,i} + 1 )
+J(v_{i+1}) = C(v_{i+1}) + ‖ p_{i+1} − p_goal ‖
+</code></pre>
+<ul>
+<li><code>C(v)</code>: 시작부터 누적된 g-cost.</li>
+<li><code>d_{i+1,i}</code>: 노드 간 거리.</li>
+<li><code>w_{i+1,i}</code>: 엣지 횡단 위험도(3.2).</li>
+<li><code>Γ</code> (safety factor, ≥0): <strong>안전과 거리 효율의 트레이드오프를 조절하는 단일 파라미터</strong> (C5 해법).</li>
+<li><code>‖p_{i+1} − p_goal‖</code>: 목표까지 유클리드 거리 휴리스틱.</li>
+</ul>
+<p><code>Γ·w + 1</code> 항의 의미: 위험도가 0이면 비용 = 거리(<code>d·1</code>)로 순수 최단경로. <code>Γ</code>가 클수록 위험한 엣지(<code>w</code> 큼)의 비용이 부풀려져 우회를 유도한다.</p>
+<pre><code>Γ = 1.0  (Optimistic, 낙관)   → 위험을 거의 무시, 최단 경로 선호, 낮은 주행 안전
+Γ = 3.0  (Balanced,  균형)    → 안전과 거리의 최적 균형 (논문 권장값)
+Γ = 10.0 (Conservative, 보수) → 안전 최우선, 과도한 우회 감수
+</code></pre>
+<h4>A* admissibility 고찰</h4>
+<p>휴리스틱이 유클리드 거리이고 모든 엣지 비용이 <code>d·(Γw+1) ≥ d ≥ 직선거리</code> 이므로, 휴리스틱은 <strong>admissible(과대평가하지 않음)</strong> → 최적성 보장. 단, <code>Γ</code>가 커지면 실제 비용과 휴리스틱의 격차(heuristic gap)가 벌어져 탐색 노드가 늘어나는 효율 저하가 있다(보수적일수록 탐색이 무거워짐).</p>
+<h4>목표 도달 불가 시 sub-goal</h4>
+<p>목표가 현재 그래프로 도달 불가하면, <strong>목표에 가장 가까운 프론티어 노드를 sub-goal로 설정</strong> 하여 그쪽으로 먼저 이동하면서 그래프를 확장한다. 이 메커니즘이 미탐색 환경에서의 점진 탐사를 가능케 한다.</p>
+<h3>3.6 PCA 위험도 모델의 작동 원리 (심화)</h3>
+<p>TRG가 스칼라 traversability를 이기는 근본 이유는 <strong>PCA가 엣지 영역의 기하를 방향 분해</strong> 하기 때문이다. 엣지 띠 안의 elevation 포인트 집합 <code>{(x_k, y_k, z_k)}</code>의 3×3 공분산 행렬을 고유분해하면, 가장 큰 고유값의 고유벡터가 그 영역에서 점들이 가장 많이 퍼진 방향(=지배적 경사 방향)을 준다. 이를 이동 좌표계(엣지 방향)에 투영해 <code>ê_lon</code>, <code>ê_lat</code>을 얻는다.</p>
+<p>여기서 <code>R_dir = −ê_dir · g</code> 는 단순하지만 강력하다. 고유벡터가 수평이면 중력(연직)과 직교해 내적 0(평지, 무위험), 연직에 가까울수록 내적이 커져(가파른 경사) 위험 증가. 즉 <strong>방향별 경사를 중력과의 정렬도로 환산</strong> 한다.</p>
+<p>이 모델의 미묘함:</p>
+<ul>
+<li><strong>장점</strong>: 계산이 가볍고(공분산 + 고유분해), 방향 분해가 자연스럽다. 스칼라 셀 비용이 못 잡는 진입 방향 의존성을 잡아낸다.</li>
+<li><strong>한계(8장에서 상술)</strong>: PCA는 영역 분산을 <em>단일 평면</em> 으로 근사하므로, <strong>비볼록 지형(V자 도랑, 돌출 바위)이나 bimodal 높이 분포</strong>에서는 평면 근사가 실제 위험을 과소/과대평가할 수 있다. 또한 설명된 분산비(explained variance ratio)가 낮을 때(평면 근사가 나쁠 때)에 대한 신뢰도 가중이 없다.</li>
+</ul>
+<pre><code>ASCII: 같은 엣지, 두 진입 방향의 위험도
+   엣지 영역 → PCA → 타원평면 ξ
+        ê_lon (이동축)            ê_lat (직교축)
+          │                          │
+   R_lon = −ê_lon·g           R_lat = −ê_lat·g
+   (정면 경사)                 (옆구리 경사)
+          └──────── w_ij = 0.2·R_lon + 0.8·R_lat ───────┘
+   ⇒ 옆구리 경사(R_lat)가 4배 가중 → 횡단 회피 유도
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<p>전체 파이프라인은 <strong>지각(perception) → TRG 구성 → 계획 → 추종</strong> 의 4단으로 흐른다:</p>
+<pre><code>[센서: LiDAR + 포즈추정]
+        │
+        ▼
+[Elevation Map 구축]  ρ_map = 0.05m 해상도 2.5D 높이맵
+        │
+        ▼
+┌──────────────────────────────────────────────────┐
+│ TRG 구성 (3.1~3.4)                                 │
+│  (1) wavefront 노드 샘플링 (r_exp=0.6m 원)        │
+│  (2) stability g(c) ∧ reachability r(E) 평가      │
+│  (3) PCA 타원평면 → R_lon, R_lat → w_ij           │
+│  (4) 계층 관리: 로컬 V_l 갱신 → 전역 G 통합       │
+└──────────────────────────────────────────────────┘
+        │   (경로 무효화 감지 시 재계획 트리거)
+        ▼
+┌──────────────────────────────────────────────────┐
+│ Risk-Aware A* (3.5)                                │
+│  C(v) = C + d·(Γ·w + 1),  J = C + ‖p − p_goal‖    │
+│  도달불가 시 → 최근접 프론티어 sub-goal           │
+└──────────────────────────────────────────────────┘
+        │
+        ▼
+[Pure Pursuit 경로 추종]  →  Unitree Go1 (DreamWaQ 보행제어)
+        │
+        ▼
+[로봇 이동] → 새 관측 → Elevation Map 갱신 (루프)
+</code></pre>
+<p><strong>데이터 흐름의 핵심</strong>: 시스템은 2Hz로 동작하며(Intel Core i7-11700K), 로봇이 이동할 때마다 (i) elevation map이 갱신되고, (ii) 로컬 TRG가 재평가되어 전역 그래프에 통합되며, (iii) 경로가 무효화되면 risk-aware A*가 재실행된다. <strong>wavefront + 계층 관리</strong> 덕에 이 전체 루프가 ms 단위로 끝나, 대규모 산악 환경에서도 실시간 재계획이 유지된다.</p>
+<p><strong>모듈 책임 분리</strong>: 지형 표현(TRG)과 탐색(A*)이 깔끔히 분리되어 있다. TRG는 &quot;어디가 안전하고 닿을 수 있는가&quot;를 그래프로 제공하고, A*는 그 위에서 <code>Γ</code>로 조절되는 비용 최소 경로를 찾는다. 이 분리 덕에 동일 TRG 위에서 <code>Γ</code>만 바꿔 낙관/균형/보수 전략을 즉시 전환할 수 있다.</p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 / 실험 환경 (Datasets &amp; Environments)</h3>
+<p><strong>시뮬레이션 — 산악 지형</strong>:</p>
+<ul>
+<li>50m × 50m × 6.9m 산악 환경, 불규칙 경사.</li>
+<li>시나리오: <strong>Short(10m), Medium(20m), Long(30m)</strong> 직선거리 — 각 100개 랜덤 시작-목표 쌍.</li>
+<li>연산: 2Hz, Intel Core i7-11700K.</li>
+</ul>
+<p><strong>실세계 — 3종</strong>:</p>
+<ul>
+<li><strong>산악(Mountainous)</strong>: 83m × 151m × 38.3m, 경사·계단·좁은 통로 포함 (장거리 전역 계획 검증).</li>
+<li><strong>둔덕(Mound)</strong>: 10m × 14m × 17.5m, 15°/25°/35° 방향성 경사 (안전 진입 방향 선택 검증).</li>
+<li><strong>ICRA 2023 QRC 아레나</strong>: 램프, 디딤장애물 포함 연질 바닥, 파이프 계단, K-rail, 상자 모사 지형 등 5개 구간 (최대 15° 경사).</li>
+</ul>
+<p><strong>로봇 플랫폼</strong>: Unitree Go1 사족보행 + DreamWaQ 보행 제어기, elevation mapping, <strong>Pure Pursuit</strong> 경로 추종.</p>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>지표</th>
+<th>정의</th>
+<th>해석</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>S_path</code></td>
+<td>경로 계획 성공률 (%)</td>
+<td>유효 경로를 찾은 빈도</td>
+</tr>
+<tr>
+<td><code>S_trav</code></td>
+<td>주행 성공률 (%)</td>
+<td>몸체 접촉 없이 목표 도달 빈도</td>
+</tr>
+<tr>
+<td><code>L_path</code></td>
+<td>계획 경로 길이 (m)</td>
+<td>거리 효율</td>
+</tr>
+<tr>
+<td><code>W</code></td>
+<td>정규화 경로 위험도 = (1/L_path)·∑ w_{i+1,i}</td>
+<td>단위거리당 평균 엣지 위험</td>
+</tr>
+<tr>
+<td><code>T</code></td>
+<td>경로 편차 = (L_trav − L_path)/L_trav (음수면 0)</td>
+<td>궤적 추종 안정성</td>
+</tr>
+<tr>
+<td>Planning Time</td>
+<td>계산 시간 (ms)</td>
+<td>실시간성</td>
+</tr>
+</tbody></table></div>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<h4>안전 전략 비교 (Table 2, 시뮬레이션)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>거리</th>
+<th>전략 (Γ)</th>
+<th>L_path (m)</th>
+<th>W</th>
+<th>T</th>
+<th>S_trav (%)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Short</td>
+<td>Optimistic (1.0)</td>
+<td>10.43</td>
+<td>0.235</td>
+<td>0.137</td>
+<td>79.8</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Conservative (10.0)</td>
+<td>11.46</td>
+<td>0.125</td>
+<td>0.114</td>
+<td>79.8</td>
+</tr>
+<tr>
+<td>Short</td>
+<td><strong>Balanced (3.0)</strong></td>
+<td>11.07</td>
+<td>0.170</td>
+<td><strong>0.112</strong></td>
+<td><strong>79.8</strong></td>
+</tr>
+<tr>
+<td>Medium</td>
+<td>Optimistic</td>
+<td>20.99</td>
+<td>0.202</td>
+<td>0.078</td>
+<td>78.8</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td>Conservative</td>
+<td>22.59</td>
+<td>0.104</td>
+<td>0.080</td>
+<td>81.8</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td><strong>Balanced</strong></td>
+<td><strong>21.31</strong></td>
+<td><strong>0.142</strong></td>
+<td><strong>0.069</strong></td>
+<td><strong>83.8</strong></td>
+</tr>
+<tr>
+<td>Long</td>
+<td>Optimistic</td>
+<td>32.15</td>
+<td>0.189</td>
+<td>0.056</td>
+<td>68.7</td>
+</tr>
+<tr>
+<td>Long</td>
+<td>Conservative</td>
+<td>34.84</td>
+<td>0.097</td>
+<td>0.052</td>
+<td>70.7</td>
+</tr>
+<tr>
+<td>Long</td>
+<td><strong>Balanced</strong></td>
+<td><strong>32.71</strong></td>
+<td><strong>0.132</strong></td>
+<td><strong>0.048</strong></td>
+<td><strong>79.8</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>해석</strong>: Balanced(Γ=3.0)가 모든 거리에서 가장 낮은 경로 편차 <code>T</code>와 가장 높은 주행 성공률 <code>S_trav</code>를 달성했다. 주목할 비대칭:</p>
+<ul>
+<li><strong>Optimistic</strong>은 경로가 가장 짧지만(L_path 최소) 위험도 <code>W</code>가 가장 높고, Long에서 <code>S_trav</code>가 68.7%로 급락 — 최단경로가 위험한 경사를 가로질러 실제 주행에서 실패.</li>
+<li><strong>Conservative</strong>는 위험도 <code>W</code>가 가장 낮지만 경로가 길어지고(우회), 균형 전략보다 주행 성공률이 오히려 낮다(Long 70.7% &lt; 79.8%) — 과도한 우회가 새로운 실패 요인.</li>
+<li>즉 <strong>&quot;가장 안전한 위험도 점수&quot;가 &quot;가장 높은 실제 주행 성공&quot;을 주지 않는다</strong>. Γ=3.0이 sweet spot. 이것이 <code>Γ</code>를 단일 파라미터로 노출한 설계의 실증적 정당성이다.</li>
+</ul>
+<h4>계획 시간 비교 (Table 3, ms)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>시나리오</th>
+<th>A*</th>
+<th>PRM*</th>
+<th>T-Hybrid</th>
+<th><strong>TRG</strong></th>
+<th>TRG 속도 우위</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>초기화</td>
+<td>—</td>
+<td>37.86 s</td>
+<td>30.00 s</td>
+<td><strong>4.01 s</strong></td>
+<td>PRM* 대비 ~9.4배</td>
+</tr>
+<tr>
+<td>Short (10m)</td>
+<td>350.60</td>
+<td>3.50</td>
+<td>86.39</td>
+<td><strong>0.43</strong></td>
+<td>A* 대비 ~815배</td>
+</tr>
+<tr>
+<td>Medium (20m)</td>
+<td>1547.23</td>
+<td>8.83</td>
+<td>254.31</td>
+<td><strong>1.35</strong></td>
+<td>A* 대비 ~1146배</td>
+</tr>
+<tr>
+<td>Long (30m)</td>
+<td>2980.02</td>
+<td>16.89</td>
+<td>482.28</td>
+<td><strong>3.00</strong></td>
+<td>A* 대비 ~993배</td>
+</tr>
+</tbody></table></div>
+<p><strong>해석</strong>: TRG가 모든 시나리오에서 압도적으로 빠르다. 단, 공정성을 위한 해석이 필요하다:</p>
+<ul>
+<li>TRG의 0.43~3.00ms는 <strong>사전 구성된 그래프 위에서의 A* 탐색 시간</strong> 이다. 그래프 초기화(4.01s)는 별도다. 따라서 A* 대비 ~1000배는 <em>알고리즘 효율</em> 이라기보다 <strong>탐색 공간 축소 효과</strong>(풀 그리드 vs 희소 TRG)가 본질이다.</li>
+<li>그럼에도 TRG의 초기화(4.01s)는 PRM*(37.86s)/T-Hybrid(30.00s) 대비 7~9배 빨라, wavefront 희소 구성의 이점이 초기화 단계에서도 분명하다.</li>
+</ul>
+<h4>시퀀스별 상세 비교 (Table 4, Long 시나리오 발췌)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>Seq.01 L_path</th>
+<th>Seq.01 W</th>
+<th>Seq.01 T</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A*</td>
+<td>41.61</td>
+<td>0.271</td>
+<td>0.063</td>
+</tr>
+<tr>
+<td>PRM*</td>
+<td>42.33</td>
+<td>0.303</td>
+<td>0.051</td>
+</tr>
+<tr>
+<td>T-Hybrid</td>
+<td>35.11</td>
+<td>0.392</td>
+<td>0.047</td>
+</tr>
+<tr>
+<td><strong>TRG (Bal.)</strong></td>
+<td><strong>33.43</strong></td>
+<td><strong>0.134</strong></td>
+<td><strong>0.018</strong></td>
+</tr>
+</tbody></table></div>
+<p>TRG-Balanced는 5개 시퀀스 중 4개에서 가장 낮은 경로 편차 <code>T</code>를 기록했고, 위험도 <code>W</code>(0.134)는 T-Hybrid(0.392)의 1/3 수준이면서 경로 길이(33.43m)도 가장 짧다. <strong>&quot;더 짧으면서 동시에 더 안전&quot;</strong> 한 파레토 우위를 보였다.</p>
+<h4>성공률 (Figure 7 요약, 근사치)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>S_path Short/Med/Long</th>
+<th>S_trav Short/Med/Long</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A*</td>
+<td>~60 / ~40 / ~20 %</td>
+<td>~75 / ~65 / ~45 %</td>
+</tr>
+<tr>
+<td>PRM*</td>
+<td>~65 / ~55 / ~35 %</td>
+<td>~78 / ~72 / ~50 %</td>
+</tr>
+<tr>
+<td>T-Hybrid</td>
+<td>~75 / ~70 / ~50 %</td>
+<td>~80 / ~75 / ~60 %</td>
+</tr>
+<tr>
+<td><strong>TRG</strong></td>
+<td><strong>~95 / ~95 / ~95 %</strong></td>
+<td><strong>~80 / ~84 / ~80 %</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 비대칭</strong>: 거리가 늘수록 베이스라인의 <code>S_path</code>(계획 성공률 자체)가 급락(A*는 Long에서 <del>20%)하는 반면, <strong>TRG는 모든 거리에서 ~95%로 평탄</strong> 하다. 이는 wavefront + reachability 통합 덕에 &quot;갈 수 있는 경로를 거의 항상 찾는다&quot;는 의미다. 주행 성공률 <code>S_trav</code>도 일관되게 최고 수준(80</del>84%)을 유지한다.</p>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p><strong>(1) 산악 환경 (83m × 151m × 38.3m)</strong>:</p>
+<ul>
+<li>경사·계단·좁은 통로가 섞인 복합 비정형 지형에서 <strong>245m 장거리 경로를 성공적으로 계획·주행</strong>.</li>
+<li>로봇이 자율적으로 험한 경사 지형을 통과. 대규모 환경에서 계층적 관리 + wavefront 구성의 실시간성이 실증된 핵심 결과.</li>
+</ul>
+<p><strong>(2) 둔덕(Mound) 실험 (15°/25°/35° 방향성 경사)</strong>:</p>
+<ul>
+<li>둔덕은 면마다 경사가 다르다(가장 완만 15°, 가장 가파른 35°).</li>
+<li>TRG-planner가 <strong>가장 완만한 15° 면을 자동 식별하여 등반 경로로 선택</strong> 하고, 가파른 25°/35° 면은 회피. 로봇이 자율적으로 둔덕을 오르내림.</li>
+<li>이것이 <strong>방향성 위험도(3.2)의 직접 증거</strong> — 같은 둔덕이라도 <em>어느 방향으로 진입하는가</em> 에 따라 <code>R_lat</code>이 달라지고, A*가 저위험 방향을 선택. 스칼라 traversability로는 불가능한 거동.</li>
+</ul>
+<p><strong>(3) ICRA 2023 QRC 우승 (실전 대회 검증)</strong>:</p>
+<ul>
+<li>TRG-planner가 <strong>DreamSTEP 팀 자율 내비게이션 프레임워크의 전역 경로 계획기</strong> 로 채택.</li>
+<li>램프·연질 바닥·파이프 계단·K-rail·상자 모사 지형 등 5개 구간(최대 15° 경사 교차로 포함)을 통과.</li>
+<li><strong>ICRA 2023 Quadruped Robot Challenge 우승</strong>. 통제된 실험을 넘어 <em>경쟁적 실전 대회</em> 에서 전역 플래너로 검증된 점이 본 연구의 실용성을 가장 강하게 뒷받침한다.</li>
+</ul>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>방향성 횡단 위험 그래프(TRG) 표현.</strong>
+PCA 타원 평면 + 중력 내적으로 엣지 위험을 종/횡방향(<code>R_lon</code>, <code>R_lat</code>)으로 분해하고 <code>w_ij = γR_lon + (1−γ)R_lat</code>로 결합(γ=0.2). 같은 지형이라도 <em>진입 방향에 따라 비대칭 위험</em> 을 부여 — 스칼라 traversability 맵이 못 잡는 방향 의존성을 그래프 엣지에 직접 인코딩한다.</p>
+</li>
+<li><p><strong>stability ∧ reachability 이중 노드 게이팅.</strong>
+안정성(<code>g(c)</code>)과 도달 가능성(<code>r(E)</code>)을 동시 만족할 때만 노드 valid. &quot;안전하게 설 수 있고 + 실제로 닿을 수 있는&quot; 지점만 경로 후보가 되어, 고립 영역을 자연히 배제.</p>
+</li>
+<li><p><strong>Wavefront 기반 희소 그래프 구성 + 계층적 관리.</strong>
+전역 그리드 대신 파면 전파로 &quot;갈 수 있는 영역만&quot; 점진 구성하고, 로컬 갱신→전역 통합으로 대규모 환경에서 ms 단위 실시간 계획(초기화 4.01s, 탐색 0.43~3.00ms).</p>
+</li>
+<li><p><strong>단일 안전 계수 Γ에 의한 트레이드오프 제어.</strong>
+<code>C = C + d·(Γw+1)</code> 의 <code>Γ</code> 하나로 낙관(1)/균형(3)/보수(10) 전략을 즉시 전환. 동일 그래프 위에서 응용별 안전성을 직관적으로 조절.</p>
+</li>
+<li><p><strong>사족보행 실로봇 + 실전 대회 검증.</strong>
+Unitree Go1로 245m 산악 주행, 둔덕 안전 진입 방향 자동 선택, 그리고 <strong>ICRA 2023 QRC 우승 팀의 전역 플래너</strong> 로 실증.</p>
+</li>
+</ol>
+<h3>추가 의의</h3>
+<ul>
+<li><strong>RA-L 2025 게재(탑티어)</strong> + 실전 대회 우승이라는 <em>학술·실전 양면 검증</em> 을 동시 충족. 다만 코드 미공개(1.1 참조)로 재현성 측면에서는 코퍼스 내 코드 공개 논문(예: BOWConnect, NeuPAN) 대비 한 칸 낮다.</li>
+</ul>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 핵심 파라미터 (Table 1)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>값</th>
+<th>단위</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ρ_map</code></td>
+<td>0.05</td>
+<td>m</td>
+<td>Elevation map 해상도</td>
+</tr>
+<tr>
+<td><code>r_robot</code></td>
+<td>0.3</td>
+<td>m</td>
+<td>로봇 내접원 반지름</td>
+</tr>
+<tr>
+<td><code>r_exp</code></td>
+<td>0.6</td>
+<td>m</td>
+<td>노드 확장 반지름(wavefront 원 반경)</td>
+</tr>
+<tr>
+<td><code>h_max</code></td>
+<td>0.16</td>
+<td>m</td>
+<td>로봇이 극복 가능한 최대 높이/단차</td>
+</tr>
+<tr>
+<td><code>γ</code></td>
+<td>0.2</td>
+<td>—</td>
+<td>종방향 위험 가중치(횡방향=0.8)</td>
+</tr>
+<tr>
+<td><code>Γ</code> (Balanced)</td>
+<td>3.0</td>
+<td>—</td>
+<td>안전 계수(낙관 1.0 / 보수 10.0)</td>
+</tr>
+</tbody></table></div>
+<h3>7.2 구현상의 미묘함</h3>
+<ul>
+<li><strong>γ=0.2의 물리적 근거</strong>: 횡방향(전복) 위험이 종방향(슬립)보다 사족보행 로봇에 더 치명적이라는 가정. 이는 단단한 지형에서는 타당하나, 모래/자갈에서는 종방향 슬립이 지배적일 수 있어 <em>지형별 적응 γ</em> 가 물리적으로 더 정확할 여지가 있다(8.2 한계).</li>
+<li><strong>wavefront <code>r_exp</code>=0.6m vs <code>r_robot</code>=0.3m</strong>: 확장 반경이 로봇 반경의 2배 → 노드 간격이 로봇 크기보다 커 그래프가 희소해지고(빠름), 병합 반경 <code>r_robot</code>=0.3m로 중복을 억제. 이 두 반경의 비율이 그래프 밀도-속도 트레이드오프를 결정.</li>
+<li><strong>계산 주파수 2Hz</strong>: 0.5s 주기 재계획. 탐색 자체는 ms급이므로, 주기 대부분은 elevation map 갱신·로컬 TRG 재평가에 쓰인다.</li>
+<li><strong>Pure Pursuit 추종</strong>: 계획된 전역 경로를 단순 기하 추종기로 따라간다. 전역 안전성은 TRG가, 국소 추종은 Pure Pursuit가 담당하는 책임 분리.</li>
+</ul>
+<h3>7.3 실배치 엔지니어링 고려</h3>
+<ul>
+<li><strong>elevation map 의존성</strong>: 성능이 입력 2.5D 높이맵 품질에 크게 의존. LiDAR 노이즈·동적 객체·초목(tall grass) 등은 높이맵을 오염시켜 위험도 오판을 유발할 수 있다.</li>
+<li><strong>2.5D 표현의 한계</strong>: 동굴·다층 구조(오버행, 터널) 같은 <em>진정한 3D</em> 환경은 단일 높이맵으로 표현 불가 — 평면 위 지형에 국한.</li>
+<li><strong>DreamWaQ 보행제어 결합</strong>: TRG는 <em>전역 경로</em> 만 제공하고, 실제 발 디딤·균형은 별도 보행 제어기(DreamWaQ)가 담당. 즉 TRG의 &quot;안전 경로&quot;는 보행기가 따라갈 수 있다는 전제 하에 유효.</li>
+</ul>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<p>TRG의 확장성은 <strong>wavefront 희소성 + 계층적 증분 갱신</strong> 에서 나온다. 전역 그리드 A*가 환경 면적에 비례(또는 제곱)해 비용이 증가하는 반면, TRG는 &quot;갈 수 있는 영역의 노드 수&quot;에만 비례한다. 83m×151m 산악 환경에서도 ms 단위 탐색이 유지된 것이 그 증거다. 다만:</p>
+<ul>
+<li><strong>그래프 초기화 4.01s</strong>는 첫 진입 시 일회성 비용이며, 이후 계층적 증분 갱신으로 상환(amortize)된다. 그러나 환경이 극단적으로 커지면(수 km²) 초기화·메모리가 선형 증가하므로 전역 그래프를 무한정 보유하는 것은 한계가 있다 — 슬라이딩 윈도우/계층 LOD 같은 추가 기법이 필요할 수 있다.</li>
+<li><strong>GPU 미활용</strong>: 현재 CPU 단일 구현. wavefront 노드 평가·PCA는 병렬화 여지가 크나 본 논문은 탐구하지 않았다.</li>
+</ul>
+<h3>8.2 한계점 (Limitations) — 구체적 실패 시나리오 동반</h3>
+<ul>
+<li><strong>(L1) PCA 평면 근사의 정보 손실.</strong> 엣지 영역을 <em>단일 타원 평면</em> 으로 근사하므로, <strong>비볼록 지형(V자 도랑, 돌출 바위), bimodal 높이 분포</strong>에서는 평면이 실제 기하를 못 담아 위험을 과소/과대평가한다. 예: 좁은 도랑을 가로지르는 엣지에서 PCA가 양 둑의 평균 경사를 잡으면, 도랑 바닥의 실제 위험이 희석될 수 있다. 설명된 분산비(평면 근사 신뢰도)가 위험도에 반영되지 않는다.</li>
+<li><strong>(L2) 기하적 위험 ≠ 물리적 안정성.</strong> <code>R_dir = −ê·g</code>는 <em>경사 가파름</em> 만 본다. 실제 전복/슬립은 ZMP(Zero-Moment Point), Coulomb 마찰계수, 무게중심 높이에 의존하는데 이는 미반영. 같은 15° 경사라도 빙판(저마찰)과 바위(고마찰)의 실제 위험은 다른데 TRG는 동일 <code>R</code>을 준다.</li>
+<li><strong>(L3) 정적 환경 가정.</strong> 동적 장애물(이동 인간/차량)은 미고려. 현재는 정적 elevation map 기반이라 움직이는 객체는 표현·회피 불가.</li>
+<li><strong>(L4) 파라미터 수동 튜닝.</strong> <code>γ</code>, <code>Γ</code>, <code>h_max</code>, <code>r_exp</code> 등이 수동 설정. 특히 <code>γ=0.2</code>(횡방향 80%)는 단단한 지형 가정이라, 모래/자갈처럼 종방향 슬립이 지배적인 지형에선 부정확. 지형별 적응 <code>γ</code>가 필요.</li>
+<li><strong>(L5) 2.5D 표현 한계.</strong> 단일 높이맵이라 오버행·터널·다층 구조 표현 불가 — 평면 위 지형에 국한.</li>
+<li><strong>(L6) 주행 성공률 <del>80%의 실패 분석 부재.</strong> S_trav 79.8</del>83.8%는 <em>5분의 1이 실패</em> 한다는 뜻인데, 어떤 지형/방향에서 실패했는지 체계적 failure-mode 분석이 없다. 서비스/구조 로봇이 요구하는 99%+ 신뢰도와는 격차.</li>
+</ul>
+<h3>8.3 향후 방향</h3>
+<ul>
+<li><strong>학습 기반 traversability 통합</strong>: WayFAST/BADGR류의 외관 기반 학습 비용을 TRG 위험 모델에 융합하면, 기하만으로 못 잡는 재질(빙판 vs 풀)을 반영 가능.</li>
+<li><strong>물리 모델 결합</strong>: ZMP·마찰을 <code>R</code>에 통합해 기하적 위험을 물리적 안정성으로 격상.</li>
+<li><strong>적응적 γ/Γ</strong>: 지형 분류에 따라 종/횡 가중과 안전 계수를 자동 조절.</li>
+<li><strong>동적 환경 확장</strong>: 이동 객체 예측 + 재계획 루프 통합.</li>
+<li><strong>GPU 병렬 + 3D 표현</strong>: wavefront 노드 평가 병렬화, 다층 구조용 3D TRG.</li>
+</ul>
+<h3>8.4 실패 모드 분석</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>실패 모드</th>
+<th>원인</th>
+<th>완화책(현재/제안)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>비볼록 지형 위험 오판</td>
+<td>PCA 단일 평면 근사</td>
+<td>분산비 가중(제안)/다중 평면(제안)</td>
+</tr>
+<tr>
+<td>저마찰 경사 전복</td>
+<td>기하만 보고 마찰 미반영</td>
+<td>마찰/ZMP 결합(제안)</td>
+</tr>
+<tr>
+<td>동적 장애물 충돌</td>
+<td>정적 가정</td>
+<td>미지원(향후)</td>
+</tr>
+<tr>
+<td>새 지형(모래) 슬립</td>
+<td>γ 고정(0.2)</td>
+<td>지형 적응 γ(제안)</td>
+</tr>
+<tr>
+<td>다층/오버행 표현 불가</td>
+<td>2.5D 높이맵</td>
+<td>3D TRG(제안)</td>
+</tr>
+</tbody></table></div>
+<p>TRG의 실패는 주로 <strong>위험 모델의 물리적 충실도(L1·L2)</strong> 와 <strong>표현의 차원(L5)</strong> 에 집중된다. 그래프 구성·탐색 자체는 견고하나, &quot;기하 위험 = 실제 안정성&quot;이라는 근사가 깨지는 지점(저마찰·비볼록·동적)이 취약점이다.</p>
+<h3>8.5 재현성 평가</h3>
+<ul>
+<li><strong>코드 ❌ 미공개</strong>(1.1에서 검증): 프로젝트 페이지·url-kaist 조직 어디에도 TRG-planner 소스 저장소가 없다(저자 프로필 링크만 존재). 따라서 정확 재현은 어렵고, 본 리뷰의 분석은 논문 본문 수식·실험표에 근거한다.</li>
+<li><strong>개념 재현성은 양호</strong>: 노드 게이팅·PCA 위험·wavefront·risk-aware A*가 명확히 기술되어 <em>원리 재구현</em> 은 가능하나, 파라미터 일부(엣지 영역 띠 폭, PCA 분산비 처리 등)와 elevation mapping 파이프라인 세부는 본문만으로 정확 복제하기 어렵다.</li>
+<li><strong>데이터 재현성</strong>: 시뮬 산악맵·실세계 환경이 비공개라 동일 벤치마크 재현 불가.</li>
+</ul>
+<h3>8.6 비교 누락 — D* Lite / Field D* / 학습 traversability</h3>
+<p>논문 비교군(A*, PRM*, T-Hybrid)은 합리적이나, <strong>incremental replanning 계열(D* Lite, Field D*)</strong> 과의 비교가 빠졌다. 이들은 환경 변화 시 <em>부분 재계획</em> 으로 유사 속도를 낼 수 있어, TRG의 계층적 증분 갱신과 직접 경쟁 관계다. 또한 <strong>학습 기반 traversability(WayFAST, ViKiNG)</strong> 와의 비교도 없어, 기하 위험 모델의 상대적 강약(외관 정보 부재)이 정량적으로 드러나지 않는다. 이 두 축의 비교가 추가되면 TRG의 위치가 더 선명해질 것이다.</p>
+<h3>8.7 이론적 위치짓기</h3>
+<p>TRG-planner는 <strong>&quot;지형 표현(terrain representation)과 그래프 탐색을 통합한 traversability-aware 전역 플래너&quot;</strong> 계열에 속한다. 전통적으로 traversability 분석(셀별 비용)과 경로 탐색(A*/RRT)은 분리된 단계였다. TRG의 기여는 이 둘을 <em>방향성 그래프</em> 라는 단일 구조로 융합한 것 — 노드가 stability/reachability를, 엣지가 방향성 위험을 담아, 탐색기가 곧바로 &quot;안전 경로&quot;를 찾게 한다. 이는 cost-map 위 탐색(분리형)과 샘플링 그래프(위험 표현력 부족)의 <strong>중간 지점을 차지</strong> 하는 하이브리드다.</p>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>같은 Planner 트랙에서 <strong>비정형 지형 + 그래프/전역 계획 + 사족보행</strong> 에 가장 가까운 선행 리뷰 세 편과 비교한다:</p>
+<ul>
+<li><strong>SCAN-Planner: Surface-Following Collision-Aware Navigation for Quadruped Robots in 3D Unstructured Environments</strong> (Planner/review/SCAN-Planner_arxiv2026) — <strong>사족보행 + 3D 비정형 + 지면추종 로컬 플래너</strong>. TRG와 플랫폼(사족보행)·문제(비정형 지형 안전 주행)가 가장 직접적으로 겹치는 비교 대상. 단, SCAN은 <em>로컬</em> 플래너(투영 A* + 풋프린트 충돌검사), TRG는 <em>전역</em> 플래너.</li>
+<li><strong>FPAS: Frontier-Based Path Planning with Adaptive Sampling for Large-Scale Unknown Environments</strong> (Planner/review/FPAS_IROS2026) — <strong>프론티어 기반 대규모 미지 환경 그래프 계획기</strong>. TRG의 wavefront 프론티어 확장과 직접 대응(프론티어로 미탐색 영역 확장). 단 FPAS는 <em>공간 개방도</em> 로 노드 밀도를 조절(평지 위주), TRG는 <em>지형 위험</em> 으로 엣지를 가중(험지 위주).</li>
+<li><strong>HEIGHT: Heterogeneous Interaction Graph Transformer for Robot Navigation in Crowded and Constrained Environments</strong> (Planner/review/HEIGHT_TASE2025) — <strong>그래프 기반 + T-ASE 탑티어</strong>. 그래프로 내비게이션을 푸는 점은 같으나, HEIGHT는 <em>동적 군중</em> 상호작용 그래프(학습), TRG는 <em>정적 지형</em> 위험 그래프(기하). 그래프의 &quot;노드/엣지가 무엇을 인코딩하는가&quot;가 정반대(에이전트 상호작용 vs 지형 횡단성)라 대조군으로 의미.</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>SCAN-Planner</th>
+<th>FPAS</th>
+<th>HEIGHT</th>
+<th><strong>TRG-planner (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>계획 범위</td>
+<td>로컬(지면추종)</td>
+<td>전역(프론티어)</td>
+<td>로컬(군중회피)</td>
+<td><strong>전역(지형위험)</strong></td>
+</tr>
+<tr>
+<td>핵심 표현</td>
+<td>투영 A* + 풋프린트</td>
+<td>적응밀도 샘플링 그래프</td>
+<td>이질 상호작용 그래프</td>
+<td><strong>방향성 위험 그래프(TRG)</strong></td>
+</tr>
+<tr>
+<td>위험 모델</td>
+<td>충돌(2점 질의)</td>
+<td>개방도(기하)</td>
+<td>학습 상호작용</td>
+<td><strong>PCA 방향위험 R_lon/R_lat</strong></td>
+</tr>
+<tr>
+<td>플랫폼</td>
+<td>사족보행(Go2)</td>
+<td>미지정(시뮬)</td>
+<td>차륜/군중</td>
+<td><strong>사족보행(Go1)</strong></td>
+</tr>
+<tr>
+<td>지형 차원</td>
+<td>3D 다층</td>
+<td>평면 위주</td>
+<td>평면 군중</td>
+<td><strong>2.5D 비정형 험지</strong></td>
+</tr>
+<tr>
+<td>안전-효율 제어</td>
+<td>스플라인 최적화</td>
+<td>거리/시간</td>
+<td>학습 정책</td>
+<td><strong>단일 Γ (1/3/10)</strong></td>
+</tr>
+<tr>
+<td>실로봇</td>
+<td>✅ Go2 다층</td>
+<td>❌ 시뮬만</td>
+<td>(학습+시뮬)</td>
+<td>✅ <strong>Go1 + ICRA QRC 우승</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>예정(Coming Soon)</td>
+<td>❌ 미공개</td>
+<td>(확인)</td>
+<td>❌ <strong>미공개</strong></td>
+</tr>
+<tr>
+<td>게재</td>
+<td>arXiv 2026</td>
+<td>IROS 2026</td>
+<td>T-ASE 2025</td>
+<td><strong>RA-L 2025</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>TRG-planner의 강점:</strong></p>
+<ol>
+<li><strong>방향성 위험 인코딩의 독창성</strong> — SCAN-Planner도 사족보행 험지 주행이지만 <em>충돌 회피(지면추종)</em> 에 집중하는 로컬 플래너로, &quot;어느 방향으로 경사를 진입해야 안전한가&quot;를 <em>전역 경로 수준</em> 에서 결정하지 못한다. TRG는 PCA 방향위험으로 둔덕 실험처럼 <em>전역적으로 안전 진입 방향</em> 을 선택한다 — 이는 스칼라 비용 기반 플래너(FPAS 포함)가 못 하는 거동.</li>
+<li><strong>실전 대회 검증</strong> — FPAS는 시뮬만, HEIGHT는 학습+시뮬 위주인데, TRG는 <strong>ICRA 2023 QRC 우승</strong> 이라는 경쟁 실전 검증을 보유. 통제 실험을 넘어선 강한 실용성 증거.</li>
+<li><strong>단일 Γ 트레이드오프</strong> — FPAS의 거리/시간 지표나 SCAN의 스플라인 최적화보다, 하나의 해석 가능한 파라미터로 안전성을 조절하는 인터페이스가 현장 적용에 직관적.</li>
+<li><strong>wavefront 희소성</strong> — FPAS의 개방도 적응과 철학은 유사하나(필요한 곳만 촘촘), TRG는 <em>지형 위험</em> 을 직접 기준으로 삼아 험지 특화.</li>
+</ol>
+<p><strong>TRG-planner의 약점:</strong></p>
+<ol>
+<li><strong>기하 위험의 물리적 충실도 부족</strong> — SCAN-Planner의 풋프린트 2점 충돌질의는 <em>실제 기하 충돌</em> 을 직접 보는 반면, TRG의 <code>R=−ê·g</code>는 경사 가파름만 본다(마찰·ZMP 미반영, 8.2 L2). 저마찰 경사에서 TRG가 안전하다고 판단한 경로가 실제로는 미끄러질 수 있다.</li>
+<li><strong>2.5D 한계</strong> — SCAN-Planner는 명시적으로 <em>3D 다층(계단·터널)</em> 을 다루지만, TRG는 단일 높이맵이라 오버행/다층 표현 불가(8.2 L5). 동굴 같은 진짜 3D 비정형은 SCAN이 유리.</li>
+<li><strong>코드 미공개</strong> — SCAN(예정)·TRG(미공개) 모두 즉시 재현 불가지만, 코퍼스의 코드 공개 논문(BOWConnect, NeuPAN) 대비 재현성에서 뒤진다. RA-L 게재에도 불구하고 소스가 없는 점은 아쉽다.</li>
+<li><strong>~80% 주행 성공률</strong> — HEIGHT/FPAS의 평지·군중 시나리오 대비 험지라 절대 비교는 어렵지만, 서비스 로봇 신뢰도(99%+)와는 거리. 실패 모드 분석 부재(8.2 L6)와 결합돼 신뢰성 입증이 약하다.</li>
+</ol>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>TRG-planner</strong>: 사족보행 로봇의 <strong>옥외 험지(산악·재난·정찰)</strong> 전역 계획에 강력. 단일 Γ로 임무별 안전성을 조절하고, 실전 대회 검증까지 있어 <em>연구-필드 전이가 즉시 가능</em> 한 후보다. 단 (i) 코드 미공개로 재구현 비용이 들고, (ii) 저마찰·동적·다층 환경은 보완 필요. 실내 평탄/서비스 로봇에는 <em>과한</em> 도구(평지에선 단순 cost-map A*로 충분).</li>
+<li><strong>SCAN-Planner</strong>: <em>국소</em> 지면추종·다층 횡단에 강점. TRG의 전역 안전 경로 위에 SCAN을 로컬 추종기로 얹는 <strong>전역(TRG)+로컬(SCAN) 결합</strong> 이 자연스럽다.</li>
+<li><strong>FPAS</strong>: 대규모 <em>미지</em> 환경 탐사(광역 매핑)에 강하나, 험지 위험 모델·실로봇은 비대상.</li>
+<li><strong>HEIGHT</strong>: <em>동적 군중</em> 회피에 특화(직교 문제). TRG와는 적용 영역이 거의 겹치지 않는다(정적 험지 vs 동적 군중).</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>TRG-planner는 모션 플래닝의 무게중심을 <strong>&quot;스칼라 traversability cost-map → 방향성 위험 그래프&quot;</strong> 로 옮긴다. 이는 FPAS(샘플 밀도 측 적응)·SCAN(로컬 충돌 측 정밀화)과 <strong>직교</strong> 하는 축이다. 따라서 결합이 자연스럽다:</p>
+<ul>
+<li><strong>TRG ⊕ SCAN</strong>: TRG가 전역 안전 경로(방향위험 최소)를, SCAN이 로컬 지면추종 충돌회피를 담당하는 2계층. TRG의 ~80% 주행 성공률 중 일부 실패는 로컬 추종 한계일 수 있어, 정밀 로컬 플래너 결합이 보완책.</li>
+<li><strong>TRG ⊕ 학습 traversability</strong>: PCA 기하 위험에 외관 학습 비용(빙판/풀 구분)을 더해 8.2 L2를 메움.</li>
+<li><strong>TRG ⊕ FPAS 개방도</strong>: wavefront 노드 밀도를 <em>위험</em> 뿐 아니라 <em>개방도</em> 로도 조절해 평지-험지 혼합 환경에서 효율 향상.</li>
+</ul>
+<h3>9.5 일반화 가능성</h3>
+<p>TRG의 &quot;PCA 방향분해 + 중력 내적 방향위험&quot;은 사족보행에 국한되지 않는다. <strong>방향 의존적 안정성을 갖는 모든 지상 플랫폼</strong>(험지 차륜 로버, 추적식 UGV, 행성 탐사 로버)에 이식 가능하다. 핵심 레시피 — <em>&quot;엣지 영역을 PCA로 방향 분해하고, 진입 방향별 위험을 그래프 가중에 직접 싣는다&quot;</em> — 는 traversability-aware 전역 계획의 일반 패턴으로 재사용될 수 있다. 다만 플랫폼별로 종/횡 위험 비대칭(<code>γ</code>)과 한계 경사(<code>h_max</code>)는 재보정이 필요하다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li>TRG-planner, <em>IEEE RA-L 2025</em>, Vol.10 No.2 pp.1736–1743. arXiv:2501.01806. DOI:10.1109/LRA.2024.3524910. 프로젝트: <a href="https://trg-planner.github.io/">https://trg-planner.github.io/</a> (코드 미공개)</li>
+<li>비교 대상 (본 코퍼스):<ul>
+<li>SCAN-Planner: Surface-Following Collision-Aware Navigation for Quadruped Robots in 3D Unstructured Environments (arXiv 2606.19555).</li>
+<li>FPAS: Frontier-Based Path Planning with Adaptive Sampling for Large-Scale Unknown Environments (IROS 2026, arXiv 2606.22838).</li>
+<li>HEIGHT: Heterogeneous Interaction Graph Transformer for Robot Navigation in Crowded and Constrained Environments (T-ASE 2025, arXiv 2411.12150).</li>
+</ul>
+</li>
+<li>관련 기법: A* (Hart et al., 1968), PRM* / RRT* (Karaman &amp; Frazzoli, 2011), D* Lite (Koenig &amp; Likhachev), Field D* (Ferguson &amp; Stentz), PCA (Jolliffe), DreamWaQ 보행제어 (Nahrendra et al.), Pure Pursuit (Coulter, 1992).</li>
+<li>검증 출처: ICRA 2023 Quadruped Robot Challenge (DreamSTEP 팀 우승), IEEE Xplore 문서 10819646.</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>혁신성</h3>
+<p>TRG-planner의 핵심 혁신은 <strong>지형 횡단성을 &quot;방향성 위험 그래프(TRG)&quot;라는 단일 구조로 통합</strong> 한 것이다. 노드는 stability(<code>g(c)</code>)와 reachability(<code>r(E)</code>)의 논리곱으로, 엣지는 PCA 타원 평면의 종/횡 고유벡터와 중력 내적(<code>R=−ê·g</code>)으로 방향별 위험을 인코딩하고, <code>w_ij=γR_lon+(1−γ)R_lat</code>(γ=0.2)로 결합한다. 여기에 wavefront 희소 구성과 계층적 증분 갱신을 결합해 대규모 비정형 환경에서 ms 단위 실시간 계획을 달성하며, risk-aware A*의 단일 안전 계수 <code>Γ</code>로 안전-효율 트레이드오프를 직관적으로 제어한다. <strong>&quot;같은 지형이라도 진입 방향에 따라 위험이 다르다&quot;</strong> 는 물리 직관을 그래프 엣지에 직접 실은 것이 본질적 기여다.</p>
+<h3>실용적 의의</h3>
+<p>시뮬레이션에서 Balanced(Γ=3.0)가 주행 성공률·경로 편차 모두 최적을 보였고(Long 시나리오 S_trav 79.8%, T 0.048), 계획 시간은 풀 그리드 A* 대비 <del>1000배 빠르다(0.43</del>3.00ms, 탐색 공간 축소 효과). 무엇보다 <strong>Unitree Go1로 245m 산악 주행, 둔덕 안전 진입 방향 자동 선택, 그리고 ICRA 2023 QRC 우승 팀의 전역 플래너</strong> 라는 실전 검증을 보유해, 사족보행 옥외 험지 내비게이션에 즉시 투입 가능한 강한 후보다.</p>
+<h3>향후 연구 방향</h3>
+<p>한계는 (i) PCA 단일 평면 근사의 비볼록 지형 정보 손실(L1), (ii) 기하 위험과 실제 물리 안정성(마찰·ZMP)의 괴리(L2), (iii) 정적·2.5D 표현 한계(L3·L5), (iv) 고정 <code>γ</code>의 지형 비적응성(L4), (v) ~80% 주행 성공률의 실패 모드 분석 부재(L6)에 있다. 따라서 <strong>학습 기반 traversability 융합</strong>(외관 정보로 마찰·재질 반영), <strong>물리 모델 결합</strong>(ZMP·마찰을 R에 통합), <strong>적응적 γ/Γ</strong>, <strong>3D TRG·GPU 병렬화</strong>, <strong>동적 환경 확장</strong> 이 자연스러운 다음 단계다. 코퍼스 관점에서는 SCAN-Planner(로컬 지면추종)를 로컬 추종기로 결합한 <strong>전역(TRG)+로컬(SCAN) 2계층</strong> 이 ~80% 성공률을 끌어올릴 유망한 경로다.</p>
+<h3>종합 평가</h3>
+<p>TRG-planner는 비정형 지형 전역 계획의 오랜 난제 — &quot;스칼라 traversability cost-map은 진입 방향 의존 위험을 표현하지 못한다&quot; — 를, <strong>PCA 방향분해 + 중력 내적</strong> 이라는 가볍고 명료한 모델로 정면 돌파한다. 둔덕 실험에서 <em>전역적으로 안전한 진입 방향을 자동 선택</em> 한 거동은 이 방향성 위험 모델의 가치를 가장 선명히 보여준다. 평가 측면에서도 시뮬레이션 정량 비교(Table 2~4)에 그치지 않고 <strong>사족보행 실로봇 + 경쟁 실전 대회(ICRA QRC) 우승</strong> 이라는 이중 검증을 충족해, RA-L 2025 탑티어 게재에 걸맞은 완성도를 갖췄다. 다만 (i) 코드 미공개로 재현성이 코퍼스의 오픈소스 논문 대비 낮고, (ii) 위험 모델이 기하에 머물러 저마찰·동적·다층 환경에서의 물리적 충실도가 입증되지 않았으며, (iii) ~80% 주행 성공률의 실패 분석이 빠진 점은 후속 연구가 메워야 할 빈칸이다. 그럼에도 &quot;방향성 위험을 그래프 엣지에 직접 싣는다&quot;는 명료한 레시피와 실전 우승 검증은, 본 논문을 사족보행 험지 내비게이션 흐름에서 주목할 가치가 높은 결과로 만든다.</p>
+<hr>
+<p><em>본 리뷰는 PhD 수준 상세 분석이며, 논문 본문(arXiv HTML / IEEE RA-L)의 수식·실험표·실로봇 기술에 기반한다. <strong>코드는 공개되지 않았으므로</strong>(프로젝트 페이지·url-kaist 조직 검증) 실제 구현 스니펫은 인용하지 않고, 방법론은 본문 수식·의사논리로부터 재구성했다.</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

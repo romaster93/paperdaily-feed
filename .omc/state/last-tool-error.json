@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd /Users/cho/repos/paper-review && grep -rn \\\"AETube-RRT\\\" Planner/review/TubeRRT_TAES2026/review.md | head -5; echo ===; grep -rn \\\"외적 전이제약\\\" VLN/review/STEMbot_IROS2026/review.md Planne...",
+  "error": "Exit code 1\nPlanner/review/TubeRRT_TAES2026/review.md:77:적응적 확장 Tube-RRT* (AETube-RRT*) 문제:\nPlanner/review/TubeRRT_TAES2026/review.md:673:| 메트릭 | STube-RRT* | AETube-RRT* | **Enhanced (Ours)** |\nPlanner/review/TubeRRT_TAES2026/review.md:688:| 메트릭 | STube-RRT* | AETube-RRT* | **Enhanced (Ours)** |\nPlanner/review/TubeRRT_TAES2026/review.md:696:**가장 중요한 결과: 성공률 94% (vs. STube-RRT* 36%, AETube-RRT* 28%)**\nPlanner/review/TubeRRT_TAES2026/review.md:704:STube-RRT*, AETube-RRT*:\n(eval):1: == not found",
+  "timestamp": "2026-07-18T05:28:24.724Z",
+  "retry_count": 1
+}

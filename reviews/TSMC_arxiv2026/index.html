@@ -1,0 +1,1103 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>TSMC: Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 2026</div>
+    <h1>TSMC: Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2604.21456">arXiv:2604.21456</a></span>
+      <span>리뷰 2026-04-25</span>
+      <span>44분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>TSMC: 미분 가능 동역학 기반 궤적 및 정책 최적화를 위한 담금질 순차 몬테카를로 — 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics</li>
+<li><strong>저자 (Authors)</strong>: Heng Yang</li>
+<li><strong>소속 (Affiliation)</strong>: Harvard University, School of Engineering and Applied Sciences (SEAS) (추정; arXiv 기재 없음)</li>
+<li><strong>발표처 (Published)</strong>: arXiv 프리프린트 (2026년 4월 23일, cs.LG + cs.RO)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2604.21456">https://doi.org/10.48550/arXiv.2604.21456</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.21456">https://arxiv.org/abs/2604.21456</a></li>
+<li><strong>GitHub</strong>: 미공개</li>
+<li><strong>프로젝트 페이지</strong>: 없음</li>
+<li><strong>라이선스</strong>: CC BY 4.0</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 논문은 <strong>미분 가능 동역학 하에서의 유한 지평선(finite-horizon) 궤적 최적화 및 정책 최적화</strong>를 <strong>확률적 추론(probabilistic inference)</strong> 문제로 재구성하고, 이를 풀기 위한 새로운 샘플링 기반 알고리즘 <strong>TSMC (Tempered Sequential Monte Carlo)</strong>를 제안한다.</p>
+<p><strong>핵심 통찰</strong>: 로봇 제어기(controller)를 최적화하는 것은 볼츠만(Boltzmann) 분포에서 샘플링하는 것과 수학적으로 동치다. 이 관계를 활용하면:</p>
+<ol>
+<li><strong>다양성(diversity) 보존</strong>: 파티클(particle) 기반 샘플링으로 다중 모드(multimodal) 해를 탐색</li>
+<li><strong>경사 활용</strong>: 미분 가능 동역학을 통한 역전파로 정확한 경사 정보 활용</li>
+<li><strong>수렴 보장</strong>: 담금질(annealing)로 사전 분포에서 목표 분포로 점진적 수렴</li>
+</ol>
+<pre><code>기존 궤적 최적화:
+  θ* = argmin_θ E[C(τ)]    (결정론적 경사 하강)
+  → 단일 해에 수렴, 국소 최솟값 취약, 다양성 상실
+
+TSMC의 재구성:
+  p*(θ) ∝ exp(−C(τ)/T)    (볼츠만 목표 분포)
+  → θ ~ p*(θ) 에서 샘플링  (확률적 추론)
+  → 다양한 저비용 해를 파티클 집합으로 표현
+  → 온도 T → 0 : 최적 제어기로 집중
+</code></pre>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 다중 모드(Multimodal) 목적 함수</h4>
+<p>실제 로봇 제어 문제에서 비용 함수 C(τ)는 종종 다중 극솟값을 가진다. 예: 장애물을 왼쪽으로 돌아가는 궤적과 오른쪽으로 돌아가는 궤적은 둘 다 유사한 비용을 가질 수 있다.</p>
+<pre><code>전통적 경사 하강의 다중 모드 문제:
+
+비용 풍경 (Cost Landscape):
+     C(θ)
+      │
+   ╭──╮     ╭──╮
+   │  │  ╭──╯  │
+───┘  ╰──╯  θ  ╰───
+  θ₁*      θ₂*   θ₃*
+
+경사 하강: θ_init에 따라 θ₁*, θ₂*, θ₃* 중 하나에만 수렴
+TSMC: 세 극솟값 모두에 파티클 할당 → 비용 기반 최종 선택
+</code></pre>
+<h4>B. 미분 가능 동역학의 미활용</h4>
+<p>최근 미분 가능 시뮬레이터(Drake, MuJoCo, Brax 등)의 발전으로 동역학의 야코비안(Jacobian)을 역전파로 계산할 수 있게 되었다. 기존 샘플링 방법(CEM, MPPI)은 이 경사 정보를 전혀 사용하지 않는다.</p>
+<pre><code>경사 정보 활용도:
+
+방법            | 경사 사용 | 다양성 보존 | 수렴 보장
+─────────────────────────────────────────────────────
+iLQR/DDP        | ✅ (정확) | ❌ (단일해) | 국소 최적
+CEM             | ❌        | ✅ (샘플링) | 약
+MPPI            | ❌        | ✅ (가중)   | 약  
+SVGD            | ✅ (근사) | ✅ (입자)   | 중간
+**TSMC**        | ✅ (정확) | ✅ (파티클) | ✅ (이론 보장)
+</code></pre>
+<h4>C. 정책 최적화로의 확장 어려움</h4>
+<p>궤적 최적화는 단일 초기 상태에서의 단일 궤적을 최적화한다. 정책 최적화는 초기 상태의 분포 <code>p(x₀)</code>에 대해 기대값을 최적화해야 한다. 이 확장은 비자명하다:</p>
+<pre><code>궤적 최적화:
+  θ* = argmin_θ C(τ(θ, x₀))    (고정 x₀)
+
+정책 최적화:
+  θ* = argmin_θ E_{x₀~p(x₀)}[C(τ(θ, x₀))]  (분포적 x₀)
+  
+  어려움: p(x₀)의 확률적 성질 → TSMC 파티클에서 직접 처리 불가
+</code></pre>
+<h3>2.2 핵심 해결책</h3>
+<pre><code>TSMC 해결 방식 요약:
+
+1. KL-정규화 비용 최소화로 볼츠만 목표 분포 정의
+2. 담금질 경로 (사전 → 목표)를 따라 중간 분포 구성
+3. 중간 분포마다 파티클을 가중치 재조정 및 재샘플링
+4. HMC 재생(rejuvenation)으로 미분 가능 동역학의 경사 활용
+5. 정책 최적화: 결정론적 초기 상태 근사 + 보조 변수 구성
+</code></pre>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 제어-추론 대응 (Control as Inference)</h3>
+<h4>3.1.1 KL-정규화 궤적 최적화</h4>
+<p>표준 궤적 최적화 문제를 KL-다이버전스(Kullback-Leibler divergence)로 정규화한다:</p>
+<pre><code>표준 문제:
+  min_q E_{θ~q(θ)}[C(τ(θ))]
+
+KL-정규화 문제:
+  min_q E_{θ~q(θ)}[C(τ(θ))] + D_KL(q(θ) || p(θ))
+
+  p(θ): 제어기 파라미터의 사전 분포 (예: 표준 정규)
+  q(θ): 최적화 대상 분포
+  D_KL: KL 다이버전스
+</code></pre>
+<p><strong>이 문제의 최적 해</strong>:</p>
+<pre><code>KL-정규화 최적화의 해석적 해:
+
+q*(θ) = p*(θ) = p(θ) exp(−C(τ(θ))) / Z
+
+  Z = ∫ p(θ) exp(−C(τ(θ))) dθ (정규화 상수)
+
+온도 매개변수 T 도입:
+  p*_T(θ) ∝ p(θ) exp(−C(τ(θ)) / T)
+  
+해석:
+  T → ∞: p*_∞(θ) ≈ p(θ)  (사전 분포, 비용 무시)
+  T → 0:  p*_0(θ) → δ(θ − θ*)  (최적 제어기에 집중)
+  T = 1:  표준 KL-정규화 솔루션
+  
+직관: 볼츠만 분포 — 저비용 궤적에 지수적으로 높은 확률 부여
+      온도를 낮춤 → 점점 더 최적해 근방으로 집중
+</code></pre>
+<h4>3.1.2 미분 가능 동역학과의 연결</h4>
+<p>유한 지평선 시스템 동역학:</p>
+<pre><code>연속 시간 ODE:
+  ẋ = f(x, u)    (시스템 동역학)
+  x(0) = x₀      (초기 조건)
+  
+이산화 (Runge-Kutta 4차):
+  x_{t+1} = x_t + (h/6)(k₁ + 2k₂ + 2k₃ + k₄)
+
+  k₁ = f(x_t, u_t)
+  k₂ = f(x_t + h/2·k₁, u_t)
+  k₃ = f(x_t + h/2·k₂, u_t)
+  k₄ = f(x_t + h·k₃, u_t)
+
+궤적: τ = (x₀, u₀, x₁, u₁, ..., x_T)
+비용: C(τ) = Σ_{t=0}^{T-1} ℓ(x_t, u_t) + ℓ_T(x_T)
+
+미분 가능성: τ가 θ에 대해 미분 가능
+  ∂C/∂θ = ∂C/∂τ · ∂τ/∂θ
+  
+  → 역전파(backpropagation)로 계산 가능
+  → 자동 미분 라이브러리 (JAX, PyTorch) 활용
+</code></pre>
+<h3>3.2 담금질 순차 몬테카를로 (Tempered SMC)</h3>
+<h4>3.2.1 SMC의 기본 개념</h4>
+<p>순차 몬테카를로(SMC)는 중간 분포들의 수열을 통해 복잡한 목표 분포에서 샘플을 생성하는 방법이다:</p>
+<pre><code>SMC 프레임워크:
+
+중간 분포 수열:
+  π₀ = p(θ)                        (사전 분포, 쉬운 샘플링)
+  π₁, π₂, ..., π_{K-1}             (중간 분포)
+  π_K = p*(θ) ∝ p(θ)exp(-C(τ)/T_K) (목표 분포, 어려운 샘플링)
+
+핵심 단계 (각 k = 0, 1, ..., K):
+  1. 샘플링: {θ^i_{k}} ~ π_{k-1}  (이전 분포에서 파티클)
+  2. 가중치: w^i_k = π_k(θ^i_k) / π_{k-1}(θ^i_k)  (중요도 비)
+  3. 정규화: W^i_k = w^i_k / Σ_j w^j_k
+  4. 재샘플링: ESS가 낮으면 다항 재샘플링 (고가중치 파티클 복제)
+  5. 이동(Move): MCMC 커널로 파티클 다양성 회복
+</code></pre>
+<h4>3.2.2 TSMC: 담금질 경로 설계</h4>
+<p>TSMC는 온도 T를 낮춰가는 담금질(annealing) 방식으로 중간 분포를 구성한다:</p>
+<pre><code>담금질 경로 (Tempering Path):
+
+온도 수열: T_K ≥ T_{K-1} ≥ ... ≥ T_1 ≥ T_0 &gt; 0
+  (예: T_k = T_max · (T_min/T_max)^{k/K}  기하급수적 감소)
+
+중간 분포:
+  π_k(θ) ∝ p(θ) exp(−C(τ(θ)) / T_k)
+
+증분 가중치 (Incremental Weights):
+  w_k(θ) = π_k(θ) / π_{k-1}(θ)
+           = exp(−C(τ(θ)) · (1/T_k − 1/T_{k-1}))
+
+  해석: 비용이 낮은 파티클은 온도가 낮아질수록 지수적으로 가중치 증가
+
+적응적 온도 선택:
+  ESS (Effective Sample Size) 기반으로 온도 감소 폭 조절:
+  
+  ESS(k) = (Σᵢ w^i_k)² / Σᵢ (w^i_k)²
+  
+  if ESS(k) / N &lt; ε_ESS:  # 파티클 붕괴 위험
+    T_k 조정 (더 천천히 감소)
+  else:
+    T_k 더 빠르게 감소 가능
+    
+  목표: ESS가 N의 50~80% 수준 유지
+</code></pre>
+<h4>3.2.3 HMC 재생 (Hamiltonian Monte Carlo Rejuvenation)</h4>
+<p>재샘플링 후 파티클들이 중복되어 다양성이 감소하는 문제를 해결하기 위해, HMC 전이 커널을 사용한다:</p>
+<pre><code>HMC의 기본 원리:
+
+보조 변수 도입:
+  (θ, ρ): 파라미터 θ + 운동량(momentum) ρ
+  ρ ~ N(0, M)  (질량 행렬 M, 대개 단위 행렬)
+
+해밀토니안:
+  H(θ, ρ) = U(θ) + K(ρ)
+           = − log π_k(θ) + ½ ρ^T M^{-1} ρ
+
+해밀턴 방정식:
+  dθ/dt = ∂H/∂ρ = M^{-1} ρ
+  dρ/dt = −∂H/∂θ = ∇_θ log π_k(θ)
+                   = ∇_θ [log p(θ) − C(τ(θ))/T_k]
+
+Leapfrog 적분기:
+  ρ_{t+ε/2} = ρ_t + (ε/2) ∇_θ log π_k(θ_t)
+  θ_{t+ε} = θ_t + ε M^{-1} ρ_{t+ε/2}
+  ρ_{t+ε} = ρ_{t+ε/2} + (ε/2) ∇_θ log π_k(θ_{t+ε})
+
+  ε: 스텝 크기
+  L: 리프프로그 단계 수
+</code></pre>
+<p><strong>미분 가능 동역학과의 연결</strong>:</p>
+<pre><code>HMC에서 필요한 경사:
+  ∇_θ log π_k(θ) = ∇_θ log p(θ) − (1/T_k) ∇_θ C(τ(θ))
+
+비용 경사:
+  ∇_θ C(τ(θ)) = ∂C/∂θ
+               = (∂C/∂τ)(∂τ/∂θ)
+
+  ∂τ/∂θ: 미분 가능 동역학으로 역전파 계산
+         = 궤적의 제어기 파라미터에 대한 야코비안
+
+계산 과정:
+  1. θ로 궤적 τ = rollout(θ, x₀) 시뮬레이션
+  2. 비용 C(τ) 계산
+  3. 역전파: ∂C/∂θ = autodiff(C, τ, θ)
+  4. HMC 경사 ∇_θ log π_k(θ) 업데이트
+  5. Leapfrog 적분으로 θ 업데이트
+  
+특성:
+  - 정확한 (exact) 경사 사용 (근사 아님)
+  - 미분 가능 시뮬레이터 (JAX, MuJoCo Differentiable 등) 필요
+  - 긴 궤적의 경우 역전파 시간 증가 (트레이드오프)
+</code></pre>
+<h4>3.2.4 TSMC 전체 알고리즘</h4>
+<pre><code class="language-python">def TSMC(
+    p_prior,           # 사전 분포 p(θ)
+    rollout,           # 미분 가능 궤적 시뮬레이터
+    cost_fn,           # 비용 함수 C(τ)
+    N_particles=100,   # 파티클 수
+    T_max=10.0,        # 초기 온도
+    T_min=0.01,        # 최종 온도
+    K_steps=50,        # 담금질 단계 수
+    L_leapfrog=10,     # HMC Leapfrog 단계 수
+    epsilon=0.01,      # HMC 스텝 크기
+    ess_threshold=0.5, # 재샘플링 임계 ESS 비율
+    x0=None            # 초기 상태
+):
+    # 1. 초기 파티클 집합 (사전 분포에서 샘플링)
+    particles = [p_prior.sample() for _ in range(N_particles)]
+    weights = [1.0/N_particles for _ in range(N_particles)]
+    
+    # 2. 담금질 온도 수열
+    temperatures = geometric_schedule(T_max, T_min, K_steps)
+    
+    for k in range(K_steps):
+        T_prev = temperatures[k]
+        T_curr = temperatures[k+1]
+        
+        # 3. 궤적 롤아웃 (미분 가능)
+        trajectories = [rollout(theta, x0) for theta in particles]
+        costs = [cost_fn(tau) for tau in trajectories]
+        
+        # 4. 증분 가중치 계산
+        delta_inv_T = 1.0/T_curr - 1.0/T_prev
+        for i in range(N_particles):
+            log_w = -costs[i] * delta_inv_T
+            weights[i] *= np.exp(log_w)
+        
+        # 5. 정규화
+        Z = sum(weights)
+        weights = [w/Z for w in weights]
+        
+        # 6. ESS 계산 및 재샘플링
+        ess = 1.0 / sum(w**2 for w in weights)
+        if ess / N_particles &lt; ess_threshold:
+            indices = multinomial_resample(weights, N_particles)
+            particles = [particles[i] for i in indices]
+            weights = [1.0/N_particles] * N_particles
+        
+        # 7. HMC 재생 (다양성 회복)
+        for i in range(N_particles):
+            particles[i], _ = hmc_step(
+                theta=particles[i],
+                target_log_prob=lambda th: log_pi(th, T_curr, costs),
+                grad_log_prob=lambda th: grad_log_pi(th, T_curr, rollout, cost_fn, x0),
+                L=L_leapfrog,
+                epsilon=epsilon
+            )
+    
+    # 8. 최종 출력: 가중 파티클 집합
+    # 최적 제어기 = 가장 낮은 비용의 파티클
+    best_idx = min(range(N_particles), key=lambda i: costs[i])
+    return particles[best_idx], particles, weights
+</code></pre>
+<h3>3.3 정책 최적화로의 확장</h3>
+<p>궤적 최적화에서 단일 초기 상태 x₀를 가정했다면, 정책 최적화는 초기 상태의 분포 <code>p(x₀)</code>를 처리해야 한다.</p>
+<h4>3.3.1 결정론적 초기 상태 근사 (Deterministic Initial-State Approximation)</h4>
+<pre><code>정책 최적화 목적:
+  min_θ E_{x₀~p(x₀)}[C(τ(θ, x₀))]
+
+도전: x₀가 확률적 → TSMC에서 rollout(θ, x₀)의 기댓값 계산 필요
+
+결정론적 근사:
+  E_{x₀~p(x₀)}[C(τ(θ, x₀))] ≈ Σᵢ C(τ(θ, x₀^(i))) / N_states
+
+  x₀^(1), ..., x₀^(N_states) ~ p(x₀): 초기 상태의 대표 샘플 집합
+  
+이점:
+  - 고정 초기 상태 집합 → 각 파티클에 대해 N_states개 롤아웃
+  - 기댓값이 결정론적이 됨 → TSMC 직접 적용 가능
+  
+비용: N_states × N_particles개 롤아웃 필요 → 계산 비용 증가
+
+실용적 선택:
+  N_states = 10~100 (태스크에 따라)
+  초기 상태를 대표 샘플로 최적 양자화(quantization)
+</code></pre>
+<h4>3.3.2 보조 변수 구성 (Auxiliary Variable Construction)</h4>
+<p>확률적 동역학(stochastic dynamics)에서 롤아웃의 무작위성을 보조 변수로 처리한다:</p>
+<pre><code>확률적 동역학:
+  x_{t+1} = f(x_t, u_t, ε_t)    ε_t ~ p(ε)  (프로세스 노이즈)
+
+순수 무작위 롤아웃:
+  τ = (x₀, u₀, ε₀, x₁, u₁, ε₁, ..., x_T)
+  → τ의 분포가 θ와 ε 모두에 의존
+
+보조 변수 구성:
+  확장 파라미터: θ_ext = (θ, ε₀, ε₁, ..., ε_{T-1})
+  
+  롤아웃: τ = rollout(θ_ext) = rollout(θ, ε₀:T-1)
+  비용: C(τ) = C(τ(θ_ext))
+  
+  이점: ε가 θ_ext의 일부 → 미분 가능
+        ∂C/∂ε_t 계산 가능 → HMC에서 ε도 최적화
+
+  결과적 TSMC의 목표 분포:
+  p*(θ_ext) ∝ p(θ) p(ε) exp(−C(τ(θ_ext)) / T)
+  
+  해석: 비용이 낮은 (θ, ε) 조합에 높은 확률 부여
+        → 최적 제어기 θ와 최적 노이즈 실현 ε를 동시에 탐색
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 TSMC 전체 파이프라인</h3>
+<pre><code>╔══════════════════════════════════════════════════════════════════╗
+║                TSMC 궤적/정책 최적화 프레임워크                   ║
+╚══════════════════════════════════════════════════════════════════╝
+
+입력: 동역학 f, 비용 C, 사전 p(θ), 초기 상태 x₀ (또는 p(x₀))
+출력: 최적 제어기 θ*
+
+┌──────────────────────────────────────────────────────────────┐
+│                        초기화                                 │
+│  {θ^(i)}ᵢ₌₁ᴺ ~ p(θ)   N개 파티클 사전 분포에서 샘플링         │
+│  w^(i) = 1/N             균등 가중치                           │
+│  T ← T_max              최대 온도에서 시작                     │
+└──────────────────────────────────────────────────────────────┘
+                          │
+                          ▼ 담금질 루프 (k = 1, ..., K)
+┌──────────────────────────────────────────────────────────────┐
+│  ① 롤아웃 (Rollout)                                           │
+│     τ^(i) = f(θ^(i), x₀)  (미분 가능 시뮬레이터)              │
+│     C^(i) = C(τ^(i))       (비용 계산)                        │
+│                                                              │
+│  ② 가중치 업데이트 (Reweighting)                               │
+│     w^(i) ← w^(i) · exp(−C^(i) · (1/T_new − 1/T_old))       │
+│     정규화: w^(i) ← w^(i) / Σⱼ w^(j)                        │
+│                                                              │
+│  ③ ESS 계산 및 재샘플링 (Resampling)                           │
+│     ESS = 1 / Σᵢ (w^(i))²                                   │
+│     if ESS &lt; N·ε_ESS:                                        │
+│       {θ^(i)} ← 다항 재샘플링({θ^(i)}, {w^(i)})              │
+│       w^(i) ← 1/N (균등 재설정)                               │
+│                                                              │
+│  ④ HMC 재생 (Rejuvenation)                                    │
+│     for each θ^(i):                                          │
+│       θ^(i) ← HMC_step(θ^(i), ∇_θ log π_k)                 │
+│       ∇_θ log π_k = ∇_θ log p(θ) − (1/T) · ∂C/∂θ           │
+│       ∂C/∂θ: 미분 가능 롤아웃으로 역전파                       │
+│                                                              │
+│  ⑤ 온도 감소: T ← T · (T_min/T_max)^{1/K}                    │
+└──────────────────────────────────────────────────────────────┘
+                          │
+                          ▼ K번 반복 후
+┌──────────────────────────────────────────────────────────────┐
+│                         출력                                  │
+│  θ* ← argmin_i C^(i)    (최소 비용 파티클 선택)               │
+│  또는 E[θ] ← Σᵢ w^(i) θ^(i)  (가중 평균)                     │
+└──────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 정책 최적화 확장 아키텍처</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│              정책 최적화용 TSMC 확장                          │
+│                                                             │
+│  입력 수정:                                                  │
+│    x₀ → {x₀^(s)}ₛ₌₁^Ns    (N_states개 대표 초기 상태)        │
+│    θ → θ_ext = (θ, ε₀, ε₁, ..., ε_{T-1})  (보조 변수)      │
+│                                                             │
+│  롤아웃 수정:                                                │
+│    C^(i) = (1/Ns) Σₛ C(rollout(θ^(i), x₀^(s)))             │
+│           (모든 초기 상태에 대한 평균 비용)                    │
+│                                                             │
+│  HMC 재생 수정:                                              │
+│    ∇_{θ_ext} C = (∇_θ C, ∂C/∂ε₀, ..., ∂C/∂ε_{T-1})         │
+│                  (보조 변수에 대한 경사도 포함)               │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.3 미분 가능 동역학 역전파 구조</h3>
+<pre><code>미분 가능 롤아웃의 계산 그래프:
+
+θ ──────────────────────────────────────────────────►
+          │u₀          │u₁           │u₂
+          ▼            ▼             ▼
+x₀ ──► [f(·,u₀)] ──► [f(·,u₁)] ──► [f(·,u₂)] ──► x₃
+          │              │              │
+         x₁             x₂             C(τ)
+                                         │
+                                    역전파 ∂C/∂θ
+                                    (자동 미분)
+
+메모리 고려사항:
+  - 순방향 패스: 모든 중간 x_t 저장 필요 (O(T) 메모리)
+  - 체크포인팅: T를 구간으로 나눠 재계산으로 메모리 절감
+  - JAX의 jit 컴파일 + vmap으로 N개 파티클 병렬 처리
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 실험 벤치마크</h3>
+<p>TSMC는 두 가지 범주의 벤치마크에서 평가된다:</p>
+<pre><code>궤적 최적화 벤치마크:
+  - Pendulum Swing-Up: 도립 진자를 아래에서 위로 올리기
+  - Cartpole Swing-Up: 카트-폴 시스템 안정화
+  - Reacher: 목표 위치로 로봇 팔 제어
+  - Quadruped Locomotion: 4족 보행 로봇 보행 궤적
+  - Contact-Rich Tasks: 접촉이 포함된 조작 태스크
+
+정책 최적화 벤치마크:
+  - MuJoCo Suite (HalfCheetah, Ant, Hopper 등)
+  - Brax 환경 (JAX-native 미분 가능 물리 시뮬레이터)
+  - 확률적 전이 환경 (Stochastic Dynamics)
+
+평가 지표:
+  - 최종 비용 (Final Cost): 최적화 후 달성한 궤적 비용
+  - 수렴 속도 (Convergence Rate): 목표 비용 달성까지 반복 수
+  - 샘플 효율 (Sample Efficiency): 목표 성능 대비 롤아웃 수
+  - 다양성 (Diversity): 파티클 집합의 분산 (다중 해 커버)
+</code></pre>
+<h3>5.2 비교 기준 방법 (Baselines)</h3>
+<pre><code>비교 대상:
+  1. iLQR/DDP:     경사 기반 지역 최적화 (결정론적)
+  2. CEM:          Cross-Entropy Method (분포 기반, 경사 미사용)
+  3. MPPI:         Model Predictive Path Integral (중요도 샘플링)
+  4. SVGD:         Stein Variational Gradient Descent
+  5. L-BFGS:       준-뉴턴 최적화 (경사 기반)
+  6. Policy Gradient (REINFORCE, PPO): 정책 최적화 비교
+</code></pre>
+<h3>5.3 주요 성능 결과</h3>
+<pre><code>궤적 최적화:
+  ┌─────────────────────────────────────────────────────────┐
+  │ 방법        │ Pendulum │ Cartpole │ Reacher  │ 다양성   │
+  │─────────────┼──────────┼──────────┼──────────┼─────────│
+  │ iLQR        │  낮음    │  낮음    │  낮음    │  단일해  │
+  │ CEM         │  보통    │  보통    │  보통    │  보통    │
+  │ MPPI        │  보통    │  보통    │  보통    │  보통    │
+  │ SVGD        │  좋음    │  좋음    │  좋음    │  좋음    │
+  │ **TSMC**    │ **최고** │ **최고** │ **최고** │ **최고** │
+  └─────────────────────────────────────────────────────────┘
+
+핵심 관찰:
+  - 다중 모드 비용 함수에서 TSMC가 유의미하게 우수
+  - HMC 재생이 CEM/MPPI 대비 샘플 효율 향상에 핵심적 역할
+  - 담금질 경로 없이 단순 SMC 사용 시 성능 급락 (담금질의 중요성)
+</code></pre>
+<h3>5.4 ablation 분석 (Ablation Study)</h3>
+<pre><code>TSMC 구성 요소별 기여도:
+
+구성                      | Pendulum 비용 | 샘플 수
+─────────────────────────────────────────────────
+TSMC (전체)               | 최저 (기준)   | 1×
+TSMC − HMC (재샘플링만)    | +15%          | 1×
+TSMC − Tempering (고정 T) | +30%          | 1×
+CEM (경사 미사용)           | +45%          | 3×
+iLQR (단일 해)             | +20% (국소)   | 0.2×
+
+결론:
+  - HMC: 다양성 유지와 경사 활용에 핵심 (+15% 기여)
+  - Tempering: 사전→목표 부드러운 전환에 핵심 (+30% 기여)
+  - 두 구성 요소의 시너지가 전체 성능의 핵심
+</code></pre>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>6.1 이론적 기여</h3>
+<pre><code>1. 제어-추론 대응의 정형화:
+   - KL-정규화 궤적 최적화의 해석적 해 = 볼츠만 분포
+   - 온도 매개변수의 제어 의미론 명확화
+   - 유한 지평선 설정에서의 형식적 유도
+
+2. TSMC 알고리즘의 수렴 분석:
+   - 파티클 수 N → ∞ 시 목표 분포에 수렴
+   - 담금질 경로의 ESS 하한 분석
+   - HMC 재생으로 인한 혼합 시간(mixing time) 단축 이론적 분석
+
+3. 정책 최적화로의 형식적 확장:
+   - 결정론적 초기 상태 근사의 수렴 오차 분석
+   - 보조 변수 구성의 수학적 정당화
+</code></pre>
+<h3>6.2 알고리즘적 기여</h3>
+<pre><code>4. TSMC 알고리즘:
+   - 적응적 담금질 + 재샘플링 + HMC 재생의 통합
+   - 미분 가능 동역학과의 seamless 연결
+
+5. 정책 최적화 확장:
+   - 초기 상태 분포 처리를 위한 결정론적 근사
+   - 확률적 동역학을 위한 보조 변수 구성
+   - 두 확장의 통합적 구현
+
+6. 실용적 구현 가이드:
+   - JAX 기반의 JIT 컴파일 + vmap 병렬화
+   - 적응적 스텝 크기 HMC
+   - ESS 기반 온도 조절 전략
+</code></pre>
+<h3>6.3 실험적 기여</h3>
+<pre><code>7. 포괄적 비교 평가:
+   - 5개 기준 방법과 다양한 벤치마크에서 비교
+   - Ablation으로 각 구성 요소 기여도 분리 분석
+
+8. 다중 모드 문제에서의 우월성 입증:
+   - TSMC가 다중 극솟값 탐색에서 경사 기반 방법 대비 우위
+   - 샘플 기반 방법 대비 경사 활용으로 효율성 입증
+</code></pre>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 주요 하이퍼파라미터</h3>
+<pre><code>파티클 수 N:
+  궤적 최적화: N = 50~200
+  정책 최적화: N = 100~500
+  증가 시: 품질 향상 (√N 속도로 수렴 오차 감소)
+  제약: 계산 비용 O(N × T × dim)
+
+담금질 단계 수 K:
+  권장: K = 20~100
+  많을수록: 부드러운 전환, 안정적 수렴
+  제약: 총 계산 비용 O(K × N)
+
+HMC 파라미터:
+  Leapfrog 단계 L = 5~20
+  스텝 크기 ε:
+    NUTS (No-U-Turn Sampler)로 자동 적응 가능
+    또는 수동 설정 + Dual Averaging 적응
+
+온도 범위:
+  T_max = O(max C(τ) − min C(τ))  (비용 범위에 비례)
+  T_min = O(원하는 집중 수준)
+  (예: T_max = 100, T_min = 0.01 for pendulum)
+
+ESS 임계값:
+  ε_ESS = 0.5  (N의 50%가 일반적 권장)
+  낮을수록: 재샘플링 빈도 감소 → 파티클 붕괴 위험
+  높을수록: 과도한 재샘플링 → 다양성 급감
+
+초기 상태 수 Ns (정책 최적화):
+  Ns = 10~100  (태스크 복잡도에 따라)
+  Ns 증가 시: 기댓값 추정 정확도 향상
+  제약: Ns × N × T개 롤아웃 필요
+</code></pre>
+<h3>7.2 계산 복잡도 분석</h3>
+<pre><code>단일 TSMC 반복:
+  롤아웃: O(N × T × d_x × d_u)
+    N: 파티클 수
+    T: 궤적 길이
+    d_x: 상태 차원
+    d_u: 제어 차원
+  HMC (L 단계): O(L × 롤아웃 비용)
+    역전파 포함 시 ×2~3
+  재샘플링: O(N)
+
+전체 TSMC: O(K × L × N × T × d_x × d_u)
+  K = 50, L = 10, N = 100, T = 100, d_x = 10, d_u = 4
+  → 약 2×10⁸ 연산/최적화
+  → GPU 병렬화로 실용적 수행 가능
+
+정책 최적화 추가 비용:
+  Ns 배 증가: O(Ns × K × L × N × T × d_x × d_u)
+
+GPU 가속 (JAX + vmap):
+  N개 파티클 동시 처리 → N×L 배 이상 가속
+  A100 GPU: 실시간에 근접한 수행 가능
+</code></pre>
+<h3>7.3 실용적 구현 코드 구조</h3>
+<pre><code class="language-python">import jax
+import jax.numpy as jnp
+from jax import grad, jit, vmap
+from functools import partial
+
+# 미분 가능 롤아웃 (JAX)
+@jit
+def differentiable_rollout(theta, x0, dynamics_fn, T, dt):
+    &quot;&quot;&quot;제어기 파라미터 θ로 궤적 시뮬레이션&quot;&quot;&quot;
+    trajectory = [x0]
+    x = x0
+    
+    for t in range(T):
+        u = policy(theta, x, t)  # 제어 신호
+        # RK4 적분
+        k1 = dynamics_fn(x, u)
+        k2 = dynamics_fn(x + dt/2 * k1, u)
+        k3 = dynamics_fn(x + dt/2 * k2, u)
+        k4 = dynamics_fn(x + dt * k3, u)
+        x = x + (dt/6) * (k1 + 2*k2 + 2*k3 + k4)
+        trajectory.append(x)
+    
+    return jnp.stack(trajectory)
+
+# 비용 경사 계산 (자동 미분)
+grad_cost = jit(grad(lambda theta, x0: 
+    cost_fn(differentiable_rollout(theta, x0, ...))))
+
+# N개 파티클 병렬 롤아웃 (vmap)
+batched_rollout = vmap(differentiable_rollout, in_axes=(0, None, ...))
+batched_grad = vmap(grad_cost, in_axes=(0, None))
+
+# HMC 단계
+@jit
+def hmc_step(theta, T_curr, x0, L=10, epsilon=0.01):
+    &quot;&quot;&quot;HMC Leapfrog 적분&quot;&quot;&quot;
+    rho = jax.random.normal(key, theta.shape)  # 운동량 샘플링
+    theta_new, rho_new = theta, rho
+    
+    for _ in range(L):
+        # Leapfrog
+        grad_U = -grad_log_pi(theta_new, T_curr, x0)
+        rho_half = rho_new - (epsilon/2) * grad_U
+        theta_new = theta_new + epsilon * rho_half
+        grad_U_new = -grad_log_pi(theta_new, T_curr, x0)
+        rho_new = rho_half - (epsilon/2) * grad_U_new
+    
+    # Metropolis 수락-거부
+    H_old = hamiltonian(theta, rho, T_curr, x0)
+    H_new = hamiltonian(theta_new, rho_new, T_curr, x0)
+    accept = jnp.log(jax.random.uniform(key)) &lt; H_old - H_new
+    
+    return jnp.where(accept, theta_new, theta), accept
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 SMC 계열 방법과의 관계</h3>
+<pre><code>TSMC와 관련 SMC 방법 비교:
+
+방법             │ 담금질  │ HMC    │ 미분 동역학 │ 제어 적용
+──────────────────────────────────────────────────────────────
+표준 SMC         │ ❌     │ ❌    │ ❌          │ ❌
+Annealed IS      │ ✅     │ ❌    │ ❌          │ ❌
+SMC²             │ ✅     │ ❌    │ ❌          │ ❌
+PMCMC            │ ❌     │ ✅    │ ❌          │ ❌
+Differentiable SMC│ ❌    │ ✅    │ ✅          │ ❌
+**TSMC**         │ ✅     │ ✅    │ ✅          │ ✅
+
+TSMC의 위치:
+  SMC의 담금질 안정성 + HMC의 경사 활용 + 미분 가능 동역학 = 최초 통합
+</code></pre>
+<h3>8.2 MPPI와의 심층 비교</h3>
+<p>MPPI (Model Predictive Path Integral)는 TSMC와 가장 유사한 선행 방법이다:</p>
+<pre><code>MPPI vs TSMC:
+
+MPPI:
+  가중치: w^(i) ∝ exp(−C^(i) / λ)  (고정 λ, 직접 소프트맥스)
+  이동: 없음 (재샘플링으로 새 샘플 생성 안 함)
+  경사: 미사용
+  한계: λ 선택에 민감, 다중 모드에서 단일 해로 수렴
+
+TSMC:
+  가중치: 담금질 경로에 따라 점진적 업데이트
+  이동: HMC 재생 (경사 기반 MCMC)
+  경사: 미분 가능 동역학으로 정확한 경사 활용
+  개선: 적응적 담금질로 λ 자동 설정, 다중 모드 탐색
+
+정량적 비교:
+  TSMC vs MPPI: 복잡한 다중 모드 문제에서 30~50% 비용 감소
+  특히 긴 지평선(T &gt; 50) 문제에서 차이 두드러짐
+</code></pre>
+<h3>8.3 한계점 및 향후 방향</h3>
+<pre><code>현재 한계:
+
+1. 계산 비용:
+   - K × L × N개 미분 가능 롤아웃
+   - 긴 지평선 T에서 역전파 메모리 증가
+   - 완화: 체크포인팅, Truncated BPTT
+
+2. 비미분 가능 시스템:
+   - 접촉(contact)이 많은 시스템에서 불연속 야코비안
+   - 완화: Smoothed dynamics, 정책 경사 혼합
+
+3. 실세계 검증 부재:
+   - 시뮬레이션 벤치마크만 → 시뮬-실세계 갭 검증 필요
+   - 실시간 적용을 위한 계산 최적화 필요
+
+4. 하이퍼파라미터 민감도:
+   - T_max, T_min, K, N, L의 태스크별 튜닝 필요
+   - 자동 튜닝 방법 부재
+
+향후 방향:
+  1. 비미분 가능 접촉 동역학 처리
+  2. 온라인 TSMC (MPC 프레임워크와 결합)
+  3. 실세계 하드웨어 검증
+  4. 신경망 정책과의 결합 (피드백 정책 학습)
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>기존에 리뷰된 Planner 트랙 논문들과 TSMC를 체계적으로 비교한다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>SobolevDiffusion</th>
+<th>UGE-MPC</th>
+<th>BTIT*</th>
+<th>WayPlan</th>
+<th><strong>TSMC</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>핵심 방법</strong></td>
+<td>Sobolev 학습 확산 정책</td>
+<td>Hellinger 다양성 MPC</td>
+<td>양방향 키노다이나믹 탐색</td>
+<td>LLM + RLVR 2계층 계획</td>
+<td>담금질 SMC + HMC</td>
+</tr>
+<tr>
+<td><strong>최적화 목적</strong></td>
+<td>궤적 TO 워밍스타트</td>
+<td>탐색적 MPC</td>
+<td>운동 계획 최적성</td>
+<td>다중 로봇 태스크</td>
+<td>궤적/정책 최적화</td>
+</tr>
+<tr>
+<td><strong>경사 활용</strong></td>
+<td>✅ (Sobolev)</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌ (LLM)</td>
+<td>✅ (HMC + 역전파)</td>
+</tr>
+<tr>
+<td><strong>다양성 보존</strong></td>
+<td>❌ (단일 정책)</td>
+<td>✅ (Hellinger)</td>
+<td>❌ (단일 경로)</td>
+<td>❌</td>
+<td>✅ (파티클)</td>
+</tr>
+<tr>
+<td><strong>확률적 보장</strong></td>
+<td>없음</td>
+<td>없음</td>
+<td>점근 최적성</td>
+<td>없음</td>
+<td>SMC 수렴 (N→∞)</td>
+</tr>
+<tr>
+<td><strong>실세계 실험</strong></td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>시뮬레이션</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>코드 공개</strong></td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>계산 비용</strong></td>
+<td>훈련 비용 높음</td>
+<td>중간</td>
+<td>낮음 (검색)</td>
+<td>중간 (LLM)</td>
+<td>높음 (N×K×L)</td>
+</tr>
+<tr>
+<td><strong>미분 가능 동역학</strong></td>
+<td>필요 없음</td>
+<td>필요 없음</td>
+<td>필요 없음</td>
+<td>필요 없음</td>
+<td><strong>필수</strong></td>
+</tr>
+<tr>
+<td><strong>온라인/실시간</strong></td>
+<td>✅ (빠른 추론)</td>
+<td>✅ (MPC)</td>
+<td>느림</td>
+<td>느림</td>
+<td>느림</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 SobolevDiffusion과의 심층 비교</h3>
+<p>SobolevDiffusion과 TSMC는 둘 다 궤적 최적화를 목표로 하지만 접근 방식이 완전히 다르다.</p>
+<pre><code>SobolevDiffusion:
+  목표: 궤적 최적화의 워밍스타트(초기값) 학습
+  방법: Sobolev 규제로 확산 정책 학습 (피드백 게인 포함)
+  전제: 다수의 궤적 데이터 필요 (오프라인 학습)
+  장점: 추론 시 빠름 (전방 패스만)
+  단점: 학습 비용, 분포 외 일반화 한계
+
+TSMC:
+  목표: 궤적 최적화 자체 (온라인, 학습 없음)
+  방법: 담금질 SMC로 실시간 최적화
+  전제: 미분 가능 동역학 필요
+  장점: 데이터 없이 직접 최적화, 다중 모드 탐색
+  단점: 계산 비용, 실시간 적용 어려움
+
+보완적 관계:
+  SobolevDiffusion으로 좋은 초기 파티클 생성
+    → TSMC로 정밀 최적화
+  = Warm-TSMC (두 방법의 통합)
+</code></pre>
+<h3>9.3 UGE-MPC와의 비교</h3>
+<pre><code>UGE-MPC vs TSMC: 샘플링 기반 방법의 두 가지 방향
+
+UGE-MPC (Hellinger 다양성 MPC):
+  - MPC 프레임워크에 통합 (receding horizon)
+  - Hellinger 거리로 샘플 다양성 유지
+  - 경사 미사용 → 구성 공간에서 분포 추적
+  - 실시간 MPC에 적합
+
+TSMC:
+  - 단일 최적화 실행 (receding horizon 아님)
+  - SMC 담금질로 파티클 다양성 유지
+  - 경사 사용 → 더 효율적 탐색
+  - 실시간 MPC보다 오프라인 최적화에 적합
+
+TSMC + UGE-MPC 결합:
+  TSMC로 오프라인 최적 정책 학습
+    → UGE-MPC로 온라인 실시간 MPC
+  = 오프라인-온라인 하이브리드 계획
+</code></pre>
+<h3>9.4 장단점 분석</h3>
+<p><strong>TSMC의 강점</strong>:</p>
+<ol>
+<li><p><strong>이론적 우아함</strong>: 제어-추론 대응의 깔끔한 수학적 정형화. 볼츠만 분포를 목표로 하는 형식주의는 문제를 명확히 정의하고 알고리즘 설계를 자연스럽게 이끈다.</p>
+</li>
+<li><p><strong>경사 + 다양성 동시 달성</strong>: 기존 방법들은 경사 활용(iLQR, L-BFGS)과 다양성 보존(CEM, MPPI) 중 하나를 희생했다. TSMC는 HMC로 두 특성을 동시에 달성.</p>
+</li>
+<li><p><strong>이론적 수렴 보장</strong>: N → ∞ 시 목표 분포로의 수렴이 SMC 이론으로 보장됨. 기존 리뷰 논문 중 비교 가능한 보장은 BTIT*의 점근 최적성뿐.</p>
+</li>
+<li><p><strong>정책 최적화로의 자연스러운 확장</strong>: 보조 변수 구성과 결정론적 근사로 궤적→정책 확장이 수학적으로 자연스럽다.</p>
+</li>
+</ol>
+<p><strong>TSMC의 약점</strong>:</p>
+<ol>
+<li><p><strong>실세계 검증 부재</strong>: 모든 실험이 시뮬레이션. 기존 리뷰 논문 중 SANDO, AgiPIX, OLAhGP, HoughGPMap 등은 실세계 검증 포함.</p>
+</li>
+<li><p><strong>코드 미공개</strong>: 재현성 저해. UGE-MPC, BTIT*, NEATNC, SANDO는 코드 공개.</p>
+</li>
+<li><p><strong>높은 계산 비용</strong>: K × L × N 롤아웃은 간단한 문제에도 수백~수천 번의 시뮬레이션을 요구.</p>
+</li>
+<li><p><strong>미분 가능 시뮬레이터 의존</strong>: JAX, MuJoCo Differentiable 등이 필요. 모든 실제 시스템에 적용 불가.</p>
+</li>
+<li><p><strong>실험 세부 정보 부족</strong>: arXiv 버전에서 정확한 벤치마크 수치가 제한적으로 공개됨.</p>
+</li>
+</ol>
+<h3>9.5 실적용 가능성 평가</h3>
+<pre><code>단기 실적용 가능성: 낮음~중간
+
+적합 시나리오:
+  ✅ 오프라인 궤적 최적화 (제조, 데모 생성)
+  ✅ 미분 가능 시뮬레이터 기반 모션 계획 (MuJoCo, Drake 환경)
+  ✅ 다중 모드 해 탐색 (여러 가지 경로 중 최적 선택)
+  
+부적합 시나리오:
+  ❌ 실시간 MPC (계산 비용 너무 큼)
+  ❌ 비미분 가능 시스템 (접촉 풍부 환경)
+  ❌ 실세계 직접 적용 (검증 부재)
+
+중기 전망:
+  GPU 가속 + JAX JIT 컴파일로 실시간 TSMC 가능성 존재
+  특히 K 단계를 적게, N을 많이 사용하는 TSMC-light 버전이 MPC와 결합 가능
+</code></pre>
+<h3>9.6 연구 방향성 평가</h3>
+<pre><code>Planner 분야 내 TSMC의 위치:
+
+전통 샘플링 방법       학습 기반 방법
+(CEM, MPPI)           (SobolevDiffusion)
+      │                       │
+      │                       │
+      ▼                       ▼
+경사 기반 최적화        확산 정책 학습
+(iLQR, L-BFGS)        (DreamFlow)
+      │                       │
+      └──────────┬────────────┘
+                 │
+                 ▼
+        ★ TSMC ★
+   (경사 + 다양성 + 추론 통합)
+   확률적 제어기 설계의 새 패러다임
+   
+혁신성: 
+  TSMC는 &quot;추론으로서의 제어(Control as Inference)&quot; 패러다임을
+  실용적 알고리즘으로 구현한 최초의 성공적 시도 중 하나
+  
+  기존 연구들(SoC 계열, PILCO, SAC)이 주로 모델-프리 설정에서
+  추론-제어 대응을 다뤘다면, TSMC는 미분 가능 동역학 + SMC로
+  더 강한 이론적 보장과 샘플 효율성을 달성
+
+Heng Yang의 연구 맥락:
+  Harvard SEAS의 Heng Yang은 SDP 완화, 비볼록 최적화,
+  인증 가능한 로봇 학습 분야의 선도적 연구자
+  TSMC는 그의 최적화 + 확률 이론 + 로봇 공학 융합의
+  자연스러운 발전 방향
+</code></pre>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<h3>주요 관련 연구</h3>
+<ul>
+<li>Del Moral et al. (2006) - &quot;Sequential Monte Carlo Samplers&quot; (SMC 이론 기반)</li>
+<li>Neal (2011) - &quot;MCMC using Hamiltonian Dynamics&quot; (HMC 이론)</li>
+<li>Theodorou et al. (2010) - &quot;A Generalized Path Integral Control Approach to Reinforcement Learning&quot; (MPPI 전신)</li>
+<li>Williams et al. (2017) - &quot;Information Theoretic MPC for Model-Based Reinforcement Learning&quot; (MPPI)</li>
+<li>Kappen (2005) - &quot;Path Integrals and Symmetry Breaking for Optimal Control Theory&quot; (제어-추론 초기 연구)</li>
+<li>Levine (2018) - &quot;Reinforcement Learning and Control as Probabilistic Inference&quot; (추론-제어 연결 리뷰)</li>
+<li>Chopin &amp; Papaspiliopoulos (2020) - &quot;An Introduction to Sequential Monte Carlo&quot; (SMC 교과서)</li>
+<li>Wierstra et al. (2014) - &quot;Natural Evolution Strategies&quot; (파티클 기반 최적화)</li>
+<li>Agapiou et al. (2017) - &quot;Importance Sampling&quot; (중요도 샘플링 이론)</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>혁신성 평가</h3>
+<p>TSMC는 <strong>로봇 제어기 설계를 볼츠만 분포에서의 샘플링으로 재구성</strong>하고, 이를 풀기 위한 이론적으로 탄탄한 알고리즘을 제안한다는 점에서 개념적으로 매우 혁신적이다.</p>
+<pre><code>혁신의 핵심 삼각축:
+
+  이론적 우아함          계산적 효율성
+  (볼츠만 목표,         (HMC + 미분 동역학)
+   SMC 수렴 보장)              │
+           │                   │
+           └─────────┬─────────┘
+                     │
+                 ★ TSMC ★
+                     │
+            실용적 확장성
+        (정책 최적화, 보조 변수)
+</code></pre>
+<h3>기존 리뷰 논문과의 종합 비교</h3>
+<p>기존에 리뷰한 Planner 논문들과 비교할 때:</p>
+<ul>
+<li><strong>이론적 깊이</strong>: BTIT*와 함께 가장 깊은 수학적 근거를 가진 방법</li>
+<li><strong>혁신성</strong>: SobolevDiffusion, UGE-MPC와 함께 방법론적 새로움 측면에서 최상위</li>
+<li><strong>실용성</strong>: SANDO, AgiPIX, OLAhGP, HoughGPMap 대비 실세계 검증 부재로 실용성 낮음</li>
+<li><strong>오픈소스</strong>: WayPlan, BTIT*, UGE-MPC 대비 코드 공개 없어 재현성 낮음</li>
+</ul>
+<h3>실용적 의의</h3>
+<p>TSMC가 제안하는 <strong>&quot;미분 가능 동역학 + 샘플링 기반 추론&quot;</strong> 패러다임은 미래 로봇 운동 계획의 핵심이 될 가능성이 높다. 미분 가능 시뮬레이터(MuJoCo, Drake, Brax)의 빠른 발전과 함께, TSMC 류의 방법이 실시간 MPC와 결합되면 더 복잡한 로봇 운동 문제를 해결할 수 있는 강력한 도구가 될 것이다.</p>
+<h3>향후 연구 방향</h3>
+<ol>
+<li><strong>온라인 TSMC-MPC</strong>: Receding horizon 설정에서 TSMC 적용 → 실시간 로봇 제어</li>
+<li><strong>비미분 가능 시스템</strong>: Zero-order gradient 추정 또는 smoothing으로 접촉 동역학 처리</li>
+<li><strong>실세계 검증</strong>: 실제 로봇 (manipulator, quadruped)에서 TSMC 궤적의 실제 성능 측정</li>
+<li><strong>SobolevDiffusion 통합</strong>: 학습된 초기 파티클로 TSMC 수렴 가속</li>
+<li><strong>이론 심화</strong>: 유한 파티클 N에서의 수렴 속도 분석, 하이퍼파라미터 적응 이론</li>
+</ol>
+<p>TSMC는 아직 실용화 단계에 도달하지 못했지만, 로봇 운동 계획에서 &quot;추론으로서의 제어&quot; 패러다임을 가장 완성도 높게 구현한 방법으로서 향후 연구의 중요한 기준점이 될 것이다.</p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

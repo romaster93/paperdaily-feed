@@ -1,0 +1,1220 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Enhanced Tube-RRT*: Trajectory Planning for 3-UAV Cascaded Rigid-Payload Transport · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">TAES 2026</div>
+    <h1>Enhanced Tube-RRT*: Trajectory Planning Algorithm for 3-UAV Cascaded Rigid-Payload Transportation Systems</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2604.15074">arXiv:2604.15074</a></span>
+      <span>리뷰 2026-04-21</span>
+      <span>49분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>Enhanced Tube-RRT*: 다중 UAV 페이로드 운송을 위한 능동 샘플링 기반 궤적 계획 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Trajectory Planning for a Multi-UAV Rigid-Payload Cascaded Transportation System Based on Enhanced Tube-RRT*</li>
+<li><strong>저자 (Authors)</strong>: Jianqiao Yu (Member, IEEE), Jia Li (Member, IEEE), Tianhua Gao (Member, IEEE, 교신저자)</li>
+<li><strong>소속 (Affiliation)</strong>:<ul>
+<li>Jianqiao Yu, Jia Li: School of Aerospace Science and Technology, Beijing Institute of Technology (BIT), Beijing 100081, China</li>
+<li>Tianhua Gao: Graduate School of Systems and Information Engineering, University of Tsukuba, Ibaraki, Japan</li>
+</ul>
+</li>
+<li><strong>발표처 (Published)</strong>: IEEE Transactions on Aerospace and Electronic Systems (TAES) 투고 중 (under review)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2604.15074">https://doi.org/10.48550/arXiv.2604.15074</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.15074v1">https://arxiv.org/abs/2604.15074v1</a></li>
+<li><strong>코드</strong>: 미공개</li>
+<li><strong>프로젝트 페이지</strong>: 미공개</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 논문은 <strong>3대의 UAV가 강성 페이로드를 케이블로 연결하여 협력 운반하는 시스템(다중 UAV 캐스케이드 운반 시스템)</strong>에서의 <strong>밀집 장애물 환경 궤적 계획</strong> 문제를 해결한다. 핵심 질문은: <strong>&quot;복잡한 케이블-페이로드 역학, 장력 제약, 충돌 회피를 모두 만족하는 실행 가능한 궤적을 밀집 장애물 환경에서 어떻게 효율적으로 생성할 수 있는가?&quot;</strong></p>
+<p>연구의 핵심 기여:</p>
+<ol>
+<li><strong>Stage I - Enhanced Tube-RRT</strong>* : 능동 혼합 샘플링(Bayesian Thompson sampling) + 적응적 포텐셜 필드 확장 + 합성 비용 함수로 기존 Tube-RRT* 대비 94% 성공률 달성</li>
+<li><strong>Stage II - 볼록 이차 계획법(Convex QP)</strong>: 케이블 장력 타당성, 페이로드 동역학, 충돌 회피를 명시적 제약으로 통합한 궤적 최적화</li>
+</ol>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 다중 UAV 캐스케이드 운반 시스템의 고유한 복잡성</h4>
+<p>단일 UAV 경로 계획과 달리, nC=3대의 UAV가 케이블로 연결된 강성 페이로드를 운반하는 시스템은 다음과 같은 다차원 복잡성을 가진다:</p>
+<pre><code>시스템 상태 공간:
+  페이로드: 위치 ξ_0 ∈ R^3 + 자세 R_0 ∈ SO(3)
+  케이블 i: 방향 q_i ∈ S^2 (단위구면)
+  UAV i: 위치 ξ_i ∈ R^3 + 자세 R_i ∈ SO(3)
+  
+  UAV i 위치와 페이로드의 기하학적 관계:
+  ξ_i = ξ_0 + R_0 * ρ_i + l_i * q_i    --- (1)
+  
+  여기서:
+    ρ_i: 페이로드 질량 중심 기준 케이블 부착점 위치
+    l_i &gt; 0: 케이블 길이
+    
+→ 페이로드 한 지점 이동 시 3대 UAV의 위치 모두 연동 변화
+→ 단순 점 장애물 회피가 아닌 &quot;시스템 전체 부피&quot; 회피 필요
+</code></pre>
+<p>충돌 회피 요소:</p>
+<pre><code>충돌 가능 구성 요소 (모두 동시에 검사 필요):
+  1. 페이로드 ↔ 장애물
+  2. UAV 1,2,3 ↔ 장애물
+  3. 케이블 1,2,3 ↔ 장애물
+  4. UAV들 ↔ 서로 간 (self-collision)
+  
+→ &quot;Tube&quot; 개념 도입: 각 경로 점에서 시스템이 차지하는 최소 안전 반경 r_min 정의
+   r_min = max(페이로드 크기, max(UAV 포지션 반경 + UAV 크기))
+   
+→ 경로의 각 점에서 r_new &gt; r_min 을 보장해야 함 (장애물까지 최소 거리)
+</code></pre>
+<h4>B. 좁은 통로와 밀집 장애물에서의 RRT* 샘플링 비효율</h4>
+<p>표준 RRT* 및 기존 Tube-RRT* 변형의 한계:</p>
+<pre><code>표준 Tube-RRT* (STube-RRT*) 문제:
+  고정 가우시안 분포 파라미터 사용
+  → 장애물 밀도 변화에 무감각
+  → 좁은 통로에서 유효 샘플 비율 저하
+  → 50 랜덤 시드 기준 성공률: 36% (본 논문의 실험)
+  
+적응적 확장 Tube-RRT* (AETube-RRT*) 문제:
+  포텐셜 필드만으로 확장 방향 결정
+  → 좁은 통로에서 국소 최솟값(local minima) 함정
+  → 탐색이 보수적이 되어 첫 해 발견 지연
+  → 50 랜덤 시드 기준 성공률: 28%
+  
+공통 문제:
+  지그재그 경로(zigzag): 불필요한 방향 전환
+  → 케이블 진동 유발 (페이로드 운반 시 치명적)
+  → 실제 UAV 동역학 제약 위반 가능성
+</code></pre>
+<h4>C. 계획-제어 불일치 (Planning-Control Mismatch)</h4>
+<p>기존 2단계 파이프라인의 구조적 문제:</p>
+<pre><code>기존 방법의 전형적 파이프라인:
+  Stage I: 기하학적 경로 계획 (충돌 회피만 고려)
+  Stage II: 궤적 스무싱 (고차 미분 최소화)
+  Stage III: 장력 할당 (별도 최적화)
+  
+문제: Stage I에서 케이블 장력 제약을 무시
+  → Stage II에서 생성된 궤적이 아무리 부드러워도
+  → Stage III에서 장력 상한 T_u 또는 기울기 각도 α_u 제약 위반 가능
+  → &quot;planning-control mismatch&quot;: 계획은 실행 가능해 보이지만 실제 불가능
+  
+예시:
+  T_u = 35N, α_u = 22°로 제한될 때
+  급격한 가속 구간에서 필요 장력 &gt; T_u 발생 가능
+  → 케이블 과부하, 페이로드 낙하 위험
+</code></pre>
+<h4>D. 페이로드 자세 관리의 복잡성</h4>
+<p>강성 페이로드의 자세는 운반 중 능동적으로 제어 가능하므로 추가 복잡성을 야기한다:</p>
+<pre><code>페이로드 병진 동역학:
+  m_0(ξ̈_0 - g) + Σ_i m_i q_i q_i^T (ξ̈_0 - g - R_0 ρ̂_i Ω̇_0) 
+    = Δ_ξ0 + Σ_i (u_i + Δ_ξi - m_i l_i ||ω_i||^2 q_i - ...)   --- (2)
+
+페이로드 회전 동역학:
+  J_0 Ω̇_0 + Ω̂_0 J_0 Ω_0 + ... = Δ_R0 + ...   --- (3)
+
+케이블 동역학:
+  m_i l_i ω̇_i = ...   --- (4)
+
+UAV 회전 동역학:
+  J_i Ω̇_i + Ω̂_i J_i Ω_i = M_i + Δ_Ri   --- (5)
+
+→ 4개 결합 동역학 방정식이 동시에 만족되어야 함
+→ 단순 수치 적분도 복잡한 비선형 연립 ODE 풀이 필요
+</code></pre>
+<h3>2.2 핵심 해결책</h3>
+<p>Enhanced Tube-RRT*의 2단계 전략:</p>
+<pre><code>Stage I — Enhanced Tube-RRT*:
+  목적: 밀집 장애물 환경에서 충돌-없는 가상 튜브 경로 고속 생성
+  
+  혁신 1 — 능동 혼합 샘플링:
+    Voronoi 분할 + 베이지안(Thompson) 샘플링으로 유망 서브영역 집중 탐색
+    
+  혁신 2 — 적응적 포텐셜 유도 확장:
+    초사중수면(superquadric) 반발 포텐셜 + 목표 인력 + 방향 선형 제약
+    장애물 근접도에 따라 포텐셜 필드 vs 랜덤 방향 적응적 혼합
+    
+  혁신 3 — 합성 비용 함수:
+    경로 길이 + 회전 가속도 에너지를 복합 비용으로 온라인 최적화
+    
+Stage II — 볼록 이차 계획법:
+  목적: Stage I의 이산 경유점을 부드럽고 장력-타당한 연속 궤적으로 변환
+  
+  혁신: 케이블 장력을 명시적 최적화 변수로 포함
+    → 궤적 계수 c 와 장력 F_k,i 를 동시 최적화
+    → 장력 상한 ||F_k,i|| ≤ T_u 와 기울기 제약 직접 강제
+</code></pre>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 능동 혼합 샘플링 (Active Mixed Sampling)</h3>
+<h4>3.1.1 Voronoi 서브영역 분할</h4>
+<pre><code>구성:
+  작업 공간 X ⊂ R^3 를 K개 서브영역으로 Voronoi 분할:
+  X_k = {ξ ∈ X | ||ξ - r_i|| ≤ ||ξ - r_j||, ∀i ≠ j}   --- (11)
+  
+  r_i, r_j ∈ R^3: Voronoi 생성점
+  각 서브영역 X_k는 장애물 밀도 ρ^obs_k 계산 (몬테 카를로)
+</code></pre>
+<h4>3.1.2 베이지안 Thompson 샘플링</h4>
+<p>각 서브영역의 샘플링 성공 확률 θ_k를 베타 분포로 모델링:</p>
+<pre><code>사전 분포 정의 (수식 12):
+  θ_k ~ Beta(α_k^(0), β_k^(0))
+  
+  α_k^(0) = 1 + κ_p(1 - ρ^obs_k)   (장애물 적을수록 높은 사전 성공 기대)
+  β_k^(0) = 1 + κ_p * ρ^obs_k      (장애물 많을수록 높은 사전 실패 기대)
+  κ_p = 10: 사전 강도 파라미터
+
+Thompson 샘플링 실행 (수식 13-15):
+  1. 각 서브영역에서 표본 추출: θ̂_k^(t) ~ Beta(α_k^(t), β_k^(t))
+  2. 최고 표본값 서브영역 선택: k* = argmax_k θ̂_k^(t)
+  3. 선택된 서브영역에서 균등 샘플링: ξ_rand ~ Unif(X_{k*})
+
+사후 업데이트 (수식 16):
+  확장 시도 후 결과 y_t ∈ {0, 1}:
+    y_t = 1: 새 노드가 타당함 (충돌 없음, r_new &gt; r_min)
+    y_t = 0: 새 노드가 타당하지 않음
+  
+  α_{k*} ← α_{k*} + y_t
+  β_{k*} ← β_{k*} + (1 - y_t)
+  
+장점:
+  - 성공률 높은 영역 → α 증가 → 더 자주 선택됨
+  - 탐색 미흡한 영역 → 불확실성 → 여전히 탐색 기회 유지
+  - 고정 파라미터 없음 → 환경에 자동 적응
+</code></pre>
+<h4>3.1.3 혼합 샘플링 전략</h4>
+<pre><code>혼합 분포 (수식 18):
+  p(ξ) = ε_u * u(ξ) + (1-ε_u) * [p_g * δ(ξ-ξ_g) + (1-p_g) * q(ξ)]
+  
+  u(ξ): 전역 균등 분포 (탐색 유지, ε_u = 0.2)
+  δ(ξ-ξ_g): 목표 지향 샘플링 (p_g = 0.2)
+  q(ξ): Thompson 샘플링 (능동 서브영역 선택)
+  
+  세 구성 요소의 역할:
+    u(ξ): 알려지지 않은 좁은 통로 발견 가능성 유지
+    δ(ξ-ξ_g): 목표를 향한 수렴 촉진
+    q(ξ): 장애물 적고 확장 성공률 높은 영역 집중
+</code></pre>
+<h4>3.1.4 Algorithm 1 요약</h4>
+<pre><code class="language-python"># 베이지안 능동 서브영역 샘플링 전략 (Algorithm 1)
+def bayesian_active_sampling(regions, alphas, betas, epsilon_u):
+    u = random.uniform(0, 1)
+    
+    if u &lt; epsilon_u:
+        # 글로벌 균등 탐색 (narrow passage 발견 유지)
+        xi_rand = uniform_sample(X)
+        k_star = None
+    else:
+        # Thompson 샘플링으로 서브영역 선택
+        theta_samples = [sample_beta(alpha_k, beta_k) 
+                        for alpha_k, beta_k in zip(alphas, betas)]
+        k_star = argmax(theta_samples)
+        
+        # 목표 편향 vs 능동 샘플링
+        if random &lt; p_goal:
+            xi_rand = xi_goal  # 목표 직접 샘플
+        else:
+            xi_rand = uniform_sample(regions[k_star])  # 선택 서브영역
+    
+    # 트리 확장 시도 (Algorithm 2 호출)
+    xi_new = adaptive_expansion(xi_near, xi_rand)
+    
+    # 사후 업데이트
+    y_t = check_feasibility(xi_new)  # 1: 성공, 0: 실패
+    if k_star is not None:
+        alphas[k_star] += y_t
+        betas[k_star] += (1 - y_t)
+    
+    return xi_rand, xi_new
+</code></pre>
+<h3>3.2 적응적 포텐셜 유도 확장 전략 (Adaptive Extension Strategy)</h3>
+<h4>3.2.1 초사중수면 반발 포텐셜</h4>
+<pre><code>볼록 장애물(다면체 포함)에 대한 부드러운 반발 포텐셜:
+
+포텐셜 함수 (수식 23):
+  U(ξ) = A * exp(-η * C(ξ)) / C(ξ)
+  
+  A, η &gt; 0: 양의 상수
+  
+  초사중수면 함수 C(ξ) (수식 24):
+  C(ξ) = [(ξ^(1)/f_1(ξ))^(2b) + (ξ^(2)/f_2(ξ))^(2b)]^(a/b) 
+           + (ξ^(3)/f_3(ξ))^(2a) - 1
+  
+  a, b: 레벨셋 기하학 조절 형태 파라미터
+  f_i(ξ): 스케일링 함수
+  
+장점:
+  - 다면체 장애물(큐브, 직육면체)에 대해 날카로운 모서리에서도 부드러운 전환
+  - 기존 역제곱 반발 포텐셜 대비 훨씬 부드러운 그래디언트
+  - 장애물 기하학에 타이트하게 부합하면서도 수치 안정성 유지
+</code></pre>
+<h4>3.2.2 전체 포텐셜 필드 구성</h4>
+<pre><code>총 힘 벡터 (수식 21-22):
+  F_tot = F_att(ξ, ξ_g) + F_rep(ξ) + F_line(ξ)
+  
+  목표 인력: F_att = K_att(ξ_g - ξ)
+  장애물 반발: F_rep = -K_rep * ∇_ξ U(ξ)
+  선형 제약력: F_line = -K_line(v - (v^T ℓ)ℓ)
+                v = ξ - ξ_p,  ℓ = (ξ_near - ξ_p) / ||ξ_near - ξ_p||
+  
+  선형 제약력의 역할:
+    - 이전 확장 방향 ℓ과 측면 이탈을 억제
+    - 국소 경로 직진성 향상 → 지그재그 감소
+</code></pre>
+<h4>3.2.3 적응적 가중 방향 혼합</h4>
+<pre><code>융합 확장 방향 (수식 26):
+  d̃ = normalize(α(ξ) * u_F + (1-α(ξ)) * u_rand)
+  
+  적응 가중치 (수식 27):
+  α(ξ) = α_obs * α_F
+        = [(d_0 - d_obs)/d_0] * [||F_tot|| / (||F_tot|| + F_0)]
+  
+  d_obs: 현재 노드에서 가장 가까운 장애물까지의 거리
+  d_0 = 3m: 포텐셜 필드 영향 거리 임계값
+  F_0: 포텐셜 필드 정규화 상수
+  
+  동작:
+    장애물 근처 (d_obs &lt; d_0): α ↑ → 반발 포텐셜 주도
+    장애물 원거리 (d_obs &gt;&gt; d_0): α ≈ 0 → 순수 랜덤 탐색
+  
+  Fallback 메커니즘:
+    확률 p_e = 0.2로 u_rand 방향 강제 적용
+    → 포텐셜 필드 국소 최솟값 함정 탈출
+</code></pre>
+<h4>3.2.4 적응적 스텝 크기</h4>
+<p>두 가지 스텝 크기를 Soft-min으로 결합:</p>
+<pre><code>회전 각도 기반 스텝 크기 (수식 29):
+  ε_1 = ε_0 * [τ + (1-τ) * exp(-β * ϑ/π)]
+  
+  ϑ: 들어오는 방향과 현재 확장 방향의 각도
+  β = 2.5: 회전 각도 패널티 가중치
+  τ ∈ (0,1]: 최소 스텝 크기 비율
+  
+  동작: 급격한 회전 시 스텝 크기 감소 → 동역학 실행 가능성 향상
+
+환경 복잡도 기반 스텝 크기 (수식 30):
+  ε_2 = ε_0 * [1 + Π[-S_λ,max, S_λ,max](S_λk)]
+  
+  S_λk = k_λ * [ρ_obs(X) - ρ_obs_k] / [1 - ρ_obs(X)]
+  ρ_obs(X): 전체 공간의 평균 장애물 밀도
+  
+  동작: 장애물 밀집 서브영역에서 스텝 크기 축소 → 세밀한 장애물 회피
+
+최종 스텝 크기 (Soft-min, 수식 31):
+  ε = softmin_α(ε_1, ε_2)
+    = ε_m - (1/α) * log[exp(-α(ε_1-ε_m)) + exp(-α(ε_2-ε_m))]
+  
+  ε_m = min{ε_1, ε_2}
+  α = 8: 부드러운 최솟값 형태 파라미터
+  
+  장점: 불연속적 min 함수 대신 연속 미분 가능한 Soft-min 사용
+        → 비용 함수의 부드러운 그래디언트 유지
+</code></pre>
+<h3>3.3 합성 비용 함수 (Composite Cost Function)</h3>
+<p>케이블 진동의 근본 원인인 급격한 방향 전환을 비용 함수에서 직접 패널티화:</p>
+<pre><code>회전 가속도 패널티 계산 (수식 33-36):
+  
+  에지 (ξ_p → ξ_new)에서 회전 가속도:
+  a = v_ref * (u_out - u_in) / Δt   --- (33)
+  
+  u_in = (ξ_p - ξ_pp) / ||ξ_p - ξ_pp||   (들어오는 방향)
+  u_out = (ξ_new - ξ_p) / ||ξ_new - ξ_p|| (나가는 방향)
+  
+  에지 가속도 패널티 (수식 36):
+  A_e = ∫ ||a(t)||^2 dt ≈ ||a||^2 * Δt
+      = (v_ref/Δt)^2 * ||u_out - u_in||^2 * Δt
+      = (v_ref^2/Δt) * ||u_out - u_in||^2
+  
+  직관: ||u_out - u_in||가 클수록 (급격한 방향 전환) → A_e 증가
+
+합성 비용 함수 (수식 37):
+  J(ξ) = w_L * Σ_t (ℓ_t/d_ref) + w_A * A_e
+  
+  w_L = 1: 경로 길이 가중치
+  w_A = 1: 가속도 패널티 가중치
+  d_ref = 2.3m: 거리 정규화 상수
+  
+  비용 함수의 특성:
+  ① 경로 길이 최소화 (shortest path)
+  ② 회전 가속도 에너지 최소화 (smoothest path)
+  
+  RRT* 와의 통합:
+  - 부모 노드 선택 시 합성 비용 사용
+  - Rewiring 시 합성 비용으로 비교
+  - 증분 계산 가능성 유지 (ξ_pp만으로 현재 회전 비용 계산)
+</code></pre>
+<h3>3.4 Enhanced Tube-RRT* 전체 알고리즘 (Algorithm 3)</h3>
+<pre><code class="language-python"># Enhanced Tube-RRT* 완전 알고리즘
+def enhanced_tube_rrt_star(X, xi_start, xi_goal, max_iterations):
+    V = {xi_start}
+    E = {}
+    G = (V, E)
+    
+    for t in range(max_iterations):
+        # 1. 샘플링 (Algorithm 1: Bayesian Active Sampling)
+        xi_rand = bayesian_active_sampling(...)
+        
+        # 2. 트리 확장 (Algorithm 2: Adaptive Potential-Guided Expansion)
+        xi_new = adaptive_expansion(xi_near, xi_rand)
+        
+        # 3. 타당성 검사
+        r_new = distance_to_nearest_obstacle(xi_new)
+        if r_new &gt; r_min:   # 시스템 전체 부피 충돌 체크
+            # 4. 근방 노드 탐색 (RRT* 반경)
+            X_near = NearConnect(G, xi_new)
+            
+            # 5. 최적 부모 선택 (합성 비용 기준)
+            xi_parent = select_best_parent(xi_new, X_near, J_composite)
+            
+            # 6. 트리 업데이트
+            V.add(xi_new)
+            E.add((xi_parent, xi_new))
+            
+            # 7. Rewiring (합성 비용으로 개선 가능한 경우)
+            G = Rewire(xi_new, X_near, G, J_composite)
+    
+    return G
+
+# 이론적 성질:
+# THEOREM 1 (확률적 완전성): 샘플 수 m → ∞ 이면 해 발견 확률 → 1
+# THEOREM 2 (점근적 최적성): 샘플 수 m → ∞ 이면 합성 비용 → 최적값 (a.s.)
+# 계산 복잡도: O(m(log m + 1))
+</code></pre>
+<h3>3.5 궤적 최적화 (Stage II: Convex Quadratic Program)</h3>
+<h4>3.5.1 다항식 궤적 파라미터화</h4>
+<pre><code>S 세그먼트 n차 다항식 궤적 (수식 38):
+  ξ_s(t) = Σ_{j=0}^{n} c_{s,j} * (t - t_{s-1})^j,   t ∈ [t_{s-1}, t_s]
+  
+  c_{s,j} ∈ R^3: s번째 세그먼트의 j차 계수
+  전체 계수 벡터: c = [c_{1,0}^T, ..., c_{1,n}^T, ..., c_{S,n}^T]^T
+  
+스무딩 목적 함수 (수식 39):
+  J_traj = (1/2) ∫_{t_0}^{t_S} ||d^r ξ(t)/dt^r||^2 dt
+          = (1/2) c^T Q c
+  
+  Q: r차 미분에 대응하는 양반정치(PSD) 비용 행렬
+  r ≥ 5: UAV 동역학 제약 (부드러운 제어 명령 필요)
+  
+연속성 제약 (수식 40):
+  ξ(t_s) = w_s  (웨이포인트 통과)
+  d^q ξ_s(t) / dt^q |_{t=ts} = d^q ξ_{s+1}(t) / dt^q |_{t=ts}   (연속성)
+  → Aeq * c = beq  (선형 등식 제약)
+  
+속도/가속도 제약 (수식 41):
+  v_min ≤ v_k ≤ v_max
+  a_min ≤ a_k ≤ a_max
+  → 선형 부등식 제약: A_{ineq} * c ≤ b_{ineq}
+</code></pre>
+<h4>3.5.2 케이블 장력 최적화 변수 도입</h4>
+<pre><code>핵심 혁신: 케이블 장력 벡터 F_{k,i} ∈ R^3을 최적화 변수로 포함
+
+목적 함수 구성 요소:
+
+1. 장력 시간 변화율 규제 (수식 42):
+   J_{ΔF} = λ_f * Σ_i Σ_{k=1}^{N_s-1} ||F_{k+1,i} - F_{k,i}||^2
+   → 인접 시간 단계 간 장력의 급격한 변화 억제
+
+2. 장력 크기 규제 (수식 43):
+   J_F = λ_T * Σ_i Σ_k ||F_{k,i}||^2
+   → 과도한 장력 억제
+
+3. 장력 균형 분배 (수식 48):
+   J_share = λ_share * Σ_i Σ_k ||F_{k,i} - r_k/n_C||^2
+   → 3개 UAV 간 장력 균등 분배
+
+4. 모멘트 추적 (수식 49):
+   J_moment = λ_M * Σ_k ||M_k - M^ref_{d,k}||^2
+   → 페이로드 자세 목표 모멘트 추적
+
+5. 물리적 제약:
+   힘 균형: Σ_i F_{k,i} = r_k = m_0(a_k + g)   (수식 44)
+   장력 상한: ||F_{k,i}|| ≤ T_u                  (수식 46)
+   기울기 제약: e_3^T F_{k,i} ≥ cos(α_u)||F_{k,i}|| (수식 47, SOC 제약)
+</code></pre>
+<h4>3.5.3 볼록 이차 계획 (Convex QP) 수식화</h4>
+<pre><code>최종 최적화 문제 (수식 52):
+  minimize   J_traj + J_{ΔF} + J_F + J_share + J_moment
+  over:      c, F_{k,i}
+  
+  subject to:
+    Aeq * c = beq                          (웨이포인트 + 연속성)
+    v_min ≤ A_k^(1) c ≤ v_max             (속도 제약)
+    a_min ≤ A_k^(2) c ≤ a_max             (가속도 제약)
+    Σ_i F_{k,i} = m_0(A_k^(2) c + g)      (힘 균형, ∀k)
+    ||F_{k,i}|| ≤ T_u                      (장력 상한, ∀k,i)
+    e_3^T F_{k,i} ≥ cos(α_u)||F_{k,i}||   (기울기 SOC, ∀k,i)
+
+문제 특성:
+  목적: 볼록 이차 함수 (c^T Q c + ||F||^2 형태)
+  제약: 선형 등식 + 선형 부등식 + 이차 원뿔(SOC) 제약
+  → 볼록 최적화 문제 (globally optimal solution 보장)
+  
+  결정 변수 수 (수식 54):
+  n_x = dim(c) + dim(F) = 3S(n+1) + 3 * N_s * n_C
+  → S에 선형 비례 → 대규모 환경에서도 효율적
+
+사용 솔버:
+  모델링 인터페이스: CVX (MATLAB)
+  내부 솔버: MOSEK (SDP/SOCP 고효율 솔버)
+</code></pre>
+<h4>3.5.4 실행 가능 초기화</h4>
+<pre><code>초기화 전략:
+  1. 케이블 제약 무시하고 최소 고차 미분 궤적 계산
+     → r_k^(0) = m_0(a_k^(0) + g) 획득
+     
+  2. 초기 장력 배분 설정 (수식 53):
+     F_{k,i}^(0) ≈ r_k^(0) / n_C
+     → 각 UAV에 균등 분배
+     
+  3. 기울기 제약 투영:
+     F_{k,i}^(0) 방향을 기울기 원뿔 제약 내로 투영
+     → 초기점이 반드시 SOC 제약 만족
+  
+  4. 고정 참조 전략 (볼록성 유지):
+     M^ref_{d,k} = r_k^(0) 기반으로 사전 계산 (고정)
+     → 비선형 결합 회피 → 볼록 QP 유지
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────────────┐
+│              Enhanced Tube-RRT* 2단계 궤적 계획 파이프라인               │
+│                                                                          │
+│  [입력]                                                                  │
+│    ξ_0 = (7, 3, 8)m  (초기 페이로드 위치)                               │
+│    ξ_g = (40, 40, 5)m (목표 페이로드 위치)                              │
+│    환경 장애물 집합 O = {O_1, ..., O_No}                                │
+│    시스템 파라미터: m_0=5kg, l_i=0.75m, 3대 UAV                        │
+│                                                                          │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │                      STAGE I: Enhanced Tube-RRT*                 │    │
+│  │                                                                   │    │
+│  │  ① Voronoi 분할 + 장애물 밀도 계산                               │    │
+│  │         ↓                                                         │    │
+│  │  ② 베이지안 Thompson 샘플링 (Algorithm 1)                         │    │
+│  │     β 사후 업데이트 → 유망 서브영역 집중 탐색                     │    │
+│  │         ↓                                                         │    │
+│  │  ③ 적응적 포텐셜 유도 확장 (Algorithm 2)                          │    │
+│  │     초사중수면 반발 + 목표 인력 + 적응적 방향 혼합 + soft-min ε   │    │
+│  │         ↓                                                         │    │
+│  │  ④ 합성 비용 RRT* Rewiring                                        │    │
+│  │     J(ξ) = w_L * 경로길이 + w_A * 회전가속도                     │    │
+│  │         ↓                                                         │    │
+│  │  ⑤ 출력: 이산 경유점 시퀀스 {ξ_0, ξ_1, ..., ξ_S}               │    │
+│  │         + 각 점에서의 안전 반경 r_new &gt; r_min 보장                │    │
+│  └─────────────────────────────────────────────────────────────────┘    │
+│                              ↓                                           │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │              STAGE II: 볼록 이차 계획법 궤적 최적화               │    │
+│  │                                                                   │    │
+│  │  ① 다항식 파라미터화: n차 piecewise polynomial ξ(t)              │    │
+│  │         ↓                                                         │    │
+│  │  ② 비용 함수 구성:                                                │    │
+│  │     J_total = J_traj + J_ΔF + J_F + J_share + J_moment           │    │
+│  │         ↓                                                         │    │
+│  │  ③ 제약 설정:                                                     │    │
+│  │     Aeq*c = beq (웨이포인트/연속성)                               │    │
+│  │     속도/가속도 선형 제약                                          │    │
+│  │     힘 균형: Σ F_{k,i} = m_0(a_k + g)                            │    │
+│  │     SOC: ||F_{k,i}|| ≤ Tu, e3^T F_{k,i} ≥ cos(αu)||F_{k,i}||   │    │
+│  │         ↓                                                         │    │
+│  │  ④ CVX/MOSEK로 볼록 QP 풀기                                      │    │
+│  │         ↓                                                         │    │
+│  │  ⑤ 출력: 부드럽고 장력-타당한 연속 궤적 ξ_d(t)                  │    │
+│  │         + 케이블 장력 프로파일 {F_{k,i}}                          │    │
+│  └─────────────────────────────────────────────────────────────────┘    │
+│                              ↓                                           │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │         중앙화 기하학적 제어 (Centralized Geometric Control)       │    │
+│  │                                                                   │    │
+│  │  페이로드 궤적 ξ_d(t) → 페이로드 제어기 → u_∥_i (케이블 방향 힘) │    │
+│  │  케이블 동역학 → u_⊥_i (케이블 수직 힘)                           │    │
+│  │  UAV 자세 제어 → 각 UAV의 Mi (회전 모멘트)                        │    │
+│  └─────────────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 시스템 모델 다이어그램</h3>
+<pre><code>  다중 UAV 강성 페이로드 캐스케이드 시스템:
+  
+      UAV 1 ────── 케이블 1 ──────┐
+                                   │
+      UAV 2 ────── 케이블 2 ────── [강성 페이로드]
+                                   │
+      UAV 3 ────── 케이블 3 ──────┘
+  
+  기하학적 관계:
+    ξ_1 = ξ_0 + R_0 ρ_1 + l_1 q_1
+    ξ_2 = ξ_0 + R_0 ρ_2 + l_2 q_2
+    ξ_3 = ξ_0 + R_0 ρ_3 + l_3 q_3
+  
+  파라미터:
+    m_0 = 5kg (페이로드 질량)
+    m_i = 1kg (UAV 질량, 각각)
+    l_i = 0.75m (케이블 길이)
+    J_0 = diag(0.6875, 0.59375, 0.78333) kg·m² (페이로드 관성)
+</code></pre>
+<p><img src="figures/fig_10_01.jpeg" alt="Tube-RRT* 경로 계획 비교" loading="lazy"></p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 실험 환경 설정</h3>
+<pre><code>시뮬레이션 환경:
+  공간 크기: 50m × 50m × 15m
+  시작 위치: ξ_o = (6, 2, 10)m (또는 (7, 3, 8)m)
+  목표 위치: ξ_g = (40, 40, 5)m
+  장애물: 고밀도 3D 박스형 장애물 배치
+  반복 실험: 50개 랜덤 시드로 통계 검증
+  
+시스템 파라미터:
+  페이로드 질량 m_0 = 5kg
+  페이로드 관성 J_0 = diag(0.6875, 0.59375, 0.78333) kg·m²
+  각 UAV 질량 m_i = 1kg
+  케이블 길이 l_i = 0.75m
+  장력 하한 T_l = 1N, 상한 T_u = 35N
+  케이블 수직 각도 제약: α_l = 0°, α_u = 22°
+  속도 제한: v_max = 2m/s
+  가속도 제한: a_max = 1m/s²
+</code></pre>
+<p>Enhanced Tube-RRT* 파라미터:</p>
+<pre><code>파라미터    값        설명
+ε_u        0.2       균등 혼합 계수
+p_g        0.2       목표 편향 샘플링 확률
+κ_p        10        베타 사전 강도
+ε_0        3m        초기 확장 스텝 크기
+β          2.5       회전 각도 패널티 가중치
+α          8         Soft-min 형태 파라미터
+d_0        3m        포텐셜 필드 영향 거리
+p_e        0.2       랜덤 확장 fallback 확률
+v_ref      1.0 m/s   참조 속도
+Δt         0.01s     최소 적분 스텝
+w_A        1         가속도 비용 가중치
+w_L        1         거리 비용 가중치
+</code></pre>
+<h3>5.2 Stage I 결과: 경로 계획 비교</h3>
+<h4>표 I: 대표 검색 과정 성능 비교 (단일 시드)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>메트릭</th>
+<th>STube-RRT*</th>
+<th>AETube-RRT*</th>
+<th><strong>Enhanced (Ours)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>충돌 검사 횟수</td>
+<td>3,656</td>
+<td>1,752</td>
+<td><strong>1,278</strong></td>
+</tr>
+<tr>
+<td>첫 해 발견 시간 T_first (s)</td>
+<td>2.66</td>
+<td>13.88</td>
+<td><strong>1.13</strong></td>
+</tr>
+<tr>
+<td>회전 각도 합계 (rad)</td>
+<td>14.56</td>
+<td>15.08</td>
+<td><strong>10.97</strong></td>
+</tr>
+<tr>
+<td>경로 길이 (m)</td>
+<td>7.75</td>
+<td>7.57</td>
+<td><strong>7.27</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>주요 관찰</strong>:</p>
+<ul>
+<li>충돌 검사: 3,656 → 1,278 (<strong>-65%</strong>): 베이지안 샘플링의 효율성</li>
+<li>첫 해 발견 시간: 2.66 → 1.13초 (<strong>-58%</strong>): 가장 빠른 초기 해</li>
+<li>회전 각도 합: 14.56 → 10.97 rad (<strong>-25%</strong>): 케이블 진동 억제에 직접 기여</li>
+<li>경로 길이: 7.75 → 7.27m (<strong>-6%</strong>): 더 짧은 최적 경로</li>
+</ul>
+<h4>표 II: 50 랜덤 시드 전체 성능 비교</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>메트릭</th>
+<th>STube-RRT*</th>
+<th>AETube-RRT*</th>
+<th><strong>Enhanced (Ours)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>성공률 (%)</strong></td>
+<td>36</td>
+<td>28</td>
+<td><strong>94</strong></td>
+</tr>
+<tr>
+<td>유효 샘플 비율 (%)</td>
+<td>39.08</td>
+<td>52.17</td>
+<td><strong>51.83</strong></td>
+</tr>
+<tr>
+<td>T_first (s)</td>
+<td>1.55</td>
+<td>1.76</td>
+<td><strong>1.11</strong></td>
+</tr>
+<tr>
+<td>회전 각도 합 (rad)</td>
+<td>18.80</td>
+<td>17.27</td>
+<td><strong>17.00</strong></td>
+</tr>
+<tr>
+<td>경로 길이 (m)</td>
+<td>8.37</td>
+<td>7.87</td>
+<td><strong>7.72</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>가장 중요한 결과: 성공률 94% (vs. STube-RRT* 36%, AETube-RRT* 28%)</strong>
+→ 밀집 장애물 환경에서 다른 방법들이 과반 실패할 때 거의 항상 성공</p>
+<p>패널티 메트릭 분석:</p>
+<pre><code>패널티 메트릭 (실패 포함, 수식 55):
+  ˜ms = ms (성공 시) / 1.1 × max_{s&#39;∈S_succ} ms&#39; (실패 시)
+  
+STube-RRT*, AETube-RRT*:
+  실패율 64-72%로 패널티 값에 지배됨
+  패널티 경로 길이: 10.25m, 9.53m
+  패널티 회전 각도: 25.34 rad, 23.43 rad
+
+Enhanced Tube-RRT*:
+  94% 성공으로 성공 샘플이 중앙값 지배
+  중앙 경로 길이: 7.69m
+  중앙 회전 각도: 16.60 rad
+</code></pre>
+<h3>5.3 Stage II 결과: 궤적 추적 검증</h3>
+<h4>페이로드 위치 추적 (Fig. 3(a))</h4>
+<pre><code>추적 성능:
+  - 전체 미션 동안 실제 궤적이 참조 궤적에 밀접하게 추종
+  - 가속/회전/고도 변화 구간에서 안정적 추적 유지
+  - 최대 위치 오차: 수십 cm 수준 (정확한 수치 미제공)
+</code></pre>
+<h4>페이로드 자세 추적 (Fig. 3(b))</h4>
+<pre><code>자세 추적 성능:
+  - 롤(ϕ), 피치(θ): 급격한 회전 구간에서 소폭 이탈 후 빠른 수렴
+  - 요(ψ): 연속적이고 부드러운 추적
+  - 기하학적 일관성: 케이블 방향과 UAV 자세 오차 ~10^-4 이내 (약 3초 내 수렴)
+</code></pre>
+<h4>공간 충돌 회피 (Fig. 4)</h4>
+<pre><code>3D 시뮬레이션에서:
+  - 페이로드, UAV, 케이블 모두 장애물과 충분한 안전 거리 유지
+  - 측면/상면 뷰에서 장애물 경계를 침범하는 궤적 세그먼트 없음
+</code></pre>
+<h4>케이블 장력 및 스윙 각도 (Fig. 7)</h4>
+<pre><code>케이블 제약 만족:
+  - 케이블 스윙 각도: 전체 운반 태스크에서 α_u = 22° 이내 유지
+  - 케이블 장력: 부드러운 변화, 급격한 급등/이완 없음
+  - 장력 분배: 3개 UAV 간 비교적 균등한 하중 분산
+</code></pre>
+<h3>5.4 이론적 보증 (Theoretical Guarantees)</h3>
+<pre><code>THEOREM 1 (확률적 완전성, Probabilistic Completeness):
+  조건: 실행 가능한 충돌-없는 경로 σ*: [0,1] → X_free 존재
+  결론: 샘플 수 m → ∞ 시, Enhanced Tube-RRT*가 해 발견할 확률 → 1
+  
+  핵심 증명 요소:
+  - 균등 혼합 계수 ε_u로 모든 X_free 부분집합에 양의 샘플링 확률 보장
+  - 조건부 최소 확장 성공 확률 p_l ∈ (0,1] 가정
+  - → P(ξ_new ∈ A) ≥ ρ · μ(A), ρ = ε_u · p_l / μ(X_free)
+
+THEOREM 2 (점근적 최적성, Asymptotic Optimality):
+  조건: 실행 가능한 해 존재
+  결론: 샘플 수 m → ∞ 시, J(ξ) → J*(ξ) (거의 확실하게)
+  
+  핵심 증명 요소:
+  - 밀도 보정 이웃 반경 r_n = min{γ(log n/n)^(1/3), 3ε_0}
+  - 합성 비용 함수의 경로 섭동에 대한 연속성
+  - 경로를 따른 가산성(additivity)
+  → 표준 RRT* 점근적 최적성 증명 프레임워크에서 직접 계승
+</code></pre>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>6.1 최초 2단계 장애물 회피 궤적 계획 프레임워크</h3>
+<pre><code>논문의 주장:
+  &quot;To the best of our knowledge, this paper presents the first two-stage 
+   obstacle-avoidance trajectory planning framework for multi-UAV cascaded 
+   transportation systems with rigid payloads, in which payload attitude 
+   variations and system-volume constraints are explicitly considered during 
+   planning.&quot;
+
+기존 방법들과의 차별점:
+  [10] 직접 배치법: 통합 최적화, 확장성 제한
+  [12] 이차 적분기 단순화: 동역학 근사로 현실성 감소
+  [22] 기하학적 샘플링 + 비선형 최적화: 높은 계산 비용
+  [23] BIGIT* + 최소 스냅: 페이로드 자세 미고려
+  
+→ 본 논문은 페이로드 자세 변화와 시스템 부피 제약을 동시에 고려
+</code></pre>
+<h3>6.2 Enhanced Tube-RRT*의 3대 혁신</h3>
+<pre><code>혁신 1: 베이지안 능동 서브영역 샘플링
+  - Thompson 샘플링으로 환경 적응적 서브영역 선택
+  - 고정 파라미터 없음 → 자동 환경 적응
+  - 밀집 장애물 환경에서 유효 샘플 비율 유지
+
+혁신 2: 초사중수면 포텐셜 기반 적응 확장
+  - 폴리헤드럴 장애물에 대한 부드럽고 타이트한 반발 포텐셜
+  - 적응적 방향-스텝 크기 혼합으로 국소 최솟값 회피
+  - Soft-min 스텝 크기로 미분 가능한 비용 함수 유지
+
+혁신 3: 합성 비용 함수 (경로 길이 + 회전 가속도 에너지)
+  - 탐색 단계에서 직접 케이블 진동 억제
+  - 증분 계산 가능 → 온라인 효율성 유지
+  - 이론적 점근 최적성 보장 호환
+</code></pre>
+<h3>6.3 장력 명시적 볼록 이차 계획</h3>
+<pre><code>기존 방법의 문제:
+  계획 단계: 장력 무시
+  후처리: 별도 장력 할당 → 실행 불가능성 발생 가능
+  
+본 논문의 기여:
+  궤적 계수 c와 장력 F_{k,i}를 단일 볼록 QP로 동시 최적화
+  → 장력 상한 T_u와 기울기 α_u가 항상 만족됨을 보장
+  → &quot;planning-control mismatch&quot; 문제 원천적 해결
+</code></pre>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 소프트웨어 환경</h3>
+<pre><code>계획 알고리즘: MATLAB (구체적 구현 정보 미공개)
+최적화: CVX 모델링 인터페이스 + MOSEK 솔버
+시뮬레이션: 중앙화 기하학적 제어 [24] 기반
+좌표 시스템: 비관성 참조 프레임 기준 (관성 프레임 I)
+</code></pre>
+<h3>7.2 궤적 최적화 가중치</h3>
+<pre><code>목적 함수 가중치:
+  λ_f = 10   (장력 변화율 규제)
+  λ_T = 1    (장력 크기 규제)
+  λ_share = 1 (장력 분배 균형)
+  λ_M = 0.1  (모멘트 추적)
+  
+물리적 제약:
+  T_l = 1N, T_u = 35N  (케이블 장력 범위)
+  α_l = 0°, α_u = 22°  (케이블 수직 각도 범위)
+  v_max = 2 m/s         (최대 속도)
+  a_max = 1 m/s²        (최대 가속도)
+</code></pre>
+<h3>7.3 제어 프레임워크</h3>
+<pre><code>중앙화 기하학적 제어 [24]:
+  레벨 1 - 페이로드 제어기:
+    입력: 원하는 ξ_d(t), R_{0d}(t)
+    출력: u_∥_i (케이블 방향 힘 성분)
+    
+  레벨 2 - 케이블 동역학:
+    u_∥_i → u_⊥_i (수직 성분 결정)
+    
+  레벨 3 - UAV 자세 제어:
+    입력: 필요 힘 u_i = u_∥_i + u_⊥_i
+    출력: 각 UAV에 대한 회전 모멘트 M_i
+</code></pre>
+<p><img src="figures/fig_10_02.jpeg" alt="궤적 추적 성능 결과" loading="lazy"></p>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 분석</h3>
+<pre><code>계산 복잡도:
+  Enhanced Tube-RRT*: O(m(log m + 1))
+  볼록 QP: O(n_x^{2.5}) 내지 O(n_x^3) (SOCP 솔버 복잡도)
+  
+  n_x = 3S(n+1) + 3 * N_s * n_C
+  → S에 선형 증가 → 대규모 환경에서도 효율적
+  
+Voronoi 분할 크기 K 선택:
+  K가 크면: 세밀한 적응, 높은 계산 오버헤드
+  K가 작으면: 거친 적응, 낮은 오버헤드
+  → 실제 환경에서의 최적 K 선택 가이드라인 미제공 (향후 과제)
+</code></pre>
+<h3>8.2 한계점</h3>
+<pre><code>한계 1: 정적 장애물 환경만 고려
+  현재: 미리 알려진 정적 장애물 집합 O
+  한계: 동적 장애물, 지도 없는 환경에서 적용 불가
+  향후: 동적 환경 확장 명시적으로 언급
+
+한계 2: 시뮬레이션 검증만
+  현재: MATLAB 시뮬레이션
+  한계: 실제 물리적 UAV 시스템에서의 검증 없음
+  특히: 케이블 질량 불무시(massless cable 가정), 공기 저항 무시
+
+한계 3: 케이블 없는 강성 연결 가정
+  m_i l_i 동역학은 케이블이 팽팽하게 유지됨을 가정
+  → 케이블 이완(slack) 상황에서는 모델 무효화
+  
+한계 4: 온라인 재계획 미지원
+  현재: 오프라인 계획 (전체 경로를 사전 계산)
+  향후: 동적 환경에서의 온라인 재계획으로 확장 예정
+
+한계 5: 다중 캐스케이드 시스템 미확장
+  현재: 단일 페이로드를 3대 UAV가 운반
+  향후: 여러 페이로드를 여러 UAV 그룹이 협력 운반하는 시나리오로 확장 예정
+</code></pre>
+<h3>8.3 향후 연구 방향</h3>
+<pre><code>1. 동적 환경으로의 확장:
+   - 이동 장애물 예측 + 온라인 경로 재계획
+   - MPC(모델 예측 제어)와 결합한 롤링 호라이즌 계획
+
+2. 다중 캐스케이드 운반:
+   - 여러 페이로드 그룹의 동시 계획
+   - 그룹 간 충돌 회피
+
+3. 실세계 배치:
+   - 비선형 케이블 모델 통합 (실제 탄성/질량 고려)
+   - 바람 외란 강인 제어와 통합
+
+4. 학습 기반 혼합:
+   - Enhanced Tube-RRT*의 하이퍼파라미터를 학습으로 최적화
+   - 신경망 포텐셜 필드로 더 복잡한 환경 적응
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>Planner 트랙에서 기존에 리뷰된 논문들과 Enhanced Tube-RRT*를 체계적으로 비교한다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>NEAT-NC (GECCO&#39;26)</th>
+<th>BTIT* (arXiv&#39;26)</th>
+<th>SANDO (arXiv&#39;26)</th>
+<th>UGE-MPC (ICRA&#39;26)</th>
+<th><strong>Enhanced Tube-RRT* (TAES)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>계획 유형</strong></td>
+<td>생물 영감 RL (경로 계획)</td>
+<td>키노다이나믹 모션 계획</td>
+<td>안전 궤적 계획 (동적 환경)</td>
+<td>불확실성 기반 샘플링 MPC</td>
+<td>다중 UAV 페이로드 운반 계획</td>
+</tr>
+<tr>
+<td><strong>알고리즘 기반</strong></td>
+<td>NEAT (신경진화)</td>
+<td>양방향 배치 탐색</td>
+<td>STSFC 안전 제약</td>
+<td>Hellinger 다양성 샘플링</td>
+<td>능동 Bayesian RRT* + 볼록 QP</td>
+</tr>
+<tr>
+<td><strong>동역학 모델</strong></td>
+<td>없음 (포인트 로봇)</td>
+<td>선형화 동역학</td>
+<td>비선형 제약</td>
+<td>MPC 모델</td>
+<td>완전 비선형 케이블-페이로드</td>
+</tr>
+<tr>
+<td><strong>환경 유형</strong></td>
+<td>정적/동적 장애물</td>
+<td>임의 기하</td>
+<td>동적 미지 환경</td>
+<td>구조화 환경</td>
+<td>밀집 정적 3D 장애물</td>
+</tr>
+<tr>
+<td><strong>주요 성능 지표</strong></td>
+<td>경로 길이, 충돌률</td>
+<td>수렴 시간, 비용</td>
+<td>SR, 안전 제약 만족</td>
+<td>샘플 다양성, 비용</td>
+<td>성공률 94%, 경로 품질</td>
+</tr>
+<tr>
+<td><strong>이론적 보증</strong></td>
+<td>진화적 수렴</td>
+<td>점근적 최적성</td>
+<td>안전 제약 보장</td>
+<td>확률적 성능</td>
+<td>확률적 완전성 + 점근적 최적성</td>
+</tr>
+<tr>
+<td><strong>코드 공개</strong></td>
+<td>✓ (GitHub)</td>
+<td>✓ (부분)</td>
+<td>✓ (GitHub)</td>
+<td>✓ (GitHub)</td>
+<td>✗</td>
+</tr>
+<tr>
+<td><strong>실세계 실험</strong></td>
+<td>2D 시뮬레이션</td>
+<td>시뮬레이션</td>
+<td>아니오</td>
+<td>아니오</td>
+<td>아니오</td>
+</tr>
+<tr>
+<td><strong>학회/저널</strong></td>
+<td>GECCO 2026</td>
+<td>arXiv</td>
+<td>arXiv</td>
+<td>ICRA 2026</td>
+<td><strong>IEEE TAES</strong> (심사 중)</td>
+</tr>
+<tr>
+<td><strong>응용 도메인</strong></td>
+<td>일반 로봇</td>
+<td>일반 UAV</td>
+<td>이동 로봇</td>
+<td>이동 로봇</td>
+<td>협력 UAV 운반</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>Enhanced Tube-RRT*의 장점</strong>:</p>
+<pre><code>1. 도메인 특화의 높은 적합성
+   → 다중 UAV 페이로드 운반이라는 명확한 응용 시나리오에 특화
+   → 케이블-페이로드 동역학, 장력 제약을 명시적으로 처리
+   → NEAT-NC, BTIT*, SANDO가 다루지 않는 시스템 볼륨 제약 처리
+
+2. 인상적인 성공률 향상
+   → 밀집 장애물 환경 94% 성공 (vs. 기존 Tube-RRT* 변형 28-36%)
+   → 확률적 완전성 + 점근적 최적성 이론적 보장
+
+3. 계획-제어 일관성
+   → 장력 F_{k,i}를 계획 단계에서 동시 최적화
+   → 실행 불가능한 궤적 생성 원천 차단
+   → BTIT*나 SANDO와 달리 하드웨어 시스템의 전체 제약 통합
+
+4. IEEE TAES 투고
+   → 저명한 항공 우주 분야 저널
+   → 항공 시스템 커뮤니티에 직접 영향력
+</code></pre>
+<p><strong>Enhanced Tube-RRT*의 단점</strong>:</p>
+<pre><code>1. 좁은 적용 범위
+   → 케이블 연결 다중 UAV 페이로드 운반에 국한
+   → NEAT-NC, BTIT*, SANDO 같은 일반 경로 계획 도구로 사용 불가
+
+2. 실세계 검증 미흡
+   → 시뮬레이션만으로 검증 (케이블 물리 시뮬레이션 포함)
+   → 실제 UAV 하드웨어, 바람 외란, 센서 노이즈 미고려
+
+3. 코드 미공개
+   → 재현성 제한
+   → NEAT-NC, BTIT*, SANDO 등 경쟁 논문들이 코드를 공개한 것과 대조
+
+4. 정적 장애물 한계
+   → 동적 장애물 환경에서는 재계획 필요
+   → SANDO (동적 환경 특화)와 직접 비교 어려움
+
+5. 계산 비용 미보고
+   → 50 랜덤 시드 전체 계획 시간 미제공
+   → 대규모 환경에서의 확장성 검증 부족
+</code></pre>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>시나리오별 평가:
+
+시나리오 1: 건물 건설 현장 자재 운반
+  적합성: ★★★★★
+  이유: 밀집 환경 + 대형 강성 페이로드 → 본 논문의 핵심 응용
+        계획-제어 일관성으로 안전한 운반 가능
+
+시나리오 2: 재난 구조 (잔해 더미에서 구조물 이동)
+  적합성: ★★★☆☆
+  이유: 정적 장애물 가정 부분적 성립
+        동적 요소(사람, 추가 잔해)에 대응 불가
+
+시나리오 3: 창고 자동화 (제품 팔레트 이동)
+  적합성: ★★★★☆
+  이유: 제어된 실내 환경 + 정적 장애물 (선반, 기둥)
+        하지만 케이블 운반 시스템의 실용성에 의문
+
+시나리오 4: 군사/물류 (외딴 지역 장비 배달)
+  적합성: ★★★☆☆
+  이유: 오프-로드 환경에서의 장애물 지도 필요
+        악천후, GPS 오차 처리 미고려
+</code></pre>
+<h3>9.4 연구 방향성 평가</h3>
+<pre><code>비교 관점에서 본 Enhanced Tube-RRT*의 위치:
+
+[방향 A] 생물 영감/진화 알고리즘 기반 (NEAT-NC):
+  장점: 학습 능력, 동적 환경 적응
+  단점: 이론적 보증 약함, 수렴 불안정
+
+[방향 B] 배치 샘플링 기반 (BTIT*):
+  장점: 강력한 이론적 보증, 범용성
+  단점: 시스템 특화 제약 처리 어려움
+
+[방향 C] 안전 제약 특화 (SANDO, UGE-MPC):
+  장점: 실시간 안전 보장, 동적 환경 대응
+  단점: 복잡한 동역학 모델 처리 어려움
+
+[본 논문 - 방향 D] 도메인 특화 샘플링 + 볼록 최적화:
+  장점: 도메인 전문 지식 최대 활용, 높은 성공률
+  단점: 범용성 제한, 응용 범위 좁음
+
+평가:
+  방향 D는 실용적 응용 관점에서 매우 가치 있는 접근
+  항공 우주 시스템, 산업 자동화 등 특정 분야에서 즉시 활용 가능
+  그러나 학술적 범용성 측면에서는 BTIT*나 SANDO에 비해 좁은 기여
+  
+  장기 관점: 방향 B와 D의 결합 (범용 배치 플래너 + 도메인 볼록 QP)이 
+  이상적 방향으로 보임
+</code></pre>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li>Yu, J., Li, J., Gao, T. &quot;Trajectory Planning for a Multi-UAV Rigid-Payload Cascaded Transportation System Based on Enhanced Tube-RRT*.&quot; arXiv:2604.15074v1 [cs.RO], 2026.</li>
+<li>Li, G., et al. &quot;Human-aware physical human-robot collaborative transportation and manipulation with multiple aerial robots.&quot; IEEE Transactions on Robotics, 2025.</li>
+<li>Foehn, P., et al. &quot;Time-optimal planning for quadrotor waypoint flight.&quot; Science Robotics, 2021.</li>
+<li>Sreenath, K., et al. &quot;Geometric control and differential flatness of a quadrotor UAV with a cable-suspended load.&quot; 2013 CDC.</li>
+<li>Tang, S., et al. &quot;Mixed Integer Quadratic Program Trajectory Generation for a Quadrotor with a Cable-Suspended Payload.&quot; 2015 ICRA.</li>
+<li>Sunkara, V., Ryu, H.S. &quot;Multiple Quadrotors Carrying a Flexible Hose: Control, Planning, and Execution.&quot; IEEE RA-L, 2021.</li>
+<li>Wang, Y., Mu, B., Shokouhi, S., Thein, M. &quot;BTIT*: Optimal Kinodynamic Motion Planning Through Anytime Bidirectional Heuristic Search.&quot; arXiv:2604.11587, 2026.</li>
+<li>Meliani, H., et al. &quot;NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning.&quot; GECCO 2026.</li>
+<li>Fan, C., et al. &quot;HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial VLN.&quot; arXiv, 2026.</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p>Enhanced Tube-RRT*는 다중 UAV 강성 페이로드 캐스케이드 운반 시스템이라는 매우 특화된 응용 도메인에서 <strong>밀집 장애물 환경 궤적 계획</strong>의 핵심 난제를 성공적으로 해결한 논문이다.</p>
+<p><strong>혁신성</strong>:</p>
+<ol>
+<li><strong>2단계 통합 프레임워크</strong>: 기존 분리된 경로 계획-궤적 최적화-장력 할당을 2단계로 통합하여 계획-제어 불일치 문제 원천 해결</li>
+<li><strong>베이지안 Thompson 샘플링</strong>: 환경 적응적 서브영역 선택으로 밀집 장애물 환경에서 94% 성공률 달성 (기존 28-36% 대비)</li>
+<li><strong>초사중수면 포텐셜 + Soft-min 스텝</strong>: 날카로운 다면체 장애물에서 부드러운 반발 포텐셜 구현</li>
+<li><strong>장력 명시적 볼록 QP</strong>: 케이블 장력을 계획 변수로 포함하여 실행 가능성 보장</li>
+</ol>
+<p><strong>실용적 의의</strong>:</p>
+<ul>
+<li>건설, 물류, 재난 구조 등 대형 페이로드 공중 운반 분야의 즉각적 응용 가능성</li>
+<li>확률적 완전성 + 점근적 최적성 이론적 보장 → 시스템 신뢰성 기반 제공</li>
+<li>IEEE TAES 투고 → 항공 우주 엔지니어링 커뮤니티에 직접 기여</li>
+</ul>
+<p><strong>한계와 미래 과제</strong>:</p>
+<ul>
+<li>정적 장애물 환경 → 동적 환경으로 확장 필요</li>
+<li>시뮬레이션 검증 → 실세계 UAV 하드웨어 실험 필요</li>
+<li>코드 미공개 → 재현성 향상 위해 공개 권장</li>
+<li>단일 페이로드 → 다중 캐스케이드 시스템 확장 예정</li>
+</ul>
+<p>NEAT-NC, BTIT*, SANDO 등 기존 Planner 트랙 논문들이 일반 경로/모션 계획에 집중했다면, 이 논문은 <strong>산업적 실용성이 높은 특화 도메인</strong>에서 구체적이고 측정 가능한 성능 향상을 달성했다는 점에서 차별화된 기여를 한다.</p>
+<hr>
+<p><em>리뷰 작성일: 2026-04-21</em><br><em>논문 arXiv 등록일: 2026-04-16</em><br><em>리뷰어: NanoClaw Paper Bot</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

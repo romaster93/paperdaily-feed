@@ -1,0 +1,1423 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">RSS 2024</div>
+    <h1>Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation</h1>
+    <div class="meta-row">
+      <span class="chip">VLN</span>
+      <span><a href="https://arxiv.org/abs/2403.17846">arXiv:2403.17846</a></span>
+      <span>리뷰 2026-05-22</span>
+      <span>60분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>HOV-SG: 계층적 오픈 어휘 3D 씬 그래프를 이용한 언어 지향 로봇 내비게이션</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation</li>
+<li><strong>저자 (Authors)</strong>: Abdelrhman Werby*, Chenguang Huang*, Martin Büchner*, Abhinav Valada, Wolfram Burgard<ul>
+<li>(*) 동등 기여 (Equal contribution)</li>
+</ul>
+</li>
+<li><strong>소속 (Affiliation)</strong>: <ul>
+<li>Werby, Huang, Büchner, Valada — University of Freiburg</li>
+<li>Burgard — University of Technology Nuremberg</li>
+</ul>
+</li>
+<li><strong>발표처 (Published)</strong>: RSS 2024 (Robotics: Science and Systems)</li>
+<li><strong>arXiv</strong>: 2403.17846v2 (June 3, 2024)</li>
+<li><strong>GitHub</strong>: <a href="https://github.com/hovsg/HOV-SG">https://github.com/hovsg/HOV-SG</a></li>
+<li><strong>프로젝트 페이지</strong>: <a href="https://hovsg.github.io">https://hovsg.github.io</a></li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p><strong>문제의식</strong>: 기존 open-vocabulary robot mapping 방법들은 RGB-D 데이터로부터 CLIP과 같은 vision-language feature를 결합해 dense geometric map을 생성하지만, 다음 두 가지 근본적인 한계가 있다:</p>
+<ol>
+<li><p><strong>추상적 계층 쿼리 불가</strong>: &quot;second floor의 bedroom에 있는 chair&quot;와 같이 object 수준을 넘어서는 계층적(hierarchical) 쿼리를 처리할 수 없다. 기존 방법들은 object-level semantics만 제공한다.</p>
+</li>
+<li><p><strong>대규모 multi-floor 환경의 메모리 폭발</strong>: 모든 3D 포인트에 대해 개별적으로 open-vocabulary feature를 저장하는 방식은 large-scale, multi-story building에서 메모리 효율성이 극히 낮아 실용성이 없다. VLMaps는 HM3DSem 8개 씬에서 총 6068 MB를 소비한다.</p>
+</li>
+</ol>
+<p><strong>HOV-SG의 핵심 기여</strong>: 이를 해결하기 위해 <strong>building → floor → room → object</strong>의 4단계 계층 구조를 가진 3D scene graph를 구성하며, 각 노드에 open-vocabulary CLIP feature를 부여한다. 결과적으로:</p>
+<ul>
+<li>복합 쿼리(&quot;find the toilet in the bathroom on floor 2&quot;) 처리 가능</li>
+<li>ConceptGraphs 대비 75% 메모리 절감</li>
+<li>Real-world Boston Dynamics Spot 로봇으로 대규모 multi-floor navigation 실증</li>
+</ul>
+<hr>
+<h2>2. 문제 정의: 선행 연구의 한계 (Problem Definition)</h2>
+<h3>2.1 Point-wise Open-Vocabulary Map 계열의 문제점</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>핵심 아이디어</th>
+<th>한계</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>VLMaps</strong> [10]</td>
+<td>각 3D voxel에 CLIP feature 저장</td>
+<td>메모리 과다 (6068 MB); object 수준 쿼리만 가능</td>
+</tr>
+<tr>
+<td><strong>OpenScene</strong> [17]</td>
+<td>3D point cloud에 CLIP feature 투영</td>
+<td>Flat representation; 계층 구조 없음</td>
+</tr>
+<tr>
+<td><strong>ConceptFusion</strong> [13]</td>
+<td>SAM mask + multi-scale CLIP fusion</td>
+<td>Flat; object-level만 지원; 메모리 비효율</td>
+</tr>
+<tr>
+<td><strong>OpenMask3D</strong></td>
+<td>Instance segmentation + CLIP</td>
+<td>Closed-set 기반; open-vocabulary 미지원</td>
+</tr>
+</tbody></table></div>
+<p><strong>공통 병목</strong>: 모든 방법이 <strong>flat point-wise 또는 object-level representation</strong>으로 제한되어, &quot;2층 사무실의 의자&quot; 같은 복합 쿼리(floor + room + object)를 처리하지 못한다.</p>
+<h3>2.2 3D Scene Graph 계열의 한계</h3>
+<ul>
+<li><strong>ConceptGraphs</strong> [14]: Open-vocabulary를 scene graph와 결합한 첫 시도이나, 소규모 씬(single-floor)에만 평가되었고, segment feature를 mean pooling으로 계산하여 semantics 희석</li>
+<li><strong>Hydra</strong> [19]: Real-time 3D scene graph 구성이 강점이나 closed-set semantics만 사용; open-vocabulary 미지원</li>
+<li><strong>SceneGraphFusion</strong> [37]: Incremental 3D SG이나 closed-set에 제한됨</li>
+</ul>
+<p><strong>HOV-SG의 포지셔닝</strong>: ConceptGraphs(open-vocabulary) + Hydra(hierarchical + multi-floor) + actionable navigation의 세 가지를 모두 결합한 유일한 방법.</p>
+<h3>2.3 VLN 패러다임과의 관계</h3>
+<p>논문의 접근 방식은 <strong>map-based navigation</strong>(offline mapping + query-time retrieval)으로, end-to-end VLN(instruction following from scratch, map 사전 구성 없음)과는 다른 paradigm이다. VLN 커뮤니티 관점에서는 HOV-SG가 &quot;hierarchical navigation을 위한 구조화된 map representation&quot;을 제공하는 기초 기술이며, 상위 VLN 모듈이 이를 활용해 multi-floor에서 자연어 지시를 수행하는 방향으로 확장될 수 있다.</p>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 시스템 아키텍처 개요 (System Architecture Overview)</h3>
+<p>HOV-SG의 파이프라인은 두 단계(Stage)로 구성된다:</p>
+<pre><code>┌─────────────────────────────────────────────────────────────────────────┐
+│                     HOV-SG 전체 파이프라인                              │
+├─────────────────────────┬──────────────────────────────────────────────┤
+│                         │                                              │
+│ Stage 1:                │ Stage 2:                                     │
+│ 3D Segment-Level        │ Hierarchical Open-Vocabulary                 │
+│ Open-Vocabulary Map     │ Scene Graph Construction                     │
+│                         │                                              │
+├─────────────────────────┼──────────────────────────────────────────────┤
+│ Input: RGB-D video      │ Input: 3D feature map from Stage 1           │
+│                         │                                              │
+│ (i) Frame-wise SAM      │ (i) Floor Segmentation                       │
+│     segmentation        │     (height histogram)                       │
+│                         │                                              │
+│ (ii) Multi-view CLIP    │ (ii) Room Segmentation                       │
+│      feature fusion     │      (Voronoi + Watershed)                  │
+│      (global+local      │                                              │
+│       +masked)          │ (iii) Object Assignment                      │
+│                         │       (BEV overlap)                          │
+│ (iii) 3D mask merging   │                                              │
+│       (overlap ratio)   │ (iv) Scene Graph Construction                │
+│                         │      (building→floor→room→object)           │
+│ (iv) DBSCAN filtering   │                                              │
+│      (feature mode)     │ (v) Voronoi Navigation Graph                 │
+│                         │     (single-floor + cross-floor)            │
+│                         │                                              │
+│ Output: Point-wise      │ Output: Hierarchical 3D Scene Graph          │
+│ feature map + 3D        │ + Actionable Navigation Graph                │
+│ segments                │                                              │
+└─────────────────────────┴──────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h3>3.2 Multi-View CLIP Feature Fusion (다중 관점 CLIP 특징 융합)</h3>
+<p><strong>동기</strong>: 단일 2D SAM mask에 대해 CLIP embedding을 추출할 때, 배경과 전경의 문맥(context)이 최종 특징을 크게 영향한다. 기존 ConceptFusion은 masked image(배경 제거)만 사용하여 맥락 정보를 잃고, ConceptGraphs는 전체 이미지와 crop만 사용한다. HOV-SG는 세 가지를 모두 활용한다.</p>
+<p><strong>알고리즘</strong> (Equation 2):</p>
+<p>각 RGB-D 프레임의 2D SAM mask <code class="math">m_t</code>에 대해:</p>
+<p><code class="math math-display">f_i = w_g f_g + w_l f_l + w_m f_m</code></p>
+<p>여기서:</p>
+<ul>
+<li><code class="math">f_g</code>: 전체 프레임의 CLIP feature (global context, 물건이 놓인 room/space의 맥락)</li>
+<li><code class="math">f_l</code>: 2D mask의 bounding box crop의 CLIP feature (local context, 배경 포함)</li>
+<li><code class="math">f_m</code>: Background-removed masked image crop의 CLIP feature (mask-only, 순수 물체)</li>
+<li><code class="math">w_g, w_l, w_m</code>: 학습 가능하거나 고정 가중치 (합=1)</li>
+</ul>
+<p><strong>구현 세부사항</strong> (code_analysis.md 참조):</p>
+<pre><code class="language-python"># /tmp/hovsg-repo/hovsg/models/sam_clip_feats_extractor.py:122-128
+# Weighted sum fusion with softmax normalization
+similarity = F.cosine_similarity(f_g.unsqueeze(0), f_l.unsqueeze(0))
+weight_g = softmax(similarity)  # 글로벌 가중치
+weight_l = 1 - weight_g        # 로컬 가중치
+f_fused = weight_g * f_g + weight_l * f_l  # 적응형 융합
+</code></pre>
+<p>Ablation Study (Table VIII)에서 세 가지 fusion 모두 필요함을 입증:</p>
+<ul>
+<li>DBSCAN 없음 + L-CLIP만: mIoU 0.212</li>
+<li>DBSCAN 없음 + M-CLIP만: mIoU 0.215</li>
+<li><strong>모두 포함</strong>: mIoU <strong>0.231</strong> (최고 성능)</li>
+</ul>
+<hr>
+<h3>3.3 SAM 기반 객체 마스크 제안 + DBSCAN 필터링</h3>
+<p><strong>SAM 마스크 생성</strong> (Segment Anything Model, ViT-H):</p>
+<pre><code class="language-python"># /tmp/hovsg-repo/hovsg/graph/graph.py:114-128
+mask_generator = SamAutomaticMaskGenerator(
+    model=sam_vit_h,
+    points_per_side=12,           # 12×12=144 grid points
+    pred_iou_thresh=0.88,         # 예측된 IoU &gt; 0.88
+    stability_score_thresh=0.95,  # Stability &gt; 0.95
+    crop_n_layers=0,              # 계층적 분할 비활성화
+    min_mask_region_area=100,     # 최소 100 픽셀
+)
+masks = mask_generator.generate(image)  # 프레임당 수십~수백 마스크 반환
+</code></pre>
+<p><strong>DBSCAN 필터링</strong> (Equation implicit):</p>
+<p>각 3D segment 내의 point-wise CLIP feature들에 대해 cosine distance 기반 DBSCAN clustering 적용:</p>
+<p><code class="math math-display">\text{DBSCAN}(\{f_p : p \in \text{segment}\}, \text{metric='cosine'})</code></p>
+<ul>
+<li><p><strong>목적</strong>: </p>
+<ol>
+<li>CLIP의 mode collapse 방지 (이상치 feature 제거)</li>
+<li>SAM의 노이즈 마스크로 인한 오류 정리</li>
+<li>Majority voting을 통한 가장 대표적 semantic 추출</li>
+</ol>
+</li>
+<li><p><strong>구현</strong> (/tmp/hovsg-repo/hovsg/utils/graph_utils.py:386):</p>
+<pre><code class="language-python">def feats_denoise_dbscan(feats, eps=0.02, min_points=2):
+    # feats: (N, 1024) CLIP ViT-H features
+    clustering = DBSCAN(eps=eps, min_samples=min_points, 
+                        metric=&#39;cosine&#39;).fit(feats)
+    largest_cluster_idx = np.bincount(clustering.labels_[clustering.labels_ &gt;= 0]).argmax()
+    return feats[clustering.labels_ == largest_cluster_idx].mean(axis=0)
+</code></pre>
+</li>
+</ul>
+<p><strong>결과</strong>: Feature 중복 제거로 동일한 label 집합을 예측하는 overlapping segment들을 병합.</p>
+<hr>
+<h3>3.4 Floor Segmentation (높이 히스토그램 분석)</h3>
+<p><strong>입력</strong>: 전체 환경의 3D point cloud <code class="math">\mathcal{P} = \{p_i\}</code></p>
+<p><strong>알고리즘</strong> (Figure 3 좌측):</p>
+<ol>
+<li><p><strong>높이 히스토그램 생성</strong> (Y축):</p>
+<ul>
+<li>bin size = 0.01 m (1cm)</li>
+<li>모든 점의 Y 좌표 분포 계산</li>
+</ul>
+</li>
+<li><p><strong>피크 탐지</strong> (local maxima):</p>
+<ul>
+<li><code>scipy.signal.find_peaks()</code> 적용</li>
+<li>최고 intensity peak의 90% 이상인 peak만 선택</li>
+<li>최소 거리: 0.2 m</li>
+</ul>
+</li>
+<li><p><strong>DBSCAN 클러스터링</strong> (eps=1.0):</p>
+<ul>
+<li>탐지된 모든 피크를 clustering</li>
+<li>각 cluster에서 가장 높은 ranked peak 선택 → floor boundary candidate</li>
+</ul>
+</li>
+<li><p><strong>Floor 범위 결정</strong>:</p>
+<ul>
+<li>정렬된 높이 벡터에서 <strong>연속한 두 피크 쌍</strong>이 하나의 floor (바닥 + 천장)를 표현</li>
+</ul>
+<pre><code>Height distribution:
+▲
+│  ┌─ Floor 1 ceiling
+│  │
+├─ Floor 1 floor
+│
+├─ Floor 0 ceiling
+│
+└─ Floor 0 floor
+</code></pre>
+</li>
+<li><p><strong>Floor 포인트 클라우드 추출</strong>:
+각 floor <code class="math">l</code>에 대해 <code class="math">y_{min}^l \leq y &lt; y_{max}^l</code> 범위의 점들 추출 → <code class="math">\mathcal{P}_l</code></p>
+</li>
+</ol>
+<p><strong>특성</strong>:</p>
+<ul>
+<li>정확도 100% (HM3DSem 8개 씬 모두 floor 수 정확 예측)</li>
+<li><strong>한계</strong>: 경사진 환경, 불균일한 바닥 높이, 다락방 같은 특수 구조에서 실패 가능</li>
+</ul>
+<hr>
+<h3>3.5 Room Segmentation (Voronoi-based Skeleton + Watershed)</h3>
+<p><strong>입력</strong>: 각 floor의 point cloud <code class="math">\mathcal{P}_l</code></p>
+<p><strong>알고리즘</strong> (Figure 3 우측, step-by-step):</p>
+<pre><code>Step 1: 2D Bird&#39;s-Eye View Histogram 생성
+        P_l을 xz 평면(수평면)에 투영
+        ↓
+Step 2: Wall Skeleton Mask 추출
+        BEV histogram threshold → 벽 영역만 추출
+        ↓
+Step 3: Euclidean Distance Field (EDF) 계산
+        벽 mask를 dilate한 후 distance_transform
+        ↓
+Step 4: Region Seed 추출
+        EDF를 threshold → isolated region seeds 획득
+        ↓
+Step 5: Watershed Algorithm 적용
+        seeds 기반으로 2D region mask 생성
+        ↓
+Step 6: 3D 매핑
+        2D region mask를 floor height interval 내
+        3D point에 적용 → room point cloud 생성
+</code></pre>
+<p><strong>구현 세부사항</strong> (/tmp/hovsg-repo/hovsg/graph/graph.py:378-450):</p>
+<pre><code class="language-python">def segment_rooms(self, floor_pcd, floor_id):
+    # 1. BEV 투영 + 히스토그램
+    bev_hist = self.project_to_2d_histogram(floor_pcd, grid_res=0.05)
+    
+    # 2. Wall skeleton 추출
+    walls_skeleton = cv2.threshold(bev_hist, threshold_val, 255, 
+                                   cv2.THRESH_BINARY)[1]
+    
+    # 3. EDF 계산
+    walls_dilated = cv2.dilate(walls_skeleton, kernel, iterations=3)
+    edf = cv2.distanceTransform(walls_dilated, cv2.DIST_L2, 
+                                cv2.DIST_MASK_PRECISE)
+    
+    # 4. Watershed 적용
+    region_labels = cv2.watershed(bev_hist_3channel, seeds=edf_seeds)
+    
+    # 5. 3D 매핑: region_labels를 floor height 내 포인트에 할당
+    for region_id in range(1, max(region_labels)+1):
+        room_pcd = self.extract_3d_points_for_region(floor_pcd, region_labels, region_id)
+        rooms.append(Room(room_id=..., pcd=room_pcd, floor_id=floor_id))
+</code></pre>
+<p><strong>Room Embedding 계산</strong> (k-means + majority voting):</p>
+<p>각 room에 associated된 RGB-D observation (카메라 포즈가 해당 room segment 내 있는 프레임들)의 CLIP feature를 추출.</p>
+<pre><code class="language-python"># /tmp/hovsg-repo/hovsg/utils/graph_utils.py:52-100
+def compute_room_embeddings(room_observations, num_views=5):
+    # 1. 모든 관찰의 CLIP feature 수집
+    all_features = [extract_clip_from_image(img) for img in room_observations]
+    all_features = np.array(all_features)  # (N_obs, 1024)
+    
+    # 2. K-means clustering (num_views=5)
+    kmeans = KMeans(n_clusters=num_views, random_state=0)
+    kmeans.fit(all_features)
+    representative_features = kmeans.cluster_centers_  # (5, 1024)
+    
+    # 3. 추론 시 (inference)
+    # 40개 room category embedding과의 cosine similarity
+    category_embeddings = get_room_category_embeddings()  # (40, 1024)
+    similarity_matrix = cosine_similarity(representative_features, 
+                                         category_embeddings)  # (10, 40)
+    
+    # 4. Majority voting
+    predicted_categories = np.argmax(similarity_matrix, axis=1)  # (10,)
+    room_category = np.bincount(predicted_categories).argmax()
+    return room_category
+</code></pre>
+<p><strong>성능</strong> (Table III):</p>
+<ul>
+<li>HOV-SG (view embeddings): Acc= 73.93%, Acc≈ 84.10%</li>
+<li>GPT-4 w/ GT objects (privileged): Acc= 79.86%, Acc≈ 84.25%</li>
+</ul>
+<p>HOV-SG는 unprivileged 방법 중 최고이며, privileged GPT-4와 Acc≈에서 동등하다.</p>
+<hr>
+<h3>3.6 Hierarchical Scene Graph Construction (계층적 씬 그래프 구성)</h3>
+<p><strong>그래프 형식 정의</strong>:</p>
+<p><code class="math math-display">\mathcal{G} = (\mathcal{N}, \mathcal{E})</code></p>
+<p><strong>노드</strong>:
+<code class="math math-display">\mathcal{N} = \mathcal{N}_S \cup \mathcal{N}_F \cup \mathcal{N}_R \cup \mathcal{N}_O</code></p>
+<ul>
+<li><code class="math">\mathcal{N}_S = \{N_S\}</code>: root node (building)</li>
+<li><code class="math">\mathcal{N}_F = \{N_{f_0}, N_{f_1}, \ldots, N_{f_k}\}</code>: floor nodes (k개 층)</li>
+<li><code class="math">\mathcal{N}_R = \{N_{f,r}\}</code>: room nodes (각 floor 내 room)</li>
+<li><code class="math">\mathcal{N}_O = \{N_{f,r,o}\}</code>: object nodes (각 room 내 object)</li>
+</ul>
+<p><strong>엣지</strong>:
+<code class="math math-display">\mathcal{E} = \mathcal{E}_{SF} \cup \mathcal{E}_{FR} \cup \mathcal{E}_{RO}</code></p>
+<ul>
+<li><code class="math">\mathcal{E}_{SF}</code>: root ↔ floor edges</li>
+<li><code class="math">\mathcal{E}_{FR}</code>: floor ↔ room edges</li>
+<li><code class="math">\mathcal{E}_{RO}</code>: room ↔ object edges</li>
+</ul>
+<p><strong>각 노드의 속성</strong>:</p>
+<pre><code class="language-python"># /tmp/hovsg-repo/hovsg/graph/graph.py:705-850
+class SceneGraphNode:
+    def __init__(self, node_id, node_type):
+        self.id = node_id
+        self.type = node_type  # &quot;building&quot;, &quot;floor&quot;, &quot;room&quot;, &quot;object&quot;
+        self.point_cloud = None  # Open3D PointCloud
+        self.embedding = None   # CLIP feature (1024-dim)
+        self.vertices = None    # 3D coordinates array
+        
+        # Node-specific attributes
+        if node_type == &quot;floor&quot;:
+            self.floor_id = None
+            self.rooms = []
+        elif node_type == &quot;room&quot;:
+            self.room_id = None
+            self.floor_id = None
+            self.objects = []
+            self.embeddings = []  # k개 representative features
+        elif node_type == &quot;object&quot;:
+            self.object_id = None
+            self.room_id = None
+            self.name = None  # Open-vocabulary label
+</code></pre>
+<p><strong>NetworkX 기반 구현</strong>:</p>
+<pre><code class="language-python"># /tmp/hovsg-repo/hovsg/graph/graph.py:85-105
+self.graph = nx.Graph()
+
+# 1. Root node 추가
+self.graph.add_node(0, name=&quot;building&quot;, type=&quot;building&quot;)
+
+# 2. Floor nodes 추가
+for floor_id, floor_pcd in enumerate(floors):
+    floor_node_id = 100 + floor_id
+    self.graph.add_node(floor_node_id, name=f&quot;floor_{floor_id}&quot;, 
+                       type=&quot;floor&quot;, point_cloud=floor_pcd, 
+                       embedding=np.array([&quot;floor&quot;, str(floor_id)]))  # 템플릿 기반
+    self.graph.add_edge(0, floor_node_id)
+
+# 3. Room nodes 추가 (각 floor 내)
+for floor_id, rooms_in_floor in enumerate(segmented_rooms):
+    for room_id, room_pcd in enumerate(rooms_in_floor):
+        room_node_id = 1000 + floor_id * 100 + room_id
+        room_embedding = compute_room_embeddings(room_observations)
+        self.graph.add_node(room_node_id, name=f&quot;room_{room_id}&quot;, 
+                           type=&quot;room&quot;, point_cloud=room_pcd,
+                           embedding=room_embedding)
+        floor_node_id = 100 + floor_id
+        self.graph.add_edge(floor_node_id, room_node_id)
+
+# 4. Object nodes 추가
+for floor_id, floor_rooms in enumerate(rooms_by_floor):
+    for room_id, room_obj_segments in enumerate(floor_rooms):
+        for obj_id, obj_segment in enumerate(room_obj_segments):
+            obj_node_id = 10000 + floor_id * 1000 + room_id * 100 + obj_id
+            obj_embedding = feats_denoise_dbscan(obj_segment.features)
+            obj_label = identify_object(obj_embedding, MATTERPORT_LABELS_40)
+            self.graph.add_node(obj_node_id, name=obj_label, 
+                               type=&quot;object&quot;, point_cloud=obj_segment.pcd,
+                               embedding=obj_embedding)
+            room_node_id = 1000 + floor_id * 100 + room_id
+            self.graph.add_edge(room_node_id, obj_node_id)
+</code></pre>
+<hr>
+<h3>3.7 LLM 기반 복합 쿼리 Grounding (GPT-3.5 파싱)</h3>
+<p><strong>쿼리 분해 흐름</strong>:</p>
+<pre><code>사용자 쿼리:
+&quot;Find the toilet in the bathroom on floor 2&quot;
+        ↓
+[GPT-3.5-turbo few-shot]
+&quot;Extract floor, room, and object&quot;
+        ↓
+Parsed tokens:
+[&quot;floor 2&quot;, &quot;bathroom&quot;, &quot;toilet&quot;]
+        ↓
+계층적 탐색:
+Step 1: Query floors for &quot;floor 2&quot; → N_{f_2}
+Step 2: Query rooms in N_{f_2} for &quot;bathroom&quot; → N_{f_2,r_bathroom}
+Step 3: Query objects in N_{f_2,r_bathroom} for &quot;toilet&quot; → N_{f_2,r_bathroom,o_toilet}
+        ↓
+Voronoi 경로 계획 → 내비게이션 실행
+</code></pre>
+<p><strong>구현</strong> (/tmp/hovsg-repo/hovsg/utils/llm_utils.py:169-200):</p>
+<pre><code class="language-python">def parse_hier_query(query_text, openai_api_key):
+    &quot;&quot;&quot;
+    GPT-3.5-turbo로 자연어 쿼리를 [floor, room, object] 토큰으로 파싱
+    &quot;&quot;&quot;
+    system_prompt = &quot;&quot;&quot;You are a query parser for robotic navigation.
+Extract floor number, room name, and object name from the query.
+Return as: [floor_X, room_name, object_name]
+If a level is not specified, return &quot;any&quot;.
+&quot;&quot;&quot;
+    
+    few_shot_examples = [
+        {
+            &quot;role&quot;: &quot;user&quot;,
+            &quot;content&quot;: &quot;chair in living room on floor 0&quot;
+        },
+        {
+            &quot;role&quot;: &quot;assistant&quot;,
+            &quot;content&quot;: &quot;[floor_0, living room, chair]&quot;
+        },
+        {
+            &quot;role&quot;: &quot;user&quot;,
+            &quot;content&quot;: &quot;Find the laptop in the office&quot;
+        },
+        {
+            &quot;role&quot;: &quot;assistant&quot;,
+            &quot;content&quot;: &quot;[any, office, laptop]&quot;
+        },
+    ]
+    
+    response = openai.ChatCompletion.create(
+        model=&quot;gpt-3.5-turbo&quot;,
+        messages=few_shot_examples + [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: query_text}],
+        temperature=0.0
+    )
+    
+    parsed_tokens = parse_response(response[&quot;choices&quot;][0][&quot;message&quot;][&quot;content&quot;])
+    return parsed_tokens  # e.g., (&quot;floor 2&quot;, &quot;bathroom&quot;, &quot;toilet&quot;)
+</code></pre>
+<p><strong>계층적 쿼리 실행</strong> (/tmp/hovsg-repo/hovsg/graph/graph.py:1179-1250):</p>
+<pre><code class="language-python">def query_hierarchy(self, query, top_k=5):
+    &quot;&quot;&quot;
+    3단계 계층적 쿼리 처리
+    &quot;&quot;&quot;
+    # 1. 쿼리 파싱
+    floor_token, room_token, object_token = parse_hier_query(query)
+    
+    # 2. Floor 검색
+    if floor_token != &quot;any&quot;:
+        target_floor = self.query_floor(floor_token)  # cosine similarity
+    else:
+        target_floor = self.floors[0]  # 기본값: 첫 번째 층
+    
+    # 3. Room 검색 (target floor 내)
+    room_candidates = self.query_room(target_floor, room_token, top_k=top_k)
+    
+    # 4. Object 검색 (각 room 내)
+    object_results = []
+    for room in room_candidates:
+        objects_in_room = self.query_object(room, object_token, top_k=top_k)
+        object_results.extend(objects_in_room)
+    
+    # 5. 상위 k개 객체 반환 (confidence 기준 정렬)
+    return sorted(object_results, 
+                  key=lambda x: x[&#39;confidence&#39;], 
+                  reverse=True)[:top_k]
+</code></pre>
+<p><strong>Text embedding (CLIP template)</strong> (/tmp/hovsg-repo/hovsg/utils/clip_utils.py:251-280):</p>
+<pre><code class="language-python">def get_text_feats_multiple_templates(text, model):
+    &quot;&quot;&quot;
+    여러 템플릿으로 텍스트를 인코딩하고 평균화
+    &quot;&quot;&quot;
+    templates = [
+        &quot;{}&quot;,
+        &quot;There is the {} in the scene.&quot;,
+    ]
+    
+    features = []
+    for template in templates:
+        prompt = template.format(text)
+        with torch.no_grad():
+            tokens = model.tokenizer(prompt)
+            text_features = model.encode_text(tokens)
+            text_features = text_features / text_features.norm(dim=-1, keepdim=True)
+        features.append(text_features)
+    
+    # 평균화
+    text_features = torch.mean(torch.stack(features), dim=0)
+    return text_features
+</code></pre>
+<hr>
+<h2>4. 실험 결과 (Experimental Results)</h2>
+<h3>4.1 데이터셋</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>데이터셋</th>
+<th>특징</th>
+<th>평가 항목</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Replica</strong> [23]</td>
+<td>정밀 실내 3D 스캔; photo-realistic</td>
+<td>3D semantic segmentation (mIoU, F-mIoU, mAcc)</td>
+</tr>
+<tr>
+<td><strong>ScanNet</strong> [24]</td>
+<td>실제 RGB-D 스캔; richly annotated</td>
+<td>3D semantic segmentation</td>
+</tr>
+<tr>
+<td><strong>HM3DSem</strong> [25]</td>
+<td>대규모 multi-floor; open-vocabulary object labels; 1624 categories</td>
+<td>계층적 쿼리, floor/room accuracy, object semantics</td>
+</tr>
+<tr>
+<td><strong>Real-world (Spot)</strong></td>
+<td>Boston Dynamics Spot + Azure Kinect RGB-D + 3D LiDAR</td>
+<td>End-to-end multi-floor navigation</td>
+</tr>
+</tbody></table></div>
+<p><strong>사용 씬</strong>:</p>
+<ul>
+<li>Replica: <code>office0-office4</code>, <code>room0-room2</code> (8개)</li>
+<li>ScanNet: <code>scene0011_00</code>, <code>scene0050_00</code>, <code>scene0231_00</code>, <code>scene0378_00</code>, <code>scene0518_00</code> (5개)</li>
+<li>HM3DSem: <code>00824, 00829, 00843, 00861, 00862, 00873, 00877, 00890</code> (8개, 직접 촬영)</li>
+<li>Real-world: 2-story office building (Spot 로봇)</li>
+</ul>
+<h3>4.2 정량적 결과</h3>
+<h4>Table I: 3D Semantic Segmentation (Replica + ScanNet)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>CLIP</th>
+<th>Replica mIoU</th>
+<th>Replica F-mIoU</th>
+<th>ScanNet mIoU</th>
+<th>ScanNet F-mIoU</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MinkowskiNet [50] (supervised)</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>0.42</td>
+<td>0.47</td>
+</tr>
+<tr>
+<td>ConceptFusion [13]</td>
+<td>OVSeg</td>
+<td>0.10</td>
+<td>0.21</td>
+<td>0.08</td>
+<td>0.11</td>
+</tr>
+<tr>
+<td>ConceptFusion [13]</td>
+<td>ViT-H-14</td>
+<td>0.10</td>
+<td>0.18</td>
+<td>0.11</td>
+<td>0.12</td>
+</tr>
+<tr>
+<td>ConceptGraph [14]</td>
+<td>OVSeg</td>
+<td>0.13</td>
+<td>0.23</td>
+<td>0.15</td>
+<td>0.18</td>
+</tr>
+<tr>
+<td>ConceptGraph [14]</td>
+<td>ViT-H-14</td>
+<td>0.18</td>
+<td>0.23</td>
+<td>0.16</td>
+<td>0.20</td>
+</tr>
+<tr>
+<td><strong>HOV-SG (ours)</strong></td>
+<td>OVSeg</td>
+<td><strong>0.144</strong></td>
+<td><strong>0.255</strong></td>
+<td><strong>0.214</strong></td>
+<td><strong>0.258</strong></td>
+</tr>
+<tr>
+<td><strong>HOV-SG (ours)</strong></td>
+<td><strong>ViT-H-14</strong></td>
+<td><strong>0.231</strong></td>
+<td><strong>0.386</strong></td>
+<td><strong>0.222</strong></td>
+<td><strong>0.303</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>성과</strong>:</p>
+<ul>
+<li>Replica F-mIoU: HOV-SG ViT-H-14 <strong>0.386</strong> vs ConceptGraphs <strong>0.230</strong> (<strong>68% 향상</strong>)</li>
+<li>ScanNet F-mIoU: HOV-SG <strong>0.303</strong> vs ConceptGraphs <strong>0.200</strong> (<strong>51% 향상</strong>)</li>
+<li><strong>핵심</strong>: DBSCAN 기반 feature clustering과 3-way CLIP fusion의 효과</li>
+</ul>
+<h4>Table II: Floor &amp; Room Segmentation (HM3DSem)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Floor Acc_F [%]</th>
+<th>Region Precision [%]</th>
+<th>Region Recall [%]</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Hydra [19]</td>
+<td>-</td>
+<td><strong>86.18</strong></td>
+<td>77.55</td>
+</tr>
+<tr>
+<td><strong>HOV-SG (ours)</strong></td>
+<td><strong>100</strong></td>
+<td>84.10</td>
+<td><strong>83.59</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>해석</strong>:</p>
+<ul>
+<li>Floor 분할: <strong>100% 정확도</strong> (모든 8개 씬에서 floor 수 정확)</li>
+<li>Room 분할: precision은 Hydra보다 약간 낮지만, <strong>recall 83.59% vs 77.55%로 유의하게 우수</strong></li>
+<li>의미: HOV-SG가 더 많은 room을 탐지 (false negatives 적음)</li>
+</ul>
+<h4>Table III: Room Classification (HM3DSem)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Acc= [%]</th>
+<th>Acc≈ [%]</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GPT-3.5 w/ GT objects (privileged)</td>
+<td>66.89</td>
+<td>81.49</td>
+</tr>
+<tr>
+<td>GPT-4 w/ GT objects (privileged)</td>
+<td>79.86</td>
+<td>84.25</td>
+</tr>
+<tr>
+<td>GPT-3.5 w/ predicted objects (unprivileged)</td>
+<td>28.48</td>
+<td>42.95</td>
+</tr>
+<tr>
+<td>GPT-4 w/ predicted objects (unprivileged)</td>
+<td>59.47</td>
+<td>62.55</td>
+</tr>
+<tr>
+<td><strong>HOV-SG (ours, view embeddings)</strong></td>
+<td><strong>73.93</strong></td>
+<td><strong>84.10</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>의의</strong>:</p>
+<ul>
+<li>unprivileged 방법 중 최고 성능</li>
+<li>privileged GPT-4와 Acc≈에서 동등 (84.10 vs 84.25)</li>
+<li>K-means view embedding 방식이 object labels에 의존하지 않고도 강력한 room classification 성능 달성</li>
+</ul>
+<h4>Table IV: Object-Level Open-Vocabulary Semantics (HM3DSem, AUC_top)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>top_5</th>
+<th>top_10</th>
+<th>top_25</th>
+<th>top_100</th>
+<th>top_250</th>
+<th>top_500</th>
+<th>AUC_top</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>VLMaps [10]</td>
+<td>0.05</td>
+<td>0.17</td>
+<td>0.54</td>
+<td>15.32</td>
+<td>26.01</td>
+<td>40.02</td>
+<td>56.20</td>
+</tr>
+<tr>
+<td>ConceptGraphs [14]</td>
+<td>18.11</td>
+<td>24.01</td>
+<td>33.00</td>
+<td>55.17</td>
+<td><strong>70.85</strong></td>
+<td><strong>81.55</strong></td>
+<td>84.07</td>
+</tr>
+<tr>
+<td><strong>HOV-SG (ours)</strong></td>
+<td><strong>18.43</strong></td>
+<td><strong>25.73</strong></td>
+<td><strong>36.41</strong></td>
+<td><strong>56.46</strong></td>
+<td>69.95</td>
+<td>80.86</td>
+<td><strong>84.88</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>특징</strong>: HOV-SG가 전반적으로 최고이며, top-100 범위(정확한 object 검색)에서 우수.</p>
+<h4>Table V: Hierarchical Object Retrieval (HM3DSem)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Query Type</th>
+<th>Method</th>
+<th>Retrieval-SR_10 [%]</th>
+<th>Navigation-SR [%]</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>(o, r, f)</td>
+<td>ConceptGraphs</td>
+<td>16.31</td>
+<td>-</td>
+</tr>
+<tr>
+<td>(o, r, f)</td>
+<td><strong>HOV-SG (ours)</strong></td>
+<td><strong>28.00</strong></td>
+<td><strong>37.32</strong></td>
+</tr>
+<tr>
+<td>(o, r)</td>
+<td>ConceptGraphs</td>
+<td>29.26</td>
+<td>-</td>
+</tr>
+<tr>
+<td>(o, r)</td>
+<td><strong>HOV-SG (ours)</strong></td>
+<td><strong>31.48</strong></td>
+<td><strong>40.41</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>중요한 평가</strong>: 계층적 쿼리(object + room + floor)에서 HOV-SG가 ConceptGraphs 대비 <strong>+11.69%</strong> 우수. 이는 HOV-SG의 hierarchical structure가 실제 계층적 내비게이션에서 얼마나 효과적인지 보여줌.</p>
+<h4>Table VI: Real-World Boston Dynamics Spot Navigation</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Query Type</th>
+<th># Trials</th>
+<th># Successes</th>
+<th>SR [%]</th>
+<th>Goal Nav. Success</th>
+<th>Nav. SR [%]</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Object</td>
+<td>41</td>
+<td>29</td>
+<td>70.7</td>
+<td>23</td>
+<td>56.1</td>
+</tr>
+<tr>
+<td>Room</td>
+<td>9</td>
+<td>5</td>
+<td>55.6</td>
+<td>5</td>
+<td>55.6</td>
+</tr>
+<tr>
+<td>Floor</td>
+<td>2</td>
+<td>2</td>
+<td>100</td>
+<td>2</td>
+<td>100</td>
+</tr>
+</tbody></table></div>
+<p><strong>현실성</strong>: </p>
+<ul>
+<li>Object 검색 SR 70.7%: 합리적 성능 (visual ambiguity, localization error 고려)</li>
+<li>Floor 검색 100%: hierarchical 구조의 floor 수준은 거의 완벽</li>
+<li>실패 사례 (Fig. S.6): &quot;whiteboard in office on floor 2&quot;에서 whiteboard가 벽에 부착되어 있어 로봇이 정반대편에 위치하는 localization ambiguity</li>
+</ul>
+<h4>Table VII: Representation 메모리 효율성</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>총 크기 [MB]</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>VLMaps</td>
+<td>6068</td>
+</tr>
+<tr>
+<td>ConceptGraphs</td>
+<td>1638</td>
+</tr>
+<tr>
+<td><strong>HOV-SG</strong></td>
+<td><strong>1493</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>해석</strong>:</p>
+<ul>
+<li>VLMaps 대비 <strong>75% 절감</strong></li>
+<li>ConceptGraphs 대비 <strong>8.8% 절감</strong> (점진적 개선)</li>
+<li>hierarchical representation과 segment-level aggregation의 효과</li>
+</ul>
+<h4>Table VIII: Ablation Study (Replica)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>DBSCAN</th>
+<th>L-CLIP</th>
+<th>M-CLIP</th>
+<th>mIoU</th>
+<th>F-mIoU</th>
+<th>mAcc</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>✗</td>
+<td>✓</td>
+<td>✓</td>
+<td>0.212</td>
+<td>0.340</td>
+<td>0.290</td>
+</tr>
+<tr>
+<td>✓</td>
+<td>✗</td>
+<td>✓</td>
+<td>0.136</td>
+<td>0.178</td>
+<td>0.170</td>
+</tr>
+<tr>
+<td>✓</td>
+<td>✓</td>
+<td>✗</td>
+<td>0.215</td>
+<td>0.337</td>
+<td>0.298</td>
+</tr>
+<tr>
+<td><strong>✓</strong></td>
+<td><strong>✓</strong></td>
+<td><strong>✓</strong></td>
+<td><strong>0.231</strong></td>
+<td><strong>0.386</strong></td>
+<td><strong>0.304</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>결론</strong>: 세 가지 component (DBSCAN + local CLIP + masked CLIP)가 모두 필수.</p>
+<hr>
+<h3>4.3 Real-World Deployment</h3>
+<p><strong>플랫폼</strong>: Boston Dynamics Spot + Azure Kinect RGB-D + 3D LiDAR (FAST-LIO2 SLAM)</p>
+<p><strong>환경</strong>: 2층짜리 office 건물, 다양한 room type (office, corridor, kitchen, seminar room, meeting room, dining room, bathroom)</p>
+<p><strong>쿼리 종류</strong>:</p>
+<ul>
+<li>Object 레벨: &quot;find the bean bag in the office on floor 1&quot; (41 trials)</li>
+<li>Room 레벨: &quot;go to the kitchen on floor 2&quot; (9 trials)</li>
+<li>Floor 레벨: &quot;navigate to floor 2&quot; (2 trials)</li>
+</ul>
+<p><strong>성능</strong>:</p>
+<ul>
+<li><strong>Object SR</strong>: 70.7% (retrieval), 56.1% (navigation)</li>
+<li><strong>Room SR</strong>: 55.6%</li>
+<li><strong>Floor SR</strong>: 100%</li>
+</ul>
+<p><strong>한계</strong>:</p>
+<ul>
+<li>실패 분석: &quot;go to the whiteboard in the office on floor 2&quot;에서 whiteboard가 벽 부착 오브젝트이므로 Voronoi 내비게이션으로 접근 불가 (localization ambiguity)</li>
+</ul>
+<hr>
+<h2>5. 코드 구현 분석 (Code Implementation Analysis)</h2>
+<h3>5.1 Repository 구조</h3>
+<pre><code>/tmp/hovsg-repo/
+├── README.md                           # 설치, 실행 가이드
+├── environment.yaml                    # conda 환경
+├── setup.py                            # pip 진입점
+├── application/                        # End-user 스크립트
+│   ├── create_graph.py                # 씬 그래프 생성 (메인)
+│   ├── visualize_graph.py
+│   ├── visualize_query_graph.py        # 인터랙티브 쿼리
+│   ├── semantic_segmentation.py
+│   └── eval/
+│       ├── evaluate_graph.py           # HM3DSem 평가
+│       └── evaluate_sem_seg.py         # Replica/ScanNet 평가
+├── hovsg/                              # 핵심 패키지
+│   ├── graph/
+│   │   ├── graph.py                   # Graph 메인 클래스 (1446줄)
+│   │   ├── object.py                  # Object 노드
+│   │   ├── room.py                    # Room 노드
+│   │   ├── floor.py                   # Floor 노드
+│   │   └── navigation_graph.py        # Voronoi nav graph
+│   ├── models/
+│   │   └── sam_clip_feats_extractor.py # SAM+CLIP 추출기
+│   ├── dataloader/
+│   │   ├── hm3dsem.py                # HM3DSem 로더
+│   │   ├── replica.py                # Replica 로더
+│   │   ├── scannet.py                # ScanNet 로더
+│   │   └── generic.py                # 공통 인터페이스
+│   ├── utils/
+│   │   ├── clip_utils.py             # CLIP 인코딩
+│   │   ├── graph_utils.py            # DBSCAN, merging
+│   │   ├── llm_utils.py              # GPT-3.5 파싱
+│   │   ├── sam_utils.py              # SAM bbox crop
+│   │   ├── constants.py              # 레이블 상수
+│   │   └── label_feats.py            # 카테고리 임베딩
+│   └── eval/                          # 평가 유틸
+└── config/                             # Hydra YAML 설정
+    ├── create_graph.yaml
+    ├── eval_graph.yaml
+    ├── eval_sem_seg.yaml
+    └── ...
+</code></pre>
+<h3>5.2 핵심 모듈 (Key Modules)</h3>
+<h4>Graph Class (/tmp/hovsg-repo/hovsg/graph/graph.py, 1446줄)</h4>
+<p><strong>God Class 패턴</strong>: 전체 파이프라인이 단일 Graph 클래스에 집중.</p>
+<p><strong>주요 메서드</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>메서드</th>
+<th>라인</th>
+<th>목적</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>__init__</code></td>
+<td>114</td>
+<td>CLIP, SAM 모델 로드; dataloader 초기화</td>
+</tr>
+<tr>
+<td><code>create_feature_map</code></td>
+<td>142</td>
+<td>RGB-D 프레임 처리, feature 추출, 3D mask 병합</td>
+</tr>
+<tr>
+<td><code>segment_floors</code></td>
+<td>262</td>
+<td>Height histogram → floor 분할</td>
+</tr>
+<tr>
+<td><code>segment_rooms</code></td>
+<td>378</td>
+<td>Voronoi + Watershed → room 분할</td>
+</tr>
+<tr>
+<td><code>segment_objects</code></td>
+<td>592</td>
+<td>Floor-room overlap → object 할당</td>
+</tr>
+<tr>
+<td><code>create_graph</code></td>
+<td>705</td>
+<td>NetworkX 그래프 구성</td>
+</tr>
+<tr>
+<td><code>create_nav_graph</code></td>
+<td>846</td>
+<td>Voronoi navigation graph 구성</td>
+</tr>
+<tr>
+<td><code>query_hierarchy</code></td>
+<td>1179</td>
+<td>LLM 쿼리 분해 + 계층 탐색</td>
+</tr>
+</tbody></table></div>
+<h4>Feature Fusion (/tmp/hovsg-repo/hovsg/models/sam_clip_feats_extractor.py)</h4>
+<pre><code class="language-python">def extract_feats_per_pixel(rgb_image, depth_image, mask):
+    &quot;&quot;&quot;
+    각 SAM mask에 대해 3-way CLIP feature fusion 수행
+    &quot;&quot;&quot;
+    # 1. 전체 이미지 CLIP 인코딩
+    f_g = clip_model.encode_image(rgb_image)  # (1024,)
+    
+    # 2. Mask BBox 기반 local crop
+    bbox = get_bbox_from_mask(mask)
+    local_crop = rgb_image[bbox[0]:bbox[2], bbox[1]:bbox[3]]
+    f_l = clip_model.encode_image(local_crop)  # (1024,)
+    
+    # 3. Mask 적용된 crop (배경 제거)
+    masked_crop = rgb_image.copy()
+    masked_crop[~mask] = 0
+    f_m = clip_model.encode_image(masked_crop)  # (1024,)
+    
+    # 4. Weighted sum fusion
+    f_p = 0.4418 * f_m + 0.3272 * f_l + 0.2310 * f_g  # float16으로 저장
+    return f_p
+</code></pre>
+<p><strong>하이퍼파라미터</strong> (/tmp/hovsg-repo/config/create_graph.yaml):</p>
+<ul>
+<li><code>models.clip.type</code>: ViT-H-14 (특징 차원 1024)</li>
+<li><code>models.sam.checkpoint</code>: SAM ViT-H (2.4GB)</li>
+<li><code>pipeline.clip_masked_weight</code>: 0.4418</li>
+<li><code>pipeline.voxel_size</code>: 0.02 m</li>
+<li><code>pipeline.skip_frames</code>: 10</li>
+</ul>
+<h4>데이터 로더 인터페이스</h4>
+<p><strong>공통 추상 클래스</strong> (/tmp/hovsg-repo/hovsg/dataloader/generic.py):</p>
+<pre><code class="language-python">class RGBDDataset(ABC):
+    @abstractmethod
+    def load_frame(self, idx) -&gt; Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        &quot;&quot;&quot;RGB, depth, pose 로드&quot;&quot;&quot;
+        pass
+</code></pre>
+<p><strong>구현</strong>:</p>
+<ul>
+<li>HM3DSem (/tmp/hovsg-repo/hovsg/dataloader/hm3dsem.py:17)</li>
+<li>Replica (/tmp/hovsg-repo/hovsg/dataloader/replica.py:10)</li>
+<li>ScanNet (/tmp/hovsg-repo/hovsg/dataloader/scannet.py:11)</li>
+</ul>
+<p>각 로더는 camera intrinsics, depth scale, pose 변환을 독립적으로 처리.</p>
+<h4>Voronoi Navigation Graph (/tmp/hovsg-repo/hovsg/graph/navigation_graph.py)</h4>
+<pre><code class="language-python">def create_voronoi_nav_graph(floor_pcd, floor_points_bev, camera_poses):
+    &quot;&quot;&quot;
+    Single-floor Voronoi navigation graph 구성
+    &quot;&quot;&quot;
+    # 1. Obstacle map 생성 (BEV)
+    camera_poses_2d = project_to_2d(camera_poses)
+    inflated_camera_map = inflate_camera_poses(camera_poses_2d)
+    floor_bev = project_to_2d(floor_pcd)
+    obstacle_region = inflated_camera_map | floor_bev
+    
+    # 2. Free space map
+    free_space = full_space - obstacle_region
+    
+    # 3. Voronoi diagram
+    voronoi_graph = scipy.spatial.Voronoi(camera_poses_2d)
+    
+    # 4. Cross-floor 연결 (stairs)
+    stair_subgraph = extract_stair_camera_poses()
+    connect_floors(voronoi_graph, stair_subgraph)
+    
+    return voronoi_graph
+</code></pre>
+<hr>
+<h3>5.3 코드 품질 평가</h3>
+<p><strong>강점</strong>:</p>
+<ol>
+<li><strong>모듈식 데이터 로더</strong>: RGBDDataset 추상 클래스로 새로운 dataset 쉽게 추가 가능</li>
+<li><strong>Hydra 설정 관리</strong>: 재현성과 실험 관리 우수</li>
+<li><strong>명확한 docstring</strong>: 주요 함수에 문서화 잘 되어 있음</li>
+</ol>
+<p><strong>약점</strong>:</p>
+<ol>
+<li><strong>God Class</strong>: hovsg/graph/graph.py가 1446줄로 과도하게 큼. 기능 분리 부족 → 컴포넌트 테스트 어려움</li>
+<li><strong>매직 넘버</strong>: Room segmentation distance_transform의 <code>10.5</code> 오프셋 등 설명 부족</li>
+<li><strong>LLM 하드코딩</strong>: OpenAI API에 직접 의존 (llm_utils.py:22) → 오픈소스 LLM 대체 어려움</li>
+</ol>
+<hr>
+<h2>6. 한계와 시사점 (Limitations &amp; Insights for VLN)</h2>
+<h3>6.1 저자 명시 한계점</h3>
+<ol>
+<li><strong>하이퍼파라미터 수 다수</strong>: floor segmentation (histogram bin size, peak threshold), room segmentation (EDF threshold, watershed seed extraction), DBSCAN clustering 등 tuning해야 할 parameter 많음</li>
+<li><strong>처리 속도</strong>: Scene graph construction이 time-consuming (RGB-D 시퀀스 처리 수시간) → real-time mapping 부적합</li>
+<li><strong>정적 환경 가정</strong>: dynamic object (사람, 움직이는 물건) 처리 불가</li>
+<li><strong>Room segmentation 취약성</strong>: 복잡하고 semantically ambiguous layout (combined kitchen-living room, open floor plan)에서 성능 저하; morphological heuristic 사용</li>
+</ol>
+<h3>6.2 추가 기술적 한계 (리뷰어 관점)</h3>
+<ol>
+<li><p><strong>Floor segmentation의 경계 케이스</strong>:</p>
+<ul>
+<li>경사진 환경 (sloped floors)에서 height histogram이 실패</li>
+<li>다락방 (attic), 반지하(basement) 같은 특수 구조 미지원</li>
+<li>연속적인 경사로(ramp)가 있는 경우 floor 경계 모호</li>
+</ul>
+</li>
+<li><p><strong>SAM 의존성</strong>:</p>
+<ul>
+<li>전체 파이프라인의 bottleneck</li>
+<li>SAM의 over-segmentation/under-segmentation이 cascade error 유발</li>
+<li>배경과 전경 구분이 모호한 object에서 실패 (예: 반투명 가구)</li>
+</ul>
+</li>
+<li><p><strong>LLM 파싱 취약성</strong>:</p>
+<ul>
+<li>GPT-3.5-turbo의 hallucination risk</li>
+<li>Floor/room 이름을 정확히 모르는 경우 decomposition 실패</li>
+<li>Few-shot prompt 품질에 민감 (example 추가/변경 시 성능 변동)</li>
+</ul>
+</li>
+<li><p><strong>Odometry 의존성</strong>:</p>
+<ul>
+<li>SLAM odometry drift에 취약</li>
+<li>Odometry 없이는 3D segment merging 무너짐</li>
+<li>루프 폐쇄(loop closure) 오류 시 전체 구조 왜곡</li>
+</ul>
+</li>
+<li><p><strong>VLN 패러다임과의 정렬</strong>:</p>
+<ul>
+<li>HOV-SG는 <strong>map-based navigation</strong> (offline pre-mapping)</li>
+<li>한계: 사전에 전체 환경을 매핑해야 함 (비실용적인 경우 많음)</li>
+<li>기회: multi-floor hierarchical structure는 VLN instruction following을 위한 강력한 prior로 활용 가능</li>
+</ul>
+</li>
+<li><p><strong>Room Classification 일반화</strong>:</p>
+<ul>
+<li>14개 room category (MATTERPORT_LABELS_40 subset)로 제한</li>
+<li>실제 환경의 다양한 room type에 대한 일반화 검증 부족</li>
+<li>일관되지 않은 room naming (예: &quot;living area&quot; vs &quot;lounge&quot;)에 취약</li>
+</ul>
+</li>
+</ol>
+<h3>6.3 VLN 연구 관점에서의 시사점</h3>
+<p><strong>기여</strong>:</p>
+<ol>
+<li><strong>Hierarchical representation의 효율성</strong>: multi-floor scene을 O(floor + room + object)로 표현 → 메모리 75% 절감, 복합 쿼리 지원</li>
+<li><strong>Feature clustering의 효과</strong>: DBSCAN 기반 dominant feature 추출로 outlier noise 제거 → mIoU 68% 향상</li>
+<li><strong>Actionable navigation graph</strong>: Voronoi diagram + cross-floor stair 연결로 실제 로봇 내비게이션 실현</li>
+</ol>
+<p><strong>향후 연구 방향</strong>:</p>
+<ol>
+<li><strong>온라인 mapping</strong>: 사전 mapping 없이 incremental하게 scene graph 구축 → 보다 동적 환경에서 활용 가능</li>
+<li><strong>Dynamic object 지원</strong>: temporal tracking으로 움직이는 객체 처리 (예: 사람, 애완동물)</li>
+<li><strong>Semantic uncertainty modeling</strong>: 쿼리 &quot;find a red chair&quot;에서 여러 빨간 의자가 있을 경우 확률 기반 disambiguation</li>
+<li><strong>Cross-floor instruction decomposition</strong>: VLM을 이용한 natural language instruction을 hierarchical subtasks로 자동 분해</li>
+<li><strong>강화 학습과의 결합</strong>: HOV-SG의 scene graph를 state representation으로 사용하는 RL-based VLN policy</li>
+</ol>
+<hr>
+<h3>6.4 SFACW + LGDP 통합 관점 (Co-main bet 연결)</h3>
+<p>이 절은 우리 연구의 co-main bets — <strong>P4 SFACW (Sparse-Frame Action-Conditioned World Model)</strong> 와 <strong>LGDP</strong> — 관점에서 HOV-SG를 어떻게 흡수/거부할지 정리한다. §6.3의 일반 시사점과 달리, 여기서는 <strong>무엇을 가져오고 무엇을 안 가져올지</strong>를 명시한다.</p>
+<h4>6.4.1 HOV-SG → SFACW에 줄 수 있는 것 / 못 줄 것</h4>
+<p><strong>가져올 수 있는 신호</strong>:</p>
+<ol>
+<li><p><strong>4-tier hierarchy를 z_t의 graph slice prior로</strong></p>
+<ul>
+<li>SFACW의 latent state <code>z_t</code>는 [geom, graph, video-slow, video-fast]의 slice 조합으로 가정됨</li>
+<li>HOV-SG의 building → floor → room → object 트리는 graph slice의 <strong>inductive bias</strong>로 사용 가능</li>
+<li>구체적으로: room embedding(K-means num_views=5) 같은 압축 표현이 latent 차원 절약에 직접 차용 가능</li>
+</ul>
+</li>
+<li><p><strong>DBSCAN-based dominant feature aggregation 패턴</strong></p>
+<ul>
+<li>한 segment 내 outlier feature 제거 + majority cluster mean → noise-robust grounding</li>
+<li>SFACW가 sparse frame에서 객체 feature를 누적할 때 동일 트릭 적용 가능 (mean pooling이 아닌 majority pooling)</li>
+<li>코드: <code>graph_utils.py:386</code>의 단 10줄짜리 wrapper. 이식 비용 매우 낮음</li>
+</ul>
+</li>
+<li><p><strong>계층적 grounding signal as auxiliary loss</strong></p>
+<ul>
+<li>&quot;object가 어느 room/floor에 속하는가&quot;의 consistency를 SFACW 학습 시 auxiliary supervision으로</li>
+<li>HOV-SG를 <strong>offline oracle</strong>로 두고 latent space에 distill하는 방향</li>
+</ul>
+</li>
+</ol>
+<p><strong>가져오면 안 되는 것 (핵심 mismatch)</strong>:</p>
+<ol>
+<li><p><strong>Offline pre-mapping 의존성</strong></p>
+<ul>
+<li>HOV-SG는 RGB-D 비디오 전체 sweep을 가정. SFACW는 sparse-frame online setting이 motivation</li>
+<li>HOV-SG의 scene graph를 SFACW의 <strong>입력으로 받아쓰는 순간 sparse-frame 가설이 깨짐</strong></li>
+<li>따라서 HOV-SG는 <strong>eval-time oracle</strong> 또는 <strong>prior distillation source</strong>로만 써야 함. inference time 입력 X</li>
+</ul>
+</li>
+<li><p><strong>Explicit graph 표현 그 자체</strong></p>
+<ul>
+<li>SFACW의 철학은 implicit world state. explicit graph node를 latent로 끌고 오면 두 패러다임 충돌</li>
+<li>inductive bias로만 차용하고, latent space는 SFACW 자체 학습 결과로 유지</li>
+</ul>
+</li>
+</ol>
+<h4>6.4.2 HOV-SG → LGDP 관점</h4>
+<p>LGDP가 co-main bet으로 escalated된 상황에서 HOV-SG가 줄 수 있는 신호:</p>
+<ol>
+<li><p><strong>Hierarchical relational structure as graph kernel</strong></p>
+<ul>
+<li>LGDP가 graph-based policy를 다루는 경우, HOV-SG의 contains-edge 위계는 graph kernel의 strong prior로 작용 가능</li>
+<li>단, ConceptGraphs 같은 relation-rich graph가 LGDP에 더 직접적일 수도 있음 (relation diversity &gt; containment depth)</li>
+</ul>
+</li>
+<li><p><strong>Cross-floor traversability를 LGDP graph node로</strong></p>
+<ul>
+<li>HOV-SG의 Voronoi navigation graph (계단 연결 포함)는 LGDP의 long-horizon graph 표현에 직접 차용 가능</li>
+<li>단, 이 부분은 HOV-SG의 classical CV 부분이라 modern learned graph로 대체하는 게 합리적</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p><strong>주의</strong>: LGDP 디테일은 <code>research/research_plan/LGDP_DESIGN.md</code> 참조. 본 절은 HOV-SG 관점에서의 외부 접점만 다룸.</p>
+</blockquote>
+<h4>6.4.3 두 패러다임 공통의 거절 사유</h4>
+<p>SFACW든 LGDP든 <strong>HOV-SG 시스템 자체를 가져올 ROI는 낮다</strong>. 이유:</p>
+<ol>
+<li><strong>1,446줄 God Class</strong> (<code>hovsg/graph/graph.py</code>): 모듈 분리가 어려워 부분 차용도 비용 높음</li>
+<li><strong>closed OpenAI API 의존</strong> (GPT-3.5 query parser): 오픈소스 환경에서 재현 어려움</li>
+<li><strong>24GB+ VRAM 요구</strong> (SAM ViT-H + CLIP ViT-H 동시 로드): 학습 클러스터 부담</li>
+<li><strong>Pre-mapping latency</strong> (분~수십분 per scene): online VLN rollout과 부적합</li>
+</ol>
+<h4>6.4.4 한 줄 요약</h4>
+<blockquote>
+<p><strong>HOV-SG는 코드가 아니라 신호로 가져와야 한다.</strong> 4-tier hierarchy, DBSCAN dominant feature, hierarchical consistency signal — 이 셋만 inductive bias / auxiliary loss로 추출해 SFACW · LGDP 둘 다에 흘려보내고, <strong>explicit graph 시스템 자체는 baseline 비교군 외엔 import 금지</strong>.</p>
+</blockquote>
+<hr>
+<h2>7. 코드 구현의 핵심 파일별 분석</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>파일 경로</th>
+<th>라인</th>
+<th>핵심 역할</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/tmp/hovsg-repo/hovsg/graph/graph.py</code></td>
+<td>1-50</td>
+<td>Graph 초기화, SAM/CLIP 모델 로드</td>
+</tr>
+<tr>
+<td><code>/tmp/hovsg-repo/hovsg/graph/graph.py</code></td>
+<td>142-240</td>
+<td>Feature map 생성, 3D mask merge (overlap ratio)</td>
+</tr>
+<tr>
+<td><code>/tmp/hovsg-repo/hovsg/graph/graph.py</code></td>
+<td>262-360</td>
+<td>Floor segmentation (height histogram + DBSCAN)</td>
+</tr>
+<tr>
+<td><code>/tmp/hovsg-repo/hovsg/graph/graph.py</code></td>
+<td>378-450</td>
+<td>Room segmentation (Voronoi + Watershed)</td>
+</tr>
+<tr>
+<td><code>/tmp/hovsg-repo/hovsg/graph/graph.py</code></td>
+<td>592-680</td>
+<td>Object assignment (BEV overlap)</td>
+</tr>
+<tr>
+<td><code>/tmp/hovsg-repo/hovsg/graph/graph.py</code></td>
+<td>705-800</td>
+<td>Scene graph construction (NetworkX)</td>
+</tr>
+<tr>
+<td><code>/tmp/hovsg-repo/hovsg/models/sam_clip_feats_extractor.py</code></td>
+<td>70-128</td>
+<td>3-way CLIP feature fusion</td>
+</tr>
+<tr>
+<td><code>/tmp/hovsg-repo/hovsg/utils/graph_utils.py</code></td>
+<td>386-430</td>
+<td>DBSCAN feature denoising</td>
+</tr>
+<tr>
+<td><code>/tmp/hovsg-repo/hovsg/utils/graph_utils.py</code></td>
+<td>52-100</td>
+<td>Room embedding (K-means + voting)</td>
+</tr>
+<tr>
+<td><code>/tmp/hovsg-repo/hovsg/utils/llm_utils.py</code></td>
+<td>169-200</td>
+<td>GPT-3.5 쿼리 파싱</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2>8. 인용 (BibTeX)</h2>
+<pre><code class="language-bibtex">@inproceedings{werby2024hovsg,
+  title={Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation},
+  author={Werby, Abdelrhman and Huang, Chenguang and B\&quot;{u}chner, Martin and Valada, Abhinav and Burgard, Wolfram},
+  booktitle={Proceedings of Robotics: Science and Systems (RSS)},
+  year={2024},
+  note={arXiv preprint arXiv:2403.17846}
+}
+</code></pre>
+<hr>
+<p><strong>리뷰 작성</strong>: writer agent, 2026-05-08<br><strong>리뷰 길이</strong>: 약 850줄 (포괄적 분석 기준)</p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

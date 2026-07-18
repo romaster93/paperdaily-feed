@@ -1,0 +1,1412 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">ICRA 2026</div>
+    <h1>Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2604.12149">arXiv:2604.12149</a></span>
+      <span>리뷰 2026-04-25</span>
+      <span>54분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>UGE-MPC: 불확실성 유도 탐색적 궤적 최적화를 통한 샘플링 기반 모델 예측 제어 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control</li>
+<li><strong>저자 (Authors)</strong>: O. Goktug Poyrazoglu, Yukang Cao, Rahul Moorthy, Volkan Isler</li>
+<li><strong>소속 (Affiliation)</strong>: Robotics, Sensing and Networks (RSN) Laboratory, University of Minnesota, Minneapolis, MN; Volkan Isler: University of Texas at Austin, Austin, TX</li>
+<li><strong>발표처 (Published)</strong>: IEEE International Conference on Robotics and Automation (ICRA) 2026</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2604.12149">https://doi.org/10.48550/arXiv.2604.12149</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.12149">https://arxiv.org/abs/2604.12149</a></li>
+<li><strong>프로젝트 페이지</strong>: <a href="https://ogpoyrazoglu.github.io/cuniform%5C_sampling/">https://ogpoyrazoglu.github.io/cuniform\_sampling/</a> (코드 공개 예정)</li>
+<li><strong>관련 선행 연구</strong>: CU-MPPI (IROS 2025), C-Free-Uniform (ICRA 2026)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>UGE-MPC는 <strong>샘플링 기반 궤적 최적화의 근본적 한계</strong>를 해결한다. MPPI(Model Predictive Path Integral Control)는 로봇 경로 계획에서 가장 널리 사용되는 샘플링 기반 최적화 방법이지만, 초기 솔루션에 과도하게 민감하고 복잡한 환경에서 로컬 미니마에 빠지는 심각한 문제가 있다.</p>
+<p>핵심 질문: &quot;샘플링 기반 MPC가 어떻게 더 다양하고 탐색적인 궤적 후보들을 생성할 수 있는가?&quot;</p>
+<p>기존 방법들의 접근:</p>
+<ol>
+<li><strong>MPPI</strong>: 단일 가우시안 분포에서 샘플링 → 행동 공간에서만 다양성 확보 시도</li>
+<li><strong>MoG-MPPI</strong>: 혼합 가우시안(Mixture of Gaussians) 사용 → 다중 모드 탐색 가능하지만 동역학 무시</li>
+<li><strong>SV-MPC</strong>: Stein Variational Gradient Descent → 입자 반발로 다양성 강제하지만 계산 비용 高</li>
+</ol>
+<p>DeCoNav의 핵심 통찰: <strong>궤적 다양성은 행동 공간이 아닌 구성 공간(configuration space)에서 측정되어야 한다.</strong> 로봇의 동역학이 동일한 행동 변화라도 완전히 다른 궤적을 만들 수 있기 때문에, 행동 공간에서의 다양성 측정은 실제 궤적 다양성을 정확히 반영하지 못한다.</p>
+<p>UGE-TO는 궤적을 <strong>불확실성 타원체(Uncertainty Ellipsoids)로 유도된 확률 분포</strong>로 표현하고, 이들 사이의 <strong>헬링거 거리(Hellinger Distance)</strong>를 최대화하여 구성 공간에서의 진정한 다양성을 달성한다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. MPPI의 근본적 한계: 로컬 미니마 수렴</h4>
+<pre><code>MPPI 동작 원리와 한계:
+
+입력: 명목 제어 시퀀스 Ū = [u_0, ..., u_{T-1}]
+      + 노이즈 분산 Sigma_u
+
+프로세스:
+  1. L개 랜덤 섭동 생성: U^(l) = Ū + eta^(l), eta^(l) ~ N(0, Sigma_u)
+  2. 각 섭동에 대해 비용 J(U^(l)) 평가
+  3. 중요도 가중치: w^(l) = exp(-J(U^(l)) / lambda)
+  4. 가중 합산으로 Ū 업데이트
+
+핵심 문제:
+  - Ū 주변 가우시안에서만 샘플링 → 좁은 탐색 범위
+  - Ū이 나쁜 로컬 미니마에 있으면 탈출 불가
+  - 행동 공간 섭동 ≠ 궤적 공간 다양성 (동역학 무시)
+</code></pre>
+<p><strong>구체적 실패 시나리오</strong>:</p>
+<pre><code>좁은 통로 (concave obstacle) 상황:
+
+        목표
+         |
+    ┌────┴────┐
+    │  장애물  │
+    └─────────┘
+         ↑
+       ┌─┴─┐
+       │   │
+       └─┬─┘
+       로봇
+
+MPPI: Ū이 장애물 정면을 향하면, 모든 샘플이 같은 방향으로 편중됨
+      → 장애물을 우회하는 경로를 발견하지 못함
+      → 결과: 정지 또는 무한 진동
+
+UGE-MPC: 불확실성 타원체로 표현된 궤적들이
+          Hellinger 거리 최대화로 강제 분리됨
+          → 좌측 우회 + 우측 우회 경로 자연 발생
+          → 더 나은 명목 솔루션 선택
+</code></pre>
+<h4>B. 기존 다양성 강화 방법들의 한계</h4>
+<pre><code>방법 비교:
+
+MoG-MPPI (Mixture of Gaussians):
+  ✅ 다중 모드 샘플링 가능
+  ❌ 행동 공간에서만 다양성 측정
+  ❌ 동역학이 행동 → 궤적 매핑에 미치는 영향 무시
+  ❌ 모드 수 사전 결정 필요
+
+SV-MPC (Stein Variational):
+  ✅ 입자 반발로 강제 다양성
+  ❌ 그래디언트 계산 필요 → 블랙박스 동역학 불가
+  ❌ 수렴 보장 약함
+  ❌ 계산 비용 높음 (MPPI 대비 3-5배)
+
+UGE-TO의 해결:
+  ✅ 구성 공간(configuration space)에서 다양성 측정
+  ✅ 동역학 전파 통해 행동→궤적 매핑 반영
+  ✅ Hellinger 거리 → [0,1] 범위, 안정적 최적화
+  ✅ 그래디언트 불필요 (순수 샘플링 기반)
+</code></pre>
+<h4>C. 동역학 인식 다양성의 필요성</h4>
+<pre><code>예시: 동일한 행동 섭동, 다른 궤적
+
+시스템: 자전거 모델 (Bicycle Model)
+        x_{t+1} = f(x_t, u_t) (비선형)
+
+섭동: delta_u = [0.1, 0.1]  (가속도, 조향각 변화)
+
+위치 A (직선 도로):
+  delta_u → 궤적 변화: ~0.3m 이탈 (소폭)
+
+위치 B (급커브):
+  delta_u → 궤적 변화: ~2.5m 이탈 (대폭)
+  (곡률 증폭 효과)
+
+→ 같은 행동 섭동이라도 동역학에 따라 궤적 다양성이 크게 다름
+→ 행동 공간에서만 다양성을 측정하면 실제 탐색 효과 과대/과소 평가
+</code></pre>
+<h3>2.2 핵심 해결책</h3>
+<p>UGE-TO의 3단계 해결 전략:</p>
+<pre><code>해결 전략:
+
+1. 불확실성 타원체 표현:
+   → 각 제어 시퀀스에 대해 선형화된 동역학으로 
+     공분산(covariance)을 앞방향으로 전파
+   → 궤적 = 평균 경로 + 불확실성 타원체 (확률 분포)
+
+2. Hellinger 거리 기반 분리:
+   → 서로 다른 궤적 분포들 사이의 Hellinger 거리 최대화
+   → [0,1]로 정규화된 안정적 거리 메트릭 활용
+
+3. UGE-MPC 통합:
+   → UGE-TO로 다양한 명목 궤적 생성 (글로벌 탐색)
+   → MPPI로 최선의 명목 궤적 주변 정밀 최적화 (로컬 수렴)
+   → 글로벌 다양성 + 로컬 수렴의 시너지
+</code></pre>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 시스템 동역학 모델 (System Dynamics Model)</h3>
+<p>UGE-TO는 다음 확률론적 동역학 시스템에 적용된다:</p>
+<pre><code>상태 전이 방정식 (Eq. 1):
+  x_{t+1} = f(x_t, u_t) + epsilon_t
+
+  여기서:
+    x_t in R^n    : 상태 벡터 (시간 t)
+    u_t in R^m    : 제어 입력
+    epsilon_t ~ N(0, Q) : 프로세스 노이즈
+
+확률론적 최적 제어 목적함수 (Eq. 2):
+  min_U  J(U) = E[ phi_T(x_T) + sum_{t=0}^{T-1} c(x_t, u_t) ]
+
+  제약조건:
+    x_0 ~ N(x̄_0, Q)    : 초기 상태 불확실성
+    u_t in U             : 제어 입력 제약
+    x_t in X             : 상태 공간 제약
+
+제어 섭동 (Eq. 3):
+  U^(i) = Ū + eta^(i),   eta^(i) ~ N(0, Sigma_u)
+</code></pre>
+<p><strong>실제 구현에서의 동역학 모델</strong> (실험 설정):</p>
+<pre><code>자전거 모델 (Bicycle Kinematic Model):
+  상태: x = [px, py, theta]  (위치 x, 위치 y, 방향각)
+  제어: u = [v, delta]  (속도, 조향각)
+
+  상태 전이:
+    px_{t+1}    = px_t + v_t * cos(theta_t) * dt
+    py_{t+1}    = py_t + v_t * sin(theta_t) * dt
+    theta_{t+1} = theta_t + v_t * tan(delta_t) / L * dt
+
+  파라미터:
+    v = 0.5 m/s (고정 속도)
+    L = 1.0m (축간 거리)
+    dt = 0.05s
+    T = 4s 예측 호라이즌
+</code></pre>
+<h3>3.2 불확실성 타원체 기반 궤적 표현 (Uncertainty Ellipsoid Representation)</h3>
+<p>UGE-TO의 핵심 아이디어: <strong>각 제어 시퀀스 U^(i)를 확률 분포 T^(i)로 표현</strong></p>
+<h4>3.2.1 공분산 전파 (Covariance Propagation)</h4>
+<p>비선형 동역학을 현재 궤적 주변에서 선형화:</p>
+<pre><code>공분산 전파 방정식 (Eq. 5):
+  Sigma_{t+1}^(i) = A_t^(i) * Sigma_t^(i) * (A_t^(i))^T + Q
+
+  여기서:
+    A_t^(i) = df/dx|_{x_t^(i), u_t^(i)}  : 자코비안 행렬
+    Sigma_t^(i)                            : 시간 t에서의 공분산
+    Q                                       : 프로세스 노이즈 공분산
+
+초기 조건:
+  Sigma_0^(i) = Q  (초기 상태 불확실성)
+</code></pre>
+<p>이 전파는 <strong>제어 입력의 동역학적 효과</strong>를 공분산에 반영한다. 같은 크기의 행동 섭동이라도 동역학 자코비안 A_t에 따라 공분산이 다르게 증폭/감쇠된다.</p>
+<h4>3.2.2 궤적 분포 정의</h4>
+<p>전체 궤적을 하나의 가우시안 분포로 표현 (Eq. 6):</p>
+<pre><code>T^(i) = N(mu^(i), Sigma^(i))
+
+mu^(i)    = [x_0^(i)^T, x_1^(i)^T, ..., x_T^(i)^T]^T
+              (예측된 평균 궤적의 상태 시퀀스 연결)
+
+Sigma^(i) = blockdiag(Sigma_0^(i), Sigma_1^(i), ..., Sigma_T^(i))
+              (시간축 공분산 블록 대각 행렬)
+</code></pre>
+<p>이 표현의 핵심 특성:</p>
+<ul>
+<li><strong>동역학 인식</strong>: 공분산이 동역학 자코비안으로 전파되므로 동역학 특성 반영</li>
+<li><strong>비용 효율적</strong>: 블록 대각 구조로 고차원에서도 계산 효율적</li>
+<li><strong>물리적 의미</strong>: 타원체 크기가 각 시간 스텝에서의 궤적 불확실성을 나타냄</li>
+</ul>
+<pre><code>시각화 예시:
+
+시간 t=0: 작은 원 (초기 불확실성 = Q)
+시간 t=2: 중간 타원 (동역학으로 전파된 불확실성)
+시간 t=4: 큰 타원 (누적 불확실성, 급격한 동역학에서 더 크게 성장)
+
+         t=0    t=2     t=4
+          ○      ○       ○
+궤적 A: ──●──────●───────●──→
+          ↕      ↕↕      ↕↕↕  (불확실성 타원체 크기)
+궤적 B: ──●────────●─────●──→
+</code></pre>
+<h3>3.3 Hellinger 거리 기반 다양성 강화</h3>
+<p>두 궤적 분포 간의 거리를 Hellinger 거리로 측정:</p>
+<h4>3.3.1 헬링거 거리 정의</h4>
+<p>두 가우시안 분포 사이의 제곱 Hellinger 거리 (Eq. 8):</p>
+<pre><code>H²(T^(i), T^(j)) = 1 - |Sigma^(i)|^{1/4} * |Sigma^(j)|^{1/4}
+                       ─────────────────────────────────────────
+                              |Sigma_bar_{ij}|^{1/2}
+                   * exp( -1/8 * Delta_mu^T * Sigma_bar_{ij}^{-1} * Delta_mu )
+
+여기서:
+  Delta_mu   = mu^(i) - mu^(j)   (평균 궤적 차이)
+  Sigma_bar_{ij} = 1/2 * (Sigma^(i) + Sigma^(j))  (평균 공분산)
+</code></pre>
+<p><strong>Hellinger 거리를 선택한 이유</strong> (KL divergence 대비):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>KL Divergence</th>
+<th>Hellinger Distance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>범위</td>
+<td>[0, ∞) (무한대 가능)</td>
+<td>[0, 1] (유계)</td>
+</tr>
+<tr>
+<td>대칭성</td>
+<td>❌ 비대칭</td>
+<td>✅ 대칭</td>
+</tr>
+<tr>
+<td>안정성</td>
+<td>분포 비겹침 시 폭발</td>
+<td>안정적 계산</td>
+</tr>
+<tr>
+<td>기울기 안정성</td>
+<td>불안정할 수 있음</td>
+<td>안정적</td>
+</tr>
+<tr>
+<td>수렴 보장</td>
+<td>약함</td>
+<td>강함</td>
+</tr>
+</tbody></table></div>
+<pre><code>수식적 비교:
+
+KL(P||Q) = integral [ p(x) log(p(x)/q(x)) ]
+           → q(x)≈0인 영역에서 log(p/q) → ∞ → 수치 불안정
+
+H²(P,Q) = 1 - integral [sqrt(p(x)*q(x))]
+          → 항상 [0,1] → 안정적 최적화
+</code></pre>
+<h4>3.3.2 분리 점수 및 최선 후보 선택</h4>
+<p>각 궤적 i에 대해 M개의 대안 후보를 생성하고, 현재 다른 궤적들로부터 가장 멀리 떨어진 후보 선택:</p>
+<pre><code>누적 분리 점수 (Eq. 9):
+  h^(i,m) = sum_{j ≠ i}  H²(T^(i,m), T^(j))
+
+  여기서:
+    T^(i,m) : 궤적 i의 m번째 대안 후보
+    j ≠ i   : 다른 모든 궤적들과의 Hellinger 거리 합산
+
+최선 후보 선택 (Eq. 10):
+  m* = argmax_m  h^(i,m)
+  U^(i) ← U^(i, m*)
+
+의미: 다른 모든 궤적들과 가장 멀리 떨어진 대안을 선택
+      → 구성 공간에서 최대 커버리지 달성
+</code></pre>
+<h3>3.4 UGE-TO 알고리즘 (Algorithm 1)</h3>
+<pre><code>알고리즘: UGE-TO (Uncertainty Guided Exploratory Trajectory Optimization)
+
+입력: 명목 제어 Ū, 호라이즌 T, N 궤적, M 후보/궤적,
+      공분산 Sigma_u, Q, K 반복 횟수
+
+초기화:
+  U^(i) = Ū + eta^(i), eta^(i) ~ N(0, Sigma_u), i=1,...,N
+  
+각 궤적 i에 대해: 동역학 전파 (Eq. 5)로 Sigma^(i) 계산
+각 궤적 i에 대해: T^(i) = N(mu^(i), Sigma^(i)) 구성
+
+for k = 1 to K:
+  for i = 2 to N:  (첫 번째 궤적 고정)
+    
+    # M개 대안 후보 생성
+    for m = 1 to M:
+      eta^(i,m) ~ N(0, Sigma_u)
+      U^(i,m) = Ū + eta^(i,m)  (명목 기준 새 섭동)
+      동역학 전파: Sigma^(i,m) 계산
+      T^(i,m) = N(mu^(i,m), Sigma^(i,m))
+    
+    # 최선 후보 선택 (Hellinger 거리 기반)
+    m* = argmax_m  sum_{j≠i} H²(T^(i,m), T^(j))
+    U^(i) ← U^(i,m*)  # 궤적 업데이트
+    T^(i) ← T^(i,m*)  # 분포 업데이트
+
+출력: N개 다양화된 제어 시퀀스 {U^(1), ..., U^(N)}
+</code></pre>
+<p><strong>시간 복잡도 분석</strong>:</p>
+<pre><code>루프당 계산:
+  - M개 후보 생성: O(M * T * n²)  [공분산 전파]
+  - Hellinger 거리 계산: O(N * T * n³)  [행렬식, 역행렬]
+  - N개 궤적, K 반복: O(K * N * M * T * n³)
+
+실제 파라미터:
+  K=8, N=6 (UGE-TO 단계), M=128 후보
+  → 총 샘플 수: 8 × 6 × 128 ≈ 6,144 (명목 포함)
+  → 실제 비용 계산 횟수: 6 × 8 = 48 (선택된 후보만)
+  → 계산 효율적: M × N × K 생성, 그러나 N × K만 비용 평가
+</code></pre>
+<h3>3.5 UGE-MPC: 통합 모델 예측 제어 (Algorithm 2)</h3>
+<p>UGE-TO를 샘플링 기반 MPC에 통합하여 되풀이 지평선(receding horizon) 제어 실현:</p>
+<pre><code>알고리즘: UGE-MPC
+
+입력: 명목 Ū, 호라이즌 T, 정제 파라미터 (N, M),
+      MPPI 샘플 예산 L, 공분산, 온도 lambda
+
+[단계 1: 글로벌 탐색 - UGE-TO]
+  UGE-TO 실행 → N개 다양한 제어 시퀀스
+
+[단계 2: 최선 명목 선택]
+  비용 평가: J(U^(i)) for i=1,...,N
+  i* = argmin_i J(U^(i))
+  Ū ← U^(i*)  (최선 후보를 새 명목으로 설정)
+
+[단계 3: 로컬 정밀 최적화 - MPPI]
+  L개 추가 섭동 생성: eta^(l) ~ N(0, Sigma_u)
+  U^(l) = Ū + eta^(l), l=1,...,L
+  비용 평가: J(U^(l)) for l=1,...,L
+
+[단계 4: MPPI 가중 업데이트 (Eq. 13)]
+  w^(l) = exp(-J(U^(l)) / lambda)   (Eq. 12)
+  Ū ← Ū + sum_l [w^(l) * eta^(l)] / sum_l w^(l)
+
+[단계 5: 되풀이 지평선]
+  u_0 실행 (첫 번째 제어 적용)
+  지평선 이동: Ū ← shift(Ū)
+  다음 스텝으로 반복
+
+출력: 연속적인 제어 입력 (실시간 MPC)
+</code></pre>
+<p><strong>UGE-MPC의 두 단계 역할 분리</strong>:</p>
+<pre><code>글로벌-로컬 분리:
+┌─────────────────────────────────────────────┐
+│ UGE-TO (글로벌 탐색)                         │
+│  - N개 다양화된 명목 궤적 생성                │
+│  - Hellinger 거리로 구성 공간 커버            │
+│  - 서로 다른 로컬 미니마 주변 탐색            │
+│  - 최선 명목 선택 → 더 나은 시작점           │
+└──────────────────┬──────────────────────────┘
+                   │ 더 나은 명목 Ū 전달
+┌──────────────────▼──────────────────────────┐
+│ MPPI (로컬 정밀 최적화)                       │
+│  - 선택된 명목 주변 L개 샘플                  │
+│  - 중요도 가중으로 세밀한 업데이트            │
+│  - 최종 제어 시퀀스 출력                      │
+└─────────────────────────────────────────────┘
+</code></pre>
+<h3>3.6 비용 함수 설계 (Cost Function)</h3>
+<pre><code>비용 함수 (Eq. 14):
+  J(tau, U) = phi(x_T) + sum_{t=0}^{T-1} [ lambda_u * C_u(u_t) + C_state(x_t, x_G) ]
+
+구성:
+  phi(x_T)         : 최종 상태 비용 (목표까지 거리)
+  C_u(u_t)         : 제어 입력 비용 (부드러움 유지)
+  C_state(x_t, x_G): 상태-목표 비용 (거리 최소화)
+  lambda_u         : 제어 비용 가중치
+
+장애물 비용:
+  C_obs(x_t) = lambda_obs * exp(-d(x_t, obstacles) / sigma)
+  
+  d(x_t, obstacles): 로봇과 가장 가까운 장애물까지의 거리
+
+하이퍼파라미터 (실험별):
+  궤적 최적화: lambda_obs=50, lambda_dist=10
+  혼잡 MPC:   lambda_obs=1000
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인</h3>
+<pre><code>UGE-MPC 시스템 아키텍처:
+
+[환경/센서]
+     │ 상태 x_t (위치, 방향)
+     │ 장애물 맵 (LiDAR 기반)
+     ▼
+┌────────────────────────────────────────────────────────┐
+│                    UGE-TO 단계                          │
+│                                                        │
+│  명목 Ū ──→ N개 초기 섭동 생성                         │
+│              eta^(i) ~ N(0, Sigma_u)                  │
+│                    │                                   │
+│              동역학 전파 (비선형 → 선형화)              │
+│              A_t = df/dx (자코비안)                    │
+│              Sigma^(i) 계산 (공분산 전파)              │
+│                    │                                   │
+│              T^(i) = N(mu^(i), Sigma^(i)) 구성        │
+│                    │                                   │
+│  ┌─────────────────▼────────────────────────────┐     │
+│  │ Hellinger 다양성 최적화 (K 반복)              │     │
+│  │   for i=2,...,N:                              │     │
+│  │     M개 대안 후보 생성                        │     │
+│  │     H²(T^(i,m), T^(j)) 계산                 │     │
+│  │     m* = argmax_m sum_j H²                   │     │
+│  │     U^(i) ← U^(i,m*)                        │     │
+│  └─────────────────┬────────────────────────────┘     │
+│                    │ N개 다양화된 궤적                  │
+└────────────────────┼───────────────────────────────────┘
+                     │
+┌────────────────────▼───────────────────────────────────┐
+│                 최선 명목 선택                           │
+│   비용 평가: J(U^(i)) for i=1,...,N                   │
+│   i* = argmin_i J(U^(i))                              │
+│   Ū ← U^(i*)                                         │
+└────────────────────┼───────────────────────────────────┘
+                     │ 개선된 명목 Ū
+┌────────────────────▼───────────────────────────────────┐
+│                  MPPI 정제 단계                          │
+│   L개 추가 섭동 생성                                    │
+│   중요도 가중 평균으로 Ū 업데이트                       │
+└────────────────────┼───────────────────────────────────┘
+                     │ 최적화된 Ū
+┌────────────────────▼───────────────────────────────────┐
+│              되풀이 지평선 실행                           │
+│   u_0 실행 → 환경 스텝 → 새 x_t 관찰 → 반복          │
+└────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 실세계 시스템 구성</h3>
+<pre><code>실제 실험 시스템 구성:
+                                     
+  ┌──────────────────────────────────┐
+  │         1/5 스케일 트럭          │
+  │                                  │
+  │  ┌──────────┐  ┌──────────────┐ │
+  │  │ Slamtec  │  │ 온보드 컴퓨터 │ │
+  │  │ R2 LiDAR │  │ UGE-MPC 실행  │ │
+  │  │ (10m 범위)│  │ 10Hz 제어     │ │
+  │  └─────┬────┘  └──────┬───────┘ │
+  │        │              │          │
+  │        └──────────────┘          │
+  │         LiDAR 데이터             │
+  └──────────────────────────────────┘
+
+환경:
+  20m × 20m 혼잡한 실내 공간
+  오목 다각형 장애물 (로컬 미니마 유발)
+  시작: [2, 2, π/2]
+  목표: [18, 18]
+
+제어 루프 (10 Hz):
+  LiDAR 스캔 → 장애물 맵 업데이트 → 
+  UGE-MPC 실행 (UGE-TO + MPPI) → 
+  모터 제어 명령 → 다음 스텝
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 및 환경 (Datasets / Environments)</h3>
+<p><strong>시뮬레이션 환경</strong>:</p>
+<pre><code>환경 1: 장애물 없는 개방 공간
+  - 8m × 8m
+  - 6개 시작-목표 쌍 (다양한 방향)
+  - 목적: 수렴 속도 측정
+
+환경 2: 혼잡한 정적 환경 (Cluttered Static)
+  - 8m × 8m
+  - 고정 장애물 배치 (오목 형태 포함)
+  - 6개 시작-목표 쌍
+  - 목적: 로컬 미니마 회피 능력 측정
+
+환경 3: 미지 혼잡 환경 (Unknown Cluttered MPC)
+  - 5개 서로 다른 장애물 배치
+  - 온라인 지도 구축 (LiDAR 기반)
+  - 목적: 실시간 MPC 성능 측정
+</code></pre>
+<p><strong>실제 실험 환경</strong>:</p>
+<pre><code>  - 20m × 20m 실내 공간
+  - 오목 다각형 장애물 (로컬 미니마 설계)
+  - 1/5 스케일 트럭 + Slamtec R2 LiDAR
+</code></pre>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<pre><code>주요 지표:
+
+1. 목표 도달 시간 (Goal-Reaching Time):
+   → 성공 시 목표까지 걸린 시간 (초)
+   → 빠를수록 좋음
+
+2. 성공률 (Success Rate, SR):
+   → 목표 도달한 시도 / 전체 시도 비율
+   → 실시간 MPC 실험에서 주요 지표
+
+3. 수렴 속도:
+   → UGE-TO가 더 나은 명목을 얼마나 빨리 찾는가
+   → 기준: 최적 시간 대비 개선율
+</code></pre>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<h4>표 1: 목표 도달 시간 비교 — 개방 환경 (초)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>목표 위치</th>
+<th>MPPI</th>
+<th>MoG-MPPI</th>
+<th>SV-MPC</th>
+<th><strong>UGE-MPC</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>(6, 0)</td>
+<td>0.2s</td>
+<td>0.3s</td>
+<td>0.4s</td>
+<td><strong>0.1s</strong></td>
+</tr>
+<tr>
+<td>(-6, -4)</td>
+<td>1.1s</td>
+<td>1.7s</td>
+<td>1.7s</td>
+<td><strong>0.8s</strong></td>
+</tr>
+<tr>
+<td>(-6, 0)</td>
+<td>실패 (0%)</td>
+<td>5.3s</td>
+<td>4.3s</td>
+<td><strong>0.8s</strong></td>
+</tr>
+</tbody></table></div>
+<p><em>UGE-MPC가 개방 환경에서 72.1% 빠른 수렴 달성</em></p>
+<h4>표 2: 목표 도달 시간 비교 — 혼잡 환경 (성공률 / 시간)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>목표 위치</th>
+<th>MPPI</th>
+<th>MoG-MPPI</th>
+<th>SV-MPC</th>
+<th><strong>UGE-MPC</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>(6, -4)</td>
+<td>80% / —</td>
+<td>100% / 5.2s</td>
+<td>100% / 5.3s</td>
+<td><strong>100% / 2.1s</strong></td>
+</tr>
+<tr>
+<td>(-6, 0)</td>
+<td>0% / 실패</td>
+<td>60% / 8.2s</td>
+<td>60% / 8.6s</td>
+<td><strong>100% / 2.7s</strong></td>
+</tr>
+</tbody></table></div>
+<p><em>UGE-MPC가 혼잡 환경에서 66% 빠른 수렴 + 6.7% 높은 성공률</em></p>
+<h4>표 3: 미지 혼잡 환경 MPC 성능 비교</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>성공률</th>
+<th>평균 시간</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MPPI</td>
+<td>54%</td>
+<td>17.3s</td>
+</tr>
+<tr>
+<td>MoG-MPPI</td>
+<td>60%</td>
+<td>24.5s</td>
+</tr>
+<tr>
+<td>SV-MPC</td>
+<td>64%</td>
+<td>25.6s</td>
+</tr>
+<tr>
+<td><strong>UGE-MPC</strong></td>
+<td><strong>88%</strong></td>
+<td><strong>21.0s</strong></td>
+</tr>
+</tbody></table></div>
+<p><em>UGE-MPC: 최고 성공률 + MPPI 대비 합리적인 시간</em></p>
+<h4>표 4: 실제 실험 결과 (1/5 스케일 트럭, 5회 시도)</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>성공 횟수</th>
+<th>평균 시간</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MPPI</td>
+<td><strong>0/5</strong> (로컬 미니마 갇힘)</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>Log-MPPI</td>
+<td>5/5</td>
+<td>14.13s</td>
+</tr>
+<tr>
+<td><strong>UGE-MPC</strong></td>
+<td><strong>5/5</strong></td>
+<td><strong>13.33s</strong></td>
+</tr>
+</tbody></table></div>
+<p><em>실제 환경에서 MPPI 완전 실패, UGE-MPC 100% 성공 + Log-MPPI보다 빠름</em></p>
+<h3>5.4 리얼월드 실험 (Real-World Experiments)</h3>
+<pre><code>실험 상세:
+
+플랫폼:
+  로봇: 1/5 스케일 RC 트럭 (자전거 모델 근사)
+  센서: Slamtec R2 LiDAR (10m 범위)
+  컴퓨팅: 온보드 컴퓨터 (UGE-MPC 실행)
+  제어 주파수: 10 Hz
+
+환경:
+  크기: 20m × 20m
+  장애물: 오목 다각형 (로컬 미니마를 의도적으로 유발)
+  시작점: [2, 2, π/2]
+  목표점: [18, 18]
+
+파라미터:
+  총 샘플 예산: N=512
+    - UGE-TO: 6 궤적 × 8 반복 = 48 평가
+    - MPPI: 126 샘플
+    - UGE-TO 후보: 6 × 8 × 128 = 6,144 (생성만, 비용 평가는 48회)
+  
+  MPPI 단독: 512 샘플 (동일 예산)
+
+결과 분석:
+  - MPPI: 5회 모두 실패 — 오목 장애물에서 로컬 미니마 갇힘 확인
+  - Log-MPPI: 5회 성공, 평균 14.13초
+  - UGE-MPC: 5회 성공, 평균 13.33초 (Log-MPPI보다 5.7% 빠름)
+
+왜 실제 환경에서 차이가 더 크게 나타나는가?
+  - 시뮬레이션: 완벽한 장애물 지도, 이상적인 동역학
+  - 실제: LiDAR 노이즈, 오도메트리 드리프트, 실시간 제약
+  - UGE-MPC의 다양한 명목 탐색이 실제 불확실성 하에서 더 강건한 경로 발견
+</code></pre>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>6.1 구성 공간에서의 궤적 다양성 정의</h3>
+<p><strong>기여 1</strong>: 행동 공간이 아닌 구성 공간에서 궤적 다양성을 측정하는 최초의 방법</p>
+<p>기존 방법들(MoG-MPPI, SV-MPC)은 행동 공간에서 다양성을 확보하려 했지만, 동역학이 행동을 궤적으로 변환하는 과정에서 다양성이 손실되거나 왜곡된다. UGE-TO는 불확실성 타원체를 통해 동역학의 영향을 직접 궤적 표현에 반영한다.</p>
+<h3>6.2 Hellinger 거리의 최적 선택</h3>
+<p><strong>기여 2</strong>: 궤적 분포 비교에 Hellinger 거리를 도입하여 KL 발산의 불안정성 극복</p>
+<p>Hellinger 거리의 [0,1] 유계성은 최적화 안정성을 보장하며, 대칭성은 공정한 비교를 가능하게 한다. 가우시안 분포에 대한 닫힌 형식(closed-form) 해가 존재하여 계산 효율적이다.</p>
+<h3>6.3 2단계 글로벌-로컬 최적화</h3>
+<p><strong>기여 3</strong>: UGE-TO(글로벌 탐색)와 MPPI(로컬 정제)의 시너지적 결합</p>
+<p>UGE-TO가 로컬 미니마에서 벗어난 더 나은 명목 궤적을 제공하면, MPPI는 그 주변에서 효율적으로 정밀 최적화를 수행한다. 이는 기존 방법들의 &quot;전적으로 글로벌&quot; 또는 &quot;전적으로 로컬&quot;의 한계를 극복한다.</p>
+<h3>6.4 동일 샘플 예산에서의 성능 향상</h3>
+<p><strong>기여 4</strong>: 총 샘플 예산을 증가시키지 않고도 탐색 효율을 72.1% 향상</p>
+<p>같은 계산 예산(2048 샘플) 내에서 UGE-TO의 선택적 비용 평가(전체 생성 후 최선만 평가)로 실제 비용 계산 횟수를 최소화하면서 탐색 커버리지를 극대화한다.</p>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 핵심 하이퍼파라미터</h3>
+<pre><code>공통 파라미터:
+  예측 호라이즌: T = 4초 (80 스텝, dt=0.05s)
+  자전거 모델 속도: v = 0.5 m/s
+  축간 거리: L = 1.0m
+
+궤적 최적화 실험:
+  총 샘플 예산: 2048
+  MPPI 온도: lambda = 0.001
+  장애물 비용 가중치: lambda_obs = 50
+  거리 비용 가중치: lambda_dist = 10
+  SV-MPC epsilon: 1.0
+
+혼잡 MPC 실험:
+  MPPI 온도: lambda = 10^-3
+  장애물 비용 가중치: lambda_obs = 10^3
+
+UGE-MPC 파라미터:
+  UGE-TO 궤적 수: N = 16 (시뮬레이션), 6 (실세계)
+  UGE-TO 후보/궤적: M = 128
+  UGE-TO 반복: K = 8
+  MPPI 추가 샘플: L = 126 (실세계) / 2016 (시뮬레이션)
+  프로세스 노이즈: Q = 0.1 * I
+
+실세계 실험:
+  총 예산: 512 샘플
+  제어 주파수: 10 Hz
+  LiDAR 업데이트: 10 Hz
+</code></pre>
+<h3>7.2 계산 복잡도</h3>
+<pre><code>UGE-TO 비용 평가 횟수:
+  생성된 후보: N × M × K = 6 × 128 × 8 = 6,144
+  실제 비용 평가: N × K = 6 × 8 = 48 (선택된 후보만)
+  MPPI 비용 평가: L = 126
+  총 비용 평가: 48 + 126 = 174 (전체 예산 512 대비 34%)
+  
+  → 샘플 효율: 비용 평가 횟수를 줄이면서 더 넓은 탐색 달성
+
+선형화 자코비안 계산:
+  자전거 모델 자코비안 (해석적 도출 가능):
+  A_t = df/dx = [1, 0, -v*sin(theta)*dt;
+                 0, 1,  v*cos(theta)*dt;
+                 0, 0,  1]
+  → 매우 효율적 계산 (역행렬 불필요)
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 UGE-TO의 이론적 특성</h3>
+<h4>수렴 보장</h4>
+<pre><code>UGE-TO는 명시적인 수렴 보장을 제공하지는 않지만,
+다음 특성이 실용적 수렴을 뒷받침한다:
+
+1. 단조 개선 (Monotonic Improvement):
+   각 반복에서 h^(i,m*)가 현재 h^(i)보다 항상 ≥
+   → 분리 점수가 감소하지 않음
+
+2. 유한 수렴:
+   H²(T^(i), T^(j)) ∈ [0,1]로 유계
+   → 무한 발산 불가능
+
+3. 탐색 완전성:
+   M개 후보가 충분히 크면, 전체 구성 공간 커버 가능
+   → M = 128이 실험적으로 충분함을 확인
+</code></pre>
+<h4>Hellinger 거리의 기하학적 해석</h4>
+<pre><code>Hellinger 거리의 기하학적 의미:
+
+두 가우시안 T^(i) = N(mu^i, Sigma^i), T^(j) = N(mu^j, Sigma^j):
+
+H²(T^i, T^j) = 1 - sqrt(Bhattacharyya 계수)
+
+Bhattacharyya 계수 = exp(-Bhattacharyya 거리)
+
+Bhattacharyya 거리:
+  D_B = 1/8 * (mu^i - mu^j)^T * Sigma_bar^{-1} * (mu^i - mu^j)  (마할라노비스 거리)
+       + 1/2 * ln(|Sigma_bar| / sqrt(|Sigma^i| * |Sigma^j|))      (분산 차이)
+
+→ H²가 클수록 궤적 분포가 더 멀리 떨어짐
+  (평균 차이 + 분산 구조 차이 모두 반영)
+→ 동역학으로 인해 분산이 커지는 방향에서 자동으로 더 큰 분리 달성
+</code></pre>
+<h3>8.2 한계점</h3>
+<p><strong>한계 1: 선형화 가정</strong></p>
+<p>공분산 전파에 자코비안 선형화를 사용하므로, 강한 비선형 동역학(드론의 대각도 기동 등)에서는 부정확할 수 있다. 실제 공분산과 선형화된 공분산 사이의 차이가 클 경우 Hellinger 거리 계산이 부정확해진다.</p>
+<p><strong>한계 2: 저차원 동역학</strong></p>
+<p>자전거 모델(3차원 상태)은 비교적 단순하다. 고차원 동역학(6-DOF 드론: 12차원, 휴머노이드: 수십 차원)에서의 성능은 검증되지 않았다. 자코비안 계산과 행렬식 계산이 차원에 따라 빠르게 비싸진다.</p>
+<p><strong>한계 3: 정적 장애물 환경</strong></p>
+<p>실험이 정적 장애물 환경에 한정되었다. 동적 장애물(보행자, 다른 로봇)이 있는 환경에서의 성능 검증이 필요하다.</p>
+<p><strong>한계 4: 온라인 계산 비용</strong></p>
+<p>M=128 후보 × N=6 궤적 × K=8 반복 = 6,144 후보 생성이 10 Hz 실시간 제어에서 계산 가능한지, 더 강한 동역학 모델에서도 가능한지 검증이 필요하다.</p>
+<p><strong>한계 5: 코드 완전 공개 대기</strong></p>
+<p>프로젝트 페이지가 &quot;Details Coming Soon&quot; 상태로 전체 코드 접근이 현재 불가능하다.</p>
+<h3>8.3 향후 연구 방향</h3>
+<ol>
+<li><strong>비선형 공분산 전파</strong>: Unscented Transform, Particle Filter 기반 공분산 계산 통합</li>
+<li><strong>고차원 동역학 적용</strong>: 드론, 사족보행 로봇, 휴머노이드 동역학에 적용</li>
+<li><strong>동적 장애물 대응</strong>: 장애물 동역학 예측과 UGE-TO 통합</li>
+<li><strong>병렬화 최적화</strong>: GPU 병렬 처리로 M=1024+ 후보에서도 실시간 가능하게</li>
+<li><strong>학습 기반 자코비안</strong>: 학습된 모델로 블랙박스 동역학에도 적용 가능한 확장</li>
+</ol>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>GPU-SLS (arxiv2026)</th>
+<th>SANDO (arxiv2026)</th>
+<th>DreamFlow (ICRA2026)</th>
+<th><strong>UGE-MPC</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>계획 유형</td>
+<td>견고한 MPC (튜브 기반)</td>
+<td>안전 궤적 계획 (STSFC)</td>
+<td>로컬 내비게이션 (확산)</td>
+<td>탐색적 궤적 최적화</td>
+</tr>
+<tr>
+<td>주요 혁신</td>
+<td>GPU 병렬 SLS MPC</td>
+<td>시공간 안전 코리도</td>
+<td>조건부 흐름 매칭</td>
+<td>Hellinger 다양성 탐색</td>
+</tr>
+<tr>
+<td>안전 보장</td>
+<td>✅ (견고성 보장)</td>
+<td>✅ (충돌 없음 보장)</td>
+<td>❌</td>
+<td>❌ (탐색 효율 집중)</td>
+</tr>
+<tr>
+<td>계산 효율</td>
+<td>✅ (GPU, ms 단위)</td>
+<td>✅ (ms 단위)</td>
+<td>✅ (온라인)</td>
+<td>✅ (10Hz 가능)</td>
+</tr>
+<tr>
+<td>리얼월드</td>
+<td>✅ (드론)</td>
+<td>✅ (UAV)</td>
+<td>✅ (모바일 로봇)</td>
+<td>✅ (1/5 트럭)</td>
+</tr>
+<tr>
+<td>코드 공개</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>🔜 (예정)</td>
+</tr>
+<tr>
+<td>학회 수준</td>
+<td>arXiv 2026</td>
+<td>arXiv 2026</td>
+<td>ICRA 2026</td>
+<td><strong>ICRA 2026</strong></td>
+</tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>BTIT* (arxiv2026)</th>
+<th>HEIGHT (T-ASE2025)</th>
+<th>GRATE (IROS2025)</th>
+<th><strong>UGE-MPC</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>계획 접근</td>
+<td>양방향 샘플링 탐색</td>
+<td>그래프 트랜스포머 RL</td>
+<td>그래프 RL 탐색</td>
+<td>샘플링 MPC</td>
+</tr>
+<tr>
+<td>환경</td>
+<td>키노다이나믹 (정적)</td>
+<td>혼잡 동적 환경</td>
+<td>일반 탐색</td>
+<td>혼잡 정적 환경</td>
+</tr>
+<tr>
+<td>최적성 보장</td>
+<td>✅ (점근적 최적)</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>온라인/오프라인</td>
+<td>온라인</td>
+<td>온라인 RL</td>
+<td>온라인 RL</td>
+<td>온라인 MPC</td>
+</tr>
+<tr>
+<td>리얼월드</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>장점</strong>:</p>
+<ol>
+<li><strong>동역학 인식 다양성</strong>: 행동 공간이 아닌 구성 공간에서 다양성 측정 → 더 의미있는 탐색</li>
+<li><strong>수학적 우아함</strong>: Hellinger 거리의 닫힌 형식, 유계성, 대칭성이 최적화를 안정하게 함</li>
+<li><strong>ICRA 2026 채택</strong>: 동료 심사 완료, 방법론의 유효성 검증</li>
+<li><strong>실제 실험</strong>: 1/5 스케일 트럭에서 100% 성공 (MPPI 0%)</li>
+<li><strong>플러그인 호환</strong>: 기존 MPPI 프레임워크에 UGE-TO를 사전 처리 단계로 삽입 가능</li>
+<li><strong>동일 예산</strong>: 추가 비용 없이 탐색 효율 극적 향상</li>
+</ol>
+<p><strong>단점</strong>:</p>
+<ol>
+<li><strong>선형화 가정</strong>: 강한 비선형 동역학에서 공분산 전파 오차 발생 가능</li>
+<li><strong>고차원 확장성 미검증</strong>: 3차원 자전거 모델에서만 실험, 복잡한 로봇에 대한 검증 필요</li>
+<li><strong>정적 환경 한정</strong>: 동적 장애물 대응 능력 미검증</li>
+<li><strong>코드 미완전 공개</strong>: 프로젝트 페이지 &quot;Details Coming Soon&quot; 상태</li>
+</ol>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>적용 시나리오별 평가:
+
+자율 주행 (저속 로봇):
+  ✅ 최적: 자전거 모델과 완벽히 호환, 10Hz 실시간 가능
+  ✅ 장점: 오목 장애물 환경에서 MPPI 대비 획기적 개선
+  ⚠️ 주의: 고속 (&gt;5m/s) 환경에서 선형화 오차 증가 가능
+
+드론 (UAV):
+  ✅ 장점: 3D 공간에서 탐색 필요 → UGE-TO 효과 클 것
+  ⚠️ 주의: 6-DOF 동역학에서 자코비안 계산 비용 증가
+  ❓ 미검증: 실제 드론 실험 없음
+
+사족보행 로봇:
+  ✅ 장점: 복잡한 지형에서 다양한 보행 궤적 탐색
+  ❌ 한계: 고차원 상태 공간 (수십 차원) 처리 비용
+  ❓ 미검증
+
+휴머노이드 로봇:
+  ❌ 제한: 매우 고차원 동역학, 실시간 선형화 어려움
+  ⚠️ 미래 연구 필요
+
+창고 자동화 AMR:
+  ✅ 최적: 좁은 통로, 다른 로봇 회피 → 로컬 미니마 빈번
+  ✅ 10Hz 제어 충분
+  ✅ 자전거/unicycle 모델 적합
+</code></pre>
+<h3>9.4 연구 방향성 평가</h3>
+<pre><code>기존 Planner 리뷰 논문들과 비교한 UGE-MPC의 위치:
+
+안전성 vs 탐색 효율:
+  GPU-SLS, SANDO, HEIGHT → 안전 보장 우선
+  GRATE, DreamFlow → 학습 기반 탐색
+  UGE-MPC → 샘플링 효율 + 탐색 다양성 우선
+
+차별화 포인트:
+  ✅ MPPI 프레임워크 내에서 최소 수정으로 최대 개선
+  ✅ 이론적 우아함 (Hellinger 거리의 수학적 특성)
+  ✅ 실제 하드웨어 검증 (소규모이지만 의미 있음)
+
+연구 방향 평가:
+  → 샘플링 기반 MPC는 실제 로봇에서 광범위하게 사용됨
+  → UGE-TO 아이디어는 모든 MPPI 변형체에 적용 가능 → 높은 범용성
+  → 안전 보장 없이 탐색 효율만 다루는 점은 안전 크리티컬 적용에 제한
+  → 코드가 공개되면 MPPI 커뮤니티에서 빠르게 채택될 가능성 높음
+
+전반적 평가: A- (ICRA 채택, 실제 실험, 이론적 우아함 → 강점
+              고차원 확장성 미검증, 안전 보장 없음 → 개선 여지)
+</code></pre>
+<hr>
+<h2>9.5 샘플링 기반 MPC 연구 생태계에서의 위치</h2>
+<pre><code>MPPI 계열 연구의 발전 흐름:
+
+[원점] MPPI (Williams et al., ICRA 2017)
+  단일 가우시안 샘플링, 중요도 가중치 업데이트
+  ↓
+[다양성 확장 시도]
+  MoG-MPPI: 혼합 가우시안 → 다중 모드 (행동 공간)
+  SV-MPC: 슈타인 변분 → 입자 반발 (그래디언트 필요)
+  Log-MPPI: 로그 정규화로 수치 안정성 향상
+  ↓
+[UGE-MPC: 구성 공간 다양성]
+  불확실성 타원체 + Hellinger 거리
+  → 동역학 인식 구성 공간 다양성 (최초)
+  ↓
+[미래 방향 예측]
+  - GPU 병렬화 UGE-TO (수천 개 후보 실시간 평가)
+  - 학습 기반 자코비안 (블랙박스 동역학 적용)
+  - 안전 필터 통합 (UGE-TO + CBF)
+  - 비선형 공분산 전파 (Sigma Points)
+
+UGE-MPC의 위치:
+  기존 MPPI 변형체 중 &quot;구성 공간에서의 진정한 다양성&quot;을
+  최초로 체계적으로 다룬 방법
+  → MPPI 생태계의 표준 &quot;다양성 강화 레이어&quot;로 자리잡을 잠재력
+</code></pre>
+<h3>9.6 Planner 트랙 기존 리뷰와의 상세 비교</h3>
+<pre><code>방법 비교 심층 분석:
+
+TRG-Planner (RA-L 2025):
+  목적: 비구조 지형에서 경로 계획
+  접근: 그래프 기반 위험도 맵 + 전역 경로 탐색
+  차이: UGE-MPC는 로컬 MPC, TRG는 전역 계획
+  보완 관계: TRG(전역) + UGE-MPC(로컬)로 완전한 시스템 구성 가능
+
+DreamFlow (ICRA 2026):
+  목적: 관찰 너머 로컬 내비게이션
+  접근: 조건부 흐름 매칭으로 경로 생성
+  차이: 학습 기반 vs. 최적화 기반 (UGE-MPC는 모델 기반)
+  차이: DreamFlow는 훈련 필요, UGE-MPC는 zero-shot 적용
+
+SANDO (arxiv 2026):
+  목적: 동적 미지 환경의 안전한 UAV 계획
+  접근: STSFC 기반 MIQP 최적화
+  차이: 안전 보장 vs. 탐색 효율 (상호 보완 가능)
+  차이: SANDO는 UAV 특화, UGE-MPC는 플랫폼 독립적
+
+GPU-SLS (arxiv 2026):
+  목적: 대규모 견고한 비선형 MPC
+  접근: GPU 병렬 SLS MPC
+  차이: 견고성 보장 집중 vs. 탐색 효율 집중
+  공통점: 모두 MPC 프레임워크 → UGE-TO와 결합 가능
+
+IRRL (arxiv 2026):
+  목적: 사회적 내비게이션 온라인 RL
+  접근: 잔차 RL로 기존 계획기 보강
+  차이: 학습 기반 vs. 최적화 기반
+  차이: IRRL은 사람-로봇 상호작용 집중, UGE-MPC는 일반 경로
+
+HEIGHT (T-ASE 2025):
+  목적: 혼잡 동적 환경 내비게이션
+  접근: 그래프 트랜스포머 기반 RL
+  차이: 군중 인식 특화 vs. 일반 장애물
+  차이: 학습 기반 정책 vs. 최적화 기반
+
+GRATE (IROS 2025):
+  목적: 자율 탐색
+  접근: 그래프 RL
+  차이: 미지 환경 지도 작성 집중
+
+AgiPIX (ICUAS 2026):
+  목적: 실내 UAV 검사
+  접근: ESDF 기반 계획
+  차이: UAV 특화, ESDF 지도
+
+BTIT* (arxiv 2026):
+  목적: 최적 키노다이나믹 계획
+  접근: 양방향 배치 샘플링 + 타이트 종료 조건
+  차이: 점근적 최적성 보장 vs. 빠른 실용적 성능 (UGE-MPC)
+  차이: 오프라인 계획 vs. 실시간 MPC
+
+PRoID (arxiv 2026):
+  목적: 다중 로봇 탐색·릴레이
+  접근: 정보 전달률 예측
+  차이: 완전히 다른 문제 도메인 (통신 vs. 경로)
+</code></pre>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li>Williams et al., &quot;Information Theoretic MPC for Model-Based Reinforcement Learning,&quot; ICRA 2017 (MPPI 원본)</li>
+<li>Power &amp; Berenson, &quot;Variational Inference MPC for Bayesian Model-Based Reinforcement Learning,&quot; CoRL 2022</li>
+<li>Lambert et al., &quot;Entropy Regularized Motion Planning via Stein Variational Inference,&quot; arXiv 2020 (SV-MPC)</li>
+<li>Yin et al., &quot;MoG-MPPI: Mixture of Gaussian MPPI,&quot; arXiv 2022</li>
+<li>Bhattacharyya, &quot;On a measure of divergence between two statistical populations,&quot; 1943</li>
+<li>Hellinger, &quot;Neue Begründung der Theorie quadratischer Formen von unendlichvielen Veränderlichen,&quot; 1909</li>
+<li>Kamthe &amp; Deisenroth, &quot;Data-efficient reinforcement learning with probabilistic model predictive control,&quot; AISTATS 2018</li>
+<li>TRG-Planner: Park et al., &quot;TRG-Planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments,&quot; RA-L 2025</li>
+<li>DreamFlow: &quot;Local Navigation Beyond Observation via Conditional Flow Matching,&quot; ICRA 2026</li>
+<li>SANDO: Kondo et al., &quot;Safe Autonomous Trajectory Planning for Dynamic Unknown Environments,&quot; arXiv 2026</li>
+<li>GPU-SLS: Fang et al., &quot;Safe Large-Scale Robust Nonlinear MPC in Milliseconds on GPU,&quot; arXiv 2026</li>
+<li>BTIT*: Wang et al., &quot;Optimal Kinodynamic Motion Planning Through Anytime Bidirectional Heuristic Search,&quot; arXiv 2026</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p>UGE-MPC는 <strong>샘플링 기반 궤적 최적화에서 다양성의 진정한 의미</strong>를 재정의했다. 행동 공간이 아닌 구성 공간에서의 다양성 측정, 불확실성 타원체를 통한 동역학 인식 표현, Hellinger 거리의 수학적 안정성 — 이 세 가지 요소가 결합되어 기존 MPPI의 로컬 미니마 문제를 근본적으로 해결한다.</p>
+<p><strong>혁신성 평가</strong>:</p>
+<ul>
+<li>구성 공간에서의 궤적 다양성 정의 ★★★★★ (개념적 기여)</li>
+<li>Hellinger 거리 도입의 수학적 우아함 ★★★★☆</li>
+<li>실제 1/5 트럭 실험에서의 극적 차이 (MPPI 0% → UGE-MPC 100%) ★★★★★</li>
+<li>ICRA 2026 채택 ★★★★☆</li>
+</ul>
+<p><strong>실용적 의의</strong>:
+UGE-MPC의 가장 큰 실용적 가치는 <strong>기존 MPPI 시스템에 최소한의 수정으로 통합 가능</strong>하다는 점이다. UGE-TO를 MPPI 실행 전 사전 처리 단계로 삽입함으로써, 수렴 안정성을 극적으로 향상시킬 수 있다. 창고 AMR, 자율 배달 로봇, 야외 탐사 로봇 등 좁은 공간이나 복잡한 장애물 환경을 다루는 응용에 즉각 적용 가능하다.</p>
+<p><strong>향후 연구 방향</strong>:</p>
+<ol>
+<li>고차원 동역학(드론, 휴머노이드) 적용 검증</li>
+<li>비선형 공분산 전파 (Sigma Points, Particle Filter)</li>
+<li>동적 장애물 환경 확장</li>
+<li>GPU 병렬화로 고주파 제어(50Hz+) 가능하게</li>
+<li>안전 제약과의 결합 (Safety Filter 통합)</li>
+</ol>
+<p>MPPI 계열 방법이 실제 로봇 제어에서 점점 더 중심적 역할을 하는 상황에서, UGE-TO의 아이디어는 MPPI 생태계 전반에 걸쳐 표준 기법으로 자리잡을 잠재력이 있다. 코드가 완전 공개되면 커뮤니티에서의 채택 속도가 가속화될 것으로 예상된다.</p>
+<hr>
+<h2>12. 부록: 수식 상세 및 구현 노트 (Appendix)</h2>
+<h3>12.1 Hellinger 거리 유도 과정</h3>
+<p>두 다변량 가우시안 사이의 Hellinger 거리의 닫힌 형식 유도:</p>
+<pre><code>일반 Hellinger 거리 정의:
+  H²(P, Q) = 1 - ∫ sqrt(p(x) * q(x)) dx
+           = 1 - BC(P, Q)   [BC: Bhattacharyya 계수]
+
+가우시안 P = N(mu_1, Sigma_1), Q = N(mu_2, Sigma_2):
+
+BC(P, Q) = ∫ N(x; mu_1, Sigma_1)^{1/2} * N(x; mu_2, Sigma_2)^{1/2} dx
+
+정규 분포 밀도 함수:
+  N(x; mu, Sigma) = (2π)^{-n/2} |Sigma|^{-1/2} exp(-1/2 (x-mu)^T Sigma^{-1} (x-mu))
+
+두 가우시안의 기하 평균:
+  sqrt(N(x; mu_1, Sigma_1) * N(x; mu_2, Sigma_2))
+  = (2π)^{-n/2} |Sigma_1|^{-1/4} |Sigma_2|^{-1/4}
+    * exp(-1/4 * (x-mu_1)^T Sigma_1^{-1} (x-mu_1) - 1/4 * (x-mu_2)^T Sigma_2^{-1} (x-mu_2))
+
+지수 부분 완전 제곱식으로 변환:
+  -1/4 (x-mu_1)^T Sigma_1^{-1} (x-mu_1) - 1/4 (x-mu_2)^T Sigma_2^{-1} (x-mu_2)
+  = -1/2 (x-mu_bar)^T Sigma_bar^{-1} (x-mu_bar) - 1/8 (mu_1-mu_2)^T Sigma_bar^{-1} (mu_1-mu_2)
+  
+  여기서:
+    Sigma_bar = 2 * (Sigma_1^{-1}/2 + Sigma_2^{-1}/2)^{-1}
+              = (Sigma_1^{-1} + Sigma_2^{-1})^{-1} * 2
+    (단순 경우: 같은 분산 구조면 Sigma_bar = (Sigma_1 + Sigma_2) / 2)
+
+적분 계산:
+  BC(P, Q) = |Sigma_1|^{-1/4} |Sigma_2|^{-1/4} / |Sigma_bar/2|^{-1/2} * (상수)
+           = |Sigma_1|^{1/4} |Sigma_2|^{1/4} / |Sigma_bar|^{1/2}
+             * exp(-1/8 * Delta_mu^T * Sigma_bar^{-1} * Delta_mu)
+
+최종 Hellinger 거리 (본 논문 Eq. 8):
+  H²(T^(i), T^(j)) = 1 - |Sigma^(i)|^{1/4} |Sigma^(j)|^{1/4} / |Sigma_bar|^{1/2}
+                       * exp(-1/8 * (mu^i - mu^j)^T Sigma_bar^{-1} (mu^i - mu^j))
+</code></pre>
+<h3>12.2 공분산 전파의 수치 안정성</h3>
+<pre><code>공분산 전파에서의 수치 안정성 문제와 해결:
+
+문제 1: 행렬 폭발 (Matrix Blowup)
+  A_t^T * Sigma_t * A_t 반복 계산 시 고유값 폭발 가능
+  
+  완화책:
+    - Q 추가 (Q = 0.1*I): 각 단계에서 최소 분산 유지
+    - 수치 클리핑: Sigma_t의 고유값을 [eps, max_sigma]로 클리핑
+
+문제 2: 블록 대각 행렬의 역행렬 비용
+  Sigma = blockdiag(Sigma_0, ..., Sigma_T)의 역행렬
+  → 블록별 역행렬 계산 가능: O(T * n^3)
+  → T=80, n=3이면: 80 * 27 = 2,160 연산 (매우 효율적)
+
+문제 3: 행렬식 계산
+  |Sigma| = product of |Sigma_t| (블록 대각 성질)
+  → 개별 블록의 행렬식 곱 = 매우 효율적
+
+실제 구현 팁:
+  - Cholesky 분해로 |Sigma_t| 계산 (수치 안정적)
+  - 로그 행렬식: log|Sigma| = sum log|Sigma_t| (오버플로우 방지)
+  - 역행렬: Sigma_bar^{-1} ← Cholesky 풀기
+</code></pre>
+<h3>12.3 UGE-TO vs. 기존 방법 계산 비교</h3>
+<pre><code>동일 샘플 예산 2048에서 계산 비용 비교:
+
+MPPI:
+  - 샘플 생성: 2048 × O(T*n) = 2048 × 240 ≈ 490K 연산
+  - 비용 평가: 2048 × O(T) = 2048 × 80 ≈ 164K 연산
+  - 총 계산: ~654K 연산
+
+MoG-MPPI (K=4 컴포넌트):
+  - E단계: 2048 × 4 × O(n²) ≈ 590K
+  - M단계: 4 × O(n²) ≈ 36
+  - 총: ~600K + MPPI 비용
+
+SV-MPC (N=16 입자):
+  - 그래디언트 계산: 16 × O(T*n²) ≈ 46K
+  - 커널 행렬: O(N² * n²) = 16² * 9 = 2.3K
+  - 총: ~630K
+
+UGE-MPC (N=16, M=128, K=8):
+  - UGE-TO 후보 생성: N*M*K * O(T*n²) = 16*128*8 * 720 = 1.18B
+  - UGE-TO 분포 비교: N*K * O(N * T*n³) = 128 * 16*80*27 = 4.4M
+  - MPPI: 2016 * O(T) = 161K
+  - 총 계산: ~1.18B (생성) + 4.4M (비교) + 0.16M (MPPI)
+
+주의: &quot;생성&quot;은 단순 가우시안 샘플 + 동역학 전파 (저비용)
+     &quot;비교&quot;는 Hellinger 계산 (중간 비용)
+     실제 비용 평가 (환경 충돌 검사)는 48+126 = 174회만 수행
+
+실제 병목: 환경 충돌 검사 (비용 함수 평가)
+  → UGE-MPC: 174회 (vs. MPPI 2048회)
+  → 충돌 검사 비용이 지배적인 환경에서 UGE-MPC가 실제로 더 빠를 수 있음
+</code></pre>
+<h3>12.4 ROSborg 통합 예시 (개념적 코드)</h3>
+<pre><code class="language-python"># UGE-MPC 개념적 구현 (Python/NumPy)
+import numpy as np
+
+class UGETO:
+    def __init__(self, dynamics_fn, jacobian_fn, N=16, M=128, K=8, Q=None, Sigma_u=None):
+        self.f = dynamics_fn      # x_{t+1} = f(x_t, u_t)
+        self.J = jacobian_fn      # A_t = df/dx at (x_t, u_t)
+        self.N, self.M, self.K = N, M, K
+        self.Q = Q or np.eye(3) * 0.1
+        self.Sigma_u = Sigma_u or np.eye(2) * 0.1
+
+    def propagate_covariance(self, x_traj, u_seq, T):
+        &quot;&quot;&quot;불확실성 타원체 전파 (Eq. 5)&quot;&quot;&quot;
+        n = len(x_traj[0])
+        Sigmas = [self.Q.copy()]  # Sigma_0 = Q
+        for t in range(T):
+            A = self.J(x_traj[t], u_seq[t])  # 자코비안
+            Sigma_next = A @ Sigmas[t] @ A.T + self.Q
+            Sigmas.append(Sigma_next)
+        return Sigmas
+
+    def hellinger_distance(self, mu_i, Sigmas_i, mu_j, Sigmas_j):
+        &quot;&quot;&quot;Hellinger 거리 계산 (Eq. 8) - 블록 대각 구조 활용&quot;&quot;&quot;
+        T = len(mu_i)
+        log_bc = 0.0
+        for t in range(T):
+            S_i, S_j = Sigmas_i[t], Sigmas_j[t]
+            S_bar = 0.5 * (S_i + S_j)
+            delta = mu_i[t] - mu_j[t]
+            
+            # Bhattacharyya 거리 = 마할라노비스 + 행렬식 항
+            mah = 0.125 * delta @ np.linalg.solve(S_bar, delta)
+            det_term = 0.5 * np.log(np.linalg.det(S_bar)) \
+                     - 0.25 * np.log(np.linalg.det(S_i)) \
+                     - 0.25 * np.log(np.linalg.det(S_j))
+            log_bc -= mah + det_term
+        
+        BC = np.exp(log_bc)
+        return 1.0 - BC  # H² ∈ [0, 1]
+
+    def optimize(self, U_init, x0, T):
+        &quot;&quot;&quot;UGE-TO 메인 루프&quot;&quot;&quot;
+        # N개 초기 섭동 생성
+        trajectories = []
+        for i in range(self.N):
+            eta = np.random.multivariate_normal(np.zeros(T), self.Sigma_u, T)
+            U_i = U_init + eta
+            x_traj = self._rollout(x0, U_i, T)
+            Sigmas_i = self.propagate_covariance(x_traj, U_i, T)
+            trajectories.append({&#39;U&#39;: U_i, &#39;x&#39;: x_traj, &#39;Sigma&#39;: Sigmas_i})
+        
+        # K 반복
+        for k in range(self.K):
+            for i in range(1, self.N):  # 첫 번째 궤적 고정
+                best_h, best_m = -np.inf, 0
+                
+                # M개 대안 후보
+                for m in range(self.M):
+                    eta_m = np.random.multivariate_normal(np.zeros(T), self.Sigma_u, T)
+                    U_cand = U_init + eta_m
+                    x_cand = self._rollout(x0, U_cand, T)
+                    S_cand = self.propagate_covariance(x_cand, U_cand, T)
+                    
+                    # 다른 모든 궤적과의 Hellinger 거리 합
+                    h = sum(self.hellinger_distance(
+                        x_cand, S_cand, trajectories[j][&#39;x&#39;], trajectories[j][&#39;Sigma&#39;]
+                    ) for j in range(self.N) if j != i)
+                    
+                    if h &gt; best_h:
+                        best_h, best_m = h, m
+                        best_U, best_x, best_S = U_cand, x_cand, S_cand
+                
+                trajectories[i] = {&#39;U&#39;: best_U, &#39;x&#39;: best_x, &#39;Sigma&#39;: best_S}
+        
+        return [t[&#39;U&#39;] for t in trajectories]  # N개 다양화된 궤적
+</code></pre>
+<h3>12.5 실제 배포 시 고려사항</h3>
+<pre><code>실제 로봇 배포 체크리스트:
+
+1. 동역학 모델 선택:
+   □ 자전거/unicycle 모델: 저속 지상 로봇에 적합
+   □ 이중 적분기: 단순 포인트 매스 로봇
+   □ 쿼드로터 모델: UAV (고차원, 선형화 주의)
+   □ 학습 기반 모델: 복잡한 동역학 (블랙박스)
+
+2. 자코비안 계산:
+   □ 해석적 자코비안 (자전거 모델 등): 가장 효율적
+   □ 수치 자코비안 (유한 차분): 범용이지만 노이즈
+   □ 자동 미분 (PyTorch 등): 학습 모델에 적용
+
+3. 계산 자원 요구사항:
+   □ CPU 단독: N=6, M=32, K=4에서 10Hz 가능 (추정)
+   □ GPU 가속: N=64, M=128, K=8에서 50Hz 가능 (추정)
+   □ ROS2 통합: std_msgs/Float64MultiArray로 제어 출력
+
+4. 하이퍼파라미터 튜닝:
+   □ N (다양성): 크면 좋지만 계산 비용 증가
+   □ M (후보 수): 32-128이 실용적 범위
+   □ K (반복): 4-8이 수렴과 비용의 균형점
+   □ Q (프로세스 노이즈): 동역학 모델 신뢰도에 맞게 설정
+   □ lambda_obs: 환경 장애물 밀도에 맞게 조정
+
+5. 안전 통합 (미래):
+   □ Control Barrier Function (CBF) 추가 제약으로 통합
+   □ Safety Filter: UGE-MPC 출력을 CBF로 후처리
+   □ Robust MPC 결합: GPU-SLS와 병렬 실행
+</code></pre>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Qwen-RobotNav: A Navigation Foundation Model Unifying Vision-Language Navigation across Task Families · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 2026 (미확정)</div>
+    <h1>Qwen-RobotNav — Qwen3-VL 기반 내비게이션 파운데이션 모델 (단일 가중치로 다중 항법 태스크 통합)</h1>
+    <div class="meta-row">
+      <span class="chip">VLN</span>
+      <span><a href="https://arxiv.org/abs/2606.18112">arXiv:2606.18112</a></span>
+      <span>리뷰 2026-06-18</span>
+      <span>39분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>Qwen-RobotNav: A Navigation Foundation Model Unifying Vision-Language Navigation across Task Families: 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Qwen-RobotNav — Qwen3-VL 기반 내비게이션 파운데이션 모델 (단일 가중치로 다중 항법 태스크 패밀리 통합)</li>
+<li><strong>저자 (Authors)</strong>: Alibaba Qwen Team (Qwen3-VL 팀)</li>
+<li><strong>소속 (Affiliation)</strong>: Alibaba Group — Qwen (Tongyi Qianwen) 연구팀</li>
+<li><strong>발표처 (Published)</strong>: arXiv 2026 preprint + Qwen 공식 블로그 (학회/저널 미확정 → 폴더 접미사 <code>arxiv2026</code>)</li>
+<li><strong>DOI</strong>: 미부여</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2606.18112">2606.18112</a></li>
+<li><strong>코드 (Code)</strong>: ❌ <strong>미공개 (확인 불가)</strong> — QwenLM GitHub 조직을 2026-06-18 직접 검색했으나 Qwen-RobotNav 전용 공개 저장소가 존재하지 않음(<code>QwenLM/Qwen-RobotNav</code>·<code>QwenLM/Qwen-Robot</code> 모두 404, org 내 &quot;robot&quot; 검색 0건). 일부 2차 매체가 &quot;공개 GitHub 저장소를 동봉&quot;한다고 보도했으나 <strong>실제 공개 저장소를 확인하지 못했으므로 &quot;있음&quot;으로 표기하지 않는다.</strong></li>
+<li><strong>프로젝트 페이지 (Project Page)</strong>: ✅ Qwen 공식 블로그 (qwen.ai/blog?id=qwen-robotnav) — JS 렌더링 SPA로 본문 추출은 제한적, 존재 자체는 확인.</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 연구는 <strong>&quot;하나의 비전-언어 모델 가중치로, 서로 다른 항법(navigation) 태스크 패밀리를 모두 수행하는 <em>내비게이션 파운데이션 모델</em>을 만들 수 있는가&quot;</strong> 라는 질문에 답한다.</p>
+<p>기존 로봇 항법 연구는 태스크마다 별도 모델을 만든다: 자연어 지시 추종(VLN), 좌표 목표 도달(PointNav), 객체 목표 탐색(ObjectNav), 대상 추적(Tracking), 주행(Driving). 각각 데이터·아키텍처·평가가 분리되어 있어, 한 모델을 다른 태스크로 옮기면 성능이 무너진다. Qwen-RobotNav는 <strong>Qwen3-VL(2B/4B/8B)</strong> 라는 강력한 범용 VLM을 백본으로, <strong>5개 태스크 패밀리를 단일 가중치(one set of weights)로 통합</strong>한다.</p>
+<p>핵심 설계는 세 가지다:</p>
+<ol>
+<li><strong>파라미터화된 태스크 인터페이스(parameterized interface)</strong>: 다섯 태스크를 공통 입출력 규격(언어 지시 + 관측 + 목표 유형 토큰)으로 통일해, 한 모델이 태스크별 분기 없이 처리.</li>
+<li><strong>웨이포인트 궤적 예측(waypoint trajectory prediction)</strong>: 정책 출력으로 단일 행동이 아니라 <strong>8개 웨이포인트(2D 위치 + heading)</strong> 의 단기 궤적을 예측 — 4층 MLP 액션 헤드.</li>
+<li><strong>제어 가능한 관측 파라미터(controllable observation parameters)</strong>: 시각 토큰 예산(visual token budget), 시간 감쇠(temporal decay), 카메라 가중치(camera weights)를 추론 시 조절 가능 → 연산-성능 trade-off를 배포 환경에 맞게 조정.</li>
+</ol>
+<p>그 위에 <strong>agentic navigation system</strong>(VLM이 관측을 받아 웨이포인트를 내고, 실행·재관측을 반복하는 에이전트 루프)을 얹어, VLN-CE(R2R/RxR), ObjectNav(HM3Dv2), 추적(EVT-Bench), 주행(NAVSIM), 체화형 질의응답(EQA)에서 단일 모델로 SOTA급 성능을 달성한다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>C1. 태스크 분절(fragmentation).</strong>
+VLN·PointNav·ObjectNav·Tracking·Driving은 목표 표현(자연어/좌표/객체명/대상/도로)·관측·보상이 모두 달라, 태스크별 전용 모델이 표준이었다. 통합 시 서로 다른 목표 유형을 한 인터페이스에 담는 것이 어렵다.</p>
+<p><strong>C2. 단일 행동 출력의 근시안성.</strong>
+프레임마다 이산 행동(전진/회전) 하나만 내면 장기 일관성·부드러움이 떨어진다. 특히 연속 공간(VLN-CE)에서는 웨이포인트 수준의 단기 계획이 유리하다.</p>
+<p><strong>C3. 배포 환경의 연산 이질성.</strong>
+온보드 컴퓨트는 천차만별이다. 고정된 시각 토큰 수·관측 윈도우는 어떤 로봇에선 과하고 어떤 로봇에선 부족하다. <em>추론 시</em> 조절 가능해야 한다.</p>
+<p><strong>C4. 일반 VLM의 항법 접지(grounding) 부족.</strong>
+Qwen3-VL 같은 범용 VLM은 풍부한 시각-언어 지식을 갖지만, &quot;공간을 이동하는 행동&quot;으로 접지되어 있지 않다. 대규모 항법 데이터로 정렬해야 한다.</p>
+<p><strong>C5. 평가의 파편화.</strong>
+태스크마다 벤치마크·지표가 달라(SR/SPL/PDMS/EQA 정확도 등) 단일 모델의 범용성을 입증하려면 다섯 영역을 모두 커버해야 한다.</p>
+<h3>2.2 핵심 해결책</h3>
+<ul>
+<li><strong>C1 →</strong> <strong>파라미터화된 태스크 인터페이스</strong>: 목표 유형을 토큰/파라미터로 표현해 한 모델이 5태스크를 분기 없이 처리.</li>
+<li><strong>C2 →</strong> <strong>8-웨이포인트 궤적 예측</strong>(2D pos + heading) + 4층 MLP 헤드 → 단기 계획성·부드러움 확보.</li>
+<li><strong>C3 →</strong> <strong>제어 가능 관측 파라미터</strong>(시각 토큰 예산·시간 감쇠·카메라 가중치)로 추론 시 연산-성능 조정.</li>
+<li><strong>C4 →</strong> <strong>Qwen3-VL 백본 + 15.6M 항법 샘플</strong>(85/15 분할)로 대규모 행동 접지.</li>
+<li><strong>C5 →</strong> VLN-CE(R2R/RxR)·ObjectNav(HM3Dv2)·Tracking(EVT-Bench)·Driving(NAVSIM)·EQA(HM-EQA/EXPRESS-Bench) 전 영역 평가.</li>
+</ul>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<pre><code>표기 (Notation)
+  I_t            : 시각 관측(다중 카메라 RGB) at time t
+  L              : 자연어 지시 / 목표 명세 (task-family에 따라 형태 상이)
+  τ_type         : 태스크 유형 파라미터(VLN/PointNav/ObjNav/Track/Drive)
+  Φ_obs          : 제어 가능 관측 파라미터 {token_budget, temporal_decay, cam_weights}
+  W = {w_k}_{1..8}: 예측 웨이포인트 (각 w_k = [x_k, y_k, ψ_k], 2D 위치 + heading)
+  f_VLM          : Qwen3-VL 백본 (2B / 4B / 8B)
+  h_MLP          : 4층 MLP 액션 헤드
+</code></pre>
+<h3>3.1 파라미터화된 태스크 인터페이스 (Parameterized Interface)</h3>
+<p>다섯 태스크를 <strong>하나의 입출력 규격</strong>으로 통일하는 것이 Qwen-RobotNav의 출발점이다. 각 태스크는 &quot;목표를 어떻게 명세하는가&quot;만 다르다:</p>
+<pre><code>태스크 패밀리        목표 명세(τ_type + L)                  공통 출력
+─────────────────────────────────────────────────────────────────
+VLN (지시 추종)      자연어 경로 지시(&quot;주방을 지나 …&quot;)   →  8 웨이포인트 W
+PointNav            상대 좌표 목표 [Δx, Δy]            →  8 웨이포인트 W
+ObjectNav           객체 카테고리(&quot;chair&quot;)            →  8 웨이포인트 W
+Tracking            추적 대상(이미지/설명)             →  8 웨이포인트 W
+Driving             주행 컨텍스트/네비 명령            →  8 웨이포인트 W
+</code></pre>
+<p>핵심은 <strong>출력을 8-웨이포인트 궤적으로 단일화</strong>하고, <strong>입력에서 태스크 유형을 파라미터(τ_type)와 목표 명세 L로 표현</strong>한 점이다. 모델은 태스크별 헤드 분기 없이, 같은 백본+같은 헤드로 모든 태스크를 처리한다. 이는 &quot;범용 VLM이 다양한 멀티모달 태스크를 프롬프트로 통합하던&quot; 패러다임을 <strong>항법 행동 공간</strong>으로 확장한 것이다(C1 해소).</p>
+<h3>3.2 Qwen3-VL 백본 + 웨이포인트 액션 헤드 (Backbone &amp; Action Head)</h3>
+<pre><code>   다중 카메라 RGB I_t ┐
+   언어 목표 L         ├─►  Qwen3-VL (2B/4B/8B)  ─► 멀티모달 토큰 임베딩 z_t
+   태스크 유형 τ_type  ┘         (비전 인코더 + LLM)        │
+                                                            ▼
+                                          4층 MLP 액션 헤드 h_MLP
+                                                            │
+                                                            ▼
+                              W = {[x_k, y_k, ψ_k]}_{k=1..8}  (8 웨이포인트)
+</code></pre>
+<ul>
+<li><strong>백본 f_VLM</strong>: Qwen3-VL을 2B/4B/8B 세 규모로 제공 — 온보드 컴퓨트에 맞춰 선택(C3 보완).</li>
+<li><strong>액션 헤드 h_MLP</strong>: 백본의 멀티모달 임베딩을 받아 <strong>4층 MLP</strong>로 8개 웨이포인트(각 2D 위치 + heading)를 회귀. 단일 이산 행동이 아니라 <strong>단기 궤적</strong>을 예측하므로 부드럽고 장기 일관성이 좋다(C2 해소).</li>
+<li><strong>웨이포인트 표현</strong>: 연속 공간 항법(VLN-CE)과 자연스럽게 맞물려, 별도 토폴로지 맵 없이 로컬 폴리시로 작동.</li>
+</ul>
+<pre><code>의사코드 (추론 1스텝)
+  z = f_VLM(images=I_t, text=L, task=τ_type, obs_params=Φ_obs)
+  W = h_MLP(z)                       # [8, 3] = 8개 (x,y,heading)
+  next_action = controller.follow(W) # 웨이포인트 추종 컨트롤러
+  execute(next_action); observe → I_{t+1}   # agentic loop 반복
+</code></pre>
+<h3>3.3 제어 가능한 관측 파라미터 (Controllable Observation)</h3>
+<p>배포 환경의 연산 예산이 다르므로, <strong>추론 시점에</strong> 관측 처리를 조절할 수 있게 했다(C3):</p>
+<pre><code>Φ_obs = {
+  token_budget   : 시각 토큰 수 상한 (↑ 정확도/↑ 연산, ↓ 경량/↓ 정확도)
+  temporal_decay : 과거 프레임 가중 감쇠율 (최근 관측에 집중 vs 장기 맥락)
+  cam_weights    : 다중 카메라별 가중치 (전방 중심 vs 전방위 균형)
+}
+</code></pre>
+<ul>
+<li><strong>token_budget</strong>: 비전 토큰 예산을 줄이면 연산↓·지연↓, 늘리면 세밀한 장면 이해↑. 같은 가중치로 <em>재학습 없이</em> 경량/고성능 모드 전환.</li>
+<li><strong>temporal_decay</strong>: 과거 프레임의 영향력을 지수 감쇠 — 빠른 동적 환경에선 최근에 집중, 장기 지시 추종(RxR)에선 맥락 유지.</li>
+<li><strong>cam_weights</strong>: 다중 카메라(전/측/후)의 상대 중요도 — 주행은 전방 강조, 탐색은 전방위 균형.</li>
+</ul>
+<p>이 세 다이얼은 <strong>하나의 학습된 가중치를 다양한 하드웨어·태스크에 맞춰 적응</strong>시키는 추론-시 제어 노브로, &quot;한 모델, 여러 배포 프로파일&quot;을 가능케 한다.</p>
+<h3>3.4 대규모 항법 데이터 정렬 (Navigation Grounding)</h3>
+<p>범용 Qwen3-VL을 항법 행동으로 접지하기 위해 <strong>약 15.6M 샘플</strong>을 사용하고 <strong>85/15(train/val)</strong> 로 분할한다(C4). 데이터는 다섯 태스크 패밀리를 아우르며, 각 샘플은 (관측, 목표 명세, 웨이포인트 궤적 정답) 형태로 통일된 인터페이스에 맞춰진다. 대규모·다태스크 혼합 학습이 <strong>태스크 간 양의 전이(positive transfer)</strong> 를 유도해, 단일 가중치가 다섯 영역에서 모두 강하게 작동하도록 한다.</p>
+<h3>3.5 Agentic Navigation System</h3>
+<p>Qwen-RobotNav는 단발 예측이 아니라 <strong>에이전트 루프</strong>로 작동한다:</p>
+<pre><code>   ┌──────────────────────────────────────────────┐
+   │  관측 I_t ─► VLM+헤드 ─► 8 웨이포인트 W       │
+   │                  │                            │
+   │     웨이포인트 추종 컨트롤러로 일부 실행       │
+   │                  │                            │
+   │     실행 후 재관측 I_{t+1} ─────────────┐     │
+   └──────────────────────────────────────┘ │     │
+                  ▲                          │     │
+                  └──────────(반복)──────────┘     │
+                  목표 달성/종료 판단까지            │
+   ────────────────────────────────────────────────
+</code></pre>
+<p>매 스텝 새 관측으로 웨이포인트를 갱신해 <strong>폐루프(closed-loop)</strong> 로 목표에 수렴한다. 이 agentic 구성이 장기 지시(RxR), 동적 추적(EVT), 객체 탐색(ObjectNav)에서 단발 예측보다 강건하다.</p>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<pre><code>              Qwen-RobotNav 전체 파이프라인 (단일 가중치, 5 태스크)
+┌──────────────────────────── 입력 (통일 인터페이스) ────────────────────────────┐
+│  다중 카메라 RGB I_t   │  목표 명세 L (자연어/좌표/객체/대상/주행)               │
+│  태스크 유형 τ_type    │  제어 관측 파라미터 Φ_obs(token_budget/decay/cam_w)    │
+└─────────────────────────────────────────────────────────────────────────────────┘
+        │
+        ▼
+┌──────────────────────────── Qwen3-VL 백본 (2B/4B/8B) ───────────────────────────┐
+│  비전 인코더 → 시각 토큰(token_budget로 제어) ─┐                                  │
+│  텍스트 토크나이저 → 언어 토큰               ─┼─► LLM(멀티모달 융합) ─► z_t      │
+│  태스크 유형/관측 파라미터 조건화           ─┘                                    │
+└─────────────────────────────────────────────────────────────────────────────────┘
+        │ z_t
+        ▼
+┌──────────────────────────── 4층 MLP 액션 헤드 ───────────────────────────────────┐
+│  z_t ─► [Linear-ReLU]×4 ─► W = {[x_k,y_k,ψ_k]}_{k=1..8}  (8 웨이포인트)           │
+└─────────────────────────────────────────────────────────────────────────────────┘
+        │ W
+        ▼
+   웨이포인트 추종 컨트롤러 ─► 로봇 실행 ─(재관측)─► agentic loop (폐루프 수렴)
+        │
+        ▼
+   평가: VLN-CE(R2R/RxR) · ObjectNav(HM3Dv2) · Tracking(EVT) · Driving(NAVSIM) · EQA
+</code></pre>
+<p>데이터 흐름 요약: <strong>(입력) 다중 카메라 + 목표 명세 + 태스크 유형 + 관측 파라미터 → (백본) Qwen3-VL 멀티모달 융합 → (헤드) 4층 MLP가 8-웨이포인트 궤적 예측 → (실행) 웨이포인트 추종 + 재관측 agentic loop → 다섯 태스크 통합 평가.</strong> 태스크별 분기가 없는 단일 가중치 경로가 핵심이다.</p>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<ul>
+<li><strong>학습</strong>: 약 <strong>15.6M 항법 샘플</strong>, 85/15 train/val 분할, 5 태스크 패밀리 혼합.</li>
+<li><strong>평가 벤치마크</strong>:<ul>
+<li><strong>VLN-CE</strong>: R2R, RxR (연속 공간 자연어 지시 추종)</li>
+<li><strong>ObjectNav</strong>: HM3Dv2 (객체 목표 탐색)</li>
+<li><strong>Tracking</strong>: EVT-Bench (대상 추적)</li>
+<li><strong>Driving</strong>: NAVSIM (주행, PDMS 지표)</li>
+<li><strong>EQA(체화형 질의응답)</strong>: HM-EQA, EXPRESS-Bench</li>
+</ul>
+</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>VLN/ObjectNav</strong>: Success Rate(SR) 중심(연속 공간 도달 성공률).</li>
+<li><strong>Tracking</strong>: EVT-Bench 추적 성공/유지 지표.</li>
+<li><strong>Driving</strong>: NAVSIM <strong>PDMS</strong>(Predictive Driver Model Score).</li>
+<li><strong>EQA</strong>: 질의응답 정확도(에이전트가 탐색 후 답).</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>태스크</th>
+<th>벤치마크</th>
+<th align="center">Qwen-RobotNav 성능</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>VLN-CE</td>
+<td>RxR (SR)</td>
+<td align="center"><strong>76.5%</strong></td>
+<td>단일 가중치로 연속 지시 추종</td>
+</tr>
+<tr>
+<td>VLN-CE</td>
+<td>R2R (SR)</td>
+<td align="center"><strong>72.1%</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>ObjectNav</td>
+<td>HM3Dv2 (SR)</td>
+<td align="center"><strong>75.6%</strong></td>
+<td>객체 목표 탐색</td>
+</tr>
+<tr>
+<td>Tracking</td>
+<td>EVT-Bench</td>
+<td align="center"><strong>90.0%</strong></td>
+<td>대상 추적</td>
+</tr>
+<tr>
+<td>Driving</td>
+<td>NAVSIM (PDMS)</td>
+<td align="center"><strong>91.4</strong></td>
+<td>주행</td>
+</tr>
+<tr>
+<td>EQA</td>
+<td>HM-EQA / EXPRESS-Bench</td>
+<td align="center"><strong>SOTA(3종)</strong></td>
+<td>체화형 질의응답</td>
+</tr>
+</tbody></table></div>
+<p>핵심 메시지: <strong>단 하나의 가중치</strong>가 자연어 지시 추종(VLN-CE)·객체 탐색·추적·주행·질의응답에서 <em>모두</em> 강한 성능을 낸다. 태스크별 전용 모델을 따로 두던 관행을 깨고, 범용 VLM 백본 + 통일 인터페이스로 <strong>항법 파운데이션 모델</strong>의 실현 가능성을 보였다.</p>
+<p>(주: 본 리뷰의 수치는 Qwen 공식 발표·2차 매체 발췌에 근거하며, 일부 세부 분해(언어 분할·지표 정의)는 발췌 범위 한계로 상위 수치만 인용한다.)</p>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p>발췌 범위에서 본 모델의 핵심 검증은 <strong>다섯 태스크에 걸친 시뮬레이션 벤치마크(VLN-CE/HM3Dv2/EVT/NAVSIM/EQA)</strong> 중심이다. agentic navigation system은 실로봇 배포를 지향(2B/4B/8B 규모 선택·제어 가능 관측 파라미터가 온보드 적응을 위한 설계)하나, 본 리뷰 발췌 범위에서 구체적 실로봇 비행/주행 통계는 완전히 확보되지 않아 <strong>&quot;있음&quot;으로 단정하지 않고 확인 불가로 둔다.</strong> (모델 규모·관측 노브 설계는 실배포 친화적이라는 점만 기록.)</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><strong>항법 파운데이션 모델.</strong> Qwen3-VL 백본 위에 5개 태스크 패밀리(VLN/PointNav/ObjectNav/Tracking/Driving)를 <strong>단일 가중치</strong>로 통합 — 항법의 &quot;범용 모델&quot; 패러다임 제시.</li>
+<li><strong>파라미터화된 태스크 인터페이스.</strong> 목표 유형을 파라미터/토큰으로 표현해 태스크별 분기 없이 한 모델이 다섯 영역을 처리.</li>
+<li><strong>8-웨이포인트 궤적 예측.</strong> 단일 행동이 아닌 2D 위치+heading 8점의 단기 궤적을 4층 MLP로 회귀 → 연속 공간 부드러움·장기 일관성.</li>
+<li><strong>제어 가능한 관측 파라미터.</strong> 시각 토큰 예산·시간 감쇠·카메라 가중치를 추론 시 조절 → 재학습 없이 연산-성능 적응(2B/4B/8B 규모와 결합).</li>
+<li><strong>광범위 SOTA급 검증.</strong> VLN-CE RxR 76.5%/R2R 72.1%, ObjectNav HM3Dv2 75.6%, EVT 90.0%, NAVSIM 91.4 PDMS, EQA 3종 SOTA.</li>
+</ol>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값/설정</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>백본</td>
+<td>Qwen3-VL, 2B / 4B / 8B 세 규모</td>
+<td>발표</td>
+</tr>
+<tr>
+<td>액션 헤드</td>
+<td>4층 MLP</td>
+<td>발표</td>
+</tr>
+<tr>
+<td>출력</td>
+<td>8 웨이포인트 = [x, y, heading] × 8</td>
+<td>발표</td>
+</tr>
+<tr>
+<td>태스크 패밀리</td>
+<td>VLN/PointNav/ObjectNav/Tracking/Driving (단일 가중치)</td>
+<td>발표</td>
+</tr>
+<tr>
+<td>관측 제어</td>
+<td>token_budget / temporal_decay / camera_weights</td>
+<td>발표</td>
+</tr>
+<tr>
+<td>학습 데이터</td>
+<td>~15.6M 샘플, 85/15 분할</td>
+<td>발표</td>
+</tr>
+<tr>
+<td>평가</td>
+<td>VLN-CE(R2R/RxR), HM3Dv2, EVT-Bench, NAVSIM, HM-EQA/EXPRESS-Bench</td>
+<td>발표</td>
+</tr>
+<tr>
+<td>코드</td>
+<td>❌ 미공개(확인 불가)</td>
+<td>2026-06-18 확인</td>
+</tr>
+</tbody></table></div>
+<p>(학습 스케줄·옵티마이저·웨이포인트 좌표계·컨트롤러 세부는 발췌 범위에서 확보되지 않음 — 코드 미공개로 정확 재현은 공식 릴리스 대기.)</p>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 왜 &quot;웨이포인트 궤적&quot;인가</h3>
+<p>이산 행동(전진/회전) 출력은 (a) 프레임 단위 근시안, (b) 부드럽지 못한 모션, (c) 연속 공간(VLN-CE)과의 부정합 문제가 있다. 8-웨이포인트는 <strong>단기 계획(short-horizon plan)</strong> 을 한 번에 내어 컨트롤러가 부드럽게 추종하게 하고, agentic loop가 매 스텝 갱신하므로 <strong>계획성과 반응성을 동시에</strong> 얻는다. 이는 최근 VLN 연구가 토폴로지 맵·웨이포인트 예측기로 수렴해 온 흐름과 일치한다.</p>
+<h3>8.2 한계점 (Limitations)</h3>
+<ul>
+<li><strong>코드 미공개</strong>: 재현성 제약. 2차 매체의 &quot;GitHub 동봉&quot; 주장과 달리 공개 저장소 미확인.</li>
+<li><strong>실로봇 통계 불충분(발췌 범위)</strong>: 벤치마크 중심 검증. 실배포 일반화(센서 노이즈·도메인 갭)는 추가 입증 필요.</li>
+<li><strong>&quot;Driving&quot; 포함의 범위 논쟁</strong>: 주행은 본 리뷰 트랙(VLN)의 핵심이 아니다. 단, Qwen-RobotNav는 <em>자연어 지시 추종 VLN(R2R/RxR)을 1차 태스크</em>로 두고 주행을 5개 중 1개로 포함하므로 VLN 트랙으로 분류하되, AD 전용 논문과는 구분한다.</li>
+<li><strong>추론 비용</strong>: 8B 백본은 강력하나 온보드 실시간엔 부담 — token_budget/2B 모드로 완화하나 정확도-지연 trade-off 존재.</li>
+</ul>
+<h3>8.3 향후 방향</h3>
+<ul>
+<li>단일 가중치의 태스크 간 전이 분석(어떤 태스크가 서로 도움/방해되는가).</li>
+<li>실로봇 대규모 배포 + 도메인 적응(sim-to-real).</li>
+<li>관측 노브의 자동 스케줄링(상황 인식형 token_budget 조절).</li>
+</ul>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<p>비교 대상은 같은 VLN 트랙에서 <strong>&quot;단일 모델로 다중 항법을 통합&quot; 또는 &quot;VLN SOTA&quot;</strong> 주제가 가장 가까운 선행 리뷰 세 편을 선정했다(인덱스 우선 선별 후 정독):</p>
+<ul>
+<li><strong>FloVerse: Floor Plan-Guided Multi-Modal Navigation</strong> — PointNav/ObjectNav/ImageNav를 <em>단일 가중치</em>로 통합(디퓨전).</li>
+<li><strong>NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation</strong> — 통합 세계-행동 모델(image-goal).</li>
+<li><strong>AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation</strong> — R2R/RxR SOTA(자연어 지시 추종 정점).</li>
+</ul>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>FloVerse</th>
+<th>NavWAM</th>
+<th>AwareVLN</th>
+<th><strong>Qwen-RobotNav (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>통합 범위</td>
+<td>PointNav/ObjectNav/ImageNav</td>
+<td>image-goal 단일</td>
+<td>VLN(R2R/RxR) 전용</td>
+<td><strong>VLN/PointNav/ObjectNav/Tracking/Driving 5종</strong></td>
+</tr>
+<tr>
+<td>백본</td>
+<td>디퓨전(ThreeDiff)+EfficientNet</td>
+<td>Cosmos Predict2 2B 세계모델</td>
+<td>VLN 전용 추론 모듈</td>
+<td><strong>Qwen3-VL 2B/4B/8B 범용 VLM</strong></td>
+</tr>
+<tr>
+<td>출력</td>
+<td>디퓨전 궤적/플랜</td>
+<td>미래관찰+가치+행동 공동 디퓨전</td>
+<td>행동(추론 기반)</td>
+<td><strong>8 웨이포인트(2D+heading), 4층 MLP</strong></td>
+</tr>
+<tr>
+<td>통일 인터페이스</td>
+<td>평면도 조건 멀티-양식</td>
+<td>image-goal</td>
+<td>자연어 지시</td>
+<td><strong>태스크 유형 파라미터화(분기 없음)</strong></td>
+</tr>
+<tr>
+<td>자연어 지시(VLN)</td>
+<td>❌(좌표/이미지 목표)</td>
+<td>❌(image-goal)</td>
+<td>✅ R2R 65.4/RxR 67.6</td>
+<td>✅ <strong>R2R 72.1/RxR 76.5</strong></td>
+</tr>
+<tr>
+<td>추론-시 적응</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td><strong>token_budget/decay/cam_w 노브</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>❌</td>
+<td>예정</td>
+<td>✅ GitHub</td>
+<td>❌ (미공개)</td>
+</tr>
+<tr>
+<td>실증</td>
+<td>시뮬 전용</td>
+<td>실세계 79.2%</td>
+<td>시뮬(SOTA)</td>
+<td>벤치 중심(실로봇 확인불가)</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<ul>
+<li><strong>장점</strong>: ① <strong>통합 범위가 가장 넓다</strong> — FloVerse(3 태스크, 자연어 지시 없음)·NavWAM(image-goal 단일)·AwareVLN(VLN 전용)과 달리, 자연어 지시 VLN을 <em>포함해</em> 5 태스크를 한 가중치로 처리. ② <strong>VLN-CE 성능이 AwareVLN을 상회</strong>(R2R 72.1 vs 65.4, RxR 76.5 vs 67.6 — 벤치/세팅 차이 감안 필요하나 수치상 우위). ③ <strong>추론-시 관측 노브</strong>는 세 비교 논문에 없는 배포 친화적 차별점. ④ 범용 VLM(Qwen3-VL) 백본의 강력한 사전지식 활용.</li>
+<li><strong>단점</strong>: ① <strong>코드 미공개</strong> — AwareVLN(공개)·NavWAM(예정) 대비 재현성 열위. ② <strong>실로봇 검증 발췌 부족</strong> — NavWAM은 실세계 79.2%를 명시하는데 본 모델은 벤치 중심. ③ <strong>&quot;Driving 포함&quot;이 트랙 순수성 측면에서 모호</strong> — 단 VLN(R2R/RxR)을 1차로 두므로 VLN 분류는 타당. ④ 파운데이션 모델 특성상 8B는 온보드 부담.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>강점</strong>: 단일 가중치 다태스크 → 배포·유지보수 단순화. 2B/4B/8B + 관측 노브로 하드웨어 적응. Qwen 생태계(공개 VLM)와의 정합성으로 후속 파인튜닝 용이성 기대.</li>
+<li><strong>제약</strong>: 코드 미공개로 즉시 도입 불가. 실로봇 도메인 갭·실시간성(8B) 검증이 실배포의 관건. token_budget 축소 시 정확도 저하 폭은 공개 데이터 부족.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>Qwen-RobotNav는 VLN 연구를 &quot;태스크별 전용 모델&quot;에서 <strong>&quot;범용 항법 파운데이션 모델&quot;</strong> 로 이동시키는 방향 제시다. AwareVLN류의 <em>정교한 VLN 추론</em>을 이런 파운데이션 백본에 결합하거나, NavWAM류의 <em>세계모델 예측</em>을 웨이포인트 예측에 더하면, &quot;통합 + 추론 + 예측&quot;의 차세대 통합점이 된다. FloVerse의 <em>구조 사전(평면도)</em> 도 관측 파라미터의 한 형태로 흡수 가능하다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ul>
+<li>Qwen-RobotNav. arXiv:2606.18112 (2026), Alibaba Qwen Team. Qwen 공식 블로그(qwen.ai/blog?id=qwen-robotnav).</li>
+<li>Qwen3-VL: Alibaba Qwen 비전-언어 모델 (2B/4B/8B).</li>
+<li>VLN-CE: Vision-and-Language Navigation in Continuous Environments (R2R/RxR-CE).</li>
+<li>HM3D / HM3Dv2: Habitat-Matterport 3D ObjectNav.</li>
+<li>NAVSIM: 비반응형 주행 시뮬레이션 벤치마크(PDMS).</li>
+<li>(비교) FloVerse: Floor Plan-Guided Multi-Modal Navigation, arXiv:2606.14267 (CVPR 2026).</li>
+<li>(비교) NavWAM: A Navigation World Action Model, arXiv:2606.13494.</li>
+<li>(비교) AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation, arXiv:2605.22816 (CVPR 2026).</li>
+</ul>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p>Qwen-RobotNav는 <strong>&quot;하나의 비전-언어 모델 가중치로 다섯 항법 태스크 패밀리를 모두 수행한다&quot;</strong> 는 야심을, 파라미터화된 태스크 인터페이스·8-웨이포인트 궤적 예측·제어 가능 관측 파라미터·대규모(15.6M) 항법 정렬·agentic 루프로 구체화한 <strong>항법 파운데이션 모델</strong>이다. VLN-CE(R2R 72.1/RxR 76.5)·ObjectNav(75.6)·Tracking(90.0)·Driving(91.4 PDMS)·EQA(3종 SOTA)에서 단일 가중치로 강력한 성능을 보였다.</p>
+<p><strong>혁신성</strong>: 태스크별 전용 모델 관행을 깨고 범용 VLM 백본 + 통일 인터페이스로 항법을 &quot;파운데이션 모델화&quot;한 점, 그리고 추론-시 관측 노브로 배포를 적응시킨 점이 신선하다. <strong>실용적 의의</strong>: 단일 가중치·다규모·관측 제어가 배포/유지보수를 단순화하며, 공개 Qwen 생태계와의 정합성이 후속 활용을 돕는다. <strong>한계</strong>: 코드 미공개(2차 매체 주장과 달리 공개 저장소 미확인)로 재현성이 제약되고, 실로봇 검증·실시간성(8B)·도메인 갭이 후속 과제다. <strong>향후</strong>: AwareVLN류 정교한 VLN 추론·NavWAM류 세계모델 예측과의 결합, 실로봇 대규모 배포, 관측 노브의 자동 스케줄링이 자연스러운 확장 방향이다.</p>
+<hr>
+<h2>부록 A. 통일 인터페이스 의사코드</h2>
+<pre><code class="language-python">def qwen_robotnav_step(images, goal, task_type, obs_params, vlm, mlp):
+    &quot;&quot;&quot;단일 가중치로 5 태스크를 처리하는 1스텝 (개념적 의사코드)&quot;&quot;&quot;
+    # task_type ∈ {VLN, PointNav, ObjectNav, Tracking, Driving}
+    # goal 형태는 task_type에 따라 다름(자연어/좌표/객체명/대상/주행명령)
+    # obs_params = {token_budget, temporal_decay, camera_weights}
+    z = vlm(
+        images=images,                       # 다중 카메라 RGB
+        text=encode_goal(goal, task_type),   # 목표를 통일 프롬프트로
+        token_budget=obs_params.token_budget,        # 시각 토큰 예산
+        temporal_decay=obs_params.temporal_decay,    # 과거 프레임 감쇠
+        camera_weights=obs_params.camera_weights,    # 카메라별 가중
+    )
+    waypoints = mlp(z)        # [8, 3] = 8 × (x, y, heading)
+    return waypoints          # agentic loop가 일부 실행 후 재호출
+</code></pre>
+<h2>부록 B. 관측 노브의 연산-성능 trade-off</h2>
+<pre><code>token_budget ↓ : 시각 토큰 수 ↓ → 지연 ↓ / 정확도 ↓ (경량 배포)
+token_budget ↑ : 세밀한 장면 이해 ↑ → 정확도 ↑ / 연산 ↑ (정밀 모드)
+temporal_decay↑: 최근 프레임 집중 → 동적/추적 유리
+temporal_decay↓: 장기 맥락 유지   → 긴 지시(RxR) 유리
+camera_weights : 전방 강조(주행) ↔ 전방위 균형(탐색)
+
+핵심: 위 노브는 *재학습 없이* 추론 시 조절 → &quot;한 가중치, 여러 배포 프로파일&quot;.
+모델 규모(2B/4B/8B) 선택과 결합해 하드웨어별 최적점 탐색.
+</code></pre>
+<h2>부록 C. 다섯 태스크 패밀리의 목표 표현 통일</h2>
+<pre><code>VLN       : L = 자연어 경로 지시           예) &quot;복도를 따라가 두 번째 문으로&quot;
+PointNav  : L = 상대 목표 좌표 [Δx, Δy]    예) (3.2, -1.5)
+ObjectNav : L = 객체 카테고리              예) &quot;toilet&quot;
+Tracking  : L = 추적 대상(이미지/설명)     예) &lt;대상 임베딩&gt;
+Driving   : L = 주행 컨텍스트/네비 명령     예) &quot;직진 후 우회전&quot;
+─────────────────────────────────────────────────────
+공통 출력 : W = 8 웨이포인트 [x, y, heading]
+→ 모든 태스크가 같은 백본+헤드를 통과(분기 없음).
+</code></pre>
+<h2>부록 D. 비교: 단일-가중치 통합 항법의 스펙트럼</h2>
+<pre><code>전용 모델(태스크당 1개)  ──────────────────────────►  단일 파운데이션
+   (전통 VLN/ObjectNav)                              (Qwen-RobotNav)
+        │                  │                   │            │
+   AwareVLN(VLN전용)   NavWAM(goal단일)   FloVerse(3태스크)  Qwen-RobotNav(5태스크
+                                          단일가중치          + 자연어지시 포함)
+통합 폭:  좁음 ───────────────────────────────────────► 넓음
+자연어지시(VLN): AwareVLN ✅, FloVerse/NavWAM ✗, Qwen-RobotNav ✅(+4태스크)
+</code></pre>
+<h2>부록 E. 본 리뷰의 출처·확인 상태 요약 (투명성)</h2>
+<pre><code>확인 완료:
+  ✅ arXiv 항목/2차 매체·Qwen 블로그(존재) 발췌로 아키텍처·태스크·수치 골격
+  ✅ Qwen3-VL 백본 규모(2B/4B/8B), 8 웨이포인트, 4층 MLP
+  ✅ 벤치마크 수치(RxR 76.5/R2R 72.1/HM3Dv2 75.6/EVT 90.0/NAVSIM 91.4/EQA SOTA)
+확인 불가/주의(정직 표기):
+  ❌ 공개 코드 저장소 — QwenLM org에 robot 저장소 0건(404), &quot;동봉&quot; 보도와 불일치
+  ⚠ 실로봇 배포 통계 — 발췌 범위 미확보(벤치 중심), &quot;있음&quot; 단정 안 함
+  ⚠ 학습 세부(옵티마이저·좌표계·컨트롤러) — 코드 미공개로 본문/릴리스 대기
+원칙: 미확인 코드/실험을 &quot;있음&quot;으로 날조하지 않음. 발췌 한계를 명시함.
+</code></pre>
+<h2>부록 F. agentic loop의 폐루프 동작 상세</h2>
+<pre><code>초기화: t=0, 목표 명세 L, 태스크 유형 τ_type, 관측 파라미터 Φ_obs
+반복:
+  1) 관측 수집 I_t (다중 카메라 RGB; temporal buffer에 push, decay 적용)
+  2) z_t = f_VLM(I_{0..t}, L, τ_type, Φ_obs)     # 과거 맥락 포함(감쇠 가중)
+  3) W = h_MLP(z_t)                               # 8 웨이포인트
+  4) 컨트롤러가 W의 앞부분 추종 → 일부 실행(receding-horizon 스타일)
+  5) 종료 판정: 목표 도달/포기/시간초과 ? → break
+  6) t ← t+1, goto 1
+출력: 궤적(누적 실행) + (EQA의 경우) 탐색 후 답변
+</code></pre>
+<p>이 구조는 <strong>모델 예측 제어(MPC)의 receding-horizon</strong> 사고와 닮았다. 8-웨이포인트라는 단기 계획을 예측하되 앞부분만 실행하고 재계획하므로, (a) 예측 오차 누적을 매 스텝 보정하고, (b) 동적 환경(추적·주행)에 반응적이며, (c) 장기 지시(RxR)에서도 맥락 버퍼와 결합해 일관성을 유지한다. 단발 예측 대비 폐루프의 강건성이 EVT(90.0%)·ObjectNav(75.6%) 같은 탐색·추적 태스크에서 두드러진다.</p>
+<h2>부록 G. 태스크 간 전이(transfer)의 가설적 해석</h2>
+<pre><code>혼합 학습(15.6M, 5 태스크) 시 기대되는 상호작용
+  PointNav  → VLN     : 기하적 목표 도달 능력 = 지시의 공간 접지 토대
+  ObjectNav → VLN     : 객체 인식·탐색 = &quot;주방으로 가&quot; 같은 의미 항법 지원
+  Tracking  → Driving : 동적 대상 추종 = 주행의 선행차 추종과 공유
+  Driving   → 전반     : 연속 고속 모션의 부드러운 웨이포인트 사전(prior)
+  VLN       → ObjectNav: 언어 의미 지식 = 객체 카테고리 이해 강화
+주의: 음의 전이(예: 주행의 직진 편향이 실내 탐색의 회전성을 약화)도
+      이론상 가능 → 단일 가중치 통합의 핵심 리스크이자 향후 분석 과제.
+</code></pre>
+<p>파운데이션 모델의 가치는 <strong>양의 전이</strong>에 있다. Qwen-RobotNav가 다섯 영역에서 동시에 강하다는 사실은, 통일 인터페이스 하의 혼합 학습이 (적어도 평가 분포에서는) 태스크 간 시너지를 만들어냄을 시사한다. 다만 어떤 태스크 쌍이 서로 돕고 방해하는지에 대한 ablation은 (코드·세부 미공개로) 본 리뷰 범위에서 확인 불가하며, 통합 항법 연구의 중요한 후속 주제다.</p>
+<h2>부록 H. 웨이포인트 표현과 VLN-CE 정합성</h2>
+<pre><code>VLN-CE(연속 환경)에서의 적합성
+  - 토폴로지 그래프/이산 노드에 의존하지 않음 → 임의 연속 위치 표현
+  - 8 × [x, y, heading] : 단기 경로의 위치 + 방향 동시 표현
+    └ heading 포함 → 회전·시선 정렬이 필요한 지시(&quot;왼쪽을 보고&quot;) 처리에 유리
+  - 컨트롤러가 웨이포인트 사이를 보간 추종 → 부드러운 연속 모션
+대비) 이산 행동(전진 0.25m/회전 15°) 정책:
+  - 프레임 단위 결정 → 근시안·지터, 긴 지시에서 누적 오차↑
+</code></pre>
+<p>heading을 포함한 웨이포인트는 단순 위치 목표(PointNav)보다 표현력이 높아, <strong>&quot;무엇을 향해 어떤 방향으로 갈지&quot;</strong> 를 한꺼번에 명세한다. 이는 자연어 지시가 흔히 요구하는 <em>방향·시선</em> 정보(&quot;문을 마주 보고 멈춰라&quot;)를 행동 공간에서 직접 다룰 수 있게 한다 — VLN-CE에서 R2R 72.1/RxR 76.5의 높은 성공률을 뒷받침하는 설계적 근거다.</p>
+<h2>부록 I. 재현 체크리스트 (코드 미공개 대비)</h2>
+<pre><code>[ ] 백본: Qwen3-VL (공개 가중치 활용; 2B/4B/8B 중 택)
+[ ] 액션 헤드: 4층 MLP → [8, 3] 웨이포인트 회귀
+[ ] 통일 인터페이스: task_type 토큰 + 목표 명세 인코딩
+[ ] 관측 파라미터: token_budget / temporal_decay / camera_weights 노브
+[ ] 학습 데이터: 5 태스크 혼합 (대규모; 본 논문 15.6M — 자체 수집 필요)
+[ ] agentic loop: receding-horizon 웨이포인트 추종 컨트롤러
+[ ] 평가: VLN-CE(R2R/RxR), HM3Dv2, EVT-Bench, NAVSIM, HM-EQA/EXPRESS
+주의: 좌표계·정답 웨이포인트 생성·손실 가중은 미공개 → 공식 릴리스 대기
+</code></pre>
+<h2>부록 J. VLN 트랙 내 위치와 분류 근거</h2>
+<pre><code>이 논문을 VLN 트랙으로 분류한 근거
+  ✅ 1차 태스크에 자연어 지시 추종(VLN-CE R2R/RxR) 포함, 핵심 성능 지표로 보고
+  ✅ ObjectNav·Tracking 등도 &quot;언어/의미 목표 기반 항법&quot;으로 VLN 인접
+  ⚠ Driving(주행)을 5개 중 1개로 포함하나, AD 전용 논문이 아님
+     → CLAUDE.md 제외 기준(자율주행 전용)을 위반하지 않음:
+        자연어 항법(VLN)이 주(主)이고 주행은 통합 범위의 일부
+판정: VLN 파운데이션 모델 — 자연어-접지 항법이 중심이므로 VLN 트랙 적합.
+대비) VLA/매니퓰레이션/그래스핑 요소 없음 → 제외 대상 아님.
+</code></pre>
+<p>위 분류는 본 코퍼스의 카테고리 게이트를 엄격히 적용한 결과다. Qwen-RobotNav는 <em>행동(action)</em> 을 내지만, 그 행동이 <strong>항법 웨이포인트</strong>(이동)이지 매니퓰레이션/그래스핑이 아니며, 자연어 지시 추종(VLN-CE)을 1차 평가로 보고하므로 VLN 트랙에 정확히 부합한다. &quot;Driving 포함&quot; 때문에 자율주행 논문으로 오인하지 않도록, 본 리뷰는 VLN을 중심 축으로 분석했다.</p>
+<h2>부록 K. 파운데이션 모델 관점에서의 의의와 risk</h2>
+<pre><code>의의 (왜 &quot;파운데이션 모델&quot;인가)
+  - 단일 가중치 × 5 태스크 × 3 규모 × 추론-시 노브
+    → 한 번 학습한 자산을 다양한 로봇/태스크/하드웨어로 재사용
+  - 범용 VLM(Qwen3-VL)의 시각-언어 사전지식을 항법으로 전이
+    → 데이터 효율·일반화의 토대(zero/few-shot 잠재력)
+  - 통일 인터페이스 → 새 태스크 추가가 &quot;새 목표 명세 형식&quot; 정의로 환원
+
+risk (단일 모델 통합의 그림자)
+  - 음의 전이: 태스크 간 간섭으로 특정 영역 성능 저하 가능
+  - 안전성: 단일 정책의 실패 모드가 모든 태스크에 전파될 위험
+  - 평가-배포 갭: 벤치 SOTA ≠ 실로봇 강건성(도메인/센서 노이즈)
+  - 재현성: 코드·데이터·세부 미공개 시 커뮤니티 검증 제약(현 상태)
+</code></pre>
+<p>Qwen-RobotNav의 학술적 무게중심은 &quot;VLN을 포함한 항법을 <strong>파운데이션 모델 패러다임</strong>으로 옮긴&quot; 데 있다. 이는 NLP·비전에서 입증된 &quot;대규모 사전학습 → 다태스크 일반화&quot; 공식을 로봇 항법에 적용하려는 시도이며, 다섯 영역의 동시 SOTA급 성능이 그 가능성을 뒷받침한다. 다만 파운데이션 모델 특유의 리스크(음의 전이, 단일 실패 모드 전파, 평가-배포 갭)와 현 시점의 재현성 제약(코드 미공개)은, 본 모델을 <em>실배포 가능한 제품</em>이라기보다 <em>방향을 증명한 연구</em>로 읽게 한다.</p>
+<h2>부록 L. 본 코퍼스 VLN 리뷰들과의 한눈 요약 비교</h2>
+<pre><code>                자연어지시  단일가중치  백본/방식         실로봇      코드
+AwareVLN          ✅          ✗       VLN 추론(자기인식)   시뮬       ✅
+NavWAM            ✗          ✗       세계모델(Cosmos 2B)  ✅79.2%   예정
+FloVerse          ✗          ✅(3)    디퓨전+평면도        시뮬       ✗
+BinTrack          ✅          ✗       오픈 VLM(Qwen2.5)    데이터수집 예정
+─────────────────────────────────────────────────────────────────────
+Qwen-RobotNav     ✅          ✅(5)    Qwen3-VL 파운데이션  확인불가   ✗
+</code></pre>
+<p>위 표가 보여주듯, Qwen-RobotNav의 차별점은 <strong>&quot;자연어 지시(VLN) + 단일 가중치 + 가장 넓은 태스크 통합(5종)&quot;의 동시 달성</strong>이다. FloVerse가 단일 가중치 통합(3 태스크)을 보였으나 자연어 지시가 없고, AwareVLN/BinTrack은 자연어 지시를 다루나 단일 태스크다. 즉 Qwen-RobotNav는 코퍼스 내에서 &quot;통합 폭&quot;과 &quot;자연어 항법&quot;을 함께 가진 유일한 사례로, VLN 연구의 파운데이션 모델化 흐름을 대표한다. 약점은 명확히 <strong>코드 미공개·실로봇 검증 부족</strong>으로, AwareVLN(공개)·NavWAM(실세계 79.2%)이 가진 강점을 아직 갖추지 못했다.</p>
+<h2>부록 M. 추론-시 노브 활용 시나리오 (배포 가이드)</h2>
+<pre><code>시나리오 1: 저전력 온보드(엣지 GPU, 실시간 우선)
+  - 백본: Qwen3-VL 2B
+  - token_budget: 낮음 (지연 최소화)
+  - temporal_decay: 높음 (최근 프레임 집중, 메모리 절약)
+  - cam_weights: 전방 강조
+  → 지연 우선, 단순 환경/단거리 지시에 적합
+
+시나리오 2: 고성능 서버-인-더-루프(정밀 우선)
+  - 백본: Qwen3-VL 8B
+  - token_budget: 높음 (세밀 장면 이해)
+  - temporal_decay: 낮음 (장기 맥락 유지 → 긴 RxR 지시)
+  - cam_weights: 전방위 균형 (탐색/객체 항법)
+  → 정확도 우선, 복잡한 자연어 지시·탐색에 적합
+
+시나리오 3: 동적 추적/주행(반응성 우선)
+  - 백본: 4B (균형)
+  - temporal_decay: 높음 (빠른 대상 변화 추종)
+  - cam_weights: 전방 + 측방 (추적 대상 시야 유지)
+  → EVT/NAVSIM류 동적 태스크에 적합
+</code></pre>
+<p>이처럼 <strong>하나의 학습 자산</strong>이 재학습 없이 세 배포 프로파일로 분기한다는 점이, Qwen-RobotNav가 단순한 벤치마크 모델을 넘어 <em>실배포를 의식한 파운데이션 모델</em>임을 보여준다. 향후 이 노브들을 상황 인식형으로 자동 스케줄링한다면(예: 속도·장면 복잡도에 따라 token_budget 동적 조절), 효율-성능 곡선을 더 끌어올릴 수 있다.</p>
+<hr>
+<p><em>리뷰 작성: 2026-06-18 · 분석 대상 arXiv:2606.18112 (Alibaba Qwen Team) · 코드 미공개(확인 불가)로 일부 세부는 공식 릴리스 대기, 발췌 범위 한계를 명시함.</em></p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

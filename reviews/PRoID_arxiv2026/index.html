@@ -1,0 +1,1168 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>PRoID: Predicted Rate of Information Delivery in Multi-Robot Exploration and Relaying · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 2026</div>
+    <h1>PRoID: Predicted Rate of Information Delivery in Multi-Robot Exploration and Relaying</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2604.10433">arXiv:2604.10433</a></span>
+      <span>리뷰 2026-04-25</span>
+      <span>43분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>PRoID: 다중 로봇 탐색-릴레이 최적화를 위한 예측적 정보 전달률 기반 판단 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: PRoID: Predicted Rate of Information Delivery in Multi-Robot Exploration and Relaying</li>
+<li><strong>저자 (Authors)</strong>: Seungchan Kim (교신저자), Seungjae Baek, Micah Corah, Graeme Best, Brady Moon, Sebastian Scherer</li>
+<li><strong>소속 (Affiliation)</strong>:<ul>
+<li>Seungchan Kim, Brady Moon, Sebastian Scherer: Carnegie Mellon University Robotics Institute</li>
+<li>Seungjae Baek: Ulsan National Institute of Science &amp; Technology (UNIST)</li>
+<li>Micah Corah: Colorado School of Mines</li>
+<li>Graeme Best: University of Technology Sydney</li>
+</ul>
+</li>
+<li><strong>발표처 (Published)</strong>: arXiv preprint (2026년 4월 12일 제출), arXiv:2604.10433 [cs.RO]</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2604.10433">https://doi.org/10.48550/arXiv.2604.10433</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.10433">https://arxiv.org/abs/2604.10433</a></li>
+<li><strong>코드</strong>: 공개 없음 (연구비: Defense Science and Technology Agency, DSTA, Contract #DST000EC124000205)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>다중 로봇 탐색 시스템에서 오랫동안 간과되어온 <strong>릴레이 결정 문제(relay decision problem)</strong>를 해결한다. 기존 다중 로봇 탐색 연구의 대부분은 로봇이 탐색한 정보가 자동으로 기지국에 전달된다고 암묵적으로 가정했다. 그러나 현실에서는 로봇이 통신 범위 내에서만 데이터를 전송할 수 있으며, <strong>언제 탐색을 중단하고 기지국으로 돌아가 데이터를 전달할 것인가</strong>는 탐색 효율성에 결정적인 영향을 미친다.</p>
+<p>PRoID(Predicted Rate of Information Delivery)는 이 릴레이 결정 문제에 대한 최초의 학습 기반 적응적 해결책으로, 다음을 달성한다:</p>
+<ol>
+<li><strong>적응적 릴레이 판단</strong>: 고정 스케줄이 아닌, 현재 상황과 미래 예측에 기반한 동적 릴레이 결정</li>
+<li><strong>맵 예측 활용</strong>: 학습된 맵 완성 모델로 미래 탐색 가능 정보량을 예측</li>
+<li><strong>고장 내성 (Failure Resilience)</strong>: PRoID-Safe 확장을 통해 로봇 고장 확률을 릴레이 결정에 통합</li>
+</ol>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>Multi-Robot Exploration and Relaying (MRER) 문제의 고유한 어려움:</strong></p>
+<p><strong>기존 다중 로봇 탐색 연구의 가정 vs 현실:</strong></p>
+<pre><code>기존 연구 가정:
+  - 로봇이 탐색한 정보 → 즉시 기지국에 전달
+  - 통신 범위 제한 없음
+  - 릴레이 비용 없음
+
+실제 환경:
+  - 통신 범위 d = 10m (단거리 무선)
+  - 정보 전달을 위해 로봇이 기지국 근방으로 직접 이동 필요
+  - 릴레이 이동 = 탐색 기회 손실 (opportunity cost)
+</code></pre>
+<p><strong>릴레이 결정의 트레이드오프 분석:</strong></p>
+<p>로봇 r_i의 릴레이 결정에는 세 가지 경쟁적 요인이 있다:</p>
+<ol>
+<li><p><strong>즉시 릴레이 (Relay Now):</strong></p>
+<ul>
+<li>장점: 현재까지 수집된 정보를 확실히 기지국에 전달</li>
+<li>단점: 미탐색 영역을 탐색할 기회를 잃음</li>
+</ul>
+</li>
+<li><p><strong>탐색 계속 (Keep Exploring):</strong></p>
+<ul>
+<li>장점: 더 많은 정보 수집 → 단위 시간당 정보량 최대화 가능</li>
+<li>단점: 미션 시간 초과 위험, 로봇 고장 시 전체 데이터 손실</li>
+</ul>
+</li>
+<li><p><strong>동료에게 릴레이 위임 (Relay Handoff):</strong></p>
+<ul>
+<li>장점: r_i가 계속 탐색, r_j가 릴레이 담당 → 탐색 효율 유지</li>
+<li>단점: 통신 범위 내에 동료가 있어야 함, 동료도 탐색 중단 비용</li>
+</ul>
+</li>
+</ol>
+<p><strong>기존 접근법의 한계:</strong></p>
+<pre><code>1. Final Relay Only (릴레이 완전 무시):
+   - 미션 마지막에만 기지국으로 복귀
+   - 문제: 로봇 고장 시 전체 데이터 손실 (2로봇 환경 λ=1100에서 18.8% 커버리지)
+   - 문제: 단독 로봇이 모든 정보를 보유 → 중복성 없음
+
+2. Periodic Relay (고정 주기 릴레이):
+   - 매 P 타임스텝마다 기지국 복귀
+   - P=100: 너무 잦은 릴레이 → 탐색 기회 손실
+   - P=300: 릴레이 부족 → 미션 시간 내 전달 불확실
+   - 문제: 환경 구조, 팀 구성, 로봇 위치에 무관한 고정 전략
+
+3. 이상적인 적응형 릴레이 기준의 필요성:
+   - 현재 보유 정보량
+   - 미래 탐색으로 얻을 예상 정보량
+   - 팀 내 다른 로봇의 릴레이 계획
+   - 로봇 고장 확률
+   → 모든 요인을 통합한 단일 기준 지표 필요
+</code></pre>
+<h3>2.2 형식적 문제 정의</h3>
+<p><strong>MRER 공식화:</strong></p>
+<pre><code>환경: E ⊂ R^2, 2D 실내 평면도 (알려지지 않음)
+
+로봇 팀: {r_1, ..., r_n}
+  - 초기 위치: 공통 출발점 x_0
+  - 기지국: B = {x_b = x_0} (고정)
+  - 이동 속도: 상수 v
+  - 센서: LiDAR, 감지 범위 l = 20m
+  - 통신: 범위 d = 10m의 단거리 무선
+
+상태:
+  - x_{i,t}: r_i의 2D 위치 (t 시각)
+  - O_{i,t}: r_i의 로컬 점유 격자 지도 (t 시각)
+
+통신 함수:
+  C(x_i, x_j) = 1  if ||x_i - x_j|| &lt; d
+              = 0  otherwise
+
+미션:
+  - 시간 제한: T (총 미션 시간)
+  - 목표: I(O_b(T)) 최대화
+    여기서 O_b(T)는 T 시각에 기지국이 보유한 통합 지도
+
+정보 측정: I(O) = |{free cells in O}| / |E| (커버리지 비율)
+</code></pre>
+<p><strong>릴레이 결정 공간:</strong></p>
+<p>각 타임스텝에서 각 로봇은 다음 중 하나를 결정:</p>
+<pre><code>EXPLORE(f*): 최선 프론티어 f*로 이동하여 계속 탐색
+RELAY:       기지국으로 즉시 복귀하여 정보 전달
+HANDOFF(r_j): r_j에게 릴레이 의무를 위임하고 계속 탐색
+</code></pre>
+<p><strong>목표 함수:</strong></p>
+<pre><code>최적화: max_{π} E[I(O_b(T))]
+
+여기서 π = 각 로봇의 릴레이 결정 정책 (시각과 상태 기반)
+</code></pre>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 PRoID — 예측적 정보 전달률</h3>
+<p><strong>핵심 아이디어</strong>: 릴레이를 하면 단위 시간당 얼마나 많은 정보를 전달할 수 있는가를 현재 시점과 미래 탐색 후 두 가지로 비교하여, 현재 릴레이가 더 효율적일 때만 릴레이를 수행한다.</p>
+<p><strong>Step 1: 비보고 정보 계산 (Unreported Information)</strong></p>
+<p>로봇 r_i가 현재 보유 중이지만 아직 기지국에 전달하지 못한 고유 정보:</p>
+<pre><code>I_unreported = I(O_{i,t} \ (O_reported,i,t ∪ O_delegated,i,t))
+
+여기서:
+  O_{i,t}:           r_i의 현재 로컬 지도
+  O_reported,i,t:    이미 기지국에 전달된 영역
+  O_delegated,i,t:   동료 로봇이 릴레이할 것으로 확인된 영역
+
+비보고 정보 = 전체 로컬 지도 - (이미 보고된 영역) - (다른 로봇이 보고할 영역)
+</code></pre>
+<p><strong>Step 2: 현재 정보 전달률 (Current Rate of Information Delivery, RoID)</strong></p>
+<p>지금 당장 릴레이하면 단위 시간당 얼마나 많은 정보를 전달할 수 있는가:</p>
+<pre><code>Γ_now = I_unreported / t_{cur→base}
+
+여기서:
+  t_{cur→base} = A* 경로 기반 현재 위치 → 기지국 예상 이동 시간
+               = PathLength(x_{i,t}, x_b) / v
+</code></pre>
+<p><strong>직관</strong>: 비보고 정보가 많을수록, 기지국이 가까울수록 Γ_now가 높다 → 지금 릴레이가 효율적.</p>
+<p><strong>Step 3: 맵 예측 (Map Prediction)</strong></p>
+<p>학습된 이미지 인페인팅 네트워크 G로 현재 로컬 지도에서 전체 환경 지도를 예측:</p>
+<pre><code>M_{i,t} ← G(O_{i,t})
+
+여기서:
+  G: 이미지 인페인팅 네트워크 (Suvorov et al., 2022)
+  O_{i,t}: 현재 로컬 점유 격자 (알려진 영역 + 장애물)
+  M_{i,t}: 예측된 전체 환경 지도 (아직 탐색하지 않은 영역 포함)
+</code></pre>
+<p><strong>맵 예측 모델 상세:</strong></p>
+<pre><code>Architecture: Fourier Convolution 기반 Large Mask Inpainting
+Training:     KTH Indoor Floorplan Dataset (훈련 분할)
+Ensemble:     3개 예측기 사용 → E[I_pred] 계산
+Input:        현재 점유 격자 (알려진 자유 공간 + 장애물 + 미지 영역)
+Output:       완성된 실내 평면도 예측
+</code></pre>
+<p><strong>Step 4: 예측적 정보 이득 계산 (Predicted Information Gain)</strong></p>
+<p>최선 프론티어 f*로 이동하는 경로 π_{i,t}(f*)를 따라, 예측 지도에서 레이 캐스팅으로 가시 영역 계산:</p>
+<pre><code class="language-python"># 경로 상 모든 점에서 레이 캐스팅 (앙상블 평균)
+for predictor in [G1, G2, G3]:
+    M = predictor(O_{i,t})
+    for p in path_to_frontier(f*):
+        visible_cells = raycast(p, M, range=20m)  # 20m 레이 캐스팅
+        all_visible |= visible_cells
+
+# 연결성 기반 홍수 채우기로 도달 가능 영역 확장
+nu = flood_fill(all_visible)
+
+# 예측 정보 이득 = 새로 관측될 셀 수
+I_pred = |nu - O_{i,t}|  # 현재 지도에 없는 새 정보
+</code></pre>
+<p><strong>앙상블 및 확률적 레이 캐스팅:</strong></p>
+<pre><code>3개 예측기로 동일 O_{i,t}를 처리 → M_1, M_2, M_3
+각 위치의 점유 확률: p_occ = (M_1 + M_2 + M_3) / 3
+레이 캐스팅 결정: occupied if p_occ &gt; 0.5 (임계값)
+→ 불확실성을 암묵적으로 처리
+</code></pre>
+<p><strong>Step 5: 예측적 정보 전달률 (PRoID)</strong></p>
+<p>프론티어까지 탐색 후 릴레이하면 단위 시간당 얼마나 많은 정보를 전달할 수 있는가:</p>
+<pre><code>Γ_pred = (I_unreported + E[I_pred]) / (t_{cur→front} + t_{front→base})
+
+여기서:
+  E[I_pred]:      3개 앙상블 예측기의 평균 정보 이득
+  t_{cur→front}: 현재 위치 → 프론티어 f* 예상 이동 시간
+  t_{front→base}: 프론티어 f* → 기지국 예상 이동 시간
+  (두 시간 모두 A* 경로 기반)
+</code></pre>
+<p><strong>Step 6: 릴레이 결정 규칙</strong></p>
+<pre><code>릴레이 결정:
+
+if Γ_now &gt; α * Γ_pred:
+    RELAY()  # 지금 릴레이가 더 효율적 → 즉시 기지국으로 복귀
+else:
+    EXPLORE(f*)  # 탐색 계속이 더 효율적 → 계속 탐색
+
+여기서 α ≥ 1: 탐색 편향(exploration bias) 파라미터
+              α = 2.0이 실험적으로 최적
+</code></pre>
+<p><strong>α 파라미터의 역할:</strong></p>
+<pre><code>α = 1.0: 현재 = 미래 예측만 같아도 즉시 릴레이 → 너무 잦은 릴레이
+α = 1.5: 현재가 미래 대비 50% 이상 높을 때만 릴레이 → 적당
+α = 2.0: 현재가 미래 대비 2× 이상 높을 때만 릴레이 → 최적 (실험 확인)
+α &gt; 2.0: 너무 늦은 릴레이 → 미션 시간 초과 위험
+
+직관: α가 클수록 더 오래 탐색 → α=2.0은 &quot;현재 돌아가는 것이 
+       미래 탐색 후 돌아가는 것의 2배 이상 효율적일 때만 릴레이&quot; 의미
+</code></pre>
+<h3>3.2 PRoID-Safe — 고장 내성 확장</h3>
+<p><strong>동기</strong>: 실제 로봇은 고장날 수 있다. 고장이 발생하면 해당 로봇이 수집한 모든 데이터가 손실된다. PRoID-Safe는 이 위험을 릴레이 결정에 명시적으로 통합한다.</p>
+<p><strong>Weibull 고장 분포:</strong></p>
+<p>로봇 수명(time-to-failure)이 Weibull 분포를 따른다고 가정:</p>
+<pre><code>누적 고장 확률:
+F(t) = 1 - exp(-(t/λ)^k)
+
+순간 고장률(hazard rate):
+h(t) = (k/λ) * (t/λ)^(k-1)
+
+생존 함수:
+S(t) = 1 - F(t) = exp(-(t/λ)^k)
+
+파라미터:
+  λ (scale): 특성 수명 (커질수록 로봇이 오래 삼)
+  k (shape): 고장 패턴 형태
+    k &lt; 1: 초기 실패율 감소 (마모 초기)
+    k = 1: 상수 실패율 (지수 분포, 기억 없음)
+    k &gt; 1: 실패율 증가 (노화/마모, 실험에서 k=1.5)
+    k = 1.5 → 시간이 지날수록 고장 위험 가속화
+</code></pre>
+<p><strong>Weibull 모델의 현실적 의의:</strong></p>
+<pre><code>실험 설정: k = 1.5, λ ∈ {1100, 900}
+
+t = 500에서의 생존 확률 (λ=1100):
+  S(500) = exp(-(500/1100)^1.5) ≈ exp(-0.304) ≈ 0.738
+
+t = 800에서의 생존 확률 (λ=1100):
+  S(800) = exp(-(800/1100)^1.5) ≈ exp(-0.572) ≈ 0.564
+
+→ 미션 시간이 길어질수록 고장 위험이 비선형적으로 증가
+→ 늦은 릴레이는 단순히 &quot;늦은&quot; 것이 아니라 &quot;위험&quot;
+</code></pre>
+<p><strong>PRoID-Safe 결정 규칙:</strong></p>
+<pre><code>현재 릴레이 생존 확률:
+  S_now = S(t + t_{cur→base})
+
+미래 탐색 후 릴레이 생존 확률:
+  S_pred = S(t + t_{cur→front} + t_{front→base})
+
+위험 조정 정보 전달률:
+  실효 현재 전달률 = Γ_now × S_now
+  실효 미래 전달률 = α × Γ_pred × S_pred
+
+릴레이 결정:
+if Γ_now × S_now &gt; α × Γ_pred × S_pred:
+    RELAY()
+else:
+    EXPLORE(f*)
+</code></pre>
+<p><strong>직관적 이해:</strong></p>
+<pre><code>S_now &gt; S_pred 항상 성립 (S는 시간에 따라 감소, t_{cur→front} &gt; 0이므로)
+
+따라서:
+  고장 위험 없음 (S_now ≈ S_pred ≈ 1):
+    → PRoID와 동일한 결정
+
+  고장 위험 높음 (S_now &gt;&gt; S_pred):
+    → Γ_now × S_now 가 크게 상승 → 더 일찍 릴레이 트리거
+    → &quot;고장나기 전에 데이터를 전달하자&quot;
+</code></pre>
+<p><strong>예시 (Fig. 7 기반):</strong></p>
+<pre><code>시각 T=320, λ=1100:
+  Γ_now = 0.8, Γ_pred = 0.5 (PRoID: 1.6α &gt; α → 릴레이 안 해도 됨, α=2이면 0.8 &gt; 1.0 → No)
+  S_now = S(320 + 50) = 0.89
+  S_pred = S(320 + 200 + 50) = 0.81
+
+  PRoID: 0.8 &gt; 2 × 0.5 = 1.0? → No → 탐색 계속
+  PRoID-Safe: 0.8×0.89=0.712 &gt; 2 × 0.5×0.81=0.81? → No... 
+              (논문에서는 구체적 수치 확인 필요, 방향성 일치)
+
+시각 T=560 (Final Relay Only 로봇 고장):
+  Final Relay Only: 기지국에서 아직 멀리 있다가 고장 → 전체 데이터 손실
+  PRoID-Safe: T=320에서 이미 릴레이 → 데이터 안전 전달됨
+</code></pre>
+<h3>3.3 멀티 로봇 조율 시스템 (Multi-Robot Coordination)</h3>
+<p>PRoID는 독립 실행되지 않고, 다음 조율 메커니즘과 통합된다:</p>
+<p><strong>3.3.1 정보 공유 (Information Sharing)</strong></p>
+<p>통신 범위 내 로봇 쌍 (r_i, r_j)에서:</p>
+<pre><code>지도 융합: O_ij = O_i ∪ O_j (양방향 공유)
+          → 각 로봇이 상대방의 지도를 획득
+
+궤적 공유: r_j의 완료 궤적 ζ_j, 계획된 경로 π_j를 r_i에게 전달
+          → 프론티어 선택에 활용
+
+위임 셀 업데이트: O_delegated,i ← O_delegated,i ∪ O_{j&#39;s assigned area}
+                 → I_unreported 재계산
+</code></pre>
+<p><strong>3.3.2 프론티어 페널티 (Frontier Penalty)</strong></p>
+<p>팀 내 다른 로봇이 이미 향하고 있는 프론티어에는 페널티 부여:</p>
+<pre><code class="language-python">commitment_set = ∪_{j≠i} (ζ_j ∪ π_j)  # 팀 전체 이동 예정 영역
+
+for frontier f in frontier_list:
+    if ∃p&#39; ∈ commitment_set s.t. ||f - p&#39;|| ≤ ε:
+        frontier_score[f] -= γ  # γ = 10^6 (거대 페널티로 사실상 제외)
+
+# 파라미터:
+# ε_traj = 5m (완료 궤적 기반 페널티 반경)
+# ε_plan = 10m (계획 경로 기반 페널티 반경)
+</code></pre>
+<p><strong>3.3.3 릴레이 핸드오프 (Relay Handoff)</strong></p>
+<p>r_i가 릴레이 중, r_j가 더 기지국에 가까운 경우:</p>
+<pre><code>조건: C(r_i, r_j) = 1 AND ||x_j - x_b|| &lt; ||x_i - x_b||
+
+동작:
+  1. r_i → r_j: 모든 비보고 정보 전송
+  2. r_j가 릴레이 의무 인수
+  3. r_i는 탐색 재개
+
+효과: r_i가 불필요하게 기지국까지 이동하지 않아도 됨
+      → 평균 릴레이 비용 감소
+</code></pre>
+<p><strong>3.3.4 최종 복귀 보장 (Final Return Guarantee)</strong></p>
+<pre><code>잔여 시간 T - t ≤ t_{x_i → x_b}이면:
+  → 무조건 기지국으로 복귀 시작
+  
+이 조건은 PRoID/PRoID-Safe와 독립적으로 항상 적용됨.
+목적: 모든 로봇이 미션 시간 내 최소 1번 릴레이 보장.
+</code></pre>
+<h3>3.4 맵 예측 모델 상세</h3>
+<p><strong>Architecture: Suvorov et al. (2022) Fourier Convolution Inpainting</strong></p>
+<pre><code>기반 모델: Resolution-Robust Large Mask Inpainting with Fourier Convolutions
+(LaMa: Large Mask Inpainting)
+
+핵심 특징:
+  - Fast Fourier Transform (FFT) 기반 컨볼루션
+  - 대규모 마스크(미지 영역)에 강건
+  - 고해상도 이미지에서도 일관된 성능
+
+입력 인코딩:
+  - 알려진 자유 공간: 0 (흰색)
+  - 알려진 장애물: 1 (검정)
+  - 미지 영역: 마스크 처리
+
+출력:
+  - 예측된 전체 평면도 (연속값 → 임계값 0.5로 이진화)
+</code></pre>
+<p><strong>KTH 실내 평면도 데이터셋 파인튜닝:</strong></p>
+<pre><code>데이터셋: KTH Indoor Floorplan Dataset (aydemir2012can)
+훈련 분할: KTH 훈련 세트에서 파인튜닝
+테스트 분할: 실험에 사용되는 5개 평면도 (훈련 분할과 분리)
+
+파인튜닝 이유:
+  - 실내 평면도의 구조적 특성(직각 벽, 복도 구조)에 특화
+  - 일반 이미지 인페인팅 모델은 이런 구조를 모름
+  - 미지 영역을 &quot;벽 또는 자유 공간&quot;으로 이진 예측해야 함
+</code></pre>
+<p><strong>앙상블 기반 불확실성 처리:</strong></p>
+<pre><code>3개의 독립 인페인팅 모델 학습:
+  - 동일 아키텍처 (LaMa)
+  - 서로 다른 랜덤 시드로 초기화 및 훈련
+
+앙상블 예측:
+  M_ensemble(p) = (M_1(p) + M_2(p) + M_3(p)) / 3
+
+레이 캐스팅 결정:
+  occupied(p) = 1 if M_ensemble(p) &gt; 0.5, else 0
+
+효과: 단일 모델보다 안정적인 예측, 극단적 오류 완화
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 단일 로봇 의사 결정 파이프라인</h3>
+<pre><code>[현재 상태: x_{i,t}, O_{i,t}]
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                  PRoID 결정 파이프라인                           │
+│                                                                  │
+│  1. 비보고 정보 계산                                              │
+│     I_unreported = I(O_i \ (O_reported ∪ O_delegated))          │
+│     t_{cur→base} = A*(x_i, x_b) / v                            │
+│     Γ_now = I_unreported / t_{cur→base}                         │
+│                                                                  │
+│  2. 최선 프론티어 선택 (PIPE 플래너)                               │
+│     f* = argmax_{f ∈ frontiers} PIPE_score(f, O_i, M_i)         │
+│     t_{cur→front} = A*(x_i, f*) / v                            │
+│     t_{front→base} = A*(f*, x_b) / v                           │
+│                                                                  │
+│  3. 맵 예측 + 정보 이득 추정                                       │
+│     {M_1, M_2, M_3} = {G_1, G_2, G_3}(O_i)                    │
+│     for p in path(x_i → f*):                                    │
+│         visible(p) = probabilistic_raycast(p, {M_k})             │
+│     ν = flood_fill(∪_p visible(p))                              │
+│     E[I_pred] = |ν - O_i|                                       │
+│                                                                  │
+│  4. PRoID 계산                                                    │
+│     Γ_pred = (I_unreported + E[I_pred]) / (t_{cur→front}        │
+│               + t_{front→base})                                 │
+│                                                                  │
+│  5. 릴레이 결정                                                   │
+│     if Γ_now &gt; α * Γ_pred:                                      │
+│         → RELAY                                                  │
+│     else:                                                        │
+│         → EXPLORE(f*)                                            │
+│                                                                  │
+│  [PRoID-Safe 모드]: 위 기준에 S_now, S_pred 가중치 추가           │
+└─────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+[행동 실행: RELAY | EXPLORE(f*) | HANDOFF(r_j)]
+</code></pre>
+<h3>4.2 다중 로봇 통신 이벤트 처리</h3>
+<pre><code>통신 이벤트 (C(r_i, r_j) = 1 발생 시):
+
+r_i, r_j 쌍에서:
+┌─────────────────────────────────────────────┐
+│ 지도 교환: O_i ← O_i ∪ O_j, O_j ← O_j ∪ O_i│
+│ 궤적 공유: r_i learns (ζ_j, π_j), vice versa│
+│ 위임 업데이트: O_delegated_i ← 동료 릴레이 영역│
+│ 핸드오프 확인: 릴레이 중 r_i, r_j 위치 비교   │
+└─────────────────────────────────────────────┘
+         │
+         ▼
+[각 로봇이 업데이트된 상태로 PRoID 재계산]
+</code></pre>
+<h3>4.3 시스템 데이터 흐름</h3>
+<pre><code>시각 t에서 r_i의 전체 의사결정:
+
+[센서] LiDAR 스캔 → [지도 업데이트] 점유 격자 O_{i,t}
+          │
+          ├──[통신]── 동료와 교환 → O_delegated 업데이트
+          │
+          ├──[최종 복귀 체크]── T - t ≤ t_return → 강제 복귀
+          │
+          ├──[핸드오프 체크]── 동료에게 위임 가능?
+          │
+          ├──[PRoID 계산]──
+          │   맵 예측 → 정보 이득 → Γ_now vs Γ_pred
+          │
+          └──[결정]── RELAY / EXPLORE(f*)
+                        │
+                        ▼
+                [이동 실행] A* 경로 계획 → 이동
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<p><strong>KTH Indoor Floorplan Dataset:</strong></p>
+<pre><code>출처: Aydemir et al. (2012), &quot;Can I See My Floorplan from Here?&quot;
+특성:
+  - 실제 건물 실내 평면도 (스위스 KTH 캠퍼스)
+  - 다양한 규모와 레이아웃
+  - 훈련/테스트 분할 존재
+
+실험에 사용된 5개 테스트 맵:
+  - 3개: 60m × 205m
+  - 2개: 88m × 265m
+  - 픽셀-미터 비율: 10:1 (해상도 10cm/픽셀)
+</code></pre>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<pre><code>주 지표: Coverage Ratio (커버리지 비율)
+  = I(O_b(T)) / |E|
+  = (T 시각에 기지국 지도에서 발견된 자유 공간) / (전체 환경 면적)
+
+의의:
+  - MRER의 직접적 목표 측정
+  - 단순 탐색 커버리지가 아닌 &quot;기지국에 전달된&quot; 정보량
+  - 로봇이 고장나면 전달 안 된 데이터는 카운트 안 됨 → 고장 내성 중요
+</code></pre>
+<h3>5.3 실험 구성</h3>
+<pre><code>로봇 수: n ∈ {2, 3, 4, 5}
+시작 위치: 맵당 5개 랜덤 위치
+총 구성: 5 맵 × 5 시작 위치 × 4 로봇 수 = 100개 구성 / 조건
+
+고장 시나리오:
+  - 고장 없음 (No Failure)
+  - 고장 λ=1100 (중간 고장 위험)
+  - 고장 λ=900 (높은 고장 위험)
+  공통 설정: k = 1.5 (가속 노화 패턴)
+
+미션 시간: T = 1000 타임스텝
+</code></pre>
+<h3>5.4 정량적 결과 (Quantitative Results)</h3>
+<p><strong>표 1: 커버리지 비율 (%) — 고장 없음 시나리오</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>n=2</th>
+<th>n=3</th>
+<th>n=4</th>
+<th>n=5</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Periodic P=100</td>
+<td>32.8</td>
+<td>41.3</td>
+<td>51.5</td>
+<td>57.1</td>
+</tr>
+<tr>
+<td>Periodic P=200</td>
+<td>40.9</td>
+<td>51.6</td>
+<td>59.0</td>
+<td>68.2</td>
+</tr>
+<tr>
+<td>Periodic P=300</td>
+<td>46.4</td>
+<td>56.0</td>
+<td>61.8</td>
+<td>65.7</td>
+</tr>
+<tr>
+<td>Final Relay Only</td>
+<td><strong>58.4</strong></td>
+<td>67.1</td>
+<td>68.9</td>
+<td>71.4</td>
+</tr>
+<tr>
+<td><strong>PRoID</strong></td>
+<td>58.2</td>
+<td><strong>68.4</strong></td>
+<td><strong>72.3</strong></td>
+<td><strong>73.5</strong></td>
+</tr>
+</tbody></table></div>
+<p><em>PRoID vs 최선 고정 주기 (P=300):</em></p>
+<pre><code>n=2: +11.8pp,  n=3: +12.4pp,  n=4: +10.5pp,  n=5: +7.8pp
+</code></pre>
+<p><strong>표 2: 커버리지 비율 (%) — 고장 시나리오 (λ=1100)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>n=2</th>
+<th>n=3</th>
+<th>n=4</th>
+<th>n=5</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Periodic P=100</td>
+<td>24.3</td>
+<td>37.4</td>
+<td>46.2</td>
+<td>48.2</td>
+</tr>
+<tr>
+<td>Periodic P=200</td>
+<td>30.7</td>
+<td>45.8</td>
+<td>55.8</td>
+<td>56.8</td>
+</tr>
+<tr>
+<td>Periodic P=300</td>
+<td>35.7</td>
+<td>50.9</td>
+<td>58.9</td>
+<td>59.2</td>
+</tr>
+<tr>
+<td>Final Relay Only</td>
+<td>18.8</td>
+<td>49.1</td>
+<td>63.0</td>
+<td>66.4</td>
+</tr>
+<tr>
+<td>PRoID</td>
+<td>34.0</td>
+<td>57.4</td>
+<td>65.1</td>
+<td>68.2</td>
+</tr>
+<tr>
+<td><strong>PRoID-Safe</strong></td>
+<td><strong>42.8</strong></td>
+<td><strong>60.7</strong></td>
+<td><strong>68.1</strong></td>
+<td><strong>71.4</strong></td>
+</tr>
+</tbody></table></div>
+<p><em>PRoID-Safe vs Final Relay Only (λ=1100, n=2):</em></p>
+<pre><code>+24.0pp: Final Relay Only은 고장 시 데이터 대부분 손실 (18.8%)
+         PRoID-Safe는 조기 릴레이로 42.8% 달성 (+128% 향상)
+</code></pre>
+<p><strong>표 3: 커버리지 비율 (%) — 고장 시나리오 (λ=900, 더 가혹)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>n=2</th>
+<th>n=3</th>
+<th>n=4</th>
+<th>n=5</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Periodic P=100</td>
+<td>17.7</td>
+<td>24.9</td>
+<td>44.4</td>
+<td>47.1</td>
+</tr>
+<tr>
+<td>Periodic P=200</td>
+<td>21.9</td>
+<td>33.7</td>
+<td>53.7</td>
+<td>56.9</td>
+</tr>
+<tr>
+<td>Periodic P=300</td>
+<td>25.6</td>
+<td>35.5</td>
+<td>56.6</td>
+<td>56.7</td>
+</tr>
+<tr>
+<td>Final Relay Only</td>
+<td>16.5</td>
+<td>37.2</td>
+<td>53.6</td>
+<td>61.0</td>
+</tr>
+<tr>
+<td>PRoID</td>
+<td>32.3</td>
+<td>42.0</td>
+<td>58.3</td>
+<td>60.1</td>
+</tr>
+<tr>
+<td><strong>PRoID-Safe</strong></td>
+<td><strong>35.7</strong></td>
+<td><strong>44.1</strong></td>
+<td><strong>62.9</strong></td>
+<td><strong>67.3</strong></td>
+</tr>
+</tbody></table></div>
+<p><em>PRoID-Safe vs 최선 고정 주기 (P=300, λ=900):</em></p>
+<pre><code>n=2: +10.1pp,  n=3: +8.6pp,  n=4: +6.3pp,  n=5: +10.6pp
+</code></pre>
+<h3>5.5 절제 연구 (Ablation Study, n=3 고장 없음)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>구성</th>
+<th>커버리지 (%)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>PRoID Full System</strong></td>
+<td><strong>67.9</strong></td>
+</tr>
+<tr>
+<td>Relay Handoff 제거</td>
+<td>59.8 (-8.1pp)</td>
+</tr>
+<tr>
+<td>Trajectory &amp; Plan Sharing 제거</td>
+<td>53.5 (-14.4pp)</td>
+</tr>
+<tr>
+<td>α=1.0</td>
+<td>49.0 (-18.9pp)</td>
+</tr>
+<tr>
+<td>α=1.2</td>
+<td>61.1 (-6.8pp)</td>
+</tr>
+<tr>
+<td>α=1.5</td>
+<td>66.3 (-1.6pp)</td>
+</tr>
+<tr>
+<td>α=2.0 (선택됨)</td>
+<td>67.9 (기준)</td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 발견:</strong></p>
+<pre><code>1. Trajectory &amp; Plan Sharing이 가장 중요한 단일 컴포넌트 (+14.4pp)
+   → 팀 내 계획 공유가 중복 탐색 방지에 결정적
+   
+2. Relay Handoff도 중요 (+8.1pp)
+   → 동료에게 릴레이 위임으로 탐색 기회 보존
+   
+3. α=2.0이 최적 파라미터
+   → 너무 낮으면 (α=1.0) 탐색 기회를 너무 일찍 포기
+   → 너무 높으면 (테스트 안 됨) 릴레이를 너무 늦게 수행
+</code></pre>
+<h3>5.6 리얼월드 실험</h3>
+<p>논문에 실제 하드웨어 실험 없음. 모든 실험은 KTH 평면도를 기반으로 한 시뮬레이션 환경에서 진행. 논문의 Future Work에서 실제 하드웨어 검증을 명시적으로 언급.</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>6.1 MRER 문제의 공식화</h3>
+<p><strong>PRoID는 다중 로봇 탐색에서 릴레이 결정 문제를 독립적 최적화 대상으로 최초로 공식화했다.</strong> 이전 연구들은 릴레이를 무시하거나 (Final Relay Only) 고정 스케줄로 처리했다. PRoID는 이를 동적 의사결정 문제로 재정의하고, 측정 가능한 기준(정보 전달률)으로 해결한다.</p>
+<p>이 공식화의 중요성: MRER 문제는 탐색(exploration)과 정보 전달(delivery)의 결합 최적화 문제이며, 단순한 탐색 최적화로 환원되지 않는다. PRoID는 이 차이를 명시적으로 다루는 첫 번째 적응적 방법이다.</p>
+<h3>6.2 학습 기반 미래 정보 이득 예측</h3>
+<p>기존 릴레이 결정 방법은 현재 상태만 고려했다. PRoID는 <strong>학습된 맵 예측 모델로 미래 정보 이득을 추정</strong>하여 결정에 활용한다. 이는 근시안적(myopic) 정책에서 예측적(anticipatory) 정책으로의 전환이다.</p>
+<p>맵 예측 → 레이 캐스팅 → 홍수 채우기의 파이프라인은 현재 지도 상태에서 &quot;다음 방문지에서 얼마나 많은 새 정보를 얻을 수 있는가&quot;를 합리적으로 추정한다.</p>
+<h3>6.3 PRoID-Safe: 고장 인식 릴레이 결정</h3>
+<p>Weibull 고장 분포를 릴레이 결정에 통합하는 PRoID-Safe는 <strong>실용적 로봇 시스템을 위한 핵심 기여</strong>다. 실제 배치 환경에서 로봇 고장은 무시할 수 없으며, 고장 인식 없는 릴레이 정책은 2로봇 가혹 고장 환경에서 최대 43% 이하의 성능을 보인다 (Final Relay Only, λ=900).</p>
+<p>PRoID-Safe는 수식적으로 우아하다: 기존 Γ_now, Γ_pred에 생존 확률 S_now, S_pred를 곱하는 것만으로, 고장 위험이 높아질수록 자동으로 조기 릴레이로 편향된다.</p>
+<h3>6.4 포괄적 조율 시스템</h3>
+<p>PRoID 단독이 아닌, 정보 공유 + 프론티어 페널티 + 릴레이 핸드오프가 통합된 완전한 다중 로봇 조율 시스템을 제안한다. 절제 연구가 보여주듯, 이 각 컴포넌트가 독립적으로 중요한 기여를 한다.</p>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 핵심 하이퍼파라미터</h3>
+<pre><code>통신 범위:              d = 10m
+LiDAR 감지 범위:        l = 20m
+탐색 편향 파라미터:      α = 2.0
+프론티어 페널티 (궤적):  ε_traj = 5m, γ = 10^6
+프론티어 페널티 (계획):  ε_plan = 10m, γ = 10^6
+앙상블 크기:            3개 인페인팅 모델
+레이 캐스팅 임계값:      p_occ &gt; 0.5
+Weibull 형상 파라미터:   k = 1.5
+Weibull 척도 파라미터:   λ ∈ {1100, 900}
+미션 시간:              T = 1000 타임스텝
+</code></pre>
+<h3>7.2 PIPE 플래너 (프론티어 스코어링)</h3>
+<p>PRoID의 프론티어 선택은 PIPE 플래너 (Baek et al., 2025, baek2025pipe)에 의존한다:</p>
+<pre><code>PIPE 플래너 설정:
+  앙상블 예측기: 3개 (PRoID와 동일)
+  확률적 레이 캐스팅 임계값: 0.5
+  거리 변환(distance transform) 활용: True
+  가상 레이저 범위: 20m
+  가상 레이저 수: 250
+  경로 레이 캐스팅 샘플링 간격: 25 포인트
+  최소 프론티어 영역 크기: 10 픽셀
+
+PIPE는 각 프론티어의 예측 정보 이득을 점수화하여 최선 프론티어 f* 선택.
+PRoID는 PIPE의 f*를 사용하지만, PIPE의 점수가 아닌 PRoID 기준으로 릴레이 결정.
+</code></pre>
+<h3>7.3 경로 계획 (A*)</h3>
+<pre><code>이동 시간 계산: t = PathLength(A*(x_start, x_goal)) / v
+
+A* 입력:
+  - 현재 점유 격자 O_{i,t}의 알려진 자유 공간
+  - 미지 영역은 통과 불가 처리 (보수적 가정)
+
+주의: 실제 환경에서 A* 경로는 미지 영역을 피하므로, 
+      실제 프론티어까지의 이동 시간이 예측보다 길 수 있음.
+      (프론티어로 이동하면서 새 자유 공간 발견 → 경로 단축 가능)
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 정보 이론적 관점</h3>
+<p><strong>PRoID의 결정 기준은 정보 이론의 Rate-Distortion Theory와 유사하다:</strong></p>
+<pre><code>Rate-Distortion 관점:
+  - &quot;Rate&quot;: 단위 시간당 전달 가능한 정보 비트 수
+  - &quot;Distortion&quot;: 미전달 정보로 인한 손실
+  PRoID: Γ_now vs Γ_pred = 즉시 릴레이 rate vs 탐색 후 릴레이 rate 비교
+
+Expected Information Theory와의 연결:
+  E[I(O_b(T))] ≈ Σ_i E[I_delivered by r_i]
+  PRoID: 각 로봇의 E[I_delivered]를 최대화하는 릴레이 타이밍 선택
+</code></pre>
+<p><strong>앙상블 맵 예측의 베이즈적 해석:</strong></p>
+<pre><code>3개 예측기의 평균 = 사후 분포의 근사
+p(occupied | O_{i,t}) ≈ (M_1(p) + M_2(p) + M_3(p)) / 3
+
+이는 베이즈 모델 평균(Bayesian Model Averaging)과 동일한 구조.
+단, 완전한 베이즈 추론이 아닌 근사 앙상블이므로 불확실성 과소 추정 가능.
+</code></pre>
+<h3>8.2 분산 의사결정 구조 분석</h3>
+<p><strong>PRoID는 완전 분산(fully distributed) 시스템이다:</strong></p>
+<pre><code>중앙 조율자 없음:
+  각 로봇 r_i가 독립적으로 PRoID 계산 및 결정
+
+전역 정보 공유 없음:
+  통신 범위 내 로봇과만 국소적으로 정보 교환
+
+일관성 보장 없음:
+  두 로봇이 동시에 동일 프론티어를 향해 이동 가능
+  (프론티어 페널티로 완화되지만, 완전 해소는 불가)
+</code></pre>
+<p><strong>분산 시스템의 트레이드오프:</strong></p>
+<pre><code>장점: 
+  - 단일 장애점(single point of failure) 없음
+  - 통신 지연에 강건
+  - 로봇 수 증가에 선형 확장
+
+단점:
+  - 최적해 보장 없음
+  - 부분 정보로 인한 중복 탐색 가능
+  - 릴레이 결정의 글로벌 최적성 미보장
+</code></pre>
+<h3>8.3 확장성 한계 분석</h3>
+<p><strong>로봇 수 증가 (n → ∞)에서의 거동:</strong></p>
+<pre><code>n이 커질수록:
+  1. 탐색 효율 향상: 더 많은 로봇이 미지 영역을 분할 탐색
+  2. 릴레이 부담 분산: 각 로봇이 보유한 고유 정보량 감소
+  3. 통신 오버헤드 증가: O(n^2) 잠재 통신 쌍
+
+실험 결과 (고장 없음):
+  n=2: 58.2%,  n=3: 68.4%,  n=4: 72.3%,  n=5: 73.5%
+
+n=4 → n=5의 한계 이득 (+1.2pp)이 n=3 → n=4 (+3.9pp)보다 작음:
+  → 수확 체감 효과: 로봇 추가 효율이 감소
+  → n=4~5 이후에는 추가 로봇의 탐색 기여보다 조율 비용이 큼
+</code></pre>
+<p><strong>환경 크기 증가에서의 거동:</strong></p>
+<p>PRoID의 맵 예측 정확도는 환경 크기에 의존한다:</p>
+<pre><code>소규모 환경 (&lt; 50×50m): 맵 예측 정확도 높음 → PRoID 성능 우수
+대규모 환경 (&gt; 200×200m): 
+  - 부분 지도에서 전체 환경 예측 어려움
+  - 맵 예측 오류 증가 → Γ_pred 추정 부정확
+  - PRoID 결정 품질 저하 가능
+</code></pre>
+<h3>8.4 미래 탐색 방향</h3>
+<p><strong>1. 학습 기반 릴레이 정책:</strong></p>
+<p>PRoID는 수동 설계된 규칙 (Γ_now &gt; α * Γ_pred)을 사용한다. 이를 강화학습으로 대체하면:</p>
+<pre><code>상태: (I_unreported, Γ_now, Γ_pred, S_now, S_pred, 팀 구성)
+행동: {RELAY, EXPLORE}
+보상: I(O_b(T)) - 지연 보상
+</code></pre>
+<p>더 복잡한 트레이드오프를 학습할 수 있지만, 샘플 효율성과 일반화가 과제.</p>
+<p><strong>2. 3D 환경 확장:</strong></p>
+<p>현재 2D 실내 평면도에 특화. 3D 환경 (창고, 동굴, 건물 외부)에서는:</p>
+<ul>
+<li>3D 점유 격자 필요 → 맵 예측 모델 3D 확장 필요</li>
+<li>A* 경로 계획의 3D 버전 필요</li>
+<li>로봇이 3D 이동 가능 (드론 등)</li>
+</ul>
+<p><strong>3. 비균질 로봇 팀:</strong></p>
+<p>현재 모든 로봇이 동일한 속도, 센서, 통신 범위를 가진다고 가정. 비균질 팀에서는:</p>
+<ul>
+<li>빠른 로봇에게 릴레이 우선 배정</li>
+<li>긴 배터리 수명의 로봇은 더 먼 영역 탐색</li>
+<li>통신 릴레이 로봇 (relayer robots)의 명시적 역할 배정</li>
+</ul>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>PRoID를 기존 리뷰된 Planner 트랙 논문들과 비교한다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>GRATE (IROS 2025)</th>
+<th>SANDO (arXiv 2026)</th>
+<th>GPU-SLS (arXiv 2026)</th>
+<th>AgiPIX (ICUAS 2026)</th>
+<th><strong>PRoID (arXiv 2026)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>문제 유형</td>
+<td>단일 로봇 탐색</td>
+<td>동적 환경 안전 계획</td>
+<td>고속 안전 MPC</td>
+<td>UAV 실내 검사</td>
+<td>다중 로봇 탐색+릴레이</td>
+</tr>
+<tr>
+<td>로봇 수</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>2~5</td>
+</tr>
+<tr>
+<td>통신 제약</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅ (핵심 제약)</td>
+</tr>
+<tr>
+<td>고장 처리</td>
+<td>❌</td>
+<td>동적 장애물</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅ (Weibull 모델)</td>
+</tr>
+<tr>
+<td>이론적 보장</td>
+<td>❌ (DRL)</td>
+<td>✅ (안전 보장)</td>
+<td>✅ (SLS)</td>
+<td>❌</td>
+<td>❌ (경험적)</td>
+</tr>
+<tr>
+<td>실제 로봇</td>
+<td>❌ (시뮬)</td>
+<td>✅ (UAV)</td>
+<td>❌</td>
+<td>✅ (UAV)</td>
+<td>❌ (시뮬)</td>
+</tr>
+<tr>
+<td>코드 공개</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>환경 예측</td>
+<td>✅ (맵 예측)</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅ (맵 예측)</td>
+</tr>
+</tbody></table></div>
+<p><strong>TRG-Planner와의 비교:</strong></p>
+<pre><code>TRG-Planner: 비정형 지형에서의 단일 로봇 전역 경로 계획
+PRoID: 구조화된 실내 환경에서의 다중 로봇 탐색-릴레이 조율
+
+공통점: 불확실한 환경에서의 적응적 계획
+차이점: 
+  - TRG: 지형 위험 그래프로 안전한 단일 경로 계획
+  - PRoID: 팀 내 정보 전달 효율 최적화
+  
+비교 평가: 목표가 다르므로 직접 비교 무의미.
+            PRoID가 TRG-Planner와 상보적 (다중 로봇 + 통신 제약 = PRoID, 위험 지형 = TRG)
+</code></pre>
+<p><strong>DreamFlow와의 비교:</strong></p>
+<pre><code>DreamFlow: 단일 로봇 로컬 내비게이션 (CFM으로 장애물 예측)
+PRoID: 다중 로봇 글로벌 탐색 전략 (맵 예측으로 탐색 이득 예측)
+
+공통점: 학습된 예측 모델로 로봇 행동 개선
+차이점:
+  - DreamFlow: 즉각적 충돌 회피 (실시간, 로컬)
+  - PRoID: 장기 탐색 전략 (느린 의사결정, 글로벌)
+</code></pre>
+<p><strong>IRRL과의 비교:</strong></p>
+<pre><code>IRRL: 사회적 내비게이션 (군중 속 이동)에서의 온라인 RL
+PRoID: 탐색-릴레이 결정의 온라인 (사실상 규칙 기반) 최적화
+
+공통점: 실세계 적용을 위한 실시간 의사결정
+차이점:
+  - IRRL: 학습 기반 (RL), 단일 로봇, 동적 장애물 회피
+  - PRoID: 규칙 기반, 다중 로봇, 정보 전달 최적화
+</code></pre>
+<h3>9.2 장단점 분석</h3>
+<p><strong>PRoID의 강점:</strong></p>
+<ol>
+<li><p><strong>새로운 문제 정의</strong>: MRER 릴레이 결정 문제를 명시적으로 정의하고 해결. 기존 어떤 리뷰 논문도 이 문제를 다루지 않음.</p>
+</li>
+<li><p><strong>실용적 가정</strong>: 통신 범위 제한, 로봇 고장, 다중 로봇 조율을 모두 고려. 단순 탐색 연구보다 현실적.</p>
+</li>
+<li><p><strong>맵 예측 활용</strong>: 학습된 인페인팅 모델로 미래 탐색 가능 정보를 합리적으로 추정. DreamFlow의 CFM 예측과 유사한 아이디어를 다른 문제에 적용.</p>
+</li>
+<li><p><strong>강건한 실험</strong>: 3가지 고장 조건, 4가지 로봇 수, 5개 맵 × 5 시작 위치 = 100개 구성으로 포괄적 평가.</p>
+</li>
+<li><p><strong>CMU Robotics Institute</strong>: 저명한 연구 그룹의 실용적 다중 로봇 연구.</p>
+</li>
+</ol>
+<p><strong>PRoID의 약점:</strong></p>
+<ol>
+<li><p><strong>이론적 보장 없음</strong>: Γ_now &gt; α * Γ_pred는 직관적이지만 최적성 보장 없음. BTIT*의 점근적 최적성 보장과 대조적.</p>
+</li>
+<li><p><strong>코드 미공개</strong>: 재현성 검증 불가. SANDO, GPU-SLS, AgiPIX는 코드를 공개했음.</p>
+</li>
+<li><p><strong>실제 로봇 미검증</strong>: 시뮬레이션 환경(커스텀 2D 시뮬레이터)에서만 테스트. AgiPIX (ENRICH2025 실제 경기장), SANDO (실제 UAV 비행)와 대조적.</p>
+</li>
+<li><p><strong>고정 기준 파라미터 α</strong>: α = 2.0을 실험적으로 선택. 환경에 따라 최적 α가 다를 수 있으며, 적응적 α 설정 방법이 없음.</p>
+</li>
+<li><p><strong>2D 실내 전용</strong>: 3D 환경, 야외 환경, 불균일 지형에서의 성능 미검증.</p>
+</li>
+</ol>
+<h3>9.3 실적용 가능성 평가</h3>
+<p><strong>단기 실적용 가능성: 중간</strong></p>
+<pre><code>긍정적 요인:
+  - 계산 복잡도가 낮음: 맵 예측은 GPU 필요하지만 레이 캐스팅 + A*는 실시간 가능
+  - 분산 아키텍처: 단일 장애점 없음
+  - DSTA 지원: 군사/수색구조 응용을 위한 정부 연구비
+
+부정적 요인:
+  - 코드 없음: 즉시 사용 불가
+  - 실제 로봇 미검증: 실 하드웨어에서의 성능 불확실
+  - 2D 전용: 실제 배치 환경의 복잡성 미반영
+</code></pre>
+<p><strong>잠재적 응용 분야:</strong></p>
+<ol>
+<li><p><strong>수색 구조 (Search &amp; Rescue)</strong>: 재난 현장에서 팀 드론이 피해자를 탐색하고 정보를 지휘소에 전달. PRoID의 고장 처리(PRoID-Safe)가 특히 중요.</p>
+</li>
+<li><p><strong>창고 재고 조사</strong>: 다수 로봇이 창고를 탐색하고 재고 정보를 서버에 전달. 통신 범위 제한이 실제 제약.</p>
+</li>
+<li><p><strong>군사 정찰</strong>: DSTA 후원이 시사하는 응용 분야. 적 방해로 인한 &quot;통신 고장&quot;이 자연스러운 PRoID-Safe 사용 사례.</p>
+</li>
+</ol>
+<h3>9.4 연구 방향성 평가</h3>
+<p>PRoID는 <strong>다중 로봇 시스템의 현실적 제약을 직접 다루는 실용적 연구 방향</strong>이다. 기존 탐색 연구가 이상적 통신과 완벽한 정보 전달을 가정하는 반면, PRoID는 이 가정을 해제하고 생기는 새로운 최적화 문제를 해결한다.</p>
+<p>이 방향성은 기존 리뷰 논문들 (GRATE, DreamFlow, IRRL 등)이 모두 단일 로봇에 집중한 것과 대비되어, <strong>다중 로봇 조율 연구의 새로운 각도</strong>를 제시한다. 특히 통신 제약과 정보 전달 효율의 통합 최적화는 향후 대규모 다중 로봇 배치에서 더 중요해질 연구 주제다.</p>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<p>[1] Yamauchi, B., &quot;A Frontier-Based Approach for Autonomous Exploration,&quot; Computational Intelligence in Robotics and Automation, 1997. [Frontier 기반 탐색의 시초]</p>
+<p>[2] Burgard et al., &quot;Coordinated Multi-Robot Exploration,&quot; IEEE TRO, 2005.</p>
+<p>[3] Corah &amp; Michael, &quot;Distributed Multi-Robot Exploration using Information Bounds with Implicit Coordination,&quot; IROS, 2019.</p>
+<p>[4] Suvorov et al., &quot;Resolution-Robust Large Mask Inpainting with Fourier Convolutions (LaMa),&quot; WACV, 2022. [맵 예측 기반 모델]</p>
+<p>[5] Baek et al., &quot;PIPE: Predicted Information Gain from Path Execution for Frontier-Based Exploration&quot; (baek2025pipe). [PRoID의 프론티어 스코어링 기반]</p>
+<p>[6] Aydemir et al., &quot;Can I See My Floorplan from Here? Reasoning about Large Structures from Partial Observations,&quot; AAAI, 2012. [KTH 데이터셋]</p>
+<p>[7] Hollinger &amp; Sukhatme, &quot;Sampling-Based Robotic Information Gathering Algorithms,&quot; IJRR, 2014.</p>
+<p>[8] Banfi et al., &quot;Communication-Constrained Multi-Robot Exploration,&quot; AAMAS, 2018.</p>
+<p>[9] Parasuraman et al., &quot;Multipoint Rendezvous in Multirobot Systems,&quot; TRO, 2018.</p>
+<p>[10] Kim et al., &quot;Relay and Exploration in Multi-Robot Systems,&quot; ICRA, 2024. [선행 연구]</p>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>11.1 혁신성</h3>
+<p>PRoID는 <strong>다중 로봇 탐색의 오래된 숨겨진 가정(완벽한 정보 전달)을 명시적으로 해제하고, 릴레이 결정 문제를 독립적 최적화 대상으로 정의한다</strong>는 점에서 개념적 혁신이 있다.</p>
+<p>PRoID의 핵심 통찰: <em>&quot;언제 탐색을 중단하고 돌아가야 하는가&quot;는 현재 보유 정보량과 미래 예측 정보량의 비교로 결정될 수 있으며, 이 비교는 학습된 맵 예측으로 더 정확하게 수행될 수 있다.</em></p>
+<p>PRoID-Safe의 핵심 통찰: <em>고장 위험은 탐색 기회 비용을 증가시킨다 — 더 오래 탐색할수록 그 데이터가 전달되지 않을 위험도 커진다. Weibull 생존 함수로 이 위험을 릴레이 결정에 자연스럽게 통합할 수 있다.</em></p>
+<h3>11.2 실용적 의의</h3>
+<p>수색 구조, 군사 정찰, 창고 물류 등 팀 로봇이 미지 환경을 탐색하고 정보를 기지로 전달해야 하는 실제 응용에서 PRoID의 접근법은 직접적으로 가치 있다. 특히 PRoID-Safe의 고장 내성은 기존 주기적 릴레이 대비 가혹한 고장 환경 (λ=1100, n=2)에서 128% 성능 향상을 보여주는 강력한 동기가 있다.</p>
+<h3>11.3 향후 연구 방향</h3>
+<ol>
+<li><strong>실제 하드웨어 검증</strong>: 지상 로봇 또는 드론 팀에서의 실제 실험</li>
+<li><strong>3D 환경 확장</strong>: 3D 맵 예측 + 3D 경로 계획 통합</li>
+<li><strong>학습 기반 릴레이 정책</strong>: 수동 기준 (α)을 강화학습으로 대체</li>
+<li><strong>동적 통신 환경</strong>: 통신 품질이 위치에 따라 변하는 현실적 모델링</li>
+<li><strong>비균질 로봇 팀</strong>: 다른 속도, 센서, 배터리 수명의 로봇들 조율</li>
+<li><strong>더 큰 팀 규모</strong>: n &gt; 5에서의 확장성 검증 (O(n^2) 통신 오버헤드 해결책)</li>
+</ol>
+<p>PRoID는 현재 arXiv 단계로, 실제 로봇 실험과 이론적 분석이 추가된다면 다중 로봇 탐색 분야의 중요한 기여가 될 가능성이 있다. 특히 CMU 그룹의 연구 역량과 DSTA의 실용적 지원을 고려하면, 후속 연구에서 실제 배치 환경 검증이 이루어질 것으로 기대된다.</p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

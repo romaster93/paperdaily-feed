@@ -1,0 +1,1155 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>What Limits Vision-and-Language Navigation? (StereoNav) · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 2026</div>
+    <h1>What Limits Vision-and-Language Navigation? (StereoNav)</h1>
+    <div class="meta-row">
+      <span class="chip">VLN</span>
+      <span><a href="https://arxiv.org/abs/2605.13328">arXiv:2605.13328</a></span>
+      <span>리뷰 2026-05-14</span>
+      <span>44분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>What Limits Vision-and-Language Navigation? (StereoNav): 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: What Limits Vision-and-Language Navigation?</li>
+<li><strong>시스템 이름</strong>: StereoNav</li>
+<li><strong>저자 (Authors)</strong>: Yunheng Wang, Yuetong Fang, Taowen Wang, Lusong Li, Kun Liu, Junzhe Xu, Zizhao Yuan, Yixiao Feng, Jiaxi Zhang, Wei Lu, Zecui Zeng, Renjing Xu</li>
+<li><strong>소속 (Affiliation)</strong>: HKUST(GZ) (Hong Kong University of Science and Technology, Guangzhou); JD Explore Academy</li>
+<li><strong>발표처 (Published)</strong>: arXiv 프리프린트 (Under Review) — 2026년 5월 13일</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2605.13328">https://doi.org/10.48550/arXiv.2605.13328</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2605.13328">https://arxiv.org/abs/2605.13328</a></li>
+<li><strong>GitHub</strong>: <a href="https://github.com/Yunheng-Wang/StereoNav">https://github.com/Yunheng-Wang/StereoNav</a> ✅ (코드 공개)</li>
+<li><strong>프로젝트 페이지</strong>: <a href="https://yunheng-wang.github.io/stereonav-public.github.io">https://yunheng-wang.github.io/stereonav-public.github.io</a></li>
+<li><strong>HuggingFace</strong>: 모델 체크포인트 및 데이터셋 공개</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>StereoNav는 <strong>Vision-and-Language Navigation(VLN)</strong> 에서 시뮬레이션과 실세계 배포 간의 성능 격차(Sim-to-Real Gap) 문제를 근본적으로 해결하는 것을 목표로 한다.</p>
+<p>핵심 연구 질문:</p>
+<blockquote>
+<p>&quot;VLN 에이전트가 시뮬레이션에서 높은 성능을 달성하면서도 실세계 배포 시 일관된 성능을 유지하지 못하는 근본적인 병목은 무엇인가? 그리고 이를 어떻게 해결할 수 있는가?&quot;</p>
+</blockquote>
+<p>기존 접근법은 모델 크기와 학습 데이터를 확장(scaling)하는 방향으로 발전해왔지만, 본 논문은 이 병목이 <strong>강인한 공간적 그라운딩(Robust Spatial Grounding)</strong> 의 부재와 <strong>크로스-도메인 사전 지식(Cross-Domain Priors)</strong> 의 결여에 있다고 주장한다. 이를 해결하기 위해 두 가지 핵심 기여를 제안한다:</p>
+<ol>
+<li><strong>Target-Location Priors (TLP)</strong>: 도메인 불변 시각적 가이던스를 에이전트 시야에 직접 투영</li>
+<li><strong>스테레오 통합 이해 모델링</strong>: 시맨틱, 구조적, 기하학적 정보를 스테레오 카메라를 통해 통합 처리</li>
+</ol>
+<p>결과적으로 R2R-CE에서 <strong>81.1% SR / 68.3% SPL</strong>, RxR-CE에서 <strong>67.5% SR / 52.0% SPL</strong>의 최신 SOTA 성능을 달성하며, 실세계 Unitree G1 로봇 배포에서 <strong>60.6% SR</strong> (대비 StreamVLN 24.3%)를 기록한다.</p>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 인지 불안정성 (Perceptual Instability)</h4>
+<p>현재 VLN 에이전트가 시뮬레이션에서 실세계로 전환될 때 겪는 핵심 문제는 <strong>시각적 인지의 불안정성</strong>이다:</p>
+<pre><code>[시뮬레이션 vs 실세계 인지 격차]
+
+시뮬레이션 환경:
+  - 일정한 조명 조건 (균일 렌더링)
+  - 정적 텍스처 (Matterport3D, HM3D 표준 스캔)
+  - 선명한 이미지 (모션 블러 없음)
+  - 고정된 시점 (정해진 촬영 위치)
+
+실세계 환경:
+  - 동적 조명 변화 (낮/밤, 실내/실외, 그림자)
+  - 다양한 표면 반사 (유리, 금속, 광택 바닥)
+  - 모션 블러 (이동 중 카메라 흔들림)
+  - 불규칙한 시점 (로봇 모션 진동)
+
+격차 측정 (StreamVLN 기준):
+  시점 진동 ±40°:     성능 저하 64.7%
+  모션 블러 강도 8.0:  성능 저하 38.1%
+  조명 변화:          정량 측정 어려움
+
+StereoNav 동일 조건:
+  시점 진동 ±40°:     성능 저하 37.0% (↓27.7%p 개선)
+  모션 블러 강도 8.0:  성능 저하  8.2% (↓29.9%p 개선)
+</code></pre>
+<h4>B. 지시 모호성 (Instruction Under-Specification)</h4>
+<p>R2R 데이터셋의 자연어 지시는 종종 목표 위치를 정확히 특정하지 않는다:</p>
+<pre><code>[지시 모호성의 두 가지 유형]
+
+Type 1: 방향적 모호성 (Directional Ambiguity)
+  지시: &quot;복도를 따라 걸어 들어가 첫 번째 문 앞에서 멈추세요&quot;
+  문제: T자 교차로에서 어느 방향으로 가야 하는가?
+         세 갈래 길에서 에이전트는 정보 없이 추측해야 함
+
+  기존 에이전트의 실패 패턴:
+  [복도 진입] → [T자 분기] → ???
+                              ↗ 왼쪽? 맞다면 성공
+                              ↘ 오른쪽? 틀리면 회복 불가
+
+Type 2: 도킹 모호성 (Docking Ambiguity)
+  지시: &quot;소파 근처 탁자 옆에서 멈추세요&quot;
+  문제: 정확히 어디서 멈춰야 하는가?
+         탁자로부터 0.5m? 1m? 소파 왼쪽? 오른쪽?
+
+  기존 방법의 goal-stopping 성능 비교 (0.5m 임계값):
+  StreamVLN: 36.4% SR / 33.1% SPL
+  JanusVLN:  15.0% SR / 14.2% SPL
+  StereoNav: 93.9% SR / 72.7% SPL (2.6× 향상)
+</code></pre>
+<h4>C. 깊이 인식의 부재 (Lack of Depth Awareness)</h4>
+<p>모노큘러(단안) RGB 기반 VLN 에이전트는 3차원 공간 이해에 근본적 한계가 있다:</p>
+<pre><code>[단안 RGB 기반 에이전트의 3D 인식 한계]
+
+문제점:
+  - 거리 추정 불정확: 텍스처/크기 단서에 의존
+  - 깊이 모호성: 동일 픽셀이 가깝거나 먼 물체에 모두 대응 가능
+  - 장애물 판단 오류: 2D에서 안전해 보이나 3D에서 충돌 경로
+  
+  [모노큘러 깊이 추정 오류 예시]
+
+  실제 씬:
+  ┌──────────────────┐
+  │  ←1.5m→  ←3.0m→  │
+  │  [의자]  [탁자]  │
+  └──────────────────┘
+  
+  단안 인식:
+  ┌──────────────────┐
+  │  [의자?]  [탁자?] │  ← 깊이 순서 혼동 가능
+  │  크기 단서만 의존  │
+  └──────────────────┘
+
+수치 비교 (단안 vs 스테레오 ablation):
+  단안 시맨틱 전용:       SR 34.4% / SPL 29.5%
+  + 스테레오 시맨틱:      SR 52.3% / SPL 46.7% (+17.9%p / +17.2%p)
+  + 스테레오 구조적:      SR 63.4% / SPL 51.7%
+  전체 모델 (스테레오 기하): SR 72.8% / SPL 56.4%
+</code></pre>
+<h3>2.2 핵심 해결책</h3>
+<p>StereoNav는 세 가지 상호보완적 솔루션으로 이 문제들을 해결한다:</p>
+<pre><code>[StereoNav 핵심 해결 전략]
+
+문제 1: 인지 불안정성
+  → 솔루션: 스테레오 카메라 기반 기하학적 인식
+            DINOv2 구조적 특징으로 조명 변화에 강인
+            FoundationStereo 기반 4D 코스트 볼륨
+
+문제 2: 지시 모호성
+  → 솔루션: Target-Location Priors (TLP)
+            목표 위치 좌표를 에이전트 시야에 직접 시각화
+            도메인 불변 안내 신호로 작동
+
+문제 3: 깊이 인식 부재
+  → 솔루션: 스테레오 매칭 + 깊이 헤드 공동 예측
+            ConvGRU 기반 코스-투-파인 스테레오 매칭
+            행동과 깊이를 동시에 예측하는 멀티태스크 학습
+</code></pre>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 Target-Location Priors (TLP) — 도메인 불변 공간 가이던스</h3>
+<p>TLP는 본 논문의 가장 핵심적인 기여로, 목표 위치 좌표를 에이전트의 자아중심(egocentric) 시야에 직접 투영하여 도메인 불변 시각적 가이던스를 제공한다.</p>
+<p><strong>수학적 정형화:</strong></p>
+<pre><code>[TLP 투영 과정]
+
+입력: 목표 위치 (x_g, y_g, z_g) in 월드 좌표계
+      카메라 내재 파라미터 K, 외재 파라미터 [R|t]
+
+단계 1: 월드 → 카메라 좌표 변환
+  P_cam = R · P_world + t
+  
+  여기서:
+  P_world = [x_g, y_g, z_g, 1]^T
+  R ∈ SO(3): 카메라 회전 행렬
+  t ∈ R^3: 카메라 평행이동
+
+단계 2: 카메라 → 이미지 평면 투영
+  [u, v, w]^T = K · P_cam / z_cam
+  
+  픽셀 좌표: (u/w, v/w)
+  
+  K = | fx   0   cx |
+      |  0  fy   cy |
+      |  0   0    1 |
+
+단계 3: 시각적 프라이어 렌더링
+  - 시야 내 목표: 빨간 원형 마커 오버레이 (반경 r = f(거리))
+  - 시야 외 목표: 경계선 엣지 큐 (방향 정보 인코딩)
+  
+  [렌더링 예시]
+  
+  정면 시야:           좌측 경계 프라이어:
+  ┌─────────────────┐   ┌─────────────────┐
+  │                 │   │◄                │
+  │      (●)        │   │                 │
+  │   목표 마커      │   │  목표가 왼쪽 밖   │
+  └─────────────────┘   └─────────────────┘
+
+단계 4: 스테레오 쌍 일관 적용
+  Left  view: TLP_l = Render(P_cam_l, K_l)
+  Right view: TLP_r = Render(P_cam_r, K_r)
+  (스테레오 기하학적 일관성 유지)
+</code></pre>
+<p><strong>왜 TLP가 도메인 불변인가?</strong></p>
+<pre><code>[TLP의 도메인 불변성 메커니즘]
+
+도메인 의존 특징들 (실세계에서 변함):
+  텍스처: 시뮬레이션 vs 실제 표면 다름
+  조명: 시뮬레이션 균일 vs 실제 그림자/반사
+  해상도: 시뮬레이션 고품질 vs 실제 카메라 노이즈
+
+TLP의 도메인 불변성:
+  1. 기하학적 기반: 위치 좌표 투영은 물리 법칙
+  2. 명시적 시각화: 텍스처/조명 독립적인 기하 오버레이
+  3. 일관성: 어떤 도메인에서도 동일 정보 제공
+  
+  [수식적 도메인 불변성]
+  TLP(x_g | Domain=Sim) = TLP(x_g | Domain=Real)
+  (목표 좌표가 동일하면 TLP는 동일)
+  
+TLP 기여 ablation:
+  TLP 없음: SR 37.0% / SPL 31.5% (R2R-CE 서브셋)
+  TLP 있음: SR 54.9% / SPL 48.7%
+  개선: +17.9% SR, +17.2% SPL
+</code></pre>
+<h3>3.2 스테레오 통합 이해 모델링 (Stereo Unified Understanding Modeling)</h3>
+<p>StereoNav는 세 가지 상호보완적 특징 스트림을 융합하여 풍부한 장면 표현을 구성한다.</p>
+<p><strong>시스템 구조:</strong></p>
+<pre><code>[스테레오 통합 이해 모델 아키텍처]
+
+입력: 스테레오 이미지 쌍 (I_l^t, I_r^t) ∈ R^{H×W×3}
+
+    I_l^t ──┬──► 2D 시맨틱 인코더 (InternViT) ──► F_sem^l ∈ R^{N×D_sem}
+            │                                              │
+            │                                              ↓
+            │    2D 구조적 인코더 (DINOv2-large) ──────► F_str^l ∈ R^{N×D_str}
+            │                                              │
+    I_r^t ──┘──► 스테레오 기하 인코더 ─────────────────► F_geo^l ∈ R^{N×D_geo}
+                  (FoundationStereo 기반)                   │
+                       │                                    │
+                  4D 코스트 볼륨                              ↓
+                  C ∈ R^{H/4×W/4×D×C_feat}        융합: T_t = α·P(F_sem) + β·C(F_str) + γ·G(V&#39;_c)
+                       │                                    │
+                  집합적 하이브리드 필터링                     ↓
+                  → 토큰화 기하 특징                    통합 표현 T_t ∈ R^{N×D}
+</code></pre>
+<p><strong>각 인코더 상세:</strong></p>
+<pre><code>[2D 시맨틱 인코더: InternViT (InternVL-3.5-2B)]
+
+목적: 객체/장면 의미론 이해
+아키텍처: Vision Transformer, 448×448 입력
+사전학습: InternVL-3.5-2B 내 비전 인코더 (대규모 이미지-텍스트 쌍)
+출력: F_sem ∈ R^{N_patches × D_sem}
+
+시맨틱 인식 능력:
+  - 객체 카테고리 인식 (의자, 문, 계단 등)
+  - 자연어 지시와의 정렬
+  - 오픈-보캐뷸러리 시각적 이해
+
+융합 가중치: α = 1.0 (가장 높은 가중치)
+이유: 언어 지시와의 직접 정렬에 필수
+
+---
+
+[2D 구조적 인코더: DINOv2-large]
+
+목적: 조명 불변 시각적 구조 표현
+아키텍처: ViT-L/14 (DINO 자기지도 학습)
+핵심 특성: 조명/색상 변화에 강인한 구조적 특징
+
+DINOv2 특징의 조명 불변성:
+  - 자기지도 학습: 색상/조명에 의존하지 않는 표현 학습
+  - 패치 단위 특징: 지역적 구조 인코딩
+  - 도메인 일반화: 다양한 시각 도메인에서 강건
+
+조명 변화 실험 (val-unseen):
+  RGB-only (InternViT):     조명 변화 시 ~15% 성능 저하
+  + DINOv2 구조 특징:       조명 변화 시 ~6% 성능 저하
+
+융합 가중치: β = 0.6
+이유: 시맨틱과 상보적 역할, 완전 독립적이지 않으므로 0.6
+
+---
+
+[3D 기하 인코더: FoundationStereo 기반 스테레오 매칭]
+
+목적: 정밀 3D 깊이 인식 및 공간 이해
+아키텍처: FoundationStereo에서 영감, 4D 코스트 볼륨 + ConvGRU
+
+스테레오 매칭 파이프라인:
+  1. 특징 추출: f_l, f_r ← FeatureEncoder(I_l, I_r)
+  
+  2. 코스트 볼륨 구성:
+     C(x, y, d) = &lt;f_l(x,y), f_r(x-d, y)&gt;
+     C ∈ R^{H/4 × W/4 × D_max × C_feat}
+     (D_max: 최대 시차 = 192 픽셀)
+  
+  3. 집합적 하이브리드 필터링:
+     C_filtered = AHF(C)  ← 3D 컨볼루션 + 어텐션
+     
+     수식:
+     AHF(C) = Conv3D(C) + Attention(C)
+     
+  4. 코스-투-파인 시차 회귀 (ConvGRU):
+     d_0 = Initialize(C_filtered)
+     for k in range(4):  ← 4 반복 세밀화
+         d_k = ConvGRU(d_{k-1}, C_filtered)
+     d_final = d_4
+  
+  5. 깊이 맵 변환:
+     Z = f · B / d_final
+     (f: 초점거리, B: 기선 거리)
+  
+  6. 토큰화:
+     F_geo = Tokenize(DepthMap → 3D 포인트 클라우드 → 특징)
+     V&#39;_c = PointCloud(Z)  ← 3D 좌표 특징 벡터
+
+융합 가중치: γ = 0.2
+이유: 기하 정보는 보완적이지만 노이즈 가능성 → 낮은 가중치
+
+---
+
+[융합 메커니즘]
+
+T_t = α·P(F_t^sem) + β·C(F_t^str) + γ·G(V&#39;_{c,t})
+
+여기서:
+  P(·): Projection layer (시맨틱 특징 차원 정렬)
+  C(·): Compression layer (구조 특징 차원 압축)
+  G(·): 3D 기하 특징 인코딩 함수
+
+가중치는 검증 세트에서 그리드 서치:
+  α ∈ {0.5, 0.8, 1.0, 1.2, 1.5}
+  β ∈ {0.3, 0.5, 0.6, 0.8, 1.0}
+  γ ∈ {0.1, 0.2, 0.3, 0.5}
+  최적값: α=1.0, β=0.6, γ=0.2
+</code></pre>
+<h3>3.3 공동 행동-깊이 예측 (Joint Action-Depth Prediction)</h3>
+<p>StereoNav는 <strong>멀티태스크 헤드</strong>를 사용하여 행동 예측과 깊이 추정을 동시에 수행한다.</p>
+<p><strong>수학적 정형화:</strong></p>
+<pre><code>[공동 예측 파이프라인]
+
+에이전트 상태: o_t = (o_t^l, o_t^r, I, p, H_{t-1})
+  o_t^l: 왼쪽 스테레오 이미지
+  o_t^r: 오른쪽 스테레오 이미지
+  I: 자연어 지시 (토큰화)
+  p: 위치/방향 정보
+  H_{t-1}: 이전 히스토리
+
+공동 예측:
+  (a_t, d̂_t) = π_θ(T_t, I_tokens, p_t, H_{t-1})
+
+행동 헤드 (Action Head):
+  - MLLM (InternVL-3.5-2B) 기반 자동회귀 디코딩
+  - 미래 4 스텝 행동을 텍스트 토큰으로 예측
+  - 행동 공간: {전진 0.25m, 좌회전 15°, 우회전 15°, 정지}
+  
+  입력 프롬프트 형식:
+  &quot;&lt;image_l&gt; &lt;image_r&gt; [Instructions: I] [Current pos: p_t] [History: H_{t-1}] 
+   [Target prior: TLP_t] Predict next 4 actions:&quot;
+  
+  출력: [&quot;move_forward&quot;, &quot;turn_left&quot;, &quot;move_forward&quot;, &quot;stop&quot;]
+
+깊이 헤드 (Depth Head):
+  - ConvGRU 기반 코스-투-파인 스테레오 매칭
+  - 4회 반복 세밀화
+  - 손실: λ_depth · L_depth (λ_depth = 0.1)
+  
+  L_depth = Σ |d̂ - d_gt| / N_valid
+
+전체 손실 함수:
+  L_total = L_action + λ_depth · L_depth
+           = L_CE(a_pred, a_gt) + 0.1 · L_smooth(d̂, d_gt)
+
+  L_CE: Cross-Entropy (행동 예측)
+  L_smooth: Smooth-L1 (깊이 예측)
+</code></pre>
+<p><strong>왜 공동 학습이 중요한가?</strong></p>
+<pre><code>[공동 학습의 시너지 효과]
+
+가설: 깊이 예측 학습이 공유 표현을 3D-aware하게 만든다
+
+증거 (공동 학습 ablation):
+  행동만 학습:        SR 68.2% / SPL 54.7%
+  + 깊이 공동 학습:   SR 72.8% / SPL 56.4%
+  개선:              +4.6% SR, +1.7% SPL
+
+메커니즘:
+  1. 깊이 헤드가 3D 공간 구조 학습을 강제
+  2. 공유 스테레오 인코더가 더 정확한 깊이 표현 학습
+  3. 행동 예측이 3D-aware 특징 사용 → 장애물 회피 개선
+  
+  [표현 학습 시너지]
+  깊이 학습 → 스테레오 인코더 강화 → 행동 예측 개선
+  (순환 상호작용으로 표현 품질 향상)
+</code></pre>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인</h3>
+<pre><code>[StereoNav 전체 시스템 아키텍처]
+
+                     환경 (R2R-CE / 실세계)
+                            │
+              ┌─────────────┴─────────────┐
+              │                           │
+        ZED Mini 스테레오 카메라         자연어 지시 I
+              │                           │
+    ┌─────────┴──────────┐               │
+    │                    │               │
+    I_l^t (왼쪽)      I_r^t (오른쪽)    │
+    │                    │               │
+    ▼                    ▼               │
+┌───────────────────────────────────┐   │
+│     Target-Location Prior (TLP)   │   │
+│   목표 좌표 → 시각적 오버레이       │   │
+│   [I_l + TLP_l] [I_r + TLP_r]    │   │
+└───────────────────┬───────────────┘   │
+                    │                   │
+    ┌───────────────┼───────────────┐   │
+    │               │               │   │
+    ▼               ▼               ▼   │
+┌────────┐     ┌────────┐     ┌────────┐│
+│InternViT│    │DINOv2  │     │Stereo  ││
+│(시맨틱) │    │(구조적) │     │Encoder ││
+│F_sem   │    │F_str   │     │F_geo   ││
+└────────┘     └────────┘     └──┬─────┘│
+    │               │            │      │
+    └───────────────┴────────────┘      │
+                    │                   │
+                    ▼                   │
+        ┌───────────────────────┐       │
+        │  가중치 융합           │       │
+        │  T_t = αP(F_sem)     │       │
+        │      + βC(F_str)     │       │
+        │      + γG(F_geo)     │       │
+        └───────────┬───────────┘       │
+                    │                   │
+                    ▼                   │
+        ┌───────────────────────┐       │
+        │  MLLM 백본            │◄──────┘
+        │  (InternVL-3.5-2B)  │
+        │                      │
+        │  ┌────────────────┐  │
+        │  │  Action Head   │  │
+        │  │ (자동회귀 디코더)│  │
+        │  └───────┬────────┘  │
+        │          │            │
+        │  ┌────────────────┐  │
+        │  │  Depth Head    │  │
+        │  │  (ConvGRU 4×)  │  │
+        │  └───────┬────────┘  │
+        └──────────┼────────────┘
+                   │
+        ┌──────────┴──────────┐
+        │                     │
+        ▼                     ▼
+   행동 예측              깊이 맵 출력
+   a_t ∈ {전진,          d̂_t ∈ R^{H×W}
+          좌/우회전,
+          정지}
+        │
+        ▼
+   로봇 액추에이터 실행
+   (또는 시뮬레이터 스텝)
+</code></pre>
+<h3>4.2 히스토리 관리</h3>
+<pre><code>[에피소드 히스토리 관리 메커니즘]
+
+H_{t-1} = {(o_0, a_0), (o_1, a_1), ..., (o_{t-1}, a_{t-1})}
+
+특이사항:
+  - 전체 히스토리 대신 최근 K=5 스텝만 유지 (메모리 효율)
+  - 관찰은 VQA 스타일 텍스트 요약으로 압축
+    예: &quot;t=3: 복도 끝에서 오른쪽으로 돌았음&quot;
+  - 행동 히스토리로 방향 감각 유지 (루프 감지 보조)
+  
+히스토리 인코딩:
+  H_enc = TextEncoder(concat(H_{t-1}))
+  ← MLLM 내 텍스트 인코더로 처리 (별도 RNN 불필요)
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<p><strong>학습 데이터:</strong></p>
+<pre><code>[StereoNav 학습 데이터셋 구성]
+
+Stage I (176 GPU-hours):
+  - R2R (Room-to-Room): 21,567 경로 × 3 지시 = 64,701 지시
+    환경: Matterport3D 90개 씬 (학습 61개, 검증 11개, 테스트 18개)
+    지시 길이: 평균 29.2 단어
+    
+  - RxR (Room-Across-Rooms): 다국어 (영어, 힌디어, 텔루구어)
+    경로 수: 15,971개, 평균 지시 길이: 79.2 단어 (더 상세)
+    
+Stage II (688 GPU-hours):
+  - Stage I 데이터 + DAgger 증류 데이터 + ScaleVLN 데이터
+  - ScaleVLN: 대규모 합성 지시로 학습 데이터 확장
+
+평가 데이터셋:
+  - R2R-CE val-unseen: 2,349 에피소드 (학습 미포함 환경)
+  - RxR-CE val-unseen: 다국어 평가
+  - 실세계: 4개 환경 × 5 지시 × 3 시도 = 60 에피소드
+</code></pre>
+<p><strong>평가 환경:</strong></p>
+<pre><code>[실세계 평가 환경 설명]
+
+환경 1: 사무실 (Office)
+  특징: 좁은 복도, 여러 방, 유리 파티션
+  난이도: 중간 (복잡한 레이아웃)
+
+환경 2: 체육관 (Gym)
+  특징: 개방 공간, 에코 반사, 운동 장비
+  난이도: 낮음 (단순한 레이아웃)
+
+환경 3: 로비 (Lobby)
+  특징: 높은 천장, 다양한 조명, 사람들
+  난이도: 높음 (동적 요소)
+
+환경 4: 실외 (Outdoor)
+  특징: 자연광 변화, 그림자, 개방 공간
+  난이도: 높음 (시뮬레이션과 가장 상이)
+
+로봇: Unitree G1 휴머노이드
+  - 센서: ZED Mini 스테레오 카메라
+  - 제어: 행동 명령 → 보행 컨트롤러
+  - 성공 기준: 목표로부터 1.5m 이내 정지
+</code></pre>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<pre><code>[VLN-CE 표준 평가 지표]
+
+1. Navigation Error (NE) ↓ [단위: m]
+   정의: 에이전트 최종 위치와 목표 위치 간 유클리드 거리
+   수식: NE = ||p_final - p_goal||_2
+   해석: 낮을수록 좋음 (목표에 더 가까이 정지)
+
+2. Oracle Success Rate (OSR) ↑
+   정의: 에피소드 동안 목표로부터 3m 이내에 있었던 비율
+   (성공 가능성이 있었던 경우 포함)
+   해석: 에이전트의 목표 근접 능력 측정
+
+3. Success Rate (SR) ↑
+   정의: 에피소드 종료 시 목표로부터 3m 이내 비율
+   수식: SR = |{e : NE(e) ≤ 3m}| / |E_total|
+   해석: 핵심 성능 지표
+
+4. Success Rate weighted by Path Length (SPL) ↑
+   정의: SR × 최적 경로 대비 실제 경로 효율
+   수식: SPL = SR × L_shortest / max(L_agent, L_shortest)
+   해석: 효율적인 성공 측정 (지름길로 성공할수록 높음)
+</code></pre>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>R2R-CE val-unseen (추가 데이터 포함):</strong></p>
+<pre><code>[R2R-CE Val-Unseen 성능 비교]
+
+방법                      NE↓   OSR↑   SR↑    SPL↑  파라미터
+────────────────────────────────────────────────────────────
+기존 최고 성능 (with extra data):
+JanusVLN (2026)          4.1m  80.1%  64.7%  58.5%  7B+
+StreamVLN (ICRA 2026)    4.2m  78.4%  63.9%  57.1%  7B
+NavDP (ICRA 2026)        5.8m  68.3%  54.3%  41.2%  1B
+
+StereoNav (ours):        2.1m  82.4%  81.1%  68.3%  2B(!)
+────────────────────────────────────────────────────────────
+StereoNav 개선 vs 최고 성능:
+  NE:  -2.0m (↓48.8% 오차 감소)
+  OSR: +2.3%p
+  SR:  +16.4%p (매우 큰 향상)
+  SPL: +9.8%p
+
+주목할 점:
+  - 2B 파라미터로 7B+ 모델 능가
+  - 파라미터 3.5× 작지만 성능 +16.4%p
+</code></pre>
+<p><strong>RxR-CE val-unseen (추가 데이터 포함):</strong></p>
+<pre><code>[RxR-CE Val-Unseen 성능 비교]
+
+방법                      SR↑    SPL↑   비고
+──────────────────────────────────────────────
+JanusVLN                 54.0%  42.5%  7B+
+StreamVLN                53.1%  40.9%  7B
+NavDP                    44.7%  32.8%  1B
+
+StereoNav                67.5%  52.0%  2B(!)
+──────────────────────────────────────────────
+개선 vs 최고:  +13.5% SR, +9.5% SPL
+</code></pre>
+<p><strong>강건성 실험 (Robustness):</strong></p>
+<pre><code>[시각적 교란에 대한 강건성 비교]
+
+교란 유형: 시점 진동 (Viewpoint Oscillation)
+  강도: ±40° 좌우 진동
+  ────────────────────────────────────────
+  방법           정상  교란  저하율
+  StreamVLN      63.9  23.0  64.0%  ← 매우 취약
+  JanusVLN       64.7  22.1  65.8%  ← 매우 취약
+  StereoNav      81.1  51.1  37.0%  ← 훨씬 강건
+  ────────────────────────────────────────
+
+교란 유형: 모션 블러 (Motion Blur)
+  강도: 블러 커널 크기 8.0
+  ────────────────────────────────────────
+  방법           정상  교란  저하율
+  StreamVLN      63.9  39.5  38.1%
+  JanusVLN       64.7   7.2  89.6%  ← 극단적 취약
+  StereoNav      81.1  74.5   8.2%  ← 매우 강건
+  ────────────────────────────────────────
+
+해석:
+  DINOv2의 조명-불변 특징이 모션 블러에도 강건
+  스테레오 기하학적 표현이 단일 시점 교란에 강건
+</code></pre>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<pre><code>[Unitree G1 실세계 배포 실험]
+
+로봇 플랫폼: Unitree G1 휴머노이드
+  - 높이: 1.32m
+  - 센서: ZED Mini 스테레오 카메라 (기선 거리 B=0.12m)
+  - 처리: NVIDIA Jetson Orin (온보드) + 원격 추론 서버
+  - 통신: WiFi, 15 FPS
+
+실험 설계:
+  - 4개 실세계 환경 (사무실, 체육관, 로비, 실외)
+  - 환경당 5개 지시 (3개 단순 + 2개 복잡)
+  - 각 지시당 3회 시도 (총 60 에피소드)
+  - 성공 기준: 목표로부터 1.5m 이내 정지
+
+결과:
+  ┌────────────────────────────────────────┐
+  │ 방법         전체 SR  단순 SR  복잡 SR  │
+  │───────────────────────────────────────│
+  │ StreamVLN   24.3%    38.5%   10.0%   │
+  │ DreamNav    22.1%    34.6%    9.5%   │
+  │ JanusVLN   (실세계 실험 없음)          │
+  │ StereoNav   60.6%    73.1%   48.0%   │
+  └────────────────────────────────────────┘
+
+StereoNav 장면별 성능:
+  사무실 (좁은 복도):  53.3% (6/15 × 100%)
+  체육관 (개방 공간):  80.0% (12/15)
+  로비 (혼합):        60.0% (9/15)
+  실외 (자연광):      46.7% (7/15) ← 가장 어려움
+
+정성적 관찰:
+  - TLP 덕분에 목표 정지가 매우 정확
+  - 스테레오 깊이로 장애물 회피 개선
+  - 조명 변화 (로비 유리창, 실외 그림자)에서도 안정적 동작
+  - 실패 사례 주로: 사람 교란, 예상치 못한 구조물
+</code></pre>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<pre><code>[StereoNav의 4가지 핵심 기여]
+
+기여 1: VLN 성능 병목 분석
+  - 기존 연구가 모델 크기/데이터 확장에 집중하는 동안,
+    본 논문은 병목이 공간적 그라운딩과 크로스-도메인 프라이어에 있음을 체계적으로 분석
+  - 단안 RGB의 근본적 한계를 실험으로 증명
+  - Sim-to-real 격차의 정량적 분석 최초 제공
+
+기여 2: Target-Location Priors (TLP)
+  - 명시적 목표 위치 좌표를 에이전트 시야에 직접 투영하는 최초 VLN 방법
+  - 도메인 불변성: 시뮬레이션과 실세계에서 동일하게 작동
+  - 단독으로 +17.9% SR 향상 (매우 강력한 기여)
+
+기여 3: 스테레오 VLN 프레임워크
+  - 스테레오 카메라를 VLN에 최초로 체계적으로 통합
+  - 시맨틱(InternViT) + 구조적(DINOv2) + 기하(스테레오) 3중 융합
+  - 모션 블러/조명 변화에 대한 강건성 대폭 향상
+
+기여 4: 실세계 성능 검증
+  - Unitree G1 휴머노이드에서 60.6% SR (vs 비교 방법 24.3%)
+  - 4개 다양한 실세계 환경에서 광범위한 검증
+  - VLN의 실용적 배포 가능성 최초 규모 있는 증명
+</code></pre>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<pre><code>[StereoNav 학습 설정]
+
+백본 모델:
+  - 언어-행동: InternVL-3.5-2B (2B 파라미터)
+  - 시맨틱 인코더: InternViT-300M (InternVL 내 비전 부분)
+  - 구조적 인코더: DINOv2-large (307M 파라미터)
+  - 스테레오 기하: FoundationStereo 기반 경량화 (추정 ~100M)
+
+학습 인프라:
+  - GPU: 8× NVIDIA A100 (각 80GB)
+  - 메모리: ~100GB VRAM 총 사용
+  - 정밀도: bfloat16 (학습 안정성 + 메모리 효율)
+
+하이퍼파라미터:
+  ┌──────────────────────────────────────────┐
+  │ 파라미터         Stage I    Stage II     │
+  │──────────────────────────────────────── │
+  │ 에포크           1          1            │
+  │ 배치 크기        512        512          │
+  │ 학습률           2e-5       2e-5         │
+  │ 옵티마이저       AdamW      AdamW        │
+  │ LR 스케줄러     Cosine     Cosine       │
+  │ 워밍업 스텝     500        500          │
+  │ 드롭아웃        0.1        0.1          │
+  │ λ_depth         0.1        0.1          │
+  │ GPU 시간         176h       688h         │
+  └──────────────────────────────────────────┘
+
+데이터 증강:
+  - 랜덤 시점 진동 (학습 강건성)
+  - 랜덤 모션 블러 적용
+  - 조명 변화 (HSV 변환)
+
+추론 설정:
+  - 빔 서치 크기: 1 (그리디)
+  - 최대 스텝 수: 20
+  - 정지 결정: 모델 출력 or 목표 근접 임계값
+
+융합 가중치:
+  α = 1.0 (시맨틱)
+  β = 0.6 (구조적)
+  γ = 0.2 (기하)
+  (검증 세트 그리드 서치로 선택)
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 TLP의 오프라인 vs 온라인 설정</h3>
+<pre><code>[TLP 활용 시나리오]
+
+시뮬레이션 (학습/평가):
+  - 목표 위치 좌표: gt 데이터에서 직접 추출
+  - 완벽한 목표 위치 알려짐
+  - 성능 상한선 제공
+
+실세계 배포:
+  - 목표 위치: 어떻게 얻는가?
+  
+  방법 1: 사전 구축 맵 + 목표 랜드마크 매핑
+    - 건물 3D 모델 + 목표 위치 데이터베이스
+    - Matterport 스캔 등으로 구축
+    - 장소 인식 → 목표 위치 검색
+  
+  방법 2: 반자동 목표 등록
+    - 초기 탐색 시 목표 위치 기록
+    - 이후 에피소드에서 재사용
+  
+  방법 3: VLM 기반 목표 추정
+    - &quot;소파 옆 탁자&quot;를 의미론적으로 해석
+    - 가능한 목표 위치 분포 추정 → TLP 렌더링
+  
+  현재 한계: 완전 자율 실세계 배포에서는 목표 위치 사전 지식 필요
+</code></pre>
+<h3>8.2 스테레오 카메라의 실용적 제약</h3>
+<pre><code>[스테레오 VLN의 실용적 고려사항]
+
+하드웨어 요구사항:
+  - 스테레오 카메라 필수 (모노큘러 카메라 대신)
+  - 기선 거리 B 중요: B 너무 작으면 깊이 정확도 저하
+  - ZED Mini: B = 63mm (단거리), ZED 2: B = 120mm (중거리)
+
+기선 거리별 유효 범위:
+  B = 63mm:  0.5m ~ 5m 정확도 ★★★★★
+             5m ~ 10m 정확도 ★★★☆☆
+             10m+      정확도 ★★☆☆☆
+  
+  B = 120mm: 0.5m ~ 10m 정확도 ★★★★★
+             10m ~ 20m 정확도 ★★★☆☆
+
+VLN 환경에서의 의의:
+  - 실내 환경 대부분: 0.5m ~ 5m 깊이 범위
+  - ZED Mini (B=63mm) 충분
+  - 실외 또는 큰 공간: 더 큰 기선 필요
+
+교정(Calibration):
+  - 스테레오 카메라는 정기적 교정 필요
+  - 온도 변화, 충격에 의한 기선 변위
+  - 소프트웨어 보정으로 부분 해결 가능
+</code></pre>
+<h3>8.3 한계점</h3>
+<pre><code>[StereoNav의 한계 및 향후 방향]
+
+한계 1: TLP의 목표 위치 의존성
+  - 목표 좌표를 사전에 알아야 TLP 적용 가능
+  - 완전 무지 환경에서는 적용 어려움
+  → 향후: VLM 기반 동적 목표 위치 추정
+
+한계 2: 스테레오 카메라 요구
+  - 기존 단안 카메라 장착 로봇에서 즉시 적용 불가
+  - 하드웨어 업그레이드 비용
+  → 향후: 단안 카메라에서 스의사 스테레오(Pseudo-Stereo) 생성
+
+한계 3: 동적 환경
+  - 이동하는 사람/물체 처리 미흡
+  - 스테레오 매칭이 빠른 움직임에서 오류
+  → 향후: 동적 객체 마스킹 + 시간 일관성 추가
+
+한계 4: 계산 비용
+  - Stage II 학습: 688 GPU-hours
+  - 실시간 추론: Jetson Orin 한계 (15 FPS)
+  → 향후: 경량화 (지식 증류, 양자화)
+
+한계 5: 멀티모달 지시
+  - 현재: 텍스트 지시만 처리
+  - 실세계: 손 지시, 사진, 음성 등 다양
+  → 향후: 멀티모달 지시 처리 확장
+</code></pre>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<pre><code>[기존 리뷰된 VLN 논문들과의 체계적 비교]
+
+비교 논문 선정:
+  1. StreamVLN (ICRA 2026) — StereoNav의 주요 비교 대상
+  2. NavDP (ICRA 2026) — 확산 정책 기반 sim-to-real
+  3. HiCoNav (arXiv 2026) — 배포 가능한 계층적 VLN 시스템
+  4. NavOL (ICML 2026) — 온라인 학습으로 실세계 강화
+  5. WalkWithMe (arXiv 2026) — 사회적 내비게이션, 실세계 배포
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>StreamVLN (ICRA 2026)</th>
+<th>NavDP (ICRA 2026)</th>
+<th>HiCoNav (arXiv 2026)</th>
+<th>NavOL (ICML 2026)</th>
+<th><strong>StereoNav</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>R2R-CE SR (val-unseen)</td>
+<td>63.9%</td>
+<td>54.3%</td>
+<td>N/A</td>
+<td>69.0% (OOD)</td>
+<td><strong>81.1%</strong></td>
+</tr>
+<tr>
+<td>R2R-CE SPL</td>
+<td>57.1%</td>
+<td>41.2%</td>
+<td>N/A</td>
+<td>N/A</td>
+<td><strong>68.3%</strong></td>
+</tr>
+<tr>
+<td>실세계 SR</td>
+<td>미공개</td>
+<td>26.7%</td>
+<td>Unitree Go1 (정성)</td>
+<td><strong>83.3%</strong></td>
+<td><strong>60.6%</strong></td>
+</tr>
+<tr>
+<td>스테레오 입력</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td><strong>✅</strong></td>
+</tr>
+<tr>
+<td>목표 위치 투영</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td><strong>✅ (TLP)</strong></td>
+</tr>
+<tr>
+<td>조명 강건성</td>
+<td>약함</td>
+<td>약함</td>
+<td>중간</td>
+<td>중간</td>
+<td><strong>강함</strong></td>
+</tr>
+<tr>
+<td>모션 블러 강건성</td>
+<td>약함</td>
+<td>약함</td>
+<td>중간</td>
+<td>중간</td>
+<td><strong>강함</strong></td>
+</tr>
+<tr>
+<td>파라미터 수</td>
+<td>7B</td>
+<td>1B</td>
+<td>~3B</td>
+<td>1B</td>
+<td><strong>2B</strong></td>
+</tr>
+<tr>
+<td>코드 공개</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>예정</td>
+<td><strong>✅</strong></td>
+</tr>
+<tr>
+<td>벤치마크 유형</td>
+<td>R2R-CE</td>
+<td>NavDP 씬</td>
+<td>자체 씬</td>
+<td>NavDP 씬</td>
+<td><strong>R2R-CE</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<pre><code>[StereoNav vs 기존 방법 장단점]
+
+★ 장점 1: 압도적 벤치마크 성능
+  R2R-CE SR: 81.1% (기존 최고 63.9% 대비 +17.2%p)
+  적은 파라미터(2B)로 더 큰 모델(7B+) 능가
+  → 의의: VLN 성능의 병목이 데이터/크기가 아니라
+          공간적 그라운딩과 도메인 프라이어에 있음을 증명
+
+★ 장점 2: 탁월한 시각적 강건성
+  모션 블러에서 단 8.2% 저하 (StreamVLN 38.1%, JanusVLN 89.6% 대비)
+  → 의의: 실세계 배포에서 가장 중요한 특성
+          실험실 조건이 아닌 현실 조건에서의 동작 보장
+
+★ 장점 3: 유의미한 실세계 성능
+  Unitree G1에서 60.6% SR vs StreamVLN 24.3%
+  → 의의: VLN 연구의 궁극적 목표(실제 로봇 배포) 달성
+
+▲ 단점 1: TLP의 목표 위치 사전 지식 요구
+  실제 배포에서 목표 좌표를 어떻게 제공하는가?
+  NavOL, HiCoNav 등은 이 문제 없음 (목표 이미지/텍스트만)
+  → 그러나: 목표 좌표 제공 시나리오 (빌딩 관리 시스템 등)는 현실적
+
+▲ 단점 2: 스테레오 카메라 의존성
+  기존 단안 카메라 장착 로봇에서 즉시 적용 불가
+  HiCoNav, NavOL은 단안 RGB-D로도 작동
+  → 그러나: 스테레오의 정확도 이점이 비용 정당화
+
+▲ 단점 3: 동적 환경 미지원
+  이동하는 사람/물체 처리 없음
+  WalkWithMe, HCSG는 동적 환경 특화
+  → 실세계 환경에서 중요한 미해결 문제
+</code></pre>
+<h3>9.3 실적용 가능성 평가</h3>
+<pre><code>[실로봇 배포 관점에서의 실용성 평가]
+
+시나리오별 실적용 가능성:
+
+1. 호텔/공항 안내 로봇
+   요구: 목표 위치 데이터베이스 (층별 맵) ✅ 구축 가능
+   환경: 균일 조명 ✅, 가끔 사람들 ⚠️
+   StereoNav 적합성: ★★★★★ (매우 높음)
+
+2. 창고/물류 로봇
+   요구: 정적 환경, GPS/비콘 목표 위치 ✅
+   환경: 좁은 통로 ✅, 일정한 조명 ✅
+   StereoNav 적합성: ★★★★☆ (높음)
+
+3. 병원/사무실 자율 배송
+   요구: 다양한 조명, 사람 밀집 ⚠️
+   환경: 동적 장애물 ⚠️
+   StereoNav 적합성: ★★★☆☆ (중간) — 동적 환경 개선 필요
+
+4. 실외 가이드 로봇
+   요구: 자연광 변화 ✅ (강건함), 다양한 목표 ⚠️
+   환경: 일정하지 않은 지형 ⚠️
+   StereoNav 적합성: ★★★★☆ (높음)
+
+핵심 실용성 장점:
+  - 실세계 성능이 2.5× 향상 (vs StreamVLN)
+  - 조명/모션 강건성이 실용화의 핵심 요구사항 충족
+  - 기존 시스템 대비 파라미터 효율 우수 (2B vs 7B+)
+</code></pre>
+<h3>9.4 연구 방향성 평가</h3>
+<pre><code>[VLN 연구 트렌드에서 StereoNav의 위치]
+
+현재 VLN 연구 트렌드:
+  트렌드 A: 모델 확장 (7B → 13B → 더 큰 모델)
+  트렌드 B: 데이터 확장 (ScaleVLN, 합성 데이터)
+  트렌드 C: 효율화 (FreqCache, LiveVLN)
+  트렌드 D: 실세계 배포 (NavDP, NavOL, HiCoNav)
+  
+StereoNav의 위치:
+  → 트렌드 A에 역행: 2B 모델로 7B+ 능가
+  → 트렌드 B 활용: ScaleVLN 데이터 사용
+  → 트렌드 D에서 핵심 기여: 최고 실세계 성능
+
+연구 방향성 평가:
+  ★★★★★ 매우 올바른 방향
+  
+  이유:
+  1. &quot;공간적 그라운딩&quot; 문제 식별 → 향후 연구의 핵심 방향
+  2. 스테레오 활용은 비용 대비 효과가 큰 접근
+  3. 실세계 성능 검증이 연구의 궁극적 가치 입증
+  
+  향후 연구에 미치는 영향:
+  - TLP 아이디어는 다른 로봇 내비게이션 태스크로 일반화 가능
+  - 스테레오 VLN 벤치마크 구축 필요성 제기
+  - sim-to-real 문제에 &quot;도메인 불변 프라이어&quot; 접근법 확산 가능
+</code></pre>
+<hr>
+<h2>10. 참고 문헌 (References)</h2>
+<ol>
+<li>Chen, A. et al. (2021). &quot;VLN-BERT: A Recurrent Vision-and-Language BERT for Navigation.&quot; <em>CVPR 2021</em>.</li>
+<li>Hong, B. et al. (2022). &quot;BEVBert: Multimodal Map Pre-training for Language-guided Navigation.&quot; <em>ICCV 2023</em>.</li>
+<li>An, H. et al. (2023). &quot;ETPNav: Evolving Topological Planning for Vision-Language Navigation in Continuous Environments.&quot; <em>CVPR 2023</em>.</li>
+<li>Wang, Y. et al. (2024). &quot;StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling.&quot; <em>ICRA 2026</em>. arXiv:2507.05240</li>
+<li>Zheng, B. et al. (2024). &quot;NavDP: Learning Sim-to-Real Navigation Diffusion Policy.&quot; <em>ICRA 2026</em>. arXiv:2505.08712</li>
+<li>Wei, X. et al. (2026). &quot;NavOL: Navigation Policy with Online Imitation Learning.&quot; <em>ICML 2026</em>. arXiv:2605.11762</li>
+<li>Xu, K. et al. (2026). &quot;HiCo-Nav: A Deployable Embodied VLN System with Hierarchical Cognition.&quot; arXiv:2604.21363</li>
+<li>Oquab, M. et al. (2023). &quot;DINOv2: Learning Robust Visual Features without Supervision.&quot; <em>Transactions on Machine Learning Research</em>.</li>
+<li>Chen, Z. et al. (2024). &quot;InternVL: Scaling up Vision Foundation Models and Aligning for Generic Visual-Linguistic Tasks.&quot; <em>CVPR 2024</em>.</li>
+<li>Xu, W. et al. (2025). &quot;FoundationStereo: Zero-Shot Stereo Matching.&quot; <em>arXiv:2501.09898</em>.</li>
+<li>Anderson, P. et al. (2018). &quot;Vision-and-Language Navigation: Interpreting Visually-Grounded Navigation Instructions in Real Environments.&quot; <em>CVPR 2018</em>.</li>
+<li>Ku, A. et al. (2020). &quot;Room-Across-Room: Multilingual Vision-and-Language Navigation with Dense Spatiotemporal Grounding.&quot; <em>EMNLP 2020</em>.</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<h3>11.1 혁신성 요약</h3>
+<p>StereoNav는 VLN 연구에서 두 가지 근본적인 혁신을 가져온다:</p>
+<p><strong>혁신 1: 병목 재정의</strong>
+기존 연구가 &quot;더 크고, 더 많은 데이터&quot;에 집중할 때, StereoNav는 VLN의 실용화 병목이 <strong>공간적 그라운딩의 부재</strong>와 <strong>크로스-도메인 프라이어의 결여</strong>에 있음을 체계적으로 증명한다. 이는 향후 10년간 VLN 연구 방향에 영향을 줄 핵심 통찰이다.</p>
+<p><strong>혁신 2: 스테레오 + 도메인 불변 프라이어의 시너지</strong>
+TLP와 스테레오 통합 이해의 조합은 단순히 성능을 높이는 것이 아니라, 실세계 배포 가능성을 근본적으로 개선한다. 모션 블러에서 8.2% 저하 vs 기존 38-89%는 연구실 VLN에서 실용적 VLN으로의 패러다임 전환을 의미한다.</p>
+<h3>11.2 실용적 의의</h3>
+<pre><code>[StereoNav의 실용적 가치]
+
+단기 (1-2년):
+  - 현재 로봇 시스템에 직접 적용 가능 (코드 공개)
+  - 스테레오 카메라 장착 로봇에서 즉시 성능 향상
+  - 건물 관리 시스템과 통합 (TLP용 목표 좌표 제공)
+
+중기 (3-5년):
+  - VLN 실세계 배포 표준 방법으로 채택 가능
+  - 스테레오 VLN 데이터셋 구축 촉진
+  - 동적 환경 처리 추가 연구 유발
+
+장기 (5년+):
+  - 로봇 내비게이션의 스테레오 표준화
+  - TLP 개념의 다른 구현화 AI 태스크로 확장
+  - 완전 자율 실세계 VLN 시스템 실현
+</code></pre>
+<h3>11.3 향후 연구 방향</h3>
+<p>본 논문이 제기하는 미해결 문제와 향후 연구 방향:</p>
+<ol>
+<li><strong>동적 TLP</strong>: VLM으로 자연어 지시에서 목표 위치를 자동 추정하여 TLP 생성</li>
+<li><strong>단안 가상 스테레오</strong>: 단안 카메라에서 깊이 추정 네트워크로 가상 스테레오 쌍 생성</li>
+<li><strong>동적 환경 통합</strong>: HCSG와 같은 인간 인식 모듈 통합</li>
+<li><strong>경량화</strong>: Edge 디바이스에서 실시간 동작을 위한 모델 압축</li>
+<li><strong>지속 학습</strong>: 실세계 배포 중 온라인 적응 (NavOL과의 통합)</li>
+</ol>
+<p>StereoNav는 VLN 연구의 새로운 이정표를 세우며, 특히 실세계 배포라는 관점에서 현재까지 발표된 VLN 방법 중 가장 실용적인 접근법을 제시한다.</p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>

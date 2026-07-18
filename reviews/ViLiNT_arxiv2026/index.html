@@ -1,0 +1,1230 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>ViLiNT: Multimodal Embodiment-Aware Navigation Transformer · PaperDaily</title>
+<style>
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --code-bg: #F8F4EC; --tag-text: #8A8073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --code-bg: #221D15; --tag-text: #9A9182;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 15.5px; line-height: 1.75;
+  padding: 0 20px;
+}
+.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
+.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
+.site-header .kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.site-header h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; color: var(--tag-text);
+}
+.meta-row a { color: var(--accent-deep); }
+.chip {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
+  font-size: 11px;
+}
+
+article { padding: 26px 0 40px; overflow-wrap: anywhere; }
+article h1, article h2, article h3, article h4 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
+  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
+  margin: 2.1em 0 0.7em;
+}
+article h1 { font-size: 24px; }
+article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; }
+article h4 { font-size: 16px; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre {
+  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
+}
+article pre code {
+  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
+}
+article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article code.math-display {
+  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
+  border: 1px solid var(--card-border); border-radius: 12px;
+  white-space: nowrap; overflow-x: auto; font-size: 13px;
+}
+.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
+article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+article th {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+}
+article tr:last-child td { border-bottom: none; }
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+}
+footer {
+  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-header">
+    <div class="kicker">arXiv 2026</div>
+    <h1>ViLiNT: Multimodal Embodiment-Aware Navigation Transformer</h1>
+    <div class="meta-row">
+      <span class="chip">Planner</span>
+      <span><a href="https://arxiv.org/abs/2604.19267">arXiv:2604.19267</a></span>
+      <span>리뷰 2026-04-25</span>
+      <span>45분 읽기</span>
+    </div>
+  </header>
+  <article>
+<h1>ViLiNT: 멀티모달 구현 인식 내비게이션 트랜스포머 — 핵심 방법론 분석 (Core Methods Analysis)</h1>
+<h2>1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Multimodal Embodiment-Aware Navigation Transformer</li>
+<li><strong>저자 (Authors)</strong>: Louis Dezons*, Quentin Picard*, Rémi Marsal†, François Goulette†, David Filliat*<ul>
+<li>(*: AMIAD Pole Recherche 공동 저자, †: U2IS, ENSTA, Institut Polytechnique de Paris)</li>
+</ul>
+</li>
+<li><strong>소속 (Affiliation)</strong>: AMIAD Pole Recherche, Palaiseau, France; ENSTA Paris, Institut Polytechnique de Paris, France</li>
+<li><strong>발표처 (Published)</strong>: arXiv 프리프린트 (2026년 4월 21일, cs.RO)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.48550/arXiv.2604.19267">https://doi.org/10.48550/arXiv.2604.19267</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2604.19267">https://arxiv.org/abs/2604.19267</a></li>
+<li><strong>GitHub</strong>: <a href="https://github.com/LARIAD/ViLiNT">https://github.com/LARIAD/ViLiNT</a></li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>지상 로봇을 위한 목표 조건부(goal-conditioned) 자율 내비게이션에서 <strong>분포 변화(distribution shift)</strong> 에 강인한 충돌 회피를 달성하는 것이 핵심 목표다. 기존 비전 전용(vision-only) 내비게이션 정책(GNM, ViNT, NoMaD)은 지도 학습으로 학습하면 제로샷 전이(zero-shot transfer)에서 유망한 결과를 보이지만, 환경·로봇·센서 구성이 달라지면 충돌 회피 능력이 현저히 저하된다.</p>
+<p>ViLiNT(Vision-LiDAR Navigation Transformer)는 세 가지 핵심 아이디어로 이 문제를 해결한다:</p>
+<ol>
+<li><strong>RGB 이미지 + 3D LiDAR 융합</strong>: 트랜스포머 기반 멀티모달 토큰 수준 융합</li>
+<li><strong>구현 인식(Embodiment-Aware)</strong>: 로봇 크기(폭, 길이)를 토큰으로 명시적 조건화</li>
+<li><strong>자동 클리어런스 레이블</strong>: LiDAR 지오메트리에서 추론하는 충돌 예측 헤드</li>
+</ol>
+<hr>
+<h2>2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<h4>A. 비전 전용 내비게이션의 한계</h4>
+<p>기존 end-to-end 내비게이션 모델(GNM, ViNT, NoMaD)은 RGB 이미지와 목표 이미지/방향을 입력받아 waypoint 시퀀스를 생성한다. 이 접근의 근본적 한계:</p>
+<pre><code>비전 전용 모델의 약점:
+
+1. 깊이/거리 모호성 (Depth Ambiguity)
+   - RGB에서 장애물까지의 거리 추정이 모호함
+   - 조명 변화, 텍스처리스 표면에서 성능 저하
+
+2. 좁은 통로 (Narrow Passage) 문제
+   - 로봇 크기를 모르면 통과 가능 여부 판단 불가
+   - 동일한 경로라도 소형 로봇은 통과, 대형 로봇은 충돌
+
+3. 분포 외 환경 (Out-of-Distribution)
+   - 훈련 데이터에 없는 새로운 지형/장애물 타입
+   - NoMaD-FT의 실세계 실험: 85% → 15% 성공률 (본 논문 비교)
+
+4. &quot;Deadlock&quot; 상황
+   - 로컬 미니마에 갇혀 탈출 불가
+   - 비전만으로는 안전한 우회 방향 판단 곤란
+</code></pre>
+<p><strong>실험 수치</strong>: NoMaD-FT(비전 전용 기준선)는 본 논문의 시뮬레이션 실험 3개 환경에서 SR = 0.33, 0.37, 0.12로 평균 0.27의 성공률을 보인다.</p>
+<h4>B. 로봇 크기 불일치 문제 (Cross-Embodiment Challenge)</h4>
+<p>내비게이션 모델을 다양한 로봇 플랫폼에 적용할 때 핵심 문제는 <strong>로봇 크기에 따른 클리어런스 요구사항</strong>이 다르다는 것이다:</p>
+<pre><code>Clearpath Husky:  폭 0.67m, 길이 1.07m
+AgileX Scout 2.0: 폭 0.69m, 길이 1.0m
+Boston Dynamics Spot: 폭 0.5m, 길이 1.1m
+
+동일한 좁은 통로에서:
+  Spot → 통과 가능 (여유 클리어런스)
+  Husky → 충돌 위험 (더 넓은 경로 필요)
+</code></pre>
+<p>기존 모델들은 훈련 데이터의 로봇 크기만 암묵적으로 학습하므로, 다른 로봇에 제로샷 적용 시 부적절한 클리어런스 마진으로 충돌을 유발한다.</p>
+<h4>C. 이질적 훈련 데이터</h4>
+<p>다양한 플랫폼의 데이터를 모아 학습하면 강인성이 향상되지만, 2D LiDAR만 있는 데이터셋(Huron, ~75시간 분량)을 3D LiDAR 기반 모델에 통합하는 것이 어렵다. 이 데이터를 버리면 엄청난 양의 도움이 되는 시각 정보를 잃는다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>ViLiNT는 세 가지 핵심 메커니즘을 제안한다:</p>
+<ol>
+<li><strong>Polar Grid LiDAR Tokenizer</strong>: 3D LiDAR 포인트 클라우드를 트랜스포머가 처리할 수 있는 고정 크기 토큰 시퀀스로 변환</li>
+<li><strong>Embodiment-Conditioned Transformer</strong>: 로봇 크기를 명시적 토큰으로 주입하여 크기 인식 경로 계획</li>
+<li><strong>Cross-Attention Clearance Head + 비대칭 Huber 손실</strong>: 자동 생성된 LiDAR 기반 레이블로 안전 마진 예측</li>
+</ol>
+<hr>
+<h2>3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 LiDAR 토큰화 (LiDAR Tokenization)</h3>
+<h4>3.1.1 PointTransformerV3 인코딩</h4>
+<p>원시 3D LiDAR 포인트 클라우드를 우선 <strong>PointTransformerV3</strong>로 처리하여 per-point 특징 벡터를 추출한다:</p>
+<pre><code>입력: 포인트 클라우드 P = {p_i} ⊂ R^3, 채널 수 = 4 (x, y, z + intensity)
+출력: 특징 벡터 h_i ∈ R^{d_e}  (각 포인트 i에 대해)
+
+PointTransformerV3:
+  - Flash-Attention 최적화 (임베디드 컴퓨팅 호환)
+  - Frozen 가중치 (사전학습 후 동결)
+  - 이유: 3D-2D 결합 시각 특징을 distillation으로 사전학습
+</code></pre>
+<p>PointTransformerV3를 동결(frozen)하는 이유: 소형 로봇 컴퓨터(Nvidia AGX Orin)에서 실시간 fine-tuning이 불가능하고, 대규모 3D 데이터로 사전학습된 특징이 이미 충분히 유용하기 때문이다.</p>
+<h4>3.1.2 Polar Grid 토큰화 (Polar Grid Tokenization)</h4>
+<pre><code>좌표 변환: Cartesian (x, y) → Polar (r, θ)
+  θ ∈ [-ϕ, ϕ]  (수평 FoV)
+  r ∈ [0, R]   (최대 탐지 거리)
+
+그리드 분할:
+  K_θ 개 각도 섹터 × K_r 개 반경 링
+  → K_θ × K_r 개 셀 (u, v)
+
+각 셀 (u, v)에 속하는 포인트 집합: B_{u,v}
+
+GeM (Generalized Mean) Pooling:
+  f_{u,v} = ( 1/|B_{u,v}| ∑_{i ∈ B_{u,v}} h_i^p )^{1/p}
+  p: 학습 가능한 지수 (p &gt; 0)
+  → p → ∞: Max Pooling, p = 1: Average Pooling
+
+빈 셀 처리:
+  B_{u,v} = ∅ → 학습 가능 임베딩으로 대체
+
+위치 인코딩:
+  π_{θ,u} = [sin(θ_u), cos(θ_u)]  (각도 방향)
+  π_{r,v} = v / K_r               (정규화된 반경)
+</code></pre>
+<p>최종 LiDAR 토큰:</p>
+<pre><code>x_{u,v} = W_f · f_{u,v}
+         + W_π · [π_{θ,u} ; π_{r,v}]
+         + W_s · [r̄_{u,v} ; r̃_{u,v}]
+
+r̄_{u,v}: 셀 내 평균 반경 (장애물 거리 추정)
+r̃_{u,v}: soft-min 중심 반경 (근접 포인트 가중 평균)
+          가중치 ∝ exp(-γ · r(x_i, y_i))
+</code></pre>
+<p>이 설계의 장점:</p>
+<ul>
+<li>고정 크기 K 개 토큰 (포인트 수 무관)</li>
+<li>방향 정보 보존 (각도 섹터)</li>
+<li>근접 장애물 강조 (soft-min weighting)</li>
+<li>빈 영역(free space) 명시적 표현</li>
+</ul>
+<h3>3.2 트랜스포머 씬 인코더 (Transformer Scene Encoder)</h3>
+<h4>3.2.1 토큰 시퀀스 구성</h4>
+<pre><code>입력 토큰 시퀀스 (총 S = (C+1) + K + 2 개):
+
+[이미지 토큰 C+1 개]  [LiDAR 토큰 K 개]  [구현 토큰 1 개]  [목표 토큰 1 개]
+       ↓                      ↓                  ↓                ↓
+  DUNE ViT                Polar Grid          MLP E_w           MLP E_g
+  (frozen)               Tokenizer       (w, ℓ) → R^d       g ∈ R^2 → R^d
+
+C = 3 (config 기준, 이전 3 프레임 + 현재 1 프레임 = 4 토큰)
+</code></pre>
+<p><strong>이미지 인코더 (DUNE ViT)</strong>: 2D와 3D 시각 특징을 distillation으로 학습한 ViT. 동결 상태로 사용.</p>
+<p><strong>구현 토큰</strong>: 로봇 폭(w)과 길이(ℓ)를 2D 벡터로 입력받아 d 차원 임베딩으로 변환. 학습 중 다양한 로봇 크기 조합으로 훈련하여 크기 인식 경로 계획을 학습한다.</p>
+<p><strong>목표 토큰</strong>: 로봇 프레임 기준 목표 위치 좌표 (x, y) → d 차원 임베딩.</p>
+<h4>3.2.2 모달리티 드롭아웃 (Modality Dropout)</h4>
+<pre><code>학습 중 마스킹 전략:
+
+목표 토큰:  P_mask = 0.5 확률로 무작위 마스킹
+           → 명시적 목표 없이도 feasible한 경로 생성 장려
+           (장애물에 갇혔을 때 탈출 행동 학습)
+
+이미지 토큰: 무작위 마스킹 (비율 미공개)
+            → 단일 모달리티 의존 방지
+
+효과:
+  테스트 시 clearance &lt; 1.0 이면 목표 마스킹 적용
+  → 탐색적 궤적 생성으로 deadlock 탈출
+</code></pre>
+<h4>3.2.3 트랜스포머 인코더 설정</h4>
+<pre><code>인코딩 크기 d    : 512
+Attention 헤드    : 4
+Transformer 레이어: 4
+FFN 확장 계수    : 4
+Down-sampling 차원: [64, 128, 256]
+</code></pre>
+<p>씬 표현 추출 (Attention Pooling):</p>
+<pre><code>α_i = softmax(a^T z_i / √d)
+s = ∑_i α_i z_i
+
+s ∈ R^d : 전체 씬을 압축한 단일 벡터
+</code></pre>
+<h3>3.3 Diffusion 기반 궤적 생성 (Trajectory Generation via Diffusion)</h3>
+<h4>3.3.1 Diffusion Policy Denoiser</h4>
+<pre><code>노이즈 예측 네트워크: ε_θ
+
+입력:
+  - 노이즈가 추가된 waypoint 시퀀스 u^{(τ)} ∈ R^{J×4}
+  - 씬 컨텍스트 s
+  - 구현 토큰 (w, ℓ)
+  - 시간스텝 τ
+
+출력:
+  - 주입된 노이즈 추정 ε̂
+
+J = 8 waypoints
+각 waypoint = (Δx, Δy, cos θ, sin θ) ∈ R^4 (로봇 프레임 기준)
+</code></pre>
+<p><strong>Forward process</strong> (훈련 시 노이즈 추가):</p>
+<pre><code>u^{(τ)} = √ᾱ_τ · u + √(1 - ᾱ_τ) · ε,  ε ~ N(0, I)
+</code></pre>
+<p><strong>Reverse process</strong> (추론 시 궤적 복원):</p>
+<pre><code>DDPM T = 10 스텝으로 역방향 샘플링
+u^{(0)} = 최종 예측 궤적 (노이즈 없는)
+</code></pre>
+<p><strong>학습 손실</strong>:</p>
+<pre><code>L_diff = E[|| ε - ε_θ(u^{(τ)}, s, τ) ||²₂]
+</code></pre>
+<p><strong>Waypoint 스페이싱 정규화</strong> (이질적 데이터셋 통합):</p>
+<pre><code>데이터셋 d별로 waypoint 간격 δwp^d가 다름
+
+정규화:
+k_d = ⌊ max_d{δwp^d} / δwp^d ⌋
+
+dataset d에서 k_d 스텝마다 1개 waypoint 샘플링
+→ 모든 데이터셋이 동일한 물리적 간격으로 정렬
+</code></pre>
+<h4>3.3.2 보조 손실 (Auxiliary Loss)</h4>
+<p>목표까지의 거리를 예측하는 보조 헤드를 추가하여 학습 안정화:</p>
+<pre><code>L_aux = ||d_goal - d̂_goal||²
+
+d_goal: 현재 위치에서 목표까지의 실제 거리
+d̂_goal: 모델 예측 거리
+</code></pre>
+<h3>3.4 클리어런스 예측 헤드 (Clearance Prediction Head)</h3>
+<h4>3.4.1 자동 클리어런스 레이블 생성</h4>
+<p>수동 어노테이션 없이 LiDAR 지오메트리에서 자동으로 클리어런스 레이블을 계산한다:</p>
+<pre><code>waypoint j에 대한 클리어런스 레이블 생성:
+
+1. d_j = 2 × min distance(LiDAR points → trajectory segment j)
+   (궤적 세그먼트 j와 LiDAR 포인트 간 최소 거리의 2배)
+
+2. 로봇 크기로 정규화:
+   c_j = d_j / max(w, ℓ)
+   (1.0 = 로봇이 딱 통과 가능한 여유)
+</code></pre>
+<p>이 레이블 생성 방식은:</p>
+<ul>
+<li>추가 센서 불필요 (LiDAR만 사용)</li>
+<li>로봇 크기에 상대적 척도 (크기 인식 자동화)</li>
+<li>동적 장애물에도 적용 가능 (훈련 시 정적 환경 기준)</li>
+</ul>
+<h4>3.4.2 Cross-Attention Clearance Architecture</h4>
+<pre><code>입력:
+  z_j : waypoint j의 위치를 쿼리로 사용
+  LiDAR 토큰들: K, V (키-값 쌍)
+  u_j^{:2}: waypoint j의 xy 좌표
+  w: 구현 벡터 (로봇 크기)
+
+Cross-Attention:
+  z_j = CrossAttention(query=waypoint_j, key=LiDAR_tokens, value=LiDAR_tokens)
+
+최종 클리어런스 예측:
+  ĉ_j = E_c( [z_j ‖ u_j^{:2} ‖ w] )
+
+E_c: 작은 MLP 네트워크
+‖: 연결(concatenation)
+</code></pre>
+<p>각 waypoint에 대해 독립적으로 클리어런스를 예측하므로, 궤적의 어느 지점에서 가장 좁은 통로를 통과하는지 세밀하게 파악할 수 있다.</p>
+<h4>3.4.3 비대칭 Huber 손실 (Asymmetric Huber Loss)</h4>
+<p>클리어런스 예측에서 <strong>과대 추정(optimistic)이 과소 추정보다 훨씬 위험</strong>하다 — 잘못된 안전 확신이 충돌로 이어지기 때문이다. 이를 반영한 비대칭 가중치:</p>
+<pre><code>L_clear = w(e) · Huber(e, δ=1)
+
+w(e) = {
+    w_over = 5,  if e &gt; 0  (과대 추정: 실제보다 안전하다고 예측)
+    1,           otherwise  (과소 추정: 보수적 예측)
+}
+
+e = ĉ_j - c_j  (예측값 - 실제값)
+
+Huber(e, δ=1) = {
+    0.5 · e²,     if |e| ≤ 1
+    |e| - 0.5,    otherwise
+}
+</code></pre>
+<p><code>w_over = 5</code>: 과대 추정을 5배 더 강하게 벌점화. 모델이 보수적으로(under-estimate) 클리어런스를 예측하도록 유도한다.</p>
+<h3>3.5 통합 학습 목적함수 (Combined Training Objective)</h3>
+<pre><code>L = λ_diff · L_diff + λ_clear · L_clear + λ_aux · L_aux
+
+λ_diff  = 1×10⁻⁴  (diffusion 손실)
+λ_clear = 0.3     (clearance 손실)
+λ_aux   = 1 - λ_diff ≈ 1  (보조 거리 예측)
+</code></pre>
+<p>2D LiDAR만 있는 Huron 데이터셋의 경우:</p>
+<pre><code>→ LiDAR 토큰 마스킹
+→ L_clear 계산 제외
+→ L_diff, L_aux만 적용
+</code></pre>
+<p>이 설계 덕분에 75시간 분량의 Huron 데이터를 통합하면서도 3D LiDAR 모델의 일관성을 유지한다.</p>
+<h3>3.6 추론 및 궤적 선택 (Inference and Trajectory Selection)</h3>
+<pre><code>추론 파이프라인:
+
+1. N개 후보 궤적 샘플링
+   { u^n }_{n=1}^N  ← Reverse Diffusion (T=10 스텝)
+
+2. 궤적별 최소 클리어런스 계산
+   ĉ^n = min_j ĉ^n_j  (8 waypoints 중 가장 좁은 지점)
+
+3. 안전 집합 판별
+   B_safe = {n : ĉ^n &gt; 3}
+   (로봇 크기의 3배 여유가 있는 궤적만 &quot;안전&quot;으로 분류)
+
+4. 궤적 선택
+   if B_safe ≠ ∅:
+       → 안전 집합 중 목표에 가장 가까운 궤적 선택 (효율 최적화)
+   elif B_safe = ∅:
+       → 최대 클리어런스 궤적 선택 (안전 최우선)
+
+5. Deadlock 탈출 (목표 마스킹)
+   if min(ĉ^*) &lt; 1.0:
+       → 목표 토큰 마스킹 → 탐색적 궤적 재생성
+   elif min(ĉ^*) &gt; 1.5 AND goal was masked:
+       → 목표 토큰 복원 (정상 목표 추구 재개)
+</code></pre>
+<p>이 hysteresis 방식(&lt; 1.0에서 마스킹, &gt; 1.5에서 복원)은 oscillation을 방지한다.</p>
+<hr>
+<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 아키텍처 다이어그램</h3>
+<pre><code>입력 레이어:
+═══════════════════════════════════════════════════════════════
+RGB 이미지 (C+1=4 프레임)  3D LiDAR 포인트클라우드  목표 (x,y)  로봇 크기 (w,ℓ)
+         ↓                           ↓                  ↓             ↓
+    DUNE ViT             PointTransformerV3             MLP            MLP
+   (Frozen)                  (Frozen)                  E_g            E_w
+         ↓                           ↓
+   이미지 토큰              per-point 특징 h_i
+   (C+1 × d)                         ↓
+                         Polar Grid 토큰화 (K_θ × K_r)
+                                      ↓
+                         GeM Pooling + 위치 인코딩
+                                      ↓
+                         LiDAR 토큰 (K × d)
+
+═══════════════════════════════════════════════════════════════
+토큰 융합 레이어:
+───────────────────────────────────────────────────────────────
+[이미지 C+1] + [LiDAR K] + [목표 1] + [로봇 1]  +  타입/시간 임베딩
+                              ↓
+                 Transformer Encoder (4L, 4H, d=512)
+                              ↓
+                      씬 표현 z_1:S
+                              ↓
+                  Attention Pooling → 씬 벡터 s ∈ R^d
+
+═══════════════════════════════════════════════════════════════
+출력 레이어 (병렬):
+───────────────────────────────────────────────────────────────
+        s + 구현(w,ℓ)                    z_j + LiDAR 토큰
+              ↓                                  ↓
+   Diffusion Denoiser ε_θ            Cross-Attention Clearance
+              ↓                                  ↓
+N × J waypoints (u^n)             ĉ^n_j per waypoint (클리어런스)
+              ↓                                  ↓
+              └──────────── 궤적 선택 ────────────┘
+                                  ↓
+              최선 궤적 (안전+효율) → 2번째 waypoint → PD 제어기
+                                                    → 속도 명령
+</code></pre>
+<h3>4.2 데이터 흐름 (Data Flow)</h3>
+<pre><code>센서 → [Ouster OS1 LiDAR 32ch, Zed2i RGB Camera]
+        ↓
+[전처리] DLIO 오도메트리 (IMU+LiDAR 퓨전)
+        ↓                    ↓
+목표 위치 변환             포인트 클라우드 필터링
+(글로벌 → 로봇 프레임)       (지면 제거, ROI 클리핑)
+        ↓                    ↓
+        ──────────────────────
+                ↓
+         ViLiNT 추론 (Nvidia AGX Orin)
+                ↓
+       선택된 waypoint (8개)
+                ↓
+       PD 속도 제어 (2번째 waypoint 추적)
+                ↓
+       Clearpath Husky 구동 명령
+</code></pre>
+<h3>4.3 ROS2 배포 스택</h3>
+<pre><code>deploy_vilint.py --model vilint --imgwaypoints
+       ↓
+ROS2 토픽 인터페이스:
+  subscribe: IMAGE, LIDAR, ODOM
+  publish:   GOAL, CMD_VEL
+
+topics_names.py: 로봇 플랫폼별 토픽 이름 매핑
+</code></pre>
+<hr>
+<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<p><strong>훈련 데이터셋 총계: 98시간 35분</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>데이터셋</th>
+<th>모달리티</th>
+<th>지속 시간</th>
+<th>지형</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RELLIS-3D</td>
+<td>RGB + 3D LiDAR</td>
+<td>35분</td>
+<td>야외 비정형</td>
+</tr>
+<tr>
+<td>TartanDrive 2.0</td>
+<td>RGB + 3D LiDAR</td>
+<td>7시간</td>
+<td>야외 비정형</td>
+</tr>
+<tr>
+<td>SCAND</td>
+<td>RGB + 3D LiDAR</td>
+<td>9시간</td>
+<td>도심 보도</td>
+</tr>
+<tr>
+<td>Grand-tour</td>
+<td>RGB + 3D LiDAR</td>
+<td>6시간</td>
+<td>보도 + 야외 혼합</td>
+</tr>
+<tr>
+<td>Husky Off-Road (커스텀)</td>
+<td>RGB + 3D LiDAR</td>
+<td>30분</td>
+<td>보도</td>
+</tr>
+<tr>
+<td>Isaac-Sim (커스텀)</td>
+<td>RGB + 3D LiDAR (시뮬)</td>
+<td>30분</td>
+<td>비정형</td>
+</tr>
+<tr>
+<td><strong>Huron</strong></td>
+<td>RGB + <strong>2D LiDAR</strong></td>
+<td><strong>75시간</strong></td>
+<td>보도 (실내+실외)</td>
+</tr>
+</tbody></table></div>
+<p>Huron 데이터셋은 2D LiDAR만 포함하므로 LiDAR 토큰 마스킹으로 통합한다. 이를 통해 전체 98시간 데이터를 활용하면서 3D LiDAR 모델의 일관성을 유지한다.</p>
+<p><strong>데이터 샘플링</strong>: Δt = 0.25s 간격 (이미지 + 포인트 클라우드 동기화)</p>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>지표</th>
+<th>설명</th>
+<th>방향</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SR (Success Rate)</td>
+<td>에피소드 성공(목표 0.5m 이내 도달) 비율</td>
+<td>↑</td>
+</tr>
+<tr>
+<td>CR (Collision Rate)</td>
+<td>에피소드 충돌 비율</td>
+<td>↓</td>
+</tr>
+<tr>
+<td>실세계 SR</td>
+<td>실제 Clearpath Husky 실험 성공률</td>
+<td>↑</td>
+</tr>
+</tbody></table></div>
+<p><strong>에피소드 종료 조건</strong>:</p>
+<ul>
+<li>성공: 목표 0.5m 이내 도달</li>
+<li>실패: 충돌 발생</li>
+<li>타임아웃: 10분 초과</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>시뮬레이션 결과 (Isaac-Sim, Table II)</strong></p>
+<p>3개 환경 (Env.1 보통, Env.2 보통, Env.3 최고난도 혼잡):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>Env.1 SR↑</th>
+<th>Env.1 CR↓</th>
+<th>Env.2 SR↑</th>
+<th>Env.2 CR↓</th>
+<th>Env.3 SR↑</th>
+<th>Env.3 CR↓</th>
+<th>평균 SR</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NoMaD-FT (vision-only)</td>
+<td>0.33</td>
+<td>0.67</td>
+<td>0.37</td>
+<td>0.63</td>
+<td>0.12</td>
+<td>0.88</td>
+<td>0.27</td>
+</tr>
+<tr>
+<td>NoMaD-Col (vision+col head)</td>
+<td>0.20</td>
+<td>0.80</td>
+<td>0.38</td>
+<td>0.62</td>
+<td>0.19</td>
+<td>0.81</td>
+<td>0.26</td>
+</tr>
+<tr>
+<td>ViLiNT-LiDAR-Mask</td>
+<td>0.17</td>
+<td>0.83</td>
+<td>0.37</td>
+<td>0.63</td>
+<td>0.20</td>
+<td>0.80</td>
+<td>0.25</td>
+</tr>
+<tr>
+<td>ViLiNT-Image-Mask</td>
+<td>0.72</td>
+<td>0.28</td>
+<td>0.67</td>
+<td>0.33</td>
+<td>0.23</td>
+<td>0.77</td>
+<td>0.54</td>
+</tr>
+<tr>
+<td><strong>ViLiNT (full)</strong></td>
+<td><strong>0.79</strong></td>
+<td><strong>0.21</strong></td>
+<td><strong>0.61</strong></td>
+<td><strong>0.39</strong></td>
+<td><strong>0.76</strong></td>
+<td><strong>0.24</strong></td>
+<td><strong>0.72</strong></td>
+</tr>
+<tr>
+<td>TEB-Elev†</td>
+<td>0.66</td>
+<td>0.00</td>
+<td>0.89</td>
+<td>0.00</td>
+<td>1.00</td>
+<td>0.00</td>
+<td>0.85</td>
+</tr>
+</tbody></table></div>
+<p>† TEB-Elev: 비학습 고전 방법 (광범위한 파라미터 튜닝 + elevation map 계산 필요)</p>
+<p><strong>핵심 발견</strong>:</p>
+<ol>
+<li>ViLiNT full: NoMaD-FT 대비 <strong>+166% SR 향상</strong> (0.27 → 0.72), <strong>−62% CR 감소</strong></li>
+<li>NoMaD-Col (비전 전용 collision head): NoMaD-FT보다 오히려 더 낮은 성능 → <strong>비전만으로는 충돌 예측 불충분</strong></li>
+<li>ViLiNT-Image-Mask (LiDAR만): 0.54 vs ViLiNT-LiDAR-Mask 0.25 → <strong>LiDAR가 이미지보다 충돌 회피에 훨씬 중요</strong></li>
+<li>RGB 추가(full ViLiNT): LiDAR-only 대비 추가 +33% SR → 이미지는 목표 탐색에 기여</li>
+<li>Env.3(최고난도)에서 ViLiNT: 0.76 vs NoMaD-FT: 0.12 → <strong>혼잡 환경에서 특히 차별적 성능</strong></li>
+</ol>
+<h3>5.4 리얼월드 실험 (Real-World Experiments)</h3>
+<p><strong>플랫폼 구성</strong>:</p>
+<pre><code>로봇    : Clearpath Husky
+카메라  : Zed2i (RGB)
+LiDAR   : Ouster OS1 32채널
+컴퓨터  : Nvidia AGX Orin (임베디드)
+오도메트리: DLIO (Direct LiDAR Inertial Odometry)
+제어    : PD 속도 제어기 (2번째 waypoint 추적)
+</code></pre>
+<p><strong>실험 설정</strong>:</p>
+<ul>
+<li>환경: 주차장 장애물 필드</li>
+<li>목표 거리: 30m</li>
+<li>장애물 크기: 통과 가능한 합리적 크기</li>
+</ul>
+<p><strong>결과</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>성공률</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NoMaD-FT</td>
+<td>15%</td>
+</tr>
+<tr>
+<td><strong>ViLiNT</strong></td>
+<td><strong>85%</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>장거리 검증</strong>: 목표 100m 이상에서도 성공적 내비게이션 확인</p>
+<p><strong>구현 인식 어블레이션</strong> (Figure 7):
+로봇 크기 파라미터를 2배로 증가시키면 모델이 좁은 통로를 피해 더 넓은 경로를 선택하는 것이 시각적으로 확인됨 → 구현 조건화의 효과 검증</p>
+<hr>
+<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<h3>기여 1: 멀티모달 토큰 레벨 융합 (Multimodal Token-Level Fusion)</h3>
+<p>기존 연구들은 RGB와 LiDAR를 대부분 별도 처리하거나 Bird&#39;s Eye View로 투영 후 결합했다. ViLiNT는 <strong>Polar Grid Tokenizer</strong>를 통해 LiDAR를 이미지 토큰과 동일한 형식으로 변환하여 Transformer가 이 두 모달리티 간 cross-attention을 수행한다. 이는 LiDAR의 정밀한 거리 정보와 이미지의 의미론적 정보를 자연스럽게 결합한다.</p>
+<h3>기여 2: 구현 인식 내비게이션 (Embodiment-Aware Navigation)</h3>
+<p>로봇 폭(w)과 길이(ℓ)를 명시적 토큰으로 모델에 주입한다. 이를 통해:</p>
+<ul>
+<li>재훈련 없이 다른 크기의 로봇에 즉시 적용 가능</li>
+<li>로봇 크기에 따른 클리어런스 마진 자동 조정</li>
+<li>크기 변화 실험(Figure 7)으로 효과 검증</li>
+</ul>
+<p>이는 기존 VLN/Navigation 연구에서 거의 다루지 않았던 <strong>cross-embodiment 일반화</strong> 문제에 대한 실용적 해법이다.</p>
+<h3>기여 3: 자동 클리어런스 레이블 생성 (Automatic Clearance Label Generation)</h3>
+<p>수동 어노테이션 없이 LiDAR와 로봇 크기만으로 클리어런스 레이블을 자동 생성한다. 이 방식은:</p>
+<ul>
+<li>대규모 레이블링 비용 제거</li>
+<li>새로운 환경/로봇에도 자동 확장</li>
+<li>물리적으로 의미 있는 척도 (로봇 크기 정규화)</li>
+</ul>
+<h3>기여 4: 비대칭 Huber 손실 (Asymmetric Huber Loss)</h3>
+<p>과대 추정(unsafe 예측)을 5배 더 강하게 벌점화하여 모델이 보수적으로 클리어런스를 예측하도록 유도한다. 이는 로봇 안전에 직접 연결되는 실용적 설계 선택이다.</p>
+<h3>기여 5: 이질적 데이터 통합 (Heterogeneous Data Integration)</h3>
+<p>2D LiDAR 데이터셋(Huron, 75시간)을 모달리티 마스킹으로 3D 모델 훈련에 통합한다. 이를 통해 훈련 데이터를 배 이상 늘리면서도 3D 모달리티의 일관성을 유지한다.</p>
+<hr>
+<h2>7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 모델 아키텍처 파라미터</h3>
+<pre><code>인코딩 크기 (d)         : 512
+Transformer 레이어 수    : 4
+Attention 헤드 수        : 4
+FFN 확장 계수            : 4
+Down-sampling 차원       : [64, 128, 256]
+Diffusion 스텝 T         : 10 (추론)
+예측 waypoint 수 J       : 8
+컨텍스트 프레임 수 C     : 3 (+ 현재 = 4 총)
+이미지 크기              : 336×336
+LiDAR 입력 채널 수       : 4 (x, y, z, intensity)
+</code></pre>
+<h3>7.2 훈련 하이퍼파라미터</h3>
+<pre><code>옵티마이저  : AdamW
+학습률     : 1×10⁻⁴
+스케줄러   : Cosine annealing + Warmup
+Warmup     : 4 에폭
+총 에폭    : 20
+배치 크기  : 256 (훈련) / 128 (검증)
+GPU        : 4개
+데이터 로더 워커: 12
+목표 마스킹 확률: 0.5
+</code></pre>
+<h3>7.3 손실 가중치</h3>
+<pre><code>λ_diff  = 1×10⁻⁴
+λ_clear = 0.3
+λ_aux   = 1 - λ_diff ≈ 1.0
+
+Clearance 비대칭 가중치:
+w_over = 5 (과대 추정 벌점)
+w_under = 1 (과소 추정 벌점)
+Huber delta = 1
+</code></pre>
+<h3>7.4 추론 파라미터</h3>
+<pre><code>안전 클리어런스 임계값   : ĉ &gt; 3 (로봇 크기의 3배)
+deadlock 진입 임계값    : ĉ &lt; 1.0
+deadlock 해제 임계값    : ĉ &gt; 1.5 (hysteresis)
+N (샘플 궤적 수)         : 논문 미공개
+</code></pre>
+<hr>
+<h2>8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 Polar Grid 설계의 계산 효율성</h3>
+<p>원시 LiDAR 포인트 클라우드(32 × 1024 = 32,768개 포인트)를 K_θ × K_r 개 토큰으로 압축한다. 이 압축은 두 가지 장점을 갖는다:</p>
+<ol>
+<li><strong>고정 크기 표현</strong>: 장거리 포인트 밀도 감소나 근거리 밀도 증가에 무관하게 항상 동일한 수의 토큰</li>
+<li><strong>방향 정보 보존</strong>: 각도 섹터별로 토큰이 분리되어 &quot;왼쪽에 장애물, 오른쪽이 비어있음&quot;을 자연스럽게 인코딩</li>
+</ol>
+<p>단, 정확한 K_θ, K_r 값이 논문에 공개되지 않아 완전한 재현을 위해서는 GitHub 코드 확인이 필요하다.</p>
+<h3>8.2 GeM Pooling의 역할</h3>
+<p>일반적인 Average Pooling 대신 Generalized Mean (GeM) Pooling을 사용하는 이유:</p>
+<pre><code>Average (p=1): 모든 포인트를 균등하게 반영
+              → 희소 포인트에 취약
+
+Max (p→∞): 가장 두드러진 특징만 반영
+           → 장애물의 가장 극단적 특징 강조
+
+GeM (학습 가능 p): 두 극단 사이의 최적 균형을 데이터에서 학습
+                  → 안전 관련 특징(근거리 장애물)을 자연스럽게 강조
+</code></pre>
+<h3>8.3 TEB-Elev과의 비교 고찰</h3>
+<p>TEB(Timed Elastic Band) + Elevation Map 방법은 Env.3에서 100% SR, 0% CR을 달성하여 수치상 ViLiNT를 상회한다. 그러나 중요한 맥락이 있다:</p>
+<pre><code>TEB-Elev의 요구사항:
+  ✗ 광범위한 파라미터 튜닝 (환경별 수동 조정)
+  ✗ Elevation map 실시간 계산 (추가 계산 비용)
+  ✗ 새로운 환경에서 재튜닝 필요
+  ✗ 제로샷 일반화 불가
+
+ViLiNT의 장점:
+  ✓ 사전 파라미터 튜닝 불필요
+  ✓ 새로운 환경에 제로샷 적용
+  ✓ 엔드-투-엔드 학습 (도메인 지식 불필요)
+  ✓ 로봇 크기 자동 적응
+</code></pre>
+<p>실용적인 시나리오에서 ViLiNT는 더 범용적인 솔루션이다.</p>
+<h3>8.4 한계점 (Limitations)</h3>
+<p><strong>1. 국소 계획 전용 (Local Planning Only)</strong>
+ViLiNT는 J=8 waypoint(~2m)의 단기 경로만 생성한다. 장거리 탐색을 위해서는 별도의 전역 계획기(global planner)와 통합이 필요하다. 빈 주차 공간 같은 상황에서 LiDAR 반사 부재로 오판할 수 있다.</p>
+<p><strong>2. 분리된 생성-선택 과정</strong>
+Diffusion 궤적 생성과 Clearance 예측이 분리되어 있어 공동 최적화가 이루어지지 않는다. 강화학습으로 충돌 피드백을 diffusion 생성 과정에 직접 통합하면 더 좋은 결과를 기대할 수 있다.</p>
+<p><strong>3. 보수적 목표 마스킹</strong>
+Deadlock 상황에서 목표를 마스킹하는 방식이 때로 불필요한 우회 경로를 유발할 수 있다.</p>
+<p><strong>4. 미공개 파라미터</strong>
+Polar grid 크기(K_θ, K_r), 샘플 궤적 수 N, 구체적 모달리티 드롭아웃 비율이 논문에서 명시되지 않았다.</p>
+<p><strong>5. 학회 미심사</strong>
+현재 arXiv 프리프린트 상태.</p>
+<hr>
+<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>TRG-Planner (RA-L2025)</th>
+<th>HEIGHT (T-ASE2025)</th>
+<th>SANDO (arxiv2026)</th>
+<th>UGE-MPC (ICRA2026)</th>
+<th><strong>ViLiNT (arxiv2026)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 방법</td>
+<td>지형 위험도 그래프</td>
+<td>이질적 그래프 트랜스포머</td>
+<td>시공간 안전 경로 코리도</td>
+<td>불확실성 유도 MPPI</td>
+<td>멀티모달 내비게이션 트랜스포머</td>
+</tr>
+<tr>
+<td>대상 환경</td>
+<td>비정형 야외 지형</td>
+<td>동적 군중 실내</td>
+<td>동적 3D UAV</td>
+<td>정적/동적 장애물</td>
+<td>야외 개방 공간</td>
+</tr>
+<tr>
+<td>로봇 타입</td>
+<td>사족보행</td>
+<td>바퀴형</td>
+<td>UAV</td>
+<td>바퀴형/UAV</td>
+<td>바퀴형 (Husky)</td>
+</tr>
+<tr>
+<td>실세계 실험</td>
+<td>✅ (KAIST)</td>
+<td>✅ (UT Austin)</td>
+<td>✅ (UAV)</td>
+<td>✅</td>
+<td>✅ (주차장)</td>
+</tr>
+<tr>
+<td>코드 공개</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>학회</td>
+<td>RA-L 2025</td>
+<td>T-ASE 2025</td>
+<td>arXiv</td>
+<td>ICRA 2026</td>
+<td>arXiv</td>
+</tr>
+<tr>
+<td>접근법</td>
+<td>기하학적 그래프</td>
+<td>RL + GNN</td>
+<td>최적화 기반</td>
+<td>샘플링 기반 MPC</td>
+<td>학습 기반</td>
+</tr>
+<tr>
+<td>훈련 필요</td>
+<td>❌ (특징 기반)</td>
+<td>✅ (RL)</td>
+<td>❌ (최적화)</td>
+<td>❌ (MPC)</td>
+<td>✅ (지도학습)</td>
+</tr>
+<tr>
+<td>멀티모달</td>
+<td>❌ (LiDAR만)</td>
+<td>❌ (카메라만)</td>
+<td>✅ (카메라+센서)</td>
+<td>❌</td>
+<td>✅ (RGB+LiDAR)</td>
+</tr>
+<tr>
+<td>크기 적응</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>ViLiNT의 주요 장점</strong>:</p>
+<ol>
+<li><p><strong>비전 전용 모델 대비 압도적 안전성</strong>: Env.3에서 SR 0.12 → 0.76, CR 0.88 → 0.24로 LiDAR 통합의 효과가 명확하다. TRG-Planner나 HEIGHT 같은 단일 모달리티 방법들이 다루지 못하는 <strong>비전과 깊이 정보의 상호 보완</strong>이 핵심이다.</p>
+</li>
+<li><p><strong>구현 인식의 독창성</strong>: 기존 리뷰된 모든 Planner 논문 중 로봇 크기를 명시적 조건으로 모델에 주입하는 방법은 ViLiNT가 유일하다. TRG-Planner는 inscribed circle을 수동으로 설정하고, HEIGHT/SANDO/UGE-MPC는 로봇 크기를 암묵적으로만 가정한다.</p>
+</li>
+<li><p><strong>제로샷 일반화</strong>: 새로운 환경에 재튜닝 없이 적용 가능하다. TEB-Elev처럼 환경마다 파라미터를 조정할 필요가 없다.</p>
+</li>
+</ol>
+<p><strong>ViLiNT의 단점</strong>:</p>
+<ol>
+<li><p><strong>동적 장애물 미검증</strong>: SANDO나 HEIGHT과 달리 동적 장애물(움직이는 사람, 차량) 환경에서의 성능을 검증하지 않았다. 클리어런스 레이블이 정적 환경 기준이므로 동적 환경에서 안전성 보장이 불명확하다.</p>
+</li>
+<li><p><strong>전역 계획 부재</strong>: UGE-MPC나 SANDO는 전역 경로와 통합된 시스템인 반면, ViLiNT는 순수 로컬 플래너다. 복잡한 건물 내부 내비게이션에는 별도 전역 플래너가 필요하다.</p>
+</li>
+<li><p><strong>TEB-Elev 대비 충돌률</strong>: 훈련된 모델로는 TEB-Elev의 0% 충돌률을 달성하지 못한다. 안전 중요 응용(병원 로봇 등)에서 학습 기반 방법의 한계다.</p>
+</li>
+</ol>
+<h3>9.3 실적용 가능성 평가</h3>
+<p><strong>높음</strong>: ViLiNT는 실제 Clearpath Husky에서 85% 성공률을 달성하고, 코드가 공개되어 있으며, ROS2 인터페이스가 구현되어 있다. Nvidia AGX Orin에서 실시간 동작이 확인되었으므로 즉시 배포 가능한 수준이다.</p>
+<p>특히 <strong>다양한 로봇 플랫폼 간 전이(cross-embodiment)</strong>가 재훈련 없이 가능하다는 점은 상업적으로 의미 있다. 창고 로봇, 자율 배송 로봇, 연구 플랫폼 교체 시나리오에서 모델을 재학습하지 않고도 적용할 수 있다.</p>
+<p>다만 동적 환경(사람이 움직이는 캠퍼스, 공항)에서의 검증이 필요하다.</p>
+<h3>9.4 연구 방향성 평가</h3>
+<p>ViLiNT가 제시하는 <strong>&quot;구현 인식 멀티모달 학습 기반 로컬 플래너&quot;</strong> 방향은 기존 Planner 리뷰 논문들과 명확히 차별화된다:</p>
+<ul>
+<li><strong>TRG-Planner, HEIGHT</strong>: 특정 센서/환경 특화 알고리즘 (일반화 한계)</li>
+<li><strong>SANDO, UGE-MPC</strong>: 최적화/제어 이론 기반 (환경 모델 의존)</li>
+<li><strong>ViLiNT</strong>: 대규모 이질적 데이터 학습 + 멀티모달 + 크기 적응</li>
+</ul>
+<p>이 방향은 Foundation Model 트렌드와 일치하며, 향후 더 많은 데이터와 더 강력한 백본을 활용하면 성능이 크게 향상될 가능성이 있다. 강화학습으로 diffusion-clearance를 공동 최적화하고, 동적 장애물을 예측하는 모듈을 추가한다면 더 강인한 시스템이 될 것이다.</p>
+<hr>
+<h2>10. 심화 분석: 멀티모달 로컬 플래너의 이론적 토대 (Advanced Analysis: Theoretical Foundations of Multimodal Local Planners)</h2>
+<h3>10.1 Polar Grid Tokenization의 정보 이론적 분석</h3>
+<p>ViLiNT의 LiDAR 처리 방식을 정보 이론 관점에서 분석한다.</p>
+<p><strong>기존 접근과의 비교</strong>:</p>
+<pre><code>접근 방식 비교:
+
+1. Raw Point Cloud (PointNet/PVCNN):
+   입력: {(x_i, y_i, z_i, I_i)}_{i=1}^N, N ≈ 32,768
+   처리: O(N log N) or O(N²)
+   정보: 미가공, 위치 무관 (permutation invariant)
+   문제: 가변 길이 → transformer 직접 입력 어려움
+
+2. Bird&#39;s Eye View (BEV):
+   입력: H × W × C 격자 이미지
+   처리: CNN
+   정보: 투영 손실 (높이 정보 압축)
+   장점: CNN과 호환
+
+3. Polar Grid (ViLiNT):
+   입력: K_θ × K_r × d 고정 크기 토큰
+   처리: Transformer (O(K²))
+   정보: 방향 구조화 + 거리 정보 보존
+   장점: 로봇 방향 기준 자연적 인코딩
+
+Polar Grid의 이론적 우위:
+  - 로봇은 앞으로 이동하므로 θ ≈ 0 (정면) 섹터가 가장 중요
+  - 정면 장애물은 항상 동일한 토큰 인덱스 → 학습 일관성
+  - 반경 r은 거리에 비례 → 클리어런스 계산 직접 활용
+</code></pre>
+<p><strong>GeM Pooling과 Maximum Likelihood</strong>:</p>
+<pre><code>셀 내 포인트들의 통계를 한 벡터로 집약하는 방법:
+
+Average Pooling (p=1):
+  f̄ = 1/N ∑_i h_i
+  의미: 셀 내 포인트들의 평균 특징 → 분산 무시
+
+Max Pooling (p→∞):
+  f̂ = max_i h_i  (element-wise)
+  의미: 가장 두드러진 특징 → 평균 무시
+
+GeM Pooling (1 &lt; p &lt; ∞):
+  f = ( 1/N ∑_i h_i^p )^{1/p}
+  
+  p에 따른 해석:
+  p=2: (∑h_i²/N)^{0.5} ≈ L2 norm 평균
+       → 에너지 기준 풀링 (물리적 의미: 신호 강도)
+  
+  학습 가능 p:
+  → 위험한 포인트(근거리, 고반사) 강조 정도를 데이터에서 최적화
+  → 안전 관련 특징을 GeM이 자동으로 강조
+</code></pre>
+<h3>10.2 비대칭 Huber 손실의 통계적 의미</h3>
+<p>클리어런스 예측에서의 비대칭 손실을 통계 결정 이론으로 해석한다.</p>
+<p><strong>Asymmetric Risk Framework</strong>:</p>
+<pre><code>클리어런스 예측의 두 가지 오류:
+
+오류 1: 과대 추정 (False Positive - &quot;안전하다고 잘못 예측&quot;)
+  ĉ &gt; c_true: 실제보다 더 넓은 공간이 있다고 예측
+  결과: 로봇이 장애물에 가까이 접근 → 충돌 위험
+  비용: w_over = 5 (높음)
+
+오류 2: 과소 추정 (False Negative - &quot;위험하다고 잘못 예측&quot;)
+  ĉ &lt; c_true: 실제보다 좁다고 예측
+  결과: 로봇이 불필요하게 우회 → 비효율적이지만 안전
+  비용: w_under = 1 (낮음)
+
+비율 분석:
+  w_over / w_under = 5/1 = 5
+  
+  의미: &quot;위험을 놓치는 것이 안전을 과잉 주의하는 것보다 5배 나쁘다&quot;
+  
+  Neyman-Pearson 관점:
+    α (False Positive Rate, FPR): 실제 위험을 안전으로 분류
+    β (False Negative Rate, FNR): 실제 안전을 위험으로 분류
+    
+    w_over/w_under = 5 → α/β 비율을 5:1로 설정
+    즉: 1번 충돌이 5번 불필요한 우회보다 나쁘다는 도메인 지식 인코딩
+</code></pre>
+<p><strong>Huber Loss 선택의 이유</strong>:</p>
+<pre><code>순수 L1 손실:
+  |e|: 큰 오류에 선형 벌점
+  단점: 0 주변 미분 불연속 → 학습 불안정
+
+순수 L2 손실:
+  e²: 큰 오류에 이차 벌점
+  단점: 이상치(outlier)에 과도하게 민감
+
+Huber 손실 (δ=1):
+  {0.5e², if |e| ≤ 1
+  {|e| - 0.5, otherwise
+  
+  장점:
+  - |e| ≤ 1: L2처럼 부드러운 그래디언트
+  - |e| &gt; 1: L1처럼 이상치 강인성
+  - δ=1: 정규화된 클리어런스 스케일에서 합리적 임계값
+         (c = d_j / max(w, ℓ) → c ∈ [0, ~10])
+
+비대칭 Huber의 효과:
+  e &gt; 0 (과대 추정): 5 × Huber(e) → 그래디언트 5배 증폭
+  → 모델이 ĉ를 c_true보다 작게 예측하도록 편향
+  → 보수적 예측 = 더 안전한 선택
+</code></pre>
+<h3>10.3 Diffusion Policy와 클리어런스 헤드의 분리 vs. 통합</h3>
+<p>ViLiNT의 현재 설계는 생성(diffusion)과 평가(clearance)를 분리한다. 이 선택의 트레이드오프를 분석한다.</p>
+<p><strong>현재 설계 (분리형)</strong>:</p>
+<pre><code>Step 1: Diffusion으로 N개 후보 궤적 생성
+  - 생성 시 클리어런스 정보 미반영
+  - DDPM T=10 스텝으로 역방향 샘플링
+
+Step 2: Clearance 헤드로 각 궤적 평가
+  - 각 waypoint의 클리어런스 예측
+  - 최소 클리어런스로 순위 결정
+
+Step 3: 안전 집합에서 최선 선택
+
+장점:
+  ✓ 모듈화 → 각 컴포넌트 독립 개발/개선
+  ✓ 학습 안정성 → 두 목적함수 충돌 없음
+  ✓ 해석 가능성 → clearance score 직접 확인 가능
+  ✓ 유연성 → clearance 임계값 테스트 시 재훈련 불필요
+
+단점:
+  ✗ 공동 최적화 불가 → 생성이 clearance를 고려하지 않음
+  ✗ N이 작으면 안전한 후보가 없을 수 있음 (특히 매우 좁은 통로)
+  ✗ 생성-평가 간 정보 흐름 단방향
+</code></pre>
+<p><strong>가능한 통합 설계 (미래 방향)</strong>:</p>
+<pre><code>Classifier-Free Guidance (CFG) 스타일:
+
+u_t^{guided} = u_t^{uncond} + w * (u_t^{safe} - u_t^{uncond})
+
+역방향 샘플링 중 매 스텝 clearance gradient 반영:
+∇_{u^{(τ)}} log P(safe | u^{(τ)}) → 안전한 방향으로 노이즈 제거 유도
+
+기대 효과: 생성 자체가 안전한 궤적을 선호하게 됨
+단점: 학습 복잡도 증가, 추론 시 추가 backward pass 필요
+
+RL Fine-tuning:
+L_RL = E_u [ R(u) ] where R(u) = clearance(u) - collision_penalty
+→ diffusion 생성이 더 높은 clearance 궤적 선호하도록 직접 최적화
+</code></pre>
+<h3>10.4 구현 인식의 로봇공학적 의미</h3>
+<p><strong>로봇 크기 조건화의 실용적 영향 분석</strong>:</p>
+<pre><code>로봇 크기 변화에 따른 예상 동작 변화:
+
+소형 로봇 (w=0.3m, ℓ=0.5m → Spot 크기):
+  clearance threshold = min(w, ℓ) = 0.3m
+  B_safe = {n : ĉ^n &gt; 3} → ĉ &gt; 0.9m 여유 필요
+  → 좁은 통로도 통과 가능
+  → 더 직선적 경로
+
+대형 로봇 (w=1.0m, ℓ=1.5m → 대형 AGV):
+  clearance threshold = min(w, ℓ) = 1.0m
+  B_safe = {n : ĉ^n &gt; 3} → ĉ &gt; 3.0m 여유 필요
+  → 좁은 통로 우회
+  → 더 보수적 경로
+
+Figure 7 실험:
+  Husky (w=0.67m) vs. 2× Husky (w=1.34m):
+  → 2× 크기에서 더 넓은 경로 선택 시각적 확인
+  → 재훈련 없이 즉시 반영
+</code></pre>
+<p><strong>Cross-Platform Transfer 시나리오</strong>:</p>
+<pre><code>훈련 플랫폼: Clearpath Husky (w=0.67m, ℓ=1.07m)
+목표 플랫폼: 창고 AGV (w=1.2m, ℓ=2.0m)
+
+기존 방법:
+  새 플랫폼 데이터 수집 → 재훈련 → 수 주 소요
+
+ViLiNT:
+  w=1.2, ℓ=2.0을 embodiment token으로 제공
+  → 즉시 배포 가능
+  → 로봇 크기에 맞는 보수적 경로 자동 생성
+
+비용 절감 추정:
+  전통 방법: 데이터 수집 2주 + 학습 1주 = 약 3주
+  ViLiNT: 0 (파라미터 변경만)
+</code></pre>
+<h3>10.5 이질적 데이터 통합의 정보량 분석</h3>
+<pre><code>데이터셋별 정보 기여도 분석:
+
+3D LiDAR + RGB 데이터셋 (23.5시간):
+  RELLIS-3D, TartanDrive, SCAND, Grand-tour, 커스텀
+  → clearance 레이블 생성 가능
+  → 3D 기하학 학습에 핵심
+
+2D LiDAR + RGB 데이터셋 (75시간 = 전체의 76%):
+  Huron
+  → clearance 레이블 없음 (LiDAR 토큰 마스킹)
+  → L_diff, L_aux만 계산
+  → 시각적 경로 계획 능력 대폭 향상
+
+Huron 통합의 효과:
+  없을 때: 23.5시간으로 학습
+  있을 때: 98.5시간으로 학습 (4.2× 증가)
+  
+  비전 인코더 품질이 목표 추적에 미치는 영향:
+    이미지 기반 SR: NoMaD-FT 0.33 → ViLiNT 0.79 (Env.1)
+    → 풍부한 시각 데이터가 이미지 표현 품질을 크게 향상
+</code></pre>
+<h3>10.6 실시간 배포에서의 컴퓨팅 분석</h3>
+<pre><code>Nvidia AGX Orin에서의 추론 지연 분석:
+
+PointTransformerV3 (frozen):
+  입력: ~32K 포인트 × 4 채널
+  특성: sparse 3D convolution → 실제 포인트만 처리
+  추정 지연: 20-50ms (GPU 최적화 시)
+
+Polar Grid Tokenizer:
+  K_θ × K_r 셀에 포인트 할당 + GeM Pooling
+  연산: O(N) = O(32K) → 10-20ms
+
+DUNE ViT (frozen):
+  336×336 이미지 → 패치 임베딩
+  추정 지연: 50-100ms
+
+Transformer Encoder (4L, 4H, d=512):
+  입력 길이: S = 4 + K + 2 (K=32면 S≈38)
+  Attention: O(S²) = O(38²) ≈ 1444 연산 → 매우 빠름
+  추정 지연: &lt;5ms
+
+Diffusion (T=10 스텝):
+  각 스텝: Transformer forward pass
+  총 추정: 50-100ms
+
+Clearance Head (Cross-Attention):
+  입력: 8 waypoints × K LiDAR 토큰
+  매우 작음: &lt;5ms
+
+총 추정 추론 지연: 150-280ms
+→ 3-7Hz 제어 주기 (로컬 플래너 기준 충분)
+→ PD 제어기가 waypoint를 고주파(≥10Hz)로 추적
+</code></pre>
+<h3>10.7 안전 이론적 보장 (Safety Theoretical Guarantees)</h3>
+<p>ViLiNT는 학습 기반 방법이므로 SANDO와 같은 형식적 안전 보장을 제공하지 않는다. 그러나 실용적 안전성 메커니즘이 있다:</p>
+<pre><code>메커니즘 1: Conservative Clearance Prediction
+  비대칭 손실(w_over=5)로 모델이 클리어런스를 보수적으로 예측
+  → 경험적으로 더 넓은 여유 선택
+
+메커니즘 2: Safety-First Trajectory Selection
+  B_safe = {n : min_j ĉ^n_j &gt; 3}
+  → 안전 여유가 없는 후보는 모두 제거 후 선택
+  → 모든 후보가 안전하지 않으면 max-clearance 선택
+
+메커니즘 3: Goal Masking Recovery
+  clearance &lt; 1.0 → 목표 무시하고 탈출 우선
+  → deadlock에서 능동적 탈출
+
+메커니즘 4: Conservative Selection Threshold
+  ĉ &gt; 3 (로봇 크기의 3배 여유)
+  → 실제 로봇 크기보다 3배 넓은 공간만 &quot;안전&quot;으로 분류
+
+한계:
+  - 훈련 분포 외 환경에서 클리어런스 예측 오류 가능
+  - 충돌 0% 보장 불가 (경험적 0% ~ TEB-Elev과 동일 수준 불가)
+  - 동적 장애물: 레이블이 정적 기준 → 예측 보수성 감소 가능
+</code></pre>
+<hr>
+<h2>11. 참고 문헌 (References)</h2>
+<ol>
+<li>Bojarski et al. (2016) — DAVE-2 (self-driving CNN)</li>
+<li>Shah et al. (2021) — ViNT (visual navigation transformer)</li>
+<li>Shah et al. (2023) — NoMaD (goal-conditioned diffusion)</li>
+<li>Chen et al. (2021) — GNM (general navigation model)</li>
+<li>Müller et al. (2021) — TartanDrive 2.0 데이터셋</li>
+<li>Wigness et al. (2019) — RELLIS-3D 데이터셋</li>
+<li>Karnan et al. (2022) — SCAND 데이터셋</li>
+<li>Wu et al. (2024) — PointTransformerV3</li>
+<li>Chi et al. (2023) — Diffusion Policy (원천 아이디어)</li>
+<li>Ho et al. (2020) — DDPM (Denoising Diffusion Probabilistic Models)</li>
+<li>DLIO: Direct LiDAR Inertial Odometry — DLIO 오도메트리</li>
+<li>DUNE ViT: 2D+3D Distillation ViT 사전학습</li>
+<li>Rösmann et al. (2013) — TEB (Timed Elastic Band)</li>
+</ol>
+<hr>
+<h2>11. 결론 (Conclusion)</h2>
+<p>ViLiNT는 야외/비정형 환경에서의 지상 로봇 로컬 내비게이션에서 비전 전용 방법의 근본적 한계를 3D LiDAR 통합으로 해결한다. 가장 혁신적인 기여는 <strong>구현 인식(embodiment-aware) 설계</strong> — 로봇 크기를 명시적 토큰으로 모델에 조건화함으로써 재훈련 없이 다양한 로봇 플랫폼에 적용 가능하다. 이는 기존 리뷰된 모든 Planner 논문에서 다루지 않은 차별적 기여다.</p>
+<p><strong>혁신성</strong>: Polar Grid LiDAR Tokenizer를 통한 멀티모달 트랜스포머 융합, 자동 클리어런스 레이블 생성, 비대칭 Huber 손실은 학습 기반 로컬 플래너의 실용성을 크게 향상시킨다. 실세계 실험에서 NoMaD-FT 대비 85% vs 15% 성공률은 인상적이다.</p>
+<p><strong>실용적 의의</strong>: ROS2 기반 배포 스택, Nvidia AGX Orin 실시간 동작, 공개 코드(<a href="https://github.com/LARIAD/ViLiNT)%EB%8A%94">https://github.com/LARIAD/ViLiNT)는</a> 즉시 활용 가능한 수준이다. 98시간의 다양한 플랫폼 데이터로 학습되어 강인한 제로샷 전이를 보인다.</p>
+<p><strong>향후 연구</strong>: (1) 강화학습 기반 diffusion-clearance 공동 최적화, (2) 동적 장애물 예측 모듈 통합, (3) 전역 계획기와의 계층적 통합, (4) 실내 밀집 환경(인간 공존) 검증이 주요 과제다.</p>
+
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+</body>
+</html>
