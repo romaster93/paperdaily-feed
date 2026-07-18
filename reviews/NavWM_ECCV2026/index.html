@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>NavWM: A Unified Navigation World Model for Foresight-Driven Planning · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2606.24101">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">ECCV 2026</div>
-    <h1>NavWM: A Unified Navigation World Model for Foresight-Driven Planning</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2606.24101">arXiv:2606.24101</a></span>
-      <span>리뷰 2026-06-25</span>
-      <span>41분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">NavWM_ECCV2026</span>
     </div>
+    <h1 class="doc-title">NavWM: A Unified Navigation World Model for Foresight-Driven Planning: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">ECCV 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2606.24101">2606.24101</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">❌ 미공개 (논문·abstract·HTML 어디에도 GitHub/프로젝트 링크 없음 — 2026-06-25 검증)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">❌ 없음</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-06-25</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">39KB · 약 41분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>NavWM: A Unified Navigation World Model for Foresight-Driven Planning: 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: NavWM: A Unified Navigation World Model for Foresight-Driven Planning</li>
@@ -147,7 +233,7 @@ footer {
 <p>NavWM은 <strong>목표 이미지 조건부 시각 내비게이션(image-goal visual navigation)</strong> 문제를, &quot;세계 모델(world model)&quot;을 단순한 미래 예측기가 아니라 <strong>폐루프 플래너(closed-loop planner)</strong> 로 작동시켜 해결하려 한다. 기존 시각 내비게이션 정책은 (a) 결정론적 단일 행동 출력에 의존해 <strong>근시안적(myopic) 의사결정</strong>과 <strong>모드 붕괴(mode collapse)</strong> 에 빠지고, (b) 세계 모델 계열은 지각(perception)·생성(generation)·제어(control)를 분리된 모듈로 다뤄 이들이 공유하는 시공간 동역학(spatio-temporal dynamics)을 포착하지 못한다.</p>
 <p>NavWM의 핵심 주장은 다음과 같다: &quot;<strong>잠재 세계 추론(latent world reasoning) + 멀티모달 행동 예측(multimodal action prediction) + 제어 가능한 시각 생성(controllable visual generation)을 하나의 통합 모델 안에서 결합</strong>하면, 생성형 세계 모델이 다양한 후보 경로를 가상으로 시뮬레이션(visual foresight)하여 목표에 가장 잘 정렬되는 경로를 선택하는 강건한 폐루프 플래너로 동작할 수 있다.&quot; 즉 NavWM은 후보 궤적의 다양성(diversity)을 명시적으로 확보한 뒤, 세계 모델이 그 다양성을 &quot;평가·선별&quot;하는 데 쓰이도록 설계되었다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <p>목표 이미지 조건부 시각 내비게이션은 다음과 같은 근본 난제를 안고 있다.</p>
 <ol>
@@ -165,9 +251,9 @@ footer {
 <li><strong>(C4→) 2단계 학습(teacher forcing → exposure bias correction)</strong>: 1단계 공동 학습 후, 2단계에서 백본·궤적 헤드를 동결하고 예측 분포에서 샘플링한 궤적으로 CDiT를 미세조정해 노출 편향을 교정.</li>
 </ul>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <p>NavWM은 <strong>단일 1.5B 파라미터 통합 모델</strong>로, 다음 식으로 추상화된다.</p>
-<pre><code>(1)   (T, O) ~ F_θ(· | O_c, o_t, o_g)
+<pre class="codeblock"><code>(1)   (T, O) ~ F_θ(· | O_c, o_t, o_g)
         O_c : 과거 4프레임 컨텍스트 (context window = 4)
         o_t : 현재 관찰
         o_g : 목표 이미지(goal image)
@@ -177,7 +263,7 @@ footer {
 <p>즉 하나의 분포 <code>F_θ</code>가 (행동 궤적 T)와 (미래 영상 O)를 <strong>공동(jointly)</strong> 생성한다. 아래 3개 모듈이 이 분포를 구성한다.</p>
 <h3>3.1 잠재 세계 추론 (Latent World Reasoning, WR)</h3>
 <p>Bidirectional <strong>Mamba(SSM)</strong> 백본이 VAE 인코딩된 과거 프레임·현재 관찰·목표 이미지를 입력받고, 그 앞에 <strong>학습 가능한 Latent World Tokens</strong>를 prepend한다. 이 토큰들은 CNN 디코더로 공간 업샘플되어 <strong>깊이(depth)</strong> 와 <strong>의미(semantic)</strong> 맵을 예측하며, 파운데이션 모델의 출력으로 감독된다.</p>
-<pre><code>Latent World Tokens ──prepend──► [VAE(O_c), VAE(o_t), VAE(o_g)]
+<pre class="diagram"><code>Latent World Tokens ──prepend──► [VAE(O_c), VAE(o_t), VAE(o_g)]
         │                                  │
         │                          Bidirectional Mamba (SSM)
         │                                  │
@@ -192,7 +278,7 @@ footer {
   V2)
 </code></pre>
 <p>깊이는 스케일 불변(scale-invariant) 손실, 의미는 MSE로 감독한다.</p>
-<pre><code>(2)   L_si  = (1/P) Σ_p g_p²  -  (λ/P²) (Σ_p g_p)²
+<pre class="codeblock"><code>(2)   L_si  = (1/P) Σ_p g_p²  -  (λ/P²) (Σ_p g_p)²
               g_p = log D̂_p - log D_gt,p   (픽셀 p의 로그 깊이 잔차)
 (3)   L_reason = λ_depth · L_si(D_gt, D̂)  +  λ_sem · L_mse(S_gt, Ŝ)
 </code></pre>
@@ -200,21 +286,21 @@ footer {
 <h3>3.2 앵커 기반 멀티모달 궤적 예측 (Anchor-Based Multimodal Trajectory Forecasting, AP)</h3>
 <p>모드 붕괴를 막기 위해, NavWM은 자율주행 모션 예측에서 검증된 <strong>앵커(anchor) 기반 2단계 예측</strong>을 내비게이션에 도입한다.</p>
 <p><strong>오프라인 앵커 코드북 구축</strong>:</p>
-<pre><code>A ∈ ℝ^(K×2)   ← K-Means( ground-truth target 좌표 ) → Farthest Point Sampling
+<pre class="codeblock"><code>A ∈ ℝ^(K×2)   ← K-Means( ground-truth target 좌표 ) → Farthest Point Sampling
               (K개의 대표 목표점 = &quot;어디로 갈 수 있는가&quot;의 사전(prior))
 </code></pre>
 <p><strong>Stage 1 — 앵커 정제(Intent + Control 헤드)</strong>:</p>
-<pre><code>(4)   π̂  = Softmax( MLP_intent([H ∥ A]) )       # 각 앵커 채택 확률 ∈ ℝ^K
+<pre class="codeblock"><code>(4)   π̂  = Softmax( MLP_intent([H ∥ A]) )       # 각 앵커 채택 확률 ∈ ℝ^K
       ΔÂ = MLP_control([H ∥ A])                  # 앵커별 공간 오프셋 ∈ ℝ^(K×2)
       Ã  = A + ΔÂ                                 # 정제된 후보 목표 K개
 </code></pre>
 <p>여기서 <code>H</code>는 3.1의 세계 특징. Intent 헤드는 &quot;어느 앵커가 그럴듯한가&quot;를 분류하고, Control 헤드는 이산 앵커를 연속 좌표로 보정한다(분류+회귀 분리 = anchor-based regression의 표준 레시피).</p>
 <p><strong>Stage 2 — 목표 조건부 궤적 회귀</strong>:</p>
-<pre><code>      T̂_k = MLP_traj( H, Ã_k )    # 각 후보 목표 Ã_k에 대응하는 waypoint 시퀀스
+<pre class="codeblock"><code>      T̂_k = MLP_traj( H, Ã_k )    # 각 후보 목표 Ã_k에 대응하는 waypoint 시퀀스
       (타임스텝 간 조건부 독립 가정으로 한 번에 회귀)
 </code></pre>
 <p><strong>손실(승자 앵커 k*만 회귀 감독 — winner-takes-all)</strong>:</p>
-<pre><code>(5)   L_anchor = -log(π̂_{k*})                                  # 정답에 가장 가까운 앵커 분류
+<pre class="codeblock"><code>(5)   L_anchor = -log(π̂_{k*})                                  # 정답에 가장 가까운 앵커 분류
                  + L_huber(Δx̂_{k*}, Δx_gt) + L_huber(Δŷ_{k*}, Δy_gt)   # 오프셋 회귀
 (6)   L_traj   = L_huber(T̂_{k*}, T_gt)                          # 궤적 회귀(Huber)
 (7)   L_action = L_anchor + λ_traj · L_traj
@@ -222,7 +308,7 @@ footer {
 <p>이 설계의 효과는 정량적으로 확인된다(Table 4): GMM·Diffusion·Anchor 세 가지 멀티모달 헤드를 비교했을 때, Anchor 방식의 <strong>APD(Average Pairwise Distance, 궤적 다양성 지표)가 1.49</strong> 로 Diffusion(0.59)·GMM(0.31)을 압도하면서도, 동시에 항법 정확도(ATE 0.36)도 가장 낮다. 즉 &quot;<strong>다양성과 정확도의 동시 달성</strong>&quot;이 앵커 방식의 핵심 우위다.</p>
 <h3>3.3 Flow Matching 시각 예지 세계 모델 (Visual Foresight World Model, WM)</h3>
 <p>각 후보 궤적이 &quot;실제로 어떤 미래를 낳는가&quot;를 합성하기 위해, NavWM은 <strong>Conditional Diffusion Transformer(CDiT)</strong> 블록을 <strong>연속시간 Flow Matching</strong>으로 학습한다.</p>
-<pre><code>행동 궤적 T̂_k ──► dense optical flow field F  (행동을 광류장으로 변환)
+<pre class="diagram"><code>행동 궤적 T̂_k ──► dense optical flow field F  (행동을 광류장으로 변환)
                                 │
                   adaLN(adaptive layer norm)으로 CDiT를 변조(modulate)
                                 │
@@ -230,18 +316,18 @@ footer {
         네트워크는 벡터장 u_τ = z₁ - z₀ 를 회귀
 </code></pre>
 <p><strong>시각 생성 손실(flow matching vector-field regression)</strong>:</p>
-<pre><code>(8)   L_visual = E_τ [ || v_θ(z_τ, τ, F, H) - (z₁ - z₀) ||²₂ ]
+<pre class="codeblock"><code>(8)   L_visual = E_τ [ || v_θ(z_τ, τ, F, H) - (z₁ - z₀) ||²₂ ]
         z₀ : 노이즈(또는 현재 잠재),  z₁ : 목표(미래) 잠재
         F  : 행동에서 유도된 광류 조건,  H : 세계 특징
 </code></pre>
 <p>행동을 <strong>광류(optical flow)</strong> 로 사상해 조건으로 주입하는 것이 핵심 트릭이다. 이는 &quot;행동(저차원 제어)&quot;과 &quot;미래 영상(고차원 픽셀)&quot; 사이의 추상화 간극을, 픽셀 이동량이라는 <strong>기하학적으로 근거 있는 중간 표현</strong>으로 메운다.</p>
 <p><strong>멀티태스크 가중(uncertainty weighting)</strong>: 세 손실(추론·행동·생성)을 학습 가능한 과제 분산으로 자동 균형한다.</p>
-<pre><code>(9)   L = Σ_k [ ½·exp(-s_k)·L_k + ½·s_k ]    (s_k = log σ_k², 학습 파라미터)
+<pre class="codeblock"><code>(9)   L = Σ_k [ ½·exp(-s_k)·L_k + ½·s_k ]    (s_k = log σ_k², 학습 파라미터)
 </code></pre>
 <p>이는 Kendall et al.의 동형 불확실성(homoscedastic uncertainty) 가중을 그대로 채택한 것으로, λ_depth·λ_sem·λ_traj를 수동 튜닝하지 않고 데이터가 자동 조정하게 한다.</p>
 <h3>3.4 폐루프 예지 플래닝 (Closed-Loop Foresight Planning)</h3>
 <p>추론 시 세계 모델은 &quot;<strong>고수준 감독 플래너</strong>&quot;로 동작한다.</p>
-<pre><code>   현재 o_t, 목표 o_g
+<pre class="diagram"><code>   현재 o_t, 목표 o_g
         │
    ┌────▼─────────────────────────────────────────┐
    │ AP: K≈7개 후보 궤적 {T̂_1, …, T̂_K} 생성        │
@@ -259,7 +345,7 @@ footer {
 </code></pre>
 <p>NavWM은 &quot;가능성들의 시뮬레이션된 멀티버스(simulated multiverse) 안에서 목표 정렬도를 평가해 최적 경로를 필터링한다&quot;고 기술한다. 무작위 샘플링 대비 세계 모델 플래닝의 이득은 Table 2의 핵심 수치로 드러난다: <strong>무작위 샘플링 0.63 SR(seen) → 세계 모델 플래너 사용 시 0.74 SR(seen), 0.44 SR(unseen)</strong>. 즉 &quot;다양한 후보를 만든 뒤 예지로 고른다&quot;는 파이프라인이 실제 성공률을 끌어올린다.</p>
 <h3>3.5 2단계 학습으로 노출 편향 교정</h3>
-<pre><code>[Stage 1] 100,000 step — 전 모듈 공동 최적화(teacher forcing)
+<pre class="diagram"><code>[Stage 1] 100,000 step — 전 모듈 공동 최적화(teacher forcing)
           CDiT에 ground-truth 궤적을 조건으로 제공 → 안정적 수렴
                          │
                          ▼
@@ -270,20 +356,20 @@ footer {
 <p>Figure 4는 2단계 미세조정이 SSIM/PSNR/LPIPS 전반의 영상 재구성 품질을 유의하게 끌어올림을 보인다. 이는 시퀀스 생성 모델의 고전 문제(teacher forcing↔free running 간극)를 내비게이션 세계 모델에 맞춰 푼 실용적 처방이다.</p>
 <h3>3.6 왜 Bidirectional Mamba(SSM)인가 — 백본 선택의 함의</h3>
 <p>NavWM이 Transformer가 아닌 <strong>양방향 상태공간모델(SSM, Mamba)</strong> 을 공유 백본으로 택한 것은 단순한 유행 추종이 아니라 과제 구조와 맞물린 선택이다.</p>
-<pre><code>표준 self-attention:   O(L²)  토큰 길이 L에 제곱   (멀티프레임×멀티스트림이면 L 폭증)
+<pre class="codeblock"><code>표준 self-attention:   O(L²)  토큰 길이 L에 제곱   (멀티프레임×멀티스트림이면 L 폭증)
 Mamba(SSM) 스캔:       O(L)   선형 — 선택적 상태 전이로 장기 의존 압축
 </code></pre>
 <p>NavWM의 입력은 (과거 4프레임 + 현재 + 목표) × (VAE 패치 토큰) + Latent World Tokens로, 시퀀스 길이 L이 쉽게 커진다. SSM의 선형 복잡도는 이 멀티스트림 잠재열을 감당하는 데 유리하다. 또한 <strong>양방향(bidirectional)</strong> 스캔은, 항법 세계 모델이 &quot;과거→현재&quot;의 인과 흐름뿐 아니라 &quot;목표 이미지 ↔ 현재 관찰&quot;의 비인과적 정합(목표가 과거/현재 어디에 대응하는가)을 양방향으로 융합해야 하기에 자연스럽다. 즉 목표 토큰이 과거 컨텍스트 전체에 양방향으로 메시지를 전달하며 H를 형성한다. 다만 이로 인해 NavWM은 NavWAM(Cosmos DiT, 사전학습 비디오 prior 이식)과 달리 <strong>대규모 비디오 사전학습 가중치의 직접 이식 이점</strong>을 포기한다 — 백본을 내비게이션 데이터로 사실상 처음부터 정렬해야 하므로, 데이터 효율 면에서 NavWAM의 &quot;2B 비디오 백본 + 커리큘럼&quot; 노선과 상반된 베팅이다.</p>
 <h3>3.7 Flow Matching vs. DDPM — 왜 연속시간 벡터장 회귀인가</h3>
 <p>NavWM의 생성 모듈이 표준 DDPM(이산 노이즈 스케줄)이 아니라 <strong>Flow Matching(연속시간 벡터장 회귀)</strong> 을 택한 점도 분석할 가치가 있다.</p>
-<pre><code>DDPM:           ε_θ(x_t, t)로 노이즈 ε를 예측, 다단계 역확산(수십~수백 스텝)
+<pre class="codeblock"><code>DDPM:           ε_θ(x_t, t)로 노이즈 ε를 예측, 다단계 역확산(수십~수백 스텝)
 Flow Matching:  직선 보간 ẑ_τ = τz₁+(1-τ)z₀ 위에서 벡터장 u_τ=z₁-z₀ 를 회귀
                 → 직선 경로(rectified flow류)이므로 적은 적분 스텝으로 샘플링 가능
 </code></pre>
 <p>핵심 이점은 <strong>추론 가속</strong>이다. NavWM은 추론 시 K개 후보 각각에 대해 미래를 rollout해야 하므로(K배 생성 비용), 생성 1회의 적분 스텝 수를 줄이는 것이 전체 실시간성에 직결된다. 직선 보간 기반 flow matching은 동일 품질에서 DDPM보다 적은 스텝으로 샘플링되어, K-후보 예지 플래닝의 비용을 구조적으로 낮춘다. 또한 <strong>행동→광류 F→adaLN 변조</strong>라는 조건 주입 방식은, 광류가 &quot;픽셀이 어디로 이동하는가&quot;라는 결정론적 기하 신호이므로, 생성 모델이 자유롭게 미래를 환각하지 않고 <strong>행동에 인과적으로 종속된</strong> 미래만 그리도록 강하게 구속한다. 이는 WorldMAP이 지적한 &quot;기하학적으로 근거 없는 미래&quot; 문제를 NavWM이 조건 설계 수준에서 완화하는 장치다.</p>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>                            ┌──────────────────────────────────────────┐
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>                            ┌──────────────────────────────────────────┐
    과거 4프레임 O_c ──VAE──► │                                          │
    현재 관찰   o_t  ──VAE──► │   Bidirectional Mamba (SSM) 백본 1.5B     │
    목표 이미지 o_g  ──VAE──► │   + Latent World Tokens (prepend)         │
@@ -305,7 +391,7 @@ Flow Matching:  직선 보간 ẑ_τ = τz₁+(1-τ)z₀ 위에서 벡터장 u_�
 </code></pre>
 <p><strong>데이터 흐름 요약</strong>: (1) 멀티-스트림 VAE 잠재 + 학습 토큰이 Mamba로 들어가 공유 세계 특징 H를 만들고, (2) H로부터 세 모듈이 분기하여 각각 구조(깊이/의미)·행동(K 후보)·미래 영상(CDiT)을 산출하며, (3) 추론 시 K 후보를 CDiT로 rollout해 목표 정렬도로 선별한다. 모든 분기가 <strong>동일한 H를 공유</strong>한다는 점이 &quot;통합(unified)&quot; 주장의 실체다.</p>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
 <p>실제 로봇 데이터로 학습·평가하되, <strong>실로봇 온라인 배치 실험은 없다(오프라인 데이터셋 롤아웃)</strong>.</p>
 <ul>
@@ -600,7 +686,7 @@ Flow Matching:  직선 보간 ẑ_τ = τz₁+(1-τ)z₀ 위에서 벡터장 u_�
 <li><strong>APD의 위상</strong>: APD(1.49)는 &quot;다양성&quot; 지표지만, 다양성 자체가 목적이 아니라 <strong>예지 평가가 고를 좋은 후보가 후보군에 존재할 확률</strong>을 높이는 수단이다. Table 4에서 APD가 낮은 GMM(0.31)이 WM 플래닝을 붙여도 ATE 0.79에 그친 것은, &quot;평가기가 아무리 좋아도 후보 풀이 빈약하면 한계&quot;라는 점 — 즉 생성(다양성)과 평가(예지)가 <strong>둘 다</strong> 필요함을 정량적으로 못박는다.</li>
 </ul>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <ol>
 <li><strong>통합 내비게이션 세계 모델</strong>: 잠재 세계 추론·멀티모달 행동 예측·제어 가능 시각 생성을 단일 Mamba 백본의 공유 특징 H 위에서 결합. 지각·생성·제어의 분절을 하나의 표현으로 해소.</li>
 <li><strong>앵커 기반 멀티모달 궤적 예측의 내비게이션 이식</strong>: 자율주행 모션 예측의 anchor regression을 image-goal 항법에 도입, APD 1.49로 다양성을 확보하면서 정확도까지 최고를 달성(다양성-정확도 동시 최적화).</li>
@@ -609,7 +695,7 @@ Flow Matching:  직선 보간 ẑ_τ = τz₁+(1-τ)z₀ 위에서 벡터장 u_�
 <li><strong>SOTA 달성</strong>: 오프라인 ATE 0.207, image-goal SR seen 0.72 / unseen 0.44로 NWM·UniWM 등 최신 세계 모델 플래너를 전 지표에서 능가(ECCV 2026).</li>
 </ol>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -680,7 +766,7 @@ Flow Matching:  직선 보간 ẑ_τ = τz₁+(1-τ)z₀ 위에서 벡터장 u_�
 </tbody></table></div>
 <p><strong>설계 노트</strong>: Goal mask 15%는 목표 이미지를 확률적으로 가려, 모델이 목표 없이도 그럴듯한 탐색 분포를 학습하게 하는 정규화로 해석된다. 앵커 코드북 K는 데이터의 목표 분포에 의존하므로, 다른 환경 분포로 옮길 때 재클러스터링이 필요할 수 있다(일반화 한계, §8).</p>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 (Scalability)</h3>
 <p>1.5B 규모는 동일 코퍼스 NavWAM(Cosmos 2B)과 비슷한 체급이지만, NavWM은 <strong>추론 시 K개 후보 각각에 CDiT rollout</strong>을 돌려 평가하므로, 추론 비용이 K에 선형 비례한다(K≈7). 이는 NWM의 CEM(수백~수천 후보)보다는 훨씬 싸지만, NavWAM처럼 행동을 직접 디퓨전하는 &quot;플래너 제거&quot; 노선(≈4.45 TFLOPs/행동, ~5Hz)보다는 무겁다. 즉 NavWM은 &quot;<strong>소수의 다양한 후보 + 예지 평가</strong>&quot;라는 중간 지점을 택했다.</p>
 <h3>8.2 한계점 (Limitations)</h3>
@@ -708,7 +794,7 @@ Flow Matching:  직선 보간 ẑ_τ = τz₁+(1-τ)z₀ 위에서 벡터장 u_�
 <li><strong>적응적 K</strong>: 분기 복잡도에 따라 후보 수를 동적으로 조절(개활지 K↓, 분기점 K↑)해 비용-성능 균형.</li>
 </ul>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <p>NavWM은 동일 코퍼스의 &quot;<strong>세계 모델 × 시각 내비게이션</strong>&quot; 선행 리뷰들과 같은 트랙(VLN)에 속한다. 가장 가까운 3편을 골라 비교한다: <strong>NavWAM</strong>(통합 세계-행동 모델, image-goal), <strong>WMNav</strong>(VLM 세계 모델, object-goal), <strong>WorldMAP</strong>(생성 세계 모델 교사-학생 VLN).</p>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
@@ -799,13 +885,13 @@ Flow Matching:  직선 보간 ẑ_τ = τz₁+(1-τ)z₀ 위에서 벡터장 u_�
 <h3>9.5 NavDP와의 위치 비교 및 베이스라인 계보 분석</h3>
 <p><strong>NavDP(ICRA 2026, 동일 코퍼스)</strong> 는 diffusion 기반 궤적 생성 + critic 함수를 결합해 시뮬에서 학습 후 다양한 로봇 플랫폼으로 zero-shot 전이하는 E2E 항법 정책이다. NavDP는 &quot;critic으로 궤적을 채점&quot;하는 반면, NavWM은 &quot;<strong>세계 모델 rollout으로 궤적을 채점</strong>&quot;한다. 둘 다 &quot;후보 생성 + 평가&quot;라는 공통 골격이지만, 평가 신호가 학습된 스칼라 critic(NavDP, 싸고 빠름)이냐 생성된 미래 영상(NavWM, 비싸지만 해석 가능)이냐가 갈린다. NavDP가 zero-shot 크로스-플랫폼 전이를 핵심 강점으로 내세운 것과 달리, NavWM은 플랫폼 전이보다 <strong>환경 일반화(seen→unseen)</strong> 와 <strong>생성 품질</strong>을 전면에 둔다.</p>
 <p><strong>베이스라인 계보</strong>: NavWM이 비교한 베이스라인은 세 계보로 정리된다.</p>
-<pre><code>(a) 순수 정책 계열:   GNM → ViNT → NoMaD   (결정론/diffusion 정책, 세계모델 없음)
+<pre class="codeblock"><code>(a) 순수 정책 계열:   GNM → ViNT → NoMaD   (결정론/diffusion 정책, 세계모델 없음)
 (b) 세계 모델 계열:   NWM → UniWM          (미래 예측 + 그 위 플래닝)
 (c) 통합 생성 계열:   Anole-7B, Diamond    (대형 생성/멀티모달)
 </code></pre>
 <p>NavWM의 직접 경쟁자는 (b)다. NWM(CEM 플래닝, 비쌈)과 UniWM(통합 세계 모델)을 전 지표에서 앞선 것이, NavWM이 &quot;세계 모델을 플래너로 쓰는&quot; 계보 안에서의 SOTA임을 뒷받침한다. 특히 UniWM 대비 PSNR +3.17dB·Unseen SR +8%p는 &quot;앵커 멀티모달 + flow matching&quot;이라는 두 축의 기여를 분리해 보여준다(Table 4가 이를 절제로 확증). 반대로 (a)의 NoMaD(diffusion 정책)가 ATE 1.070에 머문 것은, &quot;세계 모델 없는 다양성&quot;만으로는 부족하고 <strong>예지 평가가 결합되어야</strong> 정확도가 따라옴을 방증한다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ul>
 <li>본 논문: NavWM: A Unified Navigation World Model for Foresight-Driven Planning (ECCV 2026, arXiv 2606.24101)</li>
 <li>비교(동일 코퍼스): NavWAM (arXiv 2606.13494), WMNav (IROS 2025), WorldMAP (arXiv 2604.07957), NavDP (ICRA 2026)</li>
@@ -814,14 +900,109 @@ Flow Matching:  직선 보간 ẑ_τ = τz₁+(1-τ)z₀ 위에서 벡터장 u_�
 <li>데이터셋: Go Stanford, SCAND, RECON, HuRoN, TartanDrive</li>
 </ul>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p>NavWM은 &quot;세계 모델은 미래를 예측만 하는가, 아니면 직접 길을 고르는가?&quot;라는 질문에 <strong>&quot;고른다&quot;</strong> 로 답한 작업이다. 핵심 혁신은 (1) 앵커 기반 멀티모달 궤적 예측으로 <strong>모드 붕괴를 정량적으로 회피</strong>(APD 1.49)하고, (2) Flow Matching CDiT로 각 후보의 미래를 고품질로 합성(+3.17dB)하여, (3) 이 &quot;시뮬레이션된 멀티버스&quot;에서 목표 정렬도로 최적 경로를 <strong>폐루프 선별</strong>한 데 있다. 그 결과 오프라인 ATE 0.207·image-goal SR seen 0.72/unseen 0.44로 NWM·UniWM 등 최신 세계 모델 플래너를 전 지표에서 앞섰다.</p>
 <p>실용적 의의는 분명하되 경계가 있다: NavWM은 다양성·해석가능성·미지 환경 강건성에서 강점을 보이지만, <strong>실로봇 온라인 검증과 코드 공개 부재, 그리고 K-후보 rollout의 추론 비용</strong>이 실적용의 관문이다. 동일 코퍼스의 NavWAM이 &quot;플래너를 정책으로 증류해 실시간 실로봇&quot;을 이미 입증한 만큼, NavWM의 다음 과제는 명확하다 — <strong>예지 플래닝의 증류·가속과 언어 조건 확장</strong>. 두 방향이 결합되면, &quot;다양한 후보를 싸게 시뮬레이션해 고르는&quot; 진정한 실시간 내비게이션 세계 모델에 한층 가까워질 것이다.</p>
 <hr>
 <p><em>작성: 2026-06-25 · 트랙: VLN · 발표처: ECCV 2026 · 코드: 미공개</em></p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="NavWM: A Unified Navigation World Model for Foresight-Driven Planning: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

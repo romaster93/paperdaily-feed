@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>What Limits Vision-and-Language Navigation? (StereoNav) · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2605.13328">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">arXiv 2026</div>
-    <h1>What Limits Vision-and-Language Navigation? (StereoNav)</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2605.13328">arXiv:2605.13328</a></span>
-      <span>리뷰 2026-05-14</span>
-      <span>44분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">StereoNav_arxiv2026</span>
     </div>
+    <h1 class="doc-title">What Limits Vision-and-Language Navigation? (StereoNav): 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2605.13328">2605.13328</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval"><a href="https://github.com/Yunheng-Wang/StereoNav">github.com/Yunheng-Wang/StereoNav</a> ✅ (코드 공개)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://yunheng-wang.github.io/stereonav-public.github.io">yunheng-wang.github.io/stereonav-public.github.io</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-05-14</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">41KB · 약 44분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>What Limits Vision-and-Language Navigation? (StereoNav): 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: What Limits Vision-and-Language Navigation?</li>
@@ -159,11 +245,11 @@ footer {
 </ol>
 <p>결과적으로 R2R-CE에서 <strong>81.1% SR / 68.3% SPL</strong>, RxR-CE에서 <strong>67.5% SR / 52.0% SPL</strong>의 최신 SOTA 성능을 달성하며, 실세계 Unitree G1 로봇 배포에서 <strong>60.6% SR</strong> (대비 StreamVLN 24.3%)를 기록한다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 인지 불안정성 (Perceptual Instability)</h4>
 <p>현재 VLN 에이전트가 시뮬레이션에서 실세계로 전환될 때 겪는 핵심 문제는 <strong>시각적 인지의 불안정성</strong>이다:</p>
-<pre><code>[시뮬레이션 vs 실세계 인지 격차]
+<pre class="codeblock"><code>[시뮬레이션 vs 실세계 인지 격차]
 
 시뮬레이션 환경:
   - 일정한 조명 조건 (균일 렌더링)
@@ -188,7 +274,7 @@ StereoNav 동일 조건:
 </code></pre>
 <h4>B. 지시 모호성 (Instruction Under-Specification)</h4>
 <p>R2R 데이터셋의 자연어 지시는 종종 목표 위치를 정확히 특정하지 않는다:</p>
-<pre><code>[지시 모호성의 두 가지 유형]
+<pre class="codeblock"><code>[지시 모호성의 두 가지 유형]
 
 Type 1: 방향적 모호성 (Directional Ambiguity)
   지시: &quot;복도를 따라 걸어 들어가 첫 번째 문 앞에서 멈추세요&quot;
@@ -212,7 +298,7 @@ Type 2: 도킹 모호성 (Docking Ambiguity)
 </code></pre>
 <h4>C. 깊이 인식의 부재 (Lack of Depth Awareness)</h4>
 <p>모노큘러(단안) RGB 기반 VLN 에이전트는 3차원 공간 이해에 근본적 한계가 있다:</p>
-<pre><code>[단안 RGB 기반 에이전트의 3D 인식 한계]
+<pre class="diagram"><code>[단안 RGB 기반 에이전트의 3D 인식 한계]
 
 문제점:
   - 거리 추정 불정확: 텍스처/크기 단서에 의존
@@ -241,7 +327,7 @@ Type 2: 도킹 모호성 (Docking Ambiguity)
 </code></pre>
 <h3>2.2 핵심 해결책</h3>
 <p>StereoNav는 세 가지 상호보완적 솔루션으로 이 문제들을 해결한다:</p>
-<pre><code>[StereoNav 핵심 해결 전략]
+<pre class="codeblock"><code>[StereoNav 핵심 해결 전략]
 
 문제 1: 인지 불안정성
   → 솔루션: 스테레오 카메라 기반 기하학적 인식
@@ -259,11 +345,11 @@ Type 2: 도킹 모호성 (Docking Ambiguity)
             행동과 깊이를 동시에 예측하는 멀티태스크 학습
 </code></pre>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 Target-Location Priors (TLP) — 도메인 불변 공간 가이던스</h3>
 <p>TLP는 본 논문의 가장 핵심적인 기여로, 목표 위치 좌표를 에이전트의 자아중심(egocentric) 시야에 직접 투영하여 도메인 불변 시각적 가이던스를 제공한다.</p>
 <p><strong>수학적 정형화:</strong></p>
-<pre><code>[TLP 투영 과정]
+<pre class="diagram"><code>[TLP 투영 과정]
 
 입력: 목표 위치 (x_g, y_g, z_g) in 월드 좌표계
       카메라 내재 파라미터 K, 외재 파라미터 [R|t]
@@ -304,7 +390,7 @@ Type 2: 도킹 모호성 (Docking Ambiguity)
   (스테레오 기하학적 일관성 유지)
 </code></pre>
 <p><strong>왜 TLP가 도메인 불변인가?</strong></p>
-<pre><code>[TLP의 도메인 불변성 메커니즘]
+<pre class="codeblock"><code>[TLP의 도메인 불변성 메커니즘]
 
 도메인 의존 특징들 (실세계에서 변함):
   텍스처: 시뮬레이션 vs 실제 표면 다름
@@ -328,7 +414,7 @@ TLP 기여 ablation:
 <h3>3.2 스테레오 통합 이해 모델링 (Stereo Unified Understanding Modeling)</h3>
 <p>StereoNav는 세 가지 상호보완적 특징 스트림을 융합하여 풍부한 장면 표현을 구성한다.</p>
 <p><strong>시스템 구조:</strong></p>
-<pre><code>[스테레오 통합 이해 모델 아키텍처]
+<pre class="diagram"><code>[스테레오 통합 이해 모델 아키텍처]
 
 입력: 스테레오 이미지 쌍 (I_l^t, I_r^t) ∈ R^{H×W×3}
 
@@ -347,7 +433,7 @@ TLP 기여 ablation:
                   → 토큰화 기하 특징                    통합 표현 T_t ∈ R^{N×D}
 </code></pre>
 <p><strong>각 인코더 상세:</strong></p>
-<pre><code>[2D 시맨틱 인코더: InternViT (InternVL-3.5-2B)]
+<pre class="codeblock"><code>[2D 시맨틱 인코더: InternViT (InternVL-3.5-2B)]
 
 목적: 객체/장면 의미론 이해
 아키텍처: Vision Transformer, 448×448 입력
@@ -440,7 +526,7 @@ T_t = α·P(F_t^sem) + β·C(F_t^str) + γ·G(V&#39;_{c,t})
 <h3>3.3 공동 행동-깊이 예측 (Joint Action-Depth Prediction)</h3>
 <p>StereoNav는 <strong>멀티태스크 헤드</strong>를 사용하여 행동 예측과 깊이 추정을 동시에 수행한다.</p>
 <p><strong>수학적 정형화:</strong></p>
-<pre><code>[공동 예측 파이프라인]
+<pre class="codeblock"><code>[공동 예측 파이프라인]
 
 에이전트 상태: o_t = (o_t^l, o_t^r, I, p, H_{t-1})
   o_t^l: 왼쪽 스테레오 이미지
@@ -478,7 +564,7 @@ T_t = α·P(F_t^sem) + β·C(F_t^str) + γ·G(V&#39;_{c,t})
   L_smooth: Smooth-L1 (깊이 예측)
 </code></pre>
 <p><strong>왜 공동 학습이 중요한가?</strong></p>
-<pre><code>[공동 학습의 시너지 효과]
+<pre class="codeblock"><code>[공동 학습의 시너지 효과]
 
 가설: 깊이 예측 학습이 공유 표현을 3D-aware하게 만든다
 
@@ -497,9 +583,9 @@ T_t = α·P(F_t^sem) + β·C(F_t^str) + γ·G(V&#39;_{c,t})
   (순환 상호작용으로 표현 품질 향상)
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <h3>4.1 전체 파이프라인</h3>
-<pre><code>[StereoNav 전체 시스템 아키텍처]
+<pre class="diagram"><code>[StereoNav 전체 시스템 아키텍처]
 
                      환경 (R2R-CE / 실세계)
                             │
@@ -566,7 +652,7 @@ T_t = α·P(F_t^sem) + β·C(F_t^str) + γ·G(V&#39;_{c,t})
    (또는 시뮬레이터 스텝)
 </code></pre>
 <h3>4.2 히스토리 관리</h3>
-<pre><code>[에피소드 히스토리 관리 메커니즘]
+<pre class="codeblock"><code>[에피소드 히스토리 관리 메커니즘]
 
 H_{t-1} = {(o_0, a_0), (o_1, a_1), ..., (o_{t-1}, a_{t-1})}
 
@@ -581,10 +667,10 @@ H_{t-1} = {(o_0, a_0), (o_1, a_1), ..., (o_{t-1}, a_{t-1})}
   ← MLLM 내 텍스트 인코더로 처리 (별도 RNN 불필요)
 </code></pre>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
 <p><strong>학습 데이터:</strong></p>
-<pre><code>[StereoNav 학습 데이터셋 구성]
+<pre class="codeblock"><code>[StereoNav 학습 데이터셋 구성]
 
 Stage I (176 GPU-hours):
   - R2R (Room-to-Room): 21,567 경로 × 3 지시 = 64,701 지시
@@ -604,7 +690,7 @@ Stage II (688 GPU-hours):
   - 실세계: 4개 환경 × 5 지시 × 3 시도 = 60 에피소드
 </code></pre>
 <p><strong>평가 환경:</strong></p>
-<pre><code>[실세계 평가 환경 설명]
+<pre class="codeblock"><code>[실세계 평가 환경 설명]
 
 환경 1: 사무실 (Office)
   특징: 좁은 복도, 여러 방, 유리 파티션
@@ -628,7 +714,7 @@ Stage II (688 GPU-hours):
   - 성공 기준: 목표로부터 1.5m 이내 정지
 </code></pre>
 <h3>5.2 평가 지표 (Evaluation Metrics)</h3>
-<pre><code>[VLN-CE 표준 평가 지표]
+<pre class="codeblock"><code>[VLN-CE 표준 평가 지표]
 
 1. Navigation Error (NE) ↓ [단위: m]
    정의: 에이전트 최종 위치와 목표 위치 간 유클리드 거리
@@ -652,7 +738,7 @@ Stage II (688 GPU-hours):
 </code></pre>
 <h3>5.3 정량적 결과 (Quantitative Results)</h3>
 <p><strong>R2R-CE val-unseen (추가 데이터 포함):</strong></p>
-<pre><code>[R2R-CE Val-Unseen 성능 비교]
+<pre class="diagram"><code>[R2R-CE Val-Unseen 성능 비교]
 
 방법                      NE↓   OSR↑   SR↑    SPL↑  파라미터
 ────────────────────────────────────────────────────────────
@@ -674,7 +760,7 @@ StereoNav 개선 vs 최고 성능:
   - 파라미터 3.5× 작지만 성능 +16.4%p
 </code></pre>
 <p><strong>RxR-CE val-unseen (추가 데이터 포함):</strong></p>
-<pre><code>[RxR-CE Val-Unseen 성능 비교]
+<pre class="diagram"><code>[RxR-CE Val-Unseen 성능 비교]
 
 방법                      SR↑    SPL↑   비고
 ──────────────────────────────────────────────
@@ -687,7 +773,7 @@ StereoNav                67.5%  52.0%  2B(!)
 개선 vs 최고:  +13.5% SR, +9.5% SPL
 </code></pre>
 <p><strong>강건성 실험 (Robustness):</strong></p>
-<pre><code>[시각적 교란에 대한 강건성 비교]
+<pre class="diagram"><code>[시각적 교란에 대한 강건성 비교]
 
 교란 유형: 시점 진동 (Viewpoint Oscillation)
   강도: ±40° 좌우 진동
@@ -712,7 +798,7 @@ StereoNav                67.5%  52.0%  2B(!)
   스테레오 기하학적 표현이 단일 시점 교란에 강건
 </code></pre>
 <h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
-<pre><code>[Unitree G1 실세계 배포 실험]
+<pre class="diagram"><code>[Unitree G1 실세계 배포 실험]
 
 로봇 플랫폼: Unitree G1 휴머노이드
   - 높이: 1.32m
@@ -749,8 +835,8 @@ StereoNav 장면별 성능:
   - 실패 사례 주로: 사람 교란, 예상치 못한 구조물
 </code></pre>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
-<pre><code>[StereoNav의 4가지 핵심 기여]
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
+<pre class="codeblock"><code>[StereoNav의 4가지 핵심 기여]
 
 기여 1: VLN 성능 병목 분석
   - 기존 연구가 모델 크기/데이터 확장에 집중하는 동안,
@@ -774,8 +860,8 @@ StereoNav 장면별 성능:
   - VLN의 실용적 배포 가능성 최초 규모 있는 증명
 </code></pre>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
-<pre><code>[StereoNav 학습 설정]
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<pre class="diagram"><code>[StereoNav 학습 설정]
 
 백본 모델:
   - 언어-행동: InternVL-3.5-2B (2B 파라미터)
@@ -820,9 +906,9 @@ StereoNav 장면별 성능:
   (검증 세트 그리드 서치로 선택)
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 TLP의 오프라인 vs 온라인 설정</h3>
-<pre><code>[TLP 활용 시나리오]
+<pre class="codeblock"><code>[TLP 활용 시나리오]
 
 시뮬레이션 (학습/평가):
   - 목표 위치 좌표: gt 데이터에서 직접 추출
@@ -848,7 +934,7 @@ StereoNav 장면별 성능:
   현재 한계: 완전 자율 실세계 배포에서는 목표 위치 사전 지식 필요
 </code></pre>
 <h3>8.2 스테레오 카메라의 실용적 제약</h3>
-<pre><code>[스테레오 VLN의 실용적 고려사항]
+<pre class="codeblock"><code>[스테레오 VLN의 실용적 고려사항]
 
 하드웨어 요구사항:
   - 스테레오 카메라 필수 (모노큘러 카메라 대신)
@@ -874,7 +960,7 @@ VLN 환경에서의 의의:
   - 소프트웨어 보정으로 부분 해결 가능
 </code></pre>
 <h3>8.3 한계점</h3>
-<pre><code>[StereoNav의 한계 및 향후 방향]
+<pre class="codeblock"><code>[StereoNav의 한계 및 향후 방향]
 
 한계 1: TLP의 목표 위치 의존성
   - 목표 좌표를 사전에 알아야 TLP 적용 가능
@@ -902,9 +988,9 @@ VLN 환경에서의 의의:
   → 향후: 멀티모달 지시 처리 확장
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
-<pre><code>[기존 리뷰된 VLN 논문들과의 체계적 비교]
+<pre class="codeblock"><code>[기존 리뷰된 VLN 논문들과의 체계적 비교]
 
 비교 논문 선정:
   1. StreamVLN (ICRA 2026) — StereoNav의 주요 비교 대상
@@ -1006,7 +1092,7 @@ VLN 환경에서의 의의:
 </tr>
 </tbody></table></div>
 <h3>9.2 장단점 분석</h3>
-<pre><code>[StereoNav vs 기존 방법 장단점]
+<pre class="codeblock"><code>[StereoNav vs 기존 방법 장단점]
 
 ★ 장점 1: 압도적 벤치마크 성능
   R2R-CE SR: 81.1% (기존 최고 63.9% 대비 +17.2%p)
@@ -1039,7 +1125,7 @@ VLN 환경에서의 의의:
   → 실세계 환경에서 중요한 미해결 문제
 </code></pre>
 <h3>9.3 실적용 가능성 평가</h3>
-<pre><code>[실로봇 배포 관점에서의 실용성 평가]
+<pre class="codeblock"><code>[실로봇 배포 관점에서의 실용성 평가]
 
 시나리오별 실적용 가능성:
 
@@ -1069,7 +1155,7 @@ VLN 환경에서의 의의:
   - 기존 시스템 대비 파라미터 효율 우수 (2B vs 7B+)
 </code></pre>
 <h3>9.4 연구 방향성 평가</h3>
-<pre><code>[VLN 연구 트렌드에서 StereoNav의 위치]
+<pre class="codeblock"><code>[VLN 연구 트렌드에서 StereoNav의 위치]
 
 현재 VLN 연구 트렌드:
   트렌드 A: 모델 확장 (7B → 13B → 더 큰 모델)
@@ -1096,7 +1182,7 @@ StereoNav의 위치:
   - sim-to-real 문제에 &quot;도메인 불변 프라이어&quot; 접근법 확산 가능
 </code></pre>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li>Chen, A. et al. (2021). &quot;VLN-BERT: A Recurrent Vision-and-Language BERT for Navigation.&quot; <em>CVPR 2021</em>.</li>
 <li>Hong, B. et al. (2022). &quot;BEVBert: Multimodal Map Pre-training for Language-guided Navigation.&quot; <em>ICCV 2023</em>.</li>
@@ -1112,7 +1198,7 @@ StereoNav의 위치:
 <li>Ku, A. et al. (2020). &quot;Room-Across-Room: Multilingual Vision-and-Language Navigation with Dense Spatiotemporal Grounding.&quot; <em>EMNLP 2020</em>.</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>11.1 혁신성 요약</h3>
 <p>StereoNav는 VLN 연구에서 두 가지 근본적인 혁신을 가져온다:</p>
 <p><strong>혁신 1: 병목 재정의</strong>
@@ -1120,7 +1206,7 @@ StereoNav의 위치:
 <p><strong>혁신 2: 스테레오 + 도메인 불변 프라이어의 시너지</strong>
 TLP와 스테레오 통합 이해의 조합은 단순히 성능을 높이는 것이 아니라, 실세계 배포 가능성을 근본적으로 개선한다. 모션 블러에서 8.2% 저하 vs 기존 38-89%는 연구실 VLN에서 실용적 VLN으로의 패러다임 전환을 의미한다.</p>
 <h3>11.2 실용적 의의</h3>
-<pre><code>[StereoNav의 실용적 가치]
+<pre class="codeblock"><code>[StereoNav의 실용적 가치]
 
 단기 (1-2년):
   - 현재 로봇 시스템에 직접 적용 가능 (코드 공개)
@@ -1147,9 +1233,104 @@ TLP와 스테레오 통합 이해의 조합은 단순히 성능을 높이는 것
 <li><strong>지속 학습</strong>: 실세계 배포 중 온라인 적응 (NavOL과의 통합)</li>
 </ol>
 <p>StereoNav는 VLN 연구의 새로운 이정표를 세우며, 특히 실세계 배포라는 관점에서 현재까지 발표된 VLN 방법 중 가장 실용적인 접근법을 제시한다.</p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="What Limits Vision-and-Language Navigation? (StereoNav): 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

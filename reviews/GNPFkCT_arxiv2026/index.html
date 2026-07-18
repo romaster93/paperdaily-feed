@@ -6,133 +6,220 @@
 <meta name="color-scheme" content="light dark">
 <title>POMDP-based Object Search with Growing State Space and Hybrid Action Domain · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2604.14965">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">arXiv 2026</div>
-    <h1>POMDP-based Object Search with Growing State Space and Hybrid Action Domain</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2604.14965">arXiv:2604.14965</a></span>
-      <span>리뷰 2026-04-25</span>
-      <span>41분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">GNPFkCT_arxiv2026</span>
     </div>
+    <h1 class="doc-title">POMDP-based Object Search with Growing State Space and Hybrid Action Domain: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2604.14965">2604.14965</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">논문 제출 시점 미공개 (프로젝트 페이지에서 추후 공개 예정)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://sites.google.com/view/gnpfkct">sites.google.com/view/gnpfkct</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-04-25</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">40KB · 약 41분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 12개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">9</span><span class="toc-title">5 POMDP vs LLM 기반 탐색: 패러다임 비교</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-11"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>POMDP-based Object Search with Growing State Space and Hybrid Action Domain: 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: POMDP-based Object Search with Growing State Space and Hybrid Action Domain</li>
@@ -160,11 +247,11 @@ footer {
 </ul>
 <p>이 논문은 <strong>성장하는 상태 공간(growing state space)</strong>과 <strong>하이브리드 행동 영역(hybrid action domain)</strong>을 가진 새로운 POMDP 공식화를 제안하고, 이를 효율적으로 풀기 위한 <strong>GNPF-kCT(Growing Neural Process Filtered k-Center Clustering Tree)</strong> 솔버를 개발한다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 성장하는 상태 공간의 계산 복잡성</h4>
 <p>전통적인 POMDP 솔버들은 고정된 상태 공간을 가정한다. 그러나 실제 객체 탐색에서는 로봇이 탐색하면서 새로운 물체를 계속 발견하고, 이에 따라 상태 공간이 동적으로 확장된다.</p>
-<pre><code>기존 POMDP 상태 공간 (고정):
+<pre class="codeblock"><code>기존 POMDP 상태 공간 (고정):
   S = S_robot × S_known_objects
   |S|는 탐색 시작 시 고정됨
 
@@ -185,7 +272,7 @@ GNPF-kCT 상태 공간 (성장):
 </ol>
 <h4>B. 고차원 하이브리드 행동 공간의 효율적 탐색</h4>
 <p>실제 모바일 로봇(Fetch, Stretch)의 행동 공간은 연속적 부분과 이산적 부분을 동시에 포함한다:</p>
-<pre><code>행동 공간 A = A_continuous × A_discrete
+<pre class="codeblock"><code>행동 공간 A = A_continuous × A_discrete
 
 연속 행동 예시:
   - 베이스 이동: (dx, dy, dθ) ∈ ℝ³
@@ -201,7 +288,7 @@ GNPF-kCT 상태 공간 (성장):
 </code></pre>
 <p>기존 POMCP 기반 방법들은 Progressive Widening으로 연속 행동을 처리하지만, 이는 탐색 초기에 너무 많은 불필요한 원시 행동(primitive action)을 시도하여 계산 낭비를 초래한다.</p>
 <h4>C. 폐색된 물체와 제한된 정보 시나리오</h4>
-<pre><code>폐색 시나리오 예시:
+<pre class="codeblock"><code>폐색 시나리오 예시:
   목표물: 분홍색 과자 상자 (테이블 위)
   폐색 물체들: 다른 물건들이 앞을 가림
   
@@ -221,12 +308,12 @@ GNPF-kCT 상태 공간 (성장):
 <li><strong>k-center 클러스터링 초구 이산화 (k-center Clustering Hypersphere Discretization)</strong>: 고차원 연속 행동 공간을 효율적으로 이산화</li>
 </ol>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 성장하는 POMDP 공식화 (Growing POMDP Formulation)</h3>
 <h4>기본 수학적 정의</h4>
 <p>POMDP는 8-tuple로 정의된다: <code>M = (S, A, Ω, T, O, R, b₀, γ)</code></p>
 <p><strong>성장하는 상태 공간</strong>의 핵심 수식:</p>
-<pre><code>시간 t에서의 상태 공간:
+<pre class="codeblock"><code>시간 t에서의 상태 공간:
   S_t = S_0 ⊕ ΔS_1 ⊕ ΔS_2 ⊕ ... ⊕ ΔS_t
   
   여기서 ⊕는 직교 부분공간의 직합 (direct sum)
@@ -243,7 +330,7 @@ GNPF-kCT 상태 공간 (성장):
   m_i: 이동 가능성 (binary)
 </code></pre>
 <p><strong>하이브리드 행동 공간</strong>:</p>
-<pre><code>행동 공간 분해:
+<pre class="codeblock"><code>행동 공간 분해:
   A = A_c × A_d
   
   연속 부분 A_c: 유계 거리 공간에 embedding된 m차원 공간
@@ -253,7 +340,7 @@ GNPF-kCT 상태 공간 (성장):
   A_d = {pick, remove, navigate_to_predefined, observe}
 </code></pre>
 <p><strong>보상 함수 설계</strong>:</p>
-<pre><code class="language-python"># 보상 구조
+<pre class="codeblock"><code class="language-python"># 보상 구조
 R(s, a, s&#39;) = {
     R_success  if target found and retrieved,  # 큰 양의 보상
     R_goal     if target found (not retrieved),
@@ -272,7 +359,7 @@ R_step = -1
 </code></pre>
 <h4>추측된 목표 물체 전략 (Guessed Target Object)</h4>
 <p>제한된 정보 시나리오를 위한 핵심 전략:</p>
-<pre><code>문제: 목표물을 한 번도 관찰하지 못한 상황에서 어떻게 탐색할 것인가?
+<pre class="codeblock"><code>문제: 목표물을 한 번도 관찰하지 못한 상황에서 어떻게 탐색할 것인가?
 
 해결책: Guessed Target Object + Grid-World Model
 
@@ -292,7 +379,7 @@ R_step = -1
 </code></pre>
 <h3>3.2 GNPF-kCT 솔버: 신뢰 트리 재사용 (Belief Tree Reuse)</h3>
 <p>MCTS 기반 POMDP 솔버에서 신뢰 트리 재사용은 이미 알려진 개념이지만, <strong>성장하는 상태 공간</strong>에서의 재사용은 새로운 도전을 제기한다.</p>
-<pre><code>전통적 신뢰 트리 재사용:
+<pre class="codeblock"><code>전통적 신뢰 트리 재사용:
   t=k: 행동 a_k 수행, 관찰 o_k 획득
   → 트리에서 a_k 서브트리를 새 루트로 이동
   → 기존 확장 결과 재활용
@@ -303,7 +390,7 @@ R_step = -1
   → 트리 내 모든 파티클이 무효화됨 (차원 불일치)
 </code></pre>
 <p><strong>GNPF-kCT의 해결 방법 — 직교 보완 공간 파티클 확장</strong>:</p>
-<pre><code>알고리즘: Growing State Space Belief Tree Reuse
+<pre class="codeblock"><code>알고리즘: Growing State Space Belief Tree Reuse
 
 입력: 기존 신뢰 트리 Ψ_{t-1}, 새 관찰 o_t, ΔS_t
 
@@ -328,7 +415,7 @@ R_step = -1
 출력: 업데이트된 신뢰 트리 Ψ_t
 </code></pre>
 <p><strong>이점 분석</strong>:</p>
-<pre><code>계산 복잡도 비교:
+<pre class="codeblock"><code>계산 복잡도 비교:
   완전 재구축: O(N_particles × T_MCTS × |A_sampled|)
                매 스텝마다 전체 트리 재구축
                
@@ -339,7 +426,7 @@ R_step = -1
 <h3>3.3 신경 프로세스 필터링 (Neural Process Filtering)</h3>
 <p>고차원 연속 행동 공간에서 유용한 원시 행동(primitive action)을 사전에 필터링하는 핵심 모듈이다.</p>
 <h4>신경 프로세스(NP) 네트워크 기초</h4>
-<pre><code>신경 프로세스는 함수 분포를 학습하는 확률 모델:
+<pre class="codeblock"><code>신경 프로세스는 함수 분포를 학습하는 확률 모델:
 
 훈련 데이터 (context set):
   C = {(x_i, y_i)}_{i=1}^n
@@ -357,7 +444,7 @@ R_step = -1
   - Gaussian process보다 계산 효율적
 </code></pre>
 <p><strong>필터링 알고리즘</strong>:</p>
-<pre><code class="language-python">def neural_process_filtering(primitive_actions, belief, context_set):
+<pre class="codeblock"><code class="language-python">def neural_process_filtering(primitive_actions, belief, context_set):
     &quot;&quot;&quot;
     원시 행동들 중 MCTS에 전달할 유망한 행동 부분집합 선택
     
@@ -387,7 +474,7 @@ R_step = -1
     return [primitive_actions[i] for i in filtered_indices]
 </code></pre>
 <p><strong>NP 네트워크 구조</strong> (Appendix B 기반):</p>
-<pre><code>구조:
+<pre class="codeblock"><code>구조:
   입력: 행동 특징 벡터 (차원 = 로봇 DOF + 환경 특징)
   
   인코더 (Encoder):
@@ -406,7 +493,7 @@ R_step = -1
 </code></pre>
 <h3>3.4 k-center 클러스터링 초구 이산화 (k-center Clustering Hypersphere Discretization)</h3>
 <p>연속 행동 공간을 효율적으로 이산화하는 핵심 알고리즘이다.</p>
-<pre><code>문제:
+<pre class="codeblock"><code>문제:
   연속 행동 공간 A_c ⊂ ℝᵐ (m차원)
   MCTS는 이산 행동 집합이 필요
   
@@ -441,7 +528,7 @@ GNPF-kCT 접근: k-center 클러스터링 기반 적응적 이산화
   - 계산 복잡도: O(K&#39; × k) (균일 격자보다 훨씬 효율적)
 </code></pre>
 <p><strong>수정된 UCB 공식</strong>:</p>
-<pre><code>전통적 UCB1:
+<pre class="codeblock"><code>전통적 UCB1:
   UCB(s, a) = Q(s, a) + c · √(log N(s) / N(s, a))
 
 GNPF-kCT의 수정된 UCB:
@@ -461,9 +548,9 @@ GNPF-kCT의 수정된 UCB:
   → 세밀한 행동 구별이 필요함을 의미
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <h3>4.1 전체 파이프라인</h3>
-<pre><code>[전체 GNPF-kCT 파이프라인]
+<pre class="diagram"><code>[전체 GNPF-kCT 파이프라인]
 
 초기화:
   ┌─────────────────────────────┐
@@ -519,7 +606,7 @@ GNPF-kCT의 수정된 UCB:
     - 최대 스텝 초과: TIMEOUT
 </code></pre>
 <h3>4.2 인식 모듈 (Perception Module)</h3>
-<pre><code>다중 센서 퓨전 파이프라인:
+<pre class="codeblock"><code>다중 센서 퓨전 파이프라인:
 
 1. 로봇 포즈 추정:
    AMCL (Adaptive Monte Carlo Localization) → 초기 추정
@@ -544,10 +631,10 @@ GNPF-kCT의 수정된 UCB:
    로봇이 적극적으로 자세(헤드 각도, 베이스 위치)를 조정
 </code></pre>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 및 실험 환경 (Datasets &amp; Environments)</h3>
 <p><strong>시뮬레이션 환경 (Gazebo)</strong>:</p>
-<pre><code>로봇: Fetch, Stretch
+<pre class="codeblock"><code>로봇: Fetch, Stretch
 환경: 다중 방(multi-room) 가정 환경
   - 다양한 가구: 선반, 테이블, 침대, 소파
   - 소형 물체: 머그컵, 유리컵, 과자 상자, 음료 병 등
@@ -558,7 +645,7 @@ GNPF-kCT의 수정된 UCB:
   - 다양한 조명/텍스처 조건
 </code></pre>
 <p><strong>실세계 실험 (Real-world)</strong>:</p>
-<pre><code>로봇: Fetch (실제 하드웨어)
+<pre class="codeblock"><code>로봇: Fetch (실제 하드웨어)
 환경: 사무실 환경
   - 테이블 위 다양한 물체 (불규칙 배치)
   - QR 코드 등 인위적 마커 미사용
@@ -571,7 +658,7 @@ GNPF-kCT의 수정된 UCB:
   - Fetch 로봇 내장 관절 인코더
 </code></pre>
 <h3>5.2 평가 지표 (Evaluation Metrics)</h3>
-<pre><code>1. 성공률 (Success Rate, SR):
+<pre class="codeblock"><code>1. 성공률 (Success Rate, SR):
    목표 물체를 성공적으로 찾고 회수한 에피소드 비율
 
 2. 평균 계획 시간 (Average Planning Time):
@@ -592,7 +679,7 @@ GNPF-kCT의 수정된 UCB:
 <li>LLM 기반: ChatGPT/GPT-4 기반 상식 추론 객체 탐색</li>
 <li>GNPF-kCT (제안): 본 논문의 방법</li>
 </ul>
-<pre><code>시뮬레이션 결과 (Fetch 로봇, Gazebo):
+<pre class="codeblock"><code>시뮬레이션 결과 (Fetch 로봇, Gazebo):
 
 | 방법         | 성공률(%) | 계획 시간(s/step) | 에피소드 길이 | 누적 보상 |
 |-------------|---------|-----------------|------------|---------|
@@ -612,7 +699,7 @@ GNPF-kCT의 수정된 UCB:
   비정형 배치에서 성능 하락 (상식 반하는 배치 취약)
 </code></pre>
 <p><strong>Stretch 로봇 (다른 플랫폼 일반화 테스트)</strong>:</p>
-<pre><code>| 방법         | 성공률(%) | 에피소드 길이 |
+<pre class="codeblock"><code>| 방법         | 성공률(%) | 에피소드 길이 |
 |-------------|---------|------------|
 | POMCPOW     | 55.2    | 47.8       |
 | GNPF-kCT   | 74.1    | 39.4       |
@@ -621,7 +708,7 @@ GNPF-kCT의 수정된 UCB:
       (Fetch에서 Stretch로 변경 시 SR 소폭 하락은 정상)
 </code></pre>
 <p><strong>성장하는 상태 공간 효과 분석</strong>:</p>
-<pre><code>실험: 탐색 중 발견되는 물체 수에 따른 성능 변화
+<pre class="codeblock"><code>실험: 탐색 중 발견되는 물체 수에 따른 성능 변화
 
 발견 물체 수   POMCPOW SR   GNPF-kCT SR   개선율
 0개 (기존)    68.2%        82.3%         +14.1%p
@@ -633,7 +720,7 @@ GNPF-kCT의 수정된 UCB:
      → 성장하는 상태 공간 처리가 핵심임을 입증
 </code></pre>
 <h3>5.4 실세계 실험 (Real-world Experiments)</h3>
-<pre><code>실험 설정:
+<pre class="codeblock"><code>실험 설정:
   - Fetch 로봇, 실제 사무실 환경
   - 테이블 위 15가지 다른 물체 조합
   - 각 조합에서 5회 반복 실험
@@ -652,7 +739,7 @@ GNPF-kCT의 수정된 UCB:
   - 그리퍼 동작 실패 (작은 물체) (0%)
 </code></pre>
 <p><strong>정성적 관찰</strong>:</p>
-<pre><code>성공적인 탐색 시퀀스 예시:
+<pre class="codeblock"><code>성공적인 탐색 시퀀스 예시:
   Step 1: 초기 위치에서 전체 테이블 스캔
   Step 2: 분홍 과자 상자 부분 폐색 감지
   Step 3: 헤드 각도 조정으로 더 나은 시야 확보
@@ -664,7 +751,7 @@ GNPF-kCT의 수정된 UCB:
   → 총 7개 행동으로 완료 (평균보다 짧은 에피소드)
 </code></pre>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>6.1 성장하는 상태 공간의 POMDP 공식화</h3>
 <p>기존 POMDP 연구들이 고정된 상태 공간을 가정한 것과 달리, 탐색 중 새로 발견되는 물체들을 동적으로 상태 공간에 추가하는 공식화를 최초로 제안한다. 이는 직교 부분공간의 직합 구조를 통해 수학적으로 엄밀하게 정의된다. 이 공식화는 실제 로봇 배포 환경에서 필수적인 속성이다—로봇은 탐색 전에 환경의 모든 물체를 미리 알 수 없기 때문이다.</p>
 <h3>6.2 GNPF-kCT 솔버의 세 가지 혁신</h3>
@@ -676,9 +763,9 @@ GNPF-kCT의 수정된 UCB:
 <h3>6.4 실세계 검증</h3>
 <p>Gazebo 시뮬레이션뿐 아니라 실제 Fetch 로봇으로 사무실 환경에서 검증한 것은 논문의 신뢰도를 크게 높인다. sim-to-real gap이 ~4%에 불과해 실용적 배포 가능성을 입증한다.</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 하이퍼파라미터</h3>
-<pre><code>MCTS 파라미터:
+<pre class="codeblock"><code>MCTS 파라미터:
   - 탐색 상수 c: 0.5 (UCB)
   - λ (신뢰 차이 가중치): 0.1
   - 최대 트리 깊이: 15
@@ -710,7 +797,7 @@ k-center 클러스터링:
   - 계획 주기: 2 Hz (평균 계획 시간 ~1.9s)
 </code></pre>
 <h3>7.2 소프트웨어 환경</h3>
-<pre><code>플랫폼: Ubuntu 20.04 / ROS Noetic
+<pre class="codeblock"><code>플랫폼: Ubuntu 20.04 / ROS Noetic
 시뮬레이터: Gazebo 11
 로봇 SDK: Fetch Robotics ROS 패키지
 
@@ -722,10 +809,10 @@ k-center 클러스터링:
   - MoveIt! (모션 계획)
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 수렴성 이론 분석</h3>
 <p>논문은 GNPF-kCT의 수렴성을 이론적으로 분석한다:</p>
-<pre><code>정리 1 (수렴성): 
+<pre class="codeblock"><code>정리 1 (수렴성): 
   GNPF-kCT가 충분한 시뮬레이션 수에서 점근적 최적 정책에 수렴:
   lim_{n→∞} V_n(b₀) = V*(b₀)
   
@@ -746,7 +833,7 @@ k-center 클러스터링:
 </code></pre>
 <h3>8.2 확장성과 한계</h3>
 <p><strong>현재 한계점들</strong>:</p>
-<pre><code>1. 실세계 전이(sim-to-real) 갭:
+<pre class="codeblock"><code>1. 실세계 전이(sim-to-real) 갭:
    - Gazebo 물리 시뮬레이터의 완벽한 충돌 모델 vs 실세계 마찰/탄성
    - 조명 변화에 따른 특징 매칭 실패
    - 실제 로봇 관절 제어 오차 (vibration, slip)
@@ -765,7 +852,7 @@ k-center 클러스터링:
    - 다중 목표 물체 탐색 확장 필요 (물류 창고 등)
 </code></pre>
 <p><strong>향후 연구 방향</strong>:</p>
-<pre><code>1. VLA 통합: RT-2, Octo 등 비전-언어-행동 모델과 결합하여
+<pre class="codeblock"><code>1. VLA 통합: RT-2, Octo 등 비전-언어-행동 모델과 결합하여
    원시 행동의 성공률 향상 (현재 가장 큰 병목)
 
 2. 다중 로봇 확장: 여러 로봇이 협력하여 병렬 탐색 수행
@@ -780,7 +867,7 @@ k-center 클러스터링:
 5. 다중 목표 탐색: 주문 픽업 등 실용적 다중 물체 탐색 시나리오
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <p>이 리뷰에서는 VLN 트랙에서 기존에 검토된 주요 논문들과 GNPF-kCT를 비교한다.</p>
 <div class="table-wrap"><table>
@@ -866,7 +953,7 @@ k-center 클러스터링:
 </tbody></table></div>
 <h3>9.2 장단점 분석</h3>
 <p><strong>GNPF-kCT의 장점</strong>:</p>
-<pre><code>1. 수학적 엄밀성:
+<pre class="codeblock"><code>1. 수학적 엄밀성:
    POMDP 공식화는 불확실성을 확률적으로 모델링하여
    최악 케이스 성능 보장이 가능하다.
    WMNav/DeCoNav의 LLM 기반 접근은 결정론적 추론에 가깝다.
@@ -888,7 +975,7 @@ k-center 클러스터링:
    고정 상태 공간 기반 방법들이 가지지 못하는 독자적 강점이다.
 </code></pre>
 <p><strong>GNPF-kCT의 단점</strong>:</p>
-<pre><code>1. 자연어 지시 미지원:
+<pre class="codeblock"><code>1. 자연어 지시 미지원:
    WMNav, DeCoNav, HTNav는 &quot;소파 오른쪽 테이블에 있는 병 가져와&quot;와 같은
    자연어 지시를 처리할 수 있다.
    GNPF-kCT는 목표 물체의 참조 사진만 사용하여
@@ -909,7 +996,7 @@ k-center 클러스터링:
    HTNav처럼 긴 경로 내비게이션에서의 성능은 미검증.
 </code></pre>
 <h3>9.3 실적용 가능성 평가</h3>
-<pre><code>실제 로봇 배포 관점:
+<pre class="codeblock"><code>실제 로봇 배포 관점:
 
 강점:
   ✅ 완전 온보드 실행 (클라우드 API 불필요)
@@ -933,7 +1020,7 @@ k-center 클러스터링:
   - 고속 동적 환경 (2 Hz 계획 주기 부족)
 </code></pre>
 <h3>9.4 연구 방향성 평가</h3>
-<pre><code>기존 VLN 연구 트렌드 분석:
+<pre class="codeblock"><code>기존 VLN 연구 트렌드 분석:
   1. LLM/VLM 통합 (WMNav, DeCoNav, HTNav): 주류 방향
   2. 데이터 확장 (CityWalker, StreamVLN): 웹/실세계 데이터 활용
   3. 강화학습 (NaVILA, NavDP): 실세계 상호작용 학습
@@ -953,9 +1040,9 @@ GNPF-kCT의 방향성:
   &quot;LLM이 고수준 계획을, GNPF-kCT가 저수준 불확실성 관리를&quot; 담당하는 계층적 구조
 </code></pre>
 <hr>
-<h2>9.5 POMDP vs LLM 기반 탐색: 패러다임 비교</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="9. 5 POMDP vs LLM 기반 탐색: 패러다임 비교">9.5 POMDP vs LLM 기반 탐색: 패러다임 비교</h2>
 <p>현재 로봇 객체 탐색 분야에서는 크게 두 가지 패러다임이 경쟁하고 있다:</p>
-<pre><code>패러다임 1: LLM/VLM 기반 상식 추론
+<pre class="codeblock"><code>패러다임 1: LLM/VLM 기반 상식 추론
   대표 방법: CoW (CVPR 2023), ESC (ICLR 2024), 
             ChatGPT-based search, WMNav
   
@@ -1007,7 +1094,7 @@ GNPF-kCT의 위치:
   이 방향이 두 패러다임의 장점을 결합할 수 있다.
 </code></pre>
 <h3>9.6 객체 목표 내비게이션(OGN)에서의 위치</h3>
-<pre><code>OGN 문제 계층 구조:
+<pre class="codeblock"><code>OGN 문제 계층 구조:
   
   Level 1: 단순 객체 탐지 (어디에 있는가?)
     → 카메라로 물체 찾기
@@ -1029,9 +1116,9 @@ GNPF-kCT는 Level 3에서 가장 완전한 파이프라인 중 하나.
 폐색 물체 제거(Level 4의 요소 포함)까지 처리하는 점이 차별화.
 </code></pre>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">9. 5 POMDP vs LLM 기반 탐색: 패러다임 비교 →</a></div><h2 id="sec-10" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <p>주요 인용 논문:</p>
-<pre><code>[POMDP 솔버]
+<pre class="codeblock"><code>[POMDP 솔버]
 - Silver &amp; Veness (2010). Monte-Carlo Planning in Large POMDPs. NeurIPS.
   → POMCP: 표준 온라인 POMDP 솔버
 - Kurniawati &amp; Yadav (2016). An online POMDP solver for uncertainty planning in dynamic environment. ISRR.
@@ -1058,7 +1145,7 @@ GNPF-kCT는 Level 3에서 가장 완전한 파이프라인 중 하나.
   → LLM 기반 비교 방법
 </code></pre>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">10. 참고 문헌 →</a></div><h2 id="sec-11" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>혁신성 평가</h3>
 <p>GNPF-kCT는 POMDP 기반 객체 탐색 문제에 세 가지 독창적 기여를 한다:</p>
 <ol>
@@ -1073,12 +1160,107 @@ GNPF-kCT는 Level 3에서 가장 완전한 파이프라인 중 하나.
 <p>VLN 분야에서 LLM 기반 방법이 주류인 가운데, GNPF-kCT는 수학적 엄밀성과 실세계 적용성을 중시하는 대안적 접근으로서 독자적인 가치를 가진다. 특히 오프라인/엣지 배포 시나리오와 물체 조작이 필요한 탐색 태스크에서 우위를 점한다.</p>
 <hr>
 <p><strong>리뷰 작성일</strong>: 2026-04-19<br><strong>리뷰어</strong>: NanoClaw Paper Bot<br><strong>검토 기준</strong>: VLN 트랙 (객체 목표 내비게이션 포함)</p>
-<p><img src="figures/fig_02_01.jpeg" alt="Figure 1 - Fetch 로봇 객체 탐색 시나리오" loading="lazy"></p>
-<p><img src="figures/fig_04_01.jpeg" alt="Figure 2 - GNPF-kCT 전체 프레임워크" loading="lazy"></p>
-<p><img src="figures/fig_09_01.jpeg" alt="Figure - 실험 결과 및 실세계 검증" loading="lazy"></p>
-
+<figure><img src="figures/fig_02_01.jpeg" alt="Figure 1 - Fetch 로봇 객체 탐색 시나리오" loading="lazy"><figcaption>Figure 1 - Fetch 로봇 객체 탐색 시나리오</figcaption></figure>
+<figure><img src="figures/fig_04_01.jpeg" alt="Figure 2 - GNPF-kCT 전체 프레임워크" loading="lazy"><figcaption>Figure 2 - GNPF-kCT 전체 프레임워크</figcaption></figure>
+<figure><img src="figures/fig_09_01.jpeg" alt="Figure - 실험 결과 및 실세계 검증" loading="lazy"><figcaption>Figure - 실험 결과 및 실세계 검증</figcaption></figure>
+<div class="secnav"><a href="#sec-9">← 9. 5 POMDP vs LLM 기반 탐색: 패러다임 비교</a><a href="#sec-11">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="POMDP-based Object Search with Growing State Space and Hybrid Action Domain: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

@@ -6,133 +6,221 @@
 <meta name="color-scheme" content="light dark">
 <title>Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning (GATP) · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2605.19209">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">ICRA 2026</div>
-    <h1>Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning (GATP)</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2605.19209">arXiv:2605.19209</a></span>
-      <span>리뷰 2026-05-20</span>
-      <span>44분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">GATP_ICRA2026</span>
     </div>
+    <h1 class="doc-title">Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">ICRA 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2605.19209">2605.19209</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">미공개</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">없음</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-05-20</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">42KB · 약 44분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 13개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">9</span><span class="toc-title">5 다른 GNN 다중 로봇 방법들과의 심층 비교</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">9</span><span class="toc-title">8 라벨 없는 vs. 라벨 있는 다중 로봇 계획의 이론적 관계</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-11"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-12"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning</li>
@@ -152,7 +240,7 @@ footer {
 </ul>
 <h3>1.2 연구 목표 (Research Objective)</h3>
 <p>본 논문은 <strong>다중 로봇 라벨 없는 모션 계획(Multi-Robot Unlabeled Motion Planning)</strong> 문제를 다룬다. 이 문제에서 N대의 로봇은 M개의 목표 위치에 안전하게 도달해야 하며, 어느 로봇이 어느 목표로 이동할지 사전에 지정되지 않는다. 핵심 도전은 다음 세 가지를 동시에 만족시키는 것이다:</p>
-<pre><code>[핵심 도전 요소]
+<pre class="codeblock"><code>[핵심 도전 요소]
 
 도전 1 — 고확장성 (Scalability):
   로봇 수 N이 증가해도 계획 품질 저하 최소화
@@ -171,11 +259,11 @@ footer {
 </code></pre>
 <p><strong>해결 방법</strong>: GATP(GNN 기반 고수준 서브목표 생성) + NMPC(비선형 모델 예측 제어, 실시간 안전 제어)의 계층적 통합.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 라벨 없는 모션 계획의 조합 폭발</h4>
 <p>라벨 <strong>있는</strong> 모션 계획에서는 각 로봇에 미리 목표가 할당되어 경로 생성만 하면 된다. <strong>라벨 없는</strong> 계획에서는 배정과 경로 생성을 동시에 최적화해야 한다:</p>
-<pre><code>[조합적 복잡성]
+<pre class="codeblock"><code>[조합적 복잡성]
 
 N=5 로봇, M=5 목표:
   가능한 배정 수 = 5! = 120
@@ -197,7 +285,7 @@ N=10 로봇, M=10 목표:
 </code></pre>
 <h4>B. 비선형 쿼드로터 동역학의 안전 제어 문제</h4>
 <p>쿼드로터는 6-DOF 강체 동역학을 갖는 비선형 시스템이다:</p>
-<pre><code>[쿼드로터 동역학 모델]
+<pre class="codeblock"><code>[쿼드로터 동역학 모델]
 
 상태 벡터 (13차원):
   x_i = [p_i⊤, v_i⊤, q_i⊤, ω_i⊤]⊤
@@ -224,7 +312,7 @@ N=10 로봇, M=10 목표:
   - CBF(Control Barrier Function) 적용 시 고차 시스템 처리 필요
 </code></pre>
 <h4>C. 분산 추론과 통신 지연의 상호작용</h4>
-<pre><code>[통신 지연의 영향]
+<pre class="codeblock"><code>[통신 지연의 영향]
 
 이상적 시나리오:
   로봇 i → 이웃 정보 즉시 수신 → 최적 서브목표 추론
@@ -249,7 +337,7 @@ N=10 로봇, M=10 목표:
 </code></pre>
 <h3>2.2 핵심 해결책</h3>
 <p>GATP는 두 가지 핵심 혁신으로 위 도전들을 해결한다:</p>
-<pre><code>[GATP 핵심 혁신]
+<pre class="codeblock"><code>[GATP 핵심 혁신]
 
 혁신 1 — f1 업데이트 전략:
   기존 f2: h^{l+1}_i = h^l_i + φ_update(ĥ^l_i)
@@ -272,11 +360,11 @@ N=10 로봇, M=10 목표:
   효과: GNN의 자유로운 서브목표 추론 + NMPC의 강경 안전 보장
 </code></pre>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 GATP 아키텍처 (Graph ATtention Planner)</h3>
 <h4>3.1.1 입력 표현 (Input Representation)</h4>
 <p>각 로봇 i의 관측 벡터:</p>
-<pre><code>[관측 벡터 구성]
+<pre class="codeblock"><code>[관측 벡터 구성]
 
 o_i = [p_i⊤, g_{i,1}⊤, ..., g_{i,Pg}⊤, r_{i,1}⊤, ..., r_{i,Pr}⊤]⊤
 
@@ -290,7 +378,7 @@ o_i = [p_i⊤, g_{i,1}⊤, ..., g_{i,Pg}⊤, r_{i,1}⊤, ..., r_{i,Pr}⊤]⊤
   → 환경 크기에 무관한 일반화
 </code></pre>
 <h4>3.1.2 인코더 (Encoder)</h4>
-<pre><code>[인코더 설계]
+<pre class="codeblock"><code>[인코더 설계]
 
 입력: 정규화된 관측 õ_i
 출력: 로봇 임베딩 h^0_i ∈ ℝ^F, F=64
@@ -304,7 +392,7 @@ o_i = [p_i⊤, g_{i,1}⊤, ..., g_{i,Pg}⊤, r_{i,1}⊤, ..., r_{i,Pr}⊤]⊤
   - f1 전략에서 모든 레이어에 재주입되어 노드 구분 유지
 </code></pre>
 <h4>3.1.3 그래프 어텐션 메시지 패싱 (Attention Message-Passing)</h4>
-<pre><code>[수학적 정의]
+<pre class="codeblock"><code>[수학적 정의]
 
 L=2 레이어, K=3 어텐션 헤드
 
@@ -332,7 +420,7 @@ L=2 레이어, K=3 어텐션 헤드
         정보를 선택적으로 전달 → 더 표현력 있는 특징 추출
 </code></pre>
 <h4>3.1.4 f1 업데이트 전략 (Key Innovation)</h4>
-<pre><code>[f1 vs f2 비교]
+<pre class="codeblock"><code>[f1 vs f2 비교]
 
 f2 업데이트 (기존, Muthusamy et al. 2024):
   h^{l+1}_i = h^l_i + φ_update(ĥ^l_i)
@@ -358,7 +446,7 @@ f1 업데이트 (제안):
   h^{l+1}_i: F=64
 </code></pre>
 <h4>3.1.5 디코더 및 서브목표 생성 (Decoder &amp; Subgoal Generation)</h4>
-<pre><code>[디코더 설계]
+<pre class="codeblock"><code>[디코더 설계]
 
 입력: h^L_i (마지막 레이어 임베딩, L=2)
 출력: 서브목표 s_i (다음 T_p초 동안의 이동 목표)
@@ -387,7 +475,7 @@ f1 업데이트 (제안):
 <hr>
 <h3>3.2 NMPC + ECBF 안전 제어</h3>
 <h4>3.2.1 NMPC 공식화</h4>
-<pre><code>[NMPC 최적화 문제]
+<pre class="codeblock"><code>[NMPC 최적화 문제]
 
 목적함수:
   min_{u_i(·)} ∫_{t0}^{t0+Tc} [||x_i - x*_i(s_i)||²_Q + ||u_i - u*_i||²_R] dt
@@ -405,7 +493,7 @@ f1 업데이트 (제안):
 </code></pre>
 <h4>3.2.2 참조 궤적 생성 (Reference Trajectory)</h4>
 <p>NMPC는 서브목표 s_i를 향하는 최소-저크(minimum-jerk) 참조 궤적을 추적한다:</p>
-<pre><code>[최소-저크 궤적]
+<pre class="codeblock"><code>[최소-저크 궤적]
 
 정의:
   x*_i(s_i): 현재 위치에서 서브목표 s_i까지의 최소-저크 궤적
@@ -427,7 +515,7 @@ f1 업데이트 (제안):
 </code></pre>
 <h4>3.2.3 ECBF 안전 제약 (Exponential Control Barrier Functions)</h4>
 <p>쿼드로터 충돌 회피는 고차 시스템 안전 제약으로 표현된다:</p>
-<pre><code>[ECBF 기반 충돌 회피]
+<pre class="codeblock"><code>[ECBF 기반 충돌 회피]
 
 기본 배리어 함수:
   h_{ii&#39;}(x_i, x_{i&#39;}) = ||p_i - p_{i&#39;}||² - d²_safe
@@ -465,7 +553,7 @@ ACADOS 솔버:
 <hr>
 <h3>3.3 학습 절차 (Training Procedure)</h3>
 <h4>3.3.1 전문가 궤적 생성</h4>
-<pre><code>[전문가 기준 생성]
+<pre class="codeblock"><code>[전문가 기준 생성]
 
 로봇-목표 배정:
   헝가리안 알고리즘 (최소 비용 매칭)
@@ -478,7 +566,7 @@ ACADOS 솔버:
     → 서브목표들: 0m → 4m → 6m (목표 도달)
 </code></pre>
 <h4>3.3.2 DAgger-스타일 혼합 정책 훈련</h4>
-<pre><code>[혼합 정책 (Scheduled Sampling)]
+<pre class="codeblock"><code>[혼합 정책 (Scheduled Sampling)]
 
 목적: 자기 유발 분포 이동(covariate shift) 방지
   - 순수 지도학습: 전문가 데이터 분포에서만 훈련
@@ -496,7 +584,7 @@ ACADOS 솔버:
     → 점진적으로 GATP 자체 궤적에서 훈련
 </code></pre>
 <h4>3.3.3 적응형 가중 손실 함수</h4>
-<pre><code>[손실 함수 설계]
+<pre class="codeblock"><code>[손실 함수 설계]
 
 기본 회귀 손실:
   L_base = (1/NB) Σ_i Σ_t ||s̃_i(t) - s̃*_i(t)||²₂
@@ -562,9 +650,9 @@ ACADOS 솔버:
 </tr>
 </tbody></table></div>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <h3>4.1 전체 파이프라인</h3>
-<pre><code>[GATP+NMPC 계층적 아키텍처]
+<pre class="diagram"><code>[GATP+NMPC 계층적 아키텍처]
 
 입력 레이어:
   ┌─────────────────────────────────────────────────────────────┐
@@ -606,7 +694,7 @@ ACADOS 솔버:
   └─────────────────────────────────────────────────────────────┘
 </code></pre>
 <h3>4.2 통신 그래프 설계</h3>
-<pre><code>[분산 통신 구조]
+<pre class="codeblock"><code>[분산 통신 구조]
 
 각 로봇 i의 통신 이웃:
   N_i = {M=2개 가장 가까운 로봇들}
@@ -659,7 +747,7 @@ M=2의 근거:
 </tr>
 </tbody></table></div>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 평가 지표 (Evaluation Metrics)</h3>
 <ul>
 <li><strong>Coverage Rate @T_f</strong>: T_f 초 내에 모든 목표가 커버된 비율 (목표 위치 0.2m 이내 도달)</li>
@@ -699,7 +787,7 @@ M=2의 근거:
 </ul>
 <h4>주요 f2 vs f1 비교:</h4>
 <p>f2 업데이트 방식(GATP-f2)이 f1보다 성능이 낮은 이유:</p>
-<pre><code>f2에서의 Over-smoothing 문제:
+<pre class="codeblock"><code>f2에서의 Over-smoothing 문제:
 
 레이어 1: h^1_i = h^0_i + φ(ĥ^0_i)
   → h^1_i가 이미 이웃 정보 포함
@@ -712,7 +800,7 @@ M=2의 근거:
 → 디코더가 각 로봇에 맞는 서브목표 구분 실패
 </code></pre>
 <h3>5.3 확장성: 더 많은 로봇으로의 일반화</h3>
-<pre><code>[10→50 로봇 확장 성능 저하 분석, T_f=40s]
+<pre class="codeblock"><code>[10→50 로봇 확장 성능 저하 분석, T_f=40s]
 
 GATP-f1 (제안): 23.5% 저하
 GATP-f2:        24.5% 저하
@@ -829,7 +917,7 @@ GCN-f1:         34.5% 저하 (가장 큰 저하)
 </tbody></table></div>
 <p><strong>분석</strong>: GATP 계산 자체는 1.03ms로 매우 빠름. 총 시간 차이(51-134ms)는 통신 토폴로지의 비대칭성에 기인 (로봇별 이웃까지의 통신 경로 길이 차이).</p>
 <h4>실험 태스크 및 결과</h4>
-<pre><code>태스크 1 — 원형 대형 (장애물 없음):
+<pre class="codeblock"><code>태스크 1 — 원형 대형 (장애물 없음):
   4 쿼드로터 → 원형 배치 목표 위치로 이동
   결과: &quot;quadrotors successfully reach the goals safely&quot;
   
@@ -847,7 +935,7 @@ GCN-f1:         34.5% 저하 (가장 큰 저하)
   → Sim-to-real 전이 성공적
 </code></pre>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>기여 1: f1 업데이트 전략의 확장성 검증</h3>
 <p>f1 전략의 핵심 아이디어 — 초기 임베딩의 매 레이어 재주입 — 는 단순하지만 효과적이다. 10→50 로봇 확장 시 GCN-f1 대비 11%p 낮은 성능 저하는 실제 대규모 배포를 위한 실용적 의의가 크다.</p>
 <h3>기여 2: 비선형 쿼드로터 동역학에서의 분산 안전 계획</h3>
@@ -857,7 +945,7 @@ GCN-f1:         34.5% 저하 (가장 큰 저하)
 <h3>기여 4: ROS 2 기반 분산 온보드 실증</h3>
 <p>Qualcomm Snapdragon VOXL 2 위에서 실시간으로 GATP 추론과 NMPC를 실행한 것은 실제 배포 가능성을 보여주는 중요한 결과다.</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 주요 하이퍼파라미터 요약</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -963,9 +1051,9 @@ GCN-f1:         34.5% 저하 (가장 큰 저하)
 </tr>
 </tbody></table></div>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 GNN Over-smoothing과 f1 전략의 이론적 배경</h3>
-<pre><code>[Over-smoothing 현상 분석]
+<pre class="codeblock"><code>[Over-smoothing 현상 분석]
 
 GNN 레이어 수가 증가할수록 노드 특징이 유사해지는 현상:
   
@@ -991,7 +1079,7 @@ f1 전략의 대응:
   - GATP-f1: 23.5% 성능 저하 (f1 + 어텐션으로 완화)
 </code></pre>
 <h3>8.2 ECBF와 고차 시스템 안전성의 수학적 기반</h3>
-<pre><code>[ECBF (Exponential CBF) 이론]
+<pre class="codeblock"><code>[ECBF (Exponential CBF) 이론]
 
 표준 CBF (1차 상대도):
   h(x) ≥ 0 → 안전
@@ -1024,7 +1112,7 @@ ECBF (r차 상대도):
   G_{ii&#39;} = ḧ_{ii&#39;} + α₁ḣ_{ii&#39;} + α₂h_{ii&#39;} ≥ 0
 </code></pre>
 <h3>8.3 라벨 없는 계획의 미래: 집중형 대 분산형</h3>
-<pre><code>[계획 패러다임 비교]
+<pre class="codeblock"><code>[계획 패러다임 비교]
 
 중앙집중 최적 계획 (C-CAPT 등):
   장점: 전역 최적 솔루션 (최단 총 이동 거리)
@@ -1053,7 +1141,7 @@ GATP (분산 GNN):
 </code></pre>
 <h3>8.4 실제 배포 격차 (Deployment Gap)</h3>
 <p>현재 GATP의 실세계 배포에는 중요한 제한이 있다:</p>
-<pre><code>[실세계 배포 제한 사항]
+<pre class="codeblock"><code>[실세계 배포 제한 사항]
 
 1. Vicon 의존성:
    실험실 Vicon 모션 캡처 의존
@@ -1072,7 +1160,7 @@ GATP (분산 GNN):
    쿼드로터 특화 설계 → 지상 로봇(UGV) 적용 시 동역학 모델 변경 필요
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -1150,7 +1238,7 @@ WayPlan은 LLM 기반 2계층 TAMP로 태스크 계획과 모션 계획을 함�
 PRoID는 탐색-릴레이 결정 문제로 완전히 다른 문제 설정이다. 공통점은 다중 로봇 시스템에서 통신 제약을 다룬다는 것이다. PRoID는 언제 릴레이할 것인지의 판단을 최적화하며, GATP는 모션 경로를 최적화한다.</p>
 <h3>9.2 장단점 분석</h3>
 <p><strong>장점 (Advantages):</strong></p>
-<pre><code>1. 수학적으로 보장된 안전성:
+<pre class="codeblock"><code>1. 수학적으로 보장된 안전성:
    ECBF는 soft 패널티가 아닌 hard 제약
    NMPC 실행 중 충돌 수학적 불가
    → 실세계 배포에서 가장 중요한 요소
@@ -1169,7 +1257,7 @@ PRoID는 탐색-릴레이 결정 문제로 완전히 다른 문제 설정이다.
    소형 임베디드(Snapdragon VOXL 2)에서 동작
 </code></pre>
 <p><strong>단점 (Disadvantages):</strong></p>
-<pre><code>1. 코드 비공개:
+<pre class="codeblock"><code>1. 코드 비공개:
    재현 실험 불가
    커뮤니티 활용 어려움
 
@@ -1205,7 +1293,7 @@ PRoID는 탐색-릴레이 결정 문제로 완전히 다른 문제 설정이다.
 <li>비교 방법 추가 (C-CAPT, RL 방법)</li>
 </ul>
 <p><strong>경쟁 대비 실용성:</strong></p>
-<pre><code>산업용 드론 군집 (아마존 프라임에어 등):
+<pre class="codeblock"><code>산업용 드론 군집 (아마존 프라임에어 등):
   GATP의 확장성 + ECBF 안전성 → 매우 적합
   단, 야외/GPS 환경 확장 필요
   
@@ -1227,9 +1315,9 @@ PRoID는 탐색-릴레이 결정 문제로 완전히 다른 문제 설정이다.
 </ol>
 <p>그러나 코드 비공개와 제한적 실세계 실험 규모는 이 연구의 실제 임팩트를 제한한다. 향후 확장에서 50대 실세계 실험과 비교 방법 추가가 이루어지면 이 분야의 표준 방법론이 될 잠재력이 있다.</p>
 <hr>
-<h2>9.5 다른 GNN 다중 로봇 방법들과의 심층 비교</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="9. 5 다른 GNN 다중 로봇 방법들과의 심층 비교">9.5 다른 GNN 다중 로봇 방법들과의 심층 비교</h2>
 <h3>선행 GNN 방법들 계보 (Lineage of GNN Multi-Robot Planning)</h3>
-<pre><code>[GNN 다중 로봇 계획 발전 계보]
+<pre class="codeblock"><code>[GNN 다중 로봇 계획 발전 계보]
 
 Khan et al. 2019 (첫 번째 세대):
   - 방법: GCN + IL (Imitation Learning)
@@ -1267,7 +1355,7 @@ GATP (본 논문, 2026) (네 번째 세대):
   - 혁신: 실세계 비선형 동역학 + 수학적 안전 + 대규모 확장성
 </code></pre>
 <h3>9.6 GATP와 강화학습(RL) 기반 방법의 비교 관점</h3>
-<pre><code>[GATP (IL+GNN) vs. RL 기반 다중 로봇 계획]
+<pre class="codeblock"><code>[GATP (IL+GNN) vs. RL 기반 다중 로봇 계획]
 
 RL 기반 접근 (예: MAPPO, QMIX 등):
   학습 방식: 보상 신호로 정책 학습
@@ -1297,7 +1385,7 @@ GATP (IL+GNN):
   실제 배포: GATP + RL 파인튜닝 하이브리드 유망
 </code></pre>
 <h3>9.7 NMPC + ECBF의 계산 복잡도 분석</h3>
-<pre><code>[NMPC 실시간 실행 가능성 분석]
+<pre class="codeblock"><code>[NMPC 실시간 실행 가능성 분석]
 
 NMPC 최적화 문제 크기:
   상태 차원: 13 (쿼드로터)
@@ -1323,8 +1411,8 @@ ECBF 추가 계산:
   총 추가 제약: 2개 (무시 가능)
 </code></pre>
 <hr>
-<h2>9.8 라벨 없는 vs. 라벨 있는 다중 로봇 계획의 이론적 관계</h2>
-<pre><code>[문제 관계 분석]
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">9. 5 다른 GNN 다중 로봇 방법들과의 심층 비교 →</a></div><h2 id="sec-10" data-label="9. 8 라벨 없는 vs. 라벨 있는 다중 로봇 계획의 이론적 관계">9.8 라벨 없는 vs. 라벨 있는 다중 로봇 계획의 이론적 관계</h2>
+<pre class="codeblock"><code>[문제 관계 분석]
 
 라벨 있는 계획 (Labeled Motion Planning):
   주어진: 각 로봇 i에 대한 목표 g_i
@@ -1350,7 +1438,7 @@ GATP의 접근:
   - 보장: 형식적 수렴 보장 없음 (GNN 학습의 일반적 한계)
 </code></pre>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">9. 8 라벨 없는 vs. 라벨 있는 다중 로봇 계획의 이론적 관계 →</a></div><h2 id="sec-11" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li>Khan et al. 2019 — Scalable Multi-Agent Inverse Reinforcement Learning (GCN 기반 다중 로봇)</li>
 <li>Khan et al. 2021 — Graph Neural Networks for Motion Planning</li>
@@ -1366,7 +1454,7 @@ GATP의 접근:
 <li>ECBF (Exponential CBF) — Nguyen &amp; Sreenath 2016</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-9">← 9. 5 다른 GNN 다중 로봇 방법들과의 심층 비교</a><a href="#sec-11">10. 참고 문헌 →</a></div><h2 id="sec-12" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>혁신성 평가</h3>
 <p>GATP는 세 가지 핵심 혁신의 유기적 결합으로 다중 쿼드로터 분산 계획의 실용화에 기여한다. f1 업데이트 전략은 작지만 중요한 기술적 기여로, 50대 로봇 규모에서도 GNN의 구분 능력을 유지하는 효과적인 해결책이다. GATP+NMPC+ECBF의 계층적 통합은 GNN의 고수준 추론 능력과 제어 이론의 안전 보장을 결합한 실용적 아키텍처다.</p>
 <h3>실용적 의의</h3>
@@ -1380,9 +1468,104 @@ GATP의 접근:
 <li><strong>이종 로봇 시스템</strong>: 쿼드로터+UGV 혼합 팀으로 확장</li>
 </ol>
 <p>GATP는 분산 다중 로봇 계획의 실용화를 향한 중요한 이정표이며, 특히 안전 보장과 확장성의 동시 달성이라는 오랜 과제를 해결하는 방향으로 연구의 전진을 보여준다.</p>
-
+<div class="secnav"><a href="#sec-10">← 9. 8 라벨 없는 vs. 라벨 있는 다중 로봇 계획의 이론적 관계</a><a href="#sec-12">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

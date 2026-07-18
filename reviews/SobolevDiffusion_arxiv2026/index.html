@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2604.19011">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">arXiv 2026</div>
-    <h1>Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2604.19011">arXiv:2604.19011</a></span>
-      <span>리뷰 2026-04-25</span>
-      <span>43분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">SobolevDiffusion_arxiv2026</span>
     </div>
+    <h1 class="doc-title">Sobolev-Trained Diffusion Policies: 궤적 최적화 워밍스타트를 위한 1차 확산 정책 학습 — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2604.19011">2604.19011</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">미공개 (논문 승인 후 공개 예정)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">없음</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-04-25</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">43KB · 약 43분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>Sobolev-Trained Diffusion Policies: 궤적 최적화 워밍스타트를 위한 1차 확산 정책 학습 — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: Accelerating trajectory optimization with Sobolev-trained diffusion policies</li>
@@ -156,11 +242,11 @@ footer {
 <p>OLAhGP 방법으로 이를 해결하려면 <strong>학습된 정책이 각 문제에 대한 좋은 초기 궤적 추정값을 제공</strong>해야 한다. 그러나 TO 솔버가 생성한 데이터(로컬 최적 궤적)로 정책을 학습하면 <strong>복합 오차(compounding errors)</strong> 문제가 발생한다: 작은 궤적 이탈이 학습 데이터에 없던 상태로 정책을 이끌고, 이로부터 회복 불가한 오차가 연쇄 증폭된다.</p>
 <p>핵심 기여: <strong>Sobolev 학습(Sobolev learning)</strong>을 확산 정책(diffusion policy)에 적용하여, 궤적 데이터와 함께 1차 정보(피드백 게인, feedback gains)를 학습에 통합한다. 1차 정보는 TO 솔버의 역방향 패스에서 추가 계산 없이 무료로 얻을 수 있으며, 이를 통해 <strong>5<del>10배 적은 궤적 데이터로 효과적인 워밍스타트를 달성</strong>하고 TO 수렴을 <strong>2×</del>20× 가속</strong>한다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 인스턴스별 독립 해결(Per-Instance Solving)의 비효율성</h4>
 <p>경사 기반 TO 솔버(iLQR, DDP, ProxDDP)의 구조적 한계:</p>
-<pre><code>TO 솔버의 인스턴스 독립성 문제:
+<pre class="codeblock"><code>TO 솔버의 인스턴스 독립성 문제:
 
 문제 인스턴스 ξ₁ (초기상태 x̂₁, 목표 x_goal1)
   → 직선 보간 초기값
@@ -180,7 +266,7 @@ footer {
 <p><strong>양적 규모</strong>: 로봇팔(UR5), 이중 진자, 사족 드론 실험에서 TO 단독으로는 평균 400<del>900회 반복, 4</del>16초 소요. 실시간 모션 계획에는 너무 느리다.</p>
 <h4>B. 복합 오차(Compounding Errors) 문제 - TO 기반 데이터의 역설</h4>
 <p>TO 솔버가 생성한 학습 데이터의 특수성이 오히려 독이 된다:</p>
-<pre><code>TO 생성 데이터의 로컬 최적성 역설:
+<pre class="codeblock"><code>TO 생성 데이터의 로컬 최적성 역설:
 
 TO 솔버:
   초기값 → 반복 → 로컬 최적 궤적 τ*
@@ -220,11 +306,11 @@ TO 솔버:
 <li><strong>교번 알고리즘</strong>: 궤적 수집과 정책 학습을 반복하여 점진적으로 어려운 문제에 도전 → TO 솔버가 해결 못한 문제도 정책의 워밍스타트로 해결</li>
 </ol>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 확산 정책(Diffusion Policy) 배경</h3>
 <h4>3.1.1 DDPM (Denoising Diffusion Probabilistic Models)</h4>
 <p>Ho et al. (2020)의 DDPM은 정방향 노이즈 추가와 역방향 노이즈 제거 과정을 통해 데이터 분포를 학습한다:</p>
-<pre><code>DDPM 정방향 프로세스 (노이즈 추가):
+<pre class="codeblock"><code>DDPM 정방향 프로세스 (노이즈 추가):
 p_D(τ_k | τ_{k-1}) := N(τ_k; √(1-β_k) τ_{k-1}, β_k I)
 
 직접 샘플링 (Eq. 3):
@@ -246,7 +332,7 @@ p_θ(τ_{k-1} | τ_k) = N(τ_{k-1}; μ_θ(τ_k, k), β̃_k I)
 <p><strong>τ_0 파라미터화 선택</strong>: 이 논문은 ε 예측 대신 τ_0 직접 예측을 선택. 실험적으로 더 나은 성능.</p>
 <h4>3.1.2 인페인팅(Inpainting) 기법</h4>
 <p>조건화를 위해 각 역방향 단계에서 과거 행동을 τ_k에 직접 삽입:</p>
-<pre><code>인페인팅 (관측 이력 조건화):
+<pre class="codeblock"><code>인페인팅 (관측 이력 조건화):
 각 k 단계에서: τ_k[1:T_o] ← a_hist  (과거 T_o개 행동으로 고정)
 선택적으로:   τ_k[T_h] ← x_target   (목표 상태로 고정)
 
@@ -256,7 +342,7 @@ T_a = T_h - T_o = 31: 실행 행동 길이 (재계획 전)
 </code></pre>
 <h4>3.1.3 표준 DDPM 학습 손실</h4>
 <p>기본 확산 정책 학습(Diff):</p>
-<pre><code>L^Diff = E_{(ξ, τ_0, o_hist), ε, k} [||τ_0 - τ_θ(τ_k, k, ξ, o_hist)||²]
+<pre class="codeblock"><code>L^Diff = E_{(ξ, τ_0, o_hist), ε, k} [||τ_0 - τ_θ(τ_k, k, ξ, o_hist)||²]
 
 여기서:
   ξ: 문제 파라미터 (초기 위치, 목표)
@@ -268,7 +354,7 @@ T_a = T_h - T_o = 31: 실행 행동 길이 (재계획 전)
 <h3>3.2 Sobolev 학습 이론 (Sobolev Learning Theory)</h3>
 <h4>3.2.1 Sobolev 학습의 기본 원리</h4>
 <p>Czarnecki et al. (2017, NeurIPS) &quot;Sobolev Training for Neural Networks&quot;는 신경망 학습 시 함수값(0차)과 함께 <strong>도함수(1차 이상)를 손실에 포함</strong>하는 방법을 제안했다:</p>
-<pre><code>일반 Sobolev 손실 (Eq. 8):
+<pre class="codeblock"><code>일반 Sobolev 손실 (Eq. 8):
 L^Sobolev = E_x [||f_θ(x) - y||² + α_Sob ||∂f_θ(x)/∂x - ∂y/∂x||²_F]
 
 여기서:
@@ -285,7 +371,7 @@ L^Sobolev = E_x [||f_θ(x) - y||² + α_Sob ||∂f_θ(x)/∂x - ∂y/∂x||²_F]
 </ul>
 <h4>3.2.2 TO 피드백 게인에서의 1차 정보</h4>
 <p>경사 기반 TO 솔버(ProxDDP)의 역방향 패스는 피드백 게인을 자연스럽게 생성한다:</p>
-<pre><code>최적 제어 피드백 게인 (Riccati 방정식의 부산물):
+<pre class="codeblock"><code>최적 제어 피드백 게인 (Riccati 방정식의 부산물):
 ∂u_t/∂x_t: t 시점에서 상태 x_t에 대한 제어 u_t의 민감도
 
 연쇄 법칙에 의한 상태 전이 미분 (Eq. 2):
@@ -302,7 +388,7 @@ for 0 ≤ o ≤ h &lt; T_h
 <p><strong>물리적 해석</strong>: ∂u_t/∂x_t는 현재 상태에서 약간 이탈했을 때 제어 입력을 어떻게 조정해야 하는지를 나타낸다. 이를 정책이 학습하면, 롤아웃 중 작은 이탈이 발생해도 올바른 복구 방향을 알 수 있다.</p>
 <h4>3.2.3 확률적 Sobolev 학습 (Stochastic Sobolev, Eq. 9)</h4>
 <p>야코비안 전체를 계산하는 것은 비용이 크다. 확률적 투영(stochastic projection)으로 근사:</p>
-<pre><code>확률적 Sobolev 손실 (Eq. 9):
+<pre class="codeblock"><code>확률적 Sobolev 손실 (Eq. 9):
 L^Sobolev_Stochastic = E_x [||f_θ(x) - y||²
                            + (α_Sob/n_proj) Σᵢ ||vᵢᵀ · ∂y/∂x - ∂/∂x(vᵢᵀ · f_θ(x,ξ))||²]
 
@@ -316,7 +402,7 @@ L^Sobolev_Stochastic = E_x [||f_θ(x) - y||²
 <h3>3.3 확산 정책에 Sobolev 학습 적용</h3>
 <h4>3.3.1 실패한 나이브 접근법 (Eq. 10)</h4>
 <p>처음의 직관적 시도: 전체 확산 프로세스 출력에 Sobolev 손실 적용:</p>
-<pre><code>나이브 Sobolev+Diffusion 손실 (실패):
+<pre class="codeblock"><code>나이브 Sobolev+Diffusion 손실 (실패):
 L^Sob+Diff_full = E_{(ξ, τ_0, ∂τ_0/∂x_hist), τ_K} [
     ||τ_0 - τ̄_0^θ||²
   + α_Sob ||∂τ_0/∂x_hist - ∂τ̄_0^θ/∂x_hist||²
@@ -331,7 +417,7 @@ L^Sob+Diff_full = E_{(ξ, τ_0, ∂τ_0/∂x_hist), τ_K} [
 </code></pre>
 <h4>3.3.2 핵심 기여: 단계별 Sobolev 손실 (Eq. 11)</h4>
 <p>해결책: 최종 출력이 아닌 <strong>각 노이즈 단계 k에서의 단일 스텝 예측에 Sobolev 손실 적용</strong>:</p>
-<pre><code>제안 Sobolev+Diffusion 손실 (핵심 기여, Eq. 11):
+<pre class="codeblock"><code>제안 Sobolev+Diffusion 손실 (핵심 기여, Eq. 11):
 L^Sob+Diff = E_{(ξ, τ_0, ∂τ_0/∂x_hist), ε, k} [
     ||τ_0 - τ_0^{θ,k}||²                                          (0차 항)
   + (α_Sob/n_proj) Σᵢ ||vᵢᵀ·∂τ_0/∂x_hist - ∂/∂x_hist(vᵢᵀ·τ_0^{θ,k})||²  (1차 항)
@@ -346,7 +432,7 @@ L^Sob+Diff = E_{(ξ, τ_0, ∂τ_0/∂x_hist), ε, k} [
   τ̄_0^θ (미사용): K번 역방향 패스를 거친 최종 출력
 </code></pre>
 <p><strong>왜 이 방식이 작동하는가?</strong></p>
-<pre><code>직관적 설명:
+<pre class="codeblock"><code>직관적 설명:
 
 표준 DDPM 학습의 핵심:
   &quot;모든 노이즈 수준 k에서 τ_0를 예측하도록 학습&quot;
@@ -364,7 +450,7 @@ vs 나이브 접근법의 실패 이유:
   → 확산 훈련 원리와 상충 → 학습 불안정
 </code></pre>
 <p><strong>α_Sob 가중치 설계</strong>:</p>
-<pre><code>고정 가중치 (최종 선택):
+<pre class="codeblock"><code>고정 가중치 (최종 선택):
   α_Sob = 1.0: 대부분의 태스크
   α_Sob = 10⁻³: 쿼드로터 태스크 (물리적 스케일 차이가 큼)
 
@@ -375,7 +461,7 @@ vs 나이브 접근법의 실패 이유:
 </code></pre>
 <h3>3.4 교번 학습 알고리즘 (Alternating Loop, Algorithm 1)</h3>
 <h4>3.4.1 알고리즘 구조</h4>
-<pre><code>Sob+Diff 교번 알고리즘 (Algorithm 1):
+<pre class="diagram"><code>Sob+Diff 교번 알고리즘 (Algorithm 1):
 
 초기화: 확산 정책 네트워크 τ_θ; 버퍼 D = ∅
 
@@ -413,7 +499,7 @@ for n_algo 반복:
 </code></pre>
 <h4>3.4.2 세 가지 핵심 알고리즘 선택</h4>
 <p><strong>선택 1: ArgminCost — 두 초기값 경쟁</strong></p>
-<pre><code>목적: 정책 워밍스타트 + TO 솔버의 시너지 극대화
+<pre class="codeblock"><code>목적: 정책 워밍스타트 + TO 솔버의 시너지 극대화
 
 구현:
   TO(직선 보간 초기값, ξ) → 궤적 A, 비용 J_A
@@ -426,7 +512,7 @@ for n_algo 반복:
   - D의 품질 점진적 향상
 </code></pre>
 <p><strong>선택 2: 수렴 기준 n_max = 1,000회</strong></p>
-<pre><code>목적: D에 미수렴(품질 나쁜) 궤적이 들어가는 것 방지
+<pre class="codeblock"><code>목적: D에 미수렴(품질 나쁜) 궤적이 들어가는 것 방지
 
 거부 조건: 두 TO 시작점 모두 1,000회 이내에 수렴 실패
   → 해당 ξ 폐기, 새 ξ 샘플링
@@ -434,7 +520,7 @@ for n_algo 반복:
 효과: 낮은 품질 지역 자동 배제, 점진적 어려움 증가에 자연스럽게 대응
 </code></pre>
 <p><strong>선택 3: 매 반복마다 D 리셋</strong></p>
-<pre><code>목적: 오래된(과거 정책 초기값으로 생성된) 궤적이 현재 학습을 방해하지 않도록
+<pre class="codeblock"><code>목적: 오래된(과거 정책 초기값으로 생성된) 궤적이 현재 학습을 방해하지 않도록
 
 구현: 매 n_algo 반복 시작 시 D = ∅
       n_traj개 새 궤적을 현재 정책으로 생성
@@ -443,7 +529,7 @@ for n_algo 반복:
       (DAgger 알고리즘과 유사한 on-policy 특성)
 </code></pre>
 <h4>3.4.3 정책 롤아웃 (Algorithm 2)</h4>
-<pre><code>PolicyRollout(τ_θ, ξ, T_a, K_rollout):
+<pre class="codeblock"><code>PolicyRollout(τ_θ, ξ, T_a, K_rollout):
 
 초기화: t = 0, 관측 이력 o_hist, 행동 이력 a_hist
 
@@ -467,8 +553,8 @@ while t &lt; T:
 return X, U
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>Sobolev Diffusion 전체 파이프라인
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>Sobolev Diffusion 전체 파이프라인
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                     오프라인 학습 단계                             │
@@ -524,9 +610,9 @@ return X, U
 4. 추론: 확산으로 τ̄_0 생성 → TO 솔버가 τ̄_0에서 신속 수렴
 </code></pre>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 실험 환경 및 태스크 (Experimental Setup)</h3>
-<pre><code>소프트웨어:
+<pre class="codeblock"><code>소프트웨어:
   - 물리 시뮬레이터: Pinocchio (강체 동역학 라이브러리)
   - TO 솔버: Aligator (ProxDDP 구현)
   - 딥러닝: PyTorch + U-Net (조건부)
@@ -550,7 +636,7 @@ return X, U
 </code></pre>
 <h3>5.2 태스크 설명 (Task Descriptions)</h3>
 <h4>A. 역진자 (Inverted Pendulum)</h4>
-<pre><code>단일 역진자:
+<pre class="codeblock"><code>단일 역진자:
   x_t: 관절 각도 및 속도
   u_t: 관절 토크
   목표: 아래를 향한 임의 초기 위치 → 수직 균형
@@ -563,7 +649,7 @@ return X, U
   TO 단독으로는 80% 실패 → Sob+Diff 워밍스타트 필수
 </code></pre>
 <h4>B. UR5 로봇팔 (6자유도)</h4>
-<pre><code>UR5 태스크 변형 4가지:
+<pre class="diagram"><code>UR5 태스크 변형 4가지:
   q_t: 6 관절 각도 (cos/sin 전처리)
   a_t = x_t (상태 제어), u_t는 RNEA로 계산
 
@@ -578,7 +664,7 @@ return X, U
   └───────────────┴──────────────┴──────────────┴────────┘
 </code></pre>
 <h4>C. 쿼드로터 (SE3 드론)</h4>
-<pre><code>쿼드로터 태스크:
+<pre class="codeblock"><code>쿼드로터 태스크:
   SE3 다이나믹스: 6자유도 강체
   목표: 임의 초기→임의 목표 (동일 고도)
   제약: 토크 제한, 천장/바닥 충돌 방지
@@ -761,7 +847,7 @@ return X, U
 <li>제한 인정: 접촉이 풍부한 시나리오(contact-rich)에서의 검증 부재</li>
 </ul>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>6.1 확산 정책에 대한 1차 Sobolev 손실 (핵심 기여)</h3>
 <p>기존 Sobolev 학습(Le Lidec et al., 2023)은 MLP 직접 정책에만 적용되었다. 이 논문은 확산 정책의 각 노이즈 단계에서의 단일 스텝 예측에 Sobolev 손실을 적용하여 <strong>표현력 높은 확산 정책과 복합 오차 저항성을 동시에 달성</strong>하는 최초의 방법을 제시한다.</p>
 <p>핵심 아이디어인 &quot;단계별 적용 vs 전체 체인 적용&quot;의 차이는 단순해 보이지만, 실제로 확산 모델의 훈련 원리(각 노이즈 단계에서 독립적으로 τ_0 예측 학습)와 Sobolev 손실(예측의 입력 미분까지 일치)이 자연스럽게 결합되는 지점을 정확히 포착했다.</p>
@@ -796,9 +882,9 @@ return X, U
 <h3>6.4 교번 알고리즘으로 어려운 태스크 점진적 해결</h3>
 <p>DAgger와 유사하지만 중요한 차이: TO 솔버가 정책 워밍스타트를 받아 이전에 실패했던 태스크를 해결하고, 그 궤적이 다시 정책 학습에 활용된다. 이 양방향 부트스트래핑으로 어려운 태스크에서 점진적 수렴이 가능하다.</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 U-Net 아키텍처 상세</h3>
-<pre><code>조건부 U-Net 구조 (Janner 2022, Chi 2023과 동일):
+<pre class="codeblock"><code>조건부 U-Net 구조 (Janner 2022, Chi 2023과 동일):
 
 입력:
   - τ_k: 노이즈 궤적 [T_h × a_dim]
@@ -817,7 +903,7 @@ U-Net 구조:
       (노이즈 없는 궤적 예측)
 </code></pre>
 <h3>7.2 ProxDDP 솔버 특성</h3>
-<pre><code>ProxDDP (Proximal Differential Dynamic Programming):
+<pre class="codeblock"><code>ProxDDP (Proximal Differential Dynamic Programming):
   - Jallet et al. (IEEE Trans. on Robotics, 2025)의 최신 DDP 변형
   - 등식/부등식 제약 처리 (ProxALM 기반)
   - 역방향 패스: 2차 근사 + 피드백 게인 자동 계산
@@ -829,7 +915,7 @@ U-Net 구조:
   → Sobolev 학습에 추가 비용 없이 활용
 </code></pre>
 <h3>7.3 에포크 크기 정의</h3>
-<pre><code>에포크 크기 (데이터 규모 정규화):
+<pre class="codeblock"><code>에포크 크기 (데이터 규모 정규화):
 
 MLP 기반 (직접 정책):
   E = |D| × T: 전체 상태-행동 쌍 수
@@ -842,7 +928,7 @@ MLP 기반 (직접 정책):
      → 비교를 위해 정규화 필요
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 Sobolev 학습의 이론적 기반</h3>
 <p>Pfrommer et al. (2022, NeurIPS) &quot;TaSIL&quot;은 모방 학습에서 Sobolev 도함수 일치의 이론적 기반을 제공한다:</p>
 <ul>
@@ -850,14 +936,14 @@ MLP 기반 (직접 정책):
 <li>1차 도함수만으로도 컴파운딩 오차의 지수적 증폭을 다항식으로 감소</li>
 <li>이론: DAgger 같은 추가 데이터 없이도 복합 오차 저항성 달성 가능</li>
 </ul>
-<pre><code>오차 증폭 모델 (단순화):
+<pre class="codeblock"><code>오차 증폭 모델 (단순화):
 표준 BC: ||x_t - x_t*|| ≤ C · t · ||π - π*||_{0}  (선형 증폭)
 Sobolev: ||x_t - x_t*|| ≤ C · t^{1/2} · ||π - π*||_{1}  (완화된 증폭)
 
 여기서 ||π - π*||_{k}: k차 Sobolev 노름에서의 정책 오차
 </code></pre>
 <h3>8.2 확장 가능성</h3>
-<pre><code>향후 연구 방향:
+<pre class="codeblock"><code>향후 연구 방향:
 
 1. 접촉-풍부 시나리오 (Contact-Rich Scenarios)
    현재: 마찰, 접촉 이벤트 없는 단순 연속 동역학
@@ -881,7 +967,7 @@ Sobolev: ||x_t - x_t*|| ≤ C · t^{1/2} · ||π - π*||_{1}  (완화된 증폭)
    향후: UR5, 쿼드로터 실하드웨어 적용 필요
 </code></pre>
 <h3>8.3 한계점 (Limitations)</h3>
-<pre><code>주요 한계:
+<pre class="codeblock"><code>주요 한계:
 
 1. 시뮬레이션 전용 검증
    실세계 로봇 실험 없음
@@ -901,7 +987,7 @@ Sobolev: ||x_t - x_t*|| ≤ C · t^{1/2} · ||π - π*||_{1}  (완화된 증폭)
    쿼드로터에서 장애물 수가 달라지면 정책 재학습 필요
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 Planner 트랙 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -1074,7 +1160,7 @@ Sobolev: ||x_t - x_t*|| ≤ C · t^{1/2} · ||π - π*||_{1}  (완화된 증폭)
 </li>
 </ol>
 <h3>9.5 실적용 가능성 평가</h3>
-<pre><code>실적용 시나리오별 평가:
+<pre class="codeblock"><code>실적용 시나리오별 평가:
 
 시나리오 1: 산업 로봇팔 반복 작업 (적합)
   - 동일/유사한 초기 설정에서 다양한 목표로 이동
@@ -1099,7 +1185,7 @@ Sobolev: ||x_t - x_t*|| ≤ C · t^{1/2} · ||π - π*||_{1}  (완화된 증폭)
 <p>Sob+Diff는 <strong>학습-최적화 하이브리드(learning-to-optimize)</strong> 패러다임의 중요한 진전을 대표한다. 기존 Planner 트랙 리뷰 논문들이 주로 경로 계획이나 내비게이션에 집중한 것과 달리, Sob+Diff는 <strong>일반 궤적 최적화 문제의 솔버 가속</strong>이라는 더 근본적인 문제를 다룬다.</p>
 <p>TO의 장점(제약 만족, 안전성, 지역 최적)을 유지하면서 학습의 장점(경험 재활용, 빠른 추론)을 결합하는 이 방향은 실시간 로봇 제어의 핵심 병목 중 하나를 해결한다. 향후 실세계 검증과 접촉 동역학으로의 확장이 이루어진다면 상당한 실용적 가치를 가질 것이다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ul>
 <li>Czarnecki et al. (2017, NeurIPS): Sobolev Training for Neural Networks — Sobolev 학습의 원천 논문</li>
 <li>Le Lidec et al. (2023, ICRA): PDDP+S — MLP 정책에 Sobolev 적용 (이 논문의 직접 선행연구)</li>
@@ -1115,16 +1201,111 @@ Sobolev: ||x_t - x_t*|| ≤ C · t^{1/2} · ||π - π*||_{1}  (완화된 증폭)
 <li>Nichol &amp; Dhariwal (2021, ICML): Improved DDPM — square cosine 스케줄러</li>
 </ul>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p>Sobolev-trained Diffusion Policy(Sob+Diff)는 <strong>경사 기반 궤적 최적화(TO)와 확산 정책의 시너지를 1차 피드백 게인 정보로 극대화하는</strong> 혁신적 접근법이다.</p>
 <p>핵심 통찰은 세 가지다:</p>
 <p><strong>1. 피드백 게인은 무료 정보다</strong>: TO 솔버의 역방향 패스에서 추가 계산 없이 얻는 ∂u/∂x는 로컬 동특성을 완전히 기술한다. 이 정보를 정책 학습에 통합하면 복합 오차를 방지할 수 있다.</p>
 <p><strong>2. 단계별 Sobolev 적용이 핵심이다</strong>: 전체 확산 체인에 Sobolev를 적용하면 실패한다. 각 노이즈 단계에서의 단일 스텝 예측에 적용하는 것이 확산 모델의 훈련 원리와 Sobolev 학습을 자연스럽게 결합하는 유일한 방법이다.</p>
 <p><strong>3. 교번 알고리즘으로 어려운 태스크를 부트스트랩한다</strong>: TO 단독으로는 80% 실패하는 이중 역진자를 Sob+Diff 워밍스타트로 해결하고, 그 궤적으로 더 나은 정책을 훈련하는 양방향 강화 루프가 핵심이다.</p>
 <p>기존 Planner 트랙 리뷰 논문들(SANDO, DreamFlow, ViLiNT, UGE-MPC)이 경로 계획·내비게이션에 집중한 것과 달리, Sob+Diff는 <strong>최적 제어 솔버 자체를 가속하는</strong> 더 근본적인 문제를 다룬다. 실세계 검증과 접촉 동역학으로의 확장이 이루어진다면, 산업 로봇팔 사이클 타임 단축, 실시간 드론 제어, 자유도 높은 물체 조작 등에서 실질적 영향을 미칠 수 있는 연구 방향이다.</p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="Sobolev-Trained Diffusion Policies: 궤적 최적화 워밍스타트를 위한 1차 확산 정책 학습 — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>FreqCache: Accelerating Embodied VLN Models with Adaptive Frequency-Guided Token Caching · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2604.24391">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">ICCAD 2026 (IEEE/ACM International Conference on Computer-Aided Design)</div>
-    <h1>FreqCache: Accelerating Embodied VLN Models with Adaptive Frequency-Guided Token Caching</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2604.24391">arXiv:2604.24391</a></span>
-      <span>리뷰 2026-04-29</span>
-      <span>44분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">FreqCache_ICCAD2026</span>
     </div>
+    <h1 class="doc-title">FreqCache: Accelerating Embodied VLN Models with Adaptive Frequency-Guided Token Caching — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">ICCAD 2026 (IEEE/ACM International Conference on Computer-Aided Design)</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2604.24391">2604.24391</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">❌ 미공개 (~5,000줄 PyTorch/CUDA 기술)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">❌ 없음</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-04-29</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">44KB · 약 44분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>FreqCache: Accelerating Embodied VLN Models with Adaptive Frequency-Guided Token Caching — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: FreqCache: Accelerating Embodied VLN Models with Adaptive Frequency-Guided Token Caching</li>
@@ -155,11 +241,11 @@ footer {
 <p>기존 <strong>토큰 캐싱(token caching)</strong> 접근법은 시각적 도메인에서 유사한 토큰을 재사용하지만, VLN의 특수한 조건—<strong>시점 이동(viewpoint migration)</strong>, <strong>엣지 정보 결여</strong>, <strong>장면 복잡도의 시간적 변화</strong>—으로 인해 실패한다. FreqCache는 이 세 가지 핵심 한계를 <strong>주파수 도메인(frequency domain)</strong> 분석으로 해결하고, 단 2.54ms 오버헤드로 <strong>1.59× 추론 가속</strong>을 달성한다.</p>
 <p>핵심 통찰: 로봇 이동으로 발생하는 공간적 이동(spatial shift)은 주파수 도메인에서 <strong>위상 이동(phase shift)</strong>으로 나타나지만 <strong>진폭 스펙트럼(amplitude spectrum)</strong>은 불변(invariant)이다. 이 푸리에 이동 정리(Fourier Shift Theorem) 특성을 활용하면 공간 도메인 유사도 매칭보다 훨씬 강인한 토큰 캐시 결정을 내릴 수 있다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. VLN 모델의 계산 병목 구조</h4>
 <p>VLN-CE(VLN in Continuous Environments) 설정에서 각 추론 스텝의 계산 구조를 분석하면:</p>
-<pre><code>VLN 추론 파이프라인 (InternVLA-N1 7B 기준):
+<pre class="codeblock"><code>VLN 추론 파이프라인 (InternVLA-N1 7B 기준):
 
 현재 프레임 → [이미지 패치 토큰화] → [ViT 인코더] → [VLM 디코더] → 액션 예측
                   ↑                        ↑
@@ -174,7 +260,7 @@ footer {
 <h4>B. 기존 시각 도메인 방법의 세 가지 구조적 한계</h4>
 <p><strong>한계 1: 시점 이동(Viewpoint Migration)</strong></p>
 <p>로봇이 이동하면 동일한 물체가 이미지의 다른 픽셀 위치에 나타난다. 시각 도메인의 위치 기반 유사도 매칭은 이에 취약하다:</p>
-<pre><code>공간 도메인 유사도 (파괴적):
+<pre class="codeblock"><code>공간 도메인 유사도 (파괴적):
 
 t 시점: 벽 코너가 패치 위치 (i=3, j=5)에 존재
 t+1 시점: 로봇 이동 후 같은 코너가 패치 위치 (i=3, j=3)으로 이동
@@ -190,7 +276,7 @@ Sim_spa(p_(3,5)^t, p_(3,5)^(t+1)) → 낮음 (다른 내용)
 <p>단순 시각적 유사도 캐싱을 이동 환경에 적용하면 토큰 재사용률이 대폭 감소(약 19.8%)하여 가속 효과가 거의 없어진다(1.05×).</p>
 <p><strong>한계 2: 엣지 정보 무시(Edge Information Neglect)</strong></p>
 <p>VLN에서 문틀, 장애물 경계, 복도 가장자리는 내비게이션 결정에 핵심적인 정보다. 일반적인 토큰 유사도 메트릭은 부드러운 배경 영역과 날카로운 엣지 영역을 구별하지 못한다:</p>
-<pre><code>엣지 포함 토큰의 위험성:
+<pre class="codeblock"><code>엣지 포함 토큰의 위험성:
 
 배경 토큰: 연속 스텝에서 변화 작음 → 캐시 가능
 엣지 토큰 (문틀/장애물 경계): 내비게이션에서 가장 중요한 정보
@@ -202,7 +288,7 @@ Module II 없이 FreqCache: SR = 58.8 (-4.2), 토큰 재사용률 57.0%로 상�
 </code></pre>
 <p><strong>한계 3: 고정 캐시 예산(Fixed Cache Budget)</strong></p>
 <p>모든 시각 환경을 동일한 재사용률로 처리하는 것은 비효율적이다:</p>
-<pre><code>환경 복잡도별 최적 토큰 재사용률:
+<pre class="codeblock"><code>환경 복잡도별 최적 토큰 재사용률:
 
 단순 복도:
   - 장면 변화 적음, 비슷한 시각 내용 지속
@@ -222,11 +308,11 @@ Module II 없이 FreqCache: SR = 58.8 (-4.2), 토큰 재사용률 57.0%로 상�
 <li><strong>시간 적응형 캐시 예산 (Module III)</strong>: 스펙트럼 엔트로피로 장면 복잡도를 측정하고 동적으로 재사용률 조정</li>
 </ol>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 Module I: 이동 인식 토큰 캐시 설정 (Migration-Aware Token Cache Establishment)</h3>
 <h4>수학적 기반: 푸리에 이동 정리</h4>
 <p>연속된 두 프레임 F_t, F_{t-1} 사이의 시점 이동은 픽셀 공간에서 공간적 이동(Δi, Δj)으로 나타난다. 2D 이산 푸리에 변환(DFT)의 핵심 성질:</p>
-<pre><code>이동 정리 (Shift Theorem):
+<pre class="codeblock"><code>이동 정리 (Shift Theorem):
 f(x - Δx, y - Δy) ↔ e^{-j2π(u·Δx/M + v·Δy/N)} · F(u, v)
 
 결론:
@@ -236,7 +322,7 @@ f(x - Δx, y - Δy) ↔ e^{-j2π(u·Δx/M + v·Δy/N)} · F(u, v)
 <p>따라서, <strong>진폭 스펙트럼의 유사도</strong>는 공간적 이동에 무관하게 장면의 실제 내용 변화만 반영한다.</p>
 <h4>진폭 스펙트럼 기반 유사도 계산</h4>
 <p>각 이미지 패치 p^t_(i,j)에 DFT를 적용:</p>
-<pre><code>복소 DFT 계수:
+<pre class="codeblock"><code>복소 DFT 계수:
 F(u,v) = Σ_x Σ_y f(x,y) · e^{-j2π(ux/M + vy/N)}
        = R(u,v) + jI(u,v)
 
@@ -249,7 +335,7 @@ Sim_freq(t; t+1) = [A^t(u,v) · A^(t-1)(u,v)] / [||A^t(u,v)||₂ · ||A^(t-1)(u,
 </code></pre>
 <h4>이동량 추정 및 정렬 마스크 생성</h4>
 <p>시점 이동 벡터 (Δi, Δj)는 위상 상관관계(Phase Correlation)로 추정:</p>
-<pre><code>위상 상관관계 기반 이동 추정:
+<pre class="codeblock"><code>위상 상관관계 기반 이동 추정:
 
 정규화 위상 스펙트럼:
 C = [F(F_{t-1}) ⊙ F(F_t)*] / |F(F_{t-1}) ⊙ F(F_t)*|
@@ -261,14 +347,14 @@ c = F^{-1}(C)
 (Δi, Δj) = argmax_{(i,j)} c(i,j)
 </code></pre>
 <p>추정된 이동 (Δi, Δj)로 정렬 가능한 영역 R_align을 정의. 이동 후에도 양쪽 프레임에서 보이는 겹치는 영역만 캐시 후보:</p>
-<pre><code>정렬 마스크:
+<pre class="codeblock"><code>정렬 마스크:
            { 1  if (i, j) ∈ R_align (겹치는 영역)
 Mask_align = {
            { 0  otherwise (이동으로 가려진 영역, 강제 갱신)
 </code></pre>
 <p>Mask_align=0인 패치는 새로운 내용이 드러나는 영역이므로 반드시 새로 계산해야 한다.</p>
 <h4>왜 진폭 유사도인가: 공간 도메인과의 비교</h4>
-<pre><code>시각 도메인 유사도 (파괴적):
+<pre class="codeblock"><code>시각 도메인 유사도 (파괴적):
 Sim_spa(t; t+1) = Σ_{i,j} [emb(p^t_{i,j}) · emb(p^{t+1}_{i,j})] 
                            / [||emb(p^t_{i,j})||₂ · ||emb(p^{t+1}_{i,j})||₂]
 
@@ -282,7 +368,7 @@ Sim_spa(t; t+1) = Σ_{i,j} [emb(p^t_{i,j}) · emb(p^{t+1}_{i,j})]
 <p><strong>성능 영향</strong>: Module I 제거 시 토큰 재사용률 53.5% → 19.8% (−33.7%), 스텝 가속도 1.59× → 1.05×으로 급락.</p>
 <h4>위상 상관관계의 정밀도와 부화소(sub-pixel) 한계</h4>
 <p>위상 상관관계는 본질적으로 <strong>정수 화소 단위</strong>의 이동만 정확히 추정한다. argmax 연산이 c(i,j) 격자에서 가장 큰 상관 피크의 정수 좌표를 반환하기 때문이다. 그러나 패치 토큰화 단위(예: 14×14 또는 16×16 픽셀 ViT 패치)에서 토큰 정렬을 다루므로, FreqCache의 관점에서는 부화소 정밀도가 사실상 필요하지 않다는 점이 중요하다:</p>
-<pre><code>정수-화소 vs 패치-단위 정렬:
+<pre class="codeblock"><code>정수-화소 vs 패치-단위 정렬:
 
 원본 해상도 이동 추정: (Δi, Δj) = (7.3, -4.8) 픽셀
 ↓ 패치 그리드(P=14)로 양자화
@@ -294,7 +380,7 @@ Sim_spa(t; t+1) = Σ_{i,j} [emb(p^t_{i,j}) · emb(p^{t+1}_{i,j})]
 <p>이것이 FreqCache가 별도의 부화소 보간(parabolic fitting, ESINC 등)을 도입하지 않는 이유다. 추가 연산 없이 패치 정렬 정확도를 확보하므로 2.54ms 오버헤드 예산 안에 들어온다.</p>
 <h4>정렬 가능 영역 R_align의 기하학적 정의</h4>
 <p>추정된 패치 이동 (Δi, Δj)가 주어지면, 두 프레임에서 동시에 관측되는 겹침 영역은 단순한 사각형 교집합으로 계산된다:</p>
-<pre><code>프레임 패치 그리드: H_p × W_p (예: 24 × 24)
+<pre class="codeblock"><code>프레임 패치 그리드: H_p × W_p (예: 24 × 24)
 
 겹침 영역 (이동 Δi&gt;0, Δj&gt;0 가정):
 R_align = { (i,j) | Δi ≤ i &lt; H_p AND Δj ≤ j &lt; W_p }
@@ -310,7 +396,7 @@ R_align = { (i,j) | Δi ≤ i &lt; H_p AND Δj ≤ j &lt; W_p }
 <h3>3.2 Module II: 엣지 정보 관련 토큰 식별 (Edge-Information-Related Token Identification)</h3>
 <h4>이산 코사인 변환(DCT) 기반 고주파 에너지 계산</h4>
 <p>엣지(경계) 영역은 이미지 신호의 고주파 성분에 대응한다. 블록 단위 DCT를 적용하여 각 패치의 고주파 에너지를 측정:</p>
-<pre><code>패치 크기 P×P에 대한 2D DCT:
+<pre class="codeblock"><code>패치 크기 P×P에 대한 2D DCT:
 D_p(u,v) = (2/P) · C(u)·C(v) · Σ_x Σ_y f(x,y) · cos[πu(2x+1)/2P] · cos[πv(2y+1)/2P]
 
 where C(k) = { 1/√2  if k=0
@@ -326,7 +412,7 @@ E_{i,j} = Σ_u Σ_v [H(u,v) · D_p_{(i,j)}(u,v)]²
 </code></pre>
 <h4>통계 기반 적응적 갱신 마스크</h4>
 <p>단순 임계값이 아닌 프레임 내 통계적 분포를 기반으로 엣지 토큰 식별:</p>
-<pre><code>공간 평균: μ_E = (1/N) · Σ_{i,j} E_{i,j}
+<pre class="codeblock"><code>공간 평균: μ_E = (1/N) · Σ_{i,j} E_{i,j}
 표준 편차: σ_E = sqrt((1/N) · Σ_{i,j} (E_{i,j} - μ_E)²)
 
 엣지 식별 마스크 (강제 갱신):
@@ -336,7 +422,7 @@ where λ = 0.25 (감도 조정 파라미터)
 </code></pre>
 <p>평균 + λ·σ를 넘는 고에너지 패치는 엣지를 포함하는 것으로 판단하고 캐싱 금지.</p>
 <h4>DCT가 엣지 감지에 적합한 이유</h4>
-<pre><code>DCT 직교 기저 함수의 주파수 집중 특성:
+<pre class="codeblock"><code>DCT 직교 기저 함수의 주파수 집중 특성:
 
 부드러운 배경 영역:
   → 저주파 DCT 계수에 에너지 집중
@@ -354,7 +440,7 @@ where λ = 0.25 (감도 조정 파라미터)
 <p><strong>성능 영향</strong>: Module II 제거 시 SR = 63.0 → 58.8 (−4.2 포인트), SPL = 57.2 → 52.3 (−4.9 포인트). 재사용률은 53.5% → 57.0%로 증가하지만 엣지 토큰이 잘못 캐시되어 충돌률 증가.</p>
 <h4>통계적 임계값이 절대 임계값보다 우월한 이유</h4>
 <p>Mask_fresh의 핵심 설계 선택은 절대 임계값(E &gt; θ_fixed)이 아닌 <strong>프레임별 적응 임계값</strong>(μ_E + λ·σ_E)을 사용한다는 점이다. 이는 장면 간 전역 밝기/대비 변화에 강인하다:</p>
-<pre><code>절대 임계값의 실패 시나리오:
+<pre class="codeblock"><code>절대 임계값의 실패 시나리오:
 
 밝고 고대비 장면 (햇빛 든 복도):
   모든 패치의 E가 전반적으로 높음
@@ -372,7 +458,7 @@ where λ = 0.25 (감도 조정 파라미터)
 <p>λ=0.25는 정규분포 가정 하에서 대략 상위 40% 패치를 엣지 후보로 본다는 의미가 아니라(분포가 우편향이므로), 실측적으로 SR-Speedup 균형이 최적인 지점으로 선택되었다(7.3절 민감도 분석 참조).</p>
 <h4>DFT(Module I) vs DCT(Module II) 도구 선택의 직교성</h4>
 <p>FreqCache가 두 모듈에서 서로 다른 변환을 쓰는 것은 우연이 아니라 각 변환의 강점에 맞춘 설계다:</p>
-<pre><code>변환별 역할 분담:
+<pre class="codeblock"><code>변환별 역할 분담:
 
 DFT (Module I): 복소 변환 → 진폭+위상 분리 가능
   ↳ 위상 정보가 이동량 추정에 필수 (위상 상관관계)
@@ -388,14 +474,14 @@ DCT (Module II): 실수 변환 → 위상 불필요, 에너지 집중 우수
 <h3>3.3 Module III: 시간 적응형 캐시 예산 결정 (Temporal Adaptive Cache Budget Determination)</h3>
 <h4>스펙트럼 엔트로피(Spectral Entropy) 기반 장면 복잡도 측정</h4>
 <p>전체 프레임의 FFT를 계산하고 전력 스펙트럼으로 정규화:</p>
-<pre><code>프레임 전력 스펙트럼 정규화:
+<pre class="codeblock"><code>프레임 전력 스펙트럼 정규화:
 P^t(u,v) = A^t(u,v)² / Σ_{u,v} A^t(u,v)²
 
 스펙트럼 엔트로피 (Shannon Entropy 유사):
 Ψ^t = -Σ_{u,v} P^t(u,v) · log(P^t(u,v))
 </code></pre>
 <p>장면 복잡도와 엔트로피의 관계:</p>
-<pre><code>단순 복도 (단조로운 벽, 적은 세부 사항):
+<pre class="codeblock"><code>단순 복도 (단조로운 벽, 적은 세부 사항):
   → 저주파 성분 우세, 에너지 집중
   → 낮은 Ψ^t (엔트로피 낮음 = 정보 집중)
 
@@ -404,7 +490,7 @@ P^t(u,v) = A^t(u,v)² / Σ_{u,v} A^t(u,v)²
   → 높은 Ψ^t (엔트로피 높음 = 정보 분산)
 </code></pre>
 <h4>동적 재사용 비율 계산 (지수 감쇠 매핑)</h4>
-<pre><code>적응형 재사용 비율:
+<pre class="codeblock"><code>적응형 재사용 비율:
 α_t = α_min + (α_max - α_min) · e^{-Ψ^t}
 
 재사용 토큰 수:
@@ -418,7 +504,7 @@ K_reuse = ⌊α_t × N⌋
 <p><strong>성능 영향</strong>: Module III 제거 시 SR −0.7, SPL −0.9, 스텝 가속 −0.07×. 다른 두 모듈에 비해 영향이 작지만, 복잡 환경에서는 여전히 의미 있는 차이.</p>
 <hr>
 <h3>3.4 통합 알고리즘: FreqCache (Algorithm 1)</h3>
-<pre><code>입력: 프레임 F_{t-1}, F_t; 총 토큰 수 N; 임계값 {τ_mig, λ}
+<pre class="codeblock"><code>입력: 프레임 F_{t-1}, F_t; 총 토큰 수 N; 임계값 {τ_mig, λ}
 
 1단계: 이동 인식 마스크 생성 (Module I)
   - FFT(F_{t-1}), FFT(F_t) 계산
@@ -452,9 +538,9 @@ K_reuse = ⌊α_t × N⌋
 </code></pre>
 <p>전체 오버헤드: 2.54ms/스텝 (GPU CuFFT 라이브러리 활용, CUDA 코어에서 병렬 처리).</p>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <h3>4.1 전체 파이프라인</h3>
-<pre><code>입력: 현재 프레임 F_t, 이전 프레임 F_{t-1}
+<pre class="diagram"><code>입력: 현재 프레임 F_t, 이전 프레임 F_{t-1}
       언어 지시문 i, 내비게이션 히스토리 H
 
                           ┌─────────────────────────────────────────┐
@@ -490,7 +576,7 @@ F_t (선택적 토큰) ───────▶│  패치 토큰화            
 </code></pre>
 <h3>4.2 GPU 하드웨어 매핑</h3>
 <p>NVIDIA A100 GPU의 이기종 처리 코어를 활용한 병렬 실행:</p>
-<pre><code>NVIDIA A100 GPU 처리 구조:
+<pre class="diagram"><code>NVIDIA A100 GPU 처리 구조:
 
 ┌─────────────────────────────────────────────────────────────┐
 │                    NVIDIA A100 GPU (40GB)                    │
@@ -509,7 +595,7 @@ F_t (선택적 토큰) ───────▶│  패치 토큰화            
 │  CuFFT 오버헤드: 2.54ms/스텝 (텐서 코어 추론과 병렬)        │
 └─────────────────────────────────────────────────────────────┘
 </code></pre>
-<pre><code>병렬 실행 타임라인:
+<pre class="diagram"><code>병렬 실행 타임라인:
 
 스텝 t:
 VLN 추론    ├──────────────────────────────────────────────────┤ 637ms
@@ -521,7 +607,7 @@ FreqCache   ├──┤ 2.54ms
 </code></pre>
 <p>구현: ~5,000줄 PyTorch/CUDA 코드, CuFFT 라이브러리 사용.</p>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
 <ul>
 <li><strong>R2R (Room-to-Room)</strong>: 가장 널리 사용되는 VLN 벤치마크<ul>
@@ -671,7 +757,7 @@ FreqCache   ├──┤ 2.54ms
 </ul>
 <h4>효율 결과의 산술적 일관성 검증</h4>
 <p>논문 수치의 내부 정합성을 직접 확인하면:</p>
-<pre><code>FreqCache 레이턴시 분해:
+<pre class="codeblock"><code>FreqCache 레이턴시 분해:
   순수 VLN 추론 (캐시 없음): 637 ms
   FreqCache 오버헤드: 2.54 ms
   캐시로 절감된 시간: 637 - 401 + 2.54 ≈ 238.5 ms
@@ -734,7 +820,7 @@ FreqCache   ├──┤ 2.54ms
 <p>논문에서는 리얼월드 로봇 실험을 명시적으로 기술하지 않는다. 모든 실험은 VLN-CE 연속 환경 시뮬레이터(Matterport3D 기반)에서 수행되었으며, ICCAD 2026의 특성상 주요 기여는 하드웨어 가속 관점에 집중한다.</p>
 <p><strong>ICCAD 타겟 기여</strong>: 컴퓨터 지원 설계 및 하드웨어-소프트웨어 공동 최적화 관점에서의 AI 가속 솔루션.</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>기여 1: 주파수 도메인 이동 불변성의 VLN 적용 첫 체계적 분석</h3>
 <p>VLN에서 시점 이동이 토큰 캐싱에 미치는 영향을 처음으로 이론적으로 분석하고, 푸리에 이동 정리를 통해 주파수 도메인이 공간 도메인보다 우월함을 증명. 구체적으로:</p>
 <ul>
@@ -752,7 +838,7 @@ FreqCache   ├──┤ 2.54ms
 <h3>기여 3: 하드웨어 최적화 GPU 구현</h3>
 <p>A100 GPU에서 텐서 코어(VLN 추론)와 CUDA 코어(주파수 처리)를 동시에 활용하는 3-프로세스 병렬 아키텍처. 2.54ms/스텝이라는 극소 오버헤드로 1.59× 가속 달성. ~5,000줄 PyTorch/CUDA 코드로 산업 수준의 구현 완성도 보여줌.</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 핵심 하이퍼파라미터</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -799,7 +885,7 @@ FreqCache   ├──┤ 2.54ms
 </tr>
 </tbody></table></div>
 <h3>7.2 모델 아키텍처 상세</h3>
-<pre><code>InternVLA-N1 (기반 모델):
+<pre class="codeblock"><code>InternVLA-N1 (기반 모델):
 - 파라미터: 7B
 - 언어 백본: Qwen2.5-VL
 - 비전 인코더: 패치 기반 ViT (패치 수 N ≈ 576-1024)
@@ -813,7 +899,7 @@ FreqCache 적용 포인트:
 </code></pre>
 <h3>7.3 민감도 분석</h3>
 <p>논문 Figure 8 (민감도 분석):</p>
-<pre><code>λ (엣지 감도) 민감도:
+<pre class="codeblock"><code>λ (엣지 감도) 민감도:
 λ = 0.10: SR=61.2, SPL=55.8, Speedup=1.72×
 λ = 0.25: SR=63.0, SPL=57.2, Speedup=1.59× ← 선택
 λ = 0.50: SR=62.8, SPL=56.4, Speedup=1.43×
@@ -826,10 +912,10 @@ FreqCache 적용 포인트:
 → 0.50 이상에서 정확도 저하 시작
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 주파수 도메인 접근의 이론적 한계</h3>
 <p><strong>가정의 제한성</strong>: 푸리에 이동 정리는 순수한 평행 이동(translational motion)을 가정한다. 실제 로봇 이동에서는:</p>
-<pre><code>실제 시점 변화의 복잡성:
+<pre class="codeblock"><code>실제 시점 변화의 복잡성:
 - 평행 이동 (Δx, Δy): 이동 정리로 처리 가능
 - 회전 (Δθ): 주파수 도메인에서 진폭 스펙트럼도 변화 → 부정확
 - 스케일 변화 (줌인/아웃): 주파수 스케일링 → 진폭 변화
@@ -843,7 +929,7 @@ FreqCache의 대응:
 <h3>8.2 확장성 및 일반화</h3>
 <p><strong>다른 VLN 모델로의 확장</strong>:
 FreqCache는 모델 아키텍처에 독립적인 훈련 불필요(training-free) 방법이다. 패치 토큰화를 사용하는 임의의 VLN 모델에 적용 가능. 단, 비전 인코더가 패치 임베딩 단계에서 병목이어야 효과적.</p>
-<pre><code>FreqCache 효과의 전제 조건:
+<pre class="codeblock"><code>FreqCache 효과의 전제 조건:
 
 조건 1: 패치 기반 비전 토큰화 (ViT 계열)
   → 토큰 단위 캐시 결정이 가능해야 함
@@ -861,7 +947,7 @@ FreqCache는 모델 아키텍처에 독립적인 훈련 불필요(training-free)
 <p><strong>VLN 이외 비디오 이해 태스크</strong>: 스트리밍 비디오 처리 전반에 적용 가능성. 단, VLN 특유의 &quot;이동 중 환경 변화&quot;가 가장 핵심 가정이므로 정적 카메라 영상에는 이점 감소.</p>
 <h3>8.2.1 ICCAD 관점에서의 하드웨어-소프트웨어 공동 설계 의의</h3>
 <p>이 논문이 ICRA/IROS가 아닌 ICCAD(컴퓨터 지원 설계)를 타겟으로 한 점은 기여의 성격을 규정한다. 핵심은 <strong>알고리즘이 GPU 마이크로아키텍처에 맞춰 설계되었다</strong>는 것이다:</p>
-<pre><code>하드웨어 인식 설계 결정:
+<pre class="codeblock"><code>하드웨어 인식 설계 결정:
 
 1) 텐서 코어와 CUDA 코어의 작업 분리
    - 텐서 코어: 행렬 곱(VLN 추론) — 이 코어의 특기
@@ -889,7 +975,7 @@ FreqCache는 모델 아키텍처에 독립적인 훈련 불필요(training-free)
 <li><strong>동적 물체</strong>: 움직이는 사람/로봇이 있는 환경에서의 캐싱 안전성 미검증.</li>
 </ol>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -982,7 +1068,7 @@ FreqCache는 모델 아키텍처에 독립적인 훈련 불필요(training-free)
 </li>
 </ol>
 <h3>9.3 실적용 가능성 평가</h3>
-<pre><code>실용성 점수표 (LiveVLN 기준):
+<pre class="codeblock"><code>실용성 점수표 (LiveVLN 기준):
 
 기준                    | LiveVLN | FreqCache | 판단
 ----------------------|---------|-----------|------
@@ -995,7 +1081,7 @@ FreqCache는 모델 아키텍처에 독립적인 훈련 불필요(training-free)
 </code></pre>
 <p>FreqCache는 토큰 레벨 연산 최적화에서 명확한 기여를 하지만, 실제 배포 관점에서는 LiveVLN(비동기 실행)과 상호 보완적이다. 이상적으로는 두 방법을 결합—FreqCache로 각 추론 스텝을 가속하고, LiveVLN으로 stop-and-go를 제거—하면 더 큰 시너지를 낼 수 있다.</p>
 <p><strong>세 가지 가속 패러다임의 직교성 정리</strong>: 본 트랙에서 리뷰된 효율화 논문들은 파이프라인의 서로 다른 층위를 공략하므로 원리적으로 중첩 적용이 가능하다:</p>
-<pre><code>VLN 추론 가속의 3층 구조와 각 방법의 위치:
+<pre class="diagram"><code>VLN 추론 가속의 3층 구조와 각 방법의 위치:
 
 [입력 토큰화 층]  ──► FreqCache: 비전 토큰 캐싱 (이 논문)
 [LLM 디코더 층]   ──► StreamVLN: SlowFast KV-cache
@@ -1013,7 +1099,7 @@ FreqCache는 모델 아키텍처에 독립적인 훈련 불필요(training-free)
 <li><strong>Training-Free 효율화</strong>: 파인튜닝 없이 기존 모델을 가속하는 방향은 실용적이고, 빠르게 발전하는 VLN 모델 생태계에서 지속적 가치를 가짐.</li>
 </ol>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li><strong>VLN-Cache</strong> (2603.07080v2): VLN 모델을 위한 시각적 토큰 캐싱 선행 연구 — 공간 도메인 방법의 한계를 처음 노출한 작업</li>
 <li><strong>InternVLA-N1</strong>: FreqCache 실험 대상 7B VLN 모델 (Qwen2.5-VL 기반)</li>
@@ -1029,7 +1115,7 @@ FreqCache는 모델 아키텍처에 독립적인 훈련 불필요(training-free)
 <li><strong>Uni-NaVid, MiniVLN</strong>: VLN 아키텍처 경량화 관련 연구</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>혁신성 평가</h3>
 <p>FreqCache는 VLN 모델 가속이라는 실용적 문제를 주파수 도메인 분석이라는 이론적으로 탄탄한 방법으로 해결한다는 점에서 혁신적이다. 특히:</p>
 <ul>
@@ -1049,9 +1135,104 @@ FreqCache는 모델 아키텍처에 독립적인 훈련 불필요(training-free)
 <li><strong>에지 디바이스 최적화</strong>: A100 GPU 외 NVIDIA Jetson, 모바일 NPU에서의 성능 프로파일링</li>
 <li><strong>동적 환경</strong>: 움직이는 물체가 있는 환경에서의 주파수 도메인 캐싱 안전성 연구</li>
 </ol>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="FreqCache: Accelerating Embodied VLN Models with Adaptive Frequency-Guided Token Caching — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

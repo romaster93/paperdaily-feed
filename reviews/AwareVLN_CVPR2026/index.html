@@ -6,133 +6,222 @@
 <meta name="color-scheme" content="light dark">
 <title>AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2605.22816">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">CVPR 2026</div>
-    <h1>AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2605.22816">arXiv:2605.22816</a></span>
-      <span>리뷰 2026-05-23</span>
-      <span>52분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">AwareVLN_CVPR2026</span>
     </div>
+    <h1 class="doc-title">AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">CVPR 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2605.22816">2605.22816</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">✅ <a href="https://github.com/GWxuan/AwareVLN">GWxuan/AwareVLN</a> (Apache-2.0)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">✅ <a href="https://gwxuan.github.io/AwareVLN/">gwxuan.github.io/AwareVLN</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-05-23</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">48KB · 약 52분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 14개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-11"><span class="toc-num">12</span><span class="toc-title">심화 분석: VLN 추론 패러다임 변천사 (Deep Analysis: Reasoning Paradigm Evolution)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-12"><span class="toc-num">13</span><span class="toc-title">코드 분석 (Code Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-13"><span class="toc-num">14</span><span class="toc-title">기술적 제언 및 미래 전망 (Technical Recommendations)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation</li>
@@ -153,7 +242,7 @@ footer {
 <h3>1.2 연구 목표 (Research Objective)</h3>
 <p>AwareVLN은 <strong>자기인식(Self-awareness)을 갖춘 Vision-Language Navigation</strong> 에이전트를 구현하는 연구다. 기존 최신 VLN 방법들이 VLM(Vision-Language Model)의 end-to-end 행동 예측 능력에 의존하면서도, 에이전트 자신의 상태, 지시 이행 진행도, 그리고 씬과의 관계를 명시적으로 이해하지 못한다는 핵심 문제를 해결한다.</p>
 <p>핵심 연구 질문:</p>
-<pre><code>&quot;VLN 에이전트가 내비게이션 과정에서 자신이 어디에 있는지,
+<pre class="codeblock"><code>&quot;VLN 에이전트가 내비게이션 과정에서 자신이 어디에 있는지,
  지시의 어느 부분을 이행했는지, 다음에 무엇을 해야 하는지를
  명시적·구조적으로 추론할 수 있다면 성능이 어떻게 향상되는가?&quot;
 </code></pre>
@@ -181,11 +270,11 @@ footer {
 <p><img src="figures/fig_01_01.jpeg" alt="AwareVLN Overview" loading="lazy">
 <em>Fig.1 AwareVLN의 전체 프레임워크. 왼쪽: 자기인식 추론 모듈; 오른쪽: 자동 데이터 엔진.</em></p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. VLM 기반 VLN의 블랙박스 문제</h4>
 <p>최근 NaVILA, NaVid, StreamVLN 등의 방법은 Video-LLM 또는 VLA 모델을 VLN에 적용하여 인상적인 성능을 보였다. 그러나 이 접근법들은 구조적인 약점을 공유한다:</p>
-<pre><code>[현재 VLM 기반 VLN의 내부 작동 방식 (추정)]
+<pre class="diagram"><code>[현재 VLM 기반 VLN의 내부 작동 방식 (추정)]
 
 관측 O_t ──┐
 지시 I    ──┼──► VLM ──► 행동 a_t
@@ -205,7 +294,7 @@ footer {
 </code></pre>
 <h4>B. 기존 추론 증강 VLN의 비효율</h4>
 <p>추론(reasoning)을 VLN에 통합하려는 시도(Nav-R1, Chain-of-Thought Navigation)가 있었지만 다른 문제를 일으켰다:</p>
-<pre><code>[기존 추론 통합 방식의 문제]
+<pre class="codeblock"><code>[기존 추론 통합 방식의 문제]
 
 방식 1: 매 스텝마다 추론 수행 (Dense Reasoning)
   - 비용: 모든 스텝에서 긴 reasoning chain 생성
@@ -222,7 +311,7 @@ AwareVLN의 해결:
 </code></pre>
 <h4>C. 추론 감독 데이터의 부재</h4>
 <p>구조적 자기인식 추론을 학습시키려면 고품질 supervision 데이터가 필요하다. 그러나:</p>
-<pre><code>[추론 감독 데이터 확보의 어려움]
+<pre class="codeblock"><code>[추론 감독 데이터 확보의 어려움]
 
 인간 어노테이션:
   - R2R 전체 에피소드 (~22,000개) 주석 비용: 매우 높음
@@ -239,7 +328,7 @@ AwareVLN 해결책:
 </code></pre>
 <h3>2.2 핵심 해결책</h3>
 <p>AwareVLN의 세 가지 핵심 혁신:</p>
-<pre><code>[AwareVLN의 혁신 요소 3가지]
+<pre class="codeblock"><code>[AwareVLN의 혁신 요소 3가지]
 
 혁신 1: 구조적 추론 모듈 (Structural Reasoning Module)
   내비게이션의 핵심 &quot;Key Node&quot;에서만 추론 수행
@@ -254,12 +343,12 @@ AwareVLN 해결책:
   DAgger 스타일 궤적 수집으로 현실적 오류/교정 패턴 포함
 </code></pre>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 통합 Reason-Act 프레임워크 (Unified Reason-Act Framework)</h3>
 <p><img src="figures/page-02.jpeg" alt="AwareVLN Architecture" loading="lazy">
 <em>Fig.2 통합 Reason-Act 프레임워크의 상세 구조. [REASON]과 [ACT] 모드의 동적 전환.</em></p>
 <p>AwareVLN의 핵심 아이디어는 단일 VLM 모델이 <strong>추론 모드</strong>와 <strong>행동 모드</strong>를 동적으로 전환하는 것이다. 이 전환은 학습된 결정 로짓(decision logit)에 의해 제어된다:</p>
-<pre><code>[통합 정책 수식]
+<pre class="codeblock"><code>[통합 정책 수식]
 
 입력:
   I       = 언어 지시 (토크나이징된 시퀀스)
@@ -287,7 +376,7 @@ AwareVLN 해결책:
   D = [ACT]     otherwise
 </code></pre>
 <p><strong>상대 스텝 융합의 의미</strong>: 단순히 최근 추론 텍스트 R을 입력으로 넣는 것이 아니라, 그 추론이 얼마나 오래된 것인지(t - t_prev 스텝 전)를 함께 인코딩한다. 이는 에이전트가 추론의 &quot;신선도&quot;를 고려하여 새 추론이 필요한지 판단할 수 있게 한다.</p>
-<pre><code>[상대 스텝 융합 효과 예시]
+<pre class="codeblock"><code>[상대 스텝 융합 효과 예시]
 
 t_prev = 5, t = 5 (방금 추론):
   R&#39; = &quot;서재를 지나 부엌 방향으로 이동 중&quot; ⊕ &quot;0스텝 전&quot;
@@ -299,7 +388,7 @@ t_prev = 5, t = 12 (7스텝 지남):
 </code></pre>
 <h3>3.2 구조적 추론 모듈 (Structural Reasoning Module)</h3>
 <p>[REASON] 모드가 트리거되면, 에이전트는 <strong>삼중 구조(Triplet)</strong> 형태의 추론 출력을 생성한다:</p>
-<pre><code>[삼중 구조 추론 출력 형식]
+<pre class="codeblock"><code>[삼중 구조 추론 출력 형식]
 
 차원 1 — 씬 설명 (Scene Description):
   &quot;현재 위치: 거실 소파 앞. 전방에 책상이 보이고, 왼쪽에 계단이 있음.
@@ -326,7 +415,7 @@ t_prev = 5, t = 12 (7스텝 지남):
 <p>이 삼중 구조는 인간의 내비게이션 인지 과정을 모방한 것으로 해석할 수 있다: 인간도 낯선 장소를 탐색할 때 &quot;지금 어디 있지?&quot; → &quot;지시의 어느 단계지?&quot; → &quot;다음에 어디로 가지?&quot;의 순서로 사고한다.</p>
 <h3>3.3 Key Node 감지 (Key Node Detection)</h3>
 <p>AwareVLN이 추론을 <strong>선택적으로</strong> 수행하는 핵심 메커니즘은 3종류의 Key Node 자동 감지다:</p>
-<pre><code>[3종류 Key Node 정의]
+<pre class="codeblock"><code>[3종류 Key Node 정의]
 
 Key Node 유형 1: Subtask Completion (서브태스크 완료)
   정의: 방 수준의 의미론적 전환 발생
@@ -355,7 +444,7 @@ Key Node 유형 3: Stopping Error (정지 오류)
   의의: 최종 조정이 필요한 시점 → 추론으로 정밀 정지
 </code></pre>
 <p>Key Node 감지 빈도 통계 (R2R 훈련 세트 기준):</p>
-<pre><code>[Key Node 발생 통계]
+<pre class="codeblock"><code>[Key Node 발생 통계]
 
 전체 스텝 중 Key Node 비율: ~23%
   - Subtask Completion: ~12%
@@ -376,7 +465,7 @@ Key Node 유형 3: Stopping Error (정지 오류)
 <p><img src="figures/page-03.jpeg" alt="Data Engine" loading="lazy">
 <em>Fig.3 자동 데이터 엔진의 파이프라인. Key Node 감지 → 멀티뷰 컨텍스트 수집 → VLM 감독 생성.</em></p>
 <p>추론 감독 데이터를 수동 어노테이션 없이 자동 생성하는 파이프라인이다:</p>
-<pre><code>[자동 데이터 엔진 파이프라인]
+<pre class="codeblock"><code>[자동 데이터 엔진 파이프라인]
 
 단계 1: Key Node 식별
   훈련 데이터의 각 에피소드에서 3종류 Key Node 위치 자동 감지
@@ -402,7 +491,7 @@ Key Node 유형 3: Stopping Error (정지 오류)
   → &quot;오류 후 회복&quot; 추론 패턴 학습 가능
 </code></pre>
 <p>DAgger 기반 수집의 중요성:</p>
-<pre><code>[DAgger 스타일 수집의 효과]
+<pre class="codeblock"><code>[DAgger 스타일 수집의 효과]
 
 참조 궤적만 사용 (Oracle Trajectory):
   장점: 항상 최적 경로에서의 추론 데이터
@@ -418,7 +507,7 @@ DAgger 추가 수집:
   DAgger = 비상 상황 대응 훈련 포함
 </code></pre>
 <h3>3.5 학습 전략 (Training Strategy)</h3>
-<pre><code>[AwareVLN 학습 파이프라인]
+<pre class="codeblock"><code>[AwareVLN 학습 파이프라인]
 
 기반 모델: NaVILA (navila-llama3-8b-8f)
   LLaMA-3 8B 기반, 8프레임 비전 입력
@@ -442,8 +531,8 @@ DAgger 추가 수집:
   추론 하드웨어: NVIDIA RTX 4090, ~1 FPS
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>[AwareVLN 전체 파이프라인]
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>[AwareVLN 전체 파이프라인]
 
 입력 레이어:
 ┌─────────────────────────────────────────────────────────────────┐
@@ -518,7 +607,7 @@ Key Node 감지 (별도 프로세스):
 <li>t+1 관측 획득</li>
 </ol>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -833,10 +922,10 @@ Key Node 감지 (별도 프로세스):
 </ul>
 <p><strong>실세계 한계</strong>: 드문 경우 3D 환경 지각 부정확 (문에 충돌, 목표 지점 초과) — 단안 깊이 추정의 한계</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>기여 1: 자기인식 기반 VLN 프레임워크</h3>
 <p>AwareVLN은 VLN 에이전트가 <strong>자신의 상태를 명시적으로 인식하는</strong> 최초의 실용적 프레임워크다. 기존 방법들이 에이전트-씬-지시의 관계를 암묵적(implicit) 임베딩으로만 처리했다면, AwareVLN은 이를 명시적 텍스트 추론으로 외현화(externalize)한다.</p>
-<pre><code>[명시적 자기인식의 구체적 가치]
+<pre class="codeblock"><code>[명시적 자기인식의 구체적 가치]
 
 기존 방법 (암묵적):
   hidden state h_t → 행동 a_t
@@ -856,9 +945,9 @@ AwareVLN (명시적):
 <h3>기여 4: 단안 RGB만으로 SOTA 달성</h3>
 <p>Depth + Odometry에 의존하는 기존 최고 방법들(ETPNav, BEVBert)을 단안 RGB만으로 능가한다. 이는 저비용 로봇 플랫폼 배포 가능성을 크게 높인다.</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 모델 아키텍처</h3>
-<pre><code>[주요 하이퍼파라미터]
+<pre class="codeblock"><code>[주요 하이퍼파라미터]
 
 기반 모델:       NaVILA (navila-llama3-8b-8f)
 언어 모델:       LLaMA-3 8B
@@ -870,7 +959,7 @@ AwareVLN (명시적):
 특수 토큰:       [REASON], [ACT]
 </code></pre>
 <h3>7.2 학습 설정</h3>
-<pre><code>[학습 설정]
+<pre class="codeblock"><code>[학습 설정]
 
 사전학습:        NaVILA 프로토콜 (내비게이션 + VQA 데이터)
 파인튜닝:        추론 감독 데이터 + 인간 비디오
@@ -881,7 +970,7 @@ AwareVLN (명시적):
 평가 저장 경로:  evaluation/eval_awarevln/&lt;CKPT_NAME&gt;/
 </code></pre>
 <h3>7.3 데이터 파이프라인</h3>
-<pre><code>[자동 데이터 엔진 파이프라인 상세]
+<pre class="codeblock"><code>[자동 데이터 엔진 파이프라인 상세]
 
 1. Key Node 탐지:
    - Subtask: 씬 그래프 레이블 변화 감지
@@ -902,7 +991,7 @@ AwareVLN (명시적):
    - 생성된 궤적의 Key Node에 동일 파이프라인 적용
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 분석</h3>
 <p><strong>다른 VLN 프레임워크로의 전이</strong>:</p>
 <p>AwareVLN의 핵심 구성요소(Key Node 감지, 삼중 구조 추론, 자동 데이터 엔진)는 원칙적으로 다른 VLM 기반 VLN 방법에도 적용 가능하다. NaVILA를 기반 모델로 사용했지만, 동일한 방법론을 StreamVLN, NavDP 등에도 적용할 수 있다.</p>
@@ -930,7 +1019,7 @@ AwareVLN (명시적):
 <p><strong>한계 4: 훈련 데이터 의존성</strong></p>
 <p>Qwen-VL-Max를 사용한 자동 데이터 엔진은 상용 API에 의존한다. 오픈소스 환경에서 재현하려면 대체 VLM이 필요하며, 품질 차이가 발생할 수 있다.</p>
 <h3>8.3 향후 연구 방향</h3>
-<pre><code>[향후 연구 방향]
+<pre class="codeblock"><code>[향후 연구 방향]
 
 방향 1: 연속 행동 공간으로 확장
   현재: 이산 행동 (Forward/Turn/Stop)
@@ -953,7 +1042,7 @@ AwareVLN (명시적):
   추론 모듈의 컨텍스트로 활용
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -1078,7 +1167,7 @@ AwareVLN (명시적):
 <li>사람이 있는 환경(HA-VLNCE) 미처리</li>
 </ul>
 <p><strong>배포 권장사항</strong>:</p>
-<pre><code>추천 환경: 정적 실내 환경 (가정, 사무실, 복도)
+<pre class="codeblock"><code>추천 환경: 정적 실내 환경 (가정, 사무실, 복도)
 추천 플랫폼: RGB 카메라 탑재 모바일 로봇
 RTX 4090 이상 GPU 권장 (실시간 추론)
 주의: 동적 인간, 실외, 빠른 이동 환경에서 성능 미검증
@@ -1093,7 +1182,7 @@ RTX 4090 이상 GPU 권장 (실시간 추론)
 </ol>
 <p>중장기 관점에서, 추론 증강 VLN은 자율 내비게이션의 신뢰성과 설명 가능성을 동시에 향상시킬 수 있는 유망한 방향이다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li>Anderson et al. (2018). Vision-and-language navigation: Interpreting visually-grounded navigation instructions in real environments. CVPR 2018.</li>
 <li>Krantz et al. (2020). Beyond the nav-graph: Vision-and-language navigation in continuous environments. ECCV 2020.</li>
@@ -1109,7 +1198,7 @@ RTX 4090 이상 GPU 권장 (실시간 추론)
 <li>Brody et al. (2022). How attentive are graph attention networks? ICLR 2022.</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>혁신성 평가</h3>
 <p>AwareVLN은 VLN 분야에서 두 가지 혁신적 기여를 통해 CVPR 2026에 채택된 수작이다.</p>
 <p>첫째, <strong>명시적 자기인식 추론(Explicit Self-Awareness Reasoning)</strong> 패러다임을 VLN에 도입했다. 에이전트가 씬-진행도-계획을 삼중 구조로 추론하는 방식은 기존 블랙박스 end-to-end 접근법과 근본적으로 다르다. 이를 통해 내비게이션 성능 향상뿐 아니라 설명 가능성이라는 부가 가치도 얻었다.</p>
@@ -1118,7 +1207,7 @@ RTX 4090 이상 GPU 권장 (실시간 추론)
 <p>단안 RGB만으로 R2R 65.4%, 실세계 67-100% SR을 달성한다는 것은 저비용 로봇 플랫폼 배포를 위한 중요한 이정표다. Depth 센서 없이 이 수준의 성능을 내는 것은 실용적 VLN 시스템 구축 비용을 크게 낮춘다.</p>
 <h3>향후 연구 방향</h3>
 <p>가장 중요한 과제는 <strong>동적 환경 처리</strong>와 <strong>실세계 대규모 검증</strong>이다. HCSG가 해결한 동적 인간 회피, TravExplorer가 해결한 다층 탐색 등을 AwareVLN의 자기인식 추론과 통합한다면, 더욱 강인한 실세계 VLN 시스템이 가능할 것이다.</p>
-<pre><code>[AwareVLN 종합 평가]
+<pre class="codeblock"><code>[AwareVLN 종합 평가]
 
 혁신성:          ⭐⭐⭐⭐⭐ (자기인식 추론 패러다임 최초 도입)
 기술 완성도:     ⭐⭐⭐⭐   (체계적 방법론, 충분한 어블레이션)
@@ -1128,9 +1217,9 @@ RTX 4090 이상 GPU 권장 (실시간 추론)
 종합:            Excellent — CVPR 2026 Best Paper 후보급
 </code></pre>
 <hr>
-<h2>12. 심화 분석: VLN 추론 패러다임 변천사 (Deep Analysis: Reasoning Paradigm Evolution)</h2>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div><h2 id="sec-11" data-label="12. 심화 분석: VLN 추론 패러다임 변천사">12. 심화 분석: VLN 추론 패러다임 변천사 (Deep Analysis: Reasoning Paradigm Evolution)</h2>
 <h3>12.1 VLN 방법론의 역사적 흐름</h3>
-<pre><code>[VLN 방법론 발전 계보]
+<pre class="codeblock"><code>[VLN 방법론 발전 계보]
 
 1세대 (2018-2021): 순환 신경망 기반
   R2R (Anderson 2018): LSTM + 어텐션
@@ -1156,7 +1245,7 @@ RTX 4090 이상 GPU 권장 (실시간 추론)
   방향: 설명 가능 + 고성능 + 저비용 센서 동시 달성
 </code></pre>
 <h3>12.2 AwareVLN의 추론 vs 다른 추론 방식</h3>
-<pre><code>[VLN 추론 방식 비교]
+<pre class="codeblock"><code>[VLN 추론 방식 비교]
 
 방식 1: Chain-of-Thought (CoT) VLN
   매 스텝: &quot;현재 씬은... 다음 행동은...&quot; 식의 자유형 추론
@@ -1179,7 +1268,7 @@ RTX 4090 이상 GPU 권장 (실시간 추론)
 </code></pre>
 <h3>12.3 자기인식(Self-Awareness)의 신경과학적 관점</h3>
 <p>AwareVLN의 &quot;자기인식&quot; 개념은 신경과학의 메타인지(metacognition) 이론과 연결된다:</p>
-<pre><code>[메타인지 이론과 AwareVLN의 대응]
+<pre class="codeblock"><code>[메타인지 이론과 AwareVLN의 대응]
 
 인간 내비게이션의 메타인지:
   1. 공간 자기인식: &quot;나는 지금 X 위치에 있다&quot;
@@ -1202,7 +1291,7 @@ AwareVLN이 이 세 가지를 명시화함으로써 에이전트의 &quot;인지
 </code></pre>
 <h3>12.4 프로그레스 평가 모듈의 상세 작동 원리</h3>
 <p>AwareVLN의 진행도 평가는 단순한 &quot;완료/미완료&quot; 이진 판단이 아니라 세분화된 평가를 수행한다:</p>
-<pre><code>[진행도 평가 세부 메커니즘]
+<pre class="codeblock"><code>[진행도 평가 세부 메커니즘]
 
 입력:
   - 언어 지시 I: &quot;서재를 통과해, 부엌으로 가서 싱크대 앞에 멈춰라&quot;
@@ -1224,7 +1313,7 @@ AwareVLN이 이 세 가지를 명시화함으로써 에이전트의 &quot;인지
   &quot;①②는 완료됐으니 ③만 해결하면 됨&quot; → 정지 결정 가속
 </code></pre>
 <h3>12.5 AwareVLN과 기존 계획 기반 VLN의 통합 가능성</h3>
-<pre><code>[AwareVLN + 씬 그래프 계획 하이브리드]
+<pre class="codeblock"><code>[AwareVLN + 씬 그래프 계획 하이브리드]
 
 현재 AwareVLN:
   단안 RGB → 추론 → 이산 행동
@@ -1245,10 +1334,10 @@ AwareVLN이 이 세 가지를 명시화함으로써 에이전트의 &quot;인지
   + NavDP의 확산 정책 → 연속 행동 공간 VLN
 </code></pre>
 <hr>
-<h2>13. 코드 분석 (Code Analysis)</h2>
+<div class="secnav"><a href="#sec-9">← 10. 참고 문헌</a><a href="#sec-11">12. 심화 분석: VLN 추론 패러다임 변천사 →</a></div><h2 id="sec-12" data-label="13. 코드 분석">13. 코드 분석 (Code Analysis)</h2>
 <p>GitHub(<a href="https://github.com/GWxuan/AwareVLN)%EC%97%90">https://github.com/GWxuan/AwareVLN)에</a> 공개된 코드의 구조 분석:</p>
 <h3>13.1 레포지토리 구조</h3>
-<pre><code>[AwareVLN 코드 구조 (추정)]
+<pre class="diagram"><code>[AwareVLN 코드 구조 (추정)]
 
 AwareVLN/
 ├── scripts/
@@ -1269,7 +1358,7 @@ AwareVLN/
 └── README.md
 </code></pre>
 <h3>13.2 핵심 코드 패턴 (추정)</h3>
-<pre><code class="language-python"># Key Node 감지 로직 (추정)
+<pre class="codeblock"><code class="language-python"># Key Node 감지 로직 (추정)
 class KeyNodeDetector:
     def __init__(self, subtask_threshold=0.5, 
                  deviation_threshold=2.0,
@@ -1334,7 +1423,7 @@ class AwareVLNPolicy:
         return action
 </code></pre>
 <h3>13.3 데이터 엔진 활용 방법</h3>
-<pre><code class="language-python"># 자동 데이터 엔진 사용 예시 (추정)
+<pre class="codeblock"><code class="language-python"># 자동 데이터 엔진 사용 예시 (추정)
 from data_engine import AutoDataEngine
 
 engine = AutoDataEngine(
@@ -1369,10 +1458,10 @@ dagger_data = engine.collect_dagger_trajectories(
 )
 </code></pre>
 <hr>
-<h2>14. 기술적 제언 및 미래 전망 (Technical Recommendations)</h2>
+<div class="secnav"><a href="#sec-10">← 11. 결론</a><a href="#sec-12">13. 코드 분석 →</a></div><h2 id="sec-13" data-label="14. 기술적 제언 및 미래 전망">14. 기술적 제언 및 미래 전망 (Technical Recommendations)</h2>
 <h3>14.1 VLN 연구자를 위한 제언</h3>
 <p>AwareVLN의 핵심 기법을 자신의 연구에 적용하려는 연구자를 위한 실용적 조언:</p>
-<pre><code>[기술 전이 가이드]
+<pre class="codeblock"><code>[기술 전이 가이드]
 
 제언 1: Key Node 감지 모듈 독립 활용
   어떤 VLN 방법에도 Key Node 감지를 추가할 수 있다.
@@ -1394,7 +1483,7 @@ dagger_data = engine.collect_dagger_trajectories(
        [PLAN]/[EXECUTE] for manipulation
 </code></pre>
 <h3>14.2 산업 응용 전망</h3>
-<pre><code>[산업 응용 시나리오]
+<pre class="codeblock"><code>[산업 응용 시나리오]
 
 시나리오 1: 스마트 홈 로봇
   가정 환경 VLN + 자기인식 추론
@@ -1421,7 +1510,7 @@ dagger_data = engine.collect_dagger_trajectories(
 </code></pre>
 <h3>14.3 VLN 연구의 중장기 전망</h3>
 <p>AwareVLN이 개척한 추론 증강 VLN의 중장기 발전 방향:</p>
-<pre><code>[중장기 연구 전망 (2026-2030)]
+<pre class="codeblock"><code>[중장기 연구 전망 (2026-2030)]
 
 단기 (2026-2027):
   ✓ AwareVLN 방식을 더 강력한 VLM(GPT-5, Gemini 2.0)으로 확장
@@ -1441,9 +1530,104 @@ dagger_data = engine.collect_dagger_trajectories(
   ✓ 의식(Consciousness) 연구와의 연결:
     AI 자기인식이 의식의 필요조건인지에 대한 철학적 연구 기여
 </code></pre>
-
+<div class="secnav"><a href="#sec-11">← 12. 심화 분석: VLN 추론 패러다임 변천사</a><a href="#sec-13">14. 기술적 제언 및 미래 전망 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

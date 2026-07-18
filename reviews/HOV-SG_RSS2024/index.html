@@ -6,133 +6,216 @@
 <meta name="color-scheme" content="light dark">
 <title>Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2403.17846">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">RSS 2024</div>
-    <h1>Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2403.17846">arXiv:2403.17846</a></span>
-      <span>리뷰 2026-05-22</span>
-      <span>60분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">HOV-SG_RSS2024</span>
     </div>
+    <h1 class="doc-title">HOV-SG: 계층적 오픈 어휘 3D 씬 그래프를 이용한 언어 지향 로봇 내비게이션</h1>
+    
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">RSS 2024</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2403.17846">2403.17846</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval"><a href="https://github.com/hovsg/HOV-SG">github.com/hovsg/HOV-SG</a></span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://hovsg.github.io">hovsg.github.io</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-05-22</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">43KB · 약 60분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 8개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의: 선행 연구의 한계 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">실험 결과 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">코드 구현 분석 (Code Implementation Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">한계와 시사점 (Limitations &amp; Insights for VLN)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">코드 구현의 핵심 파일별 분석</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">인용 (BibTeX)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>HOV-SG: 계층적 오픈 어휘 3D 씬 그래프를 이용한 언어 지향 로봇 내비게이션</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation</li>
@@ -165,7 +248,7 @@ footer {
 <li>Real-world Boston Dynamics Spot 로봇으로 대규모 multi-floor navigation 실증</li>
 </ul>
 <hr>
-<h2>2. 문제 정의: 선행 연구의 한계 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의: 선행 연구의 한계">2. 문제 정의: 선행 연구의 한계 (Problem Definition)</h2>
 <h3>2.1 Point-wise Open-Vocabulary Map 계열의 문제점</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -207,10 +290,10 @@ footer {
 <h3>2.3 VLN 패러다임과의 관계</h3>
 <p>논문의 접근 방식은 <strong>map-based navigation</strong>(offline mapping + query-time retrieval)으로, end-to-end VLN(instruction following from scratch, map 사전 구성 없음)과는 다른 paradigm이다. VLN 커뮤니티 관점에서는 HOV-SG가 &quot;hierarchical navigation을 위한 구조화된 map representation&quot;을 제공하는 기초 기술이며, 상위 VLN 모듈이 이를 활용해 multi-floor에서 자연어 지시를 수행하는 방향으로 확장될 수 있다.</p>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의: 선행 연구의 한계 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 시스템 아키텍처 개요 (System Architecture Overview)</h3>
 <p>HOV-SG의 파이프라인은 두 단계(Stage)로 구성된다:</p>
-<pre><code>┌─────────────────────────────────────────────────────────────────────────┐
+<pre class="diagram"><code>┌─────────────────────────────────────────────────────────────────────────┐
 │                     HOV-SG 전체 파이프라인                              │
 ├─────────────────────────┬──────────────────────────────────────────────┤
 │                         │                                              │
@@ -255,7 +338,7 @@ footer {
 <li><code class="math">w_g, w_l, w_m</code>: 학습 가능하거나 고정 가중치 (합=1)</li>
 </ul>
 <p><strong>구현 세부사항</strong> (code_analysis.md 참조):</p>
-<pre><code class="language-python"># /tmp/hovsg-repo/hovsg/models/sam_clip_feats_extractor.py:122-128
+<pre class="codeblock"><code class="language-python"># /tmp/hovsg-repo/hovsg/models/sam_clip_feats_extractor.py:122-128
 # Weighted sum fusion with softmax normalization
 similarity = F.cosine_similarity(f_g.unsqueeze(0), f_l.unsqueeze(0))
 weight_g = softmax(similarity)  # 글로벌 가중치
@@ -271,7 +354,7 @@ f_fused = weight_g * f_g + weight_l * f_l  # 적응형 융합
 <hr>
 <h3>3.3 SAM 기반 객체 마스크 제안 + DBSCAN 필터링</h3>
 <p><strong>SAM 마스크 생성</strong> (Segment Anything Model, ViT-H):</p>
-<pre><code class="language-python"># /tmp/hovsg-repo/hovsg/graph/graph.py:114-128
+<pre class="codeblock"><code class="language-python"># /tmp/hovsg-repo/hovsg/graph/graph.py:114-128
 mask_generator = SamAutomaticMaskGenerator(
     model=sam_vit_h,
     points_per_side=12,           # 12×12=144 grid points
@@ -294,7 +377,7 @@ masks = mask_generator.generate(image)  # 프레임당 수십~수백 마스크 �
 </ol>
 </li>
 <li><p><strong>구현</strong> (/tmp/hovsg-repo/hovsg/utils/graph_utils.py:386):</p>
-<pre><code class="language-python">def feats_denoise_dbscan(feats, eps=0.02, min_points=2):
+<pre class="codeblock"><code class="language-python">def feats_denoise_dbscan(feats, eps=0.02, min_points=2):
     # feats: (N, 1024) CLIP ViT-H features
     clustering = DBSCAN(eps=eps, min_samples=min_points, 
                         metric=&#39;cosine&#39;).fit(feats)
@@ -332,7 +415,7 @@ masks = mask_generator.generate(image)  # 프레임당 수십~수백 마스크 �
 <ul>
 <li>정렬된 높이 벡터에서 <strong>연속한 두 피크 쌍</strong>이 하나의 floor (바닥 + 천장)를 표현</li>
 </ul>
-<pre><code>Height distribution:
+<pre class="diagram"><code>Height distribution:
 ▲
 │  ┌─ Floor 1 ceiling
 │  │
@@ -356,7 +439,7 @@ masks = mask_generator.generate(image)  # 프레임당 수십~수백 마스크 �
 <h3>3.5 Room Segmentation (Voronoi-based Skeleton + Watershed)</h3>
 <p><strong>입력</strong>: 각 floor의 point cloud <code class="math">\mathcal{P}_l</code></p>
 <p><strong>알고리즘</strong> (Figure 3 우측, step-by-step):</p>
-<pre><code>Step 1: 2D Bird&#39;s-Eye View Histogram 생성
+<pre class="codeblock"><code>Step 1: 2D Bird&#39;s-Eye View Histogram 생성
         P_l을 xz 평면(수평면)에 투영
         ↓
 Step 2: Wall Skeleton Mask 추출
@@ -376,7 +459,7 @@ Step 6: 3D 매핑
         3D point에 적용 → room point cloud 생성
 </code></pre>
 <p><strong>구현 세부사항</strong> (/tmp/hovsg-repo/hovsg/graph/graph.py:378-450):</p>
-<pre><code class="language-python">def segment_rooms(self, floor_pcd, floor_id):
+<pre class="codeblock"><code class="language-python">def segment_rooms(self, floor_pcd, floor_id):
     # 1. BEV 투영 + 히스토그램
     bev_hist = self.project_to_2d_histogram(floor_pcd, grid_res=0.05)
     
@@ -399,7 +482,7 @@ Step 6: 3D 매핑
 </code></pre>
 <p><strong>Room Embedding 계산</strong> (k-means + majority voting):</p>
 <p>각 room에 associated된 RGB-D observation (카메라 포즈가 해당 room segment 내 있는 프레임들)의 CLIP feature를 추출.</p>
-<pre><code class="language-python"># /tmp/hovsg-repo/hovsg/utils/graph_utils.py:52-100
+<pre class="codeblock"><code class="language-python"># /tmp/hovsg-repo/hovsg/utils/graph_utils.py:52-100
 def compute_room_embeddings(room_observations, num_views=5):
     # 1. 모든 관찰의 CLIP feature 수집
     all_features = [extract_clip_from_image(img) for img in room_observations]
@@ -447,7 +530,7 @@ def compute_room_embeddings(room_observations, num_views=5):
 <li><code class="math">\mathcal{E}_{RO}</code>: room ↔ object edges</li>
 </ul>
 <p><strong>각 노드의 속성</strong>:</p>
-<pre><code class="language-python"># /tmp/hovsg-repo/hovsg/graph/graph.py:705-850
+<pre class="codeblock"><code class="language-python"># /tmp/hovsg-repo/hovsg/graph/graph.py:705-850
 class SceneGraphNode:
     def __init__(self, node_id, node_type):
         self.id = node_id
@@ -471,7 +554,7 @@ class SceneGraphNode:
             self.name = None  # Open-vocabulary label
 </code></pre>
 <p><strong>NetworkX 기반 구현</strong>:</p>
-<pre><code class="language-python"># /tmp/hovsg-repo/hovsg/graph/graph.py:85-105
+<pre class="codeblock"><code class="language-python"># /tmp/hovsg-repo/hovsg/graph/graph.py:85-105
 self.graph = nx.Graph()
 
 # 1. Root node 추가
@@ -512,7 +595,7 @@ for floor_id, floor_rooms in enumerate(rooms_by_floor):
 <hr>
 <h3>3.7 LLM 기반 복합 쿼리 Grounding (GPT-3.5 파싱)</h3>
 <p><strong>쿼리 분해 흐름</strong>:</p>
-<pre><code>사용자 쿼리:
+<pre class="codeblock"><code>사용자 쿼리:
 &quot;Find the toilet in the bathroom on floor 2&quot;
         ↓
 [GPT-3.5-turbo few-shot]
@@ -529,7 +612,7 @@ Step 3: Query objects in N_{f_2,r_bathroom} for &quot;toilet&quot; → N_{f_2,r_
 Voronoi 경로 계획 → 내비게이션 실행
 </code></pre>
 <p><strong>구현</strong> (/tmp/hovsg-repo/hovsg/utils/llm_utils.py:169-200):</p>
-<pre><code class="language-python">def parse_hier_query(query_text, openai_api_key):
+<pre class="codeblock"><code class="language-python">def parse_hier_query(query_text, openai_api_key):
     &quot;&quot;&quot;
     GPT-3.5-turbo로 자연어 쿼리를 [floor, room, object] 토큰으로 파싱
     &quot;&quot;&quot;
@@ -568,7 +651,7 @@ If a level is not specified, return &quot;any&quot;.
     return parsed_tokens  # e.g., (&quot;floor 2&quot;, &quot;bathroom&quot;, &quot;toilet&quot;)
 </code></pre>
 <p><strong>계층적 쿼리 실행</strong> (/tmp/hovsg-repo/hovsg/graph/graph.py:1179-1250):</p>
-<pre><code class="language-python">def query_hierarchy(self, query, top_k=5):
+<pre class="codeblock"><code class="language-python">def query_hierarchy(self, query, top_k=5):
     &quot;&quot;&quot;
     3단계 계층적 쿼리 처리
     &quot;&quot;&quot;
@@ -596,7 +679,7 @@ If a level is not specified, return &quot;any&quot;.
                   reverse=True)[:top_k]
 </code></pre>
 <p><strong>Text embedding (CLIP template)</strong> (/tmp/hovsg-repo/hovsg/utils/clip_utils.py:251-280):</p>
-<pre><code class="language-python">def get_text_feats_multiple_templates(text, model):
+<pre class="codeblock"><code class="language-python">def get_text_feats_multiple_templates(text, model):
     &quot;&quot;&quot;
     여러 템플릿으로 텍스트를 인코딩하고 평균화
     &quot;&quot;&quot;
@@ -619,7 +702,7 @@ If a level is not specified, return &quot;any&quot;.
     return text_features
 </code></pre>
 <hr>
-<h2>4. 실험 결과 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 실험 결과">4. 실험 결과 (Experimental Results)</h2>
 <h3>4.1 데이터셋</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -641,7 +724,7 @@ If a level is not specified, return &quot;any&quot;.
 </tr>
 <tr>
 <td><strong>HM3DSem</strong> [25]</td>
-<td>대규모 multi-floor; open-vocabulary object labels; 1624 categories</td>
+<td class="longcell">대규모 multi-floor; open-vocabulary object labels; 1624 categories</td>
 <td>계층적 쿼리, floor/room accuracy, object semantics</td>
 </tr>
 <tr>
@@ -710,7 +793,7 @@ If a level is not specified, return &quot;any&quot;.
 <td>0.16</td>
 <td>0.20</td>
 </tr>
-<tr>
+<tr class="ours">
 <td><strong>HOV-SG (ours)</strong></td>
 <td>OVSeg</td>
 <td><strong>0.144</strong></td>
@@ -718,7 +801,7 @@ If a level is not specified, return &quot;any&quot;.
 <td><strong>0.214</strong></td>
 <td><strong>0.258</strong></td>
 </tr>
-<tr>
+<tr class="ours">
 <td><strong>HOV-SG (ours)</strong></td>
 <td><strong>ViT-H-14</strong></td>
 <td><strong>0.231</strong></td>
@@ -749,7 +832,7 @@ If a level is not specified, return &quot;any&quot;.
 <td><strong>86.18</strong></td>
 <td>77.55</td>
 </tr>
-<tr>
+<tr class="ours">
 <td><strong>HOV-SG (ours)</strong></td>
 <td><strong>100</strong></td>
 <td>84.10</td>
@@ -791,7 +874,7 @@ If a level is not specified, return &quot;any&quot;.
 <td>59.47</td>
 <td>62.55</td>
 </tr>
-<tr>
+<tr class="ours">
 <td><strong>HOV-SG (ours, view embeddings)</strong></td>
 <td><strong>73.93</strong></td>
 <td><strong>84.10</strong></td>
@@ -837,7 +920,7 @@ If a level is not specified, return &quot;any&quot;.
 <td><strong>81.55</strong></td>
 <td>84.07</td>
 </tr>
-<tr>
+<tr class="ours">
 <td><strong>HOV-SG (ours)</strong></td>
 <td><strong>18.43</strong></td>
 <td><strong>25.73</strong></td>
@@ -1022,9 +1105,9 @@ If a level is not specified, return &quot;any&quot;.
 <li>실패 분석: &quot;go to the whiteboard in the office on floor 2&quot;에서 whiteboard가 벽 부착 오브젝트이므로 Voronoi 내비게이션으로 접근 불가 (localization ambiguity)</li>
 </ul>
 <hr>
-<h2>5. 코드 구현 분석 (Code Implementation Analysis)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의: 선행 연구의 한계</a><a href="#sec-3">4. 실험 결과 →</a></div><h2 id="sec-4" data-label="5. 코드 구현 분석">5. 코드 구현 분석 (Code Implementation Analysis)</h2>
 <h3>5.1 Repository 구조</h3>
-<pre><code>/tmp/hovsg-repo/
+<pre class="diagram"><code>/tmp/hovsg-repo/
 ├── README.md                           # 설치, 실행 가이드
 ├── environment.yaml                    # conda 환경
 ├── setup.py                            # pip 진입점
@@ -1118,7 +1201,7 @@ If a level is not specified, return &quot;any&quot;.
 </tr>
 </tbody></table></div>
 <h4>Feature Fusion (/tmp/hovsg-repo/hovsg/models/sam_clip_feats_extractor.py)</h4>
-<pre><code class="language-python">def extract_feats_per_pixel(rgb_image, depth_image, mask):
+<pre class="codeblock"><code class="language-python">def extract_feats_per_pixel(rgb_image, depth_image, mask):
     &quot;&quot;&quot;
     각 SAM mask에 대해 3-way CLIP feature fusion 수행
     &quot;&quot;&quot;
@@ -1149,7 +1232,7 @@ If a level is not specified, return &quot;any&quot;.
 </ul>
 <h4>데이터 로더 인터페이스</h4>
 <p><strong>공통 추상 클래스</strong> (/tmp/hovsg-repo/hovsg/dataloader/generic.py):</p>
-<pre><code class="language-python">class RGBDDataset(ABC):
+<pre class="codeblock"><code class="language-python">class RGBDDataset(ABC):
     @abstractmethod
     def load_frame(self, idx) -&gt; Tuple[np.ndarray, np.ndarray, np.ndarray]:
         &quot;&quot;&quot;RGB, depth, pose 로드&quot;&quot;&quot;
@@ -1163,7 +1246,7 @@ If a level is not specified, return &quot;any&quot;.
 </ul>
 <p>각 로더는 camera intrinsics, depth scale, pose 변환을 독립적으로 처리.</p>
 <h4>Voronoi Navigation Graph (/tmp/hovsg-repo/hovsg/graph/navigation_graph.py)</h4>
-<pre><code class="language-python">def create_voronoi_nav_graph(floor_pcd, floor_points_bev, camera_poses):
+<pre class="codeblock"><code class="language-python">def create_voronoi_nav_graph(floor_pcd, floor_points_bev, camera_poses):
     &quot;&quot;&quot;
     Single-floor Voronoi navigation graph 구성
     &quot;&quot;&quot;
@@ -1200,7 +1283,7 @@ If a level is not specified, return &quot;any&quot;.
 <li><strong>LLM 하드코딩</strong>: OpenAI API에 직접 의존 (llm_utils.py:22) → 오픈소스 LLM 대체 어려움</li>
 </ol>
 <hr>
-<h2>6. 한계와 시사점 (Limitations &amp; Insights for VLN)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 코드 구현 분석 →</a></div><h2 id="sec-5" data-label="6. 한계와 시사점">6. 한계와 시사점 (Limitations &amp; Insights for VLN)</h2>
 <h3>6.1 저자 명시 한계점</h3>
 <ol>
 <li><strong>하이퍼파라미터 수 다수</strong>: floor segmentation (histogram bin size, peak threshold), room segmentation (EDF threshold, watershed seed extraction), DBSCAN clustering 등 tuning해야 할 parameter 많음</li>
@@ -1343,7 +1426,7 @@ If a level is not specified, return &quot;any&quot;.
 <p><strong>HOV-SG는 코드가 아니라 신호로 가져와야 한다.</strong> 4-tier hierarchy, DBSCAN dominant feature, hierarchical consistency signal — 이 셋만 inductive bias / auxiliary loss로 추출해 SFACW · LGDP 둘 다에 흘려보내고, <strong>explicit graph 시스템 자체는 baseline 비교군 외엔 import 금지</strong>.</p>
 </blockquote>
 <hr>
-<h2>7. 코드 구현의 핵심 파일별 분석</h2>
+<div class="secnav"><a href="#sec-3">← 4. 실험 결과</a><a href="#sec-5">6. 한계와 시사점 →</a></div><h2 id="sec-6" data-label="7. 코드 구현의 핵심 파일별 분석">7. 코드 구현의 핵심 파일별 분석</h2>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -1404,8 +1487,8 @@ If a level is not specified, return &quot;any&quot;.
 </tr>
 </tbody></table></div>
 <hr>
-<h2>8. 인용 (BibTeX)</h2>
-<pre><code class="language-bibtex">@inproceedings{werby2024hovsg,
+<div class="secnav"><a href="#sec-4">← 5. 코드 구현 분석</a><a href="#sec-6">7. 코드 구현의 핵심 파일별 분석 →</a></div><h2 id="sec-7" data-label="8. 인용">8. 인용 (BibTeX)</h2>
+<pre class="codeblock"><code class="language-bibtex">@inproceedings{werby2024hovsg,
   title={Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation},
   author={Werby, Abdelrhman and Huang, Chenguang and B\&quot;{u}chner, Martin and Valada, Abhinav and Burgard, Wolfram},
   booktitle={Proceedings of Robotics: Science and Systems (RSS)},
@@ -1415,9 +1498,104 @@ If a level is not specified, return &quot;any&quot;.
 </code></pre>
 <hr>
 <p><strong>리뷰 작성</strong>: writer agent, 2026-05-08<br><strong>리뷰 길이</strong>: 약 850줄 (포괄적 분석 기준)</p>
-
+<div class="secnav"><a href="#sec-5">← 6. 한계와 시사점</a><a href="#sec-7">8. 인용 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="HOV-SG: 계층적 오픈 어휘 3D 씬 그래프를 이용한 언어 지향 로봇 내비게이션">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

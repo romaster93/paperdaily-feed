@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>GroundControl: Anticipating Navigation Failures in Vision-Language Agents via Trajectory-Consistent Uncertainty Estimates · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2606.20479">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">arXiv preprint (cs.RO), 2026-06-18 (확정 미확인, CC BY 4.0)</div>
-    <h1>GroundControl: Anticipating Navigation Failures in Vision-Language Agents via Trajectory-Consistent Uncertainty Estimates</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2606.20479">arXiv:2606.20479</a></span>
-      <span>리뷰 2026-06-21</span>
-      <span>39분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">GroundControl_arxiv2026</span>
     </div>
+    <h1 class="doc-title">GroundControl: Anticipating Navigation Failures in Vision-Language Agents via Trajectory-Consistent Uncertainty Estimates — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv preprint (cs.RO), 2026-06-18 (확정 미확인, CC BY 4.0)</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2606.20479">2606.20479</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">❌ 미공개 (abstract·본문에 저장소 링크 미확인)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">❌ 확인 불가</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-06-21</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">39KB · 약 39분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>GroundControl: Anticipating Navigation Failures in Vision-Language Agents via Trajectory-Consistent Uncertainty Estimates — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: GroundControl: Anticipating Navigation Failures in Vision-Language Agents via Trajectory-Consistent Uncertainty Estimates</li>
@@ -154,7 +240,7 @@ footer {
 </blockquote>
 <p>핵심 차별점: <strong>학습 불필요(training-free, post-hoc) + 모델 비종속(GPT-4o/4-mini/Gemini에 동일 적용) + 궤적 수준 일관성 기반</strong>.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <p><strong>(C1) 단일 스텝 불확실성의 한계.</strong>
 엔트로피·max-prob·conformal은 한 결정 스텝의 행동 분포 위에서 계산된다. VLN 에이전트(특히 VLM 기반)는 각 스텝에서 자신만만하게(낮은 엔트로피로) 틀린 행동을 고를 수 있어, 스텝 단위 불확실성이 실패와 약하게 상관한다.</p>
@@ -165,7 +251,7 @@ VLN 백본이 GPT-4o, Gemini 등으로 다양하고, 재학습·내부 접근이
 <p><strong>(C4) 평가 프로토콜의 부재.</strong>
 &quot;실패 예측이 얼마나 좋은가&quot;를 재는 표준이 약하다. 단순 AUROC는 운영상 의미(얼마나 많은 에피소드를 자동 처리하면서 위험을 얼마나 낮출 수 있나)를 직접 주지 못한다. selective prediction 관점의 risk–coverage 척도가 필요하다.</p>
 <h3>2.2 핵심 해결책</h3>
-<pre><code>(C1) 단스텝 한계   → 거리-목표 시계열을 Kalman filter로 모델링, innovation 일관성으로 판정
+<pre class="codeblock"><code>(C1) 단스텝 한계   → 거리-목표 시계열을 Kalman filter로 모델링, innovation 일관성으로 판정
 (C2) 점진·시간성   → 4개 궤적 특징(진행/단조/효율/진동) + Kalman 통계를 융합
 (C3) 모델 비종속   → training-free·post-hoc, 백본 내부 무접근(거리·행동 신호만 사용)
 (C4) 평가 부재     → SRCN(Selective Risk–Coverage Navigation) + AURC/E-AURC 도입
@@ -174,11 +260,11 @@ VLN 백본이 GPT-4o, Gemini 등으로 다양하고, 재학습·내부 접근이
 <h3>2.3 관련 연구 맥락에서의 위치</h3>
 <p>불확실성 추정 계열은 크게 (i) <strong>단일 스텝 분포 기반</strong>(softmax entropy, max-prob, temperature scaling), (ii) <strong>앙상블/베이지안</strong>(deep ensemble, MC-dropout — 계산 무겁고 백본 수정 필요), (iii) <strong>conformal prediction</strong>(분포 무관 커버리지 보증, 그러나 단일 스텝 점수 위에 구축)으로 나뉜다. 이들은 모두 <em>한 결정의 신뢰도</em>를 잰다. GroundControl은 이와 직교하는 <strong>(iv) 시계열 일관성(temporal consistency) 기반</strong> 축을 VLN에 도입한다 — 행동의 확신이 아니라 <em>행동이 만든 거리 궤적의 규범 일치도</em>를 본다. 또한 VLN 자기인식 연구(예: 정책 내부에 진행도 추정을 심는 방식)와 달리, 백본을 전혀 수정하지 않는 post-hoc 부착이라는 점에서 운영 측면의 차별성을 갖는다. 이 위치 설정이 §5에서 단일 스텝 baseline 대비 두 자릿수 배율 우위로 이어진다.</p>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <p>GroundControl은 (A) 등속 Kalman filter 거리 동역학 모델, (B) 5성분 고정 선형 불확실성 융합, (C) SRCN 평가 프로토콜로 구성된다. <strong>학습된 분류기는 없다</strong> — 연속 점수로 순위만 매긴다.</p>
 <h3>3.1 등속(Constant-Velocity) Kalman Filter — 거리-목표 동역학</h3>
 <p>핵심 가정: 정상적으로 목표를 향해 가는 에이전트는 목표까지 거리 <code>d_t</code>가 대략 <strong>일정한 속도로 줄어든다</strong>. 이 규범을 등속 운동 모델로 세운다.</p>
-<pre><code># 상태: x_t = [ d_t , ḋ_t ]ᵀ      (거리, 거리변화율)
+<pre class="codeblock"><code># 상태: x_t = [ d_t , ḋ_t ]ᵀ      (거리, 거리변화율)
 # 과정 모델 (등속):
    x_{t+1} = F x_t + w_t,     F = [[1, 1],
                                    [0, 1]]
@@ -187,7 +273,7 @@ VLN 백본이 GPT-4o, Gemini 등으로 다양하고, 재학습·내부 접근이
    w_t ~ N(0, Q),  v_t ~ N(0, R)
 </code></pre>
 <p>표준 Kalman 예측/보정:</p>
-<pre><code># 예측 (predict)
+<pre class="codeblock"><code># 예측 (predict)
    x_{t|t-1} = F x_{t-1|t-1}
    P_{t|t-1} = F P_{t-1|t-1} Fᵀ + Q
 
@@ -200,10 +286,10 @@ VLN 백본이 GPT-4o, Gemini 등으로 다양하고, 재학습·내부 접근이
 </code></pre>
 <p><strong>핵심 통계량 — Normalized Innovation Squared (NIS).</strong>
 등속 진행 규범이 맞으면 innovation은 0 주변에서 작아야 하고, 정규화하면 자유도 1의 χ² 분포를 따른다:</p>
-<pre><code>   NIS_t = ν_t² / S_t   ~  χ²(1)   (규범 일관 시)
+<pre class="codeblock"><code>   NIS_t = ν_t² / S_t   ~  χ²(1)   (규범 일관 시)
 </code></pre>
 <p><code>NIS_t</code>가 크다는 것은 &quot;실제 거리 변화가 등속 목표 지향 진행과 통계적으로 어긋났다&quot;는 뜻 — 즉 진동·정체·표류의 신호다. 이 χ² 일관성 검정이 GroundControl의 통계적 토대다.</p>
-<pre><code>거리 d_t 시계열
+<pre class="diagram"><code>거리 d_t 시계열
  d │ ＼               정상: 등속 감소 → ν 작음, NIS↓
    │   ＼____
    │        ＼              실패: 정체/진동 → 예측 어긋남 → ν 큼, NIS↑
@@ -212,7 +298,7 @@ VLN 백본이 GPT-4o, Gemini 등으로 다양하고, 재학습·내부 접근이
 </code></pre>
 <h3>3.2 5성분 고정 선형 불확실성 융합</h3>
 <p>에피소드 <code>i</code>의 불확실성 <code>U_i</code>는 <strong>다섯 성분의 고정 가중 선형 결합</strong>이다. (학습된 분류기 아님 — 가중치는 사전 고정.)</p>
-<pre><code>U_i = 0.30 · (Kalman posterior 공분산 log-det)      ← 추정 불확실성 누적
+<pre class="codeblock"><code>U_i = 0.30 · (Kalman posterior 공분산 log-det)      ← 추정 불확실성 누적
     + 0.25 · (정규화 innovation, NIS 기반)            ← 거리 규범 이탈
     + 0.20 · f^prog   (진행 부족: 순거리 감소 미흡)
     + 0.15 · f^mono   (비단조: 거리 진화 들쭉날쭉)
@@ -255,7 +341,7 @@ VLN 백본이 GPT-4o, Gemini 등으로 다양하고, 재학습·내부 접근이
 <p>이 네 특징은 모두 <strong>궤적의 기하/시간 형태</strong>에서 직접 계산되며, 백본 내부 접근이 필요 없다(C3 충족). Kalman 통계(불확실성 누적·규범 이탈)와 합쳐져 &quot;이 에피소드가 얼마나 비정상적으로 진행되고 있나&quot;를 하나의 연속 점수로 압축한다.</p>
 <h3>3.3 왜 &quot;학습된 분류기&quot;가 아니라 &quot;고정 선형 융합&quot;인가</h3>
 <p>설계 선택의 핵심은 <strong>단순성과 일반성</strong>이다.</p>
-<pre><code>학습 분류기 방식                고정 선형 융합 방식(GroundControl)
+<pre class="diagram"><code>학습 분류기 방식                고정 선형 융합 방식(GroundControl)
 ─────────────────              ──────────────────────────────
 + 데이터에 맞춰 최적 가중       + 학습 데이터 불필요(training-free)
 - 라벨된 실패 데이터 필요       + 백본·태스크 비종속(즉시 이식)
@@ -265,15 +351,15 @@ VLN 백본이 GPT-4o, Gemini 등으로 다양하고, 재학습·내부 접근이
 <p>GroundControl은 &quot;실패는 거리 규범 이탈 + 궤적 형태 이상으로 충분히 드러난다&quot;는 가설에 기대어, 학습 없이 고정 가중만으로 near-oracle 순위(§5)를 얻는다 — 이것이 논문의 가장 도발적 주장이다.</p>
 <h3>3.4 SRCN — Selective Risk–Coverage Navigation 프로토콜</h3>
 <p>불확실성 추정의 좋음을 운영 관점에서 재기 위해, selective prediction의 risk–coverage 틀을 VLN에 이식한다.</p>
-<pre><code>1) 모든 에피소드를 불확실성 U_i 오름차순으로 정렬
+<pre class="codeblock"><code>1) 모든 에피소드를 불확실성 U_i 오름차순으로 정렬
 2) 임계 τ에서 가장 확신하는 상위 비율만 &quot;자동 처리(retain)&quot;, 나머지는 기권/인계
 3) 보유 집합에 대해 선택 위험(selective risk) 계산
 </code></pre>
 <p>두 위험 정의:</p>
-<pre><code>Risk_SR(τ)  = 보유 에피소드 중 실패율(failure rate)
+<pre class="codeblock"><code>Risk_SR(τ)  = 보유 에피소드 중 실패율(failure rate)
 Risk_SPL(τ) = 보유 에피소드의 SPL 손실(1 − SPL 기반)
 </code></pre>
-<pre><code>선택 위험 (낮을수록 좋음)
+<pre class="diagram"><code>선택 위험 (낮을수록 좋음)
  risk │ ＼                    좋은 순위: 확신 에피소드부터 보유
       │   ＼___               → 낮은 커버리지에서 위험 매우 낮음
       │       ＼___           (실패가 불확실 쪽에 몰림)
@@ -281,12 +367,12 @@ Risk_SPL(τ) = 보유 에피소드의 SPL 손실(1 − SPL 기반)
       └────────────────── coverage(보유 비율) 1.0
 </code></pre>
 <p>평가 척도:</p>
-<pre><code>AURC   = risk–coverage 곡선 아래 면적 (낮을수록 순위 우수)
+<pre class="codeblock"><code>AURC   = risk–coverage 곡선 아래 면적 (낮을수록 순위 우수)
 E-AURC = AURC − oracle AURC  (excess; 0 = 완벽한 순위)
 </code></pre>
 <p><code>E-AURC</code>는 <strong>오라클(실패를 완벽히 뒤로 정렬) 대비 초과 면적</strong>이라 0에 가까울수록 &quot;거의 완벽한 실패 순위&quot;를 뜻한다. SRCN은 단순 AUROC가 못 주는 &quot;얼마나 자동 처리하면서 위험을 얼마나 낮추나&quot;를 직접 드러낸다(C4 충족).</p>
 <h3>3.5 한 에피소드의 처리 흐름 (Worked Example)</h3>
-<pre><code>입력: VLN 에피소드 (지시 + 거리-목표 시계열 d_1..d_T + 행동열 a_1..a_T)
+<pre class="codeblock"><code>입력: VLN 에피소드 (지시 + 거리-목표 시계열 d_1..d_T + 행동열 a_1..a_T)
 
 매 스텝 t:
   Kalman predict → x_{t|t-1}, P_{t|t-1}
@@ -305,21 +391,21 @@ E-AURC = AURC − oracle AURC  (excess; 0 = 완벽한 순위)
 <h3>3.6 왜 &quot;등속&quot; 모델이고, NIS가 왜 적절한 검정인가</h3>
 <p><strong>등속(constant-velocity) 가정의 정당성.</strong>
 VLN에서 &quot;성공적으로 목표로 향하는&quot; 거동의 1차 근사는 <em>목표까지 거리가 일정 비율로 감소</em>하는 것이다. 가속(2차)까지 모델링하면 자유도가 늘어 잡음에 과적합되고, 영속도(거리=상수) 모델은 진행 자체를 못 잡는다. 등속은 &quot;꾸준히 가까워진다&quot;는 규범을 표현하는 <strong>최소 충분 모델</strong>이다 — 이 규범에서 벗어나는 모든 거동(정체=속도≈0, 후퇴=속도&gt;0의 거리 증가, 진동=속도 부호 반전)이 자연스럽게 innovation으로 잡힌다.</p>
-<pre><code>정상 진행:   ḋ_t ≈ const &lt; 0,  d_t 단조 감소      → ν_t 작음
+<pre class="codeblock"><code>정상 진행:   ḋ_t ≈ const &lt; 0,  d_t 단조 감소      → ν_t 작음
 정체:        ḋ_t ≈ 0,         d_t 평탄            → 예측(감소)과 어긋남 → ν_t↑
 후퇴/표류:   ḋ_t &gt; 0,         d_t 증가            → ν_t 크게↑
 진동:        ḋ_t 부호 반전,   d_t 톱니            → ν_t 교번 큰 값
 </code></pre>
 <p><strong>NIS의 통계적 의미.</strong>
 innovation <code>ν_t</code>는 평균 0, 공분산 <code>S_t</code>의 가우시안(필터 일관 시)이므로, 정규화하면</p>
-<pre><code>   NIS_t = ν_tᵀ S_t⁻¹ ν_t = ν_t²/S_t  ~  χ²(m),   m = dim(측정) = 1
+<pre class="codeblock"><code>   NIS_t = ν_tᵀ S_t⁻¹ ν_t = ν_t²/S_t  ~  χ²(m),   m = dim(측정) = 1
 </code></pre>
 <p>이는 칼만 필터 *일관성 검정(consistency test)*의 표준 도구다. 누적 형태(평균 NIS)는 자유도 <code>M=ΣT</code>의 χ²로, 신뢰구간 <code>[χ²_{α/2}/M, χ²_{1-α/2}/M]</code>을 벗어나면 &quot;모델 규범 불일치&quot;로 판정한다. GroundControl은 이 고전적 추적(target-tracking) 일관성 검정을 VLN 실패 탐지로 재해석한 셈이다 — 알려진 통계 도구를 새 도메인에 이식한 점이 개념적 기여다.</p>
 <p><strong>posterior 공분산 log-det의 역할.</strong>
 <code>log det P_{t|t}</code>는 상태 추정의 <em>불확실성 부피</em>를 요약한다. 거동이 규범과 어긋나 필터가 상태를 잘 못 좁히면 <code>P</code>가 커지고 log-det가 증가 → &quot;이 에피소드는 동역학이 예측 불가능&quot;이라는 보조 신호. NIS(즉각적 이탈)와 log-det(누적 불확실성)는 상보적이다.</p>
 <h3>3.7 네 궤적 특징의 형태 (정량 직관)</h3>
 <p>논문은 정확한 수식 전부를 코드로 공개하지 않으나, 각 특징의 기하적 형태는 명확하다. 개념식(설명용)으로 정리하면:</p>
-<pre><code>f^prog (진행 부족):
+<pre class="codeblock"><code>f^prog (진행 부족):
    net 감소량이 시간 대비 작을수록 큰 값
    ~  1 − (d_1 − d_T) / (기대 감소 = |ḋ_nominal|·T)
 
@@ -336,7 +422,7 @@ f^osc (진동):
    ~  (# action reversals) / (T − 1)
 </code></pre>
 <p>네 특징이 <strong>서로 다른 실패 양상에 직교적으로 반응</strong>한다는 점이 설계의 핵심이다. 예컨대 매끈하게 우회(긴 경로지만 단조 감소)하는 에피소드는 <code>f^eff</code>↑지만 <code>f^mono</code>≈0이고, 제자리 진동은 <code>f^osc</code>↑·<code>f^mono</code>↑지만 <code>f^eff</code>는 경로 자체가 짧아 낮을 수 있다. 다섯 성분의 가중합이 이 다양한 패턴을 하나의 순위로 통합한다.</p>
-<pre><code>실패 양상 → 특징 활성화 지도
+<pre class="codeblock"><code>실패 양상 → 특징 활성화 지도
               f^prog  f^mono  f^eff  f^osc  NIS
 정체           ●●      ●●●     ○      ●      ●●●
 진동           ●       ●●      ○      ●●●    ●●●
@@ -395,8 +481,8 @@ f^osc (진동):
 <p>GroundControl의 신규성은 <em>새 모델</em>이 아니라 <strong>&quot;고전적 추적 일관성 검정(Kalman NIS) + selective prediction(AURC) + 거리 궤적 신호&quot;를 VLN 안전 게이트로 결합</strong>한 통찰에 있다. 각 부품은 알려진 것이지만, 그 조합이 단일 스텝 척도를 두 자릿수 배율로 능가한다는 점이 메시지다.</p>
 <p><strong>계산 비용.</strong> 등속 Kalman은 2×2 행렬 연산, 네 특징은 거리/행동열의 단순 통계 — 에피소드당 O(T)로 거의 무비용이며 GPU 불필요. 무거운 학습형 추정기(앙상블·MC-dropout) 대비 실배치 친화적이다.</p>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>┌──────────────────────────────────────────────────────────────┐
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>┌──────────────────────────────────────────────────────────────┐
 │                    VLN 에이전트 (백본 — 무접근)                │
 │              GPT-4o / GPT-4-mini / Gemini-1.5-Flash            │
 │   지시 + 관측 → 행동 a_t,  목표까지 거리 d_t (post-hoc 신호)   │
@@ -426,7 +512,7 @@ f^osc (진동):
 </code></pre>
 <p><strong>데이터 흐름</strong>: 백본은 블랙박스로 두고, 그 산출(거리·행동)만 받아 Kalman+특징으로 불확실성을 매긴 뒤 SRCN으로 운영 의사결정(자동/인계)을 내린다. 백본 내부 logit·가중치에 의존하지 않으므로 어떤 VLM에도 그대로 부착된다.</p>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 / 벤치마크 (Datasets)</h3>
 <ul>
 <li><strong>EB-Navigation</strong> 벤치마크의 5개 스플릿, 각 N=300 에피소드:<ul>
@@ -517,7 +603,7 @@ GPT-4o·GPT-4-mini·Gemini-1.5-Flash에서 <em>동일 가중</em>으로 작동�
 <p>표본 규모(스플릿당 N=300)와 시뮬 한정이라는 점은 결과 해석의 경계다. 실세계 거리 신호 잡음 하에서 같은 격차가 유지될지는 향후 실로봇 검증의 몫이다.</p>
 </blockquote>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <ol>
 <li><strong>거리-목표 동역학의 Kalman 일관성 검정</strong>: VLN 실패를 &quot;등속 목표 지향 진행 규범으로부터의 통계적 이탈(NIS ~ χ²(1))&quot;로 정식화. 단일 스텝 확률이 아닌 시계열 일관성으로 불확실성을 정의한 점이 신규.</li>
 <li><strong>Training-free·모델 비종속 추정기</strong>: 학습 분류기 없이 5성분 고정 선형 융합만으로, 백본 내부 무접근 상태에서 GPT-4o/4-mini/Gemini에 동일 적용.</li>
@@ -525,7 +611,7 @@ GPT-4o·GPT-4-mini·Gemini-1.5-Flash에서 <em>동일 가중</em>으로 작동�
 <li><strong>near-oracle 실험 결과</strong>: E-AURC_SR ≈ 0.0024로 엔트로피(0.19)·conformal(0.40)을 압도, 단순 시계열 모델이 복잡 척도보다 VLN 실패 순위에서 우수함을 입증.</li>
 </ol>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <ul>
 <li><strong>Kalman</strong>: 등속 모델 <code>F=[[1,1],[0,1]]</code>, <code>H=[1,0]</code>, 과정/측정 잡음 <code>Q, R</code>. 핵심 통계 <code>NIS_t = ν_t²/S_t ~ χ²(1)</code>, posterior 공분산 log-det.</li>
 <li><strong>궤적 특징</strong>: <code>f^prog</code>(순거리 감소 부족), <code>f^mono</code>(비단조성), <code>f^eff</code>(경로/변위 비효율), <code>f^osc</code>(행동 반전 빈도).</li>
@@ -537,7 +623,7 @@ GPT-4o·GPT-4-mini·Gemini-1.5-Flash에서 <em>동일 가중</em>으로 작동�
 <p>코드 미공개로 <code>Q, R</code> 초기화, 특징 정규화 방식, action entropy 정의의 세부 수치는 본문 공개 범위로 한정된다. 본 리뷰는 공개 사실만 기재하며 미공개 수치를 추정·날조하지 않는다.</p>
 </blockquote>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성</h3>
 <p>거리-목표 신호와 행동열만 있으면 동작하므로, 임의의 VLN 백본·다른 시뮬레이터로 이식이 쉽다. 계산도 Kalman + 단순 특징이라 경량(실시간 가능). 다만 &quot;목표까지 거리&quot;가 산출 가능해야 한다는 전제가 필요 — 거리 신호가 없거나 잡음이 큰 환경(예: 위상적 그래프 항법)에서는 적용 제약이 있다.</p>
 <h3>8.2 한계점</h3>
@@ -557,7 +643,7 @@ GPT-4o·GPT-4-mini·Gemini-1.5-Flash에서 <em>동일 가중</em>으로 작동�
 </ul>
 <h3>8.5 selective prediction 이론과 baselines의 위치</h3>
 <p>selective prediction(거부 옵션이 있는 예측)의 위험–커버리지 틀에서, 이상적 추정기는 &quot;틀릴 에피소드를 가장 불확실로&quot; 정렬한다. 오라클은 실제 실패를 완벽히 뒤로 보내므로 E-AURC=0. 본 비교의 baseline들은:</p>
-<pre><code>Entropy   : 단일 스텝 행동분포의 섀넌 엔트로피 평균 → confident failure에 둔감
+<pre class="codeblock"><code>Entropy   : 단일 스텝 행동분포의 섀넌 엔트로피 평균 → confident failure에 둔감
 Conformal : 보정된 예측집합 크기 기반 불확실 → 단일 스텝 가정 공유, 분포이동 취약
 Oracle    : 실제 실패로 정렬(상한 기준)
 GroundCtrl: 궤적 일관성 점수 → 결과(거리궤적) 기반, 오라클에 근접
@@ -566,7 +652,7 @@ GroundCtrl: 궤적 일관성 점수 → 결과(거리궤적) 기반, 오라클�
 <h3>8.4 selective autonomy 관점에서의 위치</h3>
 <p>GroundControl은 &quot;VLN을 더 잘 항법시키는&quot; 연구가 아니라, &quot;<strong>VLN의 실패를 알아채 안전하게 운영</strong>하는&quot; 메타 계층의 연구다. 자율주행의 ODD/teleop hand-off, 의료 AI의 selective prediction과 같은 계열로, VLM 에이전트 실배치의 안전 게이트 역할을 겨냥한다.</p>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <p>같은 VLN 트랙에서 (a) <strong>자기인식/실패 인지</strong>를 정책에 내재화한 사례와 (b) <strong>VLN 실패 원인 분석</strong> 사례를 골라 비교한다.</p>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
@@ -640,7 +726,7 @@ GroundCtrl: 궤적 일관성 점수 → 결과(거리궤적) 기반, 오라클�
 <p>AwareVLN(정책 강화)·VLMNavBottleneck(원인 분석)이 각각 &quot;더 잘 가기&quot;와 &quot;왜 못 가나&quot;를 다룬다면, GroundControl은 &quot;<strong>못 갈 것 같음을 미리 알기</strong>&quot;라는 직교 축을 연다. VLM 에이전트가 실배치로 향하는 흐름에서 이 안전·신뢰성 축의 중요성은 커질 것이며, 궤적 일관성이라는 단순·일반 원리는 다른 임베디드 에이전트(매니퓰레이션·자율주행)로도 확장 가능성이 높다.</p>
 <h3>9.5 종합 — 세 접근의 상보성</h3>
 <p>세 논문을 한 그림에 놓으면 VLN 신뢰성 연구의 세 축이 드러난다.</p>
-<pre><code>            &quot;더 잘 가기&quot;            &quot;왜 못 가나&quot;           &quot;못 갈 것 같음을 미리 알기&quot;
+<pre class="diagram"><code>            &quot;더 잘 가기&quot;            &quot;왜 못 가나&quot;           &quot;못 갈 것 같음을 미리 알기&quot;
             ─────────────          ─────────────          ─────────────────────────
             AwareVLN               VLMNavBottleneck        GroundControl
  층위       정책(policy)            시스템 분석(analysis)   메타·운영(meta/ops)
@@ -651,7 +737,7 @@ GroundCtrl: 궤적 일관성 점수 → 결과(거리궤적) 기반, 오라클�
 </code></pre>
 <p>이상적 실배치 시스템은 셋을 합친다: (1) AwareVLN처럼 자기인식을 갖춘 강한 정책으로 성공률을 높이고, (2) VLMNavBottleneck의 진단으로 인식·어휘 병목을 피하도록 설계하며, (3) GroundControl로 남은 실패를 사전 포착해 인간에게 인계한다. GroundControl의 가치는 <em>단독 성능</em>이 아니라 이 안전 계층에서의 <strong>이식성과 near-oracle 순위</strong>에 있다. 다만 그 가치를 실증하려면 실로봇 검증과 코드 공개가 선결되어야 한다 — 이것이 본 논문의 가장 큰 미완 과제다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ul>
 <li>본 논문: Darabi, Kumar, Tayebati, Naik, Trivedi. <em>GroundControl: Anticipating Navigation Failures in Vision-Language Agents via Trajectory-Consistent Uncertainty Estimates.</em> arXiv:2606.20479, 2026 (UIC).</li>
 <li>비교: <em>AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation</em> (Tsinghua, CVPR 2026), arXiv:2605.22816.</li>
@@ -659,16 +745,111 @@ GroundCtrl: 궤적 일관성 점수 → 결과(거리궤적) 기반, 오라클�
 <li>배경: EB-Navigation 벤치마크; selective prediction / risk–coverage (AURC, E-AURC); Kalman filter NIS χ² 일관성 검정; softmax entropy·conformal prediction 불확실성.</li>
 </ul>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p><strong>혁신성.</strong> GroundControl의 통찰은 &quot;VLN 실패는 한 스텝의 잘못된 확률이 아니라 <strong>목표까지 거리의 시간적 일관성 붕괴</strong>로 드러난다&quot;는 것이다. 등속 Kalman filter의 정규화 innovation(χ² 일관성 검정)에 네 궤적 특징을 고정 선형 융합하는 <em>단순한</em> 추정기가, 엔트로피·conformal 같은 표준 척도를 E-AURC에서 두 자릿수 배율로 능가한다는 점은 인상적이다.</p>
 <p><strong>실용적 의의.</strong> training-free·모델 비종속·post-hoc 설계는 어떤 VLM 백본에도 즉시 부착 가능한 안전 게이트를 제공한다. SRCN 프로토콜은 &quot;얼마나 자동 처리하며 위험을 얼마나 낮추나&quot;를 운영 언어로 측정해, selective autonomy(인간 인계) 통합의 토대를 놓는다.</p>
 <p><strong>향후 연구.</strong> 실로봇 검증과 코드 공개로 재현성을 확보하고, 거리 신호가 없는 항법으로의 확장, 스텝 수준 조기 경보 분석, 강한 정책(AwareVLN류)과의 결합이 과제다. 그럼에도 &quot;궤적 일관성 = 신뢰성 신호&quot;라는 단순·일반 원리는 VLM 임베디드 에이전트의 안전 계층 표준이 될 잠재력이 있다.</p>
 <p><strong>총평.</strong> GroundControl은 화려한 새 모델 없이, 고전 추적 이론(Kalman NIS)과 selective prediction(AURC)을 거리 궤적이라는 도메인 신호로 엮어, &quot;VLM 에이전트의 조용한 실패를 미리 알아채기&quot;라는 실용적이고 중요한 문제에 단순·강력한 해법을 제시한다. 실로봇·코드 부재라는 한계에도, 방법론적 통찰과 near-oracle 결과만으로 PhD 수준 정독의 가치가 충분한 논문이다.</p>
 <hr>
 <p><em>본 리뷰는 공개된 arXiv 정보와 검증된 사실에 근거하며, 미공개 코드/수치를 추정·날조하지 않았다. 작성: 2026-06-21.</em></p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="GroundControl: Anticipating Navigation Failures in Vision-Language Agents via Trajectory-Consistent Uncertainty Estimates — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

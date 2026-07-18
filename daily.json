@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-18T05:43:12.696Z",
+  "generatedAt": "2026-07-18T07:56:11.271Z",
   "frequency": "daily",
   "header": {
     "date": "2026. 7. 18  토요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 논문 리뷰 92편"
+    "subtitle": "VLN·Planner 새 리뷰 5편 · 전체 92편"
   },
   "papers": [
     {
@@ -182,7 +182,9 @@
       "readMinutes": 52,
       "reason": "**잠재공간 계획**: 명시적 기하 모델링을 우회, 학습된 잠재 상태에서 TD-MPC2로 지역 항법 계획 — 이랑 단절/불연속의 불확실성·시맨틱 문맥을 보존\n**자기지도 시맨틱 히트맵 추출기**: 라벨 없이 작물 열 시맨틱 히트맵을 학습, 잠재 표현의 입력으로 사용\n**로지스틱 게이팅 보상**: `r_t = e^(r_task) / (1 + e^(p_stability + p_collision))` — task(`−λ_c·(v−v*)²`, λ_c=10) / stability(α_c=1.2·ω²+β_c=0.6·Δ) / collision(γ_c=30·𝕀) 결합\n**제로샷 sim2real**: 단순화 시뮬 학습(120k step/11.4h/RTX A2000) → 실제 옥수수밭 파인튜닝 없이 배포\n**이랑 단절 강건성**: plantation gap(8.7m) 구간에서 SOTA 대비 2.4× 시맨틱 실패 감소",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/LeCropFollow_arxiv2026/index.html"
-    },
+    }
+  ],
+  "archive": [
     {
       "id": "2512.00565",
       "venue": "CVPR 2026",

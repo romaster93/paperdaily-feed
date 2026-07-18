@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>ReasonNav: Human-like Navigation in a World Built for Humans · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2509.21189">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">CoRL 2025</div>
-    <h1>Human-like Navigation in a World Built for Humans</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2509.21189">arXiv:2509.21189</a></span>
-      <span>리뷰 2026-06-29</span>
-      <span>48분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">ReasonNav_CoRL2025</span>
     </div>
+    <h1 class="doc-title">Human-like Navigation in a World Built for Humans (ReasonNav): 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">CoRL 2025</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2509.21189">2509.21189</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval"><a href="https://github.com/ReasonNav/ReasonNav">github.com/ReasonNav/ReasonNav</a></span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://reasonnav.github.io/">reasonnav.github.io/</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-06-29</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">45KB · 약 48분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>Human-like Navigation in a World Built for Humans (ReasonNav): 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: Human-like Navigation in a World Built for Humans (시스템명: <strong>ReasonNav</strong>)</li>
@@ -149,7 +235,7 @@ footer {
 <h3>1.2 연구 목표 (Research Objective)</h3>
 <p>ReasonNav는 <strong>인간이 낯선 건물을 탐색할 때 사용하는 고차원 추론 기술</strong>을 로봇 내비게이션에 통합하는 연구다. 인간은 방문한 적 없는 사무실/병원에서 특정 방을 찾을 때 모든 복도를 무작정 탐색하지 않는다. 대신 (1) 방향 표지판을 읽어 방 번호 범위를 좁히고, (2) 마주친 사람에게 길을 물어보며, (3) 방 번호의 규칙성을 추론하여 효율적으로 목표에 도달한다.</p>
 <p>핵심 연구 질문:</p>
-<pre><code>&quot;인간이 &#39;인간을 위해 설계된 세계(World Built for Humans)&#39;에서
+<pre class="codeblock"><code>&quot;인간이 &#39;인간을 위해 설계된 세계(World Built for Humans)&#39;에서
  사용하는 표지판 읽기·길 묻기 같은 고차원 추론 기술을
  VLM(Vision-Language Model) 기반 에이전트로 구현하면,
  대규모·복잡 건물에서 무작정 탐색 대비 얼마나 효율적인가?&quot;
@@ -178,11 +264,11 @@ footer {
 <p><img src="figures/x1.jpeg" alt="Fig.1 ReasonNav 멀티모달 아키텍처" loading="lazy">
 <em>Fig.1 저수준 스트림(SLAM, NanoOWL 탐지, Nav2 경로계획)과 고수준 스트림(GPT-4.1 VLM 에이전트, landmark 메모리)의 통합. VLM이 표지판 읽기·인간 상호작용·다음 landmark 선택을 추론으로 결정한다.</em></p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 무작정 탐색의 비효율 (Exhaustive Search Problem)</h4>
 <p>대형 건물(논문 실험: 80m+ 길이, 30개 이상 방)에서 특정 방을 찾는 작업은 <strong>검색 공간이 너무 크다</strong>.</p>
-<pre><code>[기존 frontier 기반 탐색의 비효율]
+<pre class="codeblock"><code>[기존 frontier 기반 탐색의 비효율]
 
 목표: &quot;Room 3027을 찾아라&quot;
 
@@ -201,7 +287,7 @@ Frontier-only 전략:
 <p>ReasonNav의 핵심 통찰: <strong>건물은 인간을 위해 설계되었으므로, 인간을 위한 단서(표지판·사람·번호 규칙)가 이미 환경에 존재한다.</strong> 이를 활용하지 않는 것은 정보 낭비다.</p>
 <h4>B. VLM의 강점과 약점의 불일치</h4>
 <p>VLM(GPT-4.1)을 내비게이션에 직접 투입할 때의 본질적 미스매치:</p>
-<pre><code>[VLM 능력의 비대칭성]
+<pre class="codeblock"><code>[VLM 능력의 비대칭성]
 
 VLM이 강한 것:
   ✅ 언어 이해 (&quot;3027은 3001-3050 범위니까 North&quot;)
@@ -219,7 +305,7 @@ VLM이 약한 것:
 </code></pre>
 <h4>C. 추론과 실행의 인터페이스 부재</h4>
 <p>고수준 추론(어디로 갈까?)과 저수준 실행(어떻게 갈까?)을 어떻게 연결할 것인가:</p>
-<pre><code>[추론-실행 인터페이스 문제]
+<pre class="codeblock"><code>[추론-실행 인터페이스 문제]
 
 순진한 접근 (End-to-End):
   관측 → VLM → 직접 모터 명령
@@ -234,7 +320,7 @@ ReasonNav 해결:
 </code></pre>
 <h3>2.2 핵심 해결책</h3>
 <p>ReasonNav의 세 가지 핵심 설계:</p>
-<pre><code>[ReasonNav의 설계 3요소]
+<pre class="codeblock"><code>[ReasonNav의 설계 3요소]
 
 설계 1: Landmark 추상화 (Landmark Abstraction)
   raw 센서 데이터 → 4종 landmark(Door/Person/Sign/Frontier)
@@ -251,10 +337,10 @@ ReasonNav 해결:
   → 각 스트림이 자신의 강점 영역만 담당
 </code></pre>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 이중 스트림 아키텍처 (Dual-Stream Architecture)</h3>
 <p>ReasonNav의 가장 근본적인 설계 결정은 시스템을 <strong>저수준 스트림</strong>과 <strong>고수준 스트림</strong>으로 분리한 것이다. 이는 VLM의 약점(정밀 기하 제어)을 결정론적 모듈에 위임하고, 강점(언어·추론)에만 VLM을 투입하는 분업 구조다.</p>
-<pre><code>[이중 스트림 구조]
+<pre class="diagram"><code>[이중 스트림 구조]
 
 ────────────── 저수준 스트림 (고주파, 결정론적) ──────────────
 │
@@ -335,7 +421,7 @@ ReasonNav 해결:
 </tr>
 </tbody></table></div>
 <p><strong>VLM에 제공되는 두 가지 입력</strong>:</p>
-<pre><code class="language-json">// 입력 1: JSON landmark 메모리 뱅크
+<pre class="codeblock"><code class="language-json">// 입력 1: JSON landmark 메모리 뱅크
 {
   &quot;landmark_0&quot;: {
     &quot;type&quot;: &quot;Door&quot;,
@@ -361,7 +447,7 @@ ReasonNav 해결:
   }
 }
 </code></pre>
-<pre><code>// 입력 2: top-down 지도 시각화 (이미지)
+<pre class="codeblock"><code>// 입력 2: top-down 지도 시각화 (이미지)
   - 색상: occupancy(벽=검정) + explored/unexplored 영역
   - 각 landmark: 카테고리별 심볼 마커 + index 번호 라벨
   - VLM이 공간 배치를 시각적으로 파악
@@ -375,7 +461,7 @@ ReasonNav 해결:
 <h3>3.3 Behavior Primitive (행동 프리미티브)</h3>
 <p>각 landmark 타입마다 <strong>전문화된 행동 시퀀스</strong>가 정의되어 있다. VLM이 landmark index를 선택하면, 해당 타입의 primitive가 결정론적으로 실행된다.</p>
 <p><strong>1. Frontier (탐사)</strong>:</p>
-<pre><code>def frontier_primitive(frontier_pose):
+<pre class="codeblock"><code>def frontier_primitive(frontier_pose):
     # Nav2 point-goal planner/controller로 frontier 이동
     navigate_to_goal(frontier_pose)
     # 360도 회전 스캔 → 주변 객체 탐지
@@ -383,7 +469,7 @@ ReasonNav 해결:
     # 발견된 Door/Sign/Person을 메모리에 추가
 </code></pre>
 <p><strong>2. Door (방 라벨 읽기)</strong>:</p>
-<pre><code>def door_primitive(door_pose):
+<pre class="codeblock"><code>def door_primitive(door_pose):
     # 문에 접근
     navigate_close_to(door_pose)
     # 카메라 pan하며 room label 탐지기 질의
@@ -398,7 +484,7 @@ ReasonNav 해결:
     memory[door_id].room_label = room_number
 </code></pre>
 <p><strong>3. Person (길 묻기)</strong>:</p>
-<pre><code>def person_primitive(person_pose):
+<pre class="codeblock"><code>def person_primitive(person_pose):
     navigate_close_to(person_pose)
     # 상호작용 타입을 VLM이 먼저 선택:
     #   (a) 지시 받기 (b) 방향 묻기 (c) 디렉토리 정보 요청
@@ -410,7 +496,7 @@ ReasonNav 해결:
     memory[person_id].note = note
 </code></pre>
 <p><strong>4. Directional Sign (표지판 읽기)</strong>:</p>
-<pre><code>def sign_primitive(sign_pose):
+<pre class="codeblock"><code>def sign_primitive(sign_pose):
     navigate_close_to(sign_pose)
     # VLM 호출로 표지판 읽기
     sign_text = vlm_read_sign(img)
@@ -422,7 +508,7 @@ ReasonNav 해결:
 <p>이 primitive 설계의 강점은 <strong>명시성</strong>이다. 각 행동이 코드로 정의되어 있어 디버깅이 쉽고, 실패 시 어느 단계에서 문제가 생겼는지 추적 가능하며, 새 landmark 타입(예: 엘리베이터)을 추가하기도 간단하다.</p>
 <h3>3.4 VLM 프롬프트 구조 (다섯 가지 프롬프트)</h3>
 <p>ReasonNav는 VLM(GPT-4.1)을 다섯 가지 명확히 분리된 역할로 호출한다:</p>
-<pre><code>[5종 VLM 프롬프트]
+<pre class="codeblock"><code>[5종 VLM 프롬프트]
 
 프롬프트 1: Landmark Selection (핵심 의사결정)
   입력: 텍스트 지시 + JSON 메모리 + 지도 이미지
@@ -448,7 +534,7 @@ ReasonNav 해결:
 </code></pre>
 <p><strong>핵심 원리</strong>: VLM의 자연어 추론력으로 &quot;어디로 갈까&quot;를 결정하되(프롬프트 1), 출력은 항상 <strong>구조화된 형식</strong>(index, 딕셔너리, 방향)으로 강제하여 저수준 실행이 정확하게 받아들일 수 있게 한다.</p>
 <h3>3.5 전체 실행 루프</h3>
-<pre><code>[ReasonNav 메인 루프]
+<pre class="diagram"><code>[ReasonNav 메인 루프]
 
 initialization:
     goal_room = parse_user_instruction()  # &quot;Find Room 3027&quot;
@@ -478,8 +564,8 @@ while not done and time &lt; 900s:
 return TIMEOUT or COLLISION_FAILURE
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>[ReasonNav 전체 파이프라인 — 데이터 흐름]
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>[ReasonNav 전체 파이프라인 — 데이터 흐름]
 
 ═══════════════════ 센서 입력 레이어 ═══════════════════
 ┌──────────────┬──────────────┬──────────────┬─────────────┐
@@ -564,7 +650,7 @@ return TIMEOUT or COLLISION_FAILURE
 </ol>
 <p>이 분업 구조의 핵심은 <strong>인터넷 의존성의 국소화</strong>다. GPT-4.1 API 호출은 고수준 결정(landmark 선택, 읽기, 대화 처리)에만 필요하며, 저수준 SLAM·탐지·경로계획은 모두 온보드(NVIDIA 4070)에서 처리된다.</p>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 / 평가 환경 (Datasets &amp; Environments)</h3>
 <p>ReasonNav는 표준 VLN 벤치마크(R2R/RxR)를 사용하지 않는다. 대신 <strong>실세계 캠퍼스 건물</strong>과 <strong>자체 구축 Isaac Sim 병원 환경</strong>에서 평가한다. 이는 ReasonNav가 표지판·사람·방 번호 같은 &quot;인간을 위한 단서&quot;가 풍부한 현실적 건물을 타겟으로 하기 때문이다.</p>
 <div class="table-wrap"><table>
@@ -600,7 +686,7 @@ return TIMEOUT or COLLISION_FAILURE
 </tr>
 </tbody></table></div>
 <p><strong>Isaac Sim 병원 벤치마크 (신규 기여)</strong>:</p>
-<pre><code>[Isaac Sim 병원 환경 구성]
+<pre class="codeblock"><code>[Isaac Sim 병원 환경 구성]
 
 규모:    30개 이상 방 (사무실/수술실/검사실/병실)
 방 번호: 3001 ~ 3041
@@ -671,7 +757,7 @@ NPC:     11명 (의사/간호사/환자로 분류)
 <td>100</td>
 <td><strong>16.6</strong></td>
 </tr>
-<tr>
+<tr class="ours">
 <td><strong>Ours (ReasonNav)</strong></td>
 <td><strong>50</strong></td>
 <td><strong>100</strong></td>
@@ -711,7 +797,7 @@ NPC:     11명 (의사/간호사/환자로 분류)
 <td>860.72</td>
 <td>123.95</td>
 </tr>
-<tr>
+<tr class="ours">
 <td><strong>Ours (ReasonNav)</strong></td>
 <td><strong>57.14</strong></td>
 <td><strong>608.99</strong></td>
@@ -744,13 +830,13 @@ NPC:     11명 (의사/간호사/환자로 분류)
 <td>No JSON</td>
 <td>0</td>
 </tr>
-<tr>
+<tr class="ours">
 <td><strong>Ours (ReasonNav)</strong></td>
 <td><strong>57.14</strong></td>
 </tr>
 </tbody></table></div>
 <p><strong>어블레이션 해석</strong>:</p>
-<pre><code>No VLM (closest):  가장 가까운 unvisited landmark 선택 (휴리스틱)
+<pre class="codeblock"><code>No VLM (closest):  가장 가까운 unvisited landmark 선택 (휴리스틱)
   → 35.71% — VLM 추론 없이도 근접 휴리스틱은 어느 정도 작동
   → 그러나 ReasonNav 대비 -21.4%p (추론의 가치)
 
@@ -810,7 +896,7 @@ No JSON:           VLM에 지도 이미지만 제공 (텍스트 메모리 없음
 </ul>
 <h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
 <p>ReasonNav는 <strong>자체 제작 모바일 로봇</strong>으로 실세계 실험을 수행한다. 플랫폼 사양이 매우 구체적으로 공개되어 있다.</p>
-<pre><code>[로봇 플랫폼 상세]
+<pre class="codeblock"><code>[로봇 플랫폼 상세]
 
 모바일 베이스: AgileX Ranger Mini 2.0
   - 4륜 조향(4-wheel steering)
@@ -844,10 +930,10 @@ No JSON:           VLM에 지도 이미지만 제공 (텍스트 메모리 없음
 </ul>
 <p><strong>실세계 한계</strong>: 7-DoF 팔(xArm7)과 GPS는 현재 미사용이며, 실세계 trial 수(12개)가 통계적으로 충분치 않다(신뢰구간 미제시). 두 건물 모두 동일 대학 캠퍼스로 환경 다양성이 제한적이다.</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>기여 1: 인간 단서 활용 내비게이션 프레임워크</h3>
 <p>ReasonNav는 &quot;건물이 인간을 위해 설계되었다&quot;는 통찰에서 출발하여, <strong>표지판 읽기·길 묻기·방 번호 추론</strong>을 통합한 최초의 실용적 VLM 내비게이션 시스템이다. 기존 frontier/semantic-mapping 방법이 무시한 환경 내 인간 단서를 1차 정보원으로 활용한다.</p>
-<pre><code>[기존 방법 대비 핵심 차별점]
+<pre class="codeblock"><code>[기존 방법 대비 핵심 차별점]
 
 VLFM/frontier 기반:
   미탐사 경계를 기하적으로만 탐색
@@ -872,9 +958,9 @@ ReasonNav:
 <h3>기여 5: 완전 공개 + 저비용 실증</h3>
 <p>GitHub에 ROS2 기반 전체 시스템 코드를 공개(Python 91.2%)하고, ~$35k의 상용 부품 로봇으로 실증했다. 실세계 배포 재현성이 높다.</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 핵심 컴포넌트</h3>
-<pre><code>[주요 컴포넌트 사양]
+<pre class="codeblock"><code>[주요 컴포넌트 사양]
 
 VLM:           GPT-4.1 (API 호출, 인터넷 필요)
 탐지기:        NanoOWL (OWL-ViT 최적화 구현, open-vocabulary)
@@ -887,7 +973,7 @@ Frontier:      VLFM 방식 (탐사/미탐사 경계 세그먼트 중점)
 추가 의존성:   Bing Search API (디렉토리 조회용)
 </code></pre>
 <h3>7.2 탐지 임계치 (NanoOWL)</h3>
-<pre><code>[NanoOWL 탐지 임계치 — 객체별 정밀 튜닝]
+<pre class="codeblock"><code>[NanoOWL 탐지 임계치 — 객체별 정밀 튜닝]
 
 Door:
   confidence 0.3
@@ -911,7 +997,7 @@ Person:
 <p>room label과 sign의 confidence 임계치가 0.03~0.04로 극히 낮은 것이 주목할 만하다. 작은 텍스트 객체를 놓치지 않기 위한 선택이지만, 이는 동시에 <strong>오탐지(실세계 실패의 33.33%)</strong>의 직접 원인이기도 하다 — 포스터·게시물을 표지판으로 잘못 잡는 trade-off.</p>
 <h3>7.3 코드 공개 구조</h3>
 <p>GitHub(<a href="https://github.com/ReasonNav/ReasonNav)%EC%97%90">https://github.com/ReasonNav/ReasonNav)에</a> 실제 구현이 공개되어 있다(placeholder 아님, Python 91.2%):</p>
-<pre><code>[ReasonNav 레포 구조 (실제 공개)]
+<pre class="diagram"><code>[ReasonNav 레포 구조 (실제 공개)]
 
 ReasonNav/
 ├── .devcontainer/       # 개발 컨테이너 설정
@@ -932,7 +1018,7 @@ ReasonNav/
 언어 분포: Python 91.2% + C++/CMake/Shell/Dockerfile
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 분석</h3>
 <p><strong>VLM 교체 가능성</strong>:
 ReasonNav는 GPT-4.1을 API로 호출하므로, 더 강력한 VLM(GPT-5, Claude, Gemini)으로 교체 시 추론 품질 향상이 기대된다. Landmark 추상화 인터페이스가 VLM-agnostic하게 설계되어 모델 교체가 용이하다. 단, 실세계 추론 실패가 20%에 불과하므로(지각 60% 대비), VLM 업그레이드의 한계 효용은 제한적일 수 있다.</p>
@@ -942,7 +1028,7 @@ ReasonNav는 GPT-4.1을 API로 호출하므로, 더 강력한 VLM(GPT-5, Claude,
 시뮬레이션 실패의 28.57%가 Nav2 경로계획/제어에서 발생한다(좁은 복도). 옴니디렉셔널 베이스(Ranger Mini)의 측면 이동 능력을 더 활용하는 컨트롤러나, footprint-aware 경로계획이 필요하다.</p>
 <h3>8.2 한계점 (Limitations)</h3>
 <p><strong>한계 1: 지각의 cascading 오류</strong></p>
-<pre><code>저수준 탐지기 오류 → 잘못된 landmark → VLM 오판 → 전체 실패
+<pre class="codeblock"><code>저수준 탐지기 오류 → 잘못된 landmark → VLM 오판 → 전체 실패
 
 구체적 케이스:
   - 포스터를 directional sign으로 오인식 (실세계 33.33%)
@@ -978,7 +1064,7 @@ ReasonNav는 GPT-4.1을 API로 호출하므로, 더 강력한 VLM(GPT-5, Claude,
 <li>xArm7(7-DoF 팔), GPS가 장착되어 있으나 미사용 → 시스템 복잡도/비용 대비 활용도 낮음</li>
 </ul>
 <h3>8.3 향후 연구 방향</h3>
-<pre><code>[향후 연구 방향]
+<pre class="codeblock"><code>[향후 연구 방향]
 
 방향 1: 탐지기 강건성 (최우선)
   실세계 실패의 60%가 지각 → 도메인 특화 탐지 fine-tuning
@@ -1001,7 +1087,7 @@ ReasonNav는 GPT-4.1을 API로 호출하므로, 더 강력한 VLM(GPT-5, Claude,
   좁은 공간 통과를 위한 RL 컨트롤러
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <p>ReasonNav는 표준 R2R/RxR 연속 환경 VLN과는 다른 트랙에 속한다 — <strong>대형 건물 객체 탐색(object/room goal navigation) + 인간 단서 활용</strong>이다. 가장 가까운 선행 VLN 리뷰 논문들과 비교한다.</p>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
@@ -1144,7 +1230,7 @@ ReasonNav는 GPT-4.1을 API로 호출하므로, 더 강력한 VLM(GPT-5, Claude,
 <li>동적 인간·다층 미처리</li>
 </ul>
 <p><strong>배포 권장사항</strong>:</p>
-<pre><code>추천 환경: 표지판·방 번호가 명확한 단층 실내
+<pre class="codeblock"><code>추천 환경: 표지판·방 번호가 명확한 단층 실내
            (사무실, 단층 병원동, 공공기관)
 추천 응용: 방문객 안내, 시설 점검 (저신뢰 허용 태스크)
 주의:      배송 등 고신뢰 응용, 다층 건물,
@@ -1160,7 +1246,7 @@ ReasonNav는 GPT-4.1을 API로 호출하므로, 더 강력한 VLM(GPT-5, Claude,
 </ol>
 <p>향후 추론 증강 VLN(AwareVLN)의 자기인식과 ReasonNav의 인간 단서 활용이 결합된다면, 신뢰성·효율성·설명 가능성을 동시에 갖춘 실세계 내비게이션이 가능할 것이다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li>Chandaka et al. (2025). Human-like Navigation in a World Built for Humans (ReasonNav). CoRL 2025. arXiv:2509.21189.</li>
 <li>Yokoyama et al. (2024). VLFM: Vision-Language Frontier Maps for Zero-Shot Semantic Navigation. ICRA 2024.</li>
@@ -1175,7 +1261,7 @@ ReasonNav는 GPT-4.1을 API로 호출하므로, 더 강력한 VLM(GPT-5, Claude,
 <li>NanoOWL: A TensorRT optimized OWL-ViT. NVIDIA-AI-IOT.</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>혁신성 평가</h3>
 <p>ReasonNav는 &quot;건물은 인간을 위해 설계되었으므로, 인간을 위한 단서(표지판·사람·번호 규칙)가 이미 환경에 존재한다&quot;는 통찰을 VLM 기반 내비게이션으로 구현한 CoRL 2025 논문이다. 핵심 혁신은 두 가지다.</p>
 <p>첫째, <strong>landmark 추상화</strong>로 저수준 스트림(SLAM·탐지·Nav2)과 고수준 스트림(GPT-4.1 추론)을 분리하여, VLM이 약점(정밀 기하 제어)을 피하고 강점(언어·추론)에만 집중하게 했다. No JSON 어블레이션의 0% 성공률이 이 추상화 인터페이스의 필수성을 극적으로 증명한다.</p>
@@ -1184,7 +1270,7 @@ ReasonNav는 GPT-4.1을 API로 호출하므로, 더 강력한 VLM(GPT-5, Claude,
 <p>80m+ 실세계 캠퍼스 건물에서 $35k 상용 부품 로봇으로 실증하고, ROS2 전체 코드를 공개했다는 점에서 재현성과 실용성이 높다. 추가로 Isaac Sim 병원 벤치마크(30+방, 11 NPC)를 공개하여 표지판 읽기·길 묻기를 정량 평가할 수 있는 재현 가능한 테스트베드를 제공했다.</p>
 <h3>향후 연구 방향</h3>
 <p>가장 중요한 과제는 <strong>지각 강건성</strong>이다. 실세계 실패의 60%가 NanoOWL 탐지 오류(특히 포스터-표지판 혼동)에서 발생하므로, 도메인 특화 탐지 fine-tuning이 가장 큰 성능 향상 여지다. 그 다음으로 다층 건물(엘리베이터), 동적 인간, 오프라인 VLM이 실세계 배포의 핵심 과제다.</p>
-<pre><code>[ReasonNav 종합 평가]
+<pre class="codeblock"><code>[ReasonNav 종합 평가]
 
 혁신성:       ⭐⭐⭐⭐  (인간 단서 활용 + landmark 추상화)
 기술 완성도:  ⭐⭐⭐⭐  (이중 스트림, 충분한 어블레이션, 실패 분석)
@@ -1194,9 +1280,104 @@ ReasonNav는 GPT-4.1을 API로 호출하므로, 더 강력한 VLM(GPT-5, Claude,
 종합:         Strong — 실세계 VLM 내비게이션의 실증적 이정표
 </code></pre>
 <p>ReasonNav는 절대 성능(58.3%)은 아직 고신뢰 응용에 미달하나, &quot;환경의 인간 친화적 단서를 추론으로 활용한다&quot;는 명확한 방향성과 완전한 실세계 실증·코드 공개로, 향후 실용적 VLM 내비게이션 연구의 중요한 출발점이 된다.</p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="Human-like Navigation in a World Built for Humans (ReasonNav): 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

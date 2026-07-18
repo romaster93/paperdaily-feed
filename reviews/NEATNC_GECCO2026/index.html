@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2604.15076">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">GECCO 2026</div>
-    <h1>NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2604.15076">arXiv:2604.15076</a></span>
-      <span>리뷰 2026-04-25</span>
-      <span>40분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">NEATNC_GECCO2026</span>
     </div>
+    <h1 class="doc-title">NEAT-NC: NEAT Guided Navigation Cells for Robot Path Planning — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">GECCO 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2604.15076">2604.15076</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval"><a href="https://github.com/HHNM/NEAT-NC">github.com/HHNM/NEAT-NC</a> (공개 완료)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">미공개</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-04-25</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">40KB · 약 40분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>NEAT-NC: NEAT Guided Navigation Cells for Robot Path Planning — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning</li>
@@ -158,10 +244,10 @@ footer {
 </ul>
 <p>NEAT-NC는 이러한 한계를 <strong>네 가지 생물학적 내비게이션 세포 유형</strong>을 입력으로 사용하고, <strong>순환 신경망(RNN)</strong> 구조를 진화시킴으로써 해결한다. 이는 뇌의 공간적 자기 표현(spatial self-representation)을 알고리즘적으로 모방한 최초의 NEAT 확장이라고 저자들은 주장한다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 경로 계획 문제의 두 가지 유형</h4>
-<pre><code>정적 경로 계획:
+<pre class="codeblock"><code>정적 경로 계획:
   환경: S-미로, 고정 장애물
   → 전통적 방법(A*, RRT*)으로 비교적 쉽게 해결 가능
   
@@ -176,7 +262,7 @@ footer {
   - 미래 장애물 위치 예측이 요구됨
 </code></pre>
 <h4>B. 바닐라 NEAT의 한계</h4>
-<pre><code>기존 NEAT 접근 (Vanilla NEAT):
+<pre class="codeblock"><code>기존 NEAT 접근 (Vanilla NEAT):
   입력: 8방향 레이더 센서 (정규화된 장애물 거리)
   네트워크: 피드포워드 (시간적 기억 없음)
   출력: 각속도 + 선속도
@@ -196,7 +282,7 @@ footer {
   &quot;목표까지 얼마나 남았는가&quot;의 공간적 관계를 비효율적으로 표현
 </code></pre>
 <h4>C. 심층 강화학습(DRL)의 한계</h4>
-<pre><code>PPO 기반 DRL:
+<pre class="codeblock"><code>PPO 기반 DRL:
   장점: 강력한 적응력, 복잡한 환경 처리 가능
   
 단점:
@@ -218,11 +304,11 @@ NEAT의 장점 (비교):
 <li><strong>목표 지향 적합도 함수</strong>: 생물학적 원리에 기반한 다목적 적합도 설계</li>
 </ol>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 생물학적 내비게이션 세포 인코딩 (Biological Navigation Cell Encoding)</h3>
 <p>뇌의 공간 내비게이션 세포들을 알고리즘적으로 구현하는 것이 이 논문의 가장 창의적인 기여다.</p>
 <h4>경계 세포 (Border Cells)</h4>
-<pre><code>생물학적 원리:
+<pre class="codeblock"><code>생물학적 원리:
   경계 세포(border cells)는 해마 주변 내비내피질(MEC)에 위치하며,
   동물이 환경의 경계(벽, 가장자리)에 가까울 때 발화한다.
   → 공간적 경계 인식에 핵심적 역할
@@ -255,7 +341,7 @@ NEAT의 장점 (비교):
   - 입력 벡터 크기: N² (N=5이면 25개 값)
 </code></pre>
 <h4>장소 세포 (Place Cells) — 목표 지향적</h4>
-<pre><code>생물학적 원리:
+<pre class="codeblock"><code>생물학적 원리:
   장소 세포(place cells)는 해마(hippocampus)에 위치하며,
   동물이 특정 장소에 있을 때 발화한다.
   → 공간적 위치 인식의 기반
@@ -284,7 +370,7 @@ NEAT의 장점 (비교):
   장소 세포 (N×N): N² 패턴 → 공간적 관계의 풍부한 표현
 </code></pre>
 <h4>두부 방향 세포 (Head-Direction Cells)</h4>
-<pre><code>생물학적 원리:
+<pre class="codeblock"><code>생물학적 원리:
   두부 방향 세포(head-direction cells)는 동물의 머리 방향에
   선택적으로 발화하는 뉴런으로, 전정 기관(vestibular system) 정보를 통합한다.
   → 방향 감각(sense of direction)의 신경 기반
@@ -310,7 +396,7 @@ NEAT의 장점 (비교):
   - 입력 벡터 크기: 1
 </code></pre>
 <h4>속도 세포 (Speed Cell)</h4>
-<pre><code>생물학적 원리:
+<pre class="codeblock"><code>생물학적 원리:
   속도 세포(speed cells)는 동물의 이동 속도에 비례하여 발화하며,
   내후각피질(entorhinal cortex)에서 발견된다.
   → 자기 운동 인식(idiothetic navigation)에 기여
@@ -331,7 +417,7 @@ NEAT의 장점 (비교):
   - 입력 벡터 크기: 1
 </code></pre>
 <h4>전체 입력 벡터 구성</h4>
-<pre><code>NEAT-NC 입력 차원 분석:
+<pre class="diagram"><code>NEAT-NC 입력 차원 분석:
 
 구성요소       크기         역할
 경계 세포      N² = 25     장애물 공간적 분포
@@ -348,7 +434,7 @@ vs. 바닐라 NEAT 입력:
 </code></pre>
 <h3>3.2 RNN 기반 NEAT 진화 (RNN-based NEAT Evolution)</h3>
 <h4>피드포워드 vs 순환 신경망</h4>
-<pre><code>바닐라 NEAT (피드포워드, FFN):
+<pre class="diagram"><code>바닐라 NEAT (피드포워드, FFN):
   입력 → [은닉층] → 출력
   특성: 각 타임스텝이 독립적
   
@@ -368,7 +454,7 @@ NEAT-NC (순환, RNN):
   - 목표까지의 진행 상황 → 더 나은 방향 결정
 </code></pre>
 <h4>NEAT 진화 과정</h4>
-<pre><code>NEAT 알고리즘 개요:
+<pre class="codeblock"><code>NEAT 알고리즘 개요:
 
 초기 집단: 간단한 RNN (입력-출력 직접 연결)
            + 소수의 순환 연결
@@ -400,13 +486,13 @@ NEAT-NC 특화 설정:
 </code></pre>
 <h3>3.3 적합도 함수 설계 (Fitness Function Design)</h3>
 <p>적합도 함수는 NEAT 진화 방향을 결정하는 핵심이다. NEAT-NC의 적합도 함수는 다음 다섯 가지 구성요소를 포함한다:</p>
-<pre><code>총 적합도:
+<pre class="codeblock"><code>총 적합도:
 F = F_goal + F_displacement + F_smoothness + F_collision + F_see_goal
 
 세부 구성요소:
 </code></pre>
 <h4>목표 달성 보상 (F_goal)</h4>
-<pre><code>F_goal = {
+<pre class="codeblock"><code>F_goal = {
     B_reach + max(0, B_steps - n_steps)   if 목표에 도달한 경우
     0                                       otherwise
 }
@@ -420,7 +506,7 @@ F = F_goal + F_displacement + F_smoothness + F_collision + F_see_goal
 → 탐색의 효율성(시간 경제성) 촉진
 </code></pre>
 <h4>변위 보상 (F_displacement) - 목표 지향적 이동</h4>
-<pre><code>아이디어: 단순히 &quot;얼마나 이동했는가&quot;가 아니라
+<pre class="codeblock"><code>아이디어: 단순히 &quot;얼마나 이동했는가&quot;가 아니라
          &quot;목표 방향으로 얼마나 이동했는가&quot;를 보상
 
 수식:
@@ -439,7 +525,7 @@ dot product 효과:
 → 불필요한 우회 경로 억제
 </code></pre>
 <h4>경로 평활도 보상 (F_smoothness) - 생물학적 경로 특성 반영</h4>
-<pre><code>뇌 기반 내비게이션 특성:
+<pre class="codeblock"><code>뇌 기반 내비게이션 특성:
   해마 기반 내비게이션은 최단 직선 경로를 선호하며
   과도한 방향 전환을 회피한다 (O&#39;Keefe &amp; Nadel, 1978)
 
@@ -460,7 +546,7 @@ F_smoothness = κ_s · Σ |ω_t|
   κ_s = -0.05: 경험적으로 찾은 최적값
 </code></pre>
 <h4>충돌 패널티 (F_collision)</h4>
-<pre><code>F_collision = {
+<pre class="codeblock"><code>F_collision = {
     P_collision  if 충돌 발생 (에피소드 즉시 종료)
     0            otherwise
 }
@@ -473,7 +559,7 @@ P_collision: 큰 음의 값
   - 동적 장애물과의 충돌도 동일하게 패널티
 </code></pre>
 <h4>See-Goal 보상 (F_see_goal) - 미로 내비게이션 특화</h4>
-<pre><code>아이디어: 복잡한 미로에서 에이전트가 &quot;마지막 코너를 돌아
+<pre class="codeblock"><code>아이디어: 복잡한 미로에서 에이전트가 &quot;마지막 코너를 돌아
          목표가 시야에 들어오는 지점&quot;까지 안내하는 추가 보상
 
 구현:
@@ -491,9 +577,9 @@ F_see_goal = {
   - 과거 실패 경로(막힌 길)를 피하도록 유도
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <h3>4.1 전체 파이프라인</h3>
-<pre><code>[NEAT-NC 시스템 개요]
+<pre class="diagram"><code>[NEAT-NC 시스템 개요]
 
                     환경 (Gymnasium + pygame)
                            │
@@ -524,7 +610,7 @@ F_see_goal = {
     → 다음 세대 집단
 </code></pre>
 <h3>4.2 세 가지 실험 환경</h3>
-<pre><code>환경 1: S-자 미로 (정적)
+<pre class="diagram"><code>환경 1: S-자 미로 (정적)
 ┌──────────────────┐
 │  S               │
 │  ┌────────────┐  │
@@ -561,9 +647,9 @@ S: 시작점, G: 목표점
 난이도: 중간
 </code></pre>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 실험 설정 (Experimental Setup)</h3>
-<pre><code>시뮬레이션 플랫폼:
+<pre class="codeblock"><code>시뮬레이션 플랫폼:
   프레임워크: Gymnasium (강화학습 표준 환경)
   렌더링: pygame
   언어: Python
@@ -599,7 +685,7 @@ S: 시작점, G: 목표점
   - 유의 수준: α = 0.05
 </code></pre>
 <h3>5.2 평가 지표 (Evaluation Metrics)</h3>
-<pre><code>4가지 주요 지표의 의미:
+<pre class="codeblock"><code>4가지 주요 지표의 의미:
 
 1. 성공률 (Success Rate):
    - 가장 중요한 지표
@@ -621,7 +707,7 @@ S: 시작점, G: 목표점
 </code></pre>
 <h3>5.3 정량적 결과 (Quantitative Results)</h3>
 <p><strong>Table 3 — 세 환경에서의 성능 비교</strong>:</p>
-<pre><code>환경 1 (S-자 미로, 정적):
+<pre class="diagram"><code>환경 1 (S-자 미로, 정적):
 ┌─────────────┬──────────┬──────────┬──────────┬──────────┐
 │ 알고리즘    │ 성공률   │ 적합도   │ 경로길이 │ 시간(s)  │
 ├─────────────┼──────────┼──────────┼──────────┼──────────┤
@@ -655,7 +741,7 @@ S: 시작점, G: 목표점
   - Vanilla NEAT: 가장 낮은 성능 (입력 표현의 한계 명확)
 </code></pre>
 <p><strong>Table 4 — 통계적 유의성 (p-values)</strong>:</p>
-<pre><code>Kruskal-Wallis 검정 결과 (유의 수준 α=0.05):
+<pre class="codeblock"><code>Kruskal-Wallis 검정 결과 (유의 수준 α=0.05):
 
 환경 1:
   적합도:     p &lt; 0.05 (유의)
@@ -679,7 +765,7 @@ Dunn 사후 검정:
   30회 독립 실행의 통계적 검정력으로 결론 신뢰 가능
 </code></pre>
 <p><strong>CD (Critical Difference) 다이어그램 분석</strong>:</p>
-<pre><code>적합도 기준 순위 (평균 순위, 낮을수록 좋음):
+<pre class="codeblock"><code>적합도 기준 순위 (평균 순위, 낮을수록 좋음):
   NEAT-NC:     1.0 (최고)
   PPO DRL:     2.0 (중간)
   Vanilla NEAT: 3.0 (최저)
@@ -692,7 +778,7 @@ Dunn 사후 검정:
 결론: NEAT-NC는 일관적으로 통계적으로 유의한 최고 성능 달성
 </code></pre>
 <h3>5.4 실세계 실험 (Real-world Experiments)</h3>
-<pre><code>⚠️ 주의: NEAT-NC 논문은 시뮬레이션 실험만 보고.
+<pre class="codeblock"><code>⚠️ 주의: NEAT-NC 논문은 시뮬레이션 실험만 보고.
 실제 물리적 로봇에서의 검증은 이루어지지 않음.
 
 저자들의 주장:
@@ -710,7 +796,7 @@ Dunn 사후 검정:
   - 실제 센서 노이즈 하에서 경계/장소 세포 추정 정확도 미검증
 </code></pre>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>6.1 NEAT와 생물학적 내비게이션 세포의 최초 통합</h3>
 <p>저자들의 주장에 따르면, NEAT 알고리즘에 장소 세포, 경계 세포, 두부 방향 세포, 속도 세포를 입력으로 통합한 것은 이 논문이 최초다. 이는 단순한 센서 변환 이상으로, 수십만 년의 진화로 최적화된 공간 내비게이션 원리를 계산적으로 구현한 것이다. 이 통합은 NEAT의 진화 탐색이 더 의미 있는 표현 공간에서 이루어지도록 유도한다.</p>
 <h3>6.2 RNN을 통한 시공간적 기억 (Hippocampus 모방)</h3>
@@ -720,9 +806,9 @@ Dunn 사후 검정:
 <h3>6.4 코드 공개를 통한 재현 가능성</h3>
 <p><a href="https://github.com/HHNM/NEAT-NC">https://github.com/HHNM/NEAT-NC</a> 에 코드를 완전 공개함으로써, Planner 트랙의 많은 논문들이 코드를 공개하지 않는 상황에서 재현 가능성과 커뮤니티 기여를 실천한 점이 긍정적이다.</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 NEAT 파라미터 (Table 2 기반)</h3>
-<pre><code>공통 파라미터 (NEAT-NC and Vanilla NEAT):
+<pre class="codeblock"><code>공통 파라미터 (NEAT-NC and Vanilla NEAT):
   population_size:       N (논문 상세값 Table 2 참조)
   num_generations:       수렴까지 (최대 세대 제한)
   activation_function:   tanh
@@ -749,7 +835,7 @@ PPO 설정 (Table 1):
   independent_runs:      30
 </code></pre>
 <h3>7.2 환경 설정</h3>
-<pre><code>경계 세포 그리드:
+<pre class="codeblock"><code>경계 세포 그리드:
   크기: 5×5 (N=5) → 25개 이진 값
   센서 반경 r_s: 파라미터 (환경 크기에 따라 조정)
   업데이트: 매 타임스텝 에이전트 포즈 기반 재계산
@@ -779,9 +865,9 @@ PPO 설정 (Table 1):
   B_see: 양의 상수 (see-goal 보상)
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 생물학적 타당성 (Biological Plausibility)</h3>
-<pre><code>실제 해마 내비게이션과의 비교:
+<pre class="codeblock"><code>실제 해마 내비게이션과의 비교:
 
 실제 뇌:
   장소 세포 → 위치 특이적 발화 (강력한 공간 표현)
@@ -811,7 +897,7 @@ NEAT-NC 근사:
   적절한 균형을 달성.
 </code></pre>
 <h3>8.2 NEAT vs DRL 전반적 비교</h3>
-<pre><code>계산 효율성:
+<pre class="codeblock"><code>계산 효율성:
   NEAT-NC:     진화 기반, 500 세대 전후 수렴
   Vanilla NEAT: 진화 기반, 유사한 세대수
   PPO DRL:     500,000 타임스텝 (약 500배 더 많은 경험 필요)
@@ -831,7 +917,7 @@ NEAT-NC 근사:
   PPO DRL: 훈련 시간 길지만 더 복잡한 환경에서 강점 가능
 </code></pre>
 <h3>8.3 확장성과 한계</h3>
-<pre><code>현재 제약:
+<pre class="codeblock"><code>현재 제약:
   1. 환경 복잡도: 2D 시뮬레이션만, 3D 실세계 미검증
   2. 센서 모델: 이상적 센서 (노이즈 없음), 실제 센서 노이즈 처리 미포함
   3. 비교 기준: Vanilla NEAT와 PPO만 비교, RRT*, A* 등 전통 방법과 미비교
@@ -846,7 +932,7 @@ NEAT-NC 근사:
   5. 멀티 에이전트: 여러 NEAT-NC 에이전트의 협력 내비게이션
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <p>Planner 트랙의 기존 리뷰 논문들과 NEAT-NC를 비교한다.</p>
 <div class="table-wrap"><table>
@@ -943,7 +1029,7 @@ NEAT-NC 근사:
 </tbody></table></div>
 <h3>9.2 장단점 분석</h3>
 <p><strong>NEAT-NC의 장점</strong>:</p>
-<pre><code>1. 독창적인 생물학적 접근:
+<pre class="codeblock"><code>1. 독창적인 생물학적 접근:
    기존 Planner 트랙 논문들(BTIT*, TRG-Planner, SANDO, GPU-SLS 등)이
    최적화/샘플링/RL에 집중하는 반면,
    NEAT-NC는 뇌의 공간 내비게이션 원리에서 영감을 받은 유일한 접근이다.
@@ -968,7 +1054,7 @@ NEAT-NC 근사:
    진화 기반 접근의 샘플 효율 장점을 실증.
 </code></pre>
 <p><strong>NEAT-NC의 단점</strong>:</p>
-<pre><code>1. 실세계 검증 부재:
+<pre class="codeblock"><code>1. 실세계 검증 부재:
    TRG-Planner(사족보행 로봇), SANDO(실외 플랫폼), IRRL(Jackal 로봇)과 달리
    물리적 로봇 실험이 없다.
    시뮬레이션-실세계 전이의 핵심 질문이 미답으로 남는다.
@@ -993,7 +1079,7 @@ NEAT-NC 근사:
    NEAT의 집단 크기와 세대 수가 환경 크기에 따라 어떻게 조정되어야 하는지 미제시.
 </code></pre>
 <h3>9.3 실적용 가능성 평가</h3>
-<pre><code>실제 로봇 배포 관점:
+<pre class="codeblock"><code>실제 로봇 배포 관점:
 
 현재 즉시 배포 가능성: 낮음
   이유:
@@ -1015,7 +1101,7 @@ NEAT-NC 근사:
   - 대규모 환경 (확장성 미검증)
 </code></pre>
 <h3>9.4 연구 방향성 평가</h3>
-<pre><code>Planner 트랙 연구 트렌드 비교:
+<pre class="codeblock"><code>Planner 트랙 연구 트렌드 비교:
   1. 샘플링 기반 최적 계획 (BTIT*): 이론적 보장 중시
   2. 학습 기반 계획 (IRRL, SANDO): 실세계 적응력 중시
   3. 지형 인식 계획 (TRG-Planner): 비정형 환경 특화
@@ -1040,9 +1126,9 @@ NEAT-NC의 방향성 평가:
 장기적으로 의미 있는 발전 방향이다.
 </code></pre>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <p>주요 인용 논문:</p>
-<pre><code>[NEAT 기반 방법]
+<pre class="codeblock"><code>[NEAT 기반 방법]
 - Stanley &amp; Miikkulainen (2002). Evolving Neural Networks through Augmenting Topologies.
   → 원본 NEAT 알고리즘
 - Shrestha &amp; Valles (2025). NEAT for multi-room navigation.
@@ -1075,7 +1161,7 @@ NEAT-NC의 방향성 평가:
   → PPO 기준 알고리즘
 </code></pre>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>혁신성 평가</h3>
 <p>NEAT-NC는 해마의 공간 내비게이션 원리를 NEAT 알고리즘에 통합한 독창적인 연구다. 장소 세포, 경계 세포, 두부 방향 세포, 속도 세포라는 네 가지 생물학적 요소를 알고리즘적 입력으로 구현하고, RNN을 진화시켜 시공간적 기억을 구현한 것은 창의적인 접근이다. 세 환경에서 30회 독립 실행으로 Vanilla NEAT와 PPO DRL 대비 통계적으로 유의한 성능 향상을 입증했다.</p>
 <h3>실용적 의의</h3>
@@ -1085,13 +1171,108 @@ NEAT-NC의 방향성 평가:
 <p>Planner 트랙에서 대부분의 연구가 MPC, RRT*, RL 등 검증된 방법을 개선하는 방향인 반면, NEAT-NC는 생물학적 영감을 통해 완전히 다른 접근을 제시한다. 이 독자적인 방향은 특정 응용 분야(해석 가능성 요구, 자원 제한 환경)에서 장기적 가치를 가질 수 있다.</p>
 <hr>
 <p><strong>리뷰 작성일</strong>: 2026-04-19<br><strong>리뷰어</strong>: NanoClaw Paper Bot<br><strong>검토 기준</strong>: Planner 트랙 (로봇 경로 계획)</p>
-<p><img src="figures/fig_03_01.jpeg" alt="Figure 1 - NEAT-NC 토폴로지" loading="lazy"></p>
-<p><img src="figures/fig_03_03.jpeg" alt="Figure - 경계 세포 및 장소 세포 시각화" loading="lazy"></p>
-<p><img src="figures/fig_05_01.jpeg" alt="Figure - 3개 실험 환경" loading="lazy"></p>
-<p><img src="figures/fig_07_01.jpeg" alt="Figure - 결과 비교 (CD 다이어그램)" loading="lazy"></p>
-
+<figure><img src="figures/fig_03_01.jpeg" alt="Figure 1 - NEAT-NC 토폴로지" loading="lazy"><figcaption>Figure 1 - NEAT-NC 토폴로지</figcaption></figure>
+<figure><img src="figures/fig_03_03.jpeg" alt="Figure - 경계 세포 및 장소 세포 시각화" loading="lazy"><figcaption>Figure - 경계 세포 및 장소 세포 시각화</figcaption></figure>
+<figure><img src="figures/fig_05_01.jpeg" alt="Figure - 3개 실험 환경" loading="lazy"><figcaption>Figure - 3개 실험 환경</figcaption></figure>
+<figure><img src="figures/fig_07_01.jpeg" alt="Figure - 결과 비교 (CD 다이어그램)" loading="lazy"><figcaption>Figure - 결과 비교 (CD 다이어그램)</figcaption></figure>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="NEAT-NC: NEAT Guided Navigation Cells for Robot Path Planning — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>LP-NavOA: Integrated Local Navigation and Obstacle Avoidance for Humanoid Robots under Limited Perception · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2606.23249">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">arXiv 프리프린트 2026 (확정 학회 미확인)</div>
-    <h1>LP-NavOA: Integrated Local Navigation and Obstacle Avoidance for Humanoid Robots under Limited Perception</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2606.23249">arXiv:2606.23249</a></span>
-      <span>리뷰 2026-06-24</span>
-      <span>40분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">LP-NavOA_arxiv2026</span>
     </div>
+    <h1 class="doc-title">LP-NavOA: 제한된 인식 하의 휴머노이드 통합 로컬 내비게이션·장애물 회피</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 프리프린트 2026 (확정 학회 미확인)</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2606.23249">2606.23249</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">예정 (Coming Soon) — 프로젝트 페이지에 &quot;Code Coming soon&quot; 명시, 현재 미공개</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://shenqiqishi.github.io/LP-NavOA/">🌐 LP-NavOA</a> (실제 콘텐츠 로드 확인)</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-06-24</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">39KB · 약 40분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>LP-NavOA: 제한된 인식 하의 휴머노이드 통합 로컬 내비게이션·장애물 회피 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: LP-NavOA: Integrated Local Navigation and Obstacle Avoidance for Humanoid Robots under Limited Perception</li>
@@ -151,7 +237,7 @@ footer {
 <p>&quot;장거리 LiDAR·전역 지도·별도 경로 플래너 없이, <strong>부분 관측(partially observable)·희소 목표(sparse-goal)</strong> 조건에서, 어떻게 장애물 회피 · 목표 복원(goal recovery) · 안정적 전신 보행을 하나의 학습 정책으로 통합할 것인가?&quot;</p>
 </blockquote>
 <p>기존 휴머노이드 내비게이션은 보통 <strong>계층 분리</strong> 구조를 쓴다: 상위 전역 플래너(지도 기반 A*/RRT)가 경로를 만들고, 하위 보행 컨트롤러가 추종한다. 그러나 이 구조는:</p>
-<pre><code>계층 분리 구조의 문제:
+<pre class="codeblock"><code>계층 분리 구조의 문제:
   1. 전역 지도 의존 → 미지·동적 환경에서 지도 구축 비용·지연
   2. 장거리 센서(3D LiDAR) 가정 → 저가/경량 플랫폼에 부담
   3. 플래너-컨트롤러 인터페이스 불일치 → 컨트롤러가 추종 못하는 경로 생성 가능
@@ -165,11 +251,11 @@ footer {
 </ul>
 <p>즉 &quot;무거운 전역 계획을 추론 시점에서 완전히 제거하고, 단거리 센싱만으로 동작하는 재귀적 조향 모듈로 대체&quot;하는 것이 본 논문의 정체성이다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 제한된 인식 (Limited Perception)</h4>
 <p>LP-NavOA는 의도적으로 <strong>단거리(4m)·저해상도(8×8) 레이캐스트 3개(전/좌/우)</strong> 만 사용한다. 이는 VL53L8CX 같은 저가 ToF 센서를 모사한 설정으로, 3D LiDAR(SCAN-Planner의 Livox Mid-360 등) 대비 정보량이 극히 적다.</p>
-<pre><code>인식 제약:
+<pre class="codeblock"><code>인식 제약:
   • 거리 센서   : 8×8 레이캐스트 × 3 (전/좌/우), FOV 45°, 최대 4m, 12Hz
   • 전역 정보   : 없음 (지도 없음)
   • 목표 정보   : 신체 좌표계 목표 오프셋 + 베어링 (희소, 가려질 수 있음)
@@ -180,7 +266,7 @@ footer {
 <h4>C. 회피와 전신 안정성의 결합 (Avoidance ⊗ Whole-Body Stability)</h4>
 <p>휴머노이드는 이족 보행이라 본질적으로 불안정하다. 급격한 회피 기동(큰 헤딩 변화)은 균형 붕괴(낙상)를 유발한다. 따라서 &quot;장애물 회피를 위한 조향 명령&quot;과 &quot;안정적 전신 보행&quot;을 동시에 만족해야 한다 — 둘을 분리해 학습하면 인터페이스 불일치가 생긴다.</p>
 <h3>2.2 핵심 해결책</h3>
-<pre><code>난제 A (제한 인식) ─→ 단거리 레이캐스트만으로 동작하는 경량 정책 설계
+<pre class="codeblock"><code>난제 A (제한 인식) ─→ 단거리 레이캐스트만으로 동작하는 경량 정책 설계
 난제 B (부분관측)  ─→ GRU 순환 메모리로 과거 관측 통합, 우회 방향 결정
 난제 C (회피+안정) ─→ 보행 백본 선학습(circular cmd) 후 조향만 증류,
                       백본은 동결(frozen) → 안정성 보존
@@ -191,22 +277,22 @@ footer {
 <li><strong>조향 플래너를 백본 위에 증류</strong>하면, 백본의 안정성을 해치지 않으면서 &quot;어디로 돌아갈지&quot;만 학습할 수 있다. 추론 시 외부 플래너가 불필요해진다.</li>
 </ol>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 PPO 보행 백본 (Locomotion Backbone)</h3>
 <p>1단계는 강화학습(PPO)으로 인식-행동 정책 <code>π_θ</code>를 학습한다.</p>
-<pre><code>목적:
+<pre class="codeblock"><code>목적:
     θ* = argmax_θ  E_{π_θ} [ Σ_t γ^t · r_t^ll ]
 
   r_t^ll : 저수준(low-level) 보행 보상
   γ      : 할인율 (0.99)
 </code></pre>
 <p><strong>관측 공간</strong>(세 요소 결합):</p>
-<pre><code>  고유수용감각 : 몸체 각속도, 중력 벡터, 관절 오프셋/속도, 이전 행동, 보행 위상(gait phase)
+<pre class="codeblock"><code>  고유수용감각 : 몸체 각속도, 중력 벡터, 관절 오프셋/속도, 이전 행동, 보행 위상(gait phase)
   국소 거리센싱: 정규화 레이캐스트 3그리드(전/좌/우), 8×8, 0~4m
   명령 입력    : c_t = [Δψ_t, v_t*]   (헤딩 오차, 목표 속도)
 </code></pre>
 <p><strong>원형 목표 명령(Circular Goal Command)</strong> — 본 논문의 첫 핵심 트릭(Eq. 3):</p>
-<pre><code>    θ_t^{w,cmd} = wrap_{[-π,π]}( ψ_t + U(-θ_max, θ_max) )
+<pre class="codeblock"><code>    θ_t^{w,cmd} = wrap_{[-π,π]}( ψ_t + U(-θ_max, θ_max) )
     p_t^{w,goal} = p_t^w + R · [ cos θ_t^{w,cmd}, sin θ_t^{w,cmd} ]
 
   ψ_t        : 현재 몸체 요(yaw)
@@ -216,7 +302,7 @@ footer {
 </code></pre>
 <p><strong>해석</strong>: 고정된 흩어진 목표 시퀀스 대신, 로봇 중심 원 위에 목표를 두고 임의 방향·속도를 추종하게 하면, 정책이 &quot;모든 방향으로 안정적으로 걷는&quot; 능력을 균일하게 학습한다. 이것이 3.0 m/s 고속에서도 99.51% 완주율을 내는 비결이다(§5.3).</p>
 <p><strong>보상 설계</strong>(Table V):</p>
-<pre><code>  track_ang_vel_cmd   +1.3~1.8   요-레이트 추종
+<pre class="codeblock"><code>  track_ang_vel_cmd   +1.3~1.8   요-레이트 추종
   track_goal_velocity +2.0       전진 속도 추종
   flat_orientation_l2 −5.0       직립 자세 유지
   is_terminated       −200       낙상 페널티 (지배적)
@@ -228,20 +314,20 @@ footer {
 </code></pre>
 <p>낙상 페널티(−200)가 압도적으로 커, 백본은 &quot;무엇보다 넘어지지 않는다&quot;를 최우선으로 학습한다 — 이후 증류 단계에서 조향이 더해져도 안정성이 유지되는 토대다.</p>
 <p><strong>3단계 학습 커리큘럼</strong>:</p>
-<pre><code>  Stage 1 : 평지 원형목표 보행 (3.0 m/s 백본 확보)
+<pre class="codeblock"><code>  Stage 1 : 평지 원형목표 보행 (3.0 m/s 백본 확보)
   Stage 2 : A* 시각 일반화 (장애물 웨이포인트 추가)
   Stage 3 : (선택) 거친 지형 적응
 </code></pre>
 <h3>3.2 증류된 순환 로컬 플래너 (Distilled Recurrent Local Planner)</h3>
 <p>2단계는 동결된 백본 위에 행동 복제로 GRU 조향 플래너 <code>f_φ</code>를 학습한다.</p>
-<pre><code>목적:
+<pre class="codeblock"><code>목적:
     φ* = argmin_φ  E_{D_{π_θ}} [ ℓ( f_φ , y_t ) ]
 
   D_{π_θ} : 동결 백본 롤아웃으로 수집한 데이터셋
   y_t     : 교사(teacher)가 제공한 헤딩 타깃
 </code></pre>
 <p><strong>플래너 관측</strong>(Eq. 4):</p>
-<pre><code>    o_t^lp = [ η_t, ν_t, ρ_t^f, ρ_t^ℓ, ρ_t^r, ξ_t ]
+<pre class="codeblock"><code>    o_t^lp = [ η_t, ν_t, ρ_t^f, ρ_t^ℓ, ρ_t^r, ξ_t ]
 
   η_t = [cos ψ_t, sin ψ_t]                          요 인코딩
   ν_t = 관절속도(dead reckoning) 또는 몸체속도(odometry)
@@ -249,11 +335,11 @@ footer {
   ξ_t = [ d^x_b/10, d^y_b/10, cos β_t, sin β_t ]     신체좌표 목표 오프셋 + 베어링
 </code></pre>
 <p><strong>아키텍처</strong>(Eq. 5) — 본 논문의 두 번째 핵심:</p>
-<pre><code>    z_t^s = E_ρ( ρ_t^s ),   s ∈ {f, ℓ, r}            그룹별 CNN 인코더 (32-D)
+<pre class="codeblock"><code>    z_t^s = E_ρ( ρ_t^s ),   s ∈ {f, ℓ, r}            그룹별 CNN 인코더 (32-D)
     h_t   = GRUCell( φ([η_t, ν_t, z_t^f, z_t^ℓ, z_t^r, ξ_t]), h_{t-1} )   GRU(48-D)
     Δψ̂_t = Δψ_max · tanh( W_ψ · h_t )                헤딩 명령 (tanh 유계)
 </code></pre>
-<pre><code>구성:
+<pre class="codeblock"><code>구성:
   • 레이캐스트 그룹별 CNN 인코더 (각 32-D 출력)
   • 융합 MLP φ
   • GRU 순환 유닛 (은닉 h_t ∈ R^48)  ← 부분관측 하 시간 통합의 핵심
@@ -262,14 +348,14 @@ footer {
 <p>GRU의 48차원 은닉 상태가 &quot;벽을 따라 어느 쪽으로 돌고 있었는지&quot;의 시간적 맥락을 유지하여, 순간 관측만으로는 불가능한 일관된 우회를 가능하게 한다.</p>
 <h3>3.3 경로 형성 교사 제어 (Route-Shaping Teacher Control)</h3>
 <p>증류의 품질은 교사 신호 품질에 달려 있다. LP-NavOA는 <strong>웨이포인트 추종</strong>과 <strong>목표 직진</strong>을 동적으로 혼합하는 교사를 설계한다(Eq. 6):</p>
-<pre><code>    Δψ_t* = α_t · Δψ_t^key + (1 − α_t) · Δψ_t^wp
+<pre class="codeblock"><code>    Δψ_t* = α_t · Δψ_t^key + (1 − α_t) · Δψ_t^wp
 
   Δψ^key : 목표(key-goal) 직진 헤딩
   Δψ^wp  : 웨이포인트(우회) 헤딩
   α_t    : 게이팅 가중 (1=직진, 0=우회)
 </code></pre>
 <p><strong>게이팅 메커니즘</strong>(Eq. 7) — 전방 여유 공간에 따라 직진/우회 전환:</p>
-<pre><code>    α̃_t = σ( k_α · (d_t^f − d_turn) )                전방 여유 기반 로지스틱
+<pre class="codeblock"><code>    α̃_t = σ( k_α · (d_t^f − d_turn) )                전방 여유 기반 로지스틱
 
     α_t^raw = { 0,    if d_t^gs &lt; d_block             목표측이 막히면 강제 우회
               { α̃_t,  otherwise
@@ -279,7 +365,7 @@ footer {
     μ_t = μ_up   if α_t^raw &gt; α_{t-1}  (직진으로 빠르게 복귀)
         = μ_down otherwise            (우회로 천천히 진입)
 </code></pre>
-<pre><code>파라미터:
+<pre class="codeblock"><code>파라미터:
   d_max = 4m            센서 범위 상한
   d_t^f = d_max·min ρ^f 전방 여유 거리
   d_t^gs               목표측 좌/우 최소 여유
@@ -291,7 +377,7 @@ footer {
 <p><strong>교사 활성 데이터 수집(Teacher-active)</strong>: 교사의 경로 형성 타깃을 동결 백본 롤아웃에 주입하여, 학생이 학습할 상태 분포를 &quot;회피 상황이 풍부한&quot; 쪽으로 조건화한다. 이를 제거하면 85.3%→67.9%로 급락(§5.3) — DAgger류 분포 정합의 중요성을 보여준다.</p>
 <h3>3.4 PPO/GAE 학습 동역학 (Backbone Optimization Dynamics)</h3>
 <p>백본 <code>π_θ</code>는 PPO의 클리핑 대리목적(clipped surrogate)으로 최적화된다(논문 하이퍼파라미터 기반 재구성).</p>
-<pre><code>PPO 클리핑 목적:
+<pre class="codeblock"><code>PPO 클리핑 목적:
     L^CLIP(θ) = E_t[ min( r_t(θ)·Â_t , clip(r_t(θ), 1−ε, 1+ε)·Â_t ) ]
 
   r_t(θ) = π_θ(a_t|s_t) / π_{θ_old}(a_t|s_t)   확률비
@@ -303,7 +389,7 @@ GAE(Generalized Advantage Estimation):
     δ_t = r_t + γ·V(s_{t+1}) − V(s_t)            TD 잔차
 </code></pre>
 <p><strong>왜 이 설정이 휴머노이드에 중요한가</strong>:</p>
-<pre><code>  γ = 0.99   → 유효 지평 ~100 스텝. 낙상(−200) 페널티가 먼 미래까지
+<pre class="codeblock"><code>  γ = 0.99   → 유효 지평 ~100 스텝. 낙상(−200) 페널티가 먼 미래까지
                역전파되어 &quot;지금의 불안정 자세&quot;가 미래 낙상으로 처벌됨
   λ = 0.95   → 이득 추정의 편향-분산 균형. 휴머노이드의 고분산 보상
                (낙상 sparse + 추종 dense)에서 안정적 학습
@@ -314,14 +400,14 @@ GAE(Generalized Advantage Estimation):
 <p>엔트로피 계수 0.01은 탐험을 약하게 유지하여, 백본이 다양한 헤딩·속도 명령에 노출되도록 한다 — 원형 목표 명령(§3.1)과 결합되어 &quot;모든 방향 강건 보행&quot;을 형성한다. entropy가 과하면 균형 붕괴, 과소하면 명령 범위 미탐험이 되므로 0.01은 균형점이다.</p>
 <h3>3.5 GRU 신용 할당과 비대칭 게이트 안정성</h3>
 <p><strong>왜 MLP가 아니라 GRU인가 — 시간적 신용 할당 관점</strong>:</p>
-<pre><code>  순간 관측 o_t만으로는 &quot;벽을 좌/우 어느 쪽으로 돌고 있었나&quot;가 미관측.
+<pre class="codeblock"><code>  순간 관측 o_t만으로는 &quot;벽을 좌/우 어느 쪽으로 돌고 있었나&quot;가 미관측.
   GRU 은닉 h_t가 &quot;직전까지의 우회 방향&quot;을 보존 →
     h_t = (1−u_t)⊙h_{t-1} + u_t⊙h̃_t     (GRU 갱신 게이트 u_t)
   → 벽을 따라 도는 동안 일관된 헤딩 부호 유지 (진동/되돌이 방지)
 </code></pre>
 <p>만약 메모리가 없으면(MLP), 로봇이 벽 중앙 부근에서 좌우 관측이 대칭일 때 헤딩이 진동(chatter)하여 벽에 갇힌다. GRU의 48-D 상태가 이 대칭을 깨는 &quot;이력(hysteresis)&quot;을 제공한다. 이는 §5.3 Key-goal-only(메모리 활용 없는 직진 교사)가 33.9%로 붕괴하는 것과 대조적이다.</p>
 <p><strong>비대칭 EMA 게이트의 안정성 분석</strong>(Eq. 7):</p>
-<pre><code>  μ_up &gt; μ_down  (직진 복귀 빠름, 우회 진입 느림)
+<pre class="codeblock"><code>  μ_up &gt; μ_down  (직진 복귀 빠름, 우회 진입 느림)
 
   의미: α(직진 가중)가 올라갈 때(=장애물 벗어남)는 빠르게 목표 복귀,
         내려갈 때(=장애물 접근)는 천천히 우회 진입.
@@ -332,8 +418,8 @@ GAE(Generalized Advantage Estimation):
 </code></pre>
 <p>이 비대칭성은 제어 이론의 슈미트 트리거(Schmitt trigger)와 유사한 히스테리시스를 구현하여, 경계 근처에서의 모드 진동을 억제한다 — 휴머노이드처럼 급변 명령에 취약한 플랫폼에 특히 중요한 설계다.</p>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>[ 학습 단계 ]
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>[ 학습 단계 ]
   Stage 1 (PPO):
      관측(고유수용+레이캐스트+[Δψ,v*]) → π_θ → 정규화 관절 행동
      원형목표 명령으로 전방향 보행 학습 (3.0 m/s)
@@ -367,9 +453,9 @@ GAE(Generalized Advantage Estimation):
 </code></pre>
 <p><strong>데이터 흐름의 핵심</strong>: 추론 시 GRU 플래너가 내놓는 헤딩 명령 <code>Δψ̂_t</code>가 <strong>원형 명령을 덮어쓰고(overwrite)</strong>, 안전 필터를 거쳐, 동결 백본이 이를 전신 보행으로 실현한다. 외부 전역 플래너·지도가 전혀 개입하지 않는 <strong>완전 planner-free 추론 인터페이스</strong>가 본 아키텍처의 정체성이다.</p>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 / 시뮬레이터 (Datasets)</h3>
-<pre><code>  물리엔진 : MuJoCo (mjlab 프레임워크)
+<pre class="codeblock"><code>  물리엔진 : MuJoCo (mjlab 프레임워크)
   로봇     : Unitree G1 휴머노이드
   레이아웃 :
     • Open straight-wall : 로봇이 벽에 접근, 우회해야 함
@@ -377,7 +463,7 @@ GAE(Generalized Advantage Estimation):
   거리센서 : 전/좌/우 8×8 레이캐스트, FOV 45°, 최대 4m, 12Hz
 </code></pre>
 <h3>5.2 평가 지표 (Evaluation Metrics)</h3>
-<pre><code>  T-rel. on-time : 교사 보정 유효거리 예산 내 목표 도달 비율 (%)
+<pre class="codeblock"><code>  T-rel. on-time : 교사 보정 유효거리 예산 내 목표 도달 비율 (%)
                    (open-wall ~25-26s, indoor 23-31s)
   Overhead Δt    : T_ep − T_0  (에피소드 시간 − 최단경로 시간)
   Any brush      : 안전 제동 + 신체/발 장애물 접촉 지속
@@ -385,7 +471,7 @@ GAE(Generalized Advantage Estimation):
   Hard collision : 종료(termination) 수준 충돌
 </code></pre>
 <p><strong>조건/베이스라인</strong>:</p>
-<pre><code>  R1 (Backbone-only) : 플래너 없이 목표 직진 (백본만)
+<pre class="codeblock"><code>  R1 (Backbone-only) : 플래너 없이 목표 직진 (백본만)
   T1 (Teacher, PP)   : 플래너 있는 교사 제어 (보정 기준)
   Ours (DR, NoPP)    : Dead-reckoning, planner-free 추론
   Ours (Odom, NoPP)  : Odometry 보조, planner-free 추론
@@ -559,7 +645,7 @@ GAE(Generalized Advantage Estimation):
 </blockquote>
 <h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
 <p><strong>Unitree G1 실로봇 배포 (정성적 검증)</strong>:</p>
-<pre><code>  테스트 시나리오:
+<pre class="codeblock"><code>  테스트 시나리오:
     • 다양한 길이의 전방 단일벽 장벽
     • 비스듬히 놓인 단일벽 장벽
     • 전-후 이중벽 장벽 구성
@@ -577,7 +663,7 @@ GAE(Generalized Advantage Estimation):
 </blockquote>
 <h3>5.5 단일 에피소드 동작 추적 (Episode Walkthrough)</h3>
 <p>Open-wall 시나리오에서 한 에피소드가 어떻게 전개되는지, 게이트 <code>α_t</code>와 GRU 헤딩의 상호작용을 단계별로 추적하면 다음과 같다(설계 기반 재구성).</p>
-<pre><code>t=0  목표가 전방, 벽 아직 멀리(d^f &gt; d_turn)
+<pre class="codeblock"><code>t=0  목표가 전방, 벽 아직 멀리(d^f &gt; d_turn)
      → α≈1 (직진 모드)
      → GRU 헤딩 Δψ̂≈0, 목표 향해 직진
 
@@ -601,7 +687,7 @@ t=T  목표 도달 (on-time 예산 ~25s 내)
 </code></pre>
 <p>이 추적은 세 메커니즘(게이트 α, 비대칭 EMA, GRU 메모리)이 어떻게 협력하는지를 압축적으로 보여준다: <strong>게이트가 &quot;언제&quot; 우회할지, GRU가 &quot;어느 쪽으로&quot; 우회할지, 비대칭 EMA가 &quot;얼마나 신중히&quot; 전환할지</strong>를 각각 담당한다. R1 백본(직진만, 38%)이 벽에 부딪혀 brush 70%를 기록하는 것과 달리, 이 협력 구조가 brush를 24%로 낮추고 성공률을 85%로 끌어올린다.</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <ol>
 <li><p><strong>통합 학습 기반 로컬 내비게이션</strong>: 전역 지도·외부 플래너·장거리 LiDAR 없이, 단거리 레이캐스트만으로 장애물 회피·목표 복원·전신 보행을 하나의 정책으로 통합. 추론 시 완전 planner-free.</p>
 </li>
@@ -615,8 +701,8 @@ t=T  목표 도달 (on-time 예산 ~25s 내)
 </li>
 </ol>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
-<pre><code>PPO 학습:
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<pre class="codeblock"><code>PPO 학습:
   clip ratio        : 0.2
   entropy coef      : 0.01
   GAE γ, λ          : 0.99, 0.95
@@ -649,9 +735,9 @@ t=T  목표 도달 (on-time 예산 ~25s 내)
 </code></pre>
 <p><strong>주목점</strong>: 8192 병렬 환경 × 1600 iteration의 대규모 GPU 병렬 PPO(mjlab)로 백본을 학습하고, 증류 플래너는 단 48-D GRU의 경량 모듈이다. 추론 시 부담이 작아 G1 온보드 실행이 가능하다. 코드는 아직 미공개(Coming Soon)라 일부 상수(k_α, d_turn, d_block, μ)의 구체 값은 확인 불가다.</p>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 한계점</h3>
-<pre><code>저자 인정 / 설계상 추론 한계:
+<pre class="codeblock"><code>저자 인정 / 설계상 추론 한계:
   1. 정량 실로봇 미보고 : 실 G1은 정성적 타당성 검증, 성공률 통계 없음
   2. 정적 장애물 한정   : 동적 장애물·이동 보행자 미처리
   3. 좁은 시나리오 범위 : 장애물 2종(open wall, indoor)에 국한,
@@ -662,7 +748,7 @@ t=T  목표 도달 (on-time 예산 ~25s 내)
   7. 안전필터 보수성    : 시뮬에서 성능 약간 저하(필터 없을 때 더 높음)
 </code></pre>
 <h3>8.2 향후 방향</h3>
-<pre><code>  • 동적 환경 확장      : 이동 보행자·동적 장애물 처리 (SCAN-Planner가 일부 다룸)
+<pre class="codeblock"><code>  • 동적 환경 확장      : 이동 보행자·동적 장애물 처리 (SCAN-Planner가 일부 다룸)
   • 정량 실로봇 평가    : 반복 시행 + 성공률/충돌률 통계 보고
   • 장거리 센싱 융합    : 단거리 레이캐스트 + 희소 LiDAR 결합으로 계획 지평 확대
   • 더 긴 시간 메모리   : GRU → Transformer/SSM으로 장기 부분관측 통합
@@ -673,7 +759,7 @@ t=T  목표 도달 (on-time 예산 ~25s 내)
 <h3>8.4 안전 필터의 이중 역할</h3>
 <p>흥미로운 관찰: 안전 필터를 끄면 시뮬 성공률이 오히려 약간 오른다(85.3→87.0%). 이는 필터가 시뮬에서는 &quot;지나치게 보수적&quot;임을 뜻한다. 그럼에도 저자가 필터를 유지하는 이유는 <strong>실로봇 배포 안전</strong> 때문이다. 시뮬-실 격차를 고려한 현실적 설계 결정으로, &quot;시뮬 지표 최대화&quot;가 아니라 &quot;실배포 안전&quot;을 우선한 점은 평가할 만하다.</p>
 <h3>8.5 추론 비용과 온보드 실행 가능성 (Inference Cost)</h3>
-<pre><code>추론 경로 연산량(대략):
+<pre class="codeblock"><code>추론 경로 연산량(대략):
   • CNN 인코더 × 3 그룹  : 각 8×8 입력 → 32-D, 매우 경량(수 μs급)
   • 융합 MLP φ           : 소형 (입력 ~수십 차원)
   • GRUCell (48-D)       : O(48²) ≈ 2.3K MAC/스텝, 무시 가능
@@ -682,7 +768,7 @@ t=T  목표 도달 (on-time 예산 ~25s 내)
 </code></pre>
 <p>전체 추론은 작은 MLP+GRU 수준으로, <strong>GPU 없이 G1 온보드 CPU에서 실시간(12Hz 센서 주기 이상)으로 충분히 실행 가능</strong>하다. 학습은 8192 병렬 환경 × 1600 iteration의 대규모 GPU 작업이지만, 배포는 극히 가볍다 — &quot;학습은 무겁게, 추론은 가볍게&quot;라는 증류의 전형적 이점이다. 이것이 LP-NavOA가 저가 휴머노이드 플랫폼을 표적으로 삼을 수 있는 실질적 근거다.</p>
 <h3>8.6 시뮬-실 전이(Sim-to-Real) 격차 분석</h3>
-<pre><code>전이 시 잠재 격차 요인:
+<pre class="codeblock"><code>전이 시 잠재 격차 요인:
   1. 레이캐스트 모사 vs 실 ToF 노이즈 : 실센서의 다중경로·결측이
                                        관측 분포를 흔들 수 있음
   2. dead-reckoning 드리프트          : 관절속도 적분 목표 추종은
@@ -692,7 +778,7 @@ t=T  목표 도달 (on-time 예산 ~25s 내)
 </code></pre>
 <p>저자가 dead-reckoning(DR)과 odometry(Odom) 두 변형을 모두 제시한 것은 이 격차 인식의 산물이다. 실로봇에서 odometry가 더 신뢰되는 환경이라면 Odom 변형(시뮬 96.6%)이, 추가 센서가 없다면 DR 변형(88.0%)이 선택지가 된다 — 배포 유연성을 확보한 설계다.</p>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <p>같은 Planner 트랙에서 <strong>학습 기반 로컬 내비게이션 / 장애물 회피 / 실로봇</strong> 주제로 가장 인접한 선행 리뷰 세 편과 비교한다:</p>
 <ul>
 <li><strong>NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning</strong> (RA-L, E2E 모델 기반 map-free)</li>
@@ -768,7 +854,7 @@ t=T  목표 도달 (on-time 예산 ~25s 내)
 </tr>
 </tbody></table></div>
 <h3>9.2 장단점 분석</h3>
-<pre><code>LP-NavOA의 강점:
+<pre class="codeblock"><code>LP-NavOA의 강점:
   + 휴머노이드 특화 — 백본 동결로 보행 안정성과 조향 지능을 깔끔히 분리
   + 극도로 제한된 인식(4m 레이캐스트)만으로 동작 → 저가 플랫폼 친화
   + GRU 순환으로 부분관측·희소목표 우회를 일관되게 처리
@@ -783,7 +869,7 @@ LP-NavOA의 약점:
   − 교사(웨이포인트/A*) 품질에 학생 성능 상한 종속
 </code></pre>
 <h3>9.3 실적용 가능성 평가</h3>
-<pre><code>적용 적합:
+<pre class="codeblock"><code>적용 적합:
   ✓ 저가 ToF 센서만 장착한 휴머노이드의 실내 국소 내비게이션
   ✓ 지도 구축이 어려운 미지 실내에서 단순 장애물 우회
   ✓ 연속 조이스틱 없이 자율 우회-복원이 필요한 휴머노이드 데모
@@ -797,7 +883,7 @@ LP-NavOA의 약점:
 <p>NeuPAN이 &quot;비휴머노이드 E2E 학습&quot;의 성숙한 사례라면, LP-NavOA는 <strong>휴머노이드라는 불안정 플랫폼에 그 철학을 이식하면서 &quot;백본 동결&quot;이라는 안정성 보존 장치를 추가</strong>한 점이 차별적이다. SCAN-Planner가 기하학적 정밀 로컬 플래닝(정량 실로봇)으로 강하다면, LP-NavOA는 학습 기반 경량성·저센싱 친화성으로 강점이 있으나 실로봇 정량성에서 뒤진다.</p>
 <p><strong>트랙 분류 근거</strong>: LP-NavOA는 휴머노이드 로코모션(PPO 보행)을 포함하지만, 논문의 <strong>핵심 기여와 평가 지표가 &quot;로컬 내비게이션 · 장애물 회피 · 목표 도달&quot;</strong> 에 집중되어 있다(Table II/III의 모든 지표가 도달율·brush·충돌). 이는 본 코퍼스 Planner 트랙의 정의(&quot;경로 생성, 장애물 회피, 탐색 전략&quot;)에 정확히 부합한다. 보행 백본은 회피 조향을 실현하는 하위 수단일 뿐, 논문의 신규성은 조향 플래너(GRU)와 경로 형성 교사에 있다. 따라서 매니퓰레이션·로코모션 학습 그 자체가 목적인 논문(트랙 외)과 달리, <strong>본 논문은 Planner 트랙으로 분류함이 타당</strong>하다. (NeuPAN·IRRL·SCAN-Planner 등 학습 기반 로컬 내비 선례가 이미 코퍼스 Planner 트랙에 등재되어 있어 일관적이다.)</p>
 <h3>9.5 종합 위치 평가</h3>
-<pre><code>  검증 성숙도 :  NeuPAN ≈ SCAN-Planner &gt; LP-NavOA &gt; (코드 미공개 다수)
+<pre class="codeblock"><code>  검증 성숙도 :  NeuPAN ≈ SCAN-Planner &gt; LP-NavOA &gt; (코드 미공개 다수)
   아이디어 신선도: LP-NavOA(휴머노이드 분리 레시피) &gt; NeuPAN(성숙) ≈ SCAN(기하)
   센싱 경제성  :  LP-NavOA(4m 레이캐스트) &gt; NeuPAN &gt; SCAN(3D LiDAR)
   플랫폼 난이도:  LP-NavOA(이족 휴머노이드) &gt; SCAN(사족) &gt; NeuPAN(차량/점로봇)
@@ -806,7 +892,7 @@ LP-NavOA의 약점:
 <h3>9.4 연구 방향성 평가</h3>
 <p>LP-NavOA의 기술적 참신성은 <strong>&quot;원형 목표 명령으로 보행을 균일 학습 → 동결 → GRU 조향 증류&quot;</strong> 라는 2단계 분리 레시피에 있다. 개별 요소(PPO 보행, GRU 플래너, DAgger류 교사 강제)는 각각 알려진 기법이지만, 이를 <strong>휴머노이드 안정성 보존이라는 제약 하에 조합</strong>하고 원형 명령이라는 백본 학습 트릭으로 고속 강건성을 확보한 통합이 기여다. 순수하게 새로운 알고리즘이라기보다 <strong>&quot;잘 동작하는 시스템 통합 + 영리한 명령 설계&quot;</strong> 에 가깝다. 향후 동적 환경·장기 메모리(Transformer/SSM)·정량 실로봇으로 확장하면 휴머노이드 로컬 내비게이션의 실용 표준이 될 잠재력이 있다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li>Luo, Y., Ma, J., Min, Y., Li, J., Huang, K., Li, P. <em>LP-NavOA: Integrated Local Navigation and Obstacle Avoidance for Humanoid Robots under Limited Perception.</em> arXiv:2606.23249, 2026. (프로젝트: <a href="https://shenqiqishi.github.io/LP-NavOA/">https://shenqiqishi.github.io/LP-NavOA/</a>)</li>
 <li><strong>NeuPAN</strong> — <em>Direct Point Robot Navigation with End-to-End Model-based Learning.</em> RA-L. arXiv:2403.06828. (본 코퍼스: <code>Planner/review/NeuPAN_RAL/</code>)</li>
@@ -818,16 +904,111 @@ LP-NavOA의 약점:
 <li>mjlab / MuJoCo — GPU 가속 로봇 학습 프레임워크 및 물리엔진.</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p>LP-NavOA는 <strong>&quot;전역 지도도 외부 플래너도 장거리 LiDAR도 없이, 단거리 레이캐스트만으로 휴머노이드가 장애물을 우회하며 목표에 도달한다&quot;</strong> 는 도전적 목표를, 2단계 학습(PPO 보행 백본 + GRU 증류 조향 플래너)으로 달성한 시스템이다. 원형 목표 명령으로 3.0 m/s 강건 백본을 확보하고(완주율 99.51%), 이를 동결한 뒤 48-D GRU 조향 모듈을 동적 경로 형성 교사로 증류하여, 추론 시 완전 planner-free로 동작한다. 그 결과 시뮬레이션 목표 도달 성공률이 백본만의 38<del>40%에서 <strong>85</del>97%로 도약</strong>했고, 실 Unitree G1에서 0.281m 여유까지 우회-복원 조향을 정성적으로 시연했다.</p>
 <p><strong>혁신성</strong>: &quot;안정성은 RL로 한 번 확실히 학습해 동결, 그 위에 조향 지능만 증류&quot;하는 분리 레시피와, 전방향 강건 보행을 빠르게 얻는 원형 목표 명령 설계가 핵심 신규성이다. 부분관측·희소목표를 GRU 순환 메모리로 통합한 점도 휴머노이드 로컬 내비에 적절하다.</p>
 <p><strong>실용적 의의</strong>: 저가 단거리 센서만으로 동작하는 경량성은 비용에 민감한 휴머노이드 배포에 직접적 가치가 있다. 다만 <strong>실로봇 정량 지표 부재, 코드 미공개(Coming Soon), 정적·단순 장애물 한정, 4m 단거리 한계</strong>는 실용화의 분명한 장벽이다. SCAN-Planner(정량 실로봇)나 NeuPAN(공개·성숙)과 비교하면, LP-NavOA는 &quot;휴머노이드 특화 통합 아이디어&quot;는 신선하나 &quot;검증·재현 성숙도&quot;는 아직 낮다.</p>
 <p><strong>향후 연구</strong>: 동적 환경 확장, 정량 실로봇 평가(반복 시행·통계), 장기 메모리(Transformer/SSM) 도입, 그리고 무엇보다 코드 공개가 LP-NavOA를 데모에서 실용 표준으로 전환시킬 핵심 다음 단계다. &quot;백본 동결 + 조향 증류&quot;라는 분리 레시피는 다른 레그드 로봇(사족·이족)의 로컬 내비게이션에도 일반화될 잠재력이 충분하다.</p>
 <hr>
 <p><em>PhD 수준 상세 리뷰 — 자동 생성: 2026-06-24</em></p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="LP-NavOA: 제한된 인식 하의 휴머노이드 통합 로컬 내비게이션·장애물 회피">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

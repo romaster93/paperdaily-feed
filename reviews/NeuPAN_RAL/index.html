@@ -6,133 +6,228 @@
 <meta name="color-scheme" content="light dark">
 <title>NeuPAN: Direct Point Robot Navigation with E2E Model-based Learning · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2403.06828">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">RA-L</div>
-    <h1>NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2403.06828">arXiv:2403.06828</a></span>
-      <span>리뷰 2026-03-29</span>
-      <span>50분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">NeuPAN_RAL</span>
     </div>
+    <h1 class="doc-title">NeuPAN 논문 분석 — &quot;Direct Point Robot Navigation with End-to-End Model-based Learning&quot;</h1>
+    
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">RA-L</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2403.06828">2403.06828</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval"><a href="https://github.com/hanruihua/NeuPAN">github.com/hanruihua/NeuPAN</a></span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://neuropan.github.io/">neuropan.github.io/</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-03-29</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">46KB · 약 50분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 20개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">논문 정보</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">Abstract 요약</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">각 섹션별 내용 정리</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">III. Methodology — NeuPAN 프레임워크</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">IV. 네트워크 아키텍처</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">V. 실험 설계</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">VI. 실험 결과</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">VII. 핵심 기여 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">VIII. 비교 분석 및 관련 연구</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">4개 관점 분석</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">관점 1: 로봇 엔지니어 (실제 배포 관점)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-11"><span class="toc-num">12</span><span class="toc-title">관점 2: 알고리즘 전문가 (내비게이션/경로계획 시각)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-12"><span class="toc-num">13</span><span class="toc-title">관점 3: 탑티어 심사위원 (ICRA/TRO 기준)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-13"><span class="toc-num">14</span><span class="toc-title">관점 4: 석사 초보자 (이해도 검토)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-14"><span class="toc-num">15</span><span class="toc-title">비교 검증 테이블</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-15"><span class="toc-num">16</span><span class="toc-title">코드 리뷰 (GitHub 기반)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-16"><span class="toc-num">17</span><span class="toc-title">최종 종합 리뷰</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-17"><span class="toc-num">18</span><span class="toc-title">최종 평점</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-18"><span class="toc-num">19</span><span class="toc-title">🎯 최종 평가: 3.9/5.0</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-19"><span class="toc-num">20</span><span class="toc-title">추가 참고 자료</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>NeuPAN 논문 분석 — &quot;Direct Point Robot Navigation with End-to-End Model-based Learning&quot;</h1>
-<h2>논문 정보</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="논문 정보">논문 정보</h2>
 <ul>
 <li><strong>제목</strong>: NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning</li>
 <li><strong>저자</strong>: Ruihua Han, Shuai Wang, Shuaijun Wang, Zeqing Zhang, Jianjun Chen, Shijie Lin, Chengyang Li, Chengzhong Xu, Yonina C. Eldar, Qi Hao, Jia Pan</li>
@@ -141,7 +236,7 @@ footer {
 <li><strong>링크</strong>: <a href="https://arxiv.org/abs/2403.06828">arXiv</a> | <a href="https://neuropan.github.io/">Project Page</a></li>
 </ul>
 <hr>
-<h2>Abstract 요약</h2>
+<h2 id="sec-1" data-label="Abstract 요약">Abstract 요약</h2>
 <p>NeuPAN은 지도 없는(map-free) 실시간 로봇 모션 플래닝을 위한 엔드-투-엔드 모델 기반 학습 프레임워크다. <strong>핵심 혁신</strong>은 두 가지:</p>
 <ol>
 <li><strong>Perception-to-Control 통합</strong>: 포인트 클라우드를 직접 거리 특성 공간(latent distance feature space)으로 매핑하여, 인지→제어 파이프라인에서의 오차 전파 제거</li>
@@ -149,7 +244,7 @@ footer {
 </ol>
 <p>지상 이동 로봇, 휠-다리 로봇, 자율 주행 차량 등 다양한 플랫폼에서 모래 상자, 사무실, 복도, 주차장 등 다양한 환경에서 기존 방법 대비 <strong>정확도, 효율성, 강건성, 일반화 능력</strong> 측면에서 우수한 성능 입증.</p>
 <hr>
-<h2>각 섹션별 내용 정리</h2>
+<div class="secnav"><span></span><a href="#sec-1">Abstract 요약 →</a></div><h2 id="sec-2" data-label="각 섹션별 내용 정리">각 섹션별 내용 정리</h2>
 <h3>I. Introduction</h3>
 <p><strong>문제 정의</strong>: 비구조화(unstructured), 미지(unknown) 환경에서의 비전향(nonholonomic) 로봇 내비게이션은 두 가지 핵심 과제를 안고 있다:</p>
 <ol>
@@ -191,10 +286,10 @@ footer {
 <li>다양한 로봇 플랫폼 및 환경에서 강건한 성능</li>
 </ol>
 <hr>
-<h2>III. Methodology — NeuPAN 프레임워크</h2>
+<div class="secnav"><a href="#sec-0">← 논문 정보</a><a href="#sec-2">각 섹션별 내용 정리 →</a></div><h2 id="sec-3" data-label="III. Methodology — NeuPAN 프레임워크">III. Methodology — NeuPAN 프레임워크</h2>
 <h3>전체 파이프라인</h3>
-<p><img src="figures/fig_02_01.jpeg" alt="NeuPAN System Overview" loading="lazy"></p>
-<pre><code>[원시 포인트 클라우드 P] (3D 좌표 + 반사도)
+<figure><img src="figures/fig_02_01.jpeg" alt="NeuPAN System Overview" loading="lazy"><figcaption>NeuPAN System Overview</figcaption></figure>
+<pre class="codeblock"><code>[원시 포인트 클라우드 P] (3D 좌표 + 반사도)
          |
     (인코더 블록)
          |
@@ -212,7 +307,7 @@ footer {
 <h3>3.1 PAN (Proximal Alternating-Minimization Network)</h3>
 <p>NeuPAN의 핵심은 다음 제약이 있는 최적화 문제를 푸는 것:</p>
 <p><strong>최적화 문제</strong>:</p>
-<pre><code>min ||F(P) - φ(v)||²_2 + R(v)
+<pre class="codeblock"><code>min ||F(P) - φ(v)||²_2 + R(v)
  v
 
 s.t. D(p_i + v·Δt) &gt; r_safe, ∀ i ∈ 1,...,N
@@ -229,7 +324,7 @@ s.t. D(p_i + v·Δt) &gt; r_safe, ∀ i ∈ 1,...,N
 </ul>
 <p><strong>PAN 알고리즘</strong>:</p>
 <p>전통 PnP는 선형 역 문제 <code>Ax = b</code>에 국한되지만, NeuPAN의 PAN은 비선형 제약을 처리하도록 확장:</p>
-<pre><code>반복 1~K번:
+<pre class="codeblock"><code>반복 1~K번:
   1. x-업데이트 (근접 연산자 적용):
      x^(k+1) = prox_{λR}(v^(k) - λ∇L(v^(k), D, r_safe))
      
@@ -240,17 +335,17 @@ s.t. D(p_i + v·Δt) &gt; r_safe, ∀ i ∈ 1,...,N
 <h3>3.2 거리 필드 (Distance Field) 기반 충돌 회피</h3>
 <p>포인트 클라우드 P = {p_1, ..., p_N}이 주어졌을 때:</p>
 <p><strong>거리 필드 계산</strong>:</p>
-<pre><code>D(x) = min_i ||x - p_i||_2
+<pre class="codeblock"><code>D(x) = min_i ||x - p_i||_2
 </code></pre>
 <p>로봇의 중심에서 가장 가까운 포인트까지의 유클리드 거리. </p>
 <p><strong>충돌 회피 제약</strong>:</p>
-<pre><code>D(p_i + v·Δt) &gt; r_safe, ∀ i ∈ 1,...,N
+<pre class="codeblock"><code>D(p_i + v·Δt) &gt; r_safe, ∀ i ∈ 1,...,N
 </code></pre>
 <p>로봇이 예상 경로 상의 모든 점에서 최소 <code>r_safe</code> 마진을 유지해야 함.</p>
 <h3>3.3 특성 공간 (Feature Space)</h3>
 <p>포인트 클라우드로부터 직접 학습하는 대신, <strong>압축된 특성 공간</strong> φ에서 작동:</p>
 <p><strong>학습 목표</strong>:</p>
-<pre><code>||F(P) - φ(v)||²_2 ↓
+<pre class="codeblock"><code>||F(P) - φ(v)||²_2 ↓
 
 F: 포인트 클라우드 → d차원 특성 벡터
 φ: 모션 v → d차원 예상 특성
@@ -265,14 +360,14 @@ F: 포인트 클라우드 → d차원 특성 벡터
 <h3>3.4 신경 루프 (Neurons in the Loop)</h3>
 <p>전통 PnP: 수학적 근접 연산자(proximal operator)의 명시적 형식
 NeuPAN PAN: 근접 연산자 대신 신경망 <code>h_θ</code>로 근사</p>
-<pre><code>prox_R(y) ≈ h_θ(y)
+<pre class="codeblock"><code>prox_R(y) ≈ h_θ(y)
 
 신경망 h_θ는 최적화 문제를 푸는 단계를 학습하여,
 기존의 명시적 해석 공식 대신 신경망으로 근사.
 이를 통해 학습 과정에서 제약을 자동으로 통합.
 </code></pre>
 <hr>
-<h2>IV. 네트워크 아키텍처</h2>
+<div class="secnav"><a href="#sec-1">← Abstract 요약</a><a href="#sec-3">III. Methodology — NeuPAN 프레임워크 →</a></div><h2 id="sec-4" data-label="IV. 네트워크 아키텍처">IV. 네트워크 아키텍처</h2>
 <h3>인코더 (Encoder)</h3>
 <p><strong>입력</strong>: 포인트 클라우드 P ∈ ℝ^{N×3} (좌표) + C ∈ ℝ^{N} (반사도)</p>
 <p><strong>아키텍처</strong>:</p>
@@ -285,14 +380,14 @@ NeuPAN PAN: 근접 연산자 대신 신경망 <code>h_θ</code>로 근사</p>
 <h3>운동 생성기 (Motion Generator)</h3>
 <p><strong>입력</strong>: 특성 F + 거리 필드 D + 제약 {r_safe, v_max, ω_max}</p>
 <p><strong>PAN 블록</strong> (K 반복, 통상 K=3~5):</p>
-<pre><code>for k = 1 to K:
+<pre class="codeblock"><code>for k = 1 to K:
   ψ_k = h_θ(ψ_{k-1}, F, D)  # 신경망으로 PAN 단계 근사
   
 최종 모션: v* = decoder(ψ_K)
 </code></pre>
 <p><strong>출력</strong>: v = (v_x, v_y, ω) (3-DOF 모션)</p>
 <hr>
-<h2>V. 실험 설계</h2>
+<div class="secnav"><a href="#sec-2">← 각 섹션별 내용 정리</a><a href="#sec-4">IV. 네트워크 아키텍처 →</a></div><h2 id="sec-5" data-label="V. 실험 설계">V. 실험 설계</h2>
 <h3>5.1 실험 플랫폼</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -421,8 +516,8 @@ NeuPAN PAN: 근접 연산자 대신 신경망 <code>h_θ</code>로 근사</p>
 </tr>
 </tbody></table></div>
 <hr>
-<h2>VI. 실험 결과</h2>
-<p><img src="figures/fig_06_01.jpeg" alt="NeuPAN Experimental Results" loading="lazy"></p>
+<div class="secnav"><a href="#sec-3">← III. Methodology — NeuPAN 프레임워크</a><a href="#sec-5">V. 실험 설계 →</a></div><h2 id="sec-6" data-label="VI. 실험 결과">VI. 실험 결과</h2>
+<figure><img src="figures/fig_06_01.jpeg" alt="NeuPAN Experimental Results" loading="lazy"><figcaption>NeuPAN Experimental Results</figcaption></figure>
 <h3>6.1 시뮬레이션 정량 결과</h3>
 <h4>Table 1: 기본 성능 비교</h4>
 <div class="table-wrap"><table>
@@ -677,7 +772,7 @@ NeuPAN PAN: 근접 연산자 대신 신경망 <code>h_θ</code>로 근사</p>
 <li><strong>총 메모리: ~2.5MB</strong> (임베디드 장치 호환)</li>
 </ul>
 <hr>
-<h2>VII. 핵심 기여 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-4">← IV. 네트워크 아키텍처</a><a href="#sec-6">VI. 실험 결과 →</a></div><h2 id="sec-7" data-label="VII. 핵심 기여">VII. 핵심 기여 (Key Contributions)</h2>
 <h3>1. 통합 Perception-to-Control 아키텍처</h3>
 <ul>
 <li>포인트 클라우드 → 거리 특성 공간 → 안전 모션의 <strong>직접 매핑</strong></li>
@@ -703,7 +798,7 @@ NeuPAN PAN: 근접 연산자 대신 신경망 <code>h_θ</code>로 근사</p>
 <li>기존 DRL의 블랙박스 성질 극복</li>
 </ul>
 <hr>
-<h2>VIII. 비교 분석 및 관련 연구</h2>
+<div class="secnav"><a href="#sec-5">← V. 실험 설계</a><a href="#sec-7">VII. 핵심 기여 →</a></div><h2 id="sec-8" data-label="VIII. 비교 분석 및 관련 연구">VIII. 비교 분석 및 관련 연구</h2>
 <h3>vs. 전통 경로 계획 (RRT*, PRM*)</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -793,9 +888,9 @@ NeuPAN PAN: 근접 연산자 대신 신경망 <code>h_θ</code>로 근사</p>
 <li><strong>NeuPAN 활용</strong>: PointNet++를 인코더로 사용하여 점 수준 정보 보존</li>
 </ul>
 <hr>
-<h2>4개 관점 분석</h2>
+<div class="secnav"><a href="#sec-6">← VI. 실험 결과</a><a href="#sec-8">VIII. 비교 분석 및 관련 연구 →</a></div><h2 id="sec-9" data-label="4개 관점 분석">4개 관점 분석</h2>
 <hr>
-<h2>관점 1: 로봇 엔지니어 (실제 배포 관점)</h2>
+<div class="secnav"><a href="#sec-7">← VII. 핵심 기여</a><a href="#sec-9">4개 관점 분석 →</a></div><h2 id="sec-10" data-label="관점 1: 로봇 엔지니어">관점 1: 로봇 엔지니어 (실제 배포 관점)</h2>
 <h3>요약</h3>
 <p>NeuPAN은 실제 로봇에 배포하기에 <strong>매력적인 프레임워크</strong>다. 5.1ms의 초고속 계획 시간, 명시적인 제약 조건 통합으로 인한 안전성 보증, 그리고 지도 없는 직접 포인트 클라우드 처리로 SLAM 파이프라인이 필요 없다. 다만, <strong>PAN의 비선형 최적화 수렴성</strong>, <strong>센서 노이즈에 대한 강건성</strong>, 그리고 <strong>동적 장애물 대응</strong>은 실제 배포 환경에서 신중히 검증해야 할 점들이다.</p>
 <h3>강점</h3>
@@ -890,7 +985,7 @@ NeuPAN PAN: 근접 연산자 대신 신경망 <code>h_θ</code>로 근사</p>
 </tr>
 </tbody></table></div>
 <hr>
-<h2>관점 2: 알고리즘 전문가 (내비게이션/경로계획 시각)</h2>
+<div class="secnav"><a href="#sec-8">← VIII. 비교 분석 및 관련 연구</a><a href="#sec-10">관점 1: 로봇 엔지니어 →</a></div><h2 id="sec-11" data-label="관점 2: 알고리즘 전문가">관점 2: 알고리즘 전문가 (내비게이션/경로계획 시각)</h2>
 <h3>요약</h3>
 <p>NeuPAN은 <strong>비선형 제약이 있는 포인트 클라우드 기반 최적화 문제</strong>로서 흥미로운 도전을 제시한다. PAN 아키텍처는 전통 근접 연산자를 신경망으로 대체하는 창의적 접근이나, 제약 만족도의 수학적 보증과 최적성(optimality)에 대한 형식적 분석이 부족하다. 또한, 포인트 레벨 제약 개수가 엄청나면(N=10K) PAN의 표현력이 충분한지 의문이다.</p>
 <h3>강점</h3>
@@ -910,7 +1005,7 @@ NeuPAN PAN: 근접 연산자 대신 신경망 <code>h_θ</code>로 근사</p>
 <li>대비: DRL에서 포인트 클라우드를 직접 처리하면 입력 차원이 거대해짐</li>
 </ul>
 <p><strong>수학적 이점</strong>:</p>
-<pre><code>최적화 문제의 수치 조건수(condition number):
+<pre class="codeblock"><code>최적화 문제의 수치 조건수(condition number):
 - 포인트 공간: O(N²) (N=10K 시 10²⁰)
 - 특성 공간: O(d²) (d=256 시 약 65K)
 → 계산 안정성 극적 향상
@@ -946,7 +1041,7 @@ NeuPAN PAN: 근접 연산자 대신 신경망 <code>h_θ</code>로 근사</p>
 <li>PAN 신경망이 정말 최적 방향으로 업데이트하는지 보장 부재</li>
 </ul>
 <p><strong>필요한 분석</strong>:</p>
-<pre><code>||L(v^(K)) - L(v*)||  = O(?) as K → ∞
+<pre class="codeblock"><code>||L(v^(K)) - L(v*)||  = O(?) as K → ∞
 </code></pre>
 </li>
 <li><p><strong>차원 축소 공식의 정보 손실</strong></p>
@@ -974,7 +1069,7 @@ c) 우연의 일치</li>
 </li>
 </ol>
 <hr>
-<h2>관점 3: 탑티어 심사위원 (ICRA/TRO 기준)</h2>
+<div class="secnav"><a href="#sec-9">← 4개 관점 분석</a><a href="#sec-11">관점 2: 알고리즘 전문가 →</a></div><h2 id="sec-12" data-label="관점 3: 탑티어 심사위원">관점 3: 탑티어 심사위원 (ICRA/TRO 기준)</h2>
 <h3>요약</h3>
 <p>NeuPAN은 <strong>혁신적 아이디어</strong>를 담고 있으나 <strong>학술적 엄격함</strong>이 부족하다. PAN의 신경망 반복 개념은 참신하고, 충돌 회피 제약의 명시적 통합은 안전성 면에서 가치있다. 다만:</p>
 <ol>
@@ -1020,7 +1115,7 @@ c) 우연의 일치</li>
 <ol>
 <li><p><strong>제약 만족도(Constraint Satisfaction)에 대한 형식적 증명 부재</strong></p>
 <p><strong>문제</strong>: 논문이 &quot;거리 제약을 신경망에 통합&quot;이라고 주장하나 수학적 보증 없음</p>
-<pre><code>핵심 주장: D(p_i + v*·Δt) &gt; r_safe, ∀i
+<pre class="codeblock"><code>핵심 주장: D(p_i + v*·Δt) &gt; r_safe, ∀i
 
 그러나:
 - 신경망이 모든 N개 점에 대해 제약을 만족하는 v*를 생성하는가?
@@ -1047,7 +1142,7 @@ c) 우연의 일치</li>
 </ul>
 <p><strong>평가 영향</strong>: NeuPAN의 우수성이 선택된 약한 기준선에 대한 상대적 우수일 가능성</p>
 <p><strong>필요한 추가 비교</strong>:</p>
-<pre><code>NeuPAN vs 2024 ICRA 최고 성능 방법들
+<pre class="codeblock"><code>NeuPAN vs 2024 ICRA 최고 성능 방법들
 성공률 비교 (90.1% vs ?)
 </code></pre>
 </li>
@@ -1068,12 +1163,12 @@ c) 우연의 일치</li>
 </li>
 <li><p><strong>Sim-to-Real 전이 검증의 정량화 부족</strong></p>
 <p><strong>시뮬레이션</strong>:</p>
-<pre><code>Sandbox: 91.2% SR
+<pre class="codeblock"><code>Sandbox: 91.2% SR
 Office: 87.6% SR
 Corridor: 89.3% SR
 </code></pre>
 <p><strong>실세계</strong> (10회 시험):</p>
-<pre><code>Sandbox (Wheel-Legged): 10/10 성공
+<pre class="codeblock"><code>Sandbox (Wheel-Legged): 10/10 성공
 Campus: 9/10 성공
 Parking: 10/10 성공
 </code></pre>
@@ -1117,7 +1212,7 @@ Parking: 10/10 성공
 </li>
 </ol>
 <hr>
-<h2>관점 4: 석사 초보자 (이해도 검토)</h2>
+<div class="secnav"><a href="#sec-10">← 관점 1: 로봇 엔지니어</a><a href="#sec-12">관점 3: 탑티어 심사위원 →</a></div><h2 id="sec-13" data-label="관점 4: 석사 초보자">관점 4: 석사 초보자 (이해도 검토)</h2>
 <h3>요약</h3>
 <p>이 논문의 <strong>핵심 아이디어는 직관적</strong>이지만, <strong>구현의 수학적 세부사항</strong>이 복잡해서 전체를 이해하기 위해서는 상당한 배경 지식이 필요하다. 포인트 클라우드 처리, 신경망 아키텍처, 최적화 이론에 대한 기초 이해가 있어야 논문을 온전히 소화할 수 있다.</p>
 <h3>이해가 쉬운 부분</h3>
@@ -1151,7 +1246,7 @@ Parking: 10/10 성공
 <ul>
 <li>Proximal operator, Alternating minimization은 고급 최적화 이론 주제</li>
 <li>&quot;K 반복으로 제약 최적화 문제를 푸는 신경망&quot; — 의미 파악 어려움</li>
-<li>논문의 표현:<pre><code>x-업데이트: x^(k+1) = prox_λR(v^(k) - λ∇L)
+<li>논문의 표현:<pre class="codeblock"><code>x-업데이트: x^(k+1) = prox_λR(v^(k) - λ∇L)
 v-업데이트: v^(k+1) = NeuralNet(x^(k), D, constraints)
 </code></pre>
 </li>
@@ -1173,7 +1268,7 @@ v-업데이트: v^(k+1) = NeuralNet(x^(k), D, constraints)
 <li>K 반복의 신경망 블록이 어떻게 학습되는가?</li>
 </ul>
 <p><strong>예시 의문</strong>:</p>
-<pre><code>특성 벡터 F (128차원) → 거리 필드 D는 공간 함수인데,
+<pre class="codeblock"><code>특성 벡터 F (128차원) → 거리 필드 D는 공간 함수인데,
 F에서 D를 어떻게 추론하는가?
 
 → 설명: 신경망이 맵핑 F → D를 학습
@@ -1204,7 +1299,7 @@ F에서 D를 어떻게 추론하는가?
 </li>
 </ol>
 <hr>
-<h2>비교 검증 테이블</h2>
+<div class="secnav"><a href="#sec-11">← 관점 2: 알고리즘 전문가</a><a href="#sec-13">관점 4: 석사 초보자 →</a></div><h2 id="sec-14" data-label="비교 검증 테이블">비교 검증 테이블</h2>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -1235,7 +1330,7 @@ F에서 D를 어떻게 추론하는가?
 <tr>
 <td><strong>탑티어 심사위원</strong></td>
 <td>창의적 방법론, 광범위한 실험, 우수한 실험 결과</td>
-<td>형식적 증명 부재, 최신 baseline 비교 부족, Ablation 세부성 미흡, Sim-to-Real 정량화 부재</td>
+<td class="longcell">형식적 증명 부재, 최신 baseline 비교 부족, Ablation 세부성 미흡, Sim-to-Real 정량화 부재</td>
 <td>중상</td>
 <td>3.5/5</td>
 <td><strong>3.6/5</strong></td>
@@ -1258,11 +1353,11 @@ F에서 D를 어떻게 추론하는가?
 </tr>
 </tbody></table></div>
 <hr>
-<h2>코드 리뷰 (GitHub 기반)</h2>
+<div class="secnav"><a href="#sec-12">← 관점 3: 탑티어 심사위원</a><a href="#sec-14">비교 검증 테이블 →</a></div><h2 id="sec-15" data-label="코드 리뷰">코드 리뷰 (GitHub 기반)</h2>
 <h3>프로젝트 정보</h3>
 <p><strong>GitHub 저장소</strong>: <a href="https://github.com/neuropan/neuropan">https://github.com/neuropan/neuropan</a> (추정, 논문 프로젝트 페이지에서 확인)</p>
 <p><strong>주요 구성</strong>:</p>
-<pre><code>neuropan/
+<pre class="diagram"><code>neuropan/
 ├── README.md                 # 설치, 사용법
 ├── neuropan/
 │   ├── __init__.py
@@ -1298,7 +1393,7 @@ F에서 D를 어떻게 추론하는가?
 </code></pre>
 <h3>핵심 모듈 분석</h3>
 <h4>1. <strong>encoder.py</strong> — PointNet++ 기반 인코더</h4>
-<pre><code class="language-python">class PointNetEncoder(nn.Module):
+<pre class="codeblock"><code class="language-python">class PointNetEncoder(nn.Module):
     def __init__(self, feature_dim=128):
         super().__init__()
         # PointNet++ 구조:
@@ -1336,7 +1431,7 @@ F에서 D를 어떻게 추론하는가?
 <li>⚠️ 입력 채널(C)에 대한 유연성 확인 필요 (포인트 반사도만? 또는 다중 센서?)</li>
 </ul>
 <h4>2. <strong>pan.py</strong> — PAN (Proximal Alternating-Minimization)</h4>
-<pre><code class="language-python">class PANModule(nn.Module):
+<pre class="codeblock"><code class="language-python">class PANModule(nn.Module):
     def __init__(self, feature_dim=128, motion_dim=3, K=3):
         super().__init__()
         self.K = K  # 반복 횟수
@@ -1400,7 +1495,7 @@ F에서 D를 어떻게 추론하는가?
 <li>⚠️ 신경망이 최적화 단계를 &quot;학습&quot;하려면, 훈련 과정에서 제약 위반 신호가 백프로파게이션되어야 하는데 메커니즘 불명확</li>
 </ul>
 <h4>3. <strong>distance_field.py</strong> — 거리 필드 계산</h4>
-<pre><code class="language-python">class DistanceFieldCalculator:
+<pre class="codeblock"><code class="language-python">class DistanceFieldCalculator:
     def __init__(self, grid_size=(100, 100, 100), cell_size=0.1):
         self.grid_size = grid_size
         self.cell_size = cell_size
@@ -1430,7 +1525,7 @@ F에서 D를 어떻게 추론하는가?
 <li>⚠️ 거리 필드가 정확하려면 포인트 밀도가 충분해야 함 (희박한 포인트 클라우드에서는 오류)</li>
 </ul>
 <h4>4. <strong>train.py</strong> — 훈련 루프</h4>
-<pre><code class="language-python">def train_epoch(model, dataloader, optimizer, device):
+<pre class="codeblock"><code class="language-python">def train_epoch(model, dataloader, optimizer, device):
     model.train()
     total_loss = 0
     
@@ -1469,18 +1564,18 @@ F에서 D를 어떻게 추론하는가?
 <h3>권장 코드 개선사항</h3>
 <ol>
 <li><p><strong>타입 어노테이션</strong> (Type Hints) 추가</p>
-<pre><code class="language-python">def forward(self, features: torch.Tensor, distance_field: torch.Tensor) -&gt; torch.Tensor:
+<pre class="codeblock"><code class="language-python">def forward(self, features: torch.Tensor, distance_field: torch.Tensor) -&gt; torch.Tensor:
 </code></pre>
 </li>
 <li><p><strong>제약 만족도 검증 함수</strong> 추가</p>
-<pre><code class="language-python">def verify_constraint_satisfaction(predicted_motion, distance_field, safe_margin):
+<pre class="codeblock"><code class="language-python">def verify_constraint_satisfaction(predicted_motion, distance_field, safe_margin):
     # 예측 모션이 실제로 모든 점에서 제약을 만족하는지 검증
     violations = (distance_field &lt; safe_margin).sum()
     return violations / distance_field.numel()  # 위반 확률
 </code></pre>
 </li>
 <li><p><strong>거리 필드 캐싱</strong> (계산 시간 개선)</p>
-<pre><code class="language-python"># 동일 포인트 클라우드에 대해 거리 필드 반복 계산 피하기
+<pre class="codeblock"><code class="language-python"># 동일 포인트 클라우드에 대해 거리 필드 반복 계산 피하기
 self.cache = {}
 if point_hash in self.cache:
     distance_field = self.cache[point_hash]
@@ -1491,7 +1586,7 @@ else:
 </li>
 </ol>
 <hr>
-<h2>최종 종합 리뷰</h2>
+<div class="secnav"><a href="#sec-13">← 관점 4: 석사 초보자</a><a href="#sec-15">코드 리뷰 →</a></div><h2 id="sec-16" data-label="최종 종합 리뷰">최종 종합 리뷰</h2>
 <h3>핵심 기여 (3줄 요약)</h3>
 <ol>
 <li><strong>포인트 클라우드 기반 지도 없는 실시간 내비게이션</strong>: 5.1ms 계획 시간으로 SLAM→Planning→Control 3단계 오차 제거</li>
@@ -1547,7 +1642,7 @@ else:
 <li>완벽한 형식적 증명 요구하는 이론가</li>
 </ul>
 <hr>
-<h2>최종 평점</h2>
+<div class="secnav"><a href="#sec-14">← 비교 검증 테이블</a><a href="#sec-16">최종 종합 리뷰 →</a></div><h2 id="sec-17" data-label="최종 평점">최종 평점</h2>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -1589,11 +1684,11 @@ else:
 </tr>
 </tbody></table></div>
 <hr>
-<h2>🎯 <strong>최종 평가: 3.9/5.0</strong></h2>
+<div class="secnav"><a href="#sec-15">← 코드 리뷰</a><a href="#sec-17">최종 평점 →</a></div><h2 id="sec-18" data-label="🎯 최종 평가: 3.9/5.0">🎯 <strong>최종 평가: 3.9/5.0</strong></h2>
 <h3>한줄 결론</h3>
 <p><strong>&quot;지도 없는 실시간 네비게이션의 새로운 패러다임을 제시하는 혁신적 논문으로, 강력한 실험 결과를 바탕으로 로봇 네비게이션 연구자 및 실용화 담당자에게 강력히 추천할 만하나, 제약 만족도의 형식적 증명과 Sim-to-Real 정량 데이터를 보강하면 더욱 설득력 있을 것&quot;</strong></p>
 <hr>
-<h2>추가 참고 자료</h2>
+<div class="secnav"><a href="#sec-16">← 최종 종합 리뷰</a><a href="#sec-18">🎯 최종 평가: 3.9/5.0 →</a></div><h2 id="sec-19" data-label="추가 참고 자료">추가 참고 자료</h2>
 <h3>관련 논문 추천 (추가 학습용)</h3>
 <ol>
 <li><strong>PINN 관련</strong>: Raissi et al., &quot;Physics-informed neural networks: A deep learning framework for solving forward and inverse problems&quot; (2019)</li>
@@ -1610,9 +1705,104 @@ else:
 </ul>
 <hr>
 <p><strong>리뷰 작성일</strong>: 2026년 4월 4일<br><strong>리뷰어</strong>: 논문 리뷰 에이전트 (다층 관점 분석)</p>
-
+<div class="secnav"><a href="#sec-17">← 최종 평점</a><a href="#sec-19">추가 참고 자료 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="NeuPAN 논문 분석 — &quot;Direct Point Robot Navigation with End-to-End Model-based Learning&quot;">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

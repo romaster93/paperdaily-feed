@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>NaVILA: Legged Robot Vision-Language-Action Model for Navigation · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2412.04453">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">RSS 2025</div>
-    <h1>NaVILA: Legged Robot Vision-Language-Action Model for Navigation</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2412.04453">arXiv:2412.04453</a></span>
-      <span>리뷰 2026-06-29</span>
-      <span>45분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">NaVILA_RSS2025</span>
     </div>
+    <h1 class="doc-title">NaVILA: Legged Robot Vision-Language-Action Model for Navigation — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">RSS 2025</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2412.04453">2412.04453</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval"><a href="https://github.com/AnjieCheng/NaVILA">github.com/AnjieCheng/NaVILA</a> (Apache-2.0, 평가/추론 코드 공개 — 학습 코드 및 YouTube 데이터셋 일부 추가 공개 예정)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://navila-bot.github.io">navila-bot.github.io</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-06-29</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">41KB · 약 45분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>NaVILA: Legged Robot Vision-Language-Action Model for Navigation — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: NaVILA: Legged Robot Vision-Language-Action Model for Navigation</li>
@@ -155,7 +241,7 @@ footer {
 <h3>1.2 연구 목표 (Research Objective)</h3>
 <p>NaVILA는 <strong>Vision-and-Language Navigation(VLN)을 사족·이족 보행 로봇(legged robot)으로 확장</strong>하는 연구다. 기존 VLN 연구는 대부분 바퀴형(wheeled) 로봇 또는 이상화된 포인트 에이전트를 가정하여, 자연언어 지시를 &quot;forward / turn / stop&quot;의 이산 행동으로 매핑하는 데 집중했다. 그러나 다리형 로봇은 계단·문턱·좁은 틈·비정형 지형을 통과할 수 있는 잠재력이 있는 대신, <strong>자연언어 지시를 12개 관절의 저수준 토크 명령으로 변환하는 것</strong>이라는 새로운 난제를 안는다.</p>
 <p>핵심 연구 질문:</p>
-<pre><code>&quot;VLM의 언어·공간 추론 능력과 RL 로코모션 정책의 정밀 제어 능력을
+<pre class="codeblock"><code>&quot;VLM의 언어·공간 추론 능력과 RL 로코모션 정책의 정밀 제어 능력을
  하나의 종단형(end-to-end) 모델에 욱여넣지 않고, 어떻게 결합해야
  다리형 로봇이 자연언어 지시대로 복잡 지형을 내비게이션할 수 있는가?&quot;
 </code></pre>
@@ -183,11 +269,11 @@ footer {
 <p><img src="figures/x1.jpeg" alt="Fig 1. NaVILA 2단계 계층 구조" loading="lazy">
 <em>Fig.1 고수준 VLA(좌)가 미드레벨 액션을 자연언어로 생성하고, 저수준 정책(우)이 관절 명령으로 실행. 여러 로봇 플랫폼과 호환.</em></p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 종단형 VLA의 저수준 제어 정밀도 한계</h4>
 <p>가장 직관적인 접근은 VLM이 곧바로 관절 명령을 출력하는 종단형 VLA다. 그러나 LLM/VLM은 대규모 자연언어·이미지 코퍼스로 사전학습되었기 때문에, 정밀한 연속 제어값(joint torque, 정확한 각속도)을 직접 회귀시키는 데 근본적으로 취약하다.</p>
-<pre><code>[종단형 VLA의 구조적 문제]
+<pre class="diagram"><code>[종단형 VLA의 구조적 문제]
 
 관측 O_t ──┐
 지시 I    ──┼──► 단일 VLA ──► 관절 토크 q^d ∈ ℝ^12 (50Hz)
@@ -208,7 +294,7 @@ footer {
 </code></pre>
 <h4>B. 다리형 로봇용 VLN 데이터의 부재</h4>
 <p>VLN-CE(R2R-CE, RxR-CE)는 Habitat 시뮬레이터에서 <strong>고수준 계획(forward/turn/stop)만</strong> 다루며, 로봇의 실제 관절 역학·신체 크기·충돌 부피를 반영하지 않는다. 즉 &quot;이론적으로 통과 가능한 경로&quot;가 실제 로봇에게는 불가능한 경우(좁은 틈, 낮은 천장)를 거른다.</p>
-<pre><code>[기존 VLN-CE 벤치마크의 한계]
+<pre class="codeblock"><code>[기존 VLN-CE 벤치마크의 한계]
 
 Habitat VLN-CE:
   - 에이전트 = 반경 0.18m 실린더 (이상화)
@@ -222,7 +308,7 @@ Habitat VLN-CE:
 <p>연속 환경 VLN 학습에는 다양한 실세계 내비게이션 궤적이 필요하지만, 라벨링된 실로봇 궤적은 비싸다. 인터넷에는 1인칭 투어 영상이 풍부하나, 이들에는 <strong>행동 라벨(어디로 얼마나 이동했는가)이 없다.</strong></p>
 <h3>2.2 핵심 해결책</h3>
 <p>NaVILA는 위 세 난제를 <strong>계층화 + 자연언어 미드레벨 인터페이스</strong>로 동시에 해결한다:</p>
-<pre><code>[NaVILA의 3가지 핵심 혁신]
+<pre class="codeblock"><code>[NaVILA의 3가지 핵심 혁신]
 
 혁신 1: 자연언어 미드레벨 액션 (Language Mid-Level Action)
   VLA가 &quot;moving forward 75cm&quot; 같은 공간 정보를 담은
@@ -240,10 +326,10 @@ Habitat VLN-CE:
   + 시뮬(R2R/RxR) + 보조태스크 + 일반 VQA 혼합
 </code></pre>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 고수준 VLA: 자연언어 미드레벨 액션</h3>
 <p><strong>기반 모델</strong>: VILA(Vision-Language foundation model, SigLIP 비전 인코더 + LLaMA-3 8B). NaVILA는 VILA의 Stage-2 사전학습 가중치로 초기화한 뒤 navigation SFT를 수행한다.</p>
-<pre><code>[VLA 추론 흐름]
+<pre class="codeblock"><code>[VLA 추론 흐름]
 
 RGB 프레임 (현재 + 과거)
     ↓
@@ -262,7 +348,7 @@ Regex parser (action type + numerical argument 추출)
 Command velocity (v_x, ω_z, duration)
 </code></pre>
 <p><strong>미드레벨 액션 어휘와 속도 매핑</strong> (논문 본문 기준):</p>
-<pre><code>[고정 행동 집합 → 명령 속도]
+<pre class="diagram"><code>[고정 행동 집합 → 명령 속도]
 
 행동              명령 속도
 ─────────────────────────────────────
@@ -283,7 +369,7 @@ stop           →  0
 <p>이 설계의 핵심은 <strong>공간 정보(거리·각도)를 언어 토큰으로 표현</strong>한다는 점이다. VLM은 &quot;75cm 앞으로&quot;라는 표현을 자연언어 학습 분포 안에서 다룰 수 있으므로, 연속 회귀보다 안정적으로 예측한다. 정밀한 속도/토크 변환은 파서와 저수준 정책에 위임된다.</p>
 <p><strong>Navigation Prompt Design (현재 vs 과거 프레임 구분)</strong></p>
 <p>표준 VILA는 모든 비디오 프레임을 균등 샘플링하여 동등하게 취급한다. NaVILA는 내비게이션의 시간적 구조를 살리기 위해 현재 관측과 과거 관측을 <strong>프롬프트 텍스트로 명시 구분</strong>한다(특수 토큰 추가 없이):</p>
-<pre><code>[NaVILA 프롬프트 구조]
+<pre class="codeblock"><code>[NaVILA 프롬프트 구조]
 
 video of historical observations: &lt;frame_1&gt; ... &lt;frame_{t-1}&gt;
 current observation: &lt;frame_t&gt;
@@ -301,7 +387,7 @@ current observation: &lt;frame_t&gt;
 </code></pre>
 <h3>3.2 인간 비디오 학습 파이프라인 (Human Video Learning)</h3>
 <p>NaVILA의 가장 독창적인 기여 중 하나는 <strong>연속 환경에서 처음으로 라벨 없는 인간 1인칭 투어 영상을 직접 내비게이션 학습 데이터로 전환</strong>한 것이다.</p>
-<pre><code>[인간 비디오 → 학습 데이터 파이프라인]
+<pre class="codeblock"><code>[인간 비디오 → 학습 데이터 파이프라인]
 
 2,000 YouTube 1인칭 투어 영상
     ↓  Entropy-based sampling (대표 프레임 선택)
@@ -318,7 +404,7 @@ current observation: &lt;frame_t&gt;
 <p>MASt3R로 추정한 metric 카메라 포즈가 핵심이다 — 단순 광류(optical flow)가 아니라 미터 단위 이동량을 복원하므로, &quot;75cm 전진&quot; 같은 거리 정보를 가진 행동 라벨을 자동 생성할 수 있다. 이 파이프라인은 <strong>자연 다양성</strong>(실세계 카메라 움직임, 다양한 실내외 지형)을 데이터에 주입하여, 시뮬레이션만으로는 얻기 힘든 일반화(특히 outdoor)를 가능케 한다.</p>
 <h3>3.3 데이터 블렌드 (SFT Data Blend)</h3>
 <p>NaVILA의 SFT는 4개 데이터 소스를 혼합하여, 내비게이션 능력과 일반 시각-언어 능력을 동시에 유지한다:</p>
-<pre><code>[SFT 데이터 블렌드 4종]
+<pre class="codeblock"><code>[SFT 데이터 블렌드 4종]
 
 ① Real video navigation (인간 비디오)
    20K YouTube 궤적 (위 3.2 파이프라인 산출물)
@@ -337,7 +423,7 @@ current observation: &lt;frame_t&gt;
    일반 이미지-텍스트 QA → 사전학습 지식 보존
 </code></pre>
 <p>② 의 <strong>연속 행동 병합·라벨 리밸런싱</strong>은 VLN-CE의 oracle 경로가 압도적으로 &quot;forward&quot;에 편향되는 문제를 완화하여, 모델이 turn/stop을 적시에 예측하도록 유도하는 실무적 디테일이다.</p>
-<pre><code>[연속 행동 병합(consecutive action merging)의 의미]
+<pre class="codeblock"><code>[연속 행동 병합(consecutive action merging)의 의미]
 
 원본 oracle 시퀀스 (예):
   forward, forward, forward, turn_left, forward, stop
@@ -359,7 +445,7 @@ NaVILA 병합 (최대 3개 연속 forward 통합):
 <h3>3.4 저수준 시각 로코모션 정책 (Visual Locomotion Policy)</h3>
 <p><strong>플랫폼</strong>: Unitree Go2(사족, 18 DoF = 고정 6 base + 제어 12 leg joints), Unitree L1 LiDAR(360°×90° FOV).</p>
 <p><strong>입력 표현 — 2.5D Height Map (왜 depth가 아니라 height map인가)</strong></p>
-<pre><code>[LiDAR → 2.5D height map 구성]
+<pre class="codeblock"><code>[LiDAR → 2.5D height map 구성]
 
 LiDAR point cloud (360°×90°)
     ↓ voxel grid 내 &quot;최저값(lowest value within range)&quot; 선택
@@ -374,7 +460,7 @@ LiDAR point cloud (360°×90°)
   - max filter(5프레임): LiDAR 노이즈/스파스함 평활화
 </code></pre>
 <p><strong>관측 공간 (Actor / Critic 비대칭)</strong></p>
-<pre><code>[Actor 관측 (실배포 가용)]
+<pre class="diagram"><code>[Actor 관측 (실배포 가용)]
 ├─ Proprioception (현재): 각속도, 중력 방향, 관절 위치 q, 관절 속도 q̇
 ├─ Proprioception 이력 (속도 추론용)
 ├─ Previous action
@@ -390,14 +476,14 @@ LiDAR point cloud (360°×90°)
 </code></pre>
 <p>이 비대칭 actor-critic 구조(privileged critic)는 다리형 로코모션 RL의 표준 기법으로, critic이 학습 중 특권 정보로 더 정확한 가치 추정을 하되, 실배포되는 actor는 센서로 얻을 수 있는 정보만 사용한다.</p>
 <p><strong>행동 공간 &amp; 변환</strong></p>
-<pre><code>Output: 목표 관절 위치 q^d ∈ ℝ^12
+<pre class="codeblock"><code>Output: 목표 관절 위치 q^d ∈ ℝ^12
     ↓ stiffness(Kp) / damping(Kd) PD 변환
 joint torque τ = Kp·(q^d − q) − Kd·q̇
     ↓
 50Hz 서보 제어
 </code></pre>
 <p><strong>보상 함수 (PPO reward terms, 본문 Table 기준)</strong></p>
-<pre><code>[주요 보상 항목과 가중치]
+<pre class="diagram"><code>[주요 보상 항목과 가중치]
 
 항목                         가중치
 ──────────────────────────────────────
@@ -416,7 +502,7 @@ Feet slipping               +0.05
       에너지 효율·발 미끄러짐 억제 등 안정 보행 항목.
 </code></pre>
 <p><strong>단일 단계(single-stage) PPO — distillation 회피</strong></p>
-<pre><code>[Single-stage vs 2-stage distillation]
+<pre class="codeblock"><code>[Single-stage vs 2-stage distillation]
 
 기존 다수 방법: teacher(privileged) 학습 → student로 distill
   단점: 2단계, 느림, student가 teacher 분포에 갇힘
@@ -432,8 +518,8 @@ NaVILA: 단일 단계 PPO + privileged critic
   motor strength [0.9, 1.1]
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>[NaVILA 전체 파이프라인 — 이중 주파수 계층]
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>[NaVILA 전체 파이프라인 — 이중 주파수 계층]
 
 ═══════════════ 고수준 (VLA, ~1Hz) ═══════════════
   RGB 프레임 (current + historical)
@@ -485,7 +571,7 @@ NaVILA: 단일 단계 PPO + privileged critic
 <li><strong>로봇 교환성의 메커니즘</strong>: 인터페이스가 자연언어/속도 명령으로 추상화되어 있으므로, 새 로봇(H1, T1)은 저수준 정책만 교체하면 동일 VLA를 재사용한다.</li>
 </ul>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -632,7 +718,7 @@ NaVILA: 단일 단계 PPO + privileged critic
 <li>SPL 49.0으로 Depth+Odo를 쓰는 ETPNav(49.0)와 동급 효율.</li>
 </ol>
 <p><strong>Table II. RxR-CE Val-Unseen 및 Cross-dataset 일반화</strong></p>
-<pre><code>RxR Val-Unseen (정상):
+<pre class="codeblock"><code>RxR Val-Unseen (정상):
   NaVILA: NE=6.77, SR=49.3%, SPL=44.0%, nDTW=58.8
 
 Cross-dataset (R2R로만 학습 → RxR 평가):
@@ -790,7 +876,7 @@ Cross-dataset (R2R로만 학습 → RxR 평가):
 </tr>
 </tbody></table></div>
 <p>속도 추적 오차 2~3배 개선, 충돌률 약 1/4(3.09%→0.81%). 단일 단계 PPO + height map 정책이 명령 추종·안전성 모두에서 우수함을 입증.</p>
-<pre><code>[저수준 정책 메트릭의 실배포 의미]
+<pre class="codeblock"><code>[저수준 정책 메트릭의 실배포 의미]
 
 Linear velocity error 0.066:
   - VLA가 &quot;0.5 m/s&quot;를 명령하면 실제 ~0.434~0.566 m/s로 추종
@@ -806,7 +892,7 @@ Collision rate 0.81%:
 </code></pre>
 <p>이 표는 NaVILA 계층화의 숨은 전제를 드러낸다 — <strong>저수준 정책의 명령 추종 정확도가 높아야만 자연언어 미드레벨 인터페이스가 신뢰성 있게 작동한다.</strong> 속도 오차가 크면 VLA가 아무리 정확한 거리를 내도 실제 이동이 어긋나기 때문이다.</p>
 <p><strong>ScanQA 프레임 수 스케일링 (8 → 64 frames)</strong></p>
-<pre><code>프레임 수      Bleu-4   CIDEr
+<pre class="diagram"><code>프레임 수      Bleu-4   CIDEr
 ─────────────────────────────
 8 frames        14.8     95.1
 64 frames       16.9    102.7  (+2.1 / +7.6)
@@ -817,7 +903,7 @@ NaVILA의 &quot;Depth 없이 RGB만&quot; 전략을 뒷받침하는 증거.
 </code></pre>
 <h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
 <p><strong>플랫폼</strong>: Unitree Go2(사족), Unitree H1·Booster Dynamics T1(이족). <strong>태스크</strong>: 25개 자연언어 지시. <strong>환경</strong>: Workspace / Home / Outdoor 3종, Simple·Complex 구분.</p>
-<pre><code>[실세계 성공률 (Unitree Go2, 25 instructions)]
+<pre class="diagram"><code>[실세계 성공률 (Unitree Go2, 25 instructions)]
 
 전체 평균 SR: 88%
 
@@ -839,7 +925,7 @@ GPT-4o(베이스라인) 대비:
 </code></pre>
 <p>Simple 태스크에서 outdoor가 비교적 높고(83%) Complex에서 낮은(50%) 패턴은, 인간 비디오 학습이 단순 outdoor 내비에 도움을 주지만 복잡한 다단계 지시에는 한계가 있음을 보인다.</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>기여 1: 자연언어 미드레벨 인터페이스를 통한 VLA-로코모션 계층화</h3>
 <p>NaVILA의 본질적 기여는 <strong>고수준 추론(VLA)과 저수준 제어(RL 정책)를 &quot;공간 정보를 담은 자연언어&quot;라는 인터페이스로 분리</strong>한 것이다. 이는 (a) VLM의 언어 강점을 보존하고, (b) 50Hz 제어를 VLM 주파수에서 해방시키며, (c) 인터페이스 추상화로 로봇 교환성을 확보한다. 종단형 VLA가 겪는 &quot;정밀 제어 회귀 + 주파수 + 로봇 종속성&quot; 3중 문제를 한 번에 해결한다.</p>
 <h3>기여 2: 라벨 없는 인간 비디오의 내비게이션 데이터화</h3>
@@ -851,9 +937,9 @@ GPT-4o(베이스라인) 대비:
 <h3>기여 5: VLN-CE SOTA + 실로봇 88% 성공률</h3>
 <p>단안 RGB만으로 R2R Val-Unseen SR 54.0%(NaVid 대비 +17%p), 실세계 3환경 평균 88% 성공률을 달성하며 다리형 VLN의 실현 가능성을 입증.</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 고수준 VLA</h3>
-<pre><code>[VLA 하이퍼파라미터]
+<pre class="codeblock"><code>[VLA 하이퍼파라미터]
 
 기반 모델       : VILA (SigLIP + LLaMA-3 8B), Stage-2 가중치 초기화
 입력 프레임     : current 1 + historical (균등 샘플, 첫 프레임 포함)
@@ -865,7 +951,7 @@ SFT 데이터      : 인간비디오 + R2R/RxR + 보조 + 일반 VQA
 최적화          : AWQ W4A16 양자화 → 메모리 1/2, 속도 +40%
 </code></pre>
 <h3>7.2 저수준 로코모션 정책</h3>
-<pre><code>[정책 하이퍼파라미터]
+<pre class="codeblock"><code>[정책 하이퍼파라미터]
 
 로봇            : Unitree Go2 (12 제어 관절), Unitree L1 LiDAR
 입력            : Proprio(현재+이력) + height map + prev action + cmd vel
@@ -879,18 +965,18 @@ height map      : LiDAR 360°×90°, voxel 최저값, 5프레임 max filter
 학습 효율       : 60K+ FPS (Isaac Lab, ray-casting LiDAR)
 </code></pre>
 <h3>7.3 명령 속도 매핑(재확인)</h3>
-<pre><code>move forward → 0.5 m/s,  turn ± → ±π/6 rad/s,  stop → 0
+<pre class="codeblock"><code>move forward → 0.5 m/s,  turn ± → ±π/6 rad/s,  stop → 0
 &quot;forward Xcm&quot; → duration = X/100 / 0.5  [s]
 &quot;turn Y°&quot;     → duration = Y / 30        [s]
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 분석</h3>
 <p><strong>로봇 교환성의 일반화 한계</strong>: NaVILA는 Go2(사족)→H1/T1(이족) 전이를 보였으나, 모든 전이는 &quot;저수준 정책 교체 + 동일 VLA&quot;를 가정한다. 그러나 미드레벨 액션 어휘(forward/turn/stop)와 고정 속도(0.5 m/s)는 모든 로봇에 동일하므로, 보폭·최대 속도가 크게 다른 로봇(소형 사족 vs 대형 이족)에서 &quot;75cm&quot;의 의미가 달라질 수 있다. 실험에서 H1/T1 전이 시 5~10% 성능 저하가 관찰된 것은 이 인터페이스 경직성의 비용으로 해석할 수 있다.</p>
 <p><strong>더 강력한 VLM으로의 확장</strong>: 현재 VILA(LLaMA-3 8B) 기반이며, 미드레벨 인터페이스는 백본에 독립적이다. 더 강력한 VLM으로 교체 시 미드레벨 액션 품질(특히 복잡 지시 분해)이 향상될 여지가 크다. 실제로 후속 연구 AwareVLN은 NaVILA의 SFT 가중치(navila-llama3-8b-8f)를 기반으로 추론 모듈을 얹어 R2R SR을 54.0→65.4%로 끌어올렸다 — NaVILA가 다리형 VLN의 토대 모델 역할을 하고 있음을 보여준다.</p>
 <h3>8.2 한계점 (Limitations)</h3>
 <p><strong>한계 1: 미드레벨 액션 표현의 경직성</strong></p>
-<pre><code>고정 행동 집합 {forward, turn L/R, stop} + 고정 속도(0.5 m/s):
+<pre class="codeblock"><code>고정 행동 집합 {forward, turn L/R, stop} + 고정 속도(0.5 m/s):
   - 대각선 이동 불가 (forward + turn은 순차 실행)
   - 가변 속도 미지원 (&quot;75cm&quot;는 거리일 뿐, 속도는 항상 0.5 m/s)
   - 좁은 통로에서 0.5 m/s가 너무 빠를 수 있음
@@ -905,7 +991,7 @@ height map      : LiDAR 360°×90°, voxel 최저값, 5프레임 max filter
 <p><strong>한계 5: 인간 비디오 라벨의 잡음</strong></p>
 <p>MASt3R 포즈 추정 + VLM 캡션으로 자동 생성한 라벨은 포즈 드리프트·캡션 환각이 누적될 수 있다. 자동 라벨 품질이 학습에 미치는 영향에 대한 정량 분석이 제한적이다.</p>
 <h3>8.3 향후 연구 방향</h3>
-<pre><code>방향 1: 가변 속도/연속 미드레벨 액션
+<pre class="codeblock"><code>방향 1: 가변 속도/연속 미드레벨 액션
   거리뿐 아니라 속도/곡률을 자연언어로 표현 → 부드러운 경로
 
 방향 2: VLA↔정책 양방향 인터페이스
@@ -921,7 +1007,7 @@ height map      : LiDAR 360°×90°, voxel 최저값, 5프레임 max filter
   다양한 로봇·지형·조건의 표준화된 실세계 평가 프로토콜
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <p>비교 대상은 같은 VLN 트랙의 인접 선행/후속 리뷰 논문들이다: <strong>StreamVLN(ICRA 2026)</strong> — 동일하게 Go2 실배포된 RGB VLN VLA, <strong>NavDP(ICRA 2026)</strong> — 시뮬-투-리얼 내비게이션 정책(저수준 제어 관점 비교), <strong>AwareVLN(CVPR 2026)</strong> — NaVILA를 기반 모델로 삼은 직접 후속 연구.</p>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
@@ -1035,7 +1121,7 @@ height map      : LiDAR 360°×90°, voxel 최저값, 5프레임 max filter
 <li>단, AwareVLN은 NaVILA의 저수준 로코모션 정책(다리형 관절 제어)은 계승하지 않았다 — 순수 고수준 VLN에 집중. 즉 NaVILA의 &quot;다리형 전체 스택&quot; 기여는 여전히 독자적이다.</li>
 </ul>
 <h3>9.3 실적용 가능성 평가</h3>
-<pre><code>추천 시나리오: 다리형 로봇이 필요한 비정형 실내외 내비게이션
+<pre class="codeblock"><code>추천 시나리오: 다리형 로봇이 필요한 비정형 실내외 내비게이션
   (계단·문턱·좁은 공간이 있는 가정/사무/실외 안내·순찰)
 
 강점:
@@ -1052,7 +1138,7 @@ height map      : LiDAR 360°×90°, voxel 최저값, 5프레임 max filter
 <h3>9.4 연구 방향성 평가</h3>
 <p>NaVILA는 VLN 연구를 <strong>&quot;포인트 에이전트 고수준 계획&quot;에서 &quot;다리형 로봇의 언어→관절 전체 스택&quot;으로 끌어내린 분기점</strong>이다. 자연언어 미드레벨 인터페이스는 이후 다리형 VLN의 사실상 표준 설계가 되었고, 인간 비디오 데이터화·VLN-CE-Isaac 벤치마크는 분야 인프라로 남았다. 후속 StreamVLN/AwareVLN이 순수 VLN 성능을 끌어올리는 동안, NaVILA의 기여는 &quot;다리형 실로봇으로의 다리(bridge)&quot;라는 점에서 계속 참조된다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li>Cheng et al. (2025). NaVILA: Legged Robot Vision-Language-Action Model for Navigation. RSS 2025. arXiv:2412.04453.</li>
 <li>Lin et al. (2024). VILA: On Pre-training for Visual Language Models. CVPR 2024.</li>
@@ -1070,14 +1156,14 @@ height map      : LiDAR 360°×90°, voxel 최저값, 5프레임 max filter
 <li>Schulman et al. (2017). Proximal Policy Optimization Algorithms. arXiv:1707.06347.</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>혁신성 평가</h3>
 <p>NaVILA는 <strong>Vision-Language Navigation을 다리형 로봇의 실제 관절 제어까지 잇는 전체 스택을 처음으로 종단 검증</strong>한 연구다. 핵심 통찰은 단순하지만 강력하다 — 고수준 VLA와 저수준 RL 정책을 <strong>&quot;공간 정보를 담은 자연언어 미드레벨 액션&quot;</strong>이라는 인터페이스로 분리하면, VLM의 언어 강점·실시간 제어·로봇 교환성을 동시에 얻을 수 있다. 이 설계는 종단형 VLA가 겪는 정밀 제어 회귀·주파수 불일치·로봇 종속성 문제를 한 번에 우회한다.</p>
 <h3>실용적 의의</h3>
 <p>단안 RGB만으로 R2R-CE SR 54.0%(선행 RGB SOTA NaVid 대비 +17%p)를 달성하고, 실세계 3환경에서 평균 88% 성공률을, 사족 Go2와 이족 H1/T1에서 재학습 없는 교환성을 보였다. LiDAR height map 기반 저수준 정책은 속도 추종 오차를 2~3배, 충돌률을 1/4로 줄여 실배포 신뢰성을 높였다. 또한 라벨 없는 YouTube 영상 20,000 궤적을 자동 학습 데이터로 전환하는 파이프라인과 관절 역학을 반영한 VLN-CE-Isaac 벤치마크는 분야의 지속 가능한 인프라로 남는다.</p>
 <h3>향후 연구 방향</h3>
 <p>가장 중요한 과제는 <strong>미드레벨 인터페이스의 경직성 완화</strong>(가변 속도·연속 행동·VLA↔정책 양방향 피드백)와 <strong>대규모 실세계 검증</strong>이다. 순수 VLN 성능 자체는 후속 StreamVLN·AwareVLN이 이미 추월했으나, AwareVLN이 NaVILA의 가중치를 기반 모델로 삼아 SR을 65.4%까지 끌어올린 사실은 NaVILA가 다리형 VLN의 <strong>토대 모델(foundation)</strong>임을 역설적으로 증명한다.</p>
-<pre><code>[NaVILA 종합 평가]
+<pre class="codeblock"><code>[NaVILA 종합 평가]
 
 혁신성        : ⭐⭐⭐⭐⭐ (다리형 언어→관절 전체 스택 + 인간비디오 학습)
 기술 완성도   : ⭐⭐⭐⭐  (계층화 설계 견고, 저수준 정책 정량 우수)
@@ -1086,9 +1172,104 @@ height map      : LiDAR 360°×90°, voxel 최저값, 5프레임 max filter
 한계          : ⭐⭐⭐   (미드레벨 경직성, 실세계 표본 작음)
 종합          : Excellent — 다리형 VLN의 분기점이 된 RSS 2025 토대 연구
 </code></pre>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="NaVILA: Legged Robot Vision-Language-Action Model for Navigation — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

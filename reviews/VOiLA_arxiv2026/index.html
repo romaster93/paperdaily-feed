@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>VOiLA: Vectorized Online Planning with Learned Diffusion Model for POMDP Agents · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2606.19729">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">2026 ISRR 제출(submitted, 확정 미확인) — arXiv preprint (cs.RO), 2026-06-18</div>
-    <h1>VOiLA: Vectorized Online Planning with Learned Diffusion Model for POMDP Agents</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2606.19729">arXiv:2606.19729</a></span>
-      <span>리뷰 2026-06-21</span>
-      <span>41분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">VOiLA_arxiv2026</span>
     </div>
+    <h1 class="doc-title">VOiLA: Vectorized Online Planning with Learned Diffusion Model for POMDP Agents — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">2026 ISRR 제출(submitted, 확정 미확인) — arXiv preprint (cs.RO), 2026-06-18</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2606.19729">2606.19729</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">❌ 미공개 (abstract·본문에 저장소 링크 미확인)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">❌ 확인 불가</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-06-21</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">39KB · 약 41분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>VOiLA: Vectorized Online Planning with Learned Diffusion Model for POMDP Agents — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: VOiLA: Vectorized Online Planning with Learned Diffusion Model for POMDP Agents</li>
@@ -147,7 +233,7 @@ footer {
 <h3>1.2 연구 목표 (Research Objective)</h3>
 <p>이 논문은 <strong>부분 관측 마르코프 결정 과정(POMDP, Partially Observable Markov Decision Process)</strong> 하에서의 온라인 플래닝을 다룬다. 로봇이 자신의 위치·환경 구성·목표 위치를 정확히 모른 채(불확실성 하에서) 노이즈가 섞인 관측만으로 행동을 결정해야 하는 문제 — 즉 <strong>불확실성 하의 경로/행동 계획(planning under uncertainty)</strong> — 이 핵심 대상이다.</p>
 <p>POMDP 온라인 플래너(예: POMCP, DESPOT, ABT, POMCPOW)는 매 시간 스텝마다 현재 신뢰 상태(belief)에서 수만 번의 시뮬레이션 롤아웃을 돌려 belief tree를 구축하고 최적 행동을 찾는다. 이 롤아웃에는 <strong>생성 모델(generative model)</strong> 두 가지가 반드시 필요하다:</p>
-<pre><code>전이 모델(transition):   s&#39; ~ T(s&#39; | s, a)      — 행동 후 상태가 어떻게 바뀌는가
+<pre class="codeblock"><code>전이 모델(transition):   s&#39; ~ T(s&#39; | s, a)      — 행동 후 상태가 어떻게 바뀌는가
 관측 모델(observation):  o ~ Z(o | s&#39;, a)        — 새 상태에서 어떤 센서값이 나오는가
 </code></pre>
 <p>문제는, 실제 로봇의 센싱(RGB 카메라, lidar)은 고차원·고비선형이라 이 두 모델을 <strong>손으로 설계(hand-craft)하기가 사실상 불가능</strong>하다는 점이다. 그렇다고 고충실도 생성 모델(예: diffusion model)로 학습하면, <strong>추론 속도가 너무 느려</strong> 온라인 플래닝에 필요한 &quot;스텝당 수만 회 샘플링&quot;을 감당할 수 없다. 정확도(고충실도 학습 모델)와 속도(온라인 플래닝 실시간성)가 정면충돌하는 것이다.</p>
@@ -156,7 +242,7 @@ footer {
 <p><strong>태스크 비종속(task-agnostic)으로 전이·관측 생성 모델을 conditional diffusion으로 학습하되, 이를 compact feedforward 생성기로 distillation하여 샘플링 비용을 약 3자릿수(최대 283×) 줄이고, GPU 벡터화 온라인 POMDP 플래너(VOPP)에 결합하여 실시간 불확실성 하 플래닝을 달성한다.</strong></p>
 </blockquote>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <p><strong>(C1) 생성 모델 수작업의 한계.</strong>
 고전적 POMDP 플래너는 전이·관측 모델을 분석적으로 주어진 것으로 가정한다. 그러나 다리형 로봇(legged robot)이 거친 지형을 밟고 넘어지며 만드는 상태 전이, RGB 카메라가 벽 구성을 보는 관측, lidar가 움직이는 상자에 반사되는 관측 — 이런 것을 수식으로 적는 것은 비현실적이다.</p>
@@ -170,7 +256,7 @@ RGB/lidar 관측은 연속·고차원이다. 표준 belief tree는 이산 관측
 학습 모델 기반 플래너의 실용성은 결국 시뮬레이션에서만 학습한 모델이 실제 로봇에서 동작하느냐로 판가름난다.</p>
 <h3>2.2 핵심 해결책</h3>
 <p>VOiLA는 다섯 도전과제에 다음을 대응시킨다:</p>
-<pre><code>(C1) 수작업 한계      → conditional diffusion으로 전이/관측 샘플러를 데이터에서 학습 (task-agnostic)
+<pre class="codeblock"><code>(C1) 수작업 한계      → conditional diffusion으로 전이/관측 샘플러를 데이터에서 학습 (task-agnostic)
 (C2) 추론 지연        → ODE diffusion 샘플러를 compact feedforward 생성기로 distillation (최대 283× 가속)
 (C3) 연속 관측        → VOPP에 Progressive Widening 적용 (연속 관측 분기 제어)
 (C4) 우도 부재        → InfoNCE 대조학습으로 비정규 관측 밀도(우도) 모델 별도 학습 → 파티클 가중
@@ -178,11 +264,11 @@ RGB/lidar 관측은 연속·고차원이다. 표준 belief tree는 이산 관측
 </code></pre>
 <p>전체를 한 문장으로: <strong>&quot;느리지만 정확한 diffusion 교사 → 빠른 feedforward 학생으로 증류 → GPU 벡터화 온라인 플래너에 꽂아 실시간화&quot;</strong>.</p>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <p>VOiLA는 (A) diffusion 기반 전이·관측 샘플러 학습, (B) feedforward distillation, (C) InfoNCE 우도 모델, (D) VOPP — GPU 벡터화 온라인 POMDP 플래너 — 네 부품으로 구성된다.</p>
 <h3>3.1 학습 가능한 생성 POMDP 모델 — Conditional Diffusion 샘플러</h3>
 <p>POMDP를 <code>(S, A, O, T, Z, R, γ, b0)</code>로 둔다. VOiLA는 <code>T</code>, <code>Z</code>를 분석식이 아니라 <strong>샘플러(sampler)</strong> 형태의 학습 함수로 둔다.</p>
-<pre><code>전이 샘플러:        s&#39; = f_T(s, a, ω_T),     ω_T ~ N(0, I)
+<pre class="codeblock"><code>전이 샘플러:        s&#39; = f_T(s, a, ω_T),     ω_T ~ N(0, I)
 관측 샘플러(잠재):  z  = f_Z(s&#39;, a, ω_Z),    ω_Z ~ N(0, I)
 </code></pre>
 <ul>
@@ -191,7 +277,7 @@ RGB/lidar 관측은 연속·고차원이다. 표준 belief tree는 이산 관측
 </ul>
 <p><strong>학습 목표 — v-prediction.</strong>
 두 샘플러는 conditional diffusion model로 학습한다. 표준 diffusion은 노이즈 <code>ε</code>를 예측(ε-prediction)하지만, VOiLA는 안정성과 저-노이즈/고-노이즈 양 끝에서의 균형이 좋은 <strong>v-prediction</strong> 목적을 사용한다. 잡음 스케줄 <code>α_t, σ_t</code> (with <code>α_t² + σ_t² = 1</code>)에서:</p>
-<pre><code># 노이즈 주입 (forward process)
+<pre class="codeblock"><code># 노이즈 주입 (forward process)
 x_t = α_t · x_0 + σ_t · ε,          ε ~ N(0, I)
 
 # v-target 정의
@@ -201,7 +287,7 @@ v   = α_t · ε − σ_t · x_0
 L_diff = E_{x_0, ε, t} [ || v_θ(x_t, t, c) − v ||² ]
 </code></pre>
 <p>여기서 <code>x_0</code>는 전이 샘플러면 <code>s&#39;</code>, 관측 샘플러면 <code>z</code>이다. 데이터는 오프라인으로 수집한 <code>(s, a, s&#39;, o)</code> 튜플(시뮬레이터 롤아웃)에서 만든다 — <strong>태스크의 보상/목표와 무관</strong>하게 환경 동역학·센싱만 학습하므로 task-agnostic이고, 같은 모델을 여러 목표/태스크에 재사용할 수 있다.</p>
-<pre><code>   ┌──────────── 오프라인 데이터 수집 ────────────┐
+<pre class="diagram"><code>   ┌──────────── 오프라인 데이터 수집 ────────────┐
    │  시뮬레이터에서 무작위 정책으로 롤아웃        │
    │  → 튜플 D = { (s, a, s&#39;, o) }                │
    └──────────────────────────────────────────────┘
@@ -215,7 +301,7 @@ L_diff = E_{x_0, ε, t} [ || v_θ(x_t, t, c) − v ||² ]
 <h3>3.2 모델 증류 (Distillation) — 3자릿수 가속의 핵심</h3>
 <p>학습된 diffusion 샘플러는 정확하지만 ODE를 여러 스텝 풀어야 해서 느리다. VOiLA의 결정적 기여는 <strong>ODE 기반 diffusion 샘플러를 compact feedforward 생성기로 distillation</strong>하는 것이다.</p>
 <p>핵심 아이디어: diffusion 샘플러는 입력 노이즈 <code>ω</code>를 출력 표본 <code>x_0</code>로 보내는 <strong>결정론적 사상(ODE 흐름)</strong>으로 볼 수 있다(probability-flow ODE). 이 사상을 한 번에 흉내내는 작은 피드포워드 네트워크 <code>g_φ</code>를 모방학습(imitation)으로 훈련한다:</p>
-<pre><code># 1) 교사(diffusion)로 (노이즈 → 표본) 쌍 다량 생성
+<pre class="codeblock"><code># 1) 교사(diffusion)로 (노이즈 → 표본) 쌍 다량 생성
 for many (s,a):
     ω ~ N(0,I)
     x0_teacher = ODE_solve(v_θ, ω, c=(s,a))     # 느린 다단계 적분
@@ -226,7 +312,7 @@ L_distill = E[ || g_φ(ω, c) − x0_teacher ||² ]
 # 추론(온라인 플래닝 시):  s&#39; = g_φ(ω_T, (s,a))   ← 단일 forward, ODE 적분 없음
 </code></pre>
 <p><strong>효과(LeggedNavigation 측정)</strong>: 증류된 샘플러는 약 <code>5.9×10⁴ samples/s</code>로, diffusion model의 <code>2.1×10² samples/s</code> 대비 <strong>약 283× 처리량 향상</strong>. 이 가속이 &quot;수만 회 시뮬레이션/스텝&quot;을 실시간 예산 안에 넣어 온라인 POMDP 플래닝을 가능케 하는 가교다.</p>
-<pre><code>            정확도              속도
+<pre class="diagram"><code>            정확도              속도
  diffusion  ★★★★★ (정확)   ✗ 2.1×10² /s   ← 그대로는 온라인 불가
  distilled  ★★★★  (근사)   ✓ 5.9×10⁴ /s   ← 283× ↑, 온라인 가능
             └────────── distillation ──────────┘
@@ -234,7 +320,7 @@ L_distill = E[ || g_φ(ω, c) − x0_teacher ||² ]
 <p>즉 VOiLA의 설계 철학은 &quot;<strong>학습은 느리고 정확한 diffusion으로, 배치(deployment)는 빠른 feedforward로</strong>&quot; — 학습/추론의 비대칭을 명시적으로 활용한다.</p>
 <h3>3.3 관측 우도 모델 — InfoNCE 대조 학습</h3>
 <p>파티클 필터로 belief를 갱신하려면 관측 우도 <code>Z(o|s&#39;,a)</code>가 필요하다. 그러나 관측 샘플러 <code>f_Z</code>는 표본만 줄 뿐 밀도를 주지 않는다(암묵 모델). VOiLA는 <strong>별도의 우도 모델</strong>을 InfoNCE 대조 손실로 학습하여 <strong>비정규(unnormalized) 관측 밀도</strong>를 얻는다.</p>
-<pre><code># (s&#39;, a)와 실제 관측 z가 &quot;맞는 쌍&quot;, 다른 z들이 &quot;틀린 쌍(negatives)&quot;
+<pre class="codeblock"><code># (s&#39;, a)와 실제 관측 z가 &quot;맞는 쌍&quot;, 다른 z들이 &quot;틀린 쌍(negatives)&quot;
 # 에너지/유사도 함수 e_ψ(z, s&#39;, a) 학습
 
 L_InfoNCE = − E[ log ( exp(e_ψ(z⁺, s&#39;,a)) /
@@ -245,7 +331,7 @@ L_InfoNCE = − E[ log ( exp(e_ψ(z⁺, s&#39;,a)) /
 <p>InfoNCE로 학습된 <code>exp(e_ψ)</code>는 정규화 상수만 다를 뿐 우도에 비례하므로, 파티클 가중치는 정규화로 상쇄되어 <strong>정확한 belief 갱신이 가능</strong>하다. 이는 &quot;샘플은 diffusion이, 가중은 대조모델이&quot;라는 역할 분담으로 (C4)를 푼다.</p>
 <h3>3.4 VOPP — Vectorized Online POMDP Planner</h3>
 <p>증류된 샘플러와 우도 모델을 <strong>GPU-native 온라인 플래너 VOPP</strong>에 결합한다. VOPP는 belief tree를 <strong>fully vectorized forward search</strong>로 키운다 — 수만 개의 병렬 시뮬레이션을 텐서 연산으로 동시에 진행한다.</p>
-<pre><code>VOPP 한 결정 스텝 (개념):
+<pre class="diagram"><code>VOPP 한 결정 스텝 (개념):
 ┌─────────────────────────────────────────────────────────────┐
 │  현재 belief b (파티클 집합 {s_i})                            │
 │                                                               │
@@ -267,7 +353,7 @@ L_InfoNCE = − E[ log ( exp(e_ψ(z⁺, s&#39;,a)) /
 <li><strong>Preference Backup</strong>: 단순 평균 백업이 아닌 선호(preference) 기반 가치 역전파로, 유망한 가지에 탐색을 집중.</li>
 </ul>
 <h3>3.5 전체 학습·배치 파이프라인 한눈에</h3>
-<pre><code>[오프라인 — 1회]                          [온라인 — 매 결정 스텝]
+<pre class="diagram"><code>[오프라인 — 1회]                          [온라인 — 매 결정 스텝]
  시뮬 롤아웃 D={(s,a,s&#39;,o)}                현재 belief b
         │                                       │
    ┌────┴─────┐                            VOPP forward search
@@ -330,13 +416,13 @@ L_InfoNCE = − E[ log ( exp(e_ψ(z⁺, s&#39;,a)) /
 <p>이 표가 보여주듯 VOiLA의 신규성은 단일 부품이 아니라 <strong>&quot;고충실도 학습(diffusion) ↔ 실시간 추론(distillation+GPU)&quot;의 비대칭을 POMDP 플래닝 루프에 정합</strong>시킨 시스템 설계에 있다.</p>
 <h3>3.7 POMDP belief 갱신과 파티클 필터 — 수식 상세</h3>
 <p>VOiLA의 온라인 루프 한복판에는 belief 갱신이 있다. POMDP에서 belief <code>b(s)</code>는 현재 상태에 대한 확률분포이며, 행동 <code>a</code>와 관측 <code>o</code>를 받으면 Bayes 규칙으로 갱신된다:</p>
-<pre><code># 정확한 belief 갱신 (Bayes filter)
+<pre class="diagram"><code># 정확한 belief 갱신 (Bayes filter)
 b&#39;(s&#39;) = η · Z(o | s&#39;, a) · ∫_S T(s&#39; | s, a) · b(s) ds
          └─ 관측 우도 ─┘   └──── 전이 적분(예측) ────┘
    η : 정규화 상수 (Σ_{s&#39;} 항 = 1)
 </code></pre>
 <p>연속·고차원 상태에선 이 적분이 닫힌형으로 안 풀리므로 <strong>파티클 필터</strong>로 근사한다. VOiLA는 적분의 두 항을 각각 학습 모델로 대체한다:</p>
-<pre><code># 파티클 집합 {s_i}_{i=1..N}, 가중치 {w_i}
+<pre class="codeblock"><code># 파티클 집합 {s_i}_{i=1..N}, 가중치 {w_i}
 # 1) 예측(predict) — 증류 전이 샘플러로 각 파티클 전진
    s&#39;_i = g_φ(ω_i, (s_i, a)),         ω_i ~ N(0, I)     ← T(s&#39;|s,a) 표본
 
@@ -350,7 +436,7 @@ b&#39;(s&#39;) = η · Z(o | s&#39;, a) · ∫_S T(s&#39; | s, a) · b(s) ds
 <p>즉 &quot;전이 적분&quot;은 증류 샘플러 <code>g_φ</code>가, &quot;관측 우도&quot;는 대조모델 <code>e_ψ</code>가 담당한다. 두 학습 부품이 정확히 Bayes filter의 두 항에 일대일 대응한다는 것이 VOiLA 설계의 명료함이다. <code>N_eff = 1 / Σ_i w_i²</code>로 파티클 붕괴를 감시하고 임계 이하에서 재표집한다.</p>
 <h3>3.8 한 VOPP 결정 스텝의 워크스루 (Worked Example)</h3>
 <p><code>LeggedNavigation</code>(ANYmal-C, 벽 구성 미지)을 예로, 한 결정 스텝을 의사 수치로 따라가 본다(수치는 설명용 예시이며 논문 공개값이 아님).</p>
-<pre><code>입력:  현재 belief b = {s_1..s_N}  (N=2048 파티클, 벽 구성 후보 혼재)
+<pre class="codeblock"><code>입력:  현재 belief b = {s_1..s_N}  (N=2048 파티클, 벽 구성 후보 혼재)
 목표:  최적 행동 a* 선택
 
 [iter 0..K]  belief tree 확장:
@@ -373,8 +459,8 @@ b&#39;(s&#39;) = η · Z(o | s&#39;, a) · ∫_S T(s&#39; | s, a) · b(s) ds
 <p>핵심은 (1)(2)가 <strong>루프가 아니라 배치 텐서 연산</strong>이라는 점이다. 만약 diffusion을 직접 썼다면 각 forward가 ODE 다단계라 <code>2.1×10²/s</code> → 2048 파티클 × 다수 행동 × K iteration이 수 분으로 폭발한다. 증류로 <code>5.9×10⁴/s</code>가 되면 같은 트리를 실시간 예산(수십 ms~수백 ms) 안에 키울 수 있다. 이 단순한 처리량 차이가 &quot;온라인 가능/불가능&quot;의 경계를 가른다.</p>
 <p><strong>Progressive Widening의 직관</strong>: 연속 관측에선 같은 <code>o</code>가 두 번 안 나오므로 모든 관측마다 자식을 만들면 트리가 한 단계만에 폭발한다. PW는 노드 방문수 <code>n</code>이 늘 때만 자식 수를 <code>k·n^α</code>로 천천히 늘려, 적게 방문한 노드는 소수 분기로 깊이 탐색하고 많이 방문한 노드만 폭을 넓힌다 — 탐색/활용 균형을 연속 공간에서 유지하는 표준 장치다.</p>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>                         ┌──────────────────────────────────────┐
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>                         ┌──────────────────────────────────────┐
                          │           오프라인 학습 단계           │
                          │                                        │
    시뮬레이터 ──롤아웃──▶ │  D = {(s,a,s&#39;,o)}                      │
@@ -411,7 +497,7 @@ b&#39;(s&#39;) = η · Z(o | s&#39;, a) · ∫_S T(s&#39; | s, a) · b(s) ds
 </code></pre>
 <p><strong>데이터 흐름 요약</strong>: 오프라인에서 환경 동역학·센싱을 diffusion으로 정확히 학습 → 빠른 feedforward로 증류 → 온라인에서 VOPP가 이 증류 샘플러를 GPU 배치로 수만 번 호출하며 belief tree를 키워 행동을 결정 → 실행·관측 후 belief 갱신. 학습은 task-agnostic이므로 목표가 바뀌어도(같은 환경류) 모델 재학습 불필요.</p>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 / 벤치마크 도메인 (Datasets)</h3>
 <p>세 가지 불확실성 하 내비게이션·탐색 벤치마크에서 평가한다. 셋 모두 <strong>부분 관측·노이즈 관측 하의 경로/탐색 문제</strong>로, Planner 트랙(불확실성 하 path planning)에 부합한다.</p>
 <div class="table-wrap"><table>
@@ -493,7 +579,7 @@ b&#39;(s&#39;) = η · Z(o | s&#39;, a) · ∫_S T(s&#39; | s, a) · b(s) ds
 <td>10–12%</td>
 </tr>
 </tbody></table></div>
-<pre><code>증류 효과:  distilled  ≈ 5.9×10⁴ samples/s
+<pre class="codeblock"><code>증류 효과:  distilled  ≈ 5.9×10⁴ samples/s
             diffusion  ≈ 2.1×10²  samples/s
             → 약 283× 처리량 향상 (온라인 플래닝 실현의 핵심)
 </code></pre>
@@ -535,7 +621,7 @@ b&#39;(s&#39;) = η · Z(o | s&#39;, a) · ∫_S T(s&#39; | s, a) · b(s) ds
 <p><strong>(라) 실로봇 10/10 — 사슬의 마지막 고리.</strong>
 시뮬-only 학습 모델이 실제 Go2에서 전부 성공했다는 것은, 위 (가)~(다)가 실험실 수치에 그치지 않고 실세계 센서 노이즈·동역학 불일치를 통과했음을 뜻한다. 표본 수(10)는 통계적으로 작지만, 코드 미공개 상황에서 방법의 실효성을 보이는 결정적 증거다.</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <ol>
 <li><strong>Task-agnostic 학습 생성 POMDP 모델</strong>: 전이·관측 모델을 conditional diffusion(v-prediction)으로, 보상·목표와 무관하게 환경 동역학·센싱만 학습 → 다목표 재사용.</li>
 <li><strong>Distillation을 통한 3자릿수 가속</strong>: ODE diffusion 샘플러를 feedforward 생성기로 증류, 약 283× 처리량 향상으로 &quot;정확하지만 느린&quot; 생성 모델을 온라인 플래닝에 투입 가능케 함. <strong>이것이 논문의 가장 결정적 기여.</strong></li>
@@ -544,7 +630,7 @@ b&#39;(s&#39;) = η · Z(o | s&#39;, a) · ∫_S T(s&#39; | s, a) · b(s) ds
 <li><strong>강력한 실험 증거</strong>: 샘플 효율(52–640×), 미관측 일반화(72–80% vs 10–12%), 그리고 <strong>시뮬-only 학습의 실로봇 zero-shot 10/10</strong>.</li>
 </ol>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <ul>
 <li><strong>Diffusion 목적</strong>: v-prediction (<code>v = α_t·ε − σ_t·x_0</code>), 잡음 스케줄 <code>α_t² + σ_t² = 1</code>.</li>
 <li><strong>관측 모델링</strong>: raw 관측을 잠재 <code>z</code>로 인코딩 후 그 분포를 학습(고차원 RGB/lidar 효율화).</li>
@@ -558,7 +644,7 @@ b&#39;(s&#39;) = η · Z(o | s&#39;, a) · ∫_S T(s&#39; | s, a) · b(s) ds
 <p>코드가 미공개이므로 위 하이퍼파라미터(diffusion 스텝 수, 증류 네트워크 폭/깊이, PW 상수 <code>k,α</code>, 파티클 수, belief tree iteration 수 등)의 정확한 수치는 본문 공개 범위로 한정된다. 본 리뷰는 <strong>공개된 사실만</strong> 기재하며, 미공개 수치를 추정·날조하지 않는다.</p>
 </blockquote>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 (Scalability)</h3>
 <p>GPU 벡터화와 증류 가속 덕에 belief tree 폭을 키워도(더 많은 병렬 시뮬) 실시간성을 유지하기 쉽다. PW로 연속 관측 분기를 제어하므로 고차원 관측에서도 트리가 통제 가능. 다만 GPU 메모리가 belief tree 폭의 상한을 결정한다.</p>
 <h3>8.2 한계점 (Limitations)</h3>
@@ -581,7 +667,7 @@ b&#39;(s&#39;) = η · Z(o | s&#39;, a) · ∫_S T(s&#39; | s, a) · b(s) ds
 <h3>8.5 증류 충실도와 안전성의 트레이드오프</h3>
 <p>feedforward 증류는 ODE 흐름의 1-step 근사이므로, 분포의 꼬리(rare but critical event — 예: 드물게 발생하는 충돌 직전 전이)에서 교사 대비 확률 질량을 과소/과대 추정할 수 있다. belief planning에서 이런 꼬리 왜곡은 위험 회피 결정에 직접 영향을 준다(과소추정 시 위험 행동 선택). 본 논문은 평균 성공률로 견고함을 보였으나, 안전 임계 응용(충돌 비용이 비대칭적으로 큰 경우)에서는 증류 오차의 분포적 특성(특히 꼬리)에 대한 추가 분석이 필요하다. consistency model류의 few-step 증류로 꼬리 충실도를 끌어올리면서 속도를 일부만 양보하는 절충이 한 방향이 될 수 있다.</p>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <p>같은 Planner 트랙의 선행 리뷰 중 (a) <strong>diffusion을 플래닝에 쓴</strong> 사례와 (b) <strong>불확실성 하(POMDP) 플래닝 + 학습 근사 가속</strong> 사례를 골라 비교한다.</p>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
@@ -657,7 +743,7 @@ b&#39;(s&#39;) = η · Z(o | s&#39;, a) · ∫_S T(s&#39; | s, a) · b(s) ds
 <h3>9.4 연구 방향성 평가</h3>
 <p>세 선행 연구가 &quot;diffusion을 정책으로(ReliaDiffNav, Sobolev)&quot; 또는 &quot;POMDP를 GNN으로 가속(Scout)&quot;하는 <strong>부분 최적화</strong>라면, VOiLA는 &quot;<strong>학습 세계모델 + 증류 + GPU 플래너</strong>&quot;를 한 스택으로 통합해 <em>불확실성 하 플래닝의 모델 병목 자체</em>를 겨냥한다. diffusion-as-world-model + distillation은 향후 POMDP 플래닝의 유망한 골격이 될 가능성이 높다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ul>
 <li>본 논문: Hoerger, Joshi, Shome, Manchester, Kurniawati. <em>VOiLA: Vectorized Online Planning with Learned Diffusion Model for POMDP Agents.</em> arXiv:2606.19729, 2026. (Submitted to ISRR 2026.)</li>
 <li>비교: <em>Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation</em> (ReliaDiffNav), arXiv:2606.13883.</li>
@@ -666,15 +752,110 @@ b&#39;(s&#39;) = η · Z(o | s&#39;, a) · ∫_S T(s&#39; | s, a) · b(s) ds
 <li>배경: POMDP 온라인 플래닝(POMCP, DESPOT, ABT, POMCPOW/PFT-DPW), Progressive Widening, conditional diffusion(v-prediction), InfoNCE 대조학습.</li>
 </ul>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p><strong>혁신성.</strong> VOiLA의 핵심 통찰은 &quot;고충실도 학습 생성 모델(diffusion)과 온라인 POMDP 플래닝의 실시간성은 충돌하지만, <strong>학습/추론의 비대칭을 distillation으로 메우면 둘을 동시에 가질 수 있다</strong>&quot;는 것이다. diffusion을 정책이 아닌 <strong>세계 모델</strong>로 쓰고, 이를 feedforward로 증류해 283× 가속, GPU 벡터화 VOPP에 결합한 설계는 불확실성 하 플래닝의 모델 병목을 정면으로 푼다.</p>
 <p><strong>실용적 의의.</strong> 손으로 못 적는 센싱(RGB/lidar)까지 belief planning의 사정권에 넣었고, 시뮬-only 학습으로 실제 Unitree Go2에서 10/10을 달성해 sim-to-real 실용성을 입증했다. 샘플 효율(최대 640×)과 미관측 일반화(72–80% vs 10–12%)는 모델프리 RL 대비 belief planning의 우위를 재확인한다.</p>
 <p><strong>향후 연구.</strong> 증류 충실도-속도 트레이드오프의 정밀 분석, 온라인 모델 적응, 동적·다중 에이전트 확장, 그리고 코드 공개를 통한 재현성 확보가 과제다. 그럼에도 &quot;diffusion-as-world-model + distillation + GPU online planner&quot;라는 골격은 POMDP 로봇 플래닝의 차세대 표준 구성요소가 될 잠재력이 크다.</p>
 <hr>
 <p><em>본 리뷰는 공개된 arXiv 정보와 검증된 사실에 근거하며, 미공개 코드/수치를 추정·날조하지 않았다. 작성: 2026-06-21.</em></p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="VOiLA: Vectorized Online Planning with Learned Diffusion Model for POMDP Agents — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

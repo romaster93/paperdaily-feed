@@ -6,133 +6,222 @@
 <meta name="color-scheme" content="light dark">
 <title>Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP) · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2604.19148">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">arXiv 2026</div>
-    <h1>Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP)</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2604.19148">arXiv:2604.19148</a></span>
-      <span>리뷰 2026-04-25</span>
-      <span>40분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">OLAhGP_arxiv2026</span>
     </div>
+    <h1 class="doc-title">OLAhGP: 다단계 가우시안 프로세스 전파 기반 적응적 경로 계획 — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2604.19148">2604.19148</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">미공개 (코드 공개 계획 없음)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">없음</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-04-25</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">40KB · 약 40분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 14개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">9</span><span class="toc-title">5 OLAhGP의 위치: 정보 경로 계획 분야 내에서</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">9</span><span class="toc-title">6 GP 기반 경로 계획의 역사적 맥락</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-11"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-12"><span class="toc-num">10</span><span class="toc-title">1 OLAhGP 수식 요약표 (Quick Reference)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-13"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>OLAhGP: 다단계 가우시안 프로세스 전파 기반 적응적 경로 계획 — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: Multi-Step Gaussian Process Propagation for Adaptive Path Planning</li>
@@ -155,11 +244,11 @@ footer {
 <p>이를 해결하기 위해 OLAhGP는 <strong>가우시안 프로세스(GP)를 사용해 현재까지 획득한 측정 데이터에서 환경의 확률적 믿음(posterior)을 유지</strong>하고, 이 믿음의 불확실성을 최소화하는 방향으로 미래 경유지를 연속적으로 최적화한다.</p>
 <p>핵심 기여: <strong>다단계(multi-step) 미래 GP 전파(propagation)</strong> — 최적화 변수인 미래 경유지 R에서의 측정이 현재 믿음에 어떤 영향을 미치는지를 해석적으로(analytically) 계산하여, 실시간 소요(&lt; 1ms)에 윈도우 크기 N개 경유지를 동시에 최적화한다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 환경 모니터링에서의 경로 계획 특수성</h4>
 <p>일반적인 Point-A → Point-B 내비게이션과 달리 환경 모니터링 경로 계획은 다음과 같은 특수성을 지닌다:</p>
-<pre><code>일반 경로 계획 vs 환경 모니터링 경로 계획:
+<pre class="codeblock"><code>일반 경로 계획 vs 환경 모니터링 경로 계획:
 
               일반 경로 계획           환경 모니터링 경로 계획
 목표           목표 지점 도달           환경 상태 파악 (분류/매핑)
@@ -178,7 +267,7 @@ footer {
 </ul>
 <h4>B. 그리디(Greedy) 단일 스텝 계획의 한계</h4>
 <p>가장 직관적인 접근인 <strong>그리디 계획</strong>(N=1, 현재 위치에서 다음 한 단계만 최적화)은 다음과 같은 구조적 한계를 가진다:</p>
-<pre><code>그리디 계획의 근시안적 실패 패턴:
+<pre class="codeblock"><code>그리디 계획의 근시안적 실패 패턴:
 
 현재 위치 (*)
      |
@@ -198,7 +287,7 @@ footer {
 <p>실험 결과, N=5 OLAhGP는 그리디(N=1)에 비해 오분류 확률(misclassification probability)에서 일관되게 우수한 성능을 보인다.</p>
 <h4>C. 글로벌(Static/Offline) 계획의 적응성 부재</h4>
 <p>임무 시작 전에 전체 경로를 한 번에 계획하는 방식(Offline)은 온라인 측정 데이터를 활용하지 못한다:</p>
-<pre><code>오프라인 계획 vs 온라인 적응 계획:
+<pre class="codeblock"><code>오프라인 계획 vs 온라인 적응 계획:
 
 오프라인:  고정 경로 (zigzag/lawnmower/random)
           → 기 탐사된 불확실성 낮은 지역 재방문 낭비
@@ -224,11 +313,11 @@ footer {
 <li><strong>후퇴 수평선(receding horizon) 온라인 최적화</strong>: 매 경유지마다 GP를 갱신하고 N 스텝 앞을 동시에 최적화</li>
 </ol>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 가우시안 프로세스 환경 모델 (Gaussian Process Environment Model)</h3>
 <h4>3.1.1 GP 기본 구조</h4>
 <p>GP는 무한차원 함수에 대한 확률 분포로, 임의의 유한 점 집합에서 가우시안 분포를 정의한다:</p>
-<pre><code>f(·) ~ GP(m(·), k(·,·))
+<pre class="codeblock"><code>f(·) ~ GP(m(·), k(·,·))
 
 여기서:
   m(x): 평균 함수 (통상 0 또는 상수)
@@ -243,7 +332,7 @@ k(x₁,x₂) = σ² · exp(-½ (x₁-x₂)ᵀ L⁻¹ (x₁-x₂))
      OLAhGP 실험: ℓ = 600m (해양 조류 번성의 공간적 스케일)
 </code></pre>
 <p>데이터셋 𝒟ₜ = {(xᵢ, yᵢ)}ᵢ₌₁ⁿ 가 주어졌을 때, 새로운 지점 x*에서의 GP 후험 분포:</p>
-<pre><code>사후 평균 (Posterior Mean):
+<pre class="codeblock"><code>사후 평균 (Posterior Mean):
 μ(x*|𝒟ₜ) = m(x*) + k(x*, X) [k(X,X) + Σ]⁻¹ (Ȳ - m(X))
 
 사후 분산 (Posterior Variance):
@@ -258,13 +347,13 @@ k(x₁,x₂) = σ² · exp(-½ (x₁-x₂)ᵀ L⁻¹ (x₁-x₂))
 <h4>3.1.2 미래 경유지를 포함한 GP 전파</h4>
 <p>OLAhGP의 핵심 아이디어는 <strong>미래 계획 경유지 R = [r₁, r₂, ..., rₙ]에서 측정이 이루어질 것을 가정</strong>하고, 이를 현재 GP 후험에 통합한 결합 분포를 계산하는 것이다.</p>
 <p>기존 데이터 𝒟ₜ와 미래 경유지 R을 결합한 데이터셋:</p>
-<pre><code>𝒟ₜ ∪ R = {(x₁,y₁),...,(xₙ,yₙ), (r₁,ŷ₁),...,(rₙ,ŷₙ)}
+<pre class="codeblock"><code>𝒟ₜ ∪ R = {(x₁,y₁),...,(xₙ,yₙ), (r₁,ŷ₁),...,(rₙ,ŷₙ)}
 </code></pre>
 <p>이때 미래 경유지에서의 측정값 ŷᵢ는 알 수 없으므로, 현재 GP 사후 평균으로 대체한다:</p>
-<pre><code>ŷᵢ = μ(rᵢ|𝒟ₜ)    (최선 추정값)
+<pre class="codeblock"><code>ŷᵢ = μ(rᵢ|𝒟ₜ)    (최선 추정값)
 </code></pre>
 <p>결합 사후 분산을 블록 행렬로 표현하면 (Eq. 6):</p>
-<pre><code>[k(X,X) + Σ    k(X,R)   ]⁻¹
+<pre class="codeblock"><code>[k(X,X) + Σ    k(X,R)   ]⁻¹
 [k(R,X)        k(R,R) + Σ]
 
 이를 이용한 임의 지점 x에서의 결합 사후 분산:
@@ -273,7 +362,7 @@ k(x₁,x₂) = σ² · exp(-½ (x₁-x₂)ᵀ L⁻¹ (x₁-x₂))
 <p><strong>문제</strong>: 이 결합 역산은 O((n+N)³) 시간 복잡도로 최적화 변수 R의 변화마다 재계산이 필요 → 실시간 불가</p>
 <h4>3.1.3 베이지안 위원회 머신(BCM) 근사</h4>
 <p>OLAhGP는 Tresp(2000)의 BCM 근사를 사용하여 계산 복잡도를 드라마틱하게 감소시킨다:</p>
-<pre><code>BCM 근사 (Eq. 7):
+<pre class="codeblock"><code>BCM 근사 (Eq. 7):
 1/σ²(x|𝒟ₜ, R) ≈ 1/σ²(x|𝒟ₜ) + 1/σ²(x|R) - 1/k(x,x)
 
 즉, 사후 정밀도(precision)의 가산 분해:
@@ -285,7 +374,7 @@ k(x₁,x₂) = σ² · exp(-½ (x₁-x₂)ᵀ L⁻¹ (x₁-x₂))
 <li><code>σ²(x|R)</code>: 미래 경유지만의 사후 분산 → 최적화 변수 R에 대해서만 계산</li>
 <li><strong>분리 가능성</strong>: 기존 데이터 처리와 미래 경유지 최적화를 완전히 독립적으로 수행 가능</li>
 </ul>
-<pre><code>계산 복잡도 비교:
+<pre class="codeblock"><code>계산 복잡도 비교:
 
 방법              복잡도              OLAhGP 실험(n=25, N=5) 소요시간
 정확한 결합 역산  O((n+N)³)           ~수백ms
@@ -295,7 +384,7 @@ MIP (그리드)      O(MIP 크기 × MOSEK) 17ms
 <p>BCM은 근사이지만, 실험 결과에서 정확한 결합 역산 대비 성능 차이가 미미함을 확인했다.</p>
 <h4>3.1.4 오분류 확률 (Misclassification Probability)</h4>
 <p>조류 번성 지역을 분류하기 위해 임계값 γ (클로로필-a 농도 기준)를 사용한다. 지점 x에서의 오분류 확률은 GP 사후 평균과 분산을 이용한 정규 분포 꼬리 확률:</p>
-<pre><code>오분류 확률 (Eq. 8):
+<pre class="codeblock"><code>오분류 확률 (Eq. 8):
 p(x|𝒟ₜ, R) = Φ(-|μ(x|𝒟ₜ,R) - γ| / σ(x|𝒟ₜ,R))
 
 여기서:
@@ -313,7 +402,7 @@ p(x|𝒟ₜ, R) = Φ(-|μ(x|𝒟ₜ,R) - γ| / σ(x|𝒟ₜ,R))
 <h3>3.2 후퇴 수평선 최적화 문제 (Receding Horizon Optimization)</h3>
 <h4>3.2.1 기본 최적화 문제 (Eq. 9)</h4>
 <p>OLAhGP의 경로 계획은 다음 최적화 문제로 공식화된다:</p>
-<pre><code>최적화 문제:
+<pre class="codeblock"><code>최적화 문제:
 R* = argmin_{R∈Ω^N}  Σ_{x∈𝒳} p(x|𝒟ₜ, R) + λ₁ Σᵢ ||rᵢ₊₁ - rᵢ||₂
 
 subject to:
@@ -335,7 +424,7 @@ subject to:
 </ul>
 <h4>3.2.2 실세계 ASV 확장 목적 함수 (Eq. 10)</h4>
 <p>실제 해양 임무에서는 해류, 바람, 조류가 경로에 영향을 준다. 이를 위해 추가 비용 항목:</p>
-<pre><code>실세계 확장 목적 함수:
+<pre class="codeblock"><code>실세계 확장 목적 함수:
 R* = argmin_{R∈Ω^N}  Σ_{x∈𝒳} p(x|𝒟ₜ, R)
                     + λ₁ Σᵢ ||rᵢ₊₁ - rᵢ||₂
                     + λ₂ · c(R)           (해류 비용)
@@ -350,7 +439,7 @@ R* = argmin_{R∈Ω^N}  Σ_{x∈𝒳} p(x|𝒟ₜ, R)
 <p><strong>가중치 설계 원칙</strong>: λ₂, λ₃를 매우 작게 설정하여 해류·바람 비용이 정보 이득을 압도하지 않도록 한다. 즉, 정보가 풍부한 지역이 있다면 바람 역행을 감수하고라도 탐사한다.</p>
 <h4>3.2.3 CasADi + IPOPT 솔버</h4>
 <p>비선형 최적화에 CasADi(자동 미분 프레임워크)와 IPOPT(Interior Point Optimizer)를 사용한다:</p>
-<pre><code>솔버 설정:
+<pre class="codeblock"><code>솔버 설정:
   - CasADi: 목적 함수와 제약의 자동 미분 → 그래디언트 정확 계산
   - IPOPT: Interior Point Method로 비볼록 비선형 문제 해결
   - 핫스타팅(hot-starting): 이전 최적해를 초기값으로 재사용
@@ -358,7 +447,7 @@ R* = argmin_{R∈Ω^N}  Σ_{x∈𝒳} p(x|𝒟ₜ, R)
 </code></pre>
 <p><strong>그리드화(gridding)</strong>: 연속 영역 𝒳를 RES×RES 그리드(실험: 32×32 = 1024 지점)로 이산화하여 합산 계산. 이 그리드는 최적화 변수가 아니고 고정이므로 계산 부하가 작다.</p>
 <h3>3.3 OLAhGP 알고리즘 전체 흐름 (Algorithm 1)</h3>
-<pre><code>OLAhGP 후퇴 수평선 루프:
+<pre class="codeblock"><code>OLAhGP 후퇴 수평선 루프:
 
 초기화:
   GP 모델 초기화 (사전 분포)
@@ -389,8 +478,8 @@ until 총 이동 거리 소진 or 임무 완료
 </code></pre>
 <p><strong>후퇴 수평선의 장점</strong>: 계획된 N개 경유지 중 첫 번째만 실행하고 나머지는 다음 GP 갱신 후 재최적화된다. 이를 통해 새로운 측정 정보가 즉시 계획에 반영된다.</p>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>OLAhGP 전체 파이프라인
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>OLAhGP 전체 파이프라인
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                    실세계 ASV 시스템                              │
@@ -439,7 +528,7 @@ until 총 이동 거리 소진 or 임무 완료
 <li>실행: 첫 번째 경유지 r₁*만 ASV에 전달, 나머지는 다음 반복에 재최적화</li>
 </ul>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 및 환경 (Datasets)</h3>
 <h4>A. SINMOD 고충실도 시뮬레이션</h4>
 <ul>
@@ -458,7 +547,7 @@ until 총 이동 거리 소진 or 임무 완료
 <li><strong>날짜</strong>: 2025년 9월 2일 현장 측정 데이터</li>
 </ul>
 <h3>5.2 평가 지표 (Evaluation Metrics)</h3>
-<pre><code>지표 1: 오분류 확률 합산 (Total Misclassification Probability)
+<pre class="codeblock"><code>지표 1: 오분류 확률 합산 (Total Misclassification Probability)
   Σ_{x∈𝒳} p(x|𝒟_T)
   → 임무 완료 후 전체 지역에서 분류 오류 가능성의 합
   → 낮을수록 좋음
@@ -588,7 +677,7 @@ until 총 이동 거리 소진 or 임무 완료
 <li>파도 추진 ASV 특성상 물리적 제약(조류, 바람 방향)이 경로에 영향 → 확장 목적 함수로 처리</li>
 </ul>
 <h3>5.4 실세계 실험 (Real-world Experiments)</h3>
-<pre><code>실세계 실험 개요:
+<pre class="codeblock"><code>실세계 실험 개요:
 
 환경: 노르웨이 해안 (Norwegian Coastal Area)
      강한 조류 (tidal currents)
@@ -612,10 +701,10 @@ until 총 이동 거리 소진 or 임무 완료
 - 총 25 경유지 × 10회 실험 기준 재현 가능한 우수 성능
 </code></pre>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>6.1 다단계 미래 GP 전파 (Multi-Step Future GP Propagation)</h3>
 <p>기존 정보 경로 계획(Informative Path Planning, IPP) 연구의 대부분은 단일 스텝(그리디) 또는 제한된 이산 그리드에서의 최적화에 의존한다. OLAhGP는 <strong>연속 공간에서 N개 미래 경유지를 동시에 최적화</strong>하면서 각 경유지에서의 가상 측정이 전체 믿음에 미치는 영향을 해석적으로 계산하는 최초의 방법 중 하나다.</p>
-<pre><code>기존 방법과의 차이:
+<pre class="codeblock"><code>기존 방법과의 차이:
 
 방법            최적화 방식           계획 수평선    연속/이산
 Greedy IPP     현재→다음 1스텝       N=1           연속
@@ -628,9 +717,9 @@ OLAhGP         비선형 연속 최적화      N=5~7         연속 (CasADi)
 <h3>6.3 실세계 ASV 검증</h3>
 <p>해양 조류 번성 모니터링이라는 실용적인 환경에서 파도 추진 ASV로 현장 실험을 수행했다. 이는 대부분의 IPP 논문이 시뮬레이션에만 국한되는 것과 대비되는 중요한 기여다. 실세계 환경의 해류, 바람, 조류를 목적 함수에 직접 통합하는 확장 공식화(Eq. 10)도 제안한다.</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 소프트웨어 스택</h3>
-<pre><code>OLAhGP 구현 스택:
+<pre class="codeblock"><code>OLAhGP 구현 스택:
 
 GP 라이브러리:
   - 커스텀 구현 (BCM 근사를 위해 표준 라이브러리 미사용)
@@ -650,7 +739,7 @@ GP 라이브러리:
   - 날씨 API: 바람 데이터 (실세계 임무)
 </code></pre>
 <h3>7.2 하이퍼파라미터 설계 원칙</h3>
-<pre><code>GP 커널 설계:
+<pre class="codeblock"><code>GP 커널 설계:
   - 길이 스케일 ℓ = 600m: 해양 조류의 공간적 상관 거리에 맞춤
     (수 km 규모의 해양 현상 반영)
   - GP 분산 σ² = 1.0 (mg/m³)²: 측정 범위에 맞춤
@@ -668,7 +757,7 @@ GP 라이브러리:
   λ₃ = 10⁻⁵: 바람 비용 (λ₂보다 크지만 여전히 작음)
 </code></pre>
 <h3>7.3 핫스타팅(Hot-Starting) 전략</h3>
-<pre><code>핫스타팅 효과:
+<pre class="codeblock"><code>핫스타팅 효과:
 
 경우 A: 핫스타팅 없음 (Offline 방법)
   → 매번 직선 경로(interpolation)에서 시작
@@ -683,10 +772,10 @@ GP 라이브러리:
   → 0.99ms±0.70ms 소요 (730× 가속!)
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 BCM 근사의 이론적 한계</h3>
 <p>BCM(베이지안 위원회 머신)은 각 전문가 GP가 서로 독립임을 가정한다. 실제로 기존 데이터 𝒟ₜ와 미래 경유지 R은 공간적으로 상관되어 있어 이 가정이 엄밀하지 않다. 특히:</p>
-<pre><code>BCM 근사 오차의 원인:
+<pre class="codeblock"><code>BCM 근사 오차의 원인:
   1. 기존 관측 근처에 경유지가 있을 때: 두 전문가의 정보가 중복
   2. 경유지가 많을수록(큰 N): 경유지 간 상관도 무시 → 분산 과소 추정
   3. 길이 스케일 ℓ이 경유지 간격 대비 클 때: 근사 오차 증가
@@ -695,7 +784,7 @@ GP 라이브러리:
   → N 증가에 따른 BCM 근사 오차 누적 가능성
 </code></pre>
 <h3>8.2 확장 가능성</h3>
-<pre><code>향후 연구 방향:
+<pre class="codeblock"><code>향후 연구 방향:
 
 1. 연속 측정 경로 계획 (Continuous Measurement Path Planning)
    현재: 이산 경유지 → 측정 → 이동 반복
@@ -714,7 +803,7 @@ GP 라이브러리:
    이를 운동 비용에 반영하면 에너지 효율 극대화
 </code></pre>
 <h3>8.3 한계점 (Limitations)</h3>
-<pre><code>OLAhGP의 주요 한계:
+<pre class="codeblock"><code>OLAhGP의 주요 한계:
 
 1. 전역 최적성 보장 없음
    비볼록(non-convex) 문제 → IPOPT는 로컬 최솟값만 보장
@@ -736,7 +825,7 @@ GP 라이브러리:
    다중 에이전트 협력에는 분산 GP 공유 프로토콜 필요
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 Planner 트랙 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -836,7 +925,7 @@ GP 라이브러리:
 </li>
 </ol>
 <h3>9.3 실적용 가능성 평가</h3>
-<pre><code>실적용 시나리오별 평가:
+<pre class="codeblock"><code>실적용 시나리오별 평가:
 
 시나리오 1: 해양 환경 모니터링 (적합)
   - 조류 번성, 오염 감지, 수온 분포 매핑
@@ -856,9 +945,9 @@ GP 라이브러리:
 <p>OLAhGP가 대표하는 <strong>정보 이득 기반 경로 계획(Informative Path Planning)</strong> 은 기존 리뷰 논문들이 다루지 않은 영역이다. 특히 기후 변화 모니터링, 환경 재난 대응, 해양 생태 조사 같은 실용적 임무에서 증가하는 수요를 반영한다.</p>
 <p>그러나 단순한 격자 탐사 대비 얼마나 실질적 이익이 있는지를 더 광범위한 시나리오에서 검증할 필요가 있다. 또한 코드 공개와 장기 임무에서의 확장성 개선이 필수적이다.</p>
 <hr>
-<h2>9.5 OLAhGP의 위치: 정보 경로 계획 분야 내에서</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="9. 5 OLAhGP의 위치: 정보 경로 계획 분야 내에서">9.5 OLAhGP의 위치: 정보 경로 계획 분야 내에서</h2>
 <p>OLAhGP는 <strong>Informative Path Planning(IPP)</strong> 이라는 세부 분야에 속한다. IPP는 환경의 불확실성을 최소화하기 위해 경로를 계획하는 연구 분야로, 경로 계획의 전통적 목표(거리 최소화, 장애물 회피)와는 다른 패러다임이다.</p>
-<pre><code>IPP 분야 내 OLAhGP의 위치:
+<pre class="codeblock"><code>IPP 분야 내 OLAhGP의 위치:
 
 IPP 방법론 분류:
 
@@ -896,9 +985,9 @@ IPP 방법론 분류:
 </code></pre>
 <p><strong>OLAhGP의 독특한 포지션</strong>: 연속 공간에서 실시간으로 동작하면서 N&gt;1 다단계 전망을 가진 유일한 방법으로, MIP의 이산화 한계와 그리디의 근시안 사이를 메우는 중간 지점을 제공한다.</p>
 <hr>
-<h2>9.6 GP 기반 경로 계획의 역사적 맥락</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">9. 5 OLAhGP의 위치: 정보 경로 계획 분야 내에서 →</a></div><h2 id="sec-10" data-label="9. 6 GP 기반 경로 계획의 역사적 맥락">9.6 GP 기반 경로 계획의 역사적 맥락</h2>
 <p>가우시안 프로세스를 경로 계획에 활용하는 연구는 2000년대 초부터 시작되었다:</p>
-<pre><code>GP 기반 IPP의 발전 흐름:
+<pre class="codeblock"><code>GP 기반 IPP의 발전 흐름:
 
 초기 (2007~2014):
   Krause &amp; Guestrin (2007): NP-hard 최적 센서 배치 → 그리디 근사
@@ -915,7 +1004,7 @@ IPP 방법론 분류:
 </code></pre>
 <p>OLAhGP는 이 계보에서 두 가지 새로운 요소를 추가한다: <strong>(1) 베이지안 위원회 머신 근사로 계산 분리</strong>, <strong>(2) CasADi+IPOPT 연속 비선형 최적화</strong>. 이를 통해 이산 MIP 방법의 해상도 한계를 극복하면서도 실시간 성능을 달성한다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">9. 6 GP 기반 경로 계획의 역사적 맥락 →</a></div><h2 id="sec-11" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ul>
 <li>Tresp (2000): A Bayesian Committee Machine — BCM 근사의 원천 논문</li>
 <li>Dutta et al. (2025) IEEE T-RO: Convex Optimization for GP Path Planning — 주요 비교 대상 (MIP 기반)</li>
@@ -931,7 +1020,7 @@ IPP 방법론 분류:
 <li>Hitz et al. (2017): Adaptive Continuous-Space Informative Path Planning for Online Environmental Monitoring — ASV 수질 모니터링</li>
 </ul>
 <hr>
-<h2>10.1 OLAhGP 수식 요약표 (Quick Reference)</h2>
+<div class="secnav"><a href="#sec-9">← 9. 5 OLAhGP의 위치: 정보 경로 계획 분야 내에서</a><a href="#sec-11">10. 참고 문헌 →</a></div><h2 id="sec-12" data-label="10. 1 OLAhGP 수식 요약표">10.1 OLAhGP 수식 요약표 (Quick Reference)</h2>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -1012,16 +1101,111 @@ IPP 방법론 분류:
 </tr>
 </tbody></table></div>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-10">← 9. 6 GP 기반 경로 계획의 역사적 맥락</a><a href="#sec-12">10. 1 OLAhGP 수식 요약표 →</a></div><h2 id="sec-13" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p>OLAhGP(Online Look-Ahead Gaussian Process Path Planning)는 <strong>환경 모니터링이라는 특수 임무에 특화된 정보 이득 기반 경로 계획기</strong>로, 다음 세 가지 핵심 혁신으로 기존 방법의 한계를 극복한다:</p>
 <p><strong>1. 다단계 미래 GP 전파</strong>: 미래 N개 경유지에서의 가상 측정이 현재 GP 믿음에 미치는 영향을 해석적으로 계산. 단일 스텝 그리디 계획의 근시안적 한계를 극복하면서도 MIP 기반 방법보다 17배 빠른 최적화를 달성한다.</p>
 <p><strong>2. BCM 근사를 통한 실시간 가능성</strong>: O((n+N)³) → O(N³) 분해로 최적화 계산 부하를 극적으로 감소. 이를 핫스타팅과 결합하면 IPOPT 반복이 37회로 수렴하여 1ms 이내에 N=5 경로를 계획한다.</p>
 <p><strong>3. 실세계 해양 검증</strong>: 파도 추진 ASV로 노르웨이 해안에서 현장 실험을 수행, 해류·바람 비용을 통합한 확장 공식화로 실용성을 입증했다.</p>
 <p>기존 Planner 트랙 리뷰 논문들(SANDO, UGE-MPC, DreamFlow, ViLiNT)이 장애물 회피·목표 도달에 집중한 것과 달리, OLAhGP는 <strong>환경 상태 파악을 위한 탐사 계획</strong>이라는 새로운 방향을 대표한다. 향후 다중 에이전트 협력, Sparse GP 확장, 시공간 GP 통합을 통해 기후 변화 모니터링, 재난 대응, 해양 생태 조사 등 실용적 임무에서의 활용이 기대된다.</p>
 <p>코드 공개와 더 다양한 환경에서의 검증이 이루어진다면 환경 모니터링 로보틱스 분야의 중요한 기준선 방법이 될 것이다.</p>
-
+<div class="secnav"><a href="#sec-11">← 10. 참고 문헌</a><a href="#sec-13">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="OLAhGP: 다단계 가우시안 프로세스 전파 기반 적응적 경로 계획 — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

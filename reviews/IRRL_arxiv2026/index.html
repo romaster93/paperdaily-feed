@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>IRRL: Incremental Residual Reinforcement Learning Toward Real-World Learning for Social Navigation · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2604.07945">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">arXiv 2026</div>
-    <h1>IRRL: Incremental Residual Reinforcement Learning Toward Real-World Learning for Social Navigation</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2604.07945">arXiv:2604.07945</a></span>
-      <span>리뷰 2026-04-25</span>
-      <span>42분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">IRRL_arxiv2026</span>
     </div>
+    <h1 class="doc-title">IRRL: 실세계 적응형 소셜 내비게이션을 위한 증분 잔차 강화학습</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2604.07945">2604.07945</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">❌ 미공개</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">❌ 미확인</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-04-25</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">40KB · 약 42분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>IRRL: 실세계 적응형 소셜 내비게이션을 위한 증분 잔차 강화학습 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: Incremental Residual Reinforcement Learning Toward Real-World Learning for Social Navigation</li>
@@ -158,11 +244,11 @@ footer {
 <p><img src="figures/page-1.jpeg" alt="IRRL 시스템 개요 — 실세계 소셜 내비게이션 학습" loading="lazy">
 <em>Fig 1. IRRL 전체 파이프라인. 시뮬레이션에서 사전 훈련 후, Mecanum 바퀴 로봇이 실제 보행자와의 상호작용을 통해 온라인 적응한다.</em></p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 시뮬레이션과 현실의 격차 (Sim-to-Real Gap)</h4>
 <p>소셜 내비게이션 RL의 근본적 문제:</p>
-<pre><code>시뮬레이션 한계:
+<pre class="diagram"><code>시뮬레이션 한계:
 ┌─────────────────────────────────────────────────────────┐
 │  1. 보행자 행동 다양성 부재                                 │
 │     - SFM, ORCA 등 단순 모델 사용                         │
@@ -181,7 +267,7 @@ footer {
 </code></pre>
 <h4>B. 엣지 디바이스의 연산 제약</h4>
 <p>실세계 RL의 기술적 장벽:</p>
-<pre><code>기존 RL (SAC, TD3):
+<pre class="codeblock"><code>기존 RL (SAC, TD3):
   리플레이 버퍼: 10^6개 전이 저장 → 수 GB RAM 필요
   배치 크기: 256~1024 → GPU 필요
   업데이트: 수천 번 역전파 → 고전력 소비
@@ -215,10 +301,10 @@ footer {
 <li><strong>정규화 기법</strong>: 학습 불안정성 억제</li>
 </ol>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 문제 형식화 (Problem Formulation)</h3>
 <p>소셜 내비게이션을 연속 행동 공간의 MDP로 형식화:</p>
-<pre><code>상태 공간:
+<pre class="codeblock"><code>상태 공간:
   로봇 상태: s_t^r = [p_x^g, p_y^g, θ^g, v_x, v_y]
     p_x^g, p_y^g: 로컬 좌표계에서 목표 위치
     θ^g: 목표 방향
@@ -245,7 +331,7 @@ footer {
 </code></pre>
 <h3>3.2 베이스 정책: Social Force Model (SFM)</h3>
 <p>SFM은 물리적 힘 기반의 고전적 보행자 내비게이션 모델로, IRRL의 사전 지식 역할을 한다:</p>
-<pre><code>SFM 기본 힘:
+<pre class="codeblock"><code>SFM 기본 힘:
   F_total = F_goal + F_social + F_obstacle
 
 목표 인력:
@@ -271,7 +357,7 @@ footer {
 </ul>
 <h3>3.3 잔차 강화학습 (Residual RL)</h3>
 <p><strong>핵심 아이디어</strong>: SFM이 제공하는 기본 안전 행동에 잔차(residual)를 더하여 최적화</p>
-<pre><code>최종 행동:
+<pre class="codeblock"><code>최종 행동:
   u_t = a_t^base + a_t^res
 
   a_t^base: SFM이 계산한 기본 행동
@@ -286,14 +372,14 @@ footer {
 <li><strong>빠른 수렴</strong>: 전체 행동 공간이 아닌 잔차만 학습 → 탐색 공간 대폭 축소</li>
 <li><strong>낮은 분산</strong>: 초기에 SFM 수준 성능 보장 → 학습 불안정성 감소</li>
 </ol>
-<pre><code>비교: 표준 RL vs 잔차 RL
+<pre class="codeblock"><code>비교: 표준 RL vs 잔차 RL
                     학습 목표     탐색 공간   초기 안전성
 표준 RL:            전체 정책     R^{n×|A|}  위험 (무작위)
 잔차 RL (IRRL):     잔차만        R^{n×|A|}/부분공간  안전 (SFM 보장)
 </code></pre>
 <h3>3.4 GATv2 기반 그래프 어텐션 정책 네트워크</h3>
 <p>보행자 수가 가변적인 입력을 처리하기 위해 그래프 어텐션 네트워크 활용:</p>
-<pre><code>그래프 구조:
+<pre class="codeblock"><code>그래프 구조:
   노드: 로봇 (1개) + 보행자 (K개)
   엣지: 로봇-보행자 간 (K개), 보행자-보행자 간 (K*(K-1)개)
 
@@ -322,7 +408,7 @@ GATv2 어텐션 메커니즘:
 <h3>3.5 증분 엔트로피 최대화 RL (Incremental SAC)</h3>
 <p>표준 SAC의 배치 학습을 완전한 단일 스텝 증분 학습으로 전환:</p>
 <h4>3.5.1 표준 SAC 목적 함수</h4>
-<pre><code>Actor 목적:
+<pre class="codeblock"><code>Actor 목적:
   J_π(θ) = E_{s_t, a_t~π_θ}[α * log π_θ(a_t|s_t) - Q_φ(s_t, u_t)]
 
 Critic 목적:
@@ -341,7 +427,7 @@ Critic 목적:
 </ul>
 <p>이를 해결하기 위한 IRRL의 세 가지 기법:</p>
 <p><strong>기법 1: 페널티메이트 정규화 (Penultimate Normalization)</strong></p>
-<pre><code>정책 네트워크의 마지막 은닉층 전 L2 정규화:
+<pre class="codeblock"><code>정책 네트워크의 마지막 은닉층 전 L2 정규화:
   ψ̂(S) = ψ(S) / ||ψ(S)||_2
 
 효과:
@@ -350,7 +436,7 @@ Critic 목적:
   - 과도한 정책 변화 억제 (암묵적 신뢰 영역 역할)
 </code></pre>
 <p><strong>기법 2: TD 오차 정규화 (TD Error Scaling)</strong></p>
-<pre><code>TD 오차의 분산으로 정규화:
+<pre class="codeblock"><code>TD 오차의 분산으로 정규화:
   δ_scaled = δ / σ_δ
 
   σ_δ: 온라인으로 추정된 TD 오차의 표준편차
@@ -362,7 +448,7 @@ Critic 목적:
   - 리플레이 버퍼 없이도 안정적 학습
 </code></pre>
 <p><strong>기법 3: 온라인 분산 추정 (Online Variance Estimation)</strong></p>
-<pre><code>Welford의 온라인 알고리즘으로 실행 통계 유지:
+<pre class="codeblock"><code>Welford의 온라인 알고리즘으로 실행 통계 유지:
   n ← n + 1
   δ_old ← mean
   mean ← mean + (x - mean) / n
@@ -374,7 +460,7 @@ Critic 목적:
   배치 통계 없이도 정확한 정규화 수행
 </code></pre>
 <h4>3.5.3 완전한 IRRL 알고리즘</h4>
-<pre><code>알고리즘: IRRL 온라인 학습
+<pre class="codeblock"><code>알고리즘: IRRL 온라인 학습
 
 초기화:
   정책 π_θ (GATv2 Actor) ← 시뮬레이션 사전학습
@@ -399,9 +485,9 @@ Critic 목적:
 <p><img src="figures/page-2.jpeg" alt="IRRL 시스템 아키텍처 — 증분 잔차 RL 구조" loading="lazy">
 <em>Fig 2. IRRL 아키텍처. SFM 베이스 정책 + GATv2 잔차 정책의 결합. 실세계에서 단일 스텝마다 즉시 업데이트.</em></p>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <h3>4.1 전체 파이프라인</h3>
-<pre><code>하드웨어 입력:
+<pre class="diagram"><code>하드웨어 입력:
   Mecanum 바퀴 로봇
     AR-XT-32-a 3D LiDAR (32채널, 360°)
     Jetson AGX Orin 온보드 컴퓨터
@@ -461,7 +547,7 @@ Critic 목적:
   Mecanum 바퀴 속도 명령 [v_x, v_y] → 로봇 이동
 </code></pre>
 <h3>4.2 실세계 학습 프로토콜</h3>
-<pre><code>3단계 실세계 적응 절차:
+<pre class="diagram"><code>3단계 실세계 적응 절차:
 ┌────────────────────────────────────────────────────────┐
 │ 단계 1: 시뮬레이션 사전 학습                               │
 │   환경: CrowdNav (Python 시뮬레이터)                       │
@@ -499,7 +585,7 @@ Critic 목적:
 <p><img src="figures/fig_04_01.jpeg" alt="IRRL 실험 환경 — Mecanum 로봇과 실제 보행자" loading="lazy">
 <em>Fig 3. IRRL 실세계 실험 환경. Mecanum 바퀴 로봇이 실제 보행자와 상호작용하며 온라인으로 학습한다.</em></p>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
 <p><strong>시뮬레이션 환경</strong>:</p>
 <ul>
@@ -745,7 +831,7 @@ Critic 목적:
 <p><img src="figures/fig_06_01.jpeg" alt="IRRL 실세계 실험 결과 — 적응 전후 비교" loading="lazy">
 <em>Fig 5. 실세계 실험 결과. 온라인 학습 전후 성공률 비교. 학습 후 실제 보행자 조건에서 20%p 개선.</em></p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>6.1 증분 학습과 잔차 RL의 시너지</h3>
 <p><strong>혁신성</strong>: 두 가지 기존 기법(증분 학습 + 잔차 RL)의 결합이 개별 적용보다 훨씬 효과적</p>
 <ul>
@@ -773,9 +859,9 @@ Critic 목적:
 <li>안전 초기화(SFM 기반)로 실세계 탐색 위험 최소화</li>
 </ul>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 네트워크 아키텍처</h3>
-<pre><code class="language-python"># GATv2 Actor (잔차 정책)
+<pre class="codeblock"><code class="language-python"># GATv2 Actor (잔차 정책)
 class GATv2Actor(nn.Module):
     def __init__(self, robot_dim=5, ped_dim=4, hidden=64, heads=4):
         self.robot_embed = nn.Linear(robot_dim, hidden)
@@ -819,7 +905,7 @@ class GATv2Critic(nn.Module):
         return q_value
 </code></pre>
 <h3>7.2 주요 하이퍼파라미터</h3>
-<pre><code class="language-python"># 학습 파라미터
+<pre class="codeblock"><code class="language-python"># 학습 파라미터
 lr_Q = 3e-4          # Critic 학습률
 lr_pi = 3e-4         # Actor 학습률
 lr_alpha = 1e-4      # 온도 학습률
@@ -844,7 +930,7 @@ B_sfm = 0.3          # 사회적 반발 범위
 tau_accel = 0.5      # 가속 시간 상수
 </code></pre>
 <h3>7.3 하드웨어 사양</h3>
-<pre><code>로봇 플랫폼:
+<pre class="codeblock"><code>로봇 플랫폼:
   플랫폼: Mecanum 바퀴 이동 로봇
   온보드 컴퓨터: NVIDIA Jetson AGX Orin
   LiDAR: AR-XT-32-a (32채널 3D LiDAR)
@@ -857,7 +943,7 @@ tau_accel = 0.5      # 가속 시간 상수
   그래프 처리: PyTorch Geometric
 </code></pre>
 <h3>7.4 학습 인프라</h3>
-<pre><code>시뮬레이션 (사전학습):
+<pre class="codeblock"><code>시뮬레이션 (사전학습):
   플랫폼: CrowdNav (Python)
   하드웨어: GPU 서버 (학습 가속)
   소요: 100,000 에피소드
@@ -868,28 +954,28 @@ tau_accel = 0.5      # 가속 시간 상수
   메모리: ~50 MB (vs SAC 리플레이 버퍼 ~4 GB)
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 증분 학습의 이론적 분석</h3>
 <p>증분 RL(단일 스텝 업데이트)이 기존 방법보다 불안정한 이유:</p>
 <p><strong>1. 높은 분산 (High Variance)</strong>:</p>
-<pre><code>배치 기반 TD 오차: Var[δ_batch] = σ^2/B  (B=배치 크기)
+<pre class="codeblock"><code>배치 기반 TD 오차: Var[δ_batch] = σ^2/B  (B=배치 크기)
 단일 스텝 TD 오차: Var[δ_single] = σ^2/1 = σ^2
 
 분산이 B배 크므로 업데이트 노이즈 폭발
 </code></pre>
 <p><strong>2. 높은 상관성 (High Correlation)</strong>:</p>
-<pre><code>연속 경험 (s_t, s_{t+1}) 사이의 상관성:
+<pre class="codeblock"><code>연속 경험 (s_t, s_{t+1}) 사이의 상관성:
   Corr(δ_t, δ_{t+1}) → 1 (연속 환경에서)
   → 동일 방향의 반복 업데이트 → 과적합
 </code></pre>
 <p><strong>3. TD 오차 폭발 (TD Error Explosion)</strong>:</p>
-<pre><code>초기 Q 함수 추정이 나쁠 때:
+<pre class="codeblock"><code>초기 Q 함수 추정이 나쁠 때:
   δ_0 = r_0 + γ*Q_0(s_1) - Q_0(s_0) → 매우 큰 값
   단일 스텝: Q ← Q - lr*δ_0 → 급격한 변화
   → 다음 δ_1도 폭발 → 연쇄 불안정
 </code></pre>
 <p>IRRL의 TD 정규화가 이를 해결:</p>
-<pre><code>δ_scaled = δ / σ_δ
+<pre class="codeblock"><code>δ_scaled = δ / σ_δ
 
 초기: σ_δ ≈ |δ_0| (첫 TD 오차)
 이후: σ_δ = α*σ_δ + (1-α)*|δ_t| (지수 이동 평균)
@@ -899,7 +985,7 @@ tau_accel = 0.5      # 가속 시간 상수
 <h3>8.2 잔차 RL의 수렴 특성</h3>
 <p>잔차 RL이 표준 RL보다 빨리 수렴하는 이유:</p>
 <p><strong>유효 탐색 공간 축소</strong>:</p>
-<pre><code>표준 RL 탐색:
+<pre class="codeblock"><code>표준 RL 탐색:
   Q*(s, a)를 [0, R_max/(1-γ)] 범위에서 처음부터 추정
   초기 무작위 탐색으로 많은 에피소드 필요
 
@@ -910,7 +996,7 @@ tau_accel = 0.5      # 가속 시간 상수
     잔차 a_res만 탐색 → 작은 공간에서 수렴
 </code></pre>
 <p><strong>안전한 탐색</strong>:</p>
-<pre><code>a_base (SFM) ≈ 무작위 행동에 비해 안전한 행동
+<pre class="codeblock"><code>a_base (SFM) ≈ 무작위 행동에 비해 안전한 행동
 초기 탐색도 SFM을 따르므로 실세계 배치에서 충돌 감소
 </code></pre>
 <h3>8.3 한계점 (Limitations)</h3>
@@ -950,7 +1036,7 @@ tau_accel = 0.5      # 가속 시간 상수
 <li><strong>자연어 지시</strong>: 목표를 좌표 대신 언어로 지정하는 VLN과의 결합</li>
 </ol>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -1074,7 +1160,7 @@ tau_accel = 0.5      # 가속 시간 상수
 <p><strong>3. 한계</strong>: 실세계 성능이 60%에 머무는 것은 연구의 한계를 보여줌. 더 많은 학습 에피소드, 더 다양한 환경, 더 나은 도메인 적응 방법이 필요하다.</p>
 <h3>8.5 증분 학습의 이론적 한계와 IRRL의 해결책</h3>
 <p>온라인 RL(Incremental RL)은 이론적으로 수렴을 보장하기 어렵다. IRRL이 이를 어떻게 완화하는지 분석한다.</p>
-<pre><code>문제: i.i.d 가정 위반
+<pre class="codeblock"><code>문제: i.i.d 가정 위반
   표준 RL은 리플레이 버퍼로 i.i.d 샘플을 시뮬레이션
   증분 RL: 연속 경험 (s_t, s_{t+1}) → 높은 자기상관
   → Bellman 잔차의 기대값이 실제 기대값과 괴리
@@ -1092,7 +1178,7 @@ IRRL의 완화:
         → 실용적으로 수렴 관찰됨 (이론적 증명은 향후 과제)
 </code></pre>
 <p><strong>임시 정책 분기(Policy Divergence) 방지</strong>:</p>
-<pre><code>잔차 RL의 안정화 효과:
+<pre class="codeblock"><code>잔차 RL의 안정화 효과:
   표준 RL 정책 업데이트:
     π ← π + α * ∇J(π)  → 나쁜 방향으로 큰 스텝 가능
 
@@ -1106,7 +1192,7 @@ IRRL의 완화:
 </code></pre>
 <h3>8.6 실세계 RL의 안전성 고려</h3>
 <p>실제 로봇에서 RL을 수행할 때 가장 큰 우려는 학습 중 충돌이다. IRRL의 접근법:</p>
-<pre><code>안전 계층 구조:
+<pre class="codeblock"><code>안전 계층 구조:
   레벨 1 (항상 활성): 물리적 충돌 방지
     → 로봇 자체 비상 정지 (LiDAR 0.3m 이내 물체 감지 시 정지)
 
@@ -1130,7 +1216,7 @@ IRRL의 완화:
   - 비상 정지 버튼 연구원 대기
 </code></pre>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ul>
 <li>SFM: Helbing &amp; Molnár, &quot;Social Force Model for Pedestrian Dynamics,&quot; Physical Review E, 1995</li>
 <li>ORCA: Van den Berg et al., &quot;Reciprocal n-body Collision Avoidance,&quot; ISRR 2011</li>
@@ -1141,14 +1227,109 @@ IRRL의 완화:
 <li>NeuPAN: Han et al., &quot;NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning,&quot; T-RO 2025</li>
 </ul>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p>IRRL은 소셜 내비게이션 분야에서 <strong>실세계 온라인 학습의 실용적 가능성을 처음으로 엣지 디바이스 환경에서 시연</strong>한 의미 있는 연구다. 리플레이 버퍼 없이 98.8% 성공률(시뮬레이션)을 달성한 것은 증분 학습의 잠재력을 보여주며, 실세계에서의 온라인 적응(40%→60%)은 실제 배포 가능성을 시사한다.</p>
 <p><strong>혁신성 평가</strong>: 증분 학습과 잔차 RL의 결합이라는 아이디어는 간단하지만 효과적이다. 특히 TD 오차 정규화와 페널티메이트 정규화라는 두 가지 안정화 기법이 증분 학습의 핵심 문제를 해결한다. 이는 향후 다른 로봇 학습 도메인에도 적용 가능한 일반적 기여다.</p>
 <p><strong>실용적 의의</strong>: 배달 로봇, 안내 로봇, 청소 로봇 등 실내 서비스 로봇의 핵심 과제인 소셜 내비게이션에 직접 적용 가능하다. 지역별로 다른 보행자 행동 패턴에 온라인으로 적응하는 능력은 글로벌 배포에 필수적이다.</p>
 <p><strong>향후 연구</strong>: 더 많은 보행자, 더 다양한 환경, 코드 공개를 통한 재현성 확보가 이 연구의 가치를 더욱 높일 것이다. HEIGHT의 이질적 그래프 표현과 IRRL의 온라인 적응을 결합한 하이브리드 방법이 강력한 후속 연구가 될 것으로 전망한다.</p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="IRRL: 실세계 적응형 소셜 내비게이션을 위한 증분 잔차 강화학습">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

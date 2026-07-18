@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>SAGE — Plan in Sandbox, Navigate in Open Worlds · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2605.10118">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">ICML 2026</div>
-    <h1>SAGE — Plan in Sandbox, Navigate in Open Worlds</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2605.10118">arXiv:2605.10118</a></span>
-      <span>리뷰 2026-05-12</span>
-      <span>42분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">SAGE_ICML2026</span>
     </div>
+    <h1 class="doc-title">SAGE: Plan in Sandbox, Navigate in Open Worlds — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">ICML 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2605.10118">2605.10118</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">미공개 (논문 상태 기준)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">없음</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-05-12</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">41KB · 약 42분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>SAGE: Plan in Sandbox, Navigate in Open Worlds — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: Plan in Sandbox, Navigate in Open Worlds: Learning Physics-Grounded Abstracted Experience for Embodied Navigation</li>
@@ -147,7 +233,7 @@ footer {
 <h3>1.2 연구 목표 (Research Objective)</h3>
 <p>SAGE(Sandbox-Abstracted Grounded Experience)는 <strong>Vision-Language Model(VLM) 기반 로봇이 실세계 개방 환경(Open World)에서 언어 질의에 기반한 구현화 내비게이션(Embodied Navigation)을 수행할 수 있도록</strong>, 물리 기반 샌드박스 환경에서 학습한 경험을 실세계로 전이(sim-to-real transfer)하는 프레임워크이다.</p>
 <p>핵심 문제 의식:</p>
-<pre><code>[기존 접근법의 이중 딜레마]
+<pre class="codeblock"><code>[기존 접근법의 이중 딜레마]
 
 경로 A: 포토리얼리스틱 시뮬레이터 사용
   → 실세계 외관 갭(Appearance Gap): 색상, 조명, 질감 불일치
@@ -166,11 +252,11 @@ SAGE: 제3경로
 </code></pre>
 <p>인간의 인지 유추: 체스 그랜드마스터가 실제 말을 움직이기 전에 머릿속에서 추상적인 전략을 시뮬레이션하는 것처럼, SAGE는 로봇이 단순화된 물리 추상 환경에서 탐색 전략을 사전 연습(rehearse)하고 실세계에 전이한다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 구현화 내비게이션에서 VLM의 근본적 한계</h4>
 <p>Vision-Language Model은 자연어 이해와 시각적 추론에서 탁월하지만, 구현화 네비게이션(Embodied Navigation) 적용 시 다음 문제가 발생한다:</p>
-<pre><code>[VLM 내비게이션 적용의 3대 구조적 문제]
+<pre class="codeblock"><code>[VLM 내비게이션 적용의 3대 구조적 문제]
 
 1. 데이터 정렬 부재 (Data Alignment Gap)
    VLM 사전학습 데이터:
@@ -194,7 +280,7 @@ SAGE: 제3경로
 </code></pre>
 <h4>B. 현재 벤치마크에서의 성능 격차</h4>
 <p>실세계 구현화 내비게이션 벤치마크에서의 현황:</p>
-<pre><code>[A-EQA 벤치마크 성능 격차 분석]
+<pre class="diagram"><code>[A-EQA 벤치마크 성능 격차 분석]
 
 A-EQA: 557 쿼리, 63개 실세계 씬
 (활성화 구현화 질의응답 — Active Embodied Question Answering)
@@ -211,7 +297,7 @@ Explore-EQA (GPT-4o)       46.9    23.4    API 비용, 추론 지연
 </code></pre>
 <p>핵심 관찰: GPT-4o 기반 3D-Mem(52.6%)이 기존 최고 성능이나, 이를 달성하려면 대규모 유료 API에 의존해야 한다. 소형 모델(Qwen3-2B)은 44.3%에 그쳐 격차가 8%p에 달한다.</p>
 <h4>C. 시뮬레이터 사용의 실제적 장벽</h4>
-<pre><code>[포토리얼리스틱 시뮬레이터 vs. 추상 시뮬레이터 비교]
+<pre class="diagram"><code>[포토리얼리스틱 시뮬레이터 vs. 추상 시뮬레이터 비교]
 
                     포토리얼(Habitat-SIM)   추상(SAGE-Sandbox)
 ────────────────────────────────────────────────────────────
@@ -225,7 +311,7 @@ Explore-EQA (GPT-4o)       46.9    23.4    API 비용, 추론 지연
 </code></pre>
 <h3>2.2 핵심 해결책</h3>
 <p>SAGE의 3단계 해결 전략:</p>
-<pre><code>[SAGE 핵심 아이디어 요약]
+<pre class="codeblock"><code>[SAGE 핵심 아이디어 요약]
 
 &quot;포토리얼리즘 갭을 피하기 위해 로봇은 추상 샌드박스에서 훈련하고,
  의미론적 물리 법칙을 공유 불변량으로 실세계에 전이한다&quot;
@@ -246,10 +332,10 @@ Explore-EQA (GPT-4o)       46.9    23.4    API 비용, 추론 지연
   → 실세계 ROS 스택과 통합
 </code></pre>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 인터랙티브 샌드박스 MDP 정식화</h3>
 <p>SAGE의 공식적 프레임워크는 <strong>인터랙티브 샌드박스 MDP(Interactive Sandbox MDP)</strong>이다:</p>
-<pre><code>[인터랙티브 샌드박스 MDP 정의]
+<pre class="codeblock"><code>[인터랙티브 샌드박스 MDP 정의]
 
 E_S = (S, A, P)
 
@@ -267,7 +353,7 @@ P(s&#39;|s,a): 상태 전이 확률
    - 의미론적 레이블 일관성 유지
 </code></pre>
 <p><strong>내비게이션 RL 목적함수</strong>:</p>
-<pre><code>[목적함수 계층 구조]
+<pre class="codeblock"><code>[목적함수 계층 구조]
 
 원본 목적함수:
   J_N(θ) = E[Σ_t γ^t r_N(s_t, a_t, n)]
@@ -283,7 +369,7 @@ P(s&#39;|s,a): 상태 전이 확률
 </code></pre>
 <h3>3.2 Phase 1: Genesis (태스크 및 경험 합성)</h3>
 <p>Genesis는 내비게이션 훈련 데이터를 자동으로 합성하는 파이프라인이다:</p>
-<pre><code>[Genesis 데이터 합성 파이프라인]
+<pre class="diagram"><code>[Genesis 데이터 합성 파이프라인]
 
 입력: HM3D 데이터셋 (3D 씬 메쉬) + InteriorGS (Gaussian Splatting 씬)
 
@@ -316,7 +402,7 @@ Step 5: IF-THEN 규칙 추출 및 저장
   - 저장소: Faiss 기반 벡터 DB (빠른 유사도 검색)
 </code></pre>
 <p><strong>예시 IF-THEN 규칙</strong>:</p>
-<pre><code>규칙 #1:
+<pre class="codeblock"><code>규칙 #1:
   IF [왼쪽에 소파, 전방에 문]
   THEN [좌회전 45°]
   TO FIND [침실]
@@ -334,7 +420,7 @@ Step 5: IF-THEN 규칙 추출 및 저장
 <h3>3.3 Phase 2: Evolution (RL 기반 정책 최적화)</h3>
 <p>Evolution은 <strong>비대칭 적응 클리핑(Asymmetric Adaptive Clipping, AAC)</strong>을 핵심으로 하는 RL 훈련 단계이다.</p>
 <h4>3.3.1 복합 보상 함수 설계</h4>
-<pre><code>[보상 함수 전체 구조]
+<pre class="diagram"><code>[보상 함수 전체 구조]
 
 r_φ(s_t, a_t) = w_f * I_f + w_acc * (I_m * (1 + sim(a_t, a_t*)) - P_err)
 
@@ -355,7 +441,7 @@ r_φ(s_t, a_t) = w_f * I_f + w_acc * (I_m * (1 + sim(a_t, a_t*)) - P_err)
 </code></pre>
 <h4>3.3.2 동적 경험 주입 스케줄링</h4>
 <p>훈련 초기에는 높은 확률로 DB 규칙을 주입하고, 훈련이 진행될수록 확률을 낮춘다:</p>
-<pre><code>[동적 경험 주입 확률 스케줄]
+<pre class="diagram"><code>[동적 경험 주입 확률 스케줄]
 
 η_t = max(η_min, η_init * (1 - min(R_val^(t), R_target) / R_target))
 
@@ -381,7 +467,7 @@ r_φ(s_t, a_t) = w_f * I_f + w_acc * (I_m * (1 + sim(a_t, a_t*)) - P_err)
 </code></pre>
 <h4>3.3.3 비대칭 적응 클리핑 (AAC)</h4>
 <p>기존 PPO(Proximal Policy Optimization)의 클리핑은 증강 샘플(augmented samples)과 일반 샘플에 동일한 제약을 적용하여 비효율적이다. AAC는 이를 비대칭적으로 처리한다:</p>
-<pre><code>[AAC vs 표준 PPO 클리핑 비교]
+<pre class="codeblock"><code>[AAC vs 표준 PPO 클리핑 비교]
 
 표준 PPO 클리핑:
   ε_up = ε_std = 0.2 (모든 샘플에 동일 적용)
@@ -405,7 +491,7 @@ AAC 클리핑:
 <p><strong>AAC의 핵심 통찰</strong>: DB 규칙에서 유래한 증강 샘플은 더 신뢰할 수 있는 감독 신호를 포함하므로, 정책 업데이트 시 더 넓은 보폭(larger step)을 허용하는 것이 합리적이다.</p>
 <h4>3.3.4 동질적 그룹 이득 추정</h4>
 <p>증강 샘플과 일반 샘플이 혼재할 때, 그룹 내 보상 편차를 사용하여 공정한 어드밴티지를 계산한다:</p>
-<pre><code>[동질적 그룹 이득 추정]
+<pre class="codeblock"><code>[동질적 그룹 이득 추정]
 
 일반 GRPO (Group Relative Policy Optimization):
   A_{i,j} = (r_{i,j} - μ(R_i)) / (σ(R_i) + ε)
@@ -425,7 +511,7 @@ AAC 클리핑:
 </code></pre>
 <h3>3.4 Phase 3: Navigation (실세계 실행)</h3>
 <p>실세계 내비게이션 단계에서는 훈련된 정책을 실제 로봇에 배포한다:</p>
-<pre><code>[Navigation Phase 실행 파이프라인]
+<pre class="codeblock"><code>[Navigation Phase 실행 파이프라인]
 
 로봇 상태 표현:
   R_t = {I_query, M_t, F_t}
@@ -456,7 +542,7 @@ Step 4: 동적 씬 그래프 업데이트
   - 점유 지도(Occupancy Map) 업데이트
 </code></pre>
 <p><strong>3D 씬 그래프 구조</strong>:</p>
-<pre><code>[동적 3D 씬 그래프 구조]
+<pre class="diagram"><code>[동적 3D 씬 그래프 구조]
 
 노드 타입:
   ├── 위치 노드 (Position Node): (x, y, z, θ) 로봇 포즈
@@ -473,10 +559,10 @@ Step 4: 동적 씬 그래프 업데이트
   - 객체 이동: 이전 위치 유지 + 새 위치 추가 (이력 보존)
   - 탐색 종료 조건: 질의 객체 발견 OR T_max 도달
 </code></pre>
-<p><img src="figures/page-02.jpeg" alt="SAGE 논문 Overview — Genesis/Evolution/Navigation 3단계 프레임워크" loading="lazy"></p>
+<figure><img src="figures/page-02.jpeg" alt="SAGE 논문 Overview — Genesis/Evolution/Navigation 3단계 프레임워크" loading="lazy"><figcaption>SAGE 논문 Overview — Genesis/Evolution/Navigation 3단계 프레임워크</figcaption></figure>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>[SAGE 전체 파이프라인]
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>[SAGE 전체 파이프라인]
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                    SAGE 프레임워크                               │
@@ -524,7 +610,7 @@ Step 4: 동적 씬 그래프 업데이트
   [씬 다양성 확장] ←────── [성능 피드백] ←──────────────┘
 </code></pre>
 <p><strong>핵심 설계 원칙</strong>:</p>
-<pre><code>[SAGE 아키텍처 설계 원칙]
+<pre class="codeblock"><code>[SAGE 아키텍처 설계 원칙]
 
 1. 모듈성 (Modularity):
    Genesis / Evolution / Navigation 단계 완전 분리
@@ -543,7 +629,7 @@ Step 4: 동적 씬 그래프 업데이트
    → 성능 향상 시 자율 탐색 비중 증가
 </code></pre>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
 <p><strong>훈련 데이터</strong>:</p>
 <ul>
@@ -558,7 +644,7 @@ Step 4: 동적 씬 그래프 업데이트
 </li>
 </ul>
 <p><strong>평가 데이터</strong>:</p>
-<pre><code>[평가 벤치마크 상세]
+<pre class="codeblock"><code>[평가 벤치마크 상세]
 
 1. A-EQA (Active Embodied Question Answering):
    - 총 쿼리: 557개
@@ -574,7 +660,7 @@ Step 4: 동적 씬 그래프 업데이트
    - 유형: 객체 목표 내비게이션 (순차 멀티-목표)
 </code></pre>
 <h3>5.2 평가 지표 (Evaluation Metrics)</h3>
-<pre><code>[평가 지표 정의]
+<pre class="codeblock"><code>[평가 지표 정의]
 
 SR† (Success Rate with LLM Scoring):
   - 로봇이 목표 도달 후 생성한 답변을 Qwen3-235B-A22B가 평가
@@ -594,7 +680,7 @@ SPL (Success weighted by Path Length):
 </code></pre>
 <h3>5.3 정량적 결과 (Quantitative Results)</h3>
 <p><strong>메인 결과 (Table 1)</strong>:</p>
-<pre><code>[A-EQA 및 GOAT-Bench 성능 비교]
+<pre class="diagram"><code>[A-EQA 및 GOAT-Bench 성능 비교]
 
 방법                          | A-EQA         | GOAT-Bench    |
                               | SR†(%) SPL†(%)| SR(%)  SPL(%) |
@@ -620,7 +706,7 @@ SAGE (Qwen3-4B)               | 60.2    47.2  | 64.8   44.9  |
      → 순차 멀티-목표 태스크에서는 대형 모델에 아직 열세
 </code></pre>
 <p><strong>어블레이션 연구 (Table 2)</strong>:</p>
-<pre><code>[컴포넌트별 기여도 분석 (Qwen3-2B 기준)]
+<pre class="diagram"><code>[컴포넌트별 기여도 분석 (Qwen3-2B 기준)]
 
 방법                          | A-EQA SR†(%) | SPL†(%) | 향상폭  |
 ───────────────────────────────────────────────────────────────
@@ -641,7 +727,7 @@ SPL 관점: C_ret 추가 시 SPL 개선폭(+3.19%p)이 SR 개선폭(+2.96%p)
           보다 커 → 경로 효율성에 규칙 검색이 특히 기여
 </code></pre>
 <h3>5.4 리얼월드 실험 (Real-World Experiments)</h3>
-<pre><code>[실세계 배포 환경]
+<pre class="codeblock"><code>[실세계 배포 환경]
 
 하드웨어:
   - 플랫폼: NVIDIA RTX 4090 탑재 이동형 플랫폼
@@ -663,8 +749,8 @@ SPL 관점: C_ret 추가 시 SPL 개선폭(+3.19%p)이 SR 개선폭(+2.96%p)
    엄격한 검증 프로세스에 특별한 주의를 기울여야 합니다.&quot;
 </code></pre>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
-<pre><code>[SAGE의 4가지 핵심 기여]
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
+<pre class="codeblock"><code>[SAGE의 4가지 핵심 기여]
 
 1. 물리 기반 의미론적 추상 환경 (Physics-Grounded Semantic Sandbox):
    - 포토리얼리즘 없이 물리 법칙(가시성, 가항성, 의미론) 보존
@@ -690,8 +776,8 @@ SPL 관점: C_ret 추가 시 SPL 개선폭(+3.19%p)이 SR 개선폭(+2.96%p)
    - 의의: 학습 데이터에 없던 새로운 씬에서도 관련 경험 활용 가능
 </code></pre>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
-<pre><code>[SAGE 구현 설정 전체 요약]
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<pre class="codeblock"><code>[SAGE 구현 설정 전체 요약]
 
 기반 모델:
   - Qwen3-VL-2B (주 실험)
@@ -734,9 +820,9 @@ VLM 평가 (LLM Scoring):
   - 역할: 로봇 답변의 정확성 자동 채점
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 포토리얼리즘 갭 vs 의미론적 갭</h3>
-<pre><code>[두 가지 시뮬레이터 갭의 비교 분석]
+<pre class="codeblock"><code>[두 가지 시뮬레이터 갭의 비교 분석]
 
 포토리얼리즘 갭 (Appearance Gap):
   - 시뮬레이터 이미지 ↔ 실세계 이미지 간 시각적 불일치
@@ -754,7 +840,7 @@ SAGE의 핵심 관찰:
    올바르게 모델링되면 정책 전이가 가능하다&quot;
 </code></pre>
 <h3>8.2 소형 VLM의 잠재력</h3>
-<pre><code>[소형 VLM vs 대형 VLM 성능 격차 분석]
+<pre class="codeblock"><code>[소형 VLM vs 대형 VLM 성능 격차 분석]
 
 3D-Mem 방법에서:
   GPT-4o (1,000B+ 파라미터): 52.6% SR†
@@ -768,7 +854,7 @@ SAGE 방법에서:
       소형 모델도 충분한 특화 훈련으로 대형 모델 초과 가능
 </code></pre>
 <h3>8.3 IF-THEN 규칙 검색의 한계</h3>
-<pre><code>[벡터 DB 기반 규칙 검색의 한계]
+<pre class="codeblock"><code>[벡터 DB 기반 규칙 검색의 한계]
 
 1. 분포 외 씬 처리:
    - 훈련 씬과 완전히 다른 구조(예: 창고, 병원)에서 검색된 규칙 부적합
@@ -783,7 +869,7 @@ SAGE 방법에서:
    - 향후 연구: 지속 학습(Continual Learning) 통합 필요
 </code></pre>
 <h3>8.4 확장성 및 향후 방향</h3>
-<pre><code>[SAGE 확장 방향]
+<pre class="codeblock"><code>[SAGE 확장 방향]
 
 1. 멀티-로봇 확장:
    - 여러 로봇이 다른 영역을 탐색하며 IF-THEN 규칙 공유
@@ -802,7 +888,7 @@ SAGE 방법에서:
    - &quot;저 창문 옆에 있는 물건은 무엇인가?&quot; 유형 지원
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <p>다음의 VLN 트랙 기존 리뷰 논문들과 SAGE를 체계적으로 비교한다:</p>
 <div class="table-wrap"><table>
@@ -883,7 +969,7 @@ SAGE 방법에서:
 </tbody></table></div>
 <h3>9.2 장단점 분석</h3>
 <p><strong>SAGE의 장점</strong>:</p>
-<pre><code>1. 포토리얼리즘 갭 근본 회피:
+<pre class="codeblock"><code>1. 포토리얼리즘 갭 근본 회피:
    - 기존 방법(HiCoNav, NavDP)은 Habitat 포토리얼리스틱 시뮬레이터 의존
    - SAGE는 추상 환경으로 외관 갭 자체를 제거
    - 결과: 더 강한 의미론적 일반화
@@ -903,7 +989,7 @@ SAGE 방법에서:
    - VLN 연구의 ML 주류 편입 신호
 </code></pre>
 <p><strong>SAGE의 단점</strong>:</p>
-<pre><code>1. GOAT-Bench에서 대형 모델 열세:
+<pre class="codeblock"><code>1. GOAT-Bench에서 대형 모델 열세:
    - 순차 멀티-목표: 3D-Mem-GPT-4o(69.1%) &gt;&gt; SAGE-4B(64.8%)
    - 장기 계획 능력에서 소형 모델 한계 존재
 
@@ -920,7 +1006,7 @@ SAGE 방법에서:
    - RTX 4090 플랫폼 실험의 구체적 성공률/실패 분석 없음
 </code></pre>
 <h3>9.3 실적용 가능성 평가</h3>
-<pre><code>[실세계 로봇 배포 관점 평가]
+<pre class="diagram"><code>[실세계 로봇 배포 관점 평가]
 
 시나리오별 SAGE 적합성:
 ┌──────────────────────────────────────────────────────────────┐
@@ -940,7 +1026,7 @@ SAGE 방법에서:
   4. 실시간성: 스텝당 추론 시간 미공개 (성능 예측 어려움)
 </code></pre>
 <h3>9.4 연구 방향성 평가</h3>
-<pre><code>[연구 트렌드 관점]
+<pre class="codeblock"><code>[연구 트렌드 관점]
 
 기존 VLN 연구 방향:
   A. 포토리얼리스틱 시뮬레이션 → 도메인 랜덤화 → 실세계
@@ -960,7 +1046,7 @@ SAGE의 방향:
   ⚠️ 코드 미공개: 연구 재현 및 확장 어려움
 </code></pre>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li><strong>Qwen3-VL</strong>: Qwen Team (2026). Qwen3-VL Technical Report. Alibaba Group.</li>
 <li><strong>HM3D</strong>: Ramakrishnan et al. (2021). Habitat-Matterport 3D Dataset. NeurIPS 2021.</li>
@@ -977,7 +1063,7 @@ SAGE의 방향:
 <li><strong>Faiss</strong>: Johnson et al. (2021). Billion-scale Similarity Search with GPUs. IEEE TPAMI.</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p>SAGE는 VLN 분야에서 <strong>포토리얼리스틱 시뮬레이터와 대형 API 모델이라는 두 가지 의존성을 동시에 탈피</strong>한 최초의 체계적 프레임워크다. Genesis-Evolution-Navigation의 3단계 구조는 각각 (1) 비용 효율적 데이터 합성, (2) RL 기반 특화 훈련, (3) 실세계 검색 증강 실행이라는 서로 다른 과제를 독립적으로 해결한다.</p>
 <p><strong>혁신성 요약</strong>:</p>
 <ul>
@@ -999,9 +1085,104 @@ SAGE의 방향:
 <li>온라인 규칙 DB 갱신으로 지속 학습 통합</li>
 </ul>
 <p>SAGE는 VLN이 단순히 &quot;포토리얼리스틱 시뮬레이션과 대형 모델의 게임&quot;이 아님을 보여준다. 올바른 추상화와 훈련 방법론으로 소형 모델도 실세계에서 경쟁력 있는 내비게이션 능력을 달성할 수 있다. 이는 에지 컴퓨팅 기반 실제 로봇 배포에 직접적 시사점을 제공한다.</p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="SAGE: Plan in Sandbox, Navigate in Open Worlds — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

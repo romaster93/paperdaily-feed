@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2512.19629">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">ICRA 2026</div>
-    <h1>LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2512.19629">arXiv:2512.19629</a></span>
-      <span>리뷰 2026-06-29</span>
-      <span>42분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">LoGoPlanner_ICRA2026</span>
     </div>
+    <h1 class="doc-title">LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">ICRA 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2512.19629">2512.19629</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval"><a href="https://github.com/OpenRobotLab/LoGoPlanner">github.com/OpenRobotLab/LoGoPlanner</a></span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://steinate.github.io/logoplanner.github.io/">steinate.github.io/logoplanner.github.io/</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-06-29</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">41KB · 약 42분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry</li>
@@ -149,7 +235,7 @@ footer {
 <h3>1.2 연구 목표 (Research Objective)</h3>
 <p>LoGoPlanner는 <strong>비정형 환경(unstructured environment)에서 이동 로봇의 점-목표 내비게이션(point-goal navigation)을 위한 종단간(end-to-end) 로컬 플래너</strong>로, 별도의 로컬라이제이션 모듈에 대한 의존을 제거하는 것을 핵심 목표로 한다. 본 리뷰는 corpus 일관성을 위해 VLN 디렉토리에 배치되어 있으나(파일 경로 유지), 논문 본문의 실제 기여는 <strong>자연어 지시를 다루지 않는 Robot Path Planning(Local Planner) 영역</strong>이다. 비교 대상 베이스라인(iPlanner, ViPlanner, DD-PPO)도 모두 학습 기반 로컬 플래너이며, 트랙 분류상으로는 Planner 계열에 더 가깝다.</p>
 <p>핵심 연구 질문:</p>
-<pre><code>&quot;학습 기반 내비게이션 정책이 외부 로컬라이제이션(odometry/SLAM)에 의존하지 않고,
+<pre class="codeblock"><code>&quot;학습 기반 내비게이션 정책이 외부 로컬라이제이션(odometry/SLAM)에 의존하지 않고,
  단일 RGB-D 카메라로부터 절대 메트릭 스케일(absolute metric scale)의 기하학을
  암시적으로 추정하여, 교차 임바디먼트(cross-embodiment)·교차 환경에서
  강인하게 일반화할 수 있는가?&quot;
@@ -171,16 +257,16 @@ footer {
 <tr>
 <td><strong>외부 로컬라이제이션 의존 학습 플래너</strong></td>
 <td>iPlanner, ViPlanner</td>
-<td>정책 입력으로 odometry/외부 pose를 가정 → 로컬라이제이션이 부정확하면 성능 붕괴; 임바디먼트마다 캘리브레이션·재튜닝 필요</td>
+<td class="longcell">정책 입력으로 odometry/외부 pose를 가정 → 로컬라이제이션이 부정확하면 성능 붕괴; 임바디먼트마다 캘리브레이션·재튜닝 필요</td>
 </tr>
 </tbody></table></div>
 <p>LoGoPlanner는 <strong>메트릭 인식 비주얼 지오메트리(metric-aware visual geometry)</strong>를 통해 로봇의 상태(pose)를 정책 내부에서 암시적으로 추정(implicit state estimation)하고, 이를 정책 조건화에 사용함으로써 외부 로컬라이제이션 없이도 시뮬레이션 Home SR을 ViPlanner(외부 로컬라이제이션 포함) 대비 <strong>+27.3%p</strong>(45.0% → 57.3%) 끌어올린다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 모듈러 파이프라인의 오차 전파와 캘리브레이션 부담</h4>
 <p>전통적 내비게이션 스택은 다음과 같이 분리된 단계로 구성된다:</p>
-<pre><code>[전통적 모듈러 파이프라인]
+<pre class="diagram"><code>[전통적 모듈러 파이프라인]
 
 RGB-D ──► Perception ──► Localization(SLAM/Odometry) ──► Mapping ──► Planning ──► Control
             │                  │                            │            │
@@ -194,7 +280,7 @@ RGB-D ──► Perception ──► Localization(SLAM/Odometry) ──► Mappi
 </code></pre>
 <h4>B. 외부 로컬라이제이션 의존의 본질적 취약성</h4>
 <p>iPlanner, ViPlanner 같은 학습 기반 로컬 플래너는 충돌 회피와 경로 생성을 신경망으로 학습하지만, <strong>목표를 로봇 좌표계로 변환하기 위해 외부 로컬라이제이션(odometry)을 입력으로 가정</strong>한다:</p>
-<pre><code>[외부 로컬라이제이션 의존의 문제]
+<pre class="codeblock"><code>[외부 로컬라이제이션 의존의 문제]
 
 정책 입력: (관측 O_t, 로봇 좌표계 목표 g^robot_t)
 
@@ -211,7 +297,7 @@ g^robot_t 를 얻으려면:
 </code></pre>
 <h4>C. 단안/비디오 깊이의 스케일 모호성</h4>
 <p>종단간 정책이 외부 로컬라이제이션을 버리려면, 정책이 스스로 &quot;내가 어디에 있는가&quot;와 &quot;장애물이 몇 미터 앞인가&quot;를 알아야 한다. 그러나:</p>
-<pre><code>[메트릭 스케일 모호성]
+<pre class="codeblock"><code>[메트릭 스케일 모호성]
 
 문제: 비디오 지오메트리 모델(VGGT 등)은 상대 스케일(up-to-scale)의
       3D 구조는 잘 복원하지만, &quot;1미터 = 몇 단위&quot;인 절대 메트릭 스케일은
@@ -226,7 +312,7 @@ g^robot_t 를 얻으려면:
 </code></pre>
 <h3>2.2 핵심 해결책</h3>
 <p>LoGoPlanner의 세 가지 핵심 혁신:</p>
-<pre><code>[LoGoPlanner의 혁신 요소 3가지]
+<pre class="codeblock"><code>[LoGoPlanner의 혁신 요소 3가지]
 
 혁신 1: 메트릭 인식 비주얼 지오메트리 (Metric-aware Visual Geometry)
   VGGT(DINOv2 기반 비디오 지오메트리 트랜스포머)를 깊이 맵 스케일 prior로
@@ -241,11 +327,11 @@ g^robot_t 를 얻으려면:
   추출하고, 디퓨전 정책 헤드로 action chunk 를 생성 → 외부 로컬라이제이션 불필요.
 </code></pre>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <p>LoGoPlanner는 (3.1) 메트릭 인식 비주얼 지오메트리 학습, (3.2) 보조 기하 예측을 통한 장면 재구성, (3.3) 디커플드 포즈 추정, (3.4) query 기반 디퓨전 정책 헤드의 네 부분으로 구성된다.</p>
 <h3>3.1 메트릭 인식 비주얼 지오메트리 학습 (Metric-aware Visual Geometry Learning)</h3>
 <p>LoGoPlanner의 백본은 <strong>VGGT(Video Geometry Transformer)</strong>로, DINOv2 비전 트랜스포머를 사용하여 각 입력 이미지를 K개의 초기 패치 토큰으로 patchify 한다. 핵심은 이 사전학습 백본을 <strong>깊이 맵에서 추출한 스케일 prior를 주입(inject)</strong>하여 <em>절대 메트릭 스케일</em>의 장면 재구성이 가능하도록 파인튠하는 것이다.</p>
-<pre><code>[스케일 prior 주입 메커니즘]
+<pre class="diagram"><code>[스케일 prior 주입 메커니즘]
 
 입력 이미지 I_i ──► DINOv2 ViT ──► 시맨틱 토큰 t^I_i  (K개)
 입력 깊이 D_i  ──► 경량 ViT 변형 ──► 기하 토큰   t^D_i  (K개)
@@ -265,7 +351,7 @@ g^robot_t 를 얻으려면:
 <h3>3.2 장면 지오메트리 재구성 — 보조 기하 예측 (Scene Geometry Reconstruction)</h3>
 <p>메트릭 토큰을 세 갈래로 디코딩하여 정책에 필요한 기하 표현을 형성한다.</p>
 <h4>(1) 로컬 포인트 예측 (Local Point Prediction)</h4>
-<pre><code>[Eq. 2–3] 로컬 포인트
+<pre class="codeblock"><code>[Eq. 2–3] 로컬 포인트
 
   h^p_i = φ_p( t^metric_i )           # 포인트 헤드 특징
   P̂^local_i = f_p( h^p_i )            # 카메라 좌표계 3D 포인트 예측
@@ -281,7 +367,7 @@ g^robot_t 를 얻으려면:
 </code></pre>
 <p>즉 깊이 맵과 intrinsic으로 역투영(back-projection)한 카메라 좌표계 포인트가 GT가 되고, 정책 백본은 이를 RGB(+D)로부터 회귀하도록 학습된다. 이 과정에서 백본은 &quot;픽셀 → 미터&quot;의 메트릭 매핑을 내재화한다.</p>
 <h4>(2) 카메라 포즈 예측 (Camera Pose Prediction)</h4>
-<pre><code>[Eq. 4] 카메라 포즈
+<pre class="codeblock"><code>[Eq. 4] 카메라 포즈
 
   h^c_i = φ_c( t^metric_i )
   T̂_c,i = f_c( h^c_i )                # i번째 프레임 카메라 SE(3) 포즈
@@ -292,7 +378,7 @@ g^robot_t 를 얻으려면:
     외부 로컬라이제이션 없이도 자기완결적(self-contained).
 </code></pre>
 <h4>(3) 월드 포인트 예측 (World Point Prediction)</h4>
-<pre><code>[Eq. 5–6] 월드 포인트
+<pre class="codeblock"><code>[Eq. 5–6] 월드 포인트
 
   h^w_i = A( [ h^p_i , h^c_i ] )       # 포인트·포즈 특징 결합 + 어텐션 A
   z_i   = ψ( h^w_i )                   # 중간 스칼라/벡터 표현
@@ -306,7 +392,7 @@ g^robot_t 를 얻으려면:
   - sign(z)      : 부호 보존 (좌/우, 전/후 방향)
 </code></pre>
 <p>이 <code>sign·(exp−1)</code> 변환은 거리 회귀에서 자주 쓰이는 트릭으로, 근거리에서는 선형에 가까워 정밀하고 원거리에서는 단일 출력으로도 넓은 동적 범위를 표현한다. 로컬 포인트(카메라계)와 카메라 포즈(로봇계)를 융합하여 월드(로봇 중심) 포인트로 변환하는 이 구조가, 외부 변환 행렬 없이 &quot;장면을 로봇 좌표계에 메트릭으로 박아 넣는&quot; 핵심이다.</p>
-<pre><code>[3개 보조 헤드의 역할 요약]
+<pre class="diagram"><code>[3개 보조 헤드의 역할 요약]
 
 t^metric_i ─┬─► φ_p ─► P̂^local_i  (카메라계 3D, 핀홀 모델 지도)
             ├─► φ_c ─► T̂_c,i      (카메라 SE(3) 포즈)
@@ -317,7 +403,7 @@ t^metric_i ─┬─► φ_p ─► P̂^local_i  (카메라계 3D, 핀홀 모델
 </code></pre>
 <h3>3.3 디커플드 포즈 추정 (Decoupled Pose Estimation)</h3>
 <p>LoGoPlanner는 <strong>카메라 포즈와 섀시(차체) 포즈를 분리</strong>하여 추정한다. 카메라는 로봇 위에 높이·피치를 가지고 장착되므로, 이 둘을 구분해야 다양한 임바디먼트(높이 0.25–1.25m, 피치 0–30°)에 일반화할 수 있다.</p>
-<pre><code>[디커플드 포즈]
+<pre class="codeblock"><code>[디커플드 포즈]
 
   T̂_b,i = f_b( h^c_i )        # 섀시(body) 포즈
   ĝ_i   = f_g( h^c_i , g )    # 목표 g 를 현재 상태로 grounding 한 임베딩
@@ -334,7 +420,7 @@ t^metric_i ─┬─► φ_p ─► P̂^local_i  (카메라계 3D, 핀홀 모델
 <p>이 디커플링은 본 논문이 캘리브레이션-프리(calibration-free)·교차 임바디먼트 일반화를 달성하는 메커니즘이다. 카메라 포즈 특징 <code>h^c_i</code> 하나에서 섀시 포즈와 목표 grounding을 모두 도출함으로써, 정책은 &quot;내 카메라가 지금 어떤 높이·각도로 세상을 보고 있는가&quot;를 추론하고 이를 차체 운동으로 변환한다.</p>
 <h3>3.4 Query 기반 디퓨전 정책 헤드 (Localization Grounded Navigation Policy)</h3>
 <p>상태·기하 특징을 cross-attention 쿼리로 추출하고, 디퓨전 정책으로 action chunk를 생성한다.</p>
-<pre><code>[Query 기반 특징 추출]
+<pre class="codeblock"><code>[Query 기반 특징 추출]
 
   Q_S = CrossAttn( Q_s , h^c )    # 상태(state) 쿼리 → 카메라/포즈 특징에서 추출
   Q_G = CrossAttn( Q_g , h^p )    # 기하(geometry) 쿼리 → 로컬 포인트 특징에서 추출
@@ -342,7 +428,7 @@ t^metric_i ─┬─► φ_p ─► P̂^local_i  (카메라계 3D, 핀홀 모델
   Q_P = [ Q_S , Q_G , emb(goal) ] # 플래닝 컨텍스트 = 상태 + 기하 + 목표 임베딩
 </code></pre>
 <p><code>Q_S</code>는 &quot;나는 어디에 있는가&quot;(암시적 로컬라이제이션), <code>Q_G</code>는 &quot;내 주변 장애물 기하&quot;를 담당하며, 목표 임베딩과 합쳐져 디퓨전 헤드의 조건 <code>Q_P</code>가 된다.</p>
-<pre><code>[디퓨전 정책 헤드]
+<pre class="codeblock"><code>[디퓨전 정책 헤드]
 
 행동 청크(action chunk):
   { a_t = (Δx_t, Δy_t, Δθ_t) }_{t=1..T}   # 상대 변위 + 회전 (차체 좌표계)
@@ -357,7 +443,7 @@ t^metric_i ─┬─► φ_p ─► P̂^local_i  (카메라계 3D, 핀홀 모델
     N(0,σ²I) : 가우시안 노이즈
 </code></pre>
 <p>디퓨전 정책(Diffusion Policy)을 채택한 이유는 <strong>다봉성(multimodality)</strong> 때문이다. 장애물을 좌/우 어느 쪽으로 우회할지처럼 동등하게 유효한 다중 경로가 존재할 때, 단일 회귀(MSE) 정책은 평균(=충돌)으로 붕괴하지만 디퓨전은 여러 모드를 보존한다. action chunk 형태로 T스텝을 한 번에 생성하므로 고주파 재계획 없이도 일관된 단기 경로를 산출한다.</p>
-<pre><code>[3장 전체 파이프라인 흐름]
+<pre class="diagram"><code>[3장 전체 파이프라인 흐름]
 
 RGB(+D) 시퀀스
    │
@@ -375,8 +461,8 @@ RGB(+D) 시퀀스
  차체 속도 명령 (외부 로컬라이제이션 불필요)
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>┌──────────────────────────────────────────────────────────────────────┐
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>┌──────────────────────────────────────────────────────────────────────┐
 │                        LoGoPlanner 전체 아키텍처                          │
 └──────────────────────────────────────────────────────────────────────┘
 
@@ -427,10 +513,10 @@ RGB(+D) 시퀀스
 </code></pre>
 <p><strong>데이터 흐름 설명</strong>: 로봇의 RGB-D 관측은 백본을 통해 메트릭 토큰으로 변환되고, 보조 헤드들이 이를 로컬/월드 포인트와 카메라·섀시 포즈로 디코딩한다. 이 표현이 &quot;암시적 로컬라이제이션&quot;으로 작동하여, cross-attention 쿼리가 상태·기하 컨텍스트를 추출하고 디퓨전 헤드가 단기 action chunk를 생성한다. 실배포는 추론 서버(GPU)와 로봇측 호스트(LeKiwi 등)를 HTTP로 분리하는 client-server 구조를 취한다.</p>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
 <p><strong>학습 데이터</strong>: 다양한 3D 환경에서 렌더링한 대규모 내비게이션 데이터셋으로, <strong>20만(200k) 이상의 궤적과 약 1,000만(10M) 장의 렌더링 이미지</strong>를 포함한다(InternData-N1 계열). 임바디먼트 다양성을 위해 다음을 랜덤화한다:</p>
-<pre><code>[임바디먼트 랜덤화]
+<pre class="codeblock"><code>[임바디먼트 랜덤화]
   - 카메라 높이      : 0.25 m ~ 1.25 m
   - 카메라 피치 각   : 0° ~ 30°
   - 구동계           : 차동 구동(differential-drive) 2륜
@@ -438,7 +524,7 @@ RGB(+D) 시퀀스
 </code></pre>
 <p><strong>시뮬레이션 평가 환경</strong>: <strong>InternScenes</strong> 데이터셋의 40개 장면(가정 home 20개 + 상업 commercial 20개). 장면당 100개의 시작–목표 쌍, 목표 거리 4–10 m.</p>
 <h3>5.2 평가 지표 (Evaluation Metrics)</h3>
-<pre><code>SR  (Success Rate)               : 목표 도달 성공률 ↑
+<pre class="codeblock"><code>SR  (Success Rate)               : 목표 도달 성공률 ↑
 SPL (Success weighted by Path Length): 경로 효율 가중 성공률 ↑
 NE  (Navigation Error)           : 종료 위치–목표 유클리드 거리 ↓
 PE  (Planning Error)             : 계획된 궤적 종점–목표 거리 ↓
@@ -668,7 +754,7 @@ PE  (Planning Error)             : 계획된 궤적 종점–목표 거리 ↓
 <li>Goal·Odometry grounding도 점진적으로 기여하나, 기하 재구성(Point Cloud) 없이는 SR이 52% 수준에 머문다.</li>
 </ul>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <ol>
 <li><p><strong>메트릭 인식 비주얼 지오메트리(Metric-aware Visual Geometry)</strong>: 사전학습 VGGT에 깊이 스케일 prior를 주입(RoPE 융합 어텐션)하여, 이미지로부터 <em>절대 메트릭 스케일</em>의 3D 표현을 산출하는 백본을 제안. 이는 정책 내부의 <em>암시적 로컬라이제이션</em>으로 작동하여 외부 odometry 의존을 제거한다.</p>
 </li>
@@ -682,9 +768,9 @@ PE  (Planning Error)             : 계획된 궤적 종점–목표 거리 ↓
 </li>
 </ol>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 백본·정책 구성</h3>
-<pre><code>[모델 구성]
+<pre class="codeblock"><code>[모델 구성]
   비주얼 지오메트리 백본 : VGGT (DINOv2 ViT 기반 비디오 지오메트리 트랜스포머)
   깊이 인코더            : 동일 ViT의 경량 변형 (depth → 기하 토큰)
   토큰 융합             : RoPE 위치 인코딩 + 셀프 어텐션
@@ -694,7 +780,7 @@ PE  (Planning Error)             : 계획된 궤적 종점–목표 거리 ↓
   정책 헤드             : 디퓨전(K-step denoising), action chunk (Δx,Δy,Δθ)×T
 </code></pre>
 <h3>7.2 2단계 학습 (Two-Stage Training)</h3>
-<pre><code>[Stage 1] 디코더·과제별 헤드 파인튠
+<pre class="codeblock"><code>[Stage 1] 디코더·과제별 헤드 파인튠
   - 깊이 기반 스케일 prior 주입
   - 배치 크기 : 12
   - 학습 기간 : 약 24시간
@@ -706,7 +792,7 @@ PE  (Planning Error)             : 계획된 궤적 종점–목표 거리 ↓
 </code></pre>
 <p>2단계 분리 학습의 의도는 명확하다: 먼저 기하 표현(메트릭 스케일·포인트·포즈)을 안정화한 뒤, 그 표현을 <em>동결</em>하고 정책 디퓨전 헤드를 학습함으로써, 정책 학습이 기하 표현을 망가뜨리는 것을 방지한다(표현–정책 디커플링).</p>
 <h3>7.3 데이터·평가 설정</h3>
-<pre><code>[데이터]   200k+ 궤적 / ~10M 렌더 이미지
+<pre class="codeblock"><code>[데이터]   200k+ 궤적 / ~10M 렌더 이미지
            임바디먼트 랜덤화(높이 0.25–1.25m, 피치 0–30°)
 [시뮬]     InternScenes 40개 장면(home 20 + commercial 20)
            장면당 100 시작–목표 쌍, 거리 4–10m
@@ -715,7 +801,7 @@ PE  (Planning Error)             : 계획된 궤적 종점–목표 거리 ↓
 </code></pre>
 <h3>7.4 코드 검증 (GitHub)</h3>
 <p>본 리뷰는 <a href="https://github.com/InternRobotics/NavDP/tree/master/baselines/logoplanner">https://github.com/InternRobotics/NavDP/tree/master/baselines/logoplanner</a> 를 직접 확인했다. <strong>실제 소스 코드가 공개</strong>되어 있다(placeholder 아님):</p>
-<pre><code>NavDP/baselines/logoplanner/
+<pre class="diagram"><code>NavDP/baselines/logoplanner/
 ├── geometry_model.py                 # 메트릭 인식 비주얼 지오메트리(백본)
 ├── policy_backbone.py                # 정책 백본
 ├── policy_network.py                 # 디퓨전 정책 네트워크
@@ -729,7 +815,7 @@ PE  (Planning Error)             : 계획된 궤적 종점–목표 거리 ↓
 </code></pre>
 <p>README는 시뮬레이션 평가 커맨드와 LeKiwi 플랫폼 실로봇 배포 절차를 구체적으로 제공한다. 코드 상태 표기: <strong>✅ (실제 코드 공개)</strong>.</p>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 분석 (Scalability)</h3>
 <p><strong>교차 임바디먼트 확장</strong>: LoGoPlanner의 가장 강력한 확장성은 임바디먼트 일반화다. 디커플드 포즈(<code>T_b = T_c · T_ext</code>)에서 <code>T_ext</code>(카메라 높이·피치)를 데이터로부터 학습·흡수하므로, 학습 분포(높이 0.25–1.25m, 피치 0–30°) 안의 새 로봇에 캘리브레이션 없이 적용 가능하다. 실제로 학습 시 보지 못한 Unitree G1(휴머노이드)에서 50% 성공은 이 일반화의 직접 증거다.</p>
 <p><strong>데이터 스케일링</strong>: 200k 궤적·10M 이미지라는 대규모 합성 데이터가 일반화의 토대다. 이는 &quot;더 많은 임바디먼트·장면을 데이터에 넣으면 분포가 넓어진다&quot;는 스케일링 가설을 시사하지만, 동시에 <em>실세계 장면 부족</em>이 약점으로 남는다(§8.2).</p>
@@ -744,7 +830,7 @@ PE  (Planning Error)             : 계획된 궤적 종점–목표 거리 ↓
 <p><strong>한계 4 — 베이스라인 범위</strong>:
 비교는 학습 기반 로컬 플래너(iPlanner, ViPlanner, DD-PPO)에 집중되어 있고, 고전적 SLAM+모듈러 플래너나 LiDAR 기반 강건 플래너와의 직접 비교는 제한적이다.</p>
 <h3>8.3 향후 연구 방향</h3>
-<pre><code>[향후 방향]
+<pre class="codeblock"><code>[향후 방향]
 방향 1: 실세계 메트릭 데이터 확장 (저자 진행 중)
         ~2k 실세계 장면 → 대규모 실세계 메트릭 데이터로 재구성 품질 향상
 방향 2: 온디바이스 경량화
@@ -757,7 +843,7 @@ PE  (Planning Error)             : 계획된 궤적 종점–목표 거리 ↓
         RGB-D + LiDAR(ViLiNT식) 토큰 융합으로 분포 변화 강건성 강화
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <p>LoGoPlanner는 학습 기반 로컬/내비게이션 플래너 계열이므로, 같은 Planner 트랙의 선행 리뷰 중 <strong>(a) 임바디먼트 인식 비전 내비게이션 트랜스포머인 &quot;Multimodal Embodiment-Aware Navigation Transformer (ViLiNT)&quot;</strong>, <strong>(b) 종단간 디퓨전 플래너인 &quot;Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation (ReliaDiffNav)&quot;</strong>, <strong>(c) 사족보행 실로봇 로컬 플래너인 &quot;SCAN-Planner: Surface-Following Collision-Aware Navigation for Quadruped Robots in 3D Unstructured Environments&quot;</strong> 와 비교한다.</p>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
@@ -841,7 +927,7 @@ PE  (Planning Error)             : 계획된 궤적 종점–목표 거리 ↓
 <li><strong>글로벌 일관성 부재</strong>: 세 비교 논문 모두 로컬 플래닝에 집중하지만, LoGoPlanner의 &quot;마지막 섀시 프레임 기준 상대 좌표&quot;는 장거리 글로벌 일관성을 명시적으로 다루지 않는다.</li>
 </ol>
 <h3>9.3 실적용 가능성 평가</h3>
-<pre><code>[배포 시나리오별 적합도]
+<pre class="codeblock"><code>[배포 시나리오별 적합도]
 
 ✅ 매우 적합:
    - 다양한 로봇 플랫폼에 빠르게 이식해야 하는 경우(캘리브레이션-프리)
@@ -859,7 +945,7 @@ PE  (Planning Error)             : 계획된 궤적 종점–목표 거리 ↓
 <h3>9.4 연구 방향성 평가</h3>
 <p>LoGoPlanner는 &quot;비주얼 지오메트리 파운데이션 모델(VGGT)을 메트릭 스케일에 grounding 하여 정책의 암시적 로컬라이제이션으로 쓴다&quot;는 점에서, <em>지각–로컬라이제이션–계획의 경계를 표현 학습으로 융합</em>하는 최신 흐름의 대표 사례다. ViLiNT가 임바디먼트 인식을, ReliaDiffNav가 신뢰도 인식을, SCAN-Planner가 형상 인식을 각각 정교화했다면, LoGoPlanner는 <strong>로컬라이제이션 자체를 정책 내부로 흡수</strong>한다는 점에서 가장 급진적이다. 다음 단계는 이 암시적 로컬라이제이션을 (1) 실세계 메트릭 데이터로 강화하고, (2) 글로벌 맵·동적 예측과 결합하며, (3) 온디바이스로 경량화하는 것이다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ul>
 <li>Peng, J., Cai, W., Yang, Y., Wang, T., Shen, Y., Pang, J. <em>LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry.</em> arXiv:2512.19629, 2025 (ICRA 2026).</li>
 <li>VGGT: <em>Visual Geometry Grounded Transformer</em> (DINOv2 기반 비디오 지오메트리 모델) — 백본.</li>
@@ -874,7 +960,7 @@ PE  (Planning Error)             : 계획된 궤적 종점–목표 거리 ↓
 <li>비교 리뷰 corpus: <em>Multimodal Embodiment-Aware Navigation Transformer (ViLiNT)</em>; <em>Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation (ReliaDiffNav)</em>; <em>SCAN-Planner: Surface-Following Collision-Aware Navigation for Quadruped Robots in 3D Unstructured Environments</em>.</li>
 </ul>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p>LoGoPlanner는 <strong>&quot;학습 기반 내비게이션 정책이 외부 로컬라이제이션 없이 단일 RGB-D로 절대 메트릭 스케일을 추정하고 이를 암시적 상태 추정으로 활용할 수 있는가&quot;</strong>라는 질문에 강한 긍정으로 답한다. 핵심은 사전학습 비주얼 지오메트리 백본(VGGT)에 깊이 스케일 prior를 주입하여 메트릭 기하 표현을 만들고, 로컬/카메라/월드 기하 재구성을 보조 과제로 정칙화한 뒤, 디커플드 포즈 추정과 query 기반 디퓨전 정책으로 다봉 action chunk를 생성하는 종단간 설계다.</p>
 <p><strong>혁신성</strong>: 로컬라이제이션을 별도 모듈이 아니라 정책 내부의 표현으로 흡수하고, 이미지로부터 절대 메트릭 스케일을 학습한다는 점에서 기존 학습 플래너(외부 odometry 가정)와 본질적으로 다르다. Table IV의 PE(계획 오차) 급감(0.87→0.55)은 메트릭 스케일 grounding이 단순한 표현 개선이 아니라 <em>계획 정확도</em>에 직접 기여함을 보여준다.</p>
 <p><strong>실용적 의의</strong>: 캘리브레이션-프리·교차 임바디먼트 일반화는 실로봇 배포의 큰 장벽을 낮춘다. 베이스라인이 0%로 붕괴하는 산업용 Unitree G1에서 50% 성공을 달성한 것, 그리고 바퀴형·사족·휴머노이드 3종 실로봇 검증은 이 방법이 단일 플랫폼 과적합이 아님을 입증한다. 코드 전면 공개는 재현성과 커뮤니티 확산 측면에서 가치가 크다.</p>
@@ -883,9 +969,104 @@ PE  (Planning Error)             : 계획된 궤적 종점–목표 거리 ↓
 <p><strong>리뷰 작성일</strong>: 2026-06-29
 <strong>상태</strong>: ✅ 풀 리뷰 완료
 <strong>트랙 주의</strong>: 파일 경로는 VLN/review/에 유지되어 있으나, 논문의 실제 주제는 자연어 지시를 다루지 않는 <strong>Robot Path Planning(Local Planner)</strong> 으로, 트랙 분류상 Planner 계열에 더 부합함.</p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

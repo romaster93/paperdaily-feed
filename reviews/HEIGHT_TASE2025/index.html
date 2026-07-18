@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>HEIGHT: Heterogeneous Interaction Graph Transformer for Robot Navigation in Crowded and Constrained Environments · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2411.12150">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">T-ASE 2025</div>
-    <h1>HEIGHT: Heterogeneous Interaction Graph Transformer for Robot Navigation in Crowded and Constrained Environments</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2411.12150">arXiv:2411.12150</a></span>
-      <span>리뷰 2026-06-29</span>
-      <span>47분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">HEIGHT_TASE2025</span>
     </div>
+    <h1 class="doc-title">HEIGHT: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">T-ASE 2025</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2411.12150">2411.12150</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">✅ **공개** — <a href="https://github.com/Shuijing725/CrowdNav_HEIGHT">github.com/Shuijing725/CrowdNav_HEIGHT</a> (PyTorch 100%, `train.py`/`test.py`/`crowd_nav`/`crowd_sim`/`training` 풀스택, 사전학습 모델 Google Drive 제공, baseline·ablation 구현 포함, 실제 소스 확인됨)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://sites.google.com/view/crowdnav-height/home">sites.google.com/view/crowdnav-height/home</a> (실/시뮬 배치 영상 YouTube 플레이리스트, 실패 케이스 포함)</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-06-29</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">47KB · 약 47분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>HEIGHT: 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: HEIGHT: Heterogeneous Interaction Graph Transformer for Robot Navigation in Crowded and Constrained Environments</li>
@@ -161,7 +247,7 @@ footer {
 <li>훈련 분포(5–9명)와 다른 인간/장애물 밀도(0–4명, 10–14명)에서 <strong>out-of-distribution 일반화</strong>가 되는가?</li>
 </ol>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <p><strong>(C1) 상호작용의 이질성(heterogeneity)을 잃는 동질 표현.</strong>
 군중 내비게이션에서 일어나는 상호작용은 적어도 세 종류이며 그 물리적 성질이 다르다.</p>
@@ -181,7 +267,7 @@ End-to-end RGB/point cloud 정책은 정확도는 높지만 픽셀 분포 차이
 ORCA·Social Force 같은 모델 기반 방법은 하이퍼파라미터에 민감하고, 좁은 통로·U자형 장애물에서 <strong>freezing robot problem</strong>(과보수적 정지)이나 비효율 경로를 낳는다. DWA 같은 단순 반발력 기반은 인간 간 상호작용을 전혀 고려하지 못한다.</p>
 <h3>2.2 핵심 해결책</h3>
 <p>HEIGHT의 해법은 <strong>&quot;이질적 시공간 그래프 + 그래프-유도 이질적 네트워크&quot;</strong> 의 결합이다:</p>
-<pre><code>                ┌──────────────────────────────────────────────────────┐
+<pre class="diagram"><code>                ┌──────────────────────────────────────────────────────┐
   인간 노드 ───▶│ HH self-attention (인간 간 상호작용, visibility mask)  │──┐
   (h_1..h_n)    └──────────────────────────────────────────────────────┘  │
                 ┌──────────────────────────────────────────────────────┐  │
@@ -199,7 +285,7 @@ ORCA·Social Force 같은 모델 기반 방법은 하이퍼파라미터에 민�
 <li><strong>DRL + 적절한 보상(C5 해결)</strong>: PPO로 효율(시간 페널티)·안전(충돌/근접 페널티)·자연스러움(회전 페널티)을 균형.</li>
 </ul>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 이질적 시공간 상호작용 그래프 (Heterogeneous Spatio-Temporal Graph)</h3>
 <p>HEIGHT의 출발점은 매 timestep <code>t</code>의 장면을 그래프 <code>𝒢^t = (𝒱^t, ℰ^t)</code> 로 정식화하는 것이다.</p>
 <h4>노드 정의 (Nodes)</h4>
@@ -248,7 +334,7 @@ ORCA·Social Force 같은 모델 기반 방법은 하이퍼파라미터에 민�
 <p>여기에 <strong>시간 함수(temporal edge, 보라)</strong> 가 인접 timestep의 같은 그래프를 연결하여 과거 상태를 추적한다(GRU로 구현).</p>
 <p><strong>Parameter sharing의 의미</strong>: 동일 edge type은 동일 가중치를 공유한다. 따라서 인간이 5명이든 14명이든 <strong>HH/RH attention의 파라미터 수는 일정</strong>하다. 이 설계가 훈련(5–9명)과 다른 밀도(0–14명)로의 일반화를 수학적으로 가능케 한다 — 네트워크는 &quot;인간 한 명을 어떻게 처리할지&quot;를 배우고 그것을 임의 수에 반복 적용한다.</p>
 <h4>장면 표현의 핵심 — 인간/장애물 분리</h4>
-<pre><code>각 인간:  독립적 상태 벡터  (동적, 양방향 상호작용)  → attention으로 처리
+<pre class="codeblock"><code>각 인간:  독립적 상태 벡터  (동적, 양방향 상호작용)  → attention으로 처리
 모든 장애물:  통합 point cloud  (정적, 일방향 영향)   → CNN으로 처리
 </code></pre>
 <p>장애물 point cloud <code>o^t</code> 의 생성에는 두 가지 변종이 있다:</p>
@@ -258,48 +344,48 @@ ORCA·Social Force 같은 모델 기반 방법은 하이퍼파라미터에 민�
 </ol>
 <h3>3.2 HH Attention — 인간 간 상호작용 (Self-Attention)</h3>
 <p>인간들 간 상호작용을 self-attention으로 모델링한다. 인간 노드 행렬 <code>[h_1^t, …, h_n^t]^T</code> 로부터 Query/Key/Value를 투영:</p>
-<pre><code>Q_HH^t = [h_1^t, ..., h_n^t]^T · W_HH^Q   ∈ ℝ^{n×d}
+<pre class="codeblock"><code>Q_HH^t = [h_1^t, ..., h_n^t]^T · W_HH^Q   ∈ ℝ^{n×d}
 K_HH^t = [h_1^t, ..., h_n^t]^T · W_HH^K   ∈ ℝ^{n×d}
 V_HH^t = [h_1^t, ..., h_n^t]^T · W_HH^V   ∈ ℝ^{n×d}
 </code></pre>
 <p>가중 인간 특징 <code>v_HH^t</code> 는 scaled dot-product attention에 <strong>visibility mask</strong> <code>M^t</code> 를 더해 계산:</p>
-<pre><code>v_HH^t = softmax( (Q_HH^t (K_HH^t)^T + M^t) / √d ) · V_HH^t
+<pre class="codeblock"><code>v_HH^t = softmax( (Q_HH^t (K_HH^t)^T + M^t) / √d ) · V_HH^t
 </code></pre>
 <h4>Visibility Mask <code>M^t ∈ ℝ^{n×n}</code></h4>
-<pre><code>M^t[i,j] = -∞   if  j번째 인간이 시각 t에 감지되지 않음 (occluded / out-of-range)
+<pre class="codeblock"><code>M^t[i,j] = -∞   if  j번째 인간이 시각 t에 감지되지 않음 (occluded / out-of-range)
             0    otherwise
 </code></pre>
 <p><code>-∞</code> 항은 softmax를 거치며 <code>exp(-∞)=0</code> 으로 변환되어 <strong>해당 인간으로의 attention 가중치를 정확히 0</strong> 으로 만든다. 이로써 부분 관측(C3)을 <strong>gradient 불편향(unbiased)</strong> 하게 처리한다 — 보이지 않는 인간은 손실 함수에 기여하지 않으나, 보이는 인간에 대한 학습은 정상적으로 진행된다.</p>
 <p><strong>물리적 의미</strong>: HH attention은 각 인간의 &quot;사회적 영향도(social influence)&quot;를 계산한다. 군중 한가운데 있어 여러 인간의 흐름에 영향받는 인간은 높은 가중치를, 외곽의 고립된 인간은 낮은 가중치를 받는다. 이 가중 표현이 다음 단계 RH attention의 입력이 된다.</p>
 <h3>3.3 RH Attention — 로봇-인간 상호작용 (Cross-Attention)</h3>
 <p>RH attention은 <strong>로봇 관점에서 각 (HH-가중) 인간의 중요도</strong>를 학습한다. 핵심은 Query/Key/Value의 출처가 비대칭이라는 점이다:</p>
-<pre><code>Q_RH^t = v_HH^t · W_RH^Q   ∈ ℝ^{n×d}   (query: HH로 가중된 인간 특징)
+<pre class="codeblock"><code>Q_RH^t = v_HH^t · W_RH^Q   ∈ ℝ^{n×d}   (query: HH로 가중된 인간 특징)
 K_RH^t = w^t    · W_RH^K   ∈ ℝ^{1×d}   (key:   로봇 상태)
 V_RH^t = v_HH^t · W_RH^V   ∈ ℝ^{n×d}   (value: HH로 가중된 인간 특징)
 </code></pre>
 <p>가중 RH 특징:</p>
-<pre><code>v_RH^t = softmax( (Q_RH^t (K_RH^t)^T + M^t) / √d ) · V_RH^t
+<pre class="codeblock"><code>v_RH^t = softmax( (Q_RH^t (K_RH^t)^T + M^t) / √d ) · V_RH^t
 </code></pre>
 <p><strong>왜 HH 먼저, RH 나중인가?</strong> 이 순차 구조는 &quot;인간들 사이의 사회적 동역학을 먼저 파악(HH)한 뒤, 그 사회적 맥락 위에서 로봇에게 무엇이 중요한지 결정(RH)&quot; 하는 2단계 추론을 인코딩한다. 인간 A가 인간 B 때문에 곧 로봇 경로로 들어올 것이라면, HH가 A의 영향도를 높이고 RH가 이를 로봇 관점에서 &quot;주의해야 할 인간&quot;으로 재가중한다.</p>
 <h3>3.4 OA Encoder — 장애물-에이전트 상호작용</h3>
 <p>장애물은 attention 없이 <strong>1D-CNN + FC</strong>로 처리한다:</p>
-<pre><code>v_O^t = f_CNN(o^t)     (장애물 point cloud 임베딩)
+<pre class="codeblock"><code>v_O^t = f_CNN(o^t)     (장애물 point cloud 임베딩)
 v_R^t = f_R(w^t)       (로봇 상태 임베딩)
 </code></pre>
 <p><strong>왜 attention이 아니라 CNN/MLP인가?</strong> 논문의 논거(Footnote)는: 에이전트는 각 timestep에서 <strong>전체 장애물 집합 중 작은 부분집합과만</strong> 상호작용한다(가까운 벽/모서리). 따라서 모든 장애물에 대한 비싼 attention 계산이 불필요하며, point cloud를 CNN으로 임베딩하는 단순 처리로 충분하다. 또한 장애물은 정적이고 일방향이므로(OA edge), 인간처럼 &quot;서로 반응하는&quot; 동역학을 모델링할 필요가 없다.</p>
 <p>이것이 <strong>이질성(heterogeneity)의 핵심 구현</strong>이다 — RH/HH는 attention, OA는 CNN. 상호작용 타입의 성질에 맞춰 서로 다른 연산을 배치한다.</p>
 <h3>3.5 GRU — 시간적 상호작용 (Temporal Modeling)</h3>
 <p>공간 추론(HH/RH/OA)의 출력을 시간 축으로 통합한다:</p>
-<pre><code>h^t = GRU( h^{t-1}, [v_RH^t, v_R^t, v_O^t] )
+<pre class="codeblock"><code>h^t = GRU( h^{t-1}, [v_RH^t, v_R^t, v_O^t] )
 </code></pre>
 <p>GRU는 과거 hidden state <code>h^{t-1}</code> 를 기억하며 현재 공간 임베딩을 누적한다. 이로써 인간의 이동 경향(다가오는지/멀어지는지)과 로봇 자신의 과거 행동을 시간적으로 일관되게 추적한다. 최종 hidden state로부터 가치 함수와 정책을 출력:</p>
-<pre><code>V(s^t)        = f_V(h^t)      (가치 헤드)
+<pre class="codeblock"><code>V(s^t)        = f_V(h^t)      (가치 헤드)
 π(a^t | s^t)  = f_π(h^t)      (정책 헤드)
 </code></pre>
 <h3>3.6 보상 함수 (Reward Function)</h3>
 <p>보상은 세 부분으로 구성된다.</p>
 <h4>주 보상 <code>r_main(s^t, a^t)</code></h4>
-<pre><code>r_main = +20                        if  목표 도달 (d_goal ≤ ρ_robot)
+<pre class="codeblock"><code>r_main = +20                        if  목표 도달 (d_goal ≤ ρ_robot)
        = -20                        if  충돌      (d_min ≤ 0)
        = d_min - 0.25               if  근접 위험 (0 &lt; d_min &lt; 0.25 m)
        = 4 · (d_goal^{t-1} - d_goal^t)   otherwise  (potential-based shaping)
@@ -310,23 +396,23 @@ v_R^t = f_R(w^t)       (로봇 상태 임베딩)
 <li><code>4(d_goal^{t-1} − d_goal^t)</code> 는 목표에 가까워질수록 양의 보상을 주는 <strong>potential-based shaping</strong> 으로, 희소 보상 문제를 완화하고 학습을 가속한다.</li>
 </ul>
 <h4>회전 페널티 <code>r_spin</code></h4>
-<pre><code>r_spin = -0.05 · ‖ω^t‖_2^2
+<pre class="codeblock"><code>r_spin = -0.05 · ‖ω^t‖_2^2
 </code></pre>
 <p>고속 회전을 억제하여 <strong>자연스럽고 매끄러운 경로</strong>를 유도. 지그재그·과회전을 막는다.</p>
 <h4>시간 페널티 <code>r_time</code></h4>
-<pre><code>r_time = -0.025   (매 timestep)
+<pre class="codeblock"><code>r_time = -0.025   (매 timestep)
 </code></pre>
 <p>에피소드 단축을 유도해 <strong>효율성(navigation time 단축)</strong> 을 촉진.</p>
 <h4>전체 보상</h4>
-<pre><code>r(s^t, a^t) = r_main + r_spin + r_time
+<pre class="codeblock"><code>r(s^t, a^t) = r_main + r_spin + r_time
 </code></pre>
 <p>이 세 항의 균형이 C5(효율·안전·자연스러움 동시 달성)를 직접 다룬다 — <code>r_main</code>이 안전·완수를, <code>r_time</code>이 효율을, <code>r_spin</code>이 자연스러움을 담당한다.</p>
 <h3>3.7 상태/행동 공간과 PPO 학습</h3>
 <h4>상태 공간</h4>
-<pre><code>s^t = [w^t, o^t, h_1^t, ..., h_n^t]     (n 가변, ID 추적 없이 L2 거리순 정렬)
+<pre class="codeblock"><code>s^t = [w^t, o^t, h_1^t, ..., h_n^t]     (n 가변, ID 추적 없이 L2 거리순 정렬)
 </code></pre>
 <h4>행동 공간 (이산, discrete)</h4>
-<pre><code>병진 가속도:  {-0.05, 0, +0.05} m/s²
+<pre class="codeblock"><code>병진 가속도:  {-0.05, 0, +0.05} m/s²
 회전 가속도:  {-0.1,  0, +0.1 } rad/s²
 속도 클리핑:  병진 ∈ [-0.5, 0.5] m/s,  회전 ∈ [-1, 1] rad/s
 </code></pre>
@@ -337,7 +423,7 @@ v_R^t = f_R(w^t)       (로봇 상태 임베딩)
 <li>특권 정보(privileged information) 미사용 — 정책 입력 = 로봇이 실제 관측 가능한 상태.</li>
 <li>행동은 학습 시 <code>π(a^t|s^t)</code> 에서 샘플링, 테스트 시 최고 확률 행동 선택.</li>
 </ul>
-<pre><code>ASCII: HEIGHT 한 스텝 추론
+<pre class="diagram"><code>ASCII: HEIGHT 한 스텝 추론
   관측 → [인간 노드 | 장애물 point cloud | 로봇 노드]
             │HH self-attn (+mask)      │1D-CNN          │
             ▼                          ▼                │
@@ -350,9 +436,9 @@ v_R^t = f_R(w^t)       (로봇 상태 임베딩)
                    V(s^t),  π(a^t|s^t) ──샘플링──▶ 행동(가속도)
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <p>전체 파이프라인:</p>
-<pre><code>[센서 입력]
+<pre class="diagram"><code>[센서 입력]
   ├─ 인간 검출(off-the-shelf detector) → 상대 위치(+속도), L2 정렬 → h_1..h_n
   ├─ 장애물 → artificial point cloud(맵+raycasting) → o^t
   └─ 로봇 상태(odometry/localization) → w^t
@@ -374,7 +460,7 @@ v_R^t = f_R(w^t)       (로봇 상태 임베딩)
 <p><strong>설계 미학 — &quot;그래프 구조가 곧 네트워크 구조&quot;</strong>: HEIGHT의 핵심은 네트워크가 임의로 설계된 것이 아니라 <strong>이질적 그래프의 edge type으로부터 직접 유도</strong>됐다는 점이다. HH edge → self-attention, RH edge → cross-attention, OA edge → CNN, temporal edge → GRU. 각 컴포넌트가 그래프의 특정 상호작용 타입에 1:1 대응한다. 이 <strong>구조적 정합성</strong>이 동질 그래프(HomoGAT)와의 본질적 차이이며, 표현 능력 우위의 원천이다.</p>
 <p><strong>데이터 흐름의 비대칭성</strong>: 정보는 OA(일방향)에서 에이전트로, HH(양방향)에서 인간 간으로, RH(양방향)에서 로봇-인간으로 흐른다. 이 방향성이 attention의 Q/K/V 출처 배치(RH에서 로봇이 key, HH-가중 인간이 query)로 구현된다.</p>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 / 시뮬레이션 환경 (Datasets)</h3>
 <p><strong>플랫폼</strong>: PyBullet 기반 저충실도 시뮬레이터.</p>
 <div class="table-wrap"><table>
@@ -600,7 +686,7 @@ v_R^t = f_R(w^t)       (로봇 상태 임베딩)
 </ul>
 <p>HEIGHT의 우위는 <strong>&quot;상호작용 타입별 전용 연산(RH/HH=attention, OA=CNN) × parameter sharing(가변 n 확장) × visibility mask(부분관측)&quot;</strong> 의 곱으로 나온다. 어느 하나만으로는 OOD 일반화와 sim-to-real를 동시에 달성하지 못한다.</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <ol>
 <li><p><strong>이질적 시공간 상호작용 그래프 정식화.</strong>
 군중 내비게이션의 상호작용을 RH(직접·양방향)/HH(간접·양방향)/OA(일방향)로 <strong>명시적으로 구별</strong>하여 그래프로 정식화. 인간과 장애물을 분리 표현(동적 상태 벡터 vs 정적 point cloud)하여 정적/동적의 본질 차이를 보존.</p>
@@ -620,7 +706,7 @@ v_R^t = f_R(w^t)       (로봇 상태 임베딩)
 <li><strong>코드·영상·사전학습 모델 완전 공개</strong>(github.com/Shuijing725/CrowdNav_HEIGHT): baseline·ablation 구현, 사전학습 체크포인트(Google Drive)까지 제공되어 재현성이 매우 높다. 본 코퍼스의 군중 내비게이션 논문(iCrowdNav 등) 다수가 코드 미공개인 가운데 모범 사례.</li>
 </ul>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 핵심 하이퍼파라미터</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -726,7 +812,7 @@ v_R^t = f_R(w^t)       (로봇 상태 임베딩)
 <li><strong>사전 맵 의존</strong>: artificial point cloud는 맵+localization을 요구하므로, 맵이 없는 미지 환경이나 localization 드리프트가 큰 환경에선 OA 입력 품질이 저하된다.</li>
 </ul>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 (Scalability)</h3>
 <p><strong>Parameter sharing의 위력</strong>: 인간 수 <code>n</code>에 무관하게 파라미터 수가 일정하므로, 훈련(5–9명)에서 배운 &quot;한 인간 처리 방식&quot;을 임의 <code>n</code>에 적용 가능. OOD 실험(0–14명)이 이를 입증한다.</p>
 <p><strong>계산 복잡도의 병목</strong>: HH self-attention은 <code>O(n²·d)</code> 로 인간 수에 <strong>이차(quadratic)</strong> 다. 군중이 매우 밀집(<code>n &gt; 30</code>)하면 실시간 10 Hz 유지가 어려워질 수 있다. 본 논문 평가 범위(최대 14명)에선 문제없으나, 초밀집 플라자·역사 같은 환경 확장에는 sparse/linear attention 같은 보완이 필요하다.</p>
@@ -790,12 +876,12 @@ v_R^t = f_R(w^t)       (로봇 상태 임베딩)
 <p>HEIGHT는 <strong>그래프 신경망(GNN) 기반 군중 내비게이션</strong> 계보 안에서, &quot;동질 그래프 → 이질 그래프(heterogeneous graph)&quot;로의 전환을 대표한다. 초기 연구(CADRL, SARL, RGL)는 로봇-인간 상호작용만 또는 동질 attention만 모델링했다. DS-RNN은 RH attention + RNN을 도입했으나 HH를 누락했다. HomoGAT류는 그래프 attention을 쓰되 모든 edge를 동일하게 처리했다. HEIGHT의 기여는 <strong>edge type을 명시적으로 구별(heterogeneous)</strong> 하고 각 타입에 전용 연산을 배치한 것 — 이는 일반 GNN 문헌의 heterogeneous GNN(R-GCN, HAN 등) 아이디어를 군중 내비게이션의 물리적 상호작용 구조에 특화한 것으로 볼 수 있다.</p>
 <h3>8.7 더 넓은 맥락 — 의도/상호작용 인지 내비게이션의 스펙트럼</h3>
 <p>군중 내비게이션 연구는 &quot;보행자를 얼마나 풍부하게 표현하는가&quot;의 스펙트럼 위에 있다:</p>
-<pre><code>원판(disk)/점  →  위치+속도  →  상호작용 그래프(HEIGHT)  →  3D 포즈/의도(iCrowdNav)
+<pre class="codeblock"><code>원판(disk)/점  →  위치+속도  →  상호작용 그래프(HEIGHT)  →  3D 포즈/의도(iCrowdNav)
    (정보 최소)                    (관계 명시)              (선행 운동 신호)
 </code></pre>
 <p>HEIGHT는 <strong>에이전트 간 관계(상호작용)를 명시적으로 모델링</strong>하는 축에서 강점을 가지며, iCrowdNav류는 <strong>개별 보행자의 미래 의도(3D 자세)</strong> 를 인코딩하는 축에서 강점을 가진다. 두 축은 직교하며, 결합 가능성이 자연스러운 다음 단계다(9.4 참조).</p>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <p>같은 Planner 트랙의 선행 리뷰 중 <strong>군중/사회적 내비게이션(crowd/social navigation)</strong> 과 가장 가까운 세 편과 비교한다:</p>
 <ul>
@@ -908,7 +994,7 @@ v_R^t = f_R(w^t)       (로봇 상태 임베딩)
 <h3>9.5 일반화 가능성</h3>
 <p>HEIGHT의 &quot;이질적 그래프 + edge-type별 전용 연산 + parameter sharing&quot;은 군중 내비게이션에 국한되지 않는다. <strong>다종(multi-type) 에이전트가 상호작용하는 모든 의사결정</strong> — 다중 로봇 협조, 자율주행의 차량/보행자/신호 이질 상호작용, 멀티에이전트 RL — 에 이식 가능한 일반 레시피다. 핵심 원리는 &quot;상호작용의 물리적 타입이 다르면 같은 연산으로 처리하지 말라&quot;이며, 이는 도메인 무관하게 유효하다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ul>
 <li>HEIGHT, <em>IEEE T-ASE 2025</em>. arXiv:2411.12150. DOI: 10.1109/TASE.2025.3646588. 코드: <a href="https://github.com/Shuijing725/CrowdNav%5C_HEIGHT">https://github.com/Shuijing725/CrowdNav\_HEIGHT</a>, 프로젝트: <a href="https://sites.google.com/view/crowdnav-height/home">https://sites.google.com/view/crowdnav-height/home</a></li>
 <li>비교 대상 (본 코퍼스):<ul>
@@ -920,7 +1006,7 @@ v_R^t = f_R(w^t)       (로봇 상태 임베딩)
 <li>관련 기법/베이스라인: DS-RNN (Liu et al., decentralized structural-RNN), HomoGAT(동질 graph attention), DWA (Fox et al., 1997), DRL-VO, ORCA (van den Berg et al.), Social Force Model (Helbing &amp; Molnár, 1995), PPO (Schulman et al., 2017), GRU (Cho et al., 2014), Graph Attention Networks (Veličković et al., 2018).</li>
 </ul>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>혁신성</h3>
 <p>HEIGHT의 핵심 혁신은 <strong>군중 내비게이션의 상호작용을 &quot;동질적(homogeneous)&quot;이라는 암묵적 가정에서 해방시킨 것</strong>이다. RH(직접·양방향)/HH(간접·양방향)/OA(일방향)를 명시적으로 구별하는 <strong>이질적 시공간 그래프</strong>를 정의하고, 각 edge type에 전용 연산(HH self-attention, RH cross-attention, OA 1D-CNN, temporal GRU)을 1:1 대응시켜 <strong>그래프 구조가 곧 네트워크 구조</strong>가 되게 했다. Parameter sharing으로 가변 인간 수에 확장하고, visibility mask(<code>-∞</code>)로 부분 관측을 gradient-불편향하게 처리하며, PPO로 효율·안전·자연스러움을 균형 잡는다.</p>
 <h3>실용적 의의</h3>
@@ -931,9 +1017,104 @@ v_R^t = f_R(w^t)       (로봇 상태 임베딩)
 <p>HEIGHT는 군중 내비게이션의 오랜 약점인 &quot;상호작용을 동질적으로 뭉개는 표현&quot;을, <strong>이질적 그래프 + edge-type별 전용 연산</strong>으로 정면 돌파한다. 핵심 실험 증거는 두 가지다: (1) <strong>혼잡도가 올라갈수록 동질 그래프(HomoGAT) 대비 이득이 확대</strong>(훈련분포 +2%p → 10–14명 OOD +6%p)되어 &quot;이질성이 필요하다&quot;는 주장을 직접 입증하고, (2) <strong>저충실도 시뮬 → zero-shot 실로봇 전이</strong>가 다양한 실내·실외에서 성립하여 구조화 표현의 sim-to-real 우위를 보인다. 평가 측면에서도 동질 그래프·RH-only·반응형·end-to-end를 폭넓게 비교하고 ablation으로 HH/RH의 상보성을 분해했으며, <strong>완전한 오픈소스</strong>로 재현성을 담보했다. 다만 개별 보행자의 <em>미래 의도 신호</em>(iCrowdNav의 3D 포즈가 담는)를 표현에 담지 못해 사회적 적절성(comfort) 측면에선 보완 여지가 있고, 가장 어려운 초밀집·비합리 행동 시나리오의 정량 검증이 제한적이라는 점은 후속 연구가 메울 빈칸이다. 그럼에도 &quot;상호작용의 물리적 타입이 다르면 같은 연산으로 처리하지 말라&quot;는 명료한 원리와 즉시 재현 가능한 풀스택 오픈소스는, 본 논문을 GNN 기반 군중 내비게이션 흐름에서 주목할 가치가 높은 T-ASE 결과로 만든다.</p>
 <hr>
 <p><em>본 리뷰는 PhD 수준 상세 분석이며, 논문 본문(arXiv HTML)의 수식·실험표·ablation·실로봇 기술과 공개 코드(github.com/Shuijing725/CrowdNav_HEIGHT)에 기반한다. 코드·프로젝트 페이지·DOI는 2026-06-29 기준 검증됨.</em></p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="HEIGHT: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

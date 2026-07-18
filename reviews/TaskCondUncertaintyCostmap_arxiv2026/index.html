@@ -6,133 +6,220 @@
 <meta name="color-scheme" content="light dark">
 <title>Task-Conditioned Uncertainty Costmaps for Legged Locomotion · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2605.00261">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">arXiv 2026</div>
-    <h1>Task-Conditioned Uncertainty Costmaps for Legged Locomotion</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2605.00261">arXiv:2605.00261</a></span>
-      <span>리뷰 2026-05-04</span>
-      <span>41분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">TaskCondUncertaintyCostmap_arxiv2026</span>
     </div>
+    <h1 class="doc-title">Task-Conditioned Uncertainty Costmaps for Legged Locomotion: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2605.00261">2605.00261</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">미공개 ❌</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-05-04</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">42KB · 약 41분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 13개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-11"><span class="toc-num">12</span><span class="toc-title">심화 분석: 불확실성 기반 안전 내비게이션의 이론적 배경 (Deep Dive: Theoretical Background)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-12"><span class="toc-num">13</span><span class="toc-title">한국어 키워드 및 용어 정리</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>Task-Conditioned Uncertainty Costmaps for Legged Locomotion: 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: Task-Conditioned Uncertainty Costmaps for Legged Locomotion</li>
@@ -154,11 +241,11 @@ footer {
 </ol>
 <p>핵심 통찰: &quot;로봇이 <strong>모르는 것이 무엇인지</strong>를 알면, 알지 못하는 지형을 피할 수 있다.&quot;</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>도전과제 1: 기하학 기반 코스트맵의 불충분성</h4>
 <p>기존 사족보행 내비게이션 시스템은 주로 고도 지도(elevation map)나 표면 거칠기(surface roughness)를 기반으로 코스트맵을 생성한다:</p>
-<pre><code>기존 접근법:
+<pre class="codeblock"><code>기존 접근법:
   cost(x,y) = f(elevation_gradient(x,y))   [경사 기반]
            또는 = f(surface_roughness(x,y)) [거칠기 기반]
 
@@ -177,7 +264,7 @@ footer {
 <li>그러나 비정형 지형의 다양성은 무한하며, 한정된 훈련 데이터로 모든 지형을 커버 불가</li>
 <li>특히 훈련 분포 외 지형(wavy surfaces, spikes, stepped terrain)에서 예측 오차 급증</li>
 </ul>
-<pre><code>발판 예측의 수학적 표현:
+<pre class="codeblock"><code>발판 예측의 수학적 표현:
   입력: h ∈ ℝ^(6×17) (고도 격자, 0.6m×1.6m, 0.1m 해상도)
   운동: v = (v_x, v_y, ω) (속도 명령)
   출력: f̂ = {(x̂ᵢ, ŷᵢ, ẑᵢ)} for i=1..4 (4발 예측 발판)
@@ -214,10 +301,10 @@ footer {
 </tr>
 </tbody></table></div>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 발판 예측 모델 (Foothold Prediction Model)</h3>
 <p><strong>입력 표현:</strong></p>
-<pre><code>지형 관찰 h:
+<pre class="codeblock"><code>지형 관찰 h:
   - LiDAR 고도 격자 (6×17 = 102 셀)
   - 0.6m × 1.6m 전방 영역
   - 0.1m 해상도
@@ -230,7 +317,7 @@ footer {
 최종 입력: x = [h_pool; v] ∈ ℝ^15
 </code></pre>
 <p><strong>모델 구조:</strong></p>
-<pre><code>모델 아키텍처: MLP (Multi-Layer Perceptron)
+<pre class="codeblock"><code>모델 아키텍처: MLP (Multi-Layer Perceptron)
   입력: 15차원 (12차원 지형 + 3차원 속도)
   은닉층: [64, 128, 64] (선택적)
   출력: 4×3 = 12차원 (4발 × (x,y,z) 발판 좌표)
@@ -242,14 +329,14 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
    N_MC = 20 순전파 → 예측 분포 획득
 </code></pre>
 <p><strong>학습 데이터:</strong></p>
-<pre><code>시뮬레이터: IsaacSim (Unitree Go1)
+<pre class="codeblock"><code>시뮬레이터: IsaacSim (Unitree Go1)
 훈련 지형: 평탄 지형 (in-distribution 기준)
 평가 지형: Wavy, Stepped, Spike-rough (OOD)
 속도: 상수 속도 (훈련 분포 일치)
 </code></pre>
 <h3>3.2 인식적 불확실성 추정 (Epistemic Uncertainty Estimation)</h3>
 <p>불확실성 추정은 앙상블과 MC 드롭아웃의 결합으로 이루어진다:</p>
-<pre><code>총 예측 수: K = N_ens × N_MC = 3 × 20 = 60회 순전파
+<pre class="codeblock"><code>총 예측 수: K = N_ens × N_MC = 3 × 20 = 60회 순전파
 
 앙상블 예측 평균: μ̄ₜ = (1/K) Σ μₖ,ₜ
 
@@ -261,7 +348,7 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
 </code></pre>
 <p><strong>손실 함수:</strong></p>
 <p>학습에는 세 가지 손실 항이 사용된다:</p>
-<pre><code>1. 예측 손실 (Prediction Loss):
+<pre class="codeblock"><code>1. 예측 손실 (Prediction Loss):
    L_pred = (1/N) Σ ||f̂ₜ - fₜ||²₂  (MSE)
 
 2. 인식적 손실 (Epistemic Loss):
@@ -277,7 +364,7 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
    L = L_pred + λ_epi × L_epi + λ_cal × L_cal
 </code></pre>
 <p><strong>교정 손실의 핵심 역할:</strong></p>
-<pre><code>목표: σ²ₑ,ₜ ∝ |f̂ₜ - fₜ|  (불확실성이 실제 오차를 예측)
+<pre class="codeblock"><code>목표: σ²ₑ,ₜ ∝ |f̂ₜ - fₜ|  (불확실성이 실제 오차를 예측)
 
 직관:
   OOD 지형에서:   σ²ₑ → 높음, |error| → 높음 ✓
@@ -290,7 +377,7 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
 </code></pre>
 <h3>3.3 불확실성 코스트맵 생성 (Uncertainty Costmap Generation)</h3>
 <p>예측된 발판 불확실성을 2D 비용 지도로 변환하는 과정:</p>
-<pre><code>단계 1: 발당 불확실성 비용 계산
+<pre class="codeblock"><code>단계 1: 발당 불확실성 비용 계산
   cᵢ = min(100, α × σ̄²ₑ,ᵢ)
   여기서:
     σ̄²ₑ,ᵢ: i번째 발의 평균 인식적 분산 (x,y,z 성분 평균)
@@ -312,7 +399,7 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
   → 불확실성 높은 영역을 우회하는 경로 선택
 </code></pre>
 <p><strong>시스템 아키텍처 다이어그램:</strong></p>
-<pre><code>                Task-Conditioned Uncertainty Costmap 시스템
+<pre class="diagram"><code>                Task-Conditioned Uncertainty Costmap 시스템
 ┌──────────────────────────────────────────────────────────────────┐
 │                                                                    │
 │  ┌─────────────┐   h ∈ ℝ^(6×17)    ┌─────────────────────────┐  │
@@ -347,7 +434,7 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
 </code></pre>
 <h3>3.4 실현 가능성 평가 (Feasibility Evaluation)</h3>
 <p>경로 계획 품질 평가를 위한 정량적 지표:</p>
-<pre><code>반복 투영(IP) 안정성 여유:
+<pre class="codeblock"><code>반복 투영(IP) 안정성 여유:
   mᵗᵖʳᵉᵈ: 예측 발판에 대한 안정성 여유
   mᵗᵃᶜᵗᵘᵃˡ: 실제 발판에 대한 안정성 여유
 
@@ -359,10 +446,10 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
   FE = E[|mᵗᵖʳᵉᵈ - mᵗᵃᶜᵗᵘᵃˡ|]
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<p><img src="figures/fig_08_01.jpeg" alt="모델 아키텍처 개요" loading="lazy"></p>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<figure><img src="figures/fig_08_01.jpeg" alt="모델 아키텍처 개요" loading="lazy"><figcaption>모델 아키텍처 개요</figcaption></figure>
 <p>전체 파이프라인은 세 레이어로 구성된다:</p>
-<pre><code>레이어 1: 지각 (Perception)
+<pre class="codeblock"><code>레이어 1: 지각 (Perception)
   하향 LiDAR → 고도 격자 h (6×17)
   로코모션 정책 → 운동 명령 v = (v_x, v_y, ω)
 
@@ -376,7 +463,7 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
   → 불확실성 회피 경로 생성
 </code></pre>
 <p><strong>데이터 흐름:</strong></p>
-<pre><code>로봇 탑재 센서
+<pre class="diagram"><code>로봇 탑재 센서
        │
        ├─ 하향 LiDAR 포인트클라우드
        │        │
@@ -411,9 +498,9 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
         안전 경로 →  로코모션 실행
 </code></pre>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
-<pre><code>훈련 환경: IsaacSim (Unitree Go1)
+<pre class="codeblock"><code>훈련 환경: IsaacSim (Unitree Go1)
   - 훈련 지형: 평탄 지형 (flat terrain)
   - 훈련 속도: 상수 속도 세트
 
@@ -429,7 +516,7 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
   3. 가변 경사 램프 (0~15cm 경사)
   × Unitree Go1 실제 로봇 실험
 </code></pre>
-<p><img src="figures/fig_09_01.jpeg" alt="실험 환경 설정" loading="lazy"></p>
+<figure><img src="figures/fig_09_01.jpeg" alt="실험 환경 설정" loading="lazy"><figcaption>실험 환경 설정</figcaption></figure>
 <h3>5.2 평가 지표 (Evaluation Metrics)</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -515,7 +602,7 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
 <td>12.0 ~ 75.3</td>
 <td>부분 개선</td>
 </tr>
-<tr>
+<tr class="ours">
 <td><strong>제안 방법 (불확실성)</strong></td>
 <td><strong>12.7 ~ 20.7</strong></td>
 <td><strong>37% 감소</strong></td>
@@ -527,7 +614,7 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
 또는 중앙값 기준 15.9 → 12.7로 감소 (20% 개선), 분산 대폭 감소 (14배)</p>
 </blockquote>
 <p><strong>목표 도달 성능 (MPPI 20회, 시뮬레이션):</strong></p>
-<pre><code>MPPI 20회 실행 KDE 분포 (Figure 5):
+<pre class="diagram"><code>MPPI 20회 실행 KDE 분포 (Figure 5):
   ┌─────────────────────────────────────────────┐
   │ 제안 방법:  ████████ (높은 중앙값, 좁은 분포) │
   │ 거칠기 전용: ██████   (유사하나 과보수적)     │
@@ -535,11 +622,11 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
   └─────────────────────────────────────────────┘
 → 제안 방법: 최고 중앙 진행도 + 최소 분산 (가장 안정적)
 </code></pre>
-<p><img src="figures/fig_09_02.jpeg" alt="MPPI 계획 결과 비교" loading="lazy"></p>
+<figure><img src="figures/fig_09_02.jpeg" alt="MPPI 계획 결과 비교" loading="lazy"><figcaption>MPPI 계획 결과 비교</figcaption></figure>
 <h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
-<p><img src="figures/fig_07_01.jpeg" alt="실세계 실험 결과" loading="lazy"></p>
+<figure><img src="figures/fig_07_01.jpeg" alt="실세계 실험 결과" loading="lazy"><figcaption>실세계 실험 결과</figcaption></figure>
 <p>실세계 실험은 <strong>Unitree Go1</strong> 사족보행 로봇으로 수행되었다:</p>
-<pre><code>실험 구성:
+<pre class="codeblock"><code>실험 구성:
   - 하향 LiDAR (기존 전방 LiDAR를 하향으로 교체)
   - NAV2 스택과 제안 코스트맵 통합
   - 시뮬레이션 학습 모델을 Zero-Shot으로 전이
@@ -559,17 +646,17 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
   → OOD 감지 임계가 학습 시 미노출 경사 감지
 </code></pre>
 <p><strong>Sim-to-Real 전이 결과:</strong></p>
-<pre><code>전이 방법: 직접 배포 (Zero-Shot, 도메인 적응 없음)
+<pre class="codeblock"><code>전이 방법: 직접 배포 (Zero-Shot, 도메인 적응 없음)
 결과:
   ✅ 불확실성 패턴이 시뮬레이션과 실세계에서 일관성 유지
   ✅ 5cm 장애물 (기하학적으로 낮아 기존 코스트맵에 미감지) 탐지
   ✅ 실시간 동작 가능 (60Hz 로코모션 정책 주기 내)
 </code></pre>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>기여 1: 태스크 조건부 불확실성 모델링</h3>
 <p>기존 불확실성 기반 코스트맵과의 차별점:</p>
-<pre><code>기존 접근법:
+<pre class="codeblock"><code>기존 접근법:
   uncertainty(terrain) = f(geometry only)
   → 로봇의 현재 태스크(속도, 방향) 무시
 
@@ -580,7 +667,7 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
 </code></pre>
 <p>이 접근법은 &quot;<strong>지형이 아니라 이 지형에서 이 속도로 이 방향으로 걷는 것</strong>&quot;의 위험도를 평가한다는 점에서 이전 연구들과 근본적으로 다르다.</p>
 <h3>기여 2: 앙상블 + MC 드롭아웃 조합 불확실성 추정</h3>
-<pre><code>방법의 이점:
+<pre class="codeblock"><code>방법의 이점:
   앙상블 (3개): 모델 수준 다양성 포착
   MC 드롭아웃 (20회): 파라미터 수준 다양성 포착
 
@@ -593,7 +680,7 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
 </code></pre>
 <h3>기여 3: 교정 손실 (Calibration Loss)으로 불확실성-오차 정렬</h3>
 <p>피어슨 상관계수 기반 교정 손실은 모델이 &quot;<strong>불확실성이 높을 때 실제로 오차가 크다</strong>&quot;는 관계를 학습하게 강제한다:</p>
-<pre><code class="language-python">def calibration_loss(sigma_epistemic, prediction_error):
+<pre class="codeblock"><code class="language-python">def calibration_loss(sigma_epistemic, prediction_error):
     &quot;&quot;&quot;
     불확실성과 예측 오차의 피어슨 상관계수를 최대화
     &quot;&quot;&quot;
@@ -606,9 +693,9 @@ MC 드롭아웃: 추론 시 dropout_rate=0.1 활성화
 <h3>기여 4: Zero-Shot Sim-to-Real 전이 가능한 경량 모델</h3>
 <p>훈련은 IsaacSim에서만 이루어지고 실세계에서는 추가 훈련 없이 직접 배포 가능하다. 이는 경량 MLP 구조와 교정된 불확실성 추정 덕분에 가능하며, 실제 로봇 연구에서의 실용성을 높인다.</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 모델 하이퍼파라미터</h3>
-<pre><code>앙상블 크기: N_ens = 3
+<pre class="codeblock"><code>앙상블 크기: N_ens = 3
 MC 드롭아웃 샘플: N_MC = 20
 드롭아웃 비율: p = 0.1
 
@@ -629,7 +716,7 @@ MLP 구조 (발판 예측기):
   λ_cal = 1.0
 </code></pre>
 <h3>7.2 코스트맵 파라미터</h3>
-<pre><code>불확실성 스케일링: α = 10.0
+<pre class="codeblock"><code>불확실성 스케일링: α = 10.0
 최대 비용 클리핑: C_max = 100
 가우시안 블롭 반경: σᵦ = 0.05m (발 크기 기반)
 
@@ -639,12 +726,12 @@ MPPI 통합:
   온도: λ = 0.01
 </code></pre>
 <h3>7.3 LiDAR 설정 (실세계)</h3>
-<pre><code>시뮬레이션: 전방 LiDAR (고도 격자 직접 생성)
+<pre class="codeblock"><code>시뮬레이션: 전방 LiDAR (고도 격자 직접 생성)
 실세계: 하향 LiDAR로 교체 (발판 근처 고도 스캔)
   → 전방-하향 변환: 좌표 변환만으로 동일 입력 표현 생성
 </code></pre>
 <h3>7.4 로봇 플랫폼</h3>
-<pre><code>시뮬레이션: IsaacSim + Unitree Go1 URDF
+<pre class="codeblock"><code>시뮬레이션: IsaacSim + Unitree Go1 URDF
 실세계: Unitree Go1 (12 DOF 사족보행 로봇)
   무게: ~12kg
   속도: 최대 3.7m/s (보행 속도 기준 0.5m/s)
@@ -654,10 +741,10 @@ MPPI 통합:
 내비게이션 스택 (실세계): ROS2 NAV2
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 인식적 불확실성 vs 우연적 불확실성</h3>
 <p>이 논문은 <strong>인식적 불확실성(epistemic uncertainty)</strong> 만을 모델링한다:</p>
-<pre><code>인식적 불확실성 (Epistemic):
+<pre class="codeblock"><code>인식적 불확실성 (Epistemic):
   - 모델이 아직 학습하지 못한 것에 대한 불확실성
   - 더 많은 데이터로 감소 가능
   - OOD 탐지에 적합
@@ -688,7 +775,7 @@ MPPI 통합:
 <li>온라인 불확실성 업데이트 (지속적 학습)</li>
 </ol>
 <h3>8.3 다른 로봇 플랫폼으로의 일반화 가능성</h3>
-<pre><code>핵심 설계 요소의 이식성:
+<pre class="codeblock"><code>핵심 설계 요소의 이식성:
   ✅ 앙상블 + MC 드롭아웃: 모든 MLP 기반 모델에 적용 가능
   ✅ 교정 손실: 발판 예측 외 다른 예측 과제에도 적용 가능
   ✅ 가우시안 블롭 코스트맵: 발 수에 관계없이 확장 가능 (6발, 2발)
@@ -698,7 +785,7 @@ MPPI 통합:
   → 발판 예측 모델 재학습 (같은 파이프라인 사용 가능)
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -784,7 +871,7 @@ MPPI 통합:
 </ol>
 <h3>9.3 실적용 가능성 평가</h3>
 <p><strong>실적용 가능성: 높음 (★★★★☆)</strong></p>
-<pre><code>강점:
+<pre class="codeblock"><code>강점:
   ✅ 실세계 Unitree Go1 실험 완료
   ✅ Zero-Shot Sim-to-Real 전이 성공
   ✅ ROS2 NAV2 통합으로 기존 내비게이션 스택과 호환
@@ -802,7 +889,7 @@ MPPI 통합:
 <p>특히 이 연구의 핵심 통찰 — &quot;지형이 아니라 현재 태스크에서 이 지형의 위험도&quot; — 는 사족보행 내비게이션 연구에서 아직 충분히 탐구되지 않은 방향으로, 향후 안전 크리티컬 응용(의료, 재난 구조)에서 중요성이 높아질 연구 주제이다.</p>
 <p>다만 학회 발표 미완료 상태이므로 동료 심사를 통한 추가 검증이 필요하며, 더 다양한 지형과 로봇 플랫폼에서의 성능 검증이 향후 과제로 남는다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ul>
 <li>Crespo et al., &quot;Probabilistic costmaps for robot navigation,&quot; RA-L 2023</li>
 <li>Farshidian et al., &quot;Deep value function networks for large footstep planning,&quot; ICRA 2017</li>
@@ -813,7 +900,7 @@ MPPI 통합:
 <li>Unitree Go1: <a href="https://www.unitree.com/go1/">https://www.unitree.com/go1/</a></li>
 </ul>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p>Task-Conditioned Uncertainty Costmaps는 사족보행 로봇 경로 계획에서 <strong>학습 기반 불확실성 인식</strong>의 실용적 가능성을 보여주는 연구이다.</p>
 <p><strong>핵심 혁신:</strong></p>
 <ol>
@@ -824,10 +911,10 @@ MPPI 통합:
 <p><strong>실용적 의의:</strong> 로봇이 훈련 데이터 분포 밖의 지형을 만났을 때 &quot;모른다&quot;는 신호를 내비게이션에 활용할 수 있도록 한다. 이는 실세계 배포에서 발생하는 Long-tail 환경 변화에 대한 강건성을 높이는 중요한 메커니즘이다.</p>
 <p>HiPAN이 더 풍부한 지형 환경에서 더 복잡한 정책을 다루는 반면, 이 연구는 기존 시스템에 최소한의 변경으로 불확실성 인식 경로 계획을 추가하는 실용적 접근법을 제시한다. 코드 공개와 학회 발표를 통해 검증된다면, 안전 크리티컬 사족보행 내비게이션 연구에 표준 구성 요소가 될 잠재력이 있다.</p>
 <hr>
-<h2>12. 심화 분석: 불확실성 기반 안전 내비게이션의 이론적 배경 (Deep Dive: Theoretical Background)</h2>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div><h2 id="sec-11" data-label="12. 심화 분석: 불확실성 기반 안전 내비게이션의 이론적 배경">12. 심화 분석: 불확실성 기반 안전 내비게이션의 이론적 배경 (Deep Dive: Theoretical Background)</h2>
 <h3>12.1 베이지안 딥러닝 불확실성 추정 기법 비교</h3>
 <p>Task-Conditioned Uncertainty Costmaps의 핵심 기술인 앙상블 + MC 드롭아웃 불확실성 추정을 기존 방법들과 비교한다:</p>
-<pre><code>방법론 비교표:
+<pre class="diagram"><code>방법론 비교표:
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                  불확실성 추정 방법론 비교                        │
@@ -846,7 +933,7 @@ MPPI 통합:
 </code></pre>
 <p><strong>MC 드롭아웃의 베이지안 해석:</strong></p>
 <p>Gal &amp; Ghahramani (2016)에 의해 MC 드롭아웃이 베이지안 신경망의 근사임이 증명되었다:</p>
-<pre><code>드롭아웃 비율 p, 가중치 W에 대해:
+<pre class="codeblock"><code>드롭아웃 비율 p, 가중치 W에 대해:
   q_θ(W) ≈ 베르누이 분포로 근사된 가중치 사후 분포
 
 MC 추론:
@@ -858,7 +945,7 @@ MC 추론:
 <p>이 논문은 이를 앙상블과 결합하여 불확실성 추정의 신뢰도를 향상시킨다.</p>
 <h3>12.2 교정 불확실성 (Calibrated Uncertainty)의 중요성</h3>
 <p>교정 손실(Calibration Loss)의 수학적 의미를 더 깊이 분석한다:</p>
-<pre><code>목표: P(correct | σ²ₑ = s) = s  (신뢰도-정확도 일치)
+<pre class="codeblock"><code>목표: P(correct | σ²ₑ = s) = s  (신뢰도-정확도 일치)
 
 직관:
   σ²ₑ = 0.1 → 예측 오차 작음 (자신감 있는 영역)
@@ -876,7 +963,7 @@ MC 추론:
   - 정규화: [-1, 1] 범위로 안정적 학습
 </code></pre>
 <p><strong>교정 없이 발생하는 문제 (Over/Under Confidence):</strong></p>
-<pre><code>과자신감 (Over-confidence, ρ → 0):
+<pre class="codeblock"><code>과자신감 (Over-confidence, ρ → 0):
   OOD 지형: 높은 오차 + 낮은 불확실성
   → 코스트맵이 OOD 지형을 안전하다고 판단
   → 로봇이 OOD 지형으로 진입 → 실패 위험
@@ -888,7 +975,7 @@ MC 추론:
 </code></pre>
 <h3>12.3 MPPI와 코스트맵 통합의 수학적 분석</h3>
 <p>Model Predictive Path Integral (MPPI) 플래너와 불확실성 코스트맵의 통합:</p>
-<pre><code>MPPI 기본 공식:
+<pre class="codeblock"><code>MPPI 기본 공식:
   u* = (1/η) ∫ τ exp(-S(τ)/λ) dτ
   여기서:
     S(τ): 궤적 τ의 비용 함수
@@ -911,7 +998,7 @@ MC 추론:
   τ* = argmin_τ ∫₀ᵀ [c_goal + w_obs × c_obs + w_unc × C] dt
 </code></pre>
 <p><strong>가우시안 블롭의 수학적 역할:</strong></p>
-<pre><code>발판 불확실성 cᵢ를 공간으로 확산:
+<pre class="codeblock"><code>발판 불확실성 cᵢ를 공간으로 확산:
   C(x,y) = max_i [cᵢ × exp(-||[x,y]-[xᵢ,yᵢ]||² / (2σ²ᵦ))]
 
 이 공식의 의의:
@@ -927,7 +1014,7 @@ MC 추론:
 </code></pre>
 <h3>12.4 OOD 감지의 정보 이론적 관점</h3>
 <p>제안 방법의 OOD 감지 능력을 정보 이론으로 해석한다:</p>
-<pre><code>인식적 불확실성의 정보 이론적 해석:
+<pre class="codeblock"><code>인식적 불확실성의 정보 이론적 해석:
   σ²ₑ ∝ KL(q_θ(W) || p(W|D))
 
   ID 지형: 학습 데이터 분포에서 → KL 작음 → σ²ₑ 낮음
@@ -947,7 +1034,7 @@ OOD 탐지 임계값 설정:
 </code></pre>
 <h3>12.5 다른 Planner 방법들과의 심층 비교</h3>
 <p>기존 리뷰된 Planner 논문들과의 상세 비교:</p>
-<pre><code>HiPAN (RA-L 2026) vs 제안 방법:
+<pre class="diagram"><code>HiPAN (RA-L 2026) vs 제안 방법:
   ┌─────────────────────────────────────────────────────────┐
   │ HiPAN:                                                    │
   │   레벨: 고수준 정책 (어디로 갈 것인가) + 저수준 제어     │
@@ -984,7 +1071,7 @@ RAY-TOLD (arxiv 2026) vs 제안 방법:
 </code></pre>
 <h3>12.6 실세계 배포를 위한 공학적 고려사항</h3>
 <p>Unitree Go1 실세계 배포 시 고려해야 하는 실용적 사항들:</p>
-<pre><code>1. 컴퓨팅 자원:
+<pre class="codeblock"><code>1. 컴퓨팅 자원:
    - 모델 추론: 60 × 15차원 입력 × MLP → 빠름 (&lt; 1ms)
    - 병렬 배치로 60 순전파 → 10ms 이하 예상
    - ROS2 NAV2 코스트맵 업데이트: 5Hz 충분
@@ -1007,7 +1094,7 @@ RAY-TOLD (arxiv 2026) vs 제안 방법:
 </code></pre>
 <h3>12.7 향후 연구: 동적 지형 + 동적 속도 적응</h3>
 <p>현재 모델의 가장 큰 한계인 &quot;훈련 시 상수 속도&quot; 문제의 해결 방향:</p>
-<pre><code>현재 한계:
+<pre class="codeblock"><code>현재 한계:
   훈련: v = {v₁, v₂, ...} (상수 속도 세트)
   배포: 동일한 속도 → 분포 내 (ID)
   
@@ -1031,7 +1118,7 @@ RAY-TOLD (arxiv 2026) vs 제안 방법:
   → 새 지형 몇 번 방문으로 불확실성 신속 감소
 </code></pre>
 <hr>
-<h2>13. 한국어 키워드 및 용어 정리</h2>
+<div class="secnav"><a href="#sec-9">← 10. 참고 문헌</a><a href="#sec-11">12. 심화 분석: 불확실성 기반 안전 내비게이션의 이론적 배경 →</a></div><h2 id="sec-12" data-label="13. 한국어 키워드 및 용어 정리">13. 한국어 키워드 및 용어 정리</h2>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -1116,9 +1203,104 @@ RAY-TOLD (arxiv 2026) vs 제안 방법:
 <td>두 변수 간의 선형 상관 관계를 측정하는 지표</td>
 </tr>
 </tbody></table></div>
-
+<div class="secnav"><a href="#sec-10">← 11. 결론</a><a href="#sec-12">13. 한국어 키워드 및 용어 정리 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="Task-Conditioned Uncertainty Costmaps for Legged Locomotion: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

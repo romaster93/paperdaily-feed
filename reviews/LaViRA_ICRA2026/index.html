@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>LaViRA: Language-Vision-Robot Actions Translation for Zero-Shot VLN · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2510.19655">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">ICRA 2026</div>
-    <h1>Language-Vision-Robot Actions Translation for Zero-Shot Vision Language Navigation in Continuous Environments</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2510.19655">arXiv:2510.19655</a></span>
-      <span>리뷰 2026-06-29</span>
-      <span>44분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">LaViRA_ICRA2026</span>
     </div>
+    <h1 class="doc-title">LaViRA: Language-Vision-Robot Actions Translation for Zero-Shot VLN-CE — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">ICRA 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2510.19655">2510.19655</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval"><a href="https://github.com/NJU-R-L-Group-Embodied-Lab/lavira-code">github.com/NJU-R-L-Group-Embodied-Lab/lavira-code</a></span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://robo-lavira.github.io/lavira-zs-vln/">robo-lavira.github.io/lavira-zs-vln/</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-06-29</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">41KB · 약 44분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>LaViRA: Language-Vision-Robot Actions Translation for Zero-Shot VLN-CE — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: LaViRA: Language-Vision-Robot Actions Translation for Zero-Shot Vision Language Navigation in Continuous Environments</li>
@@ -149,7 +235,7 @@ footer {
 <h3>1.2 연구 목표 (Research Objective)</h3>
 <p>LaViRA는 <strong>사전 학습 없이(zero-shot)</strong> 자연어 지시를 따라 미지의 연속 환경(VLN-CE)을 내비게이션하는 프레임워크다. 핵심 아이디어는 내비게이션 행동을 <strong>언어(Language) → 비전(Vision) → 로봇(Robot)</strong> 의 거친-정밀(coarse-to-fine) 3계층으로 분해하고, 각 계층에 <strong>서로 다른 규모의 멀티모달 대규모 언어모델(MLLM)</strong> 또는 규칙 기반 제어기를 배정하여 각각의 강점(전략적 추론 / 시각 접지 / 물리적 제어)을 살리는 것이다.</p>
 <p>핵심 연구 질문:</p>
-<pre><code>&quot;제로-샷 VLN-CE에서, 환경 특화 웨이포인트 예측기(scene generalization을 해침)에
+<pre class="codeblock"><code>&quot;제로-샷 VLN-CE에서, 환경 특화 웨이포인트 예측기(scene generalization을 해침)에
  의존하지 않으면서도 대규모 모델의 추론 능력을 충분히 활용하려면
  행동(action)을 어떻게 구조화해야 하는가?&quot;
 </code></pre>
@@ -178,11 +264,11 @@ footer {
 <p>⚠️ <strong>메타 노트(중요)</strong>: 본 리뷰는 직전 버전(~17KB)의 사실관계 오류를 전면 교정한 재작성본이다. 직전 버전은 (a) 실로봇을 &quot;Aloha/Go1&quot;로, (b) 데이터셋을 &quot;R2R-CE + RxR-CE&quot;로, (c) 비교를 학습 기반 NaVILA/VR-Robo와의 수치로 적어 두었으나, 이는 모두 본 논문의 실제 내용과 다르다. 실제로는 <strong>R2R 기반 VLN-CE 단일 벤치마크(100-에피소드 val-unseen 서브셋)</strong>, 실로봇은 <strong>Unitree Go1 + Agilex Cobot Magic</strong>, 비교 대상은 <strong>제로-샷 LLM 기반 방법(InstructNav, NavGPT-CE 등)</strong>이다.</p>
 </blockquote>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 웨이포인트 예측기의 일반화 병목</h4>
 <p>VLN-CE(연속 환경)에서 다수의 SOTA 방법(ETPNav, BEVBert 등)은 RGB-D 관측으로부터 후보 웨이포인트(candidate waypoint)를 예측하는 <strong>학습된 waypoint predictor</strong>를 사용한다. 이를 제로-샷 LLM 방법에 차용하면 LLM이 &quot;이산 노드 중 선택&quot; 문제로 단순화되어 추론은 쉬워지지만, 예측기 자체가 학습 데이터(MP3D 등) 분포에 종속된다.</p>
-<pre><code>[웨이포인트 예측기 의존의 문제]
+<pre class="codeblock"><code>[웨이포인트 예측기 의존의 문제]
 
 학습된 Waypoint Predictor:
   RGB-D → 후보 웨이포인트 집합 {w_1, ..., w_k}
@@ -193,7 +279,7 @@ footer {
 </code></pre>
 <h4>B. 대규모 모델 추론 능력의 과소활용</h4>
 <p>반대 진영의 순수 LLM 기반 제로-샷 방법(NavGPT-CE, DiscussNav-CE, MapGPT-CE)은 학습 컴포넌트를 제거했지만, MLLM을 <strong>하나의 거대 단계</strong>로만 사용한다. 즉 고수준 계획·시각 접지·저수준 제어를 단일 프롬프트/단일 모델이 한꺼번에 처리한다.</p>
-<pre><code>[단일 단계 LLM 사용의 문제]
+<pre class="diagram"><code>[단일 단계 LLM 사용의 문제]
 
 관측 O_t ──┐
 지시 I    ──┼──► 단일 MLLM ──► 최종 행동/좌표
@@ -215,7 +301,7 @@ footer {
 <p>표 I에서 이 진영의 성능 한계가 드러난다: NavGPT-CE는 SR 16.3%, MapGPT-CE는 SR 7.0%, DiscussNav-CE는 SR 11.0%로 매우 낮다.</p>
 <h4>C. 픽셀-월드 좌표 변환의 신뢰성</h4>
 <p>VLN-CE는 이산 그래프가 아닌 연속 공간이므로, &quot;저 문으로 가라&quot;는 의미 수준 결정을 <strong>실제 3D 목표 좌표 + 충돌 없는 경로</strong>로 변환해야 한다. MLLM이 직접 좌표를 뱉으면 오차가 크고, 깊이(depth) 활용 방식(중앙값 vs 바닥 픽셀)에 따라 성능이 크게 갈린다.</p>
-<pre><code>[좌표 변환 신뢰성 이슈]
+<pre class="codeblock"><code>[좌표 변환 신뢰성 이슈]
 
 옵션 1: MLLM이 직접 (x, z) 출력
   → 공간 수치 추론 부정확, SPL 19.4% (어블레이션)
@@ -228,7 +314,7 @@ LaViRA 채택: bbox의 &quot;바닥-중앙(bottom-center)&quot; 픽셀을 투영
 </code></pre>
 <h3>2.2 핵심 해결책</h3>
 <p>LaViRA의 세 가지 핵심 설계:</p>
-<pre><code>[LaViRA 혁신 요소 3가지]
+<pre class="codeblock"><code>[LaViRA 혁신 요소 3가지]
 
 혁신 1: 거친-정밀 3계층 행동 분해 (Coarse-to-Fine Action Hierarchy)
   Language Action (고수준 계획)  — 대형 MLLM
@@ -248,10 +334,10 @@ LaViRA 채택: bbox의 &quot;바닥-중앙(bottom-center)&quot; 픽셀을 투영
   월드 좌표로 변환 → Fast Marching Method로 충돌 회피 경로 생성
 </code></pre>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 거친-정밀 3계층 행동 분해 (Coarse-to-Fine Hierarchy)</h3>
 <p>LaViRA의 중심 아이디어는 한 스텝의 내비게이션 결정을 세 개의 점점 정밀해지는 하위 행동으로 쪼개는 것이다. 상위 계층의 출력이 하위 계층의 입력 컨텍스트로 전파(propagate)된다.</p>
-<pre><code>[3계층 행동 분해 개요]
+<pre class="diagram"><code>[3계층 행동 분해 개요]
 
        지시 I + 4-방향 관측 O_t + 이력 H_t
                     │
@@ -281,7 +367,7 @@ LaViRA 채택: bbox의 &quot;바닥-중앙(bottom-center)&quot; 픽셀을 투영
 <p>이 분해의 핵심 통찰은 <strong>&quot;문제의 추상화 수준마다 다른 종류의 모델이 최적&quot;</strong>이라는 것이다. 전략적 추론(어느 방으로?)은 대규모 모델의 상식·언어 추론이 유리하고, 픽셀 단위 접지(정확히 어느 객체?)는 그라운딩 특화 모델이 유리하며, 기하학적 경로 생성은 결정론적 알고리즘(FMM)이 가장 정확하고 빠르다.</p>
 <h3>3.2 Language Action — 고수준 계획 (High-Level Planning)</h3>
 <p>가장 큰 MLLM이 담당하는 전략 계층이다. 매 스텝, 에이전트의 4-방향 자기중심(egocentric) 관측(전/좌/우/후)과 누적 이력을 입력받아 <strong>어느 방향으로 갈지</strong>와 <strong>지시 이행 진행도</strong>를 자연어로 출력한다.</p>
-<pre><code>[Language Action 정식화]
+<pre class="codeblock"><code>[Language Action 정식화]
 
 입력:
   I        = 자연어 지시
@@ -304,7 +390,7 @@ LaViRA 채택: bbox의 &quot;바닥-중앙(bottom-center)&quot; 픽셀을 투영
 <p>진행도 추정 <code>P_t</code>는 단순한 부산물이 아니라, 다음 계층(Vision Action)에 전달되어 &quot;지금 무엇을 찾아야 하는지&quot;의 맥락을 제공한다. 예: <code>P_t = &quot;거실을 통과 완료, 이제 부엌 입구를 찾는 중&quot;</code> → Vision Action이 부엌 입구에 해당하는 객체를 bounding box로 지목.</p>
 <h3>3.3 Vision Action — 시각 접지 (Perceptual Grounding)</h3>
 <p>선택된 방향의 단일 이미지(<code>I_dir</code>)에 대해, 그라운딩 특화 소형 MLLM이 <strong>이동해야 할 구체적 목표를 2D bounding box로 지목</strong>한다.</p>
-<pre><code>[Vision Action 정식화]
+<pre class="codeblock"><code>[Vision Action 정식화]
 
 입력:
   I        = 자연어 지시
@@ -324,7 +410,7 @@ LaViRA 채택: bbox의 &quot;바닥-중앙(bottom-center)&quot; 픽셀을 투영
 <p><strong>반직관적 발견 — 작은 모델이 더 낫다</strong>: Vision Action에 더 큰 Qwen2.5-VL-72B나 GPT-4o를 쓰면 오히려 성능이 떨어진다(표 II). 32B 모델이 이 그라운딩 태스크에 가장 정확하다. 이는 &quot;모든 단계에 가장 큰 모델&quot;이라는 통념을 반박하는 LaViRA의 핵심 메시지다.</p>
 <h3>3.4 Robot Action — 저수준 제어 (Low-Level Control)</h3>
 <p>순수 규칙 기반 결정론적 제어기다. MLLM이 지목한 bounding box를 실제 3D 월드 좌표로 변환하고, Fast Marching Method(FMM)로 충돌 없는 경로를 생성한다.</p>
-<pre><code>[Robot Action 3단계]
+<pre class="codeblock"><code>[Robot Action 3단계]
 
 단계 1 — 픽셀→카메라 좌표 역투영 (Pixel-to-Camera Unprojection):
   bbox의 &quot;바닥-중앙(bottom-center)&quot; 픽셀 (u_target, v_target) 선택
@@ -348,7 +434,7 @@ LaViRA 채택: bbox의 &quot;바닥-중앙(bottom-center)&quot; 픽셀을 투영
 <p>이 계층은 학습 파라미터가 전혀 없다. MLLM의 의미 수준 결정을 기하학적으로 신뢰성 있게 실현하는 &quot;번역기&quot; 역할이며, 이것이 논문 제목의 <strong>&quot;...Robot Actions Translation&quot;</strong>의 의미다.</p>
 <h3>3.5 왜 이 분해가 효과적인가 (정량적 근거)</h3>
 <p>어블레이션(표 III)이 각 계층의 필수성을 강하게 입증한다:</p>
-<pre><code>[계층 제거 시 성능 붕괴]
+<pre class="codeblock"><code>[계층 제거 시 성능 붕괴]
 
 Full LaViRA:              SR 36.0%,  SPL 28.3%
 w/o Language Action:      SR  6.7%,  SPL  4.4%   ← 계획 제거: SPL 23.9%p 붕괴
@@ -361,8 +447,8 @@ w/o LA+VA (end-to-end):   SR  0.0%,  SPL  0.0%   ← 둘 다 제거: 완전 실�
   - 두 계층의 협업이 본질 — end-to-end 단일 모델은 0% 성공
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>[LaViRA 전체 파이프라인 — 한 스텝의 데이터 흐름]
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>[LaViRA 전체 파이프라인 — 한 스텝의 데이터 흐름]
 
 입력 레이어:
 ┌───────────────────────────────────────────────────────────────────┐
@@ -414,7 +500,7 @@ w/o LA+VA (end-to-end):   SR  0.0%,  SPL  0.0%   ← 둘 다 제거: 완전 실�
 </ol>
 <p>학습 단계가 전혀 없다는 점이 구조적 특징이다. 모든 &quot;지능&quot;은 사전학습된 MLLM의 제로-샷 능력에서 나오고, 기하 변환·경로계획은 결정론적으로 처리된다.</p>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -673,7 +759,7 @@ w/o LA+VA (end-to-end):   SR  0.0%,  SPL  0.0%   ← 둘 다 제거: 완전 실�
 → Vision Action을 GPT-4o로 올리면 SPL이 28.3% → 16.8%로 <strong>11.5%p 하락</strong> — &quot;큰 모델 = 항상 좋다&quot;가 거짓임을 입증.
 → Language Action을 Qwen-32B로 낮춰도 SR 19.7%로 급락 — 전략 계층엔 큰 모델이 필요.</p>
 <p>이 표가 주는 설계 지침을 정리하면 다음과 같다:</p>
-<pre><code>[모델 배정 의사결정 규칙 (표 II 도출)]
+<pre class="codeblock"><code>[모델 배정 의사결정 규칙 (표 II 도출)]
 
 상한선 모델(GPT-4o)을 어디에 쓸 것인가?
   → Language Action(계획)에 배정해야 함
@@ -803,7 +889,7 @@ w/o LA+VA (end-to-end):   SR  0.0%,  SPL  0.0%   ← 둘 다 제거: 완전 실�
 <li><strong>bbox 바닥-중앙 투영</strong>: direct pixel output(SPL 19.4%)·bbox median depth(SPL 21.8%) 대비 full(SPL 28.3%)이 우월 → 바닥-중앙 픽셀 선택이 좌표 변환 신뢰성의 핵심.</li>
 </ul>
 <h3>5.4 비용 분석 (Inference Cost)</h3>
-<pre><code>[100 에피소드 추론 비용 — GPT-4o + Qwen2.5-VL-32B]
+<pre class="codeblock"><code>[100 에피소드 추론 비용 — GPT-4o + Qwen2.5-VL-32B]
 
 GPT-4o (Language Action):
   궤적당 ~7.93 호출, ~32,682 토큰
@@ -818,7 +904,7 @@ Qwen2.5-VL-32B (Vision Action):
 <p>→ 에피소드당 약 8.4센트. 제로-샷·무학습이라는 점을 감안하면 매우 경제적이다. (직전 리뷰가 적었던 &quot;쿼리당 $0.01–0.1 누적, 10시간 $100&quot;은 본 논문 수치와 무관한 추정이었다.)</p>
 <h3>5.5 실세계 실험 (Real-world Experiments)</h3>
 <p>LaViRA는 <strong>두 가지 이질적 실로봇 플랫폼</strong>에 추가 학습 없이 배포되어 sim-to-real 전이성을 시연했다.</p>
-<pre><code>[실로봇 플랫폼]
+<pre class="codeblock"><code>[실로봇 플랫폼]
 
 플랫폼 1: Unitree Go1 (사족보행)
   연산: Jetson Orin NX
@@ -839,7 +925,7 @@ Qwen2.5-VL-32B (Vision Action):
 <p>정정: 직전 리뷰의 &quot;Aloha(다리 로봇)&quot; 표기는 오류다. 실제 플랫폼은 <strong>Unitree Go1(사족) + Agilex Cobot Magic(바퀴형)</strong>이다.</p>
 </blockquote>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>기여 1: 거친-정밀 행동 분해 프레임워크</h3>
 <p>내비게이션 행동을 Language → Vision → Robot의 3계층으로 분해하여, 환경 특화 웨이포인트 예측기 없이도 미지 환경 일반화를 유지하면서 대규모 모델의 추론 능력을 충분히 활용한다. 어블레이션이 각 계층의 인과적 필수성을 입증한다(end-to-end는 0% 성공).</p>
 <h3>기여 2: 멀티스케일 모델 배정 원칙</h3>
@@ -849,9 +935,9 @@ Qwen2.5-VL-32B (Vision Action):
 <h3>기여 4: 제로-샷 VLN-CE SOTA + 실로봇 시연</h3>
 <p>R2R 기반 VLN-CE에서 제로-샷 SR 38.3%로 직전 최고(InstructNav 31.0%) 대비 +7.3%p 달성하고, 일부 학습 기반 방법과 SR 동급 이상. 두 종류 실로봇(Go1, Cobot Magic)에 무학습 배포로 실용성을 입증.</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 모델 구성</h3>
-<pre><code>[계층별 모델/알고리즘]
+<pre class="codeblock"><code>[계층별 모델/알고리즘]
 
 Language Action:  GPT-4o (주력) / Gemini-2.5-Pro (대안)
 Vision Action:    Qwen2.5-VL-32B (주력)
@@ -862,7 +948,7 @@ Robot Action:     규칙 기반 — 픽셀 역투영(K) + 월드 변환 + FMM
                   (코드 레포 deps엔 GroundingDINO/SAM 존재 — 환경/유틸 차원)
 </code></pre>
 <h3>7.2 행동 공간 및 좌표 변환</h3>
-<pre><code>[행동 공간]
+<pre class="codeblock"><code>[행동 공간]
 
 Language Action 이산 집합:
   navigate to &lt;direction&gt;   # 방향 진행
@@ -879,7 +965,7 @@ Vision Action 출력:
   FMM(global_map, target) → 충돌 회피 경로
 </code></pre>
 <h3>7.3 평가/실행 설정</h3>
-<pre><code>[설정 요약]
+<pre class="codeblock"><code>[설정 요약]
 
 벤치마크:       R2R 기반 VLN-CE (Habitat + MP3D)
 평가 분할:      Val-Unseen 100-에피소드 서브셋
@@ -893,7 +979,7 @@ LLM 온도/top-p:  논문 미명시
                 Dockerfile/requirements 제공 (Apache-2.0)
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 분석</h3>
 <p><strong>백본 교체 견고성</strong>: Language Action 백본을 GPT-4o ↔ Gemini-2.5-Pro로 바꿔도 SR 36.0% ↔ 38.3%로 견고하다. 향후 더 강한 추론 모델(차세대 GPT/Gemini)이 나오면 Language Action만 교체해 성능을 끌어올릴 수 있는 모듈식 구조다.</p>
 <p><strong>Vision Action 모델 선택의 일반 원칙</strong>: &quot;그라운딩 태스크엔 그라운딩 특화 중형 모델&quot;이라는 발견은 LaViRA 외의 LLM-로봇 파이프라인에도 전이 가능하다. 무조건 최대 모델을 쓰는 대신, 하위 태스크별로 특화 모델을 배정하는 설계가 비용·성능 양면에서 유리할 수 있다.</p>
@@ -910,7 +996,7 @@ R2R 기반 VLN-CE의 100-에피소드 서브셋만 평가했다. RxR-CE(다국�
 <p><strong>한계 5: depth 의존</strong>
 Robot Action의 픽셀→월드 역투영이 depth를 요구한다. 순수 RGB-only 배포에는 단안 깊이 추정 모델 통합이 추가로 필요하다.</p>
 <h3>8.3 향후 연구 방향</h3>
-<pre><code>[향후 방향]
+<pre class="codeblock"><code>[향후 방향]
 
 방향 1: 로컬 MLLM으로 API 의존 제거
   GPT-4o/Gemini → 강력한 오픈소스 모델로 교체 → 오프라인·저레이턴시
@@ -930,7 +1016,7 @@ Robot Action의 픽셀→월드 역투영이 depth를 요구한다. 순수 RGB-o
   폐루프(closed-loop) 보정 메커니즘
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <p>비교 대상은 같은 VLN 트랙의 <strong>제로-샷/LLM 기반 내비게이션</strong> 선행 리뷰들로 한정한다: <code>WMNav: World Model VLM Navigation</code>(WMNav_IROS2025), <code>ReasonNav (Human-like Navigation in a World Built for Humans)</code>(ReasonNav_CoRL2025), <code>StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling</code>(StreamVLN_ICRA2026).</p>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
@@ -1041,7 +1127,7 @@ Robot Action의 픽셀→월드 역투영이 depth를 요구한다. 순수 RGB-o
 <li>두 방법 모두 실로봇(StreamVLN: Go2, LaViRA: Go1+Cobot Magic) 시연을 포함해 실용 지향이라는 공통점.</li>
 </ul>
 <h3>9.3 실적용 가능성 평가</h3>
-<pre><code>[배포 권장 시나리오]
+<pre class="codeblock"><code>[배포 권장 시나리오]
 
 추천:
   - 학습 데이터 수집이 어려운 신규 환경 빠른 배포
@@ -1056,7 +1142,7 @@ Robot Action의 픽셀→월드 역투영이 depth를 요구한다. 순수 RGB-o
 <h3>9.4 연구 방향성 평가</h3>
 <p>LaViRA는 제로-샷 VLN-CE에서 <strong>&quot;행동을 추상화 수준별로 분해하고 각 수준에 맞는 모델을 배정한다&quot;</strong>는 설계 철학을 명확히 제시한 점에서 의미가 크다. 기존 제로-샷 LLM 방법이 단일 거대 모델에 모든 역할을 맡겨 비효율적이었다면, LaViRA는 분업(division of labor)으로 성능과 비용을 동시에 개선했다. 이 멀티스케일 배정 원칙은 VLN을 넘어 LLM 기반 로보틱스 파이프라인 일반에 적용 가능한 일반적 교훈이다. 다만 절대 성능은 학습 기반에 미치지 못하므로, 향후 로컬 모델·폐루프 보정·동적 환경 확장이 제로-샷 진영의 실용화를 좌우할 것이다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li>Anderson et al. (2018). Vision-and-language navigation: Interpreting visually-grounded navigation instructions in real environments. CVPR 2018.</li>
 <li>Krantz et al. (2020). Beyond the nav-graph: Vision-and-language navigation in continuous environments (VLN-CE). ECCV 2020.</li>
@@ -1072,14 +1158,14 @@ Robot Action의 픽셀→월드 역투영이 depth를 요구한다. 순수 RGB-o
 <li>Sethian (1996). A fast marching level set method for monotonically advancing fronts. PNAS 1996.</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>혁신성 평가</h3>
 <p>LaViRA는 제로-샷 VLN-CE의 핵심 딜레마(웨이포인트 예측기 의존 vs 대규모 모델 과소활용)를, <strong>거친-정밀 3계층 행동 분해 + 멀티스케일 모델 배정</strong>이라는 단순하지만 효과적인 설계로 해결했다. Language(전략)·Vision(접지)·Robot(제어)의 분업과, &quot;전략엔 큰 모델, 접지엔 특화 32B 모델&quot;이라는 비자명한 배정 원칙이 핵심 기여다.</p>
 <h3>실용적 의의</h3>
 <p>R2R 기반 VLN-CE에서 제로-샷 SR 38.3%(SPL 28.3%)로 직전 최고 대비 SR +7.3%p를 달성하고, Unitree Go1과 Agilex Cobot Magic이라는 동역학이 다른 두 실로봇에 무학습으로 배포했다. 에피소드당 약 $0.084의 경제성과 Apache-2.0 코드 공개는 실용·재현 가치를 높인다.</p>
 <h3>향후 연구 방향</h3>
 <p>가장 중요한 과제는 (1) 로컬 MLLM으로 API 의존·레이턴시 제거, (2) RxR-CE·실외 등 더 도전적 벤치마크 확장, (3) 실세계 정량 평가 프로토콜 구축, (4) 동적 환경 처리다. 절대 성능에서 학습 기반(BEVBert SPL 53.4%)과의 간극을 좁히는 것이 제로-샷 진영의 핵심 숙제다.</p>
-<pre><code>[LaViRA 종합 평가]
+<pre class="codeblock"><code>[LaViRA 종합 평가]
 
 혁신성:        ⭐⭐⭐⭐  (멀티스케일 계층 분해 원칙의 명확한 제시·검증)
 기술 완성도:   ⭐⭐⭐⭐  (체계적 어블레이션, 좌표 변환 설계 견고)
@@ -1091,9 +1177,104 @@ Robot Action의 픽셀→월드 역투영이 depth를 요구한다. 순수 RGB-o
 <hr>
 <p><strong>Review Date</strong>: 2026-06-29
 <strong>Reviewer</strong>: NanoClaw Paper Bot (재작성 — 직전 ~17KB 버전의 사실관계 오류 전면 교정)</p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="LaViRA: Language-Vision-Robot Actions Translation for Zero-Shot VLN-CE — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

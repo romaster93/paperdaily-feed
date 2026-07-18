@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>Early to Share, Late to Save: Synchronisation-Driven Communication Gating in Bandwidth-Constrained Cooperative VLN · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2607.08504">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">IJCAI 2026 GLOW Workshop (accepted, to appear in Springer CCIS)</div>
-    <h1>Early to Share, Late to Save: Synchronisation-Driven Communication Gating in Bandwidth-Constrained Cooperative VLN</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2607.08504">arXiv:2607.08504</a></span>
-      <span>리뷰 2026-07-11</span>
-      <span>38분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">HindsightGateVLN_IJCAIWS2026</span>
     </div>
+    <h1 class="doc-title">Early to Share, Late to Save: Synchronisation-Driven Communication Gating in Bandwidth-Constrained Cooperative VLN: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">IJCAI 2026 GLOW Workshop (accepted, to appear in Springer CCIS)</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2607.08504">2607.08504</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">✅ <a href="https://github.com/AravG13/bandwidth-constrained-cooperative-vln">AravG13/bandwidth-constrained-cooperative-vln</a> (Python/PyTorch)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">❌ (별도 프로젝트 페이지 없음)</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-07-11</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">39KB · 약 38분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>Early to Share, Late to Save: Synchronisation-Driven Communication Gating in Bandwidth-Constrained Cooperative VLN: 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: Early to Share, Late to Save: Synchronisation-Driven Communication Gating in Bandwidth-Constrained Cooperative VLN</li>
@@ -154,7 +240,7 @@ footer {
 </ol>
 <p>주목할 점은 이 논문이 <strong>성능 최고치(SOTA SR)를 겨루는 논문이 아니라 분석(analysis) 지향 워크숍 논문</strong>이라는 것이다. 절대 성능(R2R val-unseen SR 9.2%)은 낮지만, 논문의 가치는 (a) 문제 정식화의 참신성, (b) &quot;통신은 이르게(early), 절약은 늦게(late)&quot;라는 반직관적 통찰의 실증적 규명, (c) 완전 공개된 재현 가능한 코드베이스에 있다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <p>기존 협력 내비게이션·다중 에이전트 VLN이 안고 있는 한계는 다음과 같다.</p>
 <ol>
@@ -177,10 +263,10 @@ footer {
 </ul>
 <p>즉 제목 그대로 <strong>&quot;Early to Share(이르게 공유), Late to Save(늦게 아껴라)&quot;</strong>: 초반에 소수 슬롯을 몰아 쓰는 것이 대역폭 대비 효용을 극대화한다.</p>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 문제 정식화: 대역폭 제약 협력 VLN</h3>
 <p><strong>에이전트 구성.</strong> N=2 에이전트가 동일한 자연어 지시(instruction)를 받고 Matterport3D 실내 환경을 항해한다. 경로 배정은 <strong>비대칭(asymmetric)</strong> 이다:</p>
-<pre><code>전체 경로:  v_0 ── v_1 ── ... ── v_{T/2} ── ... ── v_T
+<pre class="diagram"><code>전체 경로:  v_0 ── v_1 ── ... ── v_{T/2} ── ... ── v_T
              └──────────── Agent 0 (전 구간) ──────────────┘
                                   └──── Agent 1 (후반 구간) ────┘
              Agent 1 시작점 = v_{⌊T/2⌋}
@@ -192,19 +278,19 @@ footer {
 </ul>
 <p><strong>브로드캐스트 내용.</strong> 각 에이전트 <code>i</code>는 스텝 <code>t</code>에 <strong>교차 모달 컨텍스트 벡터(cross-modal context vector)</strong> <code>c_i(t) ∈ ℝ^512</code> 를 방송한다. 이는 언어 조건부 시각 표현으로, cross-attention 모듈에서 생성된다(§3.3). 즉 원본 픽셀이 아니라 <strong>압축된 512차원 임베딩</strong>만 전송한다.</p>
 <p><strong>대역폭 예산.</strong> 게이팅 변수 <code>g_i(t) ∈ {0,1}</code> (전송=1)에 대해 에피소드당 전송 횟수를 하드 제약한다:</p>
-<pre><code>   ┌─────────────────────────────────────┐
+<pre class="diagram"><code>   ┌─────────────────────────────────────┐
    │   ∑_{t=1}^{T}  g_i(t)  ≤  B          │   (에피소드당 최대 B회 전송)
    └─────────────────────────────────────┘
    g_i(t) ∈ {0, 1},   B ∈ {1, 3, 5}   (주 실험: B=3)
 </code></pre>
 <p>이 하드 제약이 문제의 본질이다. <code>B=3</code>이면 최대 20스텝짜리 에피소드에서 단 3번만 통신할 수 있으므로, &quot;어느 3스텝을 고를 것인가&quot;가 곧 게이팅 정책의 학습 목표가 된다.</p>
 <p><strong>목적.</strong> 예산 제약 하에서 항해 성능(SR/SPL) 또는 그 대리 지표인 <strong>은닉상태 정렬 이득(alignment gain)</strong> 을 최대화하는 게이팅 정책 <code>π_gate</code> 를 찾는 것.</p>
-<pre><code>   max_{π_gate}   E[ 성능(SR, SPL, Δalignment) ]
+<pre class="codeblock"><code>   max_{π_gate}   E[ 성능(SR, SPL, Δalignment) ]
    s.t.           ∑_t g_i(t) ≤ B   (∀ 에이전트 i, ∀ 에피소드)
 </code></pre>
 <h3>3.2 Hindsight Gating: 사후 라벨링 지도학습</h3>
 <p>핵심 혁신은 통신 여부를 <strong>강화학습(REINFORCE)이 아니라 지도학습으로</strong> 학습한다는 것이다. 이를 위해 3단계 학습 파이프라인을 쓴다.</p>
-<pre><code>┌──────────────────────────────────────────────────────────────┐
+<pre class="diagram"><code>┌──────────────────────────────────────────────────────────────┐
 │  Phase 1: 단일 에이전트 사전학습 (Imitation Learning)          │
 │    - 통신 없이 seq2seq VLN 정책을 모방학습으로 훈련            │
 │    - 50 epochs, batch 32, lr 5e-5                              │
@@ -225,24 +311,24 @@ footer {
 └──────────────────────────────────────────────────────────────┘
 </code></pre>
 <p><strong>사후 라벨링 규칙 (Phase 2 핵심).</strong> 스텝 <code>t</code>에서 에이전트 <code>i</code>에 대한 이진 라벨 <code>y_i(t)</code>는:</p>
-<pre><code>   y_i(t) = 𝟙[ â_i(t) ≠ a*_i(t) ]  ∧  𝟙[ â_j(t) = a*_j(t) ]
+<pre class="diagram"><code>   y_i(t) = 𝟙[ â_i(t) ≠ a*_i(t) ]  ∧  𝟙[ â_j(t) = a*_j(t) ]
             └── 에이전트 i가 틀림 ──┘    └── 파트너 j는 맞음 ──┘
 </code></pre>
 <p>여기서 <code>â</code>는 예측 행동, <code>a*</code>는 정답(teacher) 행동, <code>j</code>는 파트너 에이전트다. 즉 <strong>&quot;내(i)가 이 스텝에서 행동을 틀렸는데(â_i≠a*_i), 마침 파트너(j)는 올바른 행동을 알고 있었던(â_j=a*_j)&quot;</strong> 스텝만을 통신-임계로 라벨링한다. 논리는 명확하다 — 그런 스텝에서 파트너가 자신의 접지 정보를 보내줬다면 내 실수를 교정할 수 있었을 것이다. 이것이 <strong>&quot;사후(hindsight)&quot;</strong> 의 의미다: 전체 에피소드를 다 본 뒤에야 어느 스텝이 통신으로 구제 가능했는지 알 수 있다.</p>
 <p>이 라벨링은 <strong>정답 행동(a*)을 아는 teacher-forcing 롤아웃</strong>에서만 계산 가능하다(학습 시). 추론 시에는 게이트가 은닉상태만 보고 이를 예측한다.</p>
 <p><strong>게이트 아키텍처.</strong> <code>π_gate</code>는 <strong>경량 3-layer MLP</strong>로, 입력은 단 두 가지다:</p>
-<pre><code>   입력:  [ h_i(t) ,  b_rem(t) ]
+<pre class="diagram"><code>   입력:  [ h_i(t) ,  b_rem(t) ]
           └─ 에이전트 은닉상태 ─┘  └─ 정규화된 잔여예산 b_rem ∈ [0,1] ─┘
    출력:  p_send(t) ∈ [0,1]   (전송 확률)
 </code></pre>
 <p>명시적 불확실성 임계값(entropy threshold)을 쓰지 않는다는 점이 중요하다 — 게이트는 순수하게 은닉상태와 남은 예산만으로 결정한다. 잔여 예산 <code>b_rem</code>을 입력에 넣음으로써, 게이트는 &quot;예산이 얼마 안 남았으면 아껴 쓴다&quot;는 자원 인식(resource-aware) 행동을 학습할 수 있다.</p>
 <p><strong>손실 함수.</strong> 표준 이진 교차 엔트로피(BCE):</p>
-<pre><code>   ℒ_gate = − E[ y · log p_send + (1 − y) · log(1 − p_send) ]
+<pre class="codeblock"><code>   ℒ_gate = − E[ y · log p_send + (1 − y) · log(1 − p_send) ]
 </code></pre>
 <p><strong>추론 시 임계.</strong> 게이트 출력 확률에 <code>τ = 0.4</code> 임계를 적용하여 전송 여부를 결정하되, 하드 예산 <code>B</code>를 넘지 않도록 잔여 예산이 소진되면 강제로 게이팅을 닫는다.</p>
 <h3>3.3 기저 협력 VLN 에이전트 아키텍처</h3>
 <p>각 에이전트는 다음 구성요소로 이뤄진 <strong>seq2seq VLN 정책</strong>이다:</p>
-<pre><code>   파노라마 RGB (36방향)          자연어 지시
+<pre class="diagram"><code>   파노라마 RGB (36방향)          자연어 지시
         │                            │
    ┌────▼─────────┐          ┌──────▼───────┐
    │ CLIP ViT-B/32│(frozen)  │ CLIP 텍스트  │(frozen)
@@ -284,21 +370,21 @@ footer {
 <li><strong>탐색 잡음</strong>: 이진 게이팅 공간에서 탐색이 비효율적이다.</li>
 </ol>
 <p>Hindsight gating은 이 문제를 <strong>사후 라벨로 지도학습 분류 문제로 변환</strong>하여 우회한다:</p>
-<pre><code>   REINFORCE:  희소 보상 + 샘플링 → 고분산 경사 (불안정)
+<pre class="codeblock"><code>   REINFORCE:  희소 보상 + 샘플링 → 고분산 경사 (불안정)
         ↓ 변환
    Hindsight:  전체 에피소드 사후 분석 → 조밀한 이진 라벨 → BCE (안정)
 </code></pre>
 <p>즉 &quot;실패 후 되짚어보니 어느 스텝이 통신으로 구제 가능했나&quot;를 <strong>오프라인 궤적 분석으로 조밀하게</strong> 라벨링함으로써, 탐색 잡음 없이 안정적인 경사 기반 학습을 가능케 한다. 이는 강화학습의 신용 할당 문제를 지도학습의 명시적 라벨로 치환한 <strong>문제 재구성(problem reformulation)</strong> 의 전형적 사례다.</p>
 <h3>3.5 예산 제약 게이팅의 조합최적화적 해석</h3>
 <p><code>∑_t g_i(t) ≤ B</code> 라는 하드 제약 하에서 &quot;어느 스텝에 전송 슬롯을 배분할 것인가&quot;는 본질적으로 <strong>0/1 배낭 문제(knapsack)</strong> 의 구조를 갖는다. 각 스텝 <code>t</code>에 전송하면 얻는 한계 효용(marginal utility)을 <code>u_i(t)</code>, 전송 비용을 1(슬롯 1개)이라 하면 이상적 목적은:</p>
-<pre><code>   max_{g}   ∑_t  u_i(t) · g_i(t)
+<pre class="codeblock"><code>   max_{g}   ∑_t  u_i(t) · g_i(t)
    s.t.      ∑_t  g_i(t) ≤ B,   g_i(t) ∈ {0,1}
 </code></pre>
 <p>이 관점에서 게이트 <code>π_gate</code>는 각 스텝의 한계 효용 <code>u_i(t)</code>를 은닉상태로부터 <strong>암묵적으로 추정</strong>하고, 잔여 예산 <code>b_rem</code>을 조건으로 삼아 상위-B개 슬롯을 그리디하게 선택하는 정책으로 볼 수 있다. <code>b_rem</code>을 입력에 넣는 설계가 바로 이 배낭 구조를 반영한다 — 예산이 넉넉하면 낮은 효용의 스텝에도 전송하고, 예산이 빠듯하면 최고 효용 스텝만 고른다.</p>
 <p>여기서 논문의 핵심 발견이 조합최적화적으로 재해석된다: <strong>한계 효용 <code>u_i(t)</code>가 시간에 대해 단조 감소(monotonically decreasing)</strong> 한다는 것이다. 즉 <code>u_i(0) &gt; u_i(1) &gt; ... &gt; u_i(T)</code>. 배낭의 그리디 해가 &quot;가치가 큰 항목부터 담기&quot;이므로, 최적 게이트는 자연히 <strong>초반 스텝에 슬롯을 몰아준다</strong>. 이것이 82.6% 조기 발화의 최적화 이론적 근거다. 왜 효용이 초반에 큰가? — 순환 은닉상태의 복리 전파(§8.4) 때문이다.</p>
 <h3>3.6 왜 엔트로피 기반 게이팅이 실패하는가</h3>
 <p>엔트로피 기반 휴리스틱은 스텝 <code>t</code>의 행동 분포 <code>p_a(t)</code>의 엔트로피 <code>H(p_a(t))</code>가 높을 때(=불확실할 때) 전송한다:</p>
-<pre><code>   g_entropy(t) = 𝟙[ H(p_a(t)) &gt; 임계 ]
+<pre class="codeblock"><code>   g_entropy(t) = 𝟙[ H(p_a(t)) &gt; 임계 ]
 </code></pre>
 <p>이 휴리스틱의 암묵적 가정은 &quot;불확실성 = 통신 필요&quot;다. 그러나 본 논문의 Table 3은 엔트로피 게이팅의 누적 정렬 이득이 +0.017로, <strong>통신 없음(+0.016)과 거의 차이가 없고 random(+0.020)보다도 낮음</strong>을 보인다. 왜인가?</p>
 <ul>
@@ -307,9 +393,9 @@ footer {
 </ul>
 <p>이는 통신 게이팅 문헌에 대한 실증적 기여다 — 불확실성 기반 통신이라는 널리 쓰이는 직관이, 순환 정책 구조에서는 최적이 아닐 수 있음을 보여준다.</p>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <p>전체 파이프라인은 학습(3단계)과 추론(예산 제약 실행)으로 나뉜다.</p>
-<pre><code>════════════════════ 학습(Training) ════════════════════
+<pre class="diagram"><code>════════════════════ 학습(Training) ════════════════════
 
   R2R (Matterport3D 72 scans)
         │
@@ -347,7 +433,7 @@ footer {
 </code></pre>
 <p><strong>데이터 흐름의 핵심.</strong> 통신(<code>c_j(t)</code>)은 GRU 은닉상태 <code>h_i(t)</code> 갱신에 융합되므로, <strong>한 번의 초기 통신이 이후 모든 스텝의 은닉상태에 순환적으로 전파</strong>된다. 이 구조적 특성이 §5의 &quot;조기 동기화&quot; 발견을 낳는 메커니즘적 근거다 — 늦게 받은 정보는 남은 스텝이 적어 복리 효과를 누릴 시간이 없다.</p>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
 <ul>
 <li><strong>Room-to-Room (R2R)</strong> on <strong>Matterport3D</strong> (72 실내 스캔).</li>
@@ -450,7 +536,7 @@ footer {
 </tbody></table></div>
 <p>학습된 게이트는 전송당 정렬 이득에서 <strong>random 대비 +260%, entropy 기반 대비 +320%</strong> 우월하며(논문 주장), 매 스텝 통신(+0.078)에 근접한 +0.072를 <strong>단 B=3 예산으로</strong> 달성한다.</p>
 <p><strong>예산 B에 따른 해석 (B∈{1,3,5}).</strong> 논문은 예산을 1·3·5로 변주한다. 세 지표(SR/정렬)를 종합하면 다음 경향이 읽힌다:</p>
-<pre><code>   B=1:  전송이 사실상 step 0 한 곳으로 강제됨 → 조기 동기화가 극단화.
+<pre class="codeblock"><code>   B=1:  전송이 사실상 step 0 한 곳으로 강제됨 → 조기 동기화가 극단화.
          한 슬롯을 초반에 쓰는 것이 이미 정렬 이득의 대부분을 확보.
    B=3:  주 실험. 초반 3스텝(0–2)에 82.6% 집중 → always(무제한)와
          동등 성능. &quot;수익 체감(diminishing returns)&quot;의 무릎(knee) 지점.
@@ -462,7 +548,7 @@ footer {
 <h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
 <p>본 논문은 <strong>실 로봇 실험을 포함하지 않는다.</strong> 모든 평가는 R2R/Matterport3D 시뮬레이션(val_seen/unseen)에서 수행되었다. 이는 워크숍 분석 논문의 범위 한계로, 향후 실 로봇 팀(대역폭 실측 하)에서의 검증이 남은 과제다. (본 코퍼스의 실 로봇 검증 VLN인 AwareVLN·StreamVLN과 대비되는 지점.)</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <ol>
 <li><p><strong>문제 정식화의 참신성</strong>: &quot;대역폭 제약 협력 VLN&quot;을 에피소드당 하드 전송 예산 <code>∑g≤B</code>로 명시적으로 정의. &quot;무엇을 통신&quot;이 아니라 &quot;<strong>언제</strong> 통신&quot;에 초점을 맞춘 최초 계열의 정식화.</p>
 </li>
@@ -478,7 +564,7 @@ footer {
 </li>
 </ol>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <p><strong>주요 하이퍼파라미터:</strong></p>
 <div class="table-wrap"><table>
 <thead>
@@ -533,7 +619,7 @@ footer {
 </tr>
 </tbody></table></div>
 <p><strong>코드베이스 구조</strong> (github.com/AravG13/bandwidth-constrained-cooperative-vln, Python 100%):</p>
-<pre><code>├── models/                     # 핵심 신경망 아키텍처
+<pre class="diagram"><code>├── models/                     # 핵심 신경망 아키텍처
 │   └── (CrossModalAttn, GRU, CommGate 모듈)
 ├── utils/                      # 항해 유틸리티
 ├── r2r_dataset.py             # R2R 데이터 로더
@@ -551,7 +637,7 @@ footer {
 </ul>
 <p><strong>코드 분석 관점.</strong> <code>hidden_state_analysis.py</code>가 논문의 핵심 발견(§5.3 Table 3)을 재현하는 스크립트라는 점이 중요하다 — 저자들이 &quot;조기 동기화&quot; 주장을 은닉상태 정렬이라는 <strong>측정 가능한 대리 지표</strong>로 조작화(operationalize)했음을 보여준다. 이는 분석 논문으로서의 방법론적 엄밀성을 뒷받침한다.</p>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 (Scalability)</h3>
 <ul>
 <li><strong>에이전트 수</strong>: 현재 N=2 비대칭 배정에 국한. N&gt;2로 확장 시, 사후 라벨링 규칙 <code>𝟙[â_j=a*_j]</code>을 &quot;적어도 한 파트너가 옳음&quot;으로 일반화해야 하며, 브로드캐스트 대상 선택(누구에게 보낼까) 문제가 추가된다.</li>
@@ -574,17 +660,17 @@ footer {
 </ul>
 <h3>8.4 순환 은닉상태 정렬 메커니즘의 이론적 해부</h3>
 <p>논문의 반직관적 발견을 관통하는 인과 메커니즘은 <strong>&quot;초기 통신이 GRU 은닉상태에 접지된 궤적 표현을 주입하면, 그것이 이후 스텝에 걸쳐 지속·복리(compound)된다&quot;</strong> 는 것이다. 이를 GRU 갱신식 관점에서 풀어보면:</p>
-<pre><code>   h_i(t) = GRU( h_i(t-1),  [x_i(t) ; 수신 c_j(t)·g_j(t)] )
+<pre class="codeblock"><code>   h_i(t) = GRU( h_i(t-1),  [x_i(t) ; 수신 c_j(t)·g_j(t)] )
 </code></pre>
 <p>여기서 스텝 <code>t=0</code>에 파트너 통신 <code>c_j(0)</code>이 융합되면 <code>h_i(0)</code>이 정답 궤적 방향으로 정렬된다. GRU의 순환 구조상 <code>h_i(0)</code>은 <code>h_i(1)</code>, <code>h_i(1)</code>은 <code>h_i(2)</code>, ... 로 전파되므로, <strong>단 한 번의 초기 정렬이 이후 T개 스텝 전부의 은닉상태에 잔류</strong>한다. 반면 스텝 <code>t=T-1</code>(후반)에 받은 통신은 <code>h_i(T-1)</code>, <code>h_i(T)</code>에만 영향을 미쳐 잔류 구간이 짧다.</p>
 <p>이를 한계 효용 <code>u_i(t)</code>의 근사로 정량화하면:</p>
-<pre><code>   u_i(t)  ∝  (남은 스텝 수) × (스텝당 정렬 잔류율 γ)
+<pre class="codeblock"><code>   u_i(t)  ∝  (남은 스텝 수) × (스텝당 정렬 잔류율 γ)
            ≈  γ · (T − t)          (γ: GRU 망각률 보정 계수, 0&lt;γ&lt;1)
 </code></pre>
 <p>즉 <code>u_i(t)</code>는 <code>(T−t)</code>에 비례하여 <strong>시간에 대해 단조 감소</strong>한다(§3.5의 가정과 일치). 이것이 Table 3에서 학습 게이트(+0.072)가 always(+0.078)에 근접하면서도 random(+0.020)·entropy(+0.017)를 압도하는 이유의 메커니즘적 설명이다 — 학습 게이트는 <code>u</code>가 가장 큰 초반 슬롯을 정확히 포착한다.</p>
 <p><strong>확신 발화의 역설.</strong> 왜 게이트는 confidence가 높을 때(0.453&gt;0.413) 발화하는가? 불확실할 때가 아니라 확신할 때 통신하는 것은, 에이전트가 <strong>자신의 접지 표현이 신뢰할 만할 때 그것을 파트너에게 전파</strong>하는 것이 팀 전체에 이득이기 때문이다. 확신에 찬 초기 표현은 &quot;좋은 씨앗&quot;이고, 이 씨앗을 GRU 순환으로 복리 성장시키는 것이 조기 동기화의 본질이다. 불확실한 표현을 뿌리면 잡음이 복리로 증폭될 위험이 있다. 이 해석은 다중 에이전트 통신 설계에 시사점을 준다: <strong>&quot;내가 헷갈릴 때 도움을 청하라&quot;가 아니라 &quot;내가 확신할 때 먼저 나눠라&quot;</strong>.</p>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <p>본 논문은 코퍼스 내 기존 VLN 리뷰들과 <strong>근본적으로 다른 축</strong>에 놓인다. 대부분의 선행 VLN은 <strong>단일 에이전트의 성능·추론 능력</strong>을 겨루는 반면, 본 논문은 <strong>다중 에이전트의 통신 효율·타이밍</strong>을 분석한다.</p>
 <div class="table-wrap"><table>
@@ -674,7 +760,7 @@ footer {
 <h3>9.4 연구 방향성 평가</h3>
 <p>협력·다중 에이전트 VLN은 코퍼스에서 희소한 영역이다. 본 논문은 이 방향의 <strong>개척적 분석</strong>으로서, 단일 에이전트 성능 경쟁이 포화된 VLN 분야에 &quot;통신 타이밍&quot;이라는 새 축을 제시한다. 강력한 백본(StreamVLN류 Video-LLM)에 조기 동기화 원칙을 결합하면, 성능과 통신 효율을 동시에 잡는 실용적 협력 VLN으로 발전할 잠재력이 있다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li>Gupta, A., Yakolli, N., Gautam, A. &quot;Early to Share, Late to Save: Synchronisation-Driven Communication Gating in Bandwidth-Constrained Cooperative VLN.&quot; IJCAI 2026 GLOW Workshop (to appear in Springer CCIS). arXiv:2607.08504.</li>
 <li>Anderson, P. et al. &quot;Vision-and-Language Navigation: Interpreting Visually-Grounded Navigation Instructions in Real Environments (R2R).&quot; CVPR 2018.</li>
@@ -685,15 +771,110 @@ footer {
 <li>Wei, M. et al. &quot;StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling.&quot; ICRA 2026. (코퍼스 내 비교 대상)</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p><strong>혁신성.</strong> 본 논문의 혁신은 성능 수치가 아니라 <strong>문제 정식화와 통찰</strong>에 있다. &quot;대역폭 제약 협력 VLN&quot;이라는 새 문제를 하드 전송 예산으로 정의하고, hindsight gating이라는 지도학습 게이트로 &quot;언제 통신할까&quot;를 학습한 뒤, <strong>&quot;Early to Share, Late to Save&quot;</strong>라는 반직관적 원칙을 실증했다 — 통신은 에피소드 초반(82.6% at steps 0–2)에, 그리고 에이전트가 <strong>확신에 찰 때</strong>(0.453&gt;0.413) 몰리며, 이는 순환 은닉상태의 복리적 정렬로 설명된다.</p>
 <p><strong>실용적 의의.</strong> 단 B=3의 전송으로 무제한 통신과 동등한 성능(SR 8.9%)을 달성하고 random 대비 +260% 정렬 효율을 보인 것은, 대역폭이 귀한 실 로봇 팀(수색·구조, 군집, 창고)에서 통신 스케줄러를 설계할 때 &quot;초반에 슬롯을 몰아쓰라&quot;는 구체적 지침을 준다. 엔트로피 기반 &quot;불확실할 때 통신&quot; 휴리스틱이 실제로는 비효율적이라는 실증은 이 분야 설계 관행을 재고하게 만든다.</p>
 <p><strong>향후 연구 방향.</strong> (1) 강력한 VLM 백본에서 조기 동기화의 일반성 검증, (2) 실 로봇·실 대역폭 검증, (3) N&gt;2 확장 및 수신자 선택 게이팅, (4) teacher-free 사후 라벨링. 절대 성능이 낮다는 명백한 한계에도 불구하고, 본 논문은 포화된 단일 에이전트 VLN 경쟁에 <strong>통신 타이밍</strong>이라는 신선한 분석 축을 도입한 개척적 워크숍 기여로 평가된다.</p>
 <hr>
 <p><em>리뷰 작성: 2026-07-11 | 트랙: VLN | 발표처: IJCAI 2026 GLOW Workshop | 코드: ✅ 공개</em></p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="Early to Share, Late to Save: Synchronisation-Driven Communication Gating in Bandwidth-Constrained Cooperative VLN: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

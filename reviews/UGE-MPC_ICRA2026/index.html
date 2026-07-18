@@ -6,133 +6,220 @@
 <meta name="color-scheme" content="light dark">
 <title>Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2604.12149">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">ICRA 2026</div>
-    <h1>Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2604.12149">arXiv:2604.12149</a></span>
-      <span>리뷰 2026-04-25</span>
-      <span>54분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">UGE-MPC_ICRA2026</span>
     </div>
+    <h1 class="doc-title">UGE-MPC: 불확실성 유도 탐색적 궤적 최적화를 통한 샘플링 기반 모델 예측 제어</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">ICRA 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2604.12149">2604.12149</a></span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://ogpoyrazoglu.github.io/cuniform_sampling/">ogpoyrazoglu.github.io/cuniform_sampling/</a> (코드 공개 예정)</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-04-25</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">49KB · 약 54분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 13개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">9</span><span class="toc-title">5 샘플링 기반 MPC 연구 생태계에서의 위치</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-11"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-12"><span class="toc-num">12</span><span class="toc-title">부록: 수식 상세 및 구현 노트 (Appendix)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>UGE-MPC: 불확실성 유도 탐색적 궤적 최적화를 통한 샘플링 기반 모델 예측 제어 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control</li>
@@ -156,10 +243,10 @@ footer {
 <p>DeCoNav의 핵심 통찰: <strong>궤적 다양성은 행동 공간이 아닌 구성 공간(configuration space)에서 측정되어야 한다.</strong> 로봇의 동역학이 동일한 행동 변화라도 완전히 다른 궤적을 만들 수 있기 때문에, 행동 공간에서의 다양성 측정은 실제 궤적 다양성을 정확히 반영하지 못한다.</p>
 <p>UGE-TO는 궤적을 <strong>불확실성 타원체(Uncertainty Ellipsoids)로 유도된 확률 분포</strong>로 표현하고, 이들 사이의 <strong>헬링거 거리(Hellinger Distance)</strong>를 최대화하여 구성 공간에서의 진정한 다양성을 달성한다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. MPPI의 근본적 한계: 로컬 미니마 수렴</h4>
-<pre><code>MPPI 동작 원리와 한계:
+<pre class="codeblock"><code>MPPI 동작 원리와 한계:
 
 입력: 명목 제어 시퀀스 Ū = [u_0, ..., u_{T-1}]
       + 노이즈 분산 Sigma_u
@@ -176,7 +263,7 @@ footer {
   - 행동 공간 섭동 ≠ 궤적 공간 다양성 (동역학 무시)
 </code></pre>
 <p><strong>구체적 실패 시나리오</strong>:</p>
-<pre><code>좁은 통로 (concave obstacle) 상황:
+<pre class="diagram"><code>좁은 통로 (concave obstacle) 상황:
 
         목표
          |
@@ -199,7 +286,7 @@ UGE-MPC: 불확실성 타원체로 표현된 궤적들이
           → 더 나은 명목 솔루션 선택
 </code></pre>
 <h4>B. 기존 다양성 강화 방법들의 한계</h4>
-<pre><code>방법 비교:
+<pre class="codeblock"><code>방법 비교:
 
 MoG-MPPI (Mixture of Gaussians):
   ✅ 다중 모드 샘플링 가능
@@ -220,7 +307,7 @@ UGE-TO의 해결:
   ✅ 그래디언트 불필요 (순수 샘플링 기반)
 </code></pre>
 <h4>C. 동역학 인식 다양성의 필요성</h4>
-<pre><code>예시: 동일한 행동 섭동, 다른 궤적
+<pre class="codeblock"><code>예시: 동일한 행동 섭동, 다른 궤적
 
 시스템: 자전거 모델 (Bicycle Model)
         x_{t+1} = f(x_t, u_t) (비선형)
@@ -239,7 +326,7 @@ UGE-TO의 해결:
 </code></pre>
 <h3>2.2 핵심 해결책</h3>
 <p>UGE-TO의 3단계 해결 전략:</p>
-<pre><code>해결 전략:
+<pre class="codeblock"><code>해결 전략:
 
 1. 불확실성 타원체 표현:
    → 각 제어 시퀀스에 대해 선형화된 동역학으로 
@@ -256,10 +343,10 @@ UGE-TO의 해결:
    → 글로벌 다양성 + 로컬 수렴의 시너지
 </code></pre>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 시스템 동역학 모델 (System Dynamics Model)</h3>
 <p>UGE-TO는 다음 확률론적 동역학 시스템에 적용된다:</p>
-<pre><code>상태 전이 방정식 (Eq. 1):
+<pre class="codeblock"><code>상태 전이 방정식 (Eq. 1):
   x_{t+1} = f(x_t, u_t) + epsilon_t
 
   여기서:
@@ -279,7 +366,7 @@ UGE-TO의 해결:
   U^(i) = Ū + eta^(i),   eta^(i) ~ N(0, Sigma_u)
 </code></pre>
 <p><strong>실제 구현에서의 동역학 모델</strong> (실험 설정):</p>
-<pre><code>자전거 모델 (Bicycle Kinematic Model):
+<pre class="codeblock"><code>자전거 모델 (Bicycle Kinematic Model):
   상태: x = [px, py, theta]  (위치 x, 위치 y, 방향각)
   제어: u = [v, delta]  (속도, 조향각)
 
@@ -298,7 +385,7 @@ UGE-TO의 해결:
 <p>UGE-TO의 핵심 아이디어: <strong>각 제어 시퀀스 U^(i)를 확률 분포 T^(i)로 표현</strong></p>
 <h4>3.2.1 공분산 전파 (Covariance Propagation)</h4>
 <p>비선형 동역학을 현재 궤적 주변에서 선형화:</p>
-<pre><code>공분산 전파 방정식 (Eq. 5):
+<pre class="codeblock"><code>공분산 전파 방정식 (Eq. 5):
   Sigma_{t+1}^(i) = A_t^(i) * Sigma_t^(i) * (A_t^(i))^T + Q
 
   여기서:
@@ -312,7 +399,7 @@ UGE-TO의 해결:
 <p>이 전파는 <strong>제어 입력의 동역학적 효과</strong>를 공분산에 반영한다. 같은 크기의 행동 섭동이라도 동역학 자코비안 A_t에 따라 공분산이 다르게 증폭/감쇠된다.</p>
 <h4>3.2.2 궤적 분포 정의</h4>
 <p>전체 궤적을 하나의 가우시안 분포로 표현 (Eq. 6):</p>
-<pre><code>T^(i) = N(mu^(i), Sigma^(i))
+<pre class="codeblock"><code>T^(i) = N(mu^(i), Sigma^(i))
 
 mu^(i)    = [x_0^(i)^T, x_1^(i)^T, ..., x_T^(i)^T]^T
               (예측된 평균 궤적의 상태 시퀀스 연결)
@@ -326,7 +413,7 @@ Sigma^(i) = blockdiag(Sigma_0^(i), Sigma_1^(i), ..., Sigma_T^(i))
 <li><strong>비용 효율적</strong>: 블록 대각 구조로 고차원에서도 계산 효율적</li>
 <li><strong>물리적 의미</strong>: 타원체 크기가 각 시간 스텝에서의 궤적 불확실성을 나타냄</li>
 </ul>
-<pre><code>시각화 예시:
+<pre class="diagram"><code>시각화 예시:
 
 시간 t=0: 작은 원 (초기 불확실성 = Q)
 시간 t=2: 중간 타원 (동역학으로 전파된 불확실성)
@@ -342,7 +429,7 @@ Sigma^(i) = blockdiag(Sigma_0^(i), Sigma_1^(i), ..., Sigma_T^(i))
 <p>두 궤적 분포 간의 거리를 Hellinger 거리로 측정:</p>
 <h4>3.3.1 헬링거 거리 정의</h4>
 <p>두 가우시안 분포 사이의 제곱 Hellinger 거리 (Eq. 8):</p>
-<pre><code>H²(T^(i), T^(j)) = 1 - |Sigma^(i)|^{1/4} * |Sigma^(j)|^{1/4}
+<pre class="diagram"><code>H²(T^(i), T^(j)) = 1 - |Sigma^(i)|^{1/4} * |Sigma^(j)|^{1/4}
                        ─────────────────────────────────────────
                               |Sigma_bar_{ij}|^{1/2}
                    * exp( -1/8 * Delta_mu^T * Sigma_bar_{ij}^{-1} * Delta_mu )
@@ -386,7 +473,7 @@ Sigma^(i) = blockdiag(Sigma_0^(i), Sigma_1^(i), ..., Sigma_T^(i))
 <td>강함</td>
 </tr>
 </tbody></table></div>
-<pre><code>수식적 비교:
+<pre class="codeblock"><code>수식적 비교:
 
 KL(P||Q) = integral [ p(x) log(p(x)/q(x)) ]
            → q(x)≈0인 영역에서 log(p/q) → ∞ → 수치 불안정
@@ -396,7 +483,7 @@ H²(P,Q) = 1 - integral [sqrt(p(x)*q(x))]
 </code></pre>
 <h4>3.3.2 분리 점수 및 최선 후보 선택</h4>
 <p>각 궤적 i에 대해 M개의 대안 후보를 생성하고, 현재 다른 궤적들로부터 가장 멀리 떨어진 후보 선택:</p>
-<pre><code>누적 분리 점수 (Eq. 9):
+<pre class="codeblock"><code>누적 분리 점수 (Eq. 9):
   h^(i,m) = sum_{j ≠ i}  H²(T^(i,m), T^(j))
 
   여기서:
@@ -411,7 +498,7 @@ H²(P,Q) = 1 - integral [sqrt(p(x)*q(x))]
       → 구성 공간에서 최대 커버리지 달성
 </code></pre>
 <h3>3.4 UGE-TO 알고리즘 (Algorithm 1)</h3>
-<pre><code>알고리즘: UGE-TO (Uncertainty Guided Exploratory Trajectory Optimization)
+<pre class="codeblock"><code>알고리즘: UGE-TO (Uncertainty Guided Exploratory Trajectory Optimization)
 
 입력: 명목 제어 Ū, 호라이즌 T, N 궤적, M 후보/궤적,
       공분산 Sigma_u, Q, K 반복 횟수
@@ -440,7 +527,7 @@ for k = 1 to K:
 출력: N개 다양화된 제어 시퀀스 {U^(1), ..., U^(N)}
 </code></pre>
 <p><strong>시간 복잡도 분석</strong>:</p>
-<pre><code>루프당 계산:
+<pre class="codeblock"><code>루프당 계산:
   - M개 후보 생성: O(M * T * n²)  [공분산 전파]
   - Hellinger 거리 계산: O(N * T * n³)  [행렬식, 역행렬]
   - N개 궤적, K 반복: O(K * N * M * T * n³)
@@ -453,7 +540,7 @@ for k = 1 to K:
 </code></pre>
 <h3>3.5 UGE-MPC: 통합 모델 예측 제어 (Algorithm 2)</h3>
 <p>UGE-TO를 샘플링 기반 MPC에 통합하여 되풀이 지평선(receding horizon) 제어 실현:</p>
-<pre><code>알고리즘: UGE-MPC
+<pre class="codeblock"><code>알고리즘: UGE-MPC
 
 입력: 명목 Ū, 호라이즌 T, 정제 파라미터 (N, M),
       MPPI 샘플 예산 L, 공분산, 온도 lambda
@@ -483,7 +570,7 @@ for k = 1 to K:
 출력: 연속적인 제어 입력 (실시간 MPC)
 </code></pre>
 <p><strong>UGE-MPC의 두 단계 역할 분리</strong>:</p>
-<pre><code>글로벌-로컬 분리:
+<pre class="diagram"><code>글로벌-로컬 분리:
 ┌─────────────────────────────────────────────┐
 │ UGE-TO (글로벌 탐색)                         │
 │  - N개 다양화된 명목 궤적 생성                │
@@ -500,7 +587,7 @@ for k = 1 to K:
 └─────────────────────────────────────────────┘
 </code></pre>
 <h3>3.6 비용 함수 설계 (Cost Function)</h3>
-<pre><code>비용 함수 (Eq. 14):
+<pre class="codeblock"><code>비용 함수 (Eq. 14):
   J(tau, U) = phi(x_T) + sum_{t=0}^{T-1} [ lambda_u * C_u(u_t) + C_state(x_t, x_G) ]
 
 구성:
@@ -519,9 +606,9 @@ for k = 1 to K:
   혼잡 MPC:   lambda_obs=1000
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <h3>4.1 전체 파이프라인</h3>
-<pre><code>UGE-MPC 시스템 아키텍처:
+<pre class="diagram"><code>UGE-MPC 시스템 아키텍처:
 
 [환경/센서]
      │ 상태 x_t (위치, 방향)
@@ -569,7 +656,7 @@ for k = 1 to K:
 └────────────────────────────────────────────────────────┘
 </code></pre>
 <h3>4.2 실세계 시스템 구성</h3>
-<pre><code>실제 실험 시스템 구성:
+<pre class="diagram"><code>실제 실험 시스템 구성:
                                      
   ┌──────────────────────────────────┐
   │         1/5 스케일 트럭          │
@@ -596,10 +683,10 @@ for k = 1 to K:
   모터 제어 명령 → 다음 스텝
 </code></pre>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 및 환경 (Datasets / Environments)</h3>
 <p><strong>시뮬레이션 환경</strong>:</p>
-<pre><code>환경 1: 장애물 없는 개방 공간
+<pre class="codeblock"><code>환경 1: 장애물 없는 개방 공간
   - 8m × 8m
   - 6개 시작-목표 쌍 (다양한 방향)
   - 목적: 수렴 속도 측정
@@ -616,12 +703,12 @@ for k = 1 to K:
   - 목적: 실시간 MPC 성능 측정
 </code></pre>
 <p><strong>실제 실험 환경</strong>:</p>
-<pre><code>  - 20m × 20m 실내 공간
+<pre class="codeblock"><code>  - 20m × 20m 실내 공간
   - 오목 다각형 장애물 (로컬 미니마 설계)
   - 1/5 스케일 트럭 + Slamtec R2 LiDAR
 </code></pre>
 <h3>5.2 평가 지표 (Evaluation Metrics)</h3>
-<pre><code>주요 지표:
+<pre class="codeblock"><code>주요 지표:
 
 1. 목표 도달 시간 (Goal-Reaching Time):
    → 성공 시 목표까지 걸린 시간 (초)
@@ -755,7 +842,7 @@ for k = 1 to K:
 </tbody></table></div>
 <p><em>실제 환경에서 MPPI 완전 실패, UGE-MPC 100% 성공 + Log-MPPI보다 빠름</em></p>
 <h3>5.4 리얼월드 실험 (Real-World Experiments)</h3>
-<pre><code>실험 상세:
+<pre class="codeblock"><code>실험 상세:
 
 플랫폼:
   로봇: 1/5 스케일 RC 트럭 (자전거 모델 근사)
@@ -788,7 +875,7 @@ for k = 1 to K:
   - UGE-MPC의 다양한 명목 탐색이 실제 불확실성 하에서 더 강건한 경로 발견
 </code></pre>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>6.1 구성 공간에서의 궤적 다양성 정의</h3>
 <p><strong>기여 1</strong>: 행동 공간이 아닌 구성 공간에서 궤적 다양성을 측정하는 최초의 방법</p>
 <p>기존 방법들(MoG-MPPI, SV-MPC)은 행동 공간에서 다양성을 확보하려 했지만, 동역학이 행동을 궤적으로 변환하는 과정에서 다양성이 손실되거나 왜곡된다. UGE-TO는 불확실성 타원체를 통해 동역학의 영향을 직접 궤적 표현에 반영한다.</p>
@@ -802,9 +889,9 @@ for k = 1 to K:
 <p><strong>기여 4</strong>: 총 샘플 예산을 증가시키지 않고도 탐색 효율을 72.1% 향상</p>
 <p>같은 계산 예산(2048 샘플) 내에서 UGE-TO의 선택적 비용 평가(전체 생성 후 최선만 평가)로 실제 비용 계산 횟수를 최소화하면서 탐색 커버리지를 극대화한다.</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 핵심 하이퍼파라미터</h3>
-<pre><code>공통 파라미터:
+<pre class="codeblock"><code>공통 파라미터:
   예측 호라이즌: T = 4초 (80 스텝, dt=0.05s)
   자전거 모델 속도: v = 0.5 m/s
   축간 거리: L = 1.0m
@@ -833,7 +920,7 @@ UGE-MPC 파라미터:
   LiDAR 업데이트: 10 Hz
 </code></pre>
 <h3>7.2 계산 복잡도</h3>
-<pre><code>UGE-TO 비용 평가 횟수:
+<pre class="codeblock"><code>UGE-TO 비용 평가 횟수:
   생성된 후보: N × M × K = 6 × 128 × 8 = 6,144
   실제 비용 평가: N × K = 6 × 8 = 48 (선택된 후보만)
   MPPI 비용 평가: L = 126
@@ -849,10 +936,10 @@ UGE-MPC 파라미터:
   → 매우 효율적 계산 (역행렬 불필요)
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 UGE-TO의 이론적 특성</h3>
 <h4>수렴 보장</h4>
-<pre><code>UGE-TO는 명시적인 수렴 보장을 제공하지는 않지만,
+<pre class="codeblock"><code>UGE-TO는 명시적인 수렴 보장을 제공하지는 않지만,
 다음 특성이 실용적 수렴을 뒷받침한다:
 
 1. 단조 개선 (Monotonic Improvement):
@@ -868,7 +955,7 @@ UGE-MPC 파라미터:
    → M = 128이 실험적으로 충분함을 확인
 </code></pre>
 <h4>Hellinger 거리의 기하학적 해석</h4>
-<pre><code>Hellinger 거리의 기하학적 의미:
+<pre class="codeblock"><code>Hellinger 거리의 기하학적 의미:
 
 두 가우시안 T^(i) = N(mu^i, Sigma^i), T^(j) = N(mu^j, Sigma^j):
 
@@ -904,7 +991,7 @@ Bhattacharyya 거리:
 <li><strong>학습 기반 자코비안</strong>: 학습된 모델로 블랙박스 동역학에도 적용 가능한 확장</li>
 </ol>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -1030,7 +1117,7 @@ Bhattacharyya 거리:
 <li><strong>코드 미완전 공개</strong>: 프로젝트 페이지 &quot;Details Coming Soon&quot; 상태</li>
 </ol>
 <h3>9.3 실적용 가능성 평가</h3>
-<pre><code>적용 시나리오별 평가:
+<pre class="codeblock"><code>적용 시나리오별 평가:
 
 자율 주행 (저속 로봇):
   ✅ 최적: 자전거 모델과 완벽히 호환, 10Hz 실시간 가능
@@ -1057,7 +1144,7 @@ Bhattacharyya 거리:
   ✅ 자전거/unicycle 모델 적합
 </code></pre>
 <h3>9.4 연구 방향성 평가</h3>
-<pre><code>기존 Planner 리뷰 논문들과 비교한 UGE-MPC의 위치:
+<pre class="codeblock"><code>기존 Planner 리뷰 논문들과 비교한 UGE-MPC의 위치:
 
 안전성 vs 탐색 효율:
   GPU-SLS, SANDO, HEIGHT → 안전 보장 우선
@@ -1079,8 +1166,8 @@ Bhattacharyya 거리:
               고차원 확장성 미검증, 안전 보장 없음 → 개선 여지)
 </code></pre>
 <hr>
-<h2>9.5 샘플링 기반 MPC 연구 생태계에서의 위치</h2>
-<pre><code>MPPI 계열 연구의 발전 흐름:
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="9. 5 샘플링 기반 MPC 연구 생태계에서의 위치">9.5 샘플링 기반 MPC 연구 생태계에서의 위치</h2>
+<pre class="codeblock"><code>MPPI 계열 연구의 발전 흐름:
 
 [원점] MPPI (Williams et al., ICRA 2017)
   단일 가우시안 샘플링, 중요도 가중치 업데이트
@@ -1106,7 +1193,7 @@ UGE-MPC의 위치:
   → MPPI 생태계의 표준 &quot;다양성 강화 레이어&quot;로 자리잡을 잠재력
 </code></pre>
 <h3>9.6 Planner 트랙 기존 리뷰와의 상세 비교</h3>
-<pre><code>방법 비교 심층 분석:
+<pre class="codeblock"><code>방법 비교 심층 분석:
 
 TRG-Planner (RA-L 2025):
   목적: 비구조 지형에서 경로 계획
@@ -1166,7 +1253,7 @@ PRoID (arxiv 2026):
   차이: 완전히 다른 문제 도메인 (통신 vs. 경로)
 </code></pre>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">9. 5 샘플링 기반 MPC 연구 생태계에서의 위치 →</a></div><h2 id="sec-10" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li>Williams et al., &quot;Information Theoretic MPC for Model-Based Reinforcement Learning,&quot; ICRA 2017 (MPPI 원본)</li>
 <li>Power &amp; Berenson, &quot;Variational Inference MPC for Bayesian Model-Based Reinforcement Learning,&quot; CoRL 2022</li>
@@ -1182,7 +1269,7 @@ PRoID (arxiv 2026):
 <li>BTIT*: Wang et al., &quot;Optimal Kinodynamic Motion Planning Through Anytime Bidirectional Heuristic Search,&quot; arXiv 2026</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">10. 참고 문헌 →</a></div><h2 id="sec-11" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p>UGE-MPC는 <strong>샘플링 기반 궤적 최적화에서 다양성의 진정한 의미</strong>를 재정의했다. 행동 공간이 아닌 구성 공간에서의 다양성 측정, 불확실성 타원체를 통한 동역학 인식 표현, Hellinger 거리의 수학적 안정성 — 이 세 가지 요소가 결합되어 기존 MPPI의 로컬 미니마 문제를 근본적으로 해결한다.</p>
 <p><strong>혁신성 평가</strong>:</p>
 <ul>
@@ -1203,10 +1290,10 @@ UGE-MPC의 가장 큰 실용적 가치는 <strong>기존 MPPI 시스템에 최�
 </ol>
 <p>MPPI 계열 방법이 실제 로봇 제어에서 점점 더 중심적 역할을 하는 상황에서, UGE-TO의 아이디어는 MPPI 생태계 전반에 걸쳐 표준 기법으로 자리잡을 잠재력이 있다. 코드가 완전 공개되면 커뮤니티에서의 채택 속도가 가속화될 것으로 예상된다.</p>
 <hr>
-<h2>12. 부록: 수식 상세 및 구현 노트 (Appendix)</h2>
+<div class="secnav"><a href="#sec-9">← 9. 5 샘플링 기반 MPC 연구 생태계에서의 위치</a><a href="#sec-11">11. 결론 →</a></div><h2 id="sec-12" data-label="12. 부록: 수식 상세 및 구현 노트">12. 부록: 수식 상세 및 구현 노트 (Appendix)</h2>
 <h3>12.1 Hellinger 거리 유도 과정</h3>
 <p>두 다변량 가우시안 사이의 Hellinger 거리의 닫힌 형식 유도:</p>
-<pre><code>일반 Hellinger 거리 정의:
+<pre class="codeblock"><code>일반 Hellinger 거리 정의:
   H²(P, Q) = 1 - ∫ sqrt(p(x) * q(x)) dx
            = 1 - BC(P, Q)   [BC: Bhattacharyya 계수]
 
@@ -1241,7 +1328,7 @@ BC(P, Q) = ∫ N(x; mu_1, Sigma_1)^{1/2} * N(x; mu_2, Sigma_2)^{1/2} dx
                        * exp(-1/8 * (mu^i - mu^j)^T Sigma_bar^{-1} (mu^i - mu^j))
 </code></pre>
 <h3>12.2 공분산 전파의 수치 안정성</h3>
-<pre><code>공분산 전파에서의 수치 안정성 문제와 해결:
+<pre class="codeblock"><code>공분산 전파에서의 수치 안정성 문제와 해결:
 
 문제 1: 행렬 폭발 (Matrix Blowup)
   A_t^T * Sigma_t * A_t 반복 계산 시 고유값 폭발 가능
@@ -1265,7 +1352,7 @@ BC(P, Q) = ∫ N(x; mu_1, Sigma_1)^{1/2} * N(x; mu_2, Sigma_2)^{1/2} dx
   - 역행렬: Sigma_bar^{-1} ← Cholesky 풀기
 </code></pre>
 <h3>12.3 UGE-TO vs. 기존 방법 계산 비교</h3>
-<pre><code>동일 샘플 예산 2048에서 계산 비용 비교:
+<pre class="codeblock"><code>동일 샘플 예산 2048에서 계산 비용 비교:
 
 MPPI:
   - 샘플 생성: 2048 × O(T*n) = 2048 × 240 ≈ 490K 연산
@@ -1297,7 +1384,7 @@ UGE-MPC (N=16, M=128, K=8):
   → 충돌 검사 비용이 지배적인 환경에서 UGE-MPC가 실제로 더 빠를 수 있음
 </code></pre>
 <h3>12.4 ROSborg 통합 예시 (개념적 코드)</h3>
-<pre><code class="language-python"># UGE-MPC 개념적 구현 (Python/NumPy)
+<pre class="codeblock"><code class="language-python"># UGE-MPC 개념적 구현 (Python/NumPy)
 import numpy as np
 
 class UGETO:
@@ -1374,7 +1461,7 @@ class UGETO:
         return [t[&#39;U&#39;] for t in trajectories]  # N개 다양화된 궤적
 </code></pre>
 <h3>12.5 실제 배포 시 고려사항</h3>
-<pre><code>실제 로봇 배포 체크리스트:
+<pre class="codeblock"><code>실제 로봇 배포 체크리스트:
 
 1. 동역학 모델 선택:
    □ 자전거/unicycle 모델: 저속 지상 로봇에 적합
@@ -1404,9 +1491,104 @@ class UGETO:
    □ Safety Filter: UGE-MPC 출력을 CBF로 후처리
    □ Robust MPC 결합: GPU-SLS와 병렬 실행
 </code></pre>
-
+<div class="secnav"><a href="#sec-10">← 10. 참고 문헌</a><a href="#sec-12">12. 부록: 수식 상세 및 구현 노트 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="UGE-MPC: 불확실성 유도 탐색적 궤적 최적화를 통한 샘플링 기반 모델 예측 제어">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>Slow Brain, Fast Planner: Latency-Resilient VLM-Augmented Urban Navigation · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2606.20458">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">arXiv preprint (cs.RO), 2026-06-18 제출 (확정 미확인)</div>
-    <h1>Slow Brain, Fast Planner: Latency-Resilient VLM-Augmented Urban Navigation</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2606.20458">arXiv:2606.20458</a></span>
-      <span>리뷰 2026-06-20</span>
-      <span>38분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">SlowBrainFastPlanner_arxiv2026</span>
     </div>
+    <h1 class="doc-title">Slow Brain, Fast Planner: Latency-Resilient VLM-Augmented Urban Navigation — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv preprint (cs.RO), 2026-06-18 제출 (확정 미확인)</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2606.20458">2606.20458</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">❌ 미공개 / 확인 불가 (abstract·comments에 저장소 언급 없음, 웹 검색 미발견)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">❌ 확인 불가</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-06-20</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">39KB · 약 38분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>Slow Brain, Fast Planner: Latency-Resilient VLM-Augmented Urban Navigation — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: Slow Brain, Fast Planner: Latency-Resilient VLM-Augmented Urban Navigation</li>
@@ -159,7 +245,7 @@ footer {
 <p><strong>트랙 분류 주석.</strong> 본 논문은 자연어 <em>지시</em>를 받아 목표까지 이동하는 VLN(Vision-Language Navigation)이 아니라, VLM을 <strong>플래너의 후보 궤적 채점·선택기</strong>로 쓰는 <strong>로컬 플래닝 보강</strong> 연구다. 따라서 본 리뷰는 <strong>Planner 트랙</strong>으로 분류한다(자연어 지시 추종이 핵심인 VLN 게이트에 해당하지 않음).</p>
 </blockquote>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <p><strong>(C1) 궤적 채점 격차(trajectory scoring gap).</strong>
 플래너는 기하·동역학적으로 실행 가능한 다수 후보를 빠르게 만들지만, &quot;사회적으로/의미적으로 어느 궤적이 최선인가&quot;는 수작업 비용 함수로 포착하기 어렵다. 보도 환경의 보행자 군집, 공사 구역, 교차로 양보, 좁은 통행로 등은 의미 이해를 요구한다.</p>
@@ -185,11 +271,11 @@ VLM 판단을 플래너에 녹이는 가장 흔한 방법은 대규모 데이터
 </tr>
 <tr>
 <td>(C2) 지연 vs 루프</td>
-<td><strong>비동기 분리</strong>: 느린 VLM(Slow Brain)과 빠른 플래너(Fast Planner)를 분리, 융합층이 중개</td>
+<td class="longcell"><strong>비동기 분리</strong>: 느린 VLM(Slow Brain)과 빠른 플래너(Fast Planner)를 분리, 융합층이 중개</td>
 </tr>
 <tr>
 <td>(C3) stale 판단</td>
-<td><strong>궤적 수준 융합(trajectory-level fusion)</strong>: VLM이 과거에 고른 궤적을, 현재 후보 집합에 <strong>기하 유사도</strong>로 재사상</td>
+<td class="longcell"><strong>궤적 수준 융합(trajectory-level fusion)</strong>: VLM이 과거에 고른 궤적을, 현재 후보 집합에 <strong>기하 유사도</strong>로 재사상</td>
 </tr>
 <tr>
 <td>(C4) 학습 비용</td>
@@ -197,15 +283,15 @@ VLM 판단을 플래너에 녹이는 가장 흔한 방법은 대규모 데이터
 </tr>
 <tr>
 <td>(C5) 무해성</td>
-<td><strong>exponential decay(지수 감쇠)</strong>: VLM 선호의 영향력이 시간에 따라 사라져, 오래된/무관한 판단은 자연 소멸 → 평시 플래너로 복귀</td>
+<td class="longcell"><strong>exponential decay(지수 감쇠)</strong>: VLM 선호의 영향력이 시간에 따라 사라져, 오래된/무관한 판단은 자연 소멸 → 평시 플래너로 복귀</td>
 </tr>
 </tbody></table></div>
 <p>핵심 통찰은 <strong>&quot;VLM의 선택을 인덱스가 아니라 기하학적 궤적(공간 형상)으로 기억하라&quot;</strong> 는 것이다. 인덱스는 후보 집합이 바뀌면 무의미해지지만, 궤적의 공간 형상은 다음 주기의 후보들과 <strong>기하 유사도</strong>로 비교 가능하다. 여기에 시간 지수 감쇠를 더해 지연을 견디고, 오래되면 자연히 영향력을 잃게 한다.</p>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 VLM-Planner 인터페이스 (대체가 아닌 선택)</h3>
 <p>핵심 설계 결정은 VLM에게 <strong>궤적을 생성하게 하지 않고</strong>, 플래너가 만든 <strong>후보 집합에서 하나를 고르게</strong> 하는 것이다.</p>
-<pre><code>매 플래닝 주기 t:
+<pre class="codeblock"><code>매 플래닝 주기 t:
   플래너 → 후보 궤적 집합  T_t = { τ_t^1, τ_t^2, ..., τ_t^K }
                           (각 τ: 기하 궤적 = waypoint 시퀀스)
   플래너 자체 비용     → 자체 최선 선택  i*_planner = argmin_k cost(τ_t^k)
@@ -222,7 +308,7 @@ VLM 판단을 플래너에 녹이는 가장 흔한 방법은 대규모 데이터
 <p>문제는 <code>i*_vlm</code>이 <strong>1~3초 전 장면에 대한</strong> 선택이라는 점이다(§3.3에서 해결).</p>
 <h3>3.2 지연의 분리: Slow Brain / Fast Planner 비동기 구조</h3>
 <p>VLM(Slow Brain)과 플래너(Fast Planner)를 <strong>서로 다른 속도의 비동기 프로세스</strong>로 분리한다.</p>
-<pre><code>   ┌──────────────── Fast Planner (5~20 Hz) ────────────────┐
+<pre class="diagram"><code>   ┌──────────────── Fast Planner (5~20 Hz) ────────────────┐
    │  t  : T_t 생성 → 융합층이 최종 궤적 선택 → 제어         │
    │  t+1: T_{t+1} 생성 → 융합 → 제어                        │
    │  ...                                                     │
@@ -239,18 +325,18 @@ VLM 판단을 플래너에 녹이는 가장 흔한 방법은 대규모 데이터
 <p>본 논문의 가장 핵심적 기여다. VLM이 과거(t_v 시점)에 고른 궤적 <code>τ_vlm = τ_{t_v}^{i*_vlm}</code> 의 <strong>기하 형상</strong>을 기억해 두고, 현재 주기 t의 새 후보들 <code>{τ_t^k}</code> 각각과 <strong>기하 유사도(geometric similarity)</strong> 를 비교하여, VLM 선호를 현재 후보 채점에 반영한다.</p>
 <p><strong>(1) 기하 유사도 점수</strong></p>
 <p>현재 후보 <code>τ_t^k</code>가 VLM이 선택했던 궤적 <code>τ_vlm</code>과 공간적으로 얼마나 닮았는지를 유사도 <code>sim(τ_t^k, τ_vlm)</code> ∈ [0,1] 로 측정한다(예: 대응 waypoint 간 평균 거리의 음의 지수, 또는 형상 정합). 닮을수록 1에 가깝다.</p>
-<pre><code>sim(τ_t^k, τ_vlm) = exp( - dist(τ_t^k, τ_vlm) / σ )      # 기하 거리 → 유사도
+<pre class="codeblock"><code>sim(τ_t^k, τ_vlm) = exp( - dist(τ_t^k, τ_vlm) / σ )      # 기하 거리 → 유사도
        dist(·,·) : 두 궤적의 평균/누적 waypoint 거리 (형상 정합)
 </code></pre>
 <p>핵심은 <strong>인덱스가 아니라 형상으로 매칭</strong>한다는 점이다. 후보 집합이 매 주기 갱신되어 인덱스 의미가 사라져도, VLM이 선호했던 &quot;공간적으로 그 방향/그 회피 형태&quot;의 궤적을 현재 후보들 중에서 다시 찾아낼 수 있다(C3 해결).</p>
 <p><strong>(2) 시간 지수 감쇠(exponential decay)</strong></p>
 <p>VLM 선택은 시간이 지날수록 낡는다(장면 변화). VLM 응답이 도착한 시각 <code>t_v</code>로부터 경과 시간에 따라 그 영향력 <code>w(t)</code>를 지수적으로 감쇠시킨다.</p>
-<pre><code>w(t) = exp( - (t - t_v) / λ )      # λ: 감쇠 시상수, t-t_v: VLM 판단의 나이
+<pre class="codeblock"><code>w(t) = exp( - (t - t_v) / λ )      # λ: 감쇠 시상수, t-t_v: VLM 판단의 나이
 </code></pre>
 <p><code>λ</code>가 곧 &quot;VLM 판단을 얼마나 오래 신뢰할지&quot;를 조절한다. 새 VLM 응답이 오면 <code>t_v</code>와 선호 궤적이 갱신되어 <code>w</code>가 다시 1 부근으로 복원된다.</p>
 <p><strong>(3) 융합 채점과 최종 선택</strong></p>
 <p>플래너 자체 비용에 VLM 선호 보너스를 가중 결합하여 최종 궤적을 고른다.</p>
-<pre><code>score(τ_t^k) =  - cost_planner(τ_t^k)                      # 플래너 기하/동역학 적합
+<pre class="codeblock"><code>score(τ_t^k) =  - cost_planner(τ_t^k)                      # 플래너 기하/동역학 적합
               +  α · w(t) · sim(τ_t^k, τ_vlm)              # VLM 선호(감쇠·기하정합)
 
 i*_final(t) = argmax_k  score(τ_t^k)
@@ -261,7 +347,7 @@ i*_final(t) = argmax_k  score(τ_t^k)
 <li>VLM 응답이 신선하고(<code>w≈1</code>) 현재 후보 중 닮은 궤적이 있으면(<code>sim≈1</code>) 그 후보가 가산점을 받아 선택됨 → 어려운 상황에서 의미적 이득(C1).</li>
 <li>모든 후보는 플래너 검증을 통과했으므로 무엇이 뽑혀도 <strong>안전 하한 유지</strong>.</li>
 </ul>
-<pre><code>   궤적 수준 융합 개념도
+<pre class="diagram"><code>   궤적 수준 융합 개념도
    VLM 과거 선택 τ_vlm:        ╱╲___          (t_v 시점, 보행자 우회 형상)
                               ╱     ╲
 
@@ -284,7 +370,7 @@ i*_final(t) = argmax_k  score(τ_t^k)
 <p>본 논문의 핵심 설계 선택 — VLM 판단을 <em>기하 궤적 형상</em>으로 기억하는 것 — 의 정당성은, 자연스럽게 떠오르는 대안들이 모두 지연 환경에서 실패한다는 점을 보면 분명해진다.</p>
 <p><strong>(대안 A) 인덱스 직접 사용 (index passthrough).</strong>
 가장 단순한 방법은 VLM이 반환한 <code>i*_vlm</code>을 그대로 현재 주기의 <code>i*_vlm</code>번째 후보로 쓰는 것이다.</p>
-<pre><code>실패 이유:
+<pre class="codeblock"><code>실패 이유:
   t_v 시점 후보  T_{t_v} = {τ^1, τ^2, τ^3}   (VLM: i*_vlm = 2 선택)
   t   시점 후보  T_t     = {ρ^1, ρ^2, ρ^3}   (플래너가 새로 생성, 정렬·내용 무관)
   → ρ^2 가 τ^2 와 전혀 다른 궤적일 수 있음 (인덱스의 의미가 보존되지 않음)
@@ -297,7 +383,7 @@ VLM에게 직접 waypoint를 출력하게 하면, (i) 기하·동역학 실현�
 VLM 선택 궤적과 현재 후보를 학습된 임베딩 공간에서 매칭할 수도 있다. 그러나 이는 <strong>학습이 필요</strong>(training-free 원칙 위배)하고, 도메인/플래너 변경 시 임베딩 재학습이 필요해 이식성을 해친다.</p>
 <p><strong>(본 논문의 선택) 기하 유사도 + 지수 감쇠.</strong>
 궤적의 <em>공간 형상</em>은 후보 집합 재생성·인덱스 변동과 무관한 <strong>불변 표현(invariant representation)</strong> 이다. 두 궤적이 &quot;공간적으로 같은 회피/방향&quot;이면 인덱스가 달라도 <code>sim</code>이 높다. 여기에 시간 감쇠를 곱해 지연을 견딘다. 학습이 없어 즉시 이식 가능하다. 즉 본 설계는 <strong>(A)의 단순성</strong>(닫힌 형식)과 <strong>(B)의 의미성</strong>(VLM 판단 반영)을 취하면서, (A)의 stale 문제와 (B)의 안전·환각 문제, (C)의 학습 비용을 모두 회피한다.</p>
-<pre><code>   설계 공간 요약
+<pre class="codeblock"><code>   설계 공간 요약
                   안전하한   지연탄력   무학습   의미반영
    (A) 인덱스       ✅         ❌        ✅        ⚠(stale)
    (B) 생성         ❌         ❌        ✅        ✅
@@ -307,7 +393,7 @@ VLM 선택 궤적과 현재 후보를 학습된 임베딩 공간에서 매칭할
 <h3>3.6 융합 채점의 수치 예시 (Worked Example)</h3>
 <p>융합층의 거동을 구체적 숫자로 따라가 본다. 파라미터를 <code>α=1.0, λ=2.0 s, σ=1.0 m</code> 로 두고, VLM이 <code>t_v</code> 에 &quot;보행자 우회&quot; 형상의 궤적을 선택했다고 하자.</p>
 <p><strong>경우 1 — VLM 응답이 신선함 (<code>t - t_v = 0.5 s</code>).</strong></p>
-<pre><code>w(t) = exp(-0.5/2.0) = 0.78
+<pre class="codeblock"><code>w(t) = exp(-0.5/2.0) = 0.78
 현재 후보별 플래너 비용 cost 와 τ_vlm 과의 기하거리 dist:
   k=1 (직진)  : cost=0.20, dist=2.0 m → sim=exp(-2.0)=0.135
   k=2 (우회)  : cost=0.35, dist=0.3 m → sim=exp(-0.3)=0.741
@@ -320,7 +406,7 @@ score = -cost + α·w·sim:
   의미적으로 옳은 k=2(우회)를 끌어올려 선택. (채점 격차 메움)
 </code></pre>
 <p><strong>경우 2 — VLM 응답이 낡음 (<code>t - t_v = 6.0 s</code>).</strong></p>
-<pre><code>w(t) = exp(-6.0/2.0) = 0.050   (거의 소멸)
+<pre class="codeblock"><code>w(t) = exp(-6.0/2.0) = 0.050   (거의 소멸)
   k=1: -0.20 + 0.050·0.135 = -0.193   ← 최대 → 선택
   k=2: -0.35 + 0.050·0.741 = -0.313
   k=3: -0.30 + 0.050·0.301 = -0.285
@@ -329,8 +415,8 @@ score = -cost + α·w·sim:
 </code></pre>
 <p>이 예시는 §3.4의 두 주장을 수치로 확인한다: 신선할 때는 의미적 이득을, 낡으면 안전한 퇴행을 자동으로 달성한다. <code>λ</code>를 키우면 경우 2에서도 VLM 영향이 더 오래 남고(공격적), 줄이면 더 빨리 잊는다(보수적).</p>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>┌──────────────────────────────────────────────────────────────────────┐
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>┌──────────────────────────────────────────────────────────────────────┐
 │              Slow Brain, Fast Planner 파이프라인                        │
 └──────────────────────────────────────────────────────────────────────┘
 
@@ -358,7 +444,7 @@ score = -cost + α·w·sim:
 </code></pre>
 <p><strong>데이터 흐름.</strong> 빠른 플래너는 매 주기 후보 궤적과 자체 비용을 융합층에 보낸다. 느린 VLM은 비동기로 장면을 보고 의미적 최선 궤적을 골라 그 <strong>형상</strong>과 도착 시각을 융합층에 주입한다. 융합층은 매 빠른 주기마다 플래너 비용과 (감쇠된·기하정합된) VLM 선호를 결합해 최종 궤적을 선택한다. VLM이 느리거나 응답이 없으면 자연히 플래너 단독 선택으로 복귀한다.</p>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 / 시나리오 (Datasets / Scenarios)</h3>
 <ul>
 <li><strong>실세계 평가 집합</strong>: 약 <strong>2,000개의 도전적 도시 보도 시나리오</strong> — 교차로(junctions), 보행자(pedestrians) 상호작용 등 의미적 판단이 필요한 상황 위주.</li>
@@ -432,7 +518,7 @@ score = -cost + α·w·sim:
 <p>특히 주목할 점은 <strong>&quot;선택만으로 ADE 30% 감소&quot;</strong> 라는 결과다. VLM이 새 궤적을 만들지 않고 플래너가 이미 만든 후보 중 고르기만 했는데도 큰 개선이 나왔다는 것은, (i) 플래너 후보 집합 안에 <em>이미 좋은 궤적이 존재</em>하지만 플래너의 수작업 비용 함수가 그것을 <em>고르지 못하고</em> 있었다는 뜻이며, (ii) 따라서 문제의 본질이 &quot;생성 능력&quot;이 아니라 &quot;채점 능력&quot;임을 강하게 시사한다. 이는 본 논문의 인터페이스 설계 철학(생성 아닌 선택)을 사후적으로 정당화한다.</p>
 <p>반대로 이 결과는 §8.2의 한계 (1)도 함의한다 — 개선의 상한은 후보 집합의 다양성·품질에 묶여 있다. 후보 집합이 빈약하면 &quot;고를 좋은 것&quot;이 없어 VLM 선택의 가치도 줄어든다. 즉 본 시스템은 <strong>좋은 후보 생성기 위에 얹는 의미적 채점 보강기</strong>로 이해해야 정확하다.</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <ol>
 <li><p><strong>VLM-Planner 인터페이스 (선택 패러다임).</strong>
 VLM에게 궤적을 생성·대체시키지 않고 플래너 후보 중 <em>선택</em>하게 함으로써, 기하·동역학 안전 하한을 보장하면서 의미적 판단을 주입. 어떤 후보-생성 플래너에도 부착 가능한 이식성.</p>
@@ -448,11 +534,11 @@ VLM 선택을 <em>인덱스</em>가 아닌 <em>기하 궤적 형상</em>으로 �
 </li>
 </ol>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <blockquote>
 <p>코드 미공개로, 아래는 본문 기술에 근거한 정리이며 정확한 기본값의 코드 검증은 불가하다.</p>
 </blockquote>
-<pre><code>[VLM-Planner 인터페이스]
+<pre class="codeblock"><code>[VLM-Planner 인터페이스]
 입력  : 플래너 후보 집합 T_t = {τ^1..τ^K} + 장면 이미지(후보 시각화 오버레이)
 VLM   : 후보 중 의미적 최선 인덱스 i*_vlm 반환 (질의 지연 1~3 s)
 출력  : 선택 궤적 τ_vlm = τ_{t_v}^{i*_vlm}, 도착시각 t_v
@@ -471,7 +557,7 @@ Slow Brain   : 0.3~1 Hz (1~3 s/질의), 비동기 주입
 </code></pre>
 <p><code>λ</code>(감쇠 시상수)가 시스템 거동의 핵심 노브다: 작으면 VLM을 빨리 잊어 보수적(플래너 편향), 크면 VLM 판단을 오래 신뢰(지연/stale 위험 증가). 5초 지연에서 80% SR을 낸 설정이 이 균형의 실효 영역을 보여준다.</p>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 (Scalability)</h3>
 <p>융합층은 후보 수 <code>K</code>에 선형(각 후보당 유사도 1회), VLM 호출과 무관하게 빠른 루프가 돌므로 연산 확장성이 좋다. 학습이 없어 새 도시·새 플래너·새 VLM 교체가 재학습 없이 가능 — 이식성이 본 방법의 가장 큰 실무적 자산이다.</p>
 <h3>8.2 한계점 (Limitations)</h3>
@@ -491,14 +577,14 @@ Slow Brain   : 0.3~1 Hz (1~3 s/질의), 비동기 주입
 </ul>
 <h3>8.4 이중과정(Dual-Process) 인지 관점에서의 위치</h3>
 <p>제목의 &quot;Slow Brain / Fast Planner&quot;는 인지과학의 <strong>이중과정 이론(dual-process theory)</strong> — Kahneman의 System 2(느리고 신중한 추론) / System 1(빠르고 자동적인 반응) — 을 로보틱스 제어 스택에 사상한 것이다. 본 논문의 기여를 이 관점에서 보면 그 일반성이 드러난다.</p>
-<pre><code>   인지 이론        본 시스템           특성
+<pre class="codeblock"><code>   인지 이론        본 시스템           특성
    System 2 (느림)  VLM (Slow Brain)    의미·맥락 추론, 1~3 s, 저주파
    System 1 (빠름)  Planner (Fast)      기하·반응 실행, 50~200 ms, 고주파
    두 시스템의 중재  융합층 (감쇠+유사도) 느린 판단을 빠른 실행에 안전 주입
 </code></pre>
 <p>기존의 &quot;fast-and-slow&quot; 로보틱스 연구 다수는 <strong>언제 느린 시스템을 호출할지(gating)</strong> 에 초점을 두거나, 느린 시스템 출력을 <strong>그대로 신뢰</strong>한다. 본 논문의 차별점은 <strong>&quot;느린 시스템의 출력이 도착했을 때 이미 낡아 있다&quot;는 지연 문제를 정면으로 다루고, 그것을 시간 감쇠 + 기하 불변 표현으로 해소</strong>한 데 있다. 즉 단순한 &quot;언제 부를까&quot;가 아니라 &quot;느린 답이 늦게 와도 어떻게 안전하게 쓸까&quot;를 푼다. 이 프레이밍은 LLM 플래너 + 실시간 제어기, 클라우드 추론 + 엣지 제어 등 &quot;고지연 고수준 추론 + 저지연 저수준 실행&quot; 일반에 그대로 이식될 수 있어, 본 논문의 학문적 파급력을 보도 내비게이션 너머로 확장한다.</p>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <p>같은 <strong>Planner 트랙</strong>의 선행 리뷰 중, VLM/학습 기반 보강 또는 외부 정보로 플래닝을 강화하는 세 편과 비교한다: <strong>ReliaDiffNav</strong>(&quot;Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation&quot;), <strong>Scout-Assisted Planning</strong>(&quot;Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments&quot;), <strong>FLAP</strong>(&quot;FLAP: FOV-Constrained Active Perception Planning for Prior-Map-Free 3D Navigation&quot;).</p>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
@@ -606,7 +692,7 @@ FLAP은 시야(FOV) 제약을 최적화에 내재화한 <strong>순수 최적화
 <li><strong>지시 추종(VLN)으로 확장</strong> — 의미 <em>선택</em>에서 자연어 <em>지시</em> 추종으로.</li>
 </ol>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ul>
 <li>Slow Brain, Fast Planner: Latency-Resilient VLM-Augmented Urban Navigation. Zhenghao Peng, Honglin He, Quanyi Li, Yukai Ma, Bolei Zhou. arXiv:2606.20458 (cs.RO).</li>
 <li>(배경) Vision-Language Models for robotics / trajectory scoring — 본 논문의 VLM-Planner 인터페이스 배경.</li>
@@ -617,15 +703,110 @@ FLAP은 시야(FOV) 제약을 최적화에 내재화한 <strong>순수 최적화
 <li>[선행 리뷰] FLAP: FOV-Constrained Active Perception Planning for Prior-Map-Free 3D Navigation (arXiv 2026).</li>
 </ul>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p><strong>혁신성.</strong> Slow Brain, Fast Planner의 핵심 혁신은 <strong>VLM의 선택을 &quot;인덱스가 아니라 기하 궤적 형상&quot;으로 기억하고, 기하 유사도와 시간 지수 감쇠로 현재 후보에 재사상하는 training-free 융합층</strong>이다. 이 한 가지 아이디어가 &quot;느린 VLM(1<del>3 s)을 빠른 제어 루프(5</del>20 Hz)에 안전하게 끼워 넣는다&quot;는 본질적 난제를 우아하게 해결한다. VLM은 플래너를 대체하지 않고 선택만 하므로 기하·동역학 안전 하한이 항상 보장되고, 지수 감쇠 덕분에 판단이 낡으면 자동으로 플래너로 퇴행한다.</p>
 <p><strong>실용적 의의.</strong> ~2,000개 실세계 도시 보도 시나리오에서 플래너 자체 최선 대비 <strong>ADE 30% 감소</strong>, 시뮬레이션에서 <strong>최대 5초 지연까지 SR 80%+</strong>, 그리고 실제 캠퍼스 보도 모바일 로봇 실증은, 본 방법이 &quot;궤적 채점 격차&quot;를 현실적으로 메우면서도 VLM 지연이라는 치명적 실무 장벽을 넘었음을 보여준다. 특히 <strong>학습이 전혀 필요 없어 어떤 플래너·어떤 VLM에도 즉시 부착</strong>된다는 점은, 실 배송/서비스 로봇 플릿에 매우 낮은 비용으로 의미적 지능을 더할 수 있는 강력한 실용성을 의미한다.</p>
 <p><strong>향후 연구 방향.</strong> 지연-정보 융합의 일반 프레임워크화(기하+의미 통합), VLM 신뢰도 가중, 상황 적응형 감쇠, 그리고 의미 선택에서 자연어 지시 추종(VLN)으로의 확장이 유망하다. 종합적으로 본 논문은 &quot;느린 고수준 추론기 + 빠른 저수준 제어기&quot;라는 광범위한 로보틱스 시스템 패턴에 적용 가능한 <strong>지연 탄력적 융합 원리</strong>를 제시한, 단순하지만 깊은 통찰을 가진 실용적 기여다.</p>
 <hr>
 <p><em>본 리뷰는 arXiv 논문의 abstract 및 공개 정보에 근거하여 작성되었으며, 코드/프로젝트 페이지가 공개되지 않아 실제 구현 스니펫·세부 수치의 독립 검증은 제한됨을 명시한다.</em></p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="Slow Brain, Fast Planner: Latency-Resilient VLM-Augmented Urban Navigation — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

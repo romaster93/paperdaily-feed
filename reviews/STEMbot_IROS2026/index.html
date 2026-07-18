@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>STEMbot: A Compliant Robot for Under-Canopy Plant Navigation · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2607.07873">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">IROS 2026</div>
-    <h1>STEMbot: A Compliant Robot for Under-Canopy Plant Navigation</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2607.07873">arXiv:2607.07873</a></span>
-      <span>리뷰 2026-07-11</span>
-      <span>38분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">STEMbot_IROS2026</span>
     </div>
+    <h1 class="doc-title">STEMbot: A Compliant Robot for Under-Canopy Plant Navigation: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">IROS 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2607.07873">2607.07873</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">✅ <a href="https://github.com/UM-ARM-Lab/stembot">UM-ARM-Lab/stembot</a> (C++/Python/CMake, ROS·Docker·독립 플래너·Arduino 펌웨어, LICENSE pending 특허심사)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">✅ <a href="https://um-arm-lab.github.io/stembot-site/">um-arm-lab.github.io/stembot-site</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-07-11</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">39KB · 약 38분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>STEMbot: A Compliant Robot for Under-Canopy Plant Navigation: 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: STEMbot: A Compliant Robot for Under-Canopy Plant Navigation</li>
@@ -155,7 +241,7 @@ footer {
 </ol>
 <p>즉 본 논문은 하드웨어(순응 메커니즘)·인지(의미 매핑)·플래닝(매니폴드 제약 탐색)을 통합한 <strong>under-canopy 식물 항해 시스템</strong>이며, 본 리뷰의 초점(Planner 트랙)은 §3의 <strong>매니폴드 제약 A* 모션 플래닝</strong>과 이를 뒷받침하는 의미 매핑 파이프라인이다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <p>식물 줄기 등반 항해는 표준 지상/공중 모션 플래닝과 근본적으로 다른 도전을 안는다.</p>
 <ol>
@@ -179,42 +265,42 @@ footer {
 </ul>
 <p><strong>왜 기존 플래너로 안 되는가.</strong> 표준 지상 플래너(예: TRG-Planner의 주행가능성 그래프)는 로봇이 지형 &quot;위에&quot; 지지된다고 가정하고 중력을 지지력으로 상쇄한다. 등반 로봇은 반대로 <strong>중력에 맞서 표면에 매달려</strong> 있으며, 지지력이 순응 바퀴 그립과 스프링 클램핑에서 나온다. 따라서 &quot;이 지점이 등반 가능한가&quot;는 단순 기하(경사·거칠기)가 아니라 <strong>줄기 굵기·법선·클램핑 가능성</strong>의 함수다. 또한 자유공간 샘플링 플래너(RRT/PRM)는 3D 볼륨을 샘플링하지만, 로봇이 존재할 수 있는 공간은 줄기 표면(측정 0의 2D 다양체)이라 무작위 샘플이 거의 전부 무효가 된다 — 이것이 곡면 매니폴드에 특화된 A*가 필요한 근본 이유다.</p>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 매니폴드 제약 상태 표현</h3>
 <p>핵심은 로봇이 <strong>줄기 표면이라는 2D 매니폴드에 구속</strong>된다는 사실을 상태 정의에 직접 담는 것이다.</p>
-<pre><code>   상태:  s = { p, n, b }
+<pre class="codeblock"><code>   상태:  s = { p, n, b }
           p ∈ ℝ³   : 3D 위치 (줄기 표면 위)
           n ∈ ℝ³   : 표면 법선 (로봇이 붙어있는 면의 방향)
           b ∈ ℝ³   : 가지 방향(branch heading, 줄기 축 방향)
 </code></pre>
 <p>이 세 벡터가 함께 로봇의 곡면 위 자세를 완전히 규정한다. 표준 지상 플래닝의 <code>(x, y, θ)</code>나 자유공간 플래닝의 <code>SE(3)</code>와 달리, <code>n</code>과 <code>b</code>가 표면 기하에 고정되어 있어 <strong>자유도가 곡면으로 제한</strong>된다.</p>
 <p>법선 <code>n</code>과 가지 방향 <code>b</code>는 지역 점군에 대한 <strong>PCA(주성분분석)</strong> 로 추정한다:</p>
-<pre><code>   n = PCA_normal(P_local, r_normal=0.005 m)   ← 작은 반경, 표면 법선
+<pre class="codeblock"><code>   n = PCA_normal(P_local, r_normal=0.005 m)   ← 작은 반경, 표면 법선
    b = PCA_branch(P_local, r_branch=0.14 m)    ← 큰 반경, 줄기 축 방향
 </code></pre>
 <p>두 반경(0.005m vs 0.14m)의 차이가 의미심장하다 — 작은 반경으로는 국소 표면 법선을, 큰 반경으로는 줄기의 전역 축 방향을 잡아낸다. 이 다중 스케일 PCA가 매니폴드의 국소 좌표계를 구성한다.</p>
 <h3>3.2 매니폴드 제약 A* 탐색</h3>
 <p>플래너는 이산화된 상태공간 위에서 <strong>manifold-constrained A* search</strong> 를 수행한다.</p>
 <p><strong>행동 원시(action primitives).</strong> 4개의 이산 동작:</p>
-<pre><code>   {UP, DOWN, LEFT, RIGHT}
+<pre class="codeblock"><code>   {UP, DOWN, LEFT, RIGHT}
    - UP/DOWN   : 줄기 축(b) 방향 상하 이동, 스텝 δ_linear (0.1–0.2 mm)
    - LEFT/RIGHT: 표면 상 요(yaw) 회전, 스텝 δ_angular (0.1°)
 </code></pre>
 <p><strong>비용 함수(cost).</strong> 매니폴드 위 경로 길이:</p>
-<pre><code>   g(s_{t+1}) = g(s_t) + || p_{t+1} − p_t ||_2
+<pre class="codeblock"><code>   g(s_{t+1}) = g(s_t) + || p_{t+1} − p_t ||_2
 </code></pre>
 <p>즉 누적 이동 거리를 최소화한다.</p>
 <p><strong>휴리스틱(heuristic).</strong> 공간 거리 + 헤딩 정렬(heading alignment)을 가중 결합:</p>
-<pre><code>   h(s) = 공간거리(p → goal) + W_θ · 헤딩정렬비용    (W_θ = 1.0)
+<pre class="codeblock"><code>   h(s) = 공간거리(p → goal) + W_θ · 헤딩정렬비용    (W_θ = 1.0)
 </code></pre>
 <p>헤딩 정렬 항이 있어, 단순 최단거리뿐 아니라 로봇이 목표를 향하도록 자세도 유도한다.</p>
 <p><strong>매니폴드 투영(manifold projection).</strong> 후보 상태를 그대로 쓰면 곡면을 벗어날 수 있으므로, <strong>등반 가능 복셀 중심(traversable voxel centroid)의 k-d tree에서 최근접 이웃으로 투영</strong>한다. 즉 A*가 확장한 후보 위치를 항상 실제 줄기 표면으로 스냅(snap)한다. 방향 일관성은 내적(dot-product) 제약으로 강제한다.</p>
-<pre><code>   후보 p_cand  ──투영──▶  p&#39; = NN_kdtree(p_cand, traversable_centroids)
+<pre class="diagram"><code>   후보 p_cand  ──투영──▶  p&#39; = NN_kdtree(p_cand, traversable_centroids)
    법선/헤딩 일관성:  n&#39;·n_prev, b&#39;·b_prev 내적 제약 만족해야 유효
 </code></pre>
 <h3>3.3 가지 전이 제약 (Branch Transition)</h3>
 <p>분기점에서 한 가지→다른 가지로 옮겨탈 때 <strong>물리적으로 불가능한 측면 기동을 차단</strong>하는 것이 핵심 안전장치다.</p>
-<pre><code>   가지 전이 유효 조건:   | m · b_{t+1} | &lt; ε
+<pre class="codeblock"><code>   가지 전이 유효 조건:   | m · b_{t+1} | &lt; ε
    여기서   m = b_t × n_t   (현재 가지방향 × 법선 = 측면 벡터)
             ε = 0.40        (전이 임계, 비물리적 측면기동 방지)
             γ = 0.995       (가지 검출 임계)
@@ -222,7 +308,7 @@ footer {
 <p><code>m = b_t × n_t</code>는 현재 줄기 축과 표면 법선의 외적으로, <strong>로봇 몸체의 측면 방향</strong>을 나타낸다. 새 가지 방향 <code>b_{t+1}</code>이 이 측면 벡터와 지나치게 정렬되면(<code>|m·b_{t+1}| ≥ ε</code>) 로봇이 옆으로 미끄러져 붙어야 한다는 뜻이라 <strong>물리적으로 불가능</strong> → 전이 무효. 이 단순한 외적·내적 제약이 순응형 등반 로봇의 운동학적 한계를 우아하게 인코딩한다.</p>
 <h3>3.4 충돌 검사 및 목표 명세</h3>
 <p><strong>충돌 검사(collision checking).</strong> 장애물 집합 <code>P_obs</code>에 대한 k-d tree 최근접 질의:</p>
-<pre><code>   상태 유효 ⟺  d(p_t, P_obs) ≥ r_robot
+<pre class="codeblock"><code>   상태 유효 ⟺  d(p_t, P_obs) ≥ r_robot
 </code></pre>
 <p><strong>목표 명세(goal specification).</strong> 두 가지 모달리티:</p>
 <ol>
@@ -231,7 +317,7 @@ footer {
 </ol>
 <h3>3.5 수신 지평선 재계획 (Receding Horizon)</h3>
 <p>플래너는 <strong>매 이산 동작마다 재계획</strong>한다:</p>
-<pre><code>   loop:
+<pre class="codeblock"><code>   loop:
      1) 현재 오도메트리로 상태 s_t 갱신
      2) 매니폴드 제약 A* 로 s_t → goal 경로 계획
      3) 경로의 첫 동작 1개만 실행 (300 ms 이동)
@@ -241,7 +327,7 @@ footer {
 <p><strong>동작 타이밍</strong>이 특징적이다: <strong>300ms 이동 후 1s 정지</strong>. 정지 구간에 자세를 동기화하고 다음 계획을 병행 수행한다. 이 stop-and-go 방식은 순응형 로봇의 미끄러짐·SLAM 추적 안정성을 확보하기 위한 실용적 선택이다.</p>
 <h3>3.6 매니폴드 제약 A* 의사코드 (통합)</h3>
 <p>앞의 구성요소(§3.1–3.5)를 하나의 탐색 루프로 종합하면 다음과 같다:</p>
-<pre><code>manifold_astar(s_start, goal, OcTree):
+<pre class="codeblock"><code>manifold_astar(s_start, goal, OcTree):
     traversable ← OcTree.query(&quot;traversable&quot;)      # 의미 복셀 중심 집합
     kdtree_free ← KDTree(traversable)              # 투영용
     kdtree_obs  ← KDTree(OcTree.query(&quot;obstacle&quot;)) # 충돌검사용
@@ -264,13 +350,13 @@ footer {
 <p>이 의사코드는 <strong>투영(projection) → 국소좌표 재추정 → 3중 유효성 검사(충돌/방향/전이)</strong> 라는 매 확장 단계를 드러낸다. 표준 A*와의 결정적 차이는 (a) 후보를 매번 실제 표면으로 스냅하고, (b) 확장마다 <code>{n, b}</code>를 PCA로 재추정하며, (c) 외적 기반 전이 제약으로 비물리적 이웃을 가지치기(prune)한다는 점이다. 이로써 탐색 트리가 곡면을 벗어나지 않는다.</p>
 <h3>3.7 확률적 의미 OcTree의 베이지안 갱신</h3>
 <p>플래너의 유효 상태 집합을 제공하는 의미 OcTree는 각 복셀의 클래스 확률을 <strong>로그-오즈(log-odds)</strong> 로 누적한다:</p>
-<pre><code>   L_t(voxel, c) = L_{t-1}(voxel, c) + log[ p(c | z_t) / (1 − p(c | z_t)) ]
+<pre class="codeblock"><code>   L_t(voxel, c) = L_{t-1}(voxel, c) + log[ p(c | z_t) / (1 − p(c | z_t)) ]
 </code></pre>
 <p>여기서 <code>z_t</code>는 스텝 <code>t</code>의 SAM/CLIP 의미 관측(<code>p&gt;0.90</code> 임계 통과분), <code>c ∈ {traversable, obstacle, ...}</code>. 로그-오즈 누적은 다중 관측을 베이지안으로 융합하여 <strong>단발 오분류에 강건</strong>하게 만든다 — 한 프레임의 잘못된 분할이 여러 프레임의 일관된 관측에 의해 교정된다.</p>
 <p>그럼에도 살아있는 식물의 traversable 오차(37.56mm, §5.3)가 큰 것은, 반투명 잎·불규칙 형상에서 <strong>관측 자체가 계통적으로(systematically) 편향</strong>되어 로그-오즈 융합으로도 상쇄되지 않기 때문이다. 이는 인지-플래닝 결합 구조의 근본 취약점을 드러낸다: 매핑이 계통 오차를 가지면 플래너 매니폴드도 계통적으로 왜곡된다.</p>
 <h3>3.8 가시성 제약 목표의 기하</h3>
 <p>검사 임무용 목표 모달리티는 <strong>&quot;대상 t를 가리지 않고 관측 가능한 지점&quot;</strong> 을 자동 탐색한다. 대상 주위 구면에 <strong>피보나치 구(Fibonacci sphere) 샘플링</strong>으로 균등 분포 후보 관측점을 뿌리고, 각 후보에서 대상으로 <strong>레이 캐스팅</strong>하여 가림(occlusion)을 검사한다:</p>
-<pre><code>   for k in 0..N_sample-1:                     # 피보나치 구 균등 샘플
+<pre class="codeblock"><code>   for k in 0..N_sample-1:                     # 피보나치 구 균등 샘플
        φ = π(3 − √5)·k                          # 황금각
        y = 1 − 2k/(N−1);  r = √(1−y²)
        obs_k = target + R·(r·cos φ, y, r·sin φ)
@@ -280,8 +366,8 @@ footer {
 </code></pre>
 <p>피보나치 구는 구면 위 점을 거의 균등하게 분포시키는 결정론적 방법으로, 무작위 샘플링보다 커버리지가 균일하다. 무가림 + 등반가능(traversable) 두 조건을 만족하는 관측점만 목표 후보가 되고, 그중 경로비용 최소점을 최종 목표로 삼는다. 이 설계는 &quot;물리적으로 도달 가능하면서 대상을 볼 수 있는&quot; 지점을 자동 계산하여, 잎에 가린 병변·분기점 내부 검사를 가능케 한다.</p>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>┌───────────────────── 센싱 ─────────────────────┐
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>┌───────────────────── 센싱 ─────────────────────┐
 │ Intel RealSense D405 (스테레오, 30Hz depth)      │
 │   → 서브샘플 3.75Hz 오도메트리                   │
 │ Adafruit VL6180X ToF (피치 피드백, 90Hz)         │
@@ -313,7 +399,7 @@ footer {
 <p><strong>데이터 흐름의 핵심.</strong> 의미 OcTree의 &quot;traversable&quot; 복셀 중심이 곧 A*의 유효 상태 집합(k-d tree 투영 대상)이 된다 — <strong>인지(의미 분할)와 플래닝(매니폴드 투영)이 OcTree를 매개로 긴밀히 결합</strong>되어 있다. 잘못 분류된 표면(§5의 live plant traversable 오차 37.56mm)은 곧바로 플래너의 매니폴드를 오염시키므로, 인지 정확도가 플래닝 성패를 좌우한다.</p>
 <h3>4.1 계층적 시간 스케일 (Multi-rate control)</h3>
 <p>STEMbot의 구성요소들은 <strong>서로 다른 주파수</strong>에서 동작하며, 이 다중 속도(multi-rate) 구조가 순응 등반의 안정성을 확보하는 핵심이다:</p>
-<pre><code>   90.0 Hz  ── ToF 피드백 PID 피치 제어 (가장 빠름, 접촉 유지)
+<pre class="diagram"><code>   90.0 Hz  ── ToF 피드백 PID 피치 제어 (가장 빠름, 접촉 유지)
     3.75 Hz ── 오도메트리 (30Hz depth 서브샘플)
     1.0 Hz  ── 의미 OcTree 갱신 (가장 느림, 무거운 SAM/CLIP)
    이산동작 ── 매니폴드 A* 재계획 (300ms 이동/1s 정지 주기)
@@ -321,13 +407,13 @@ footer {
 <p><strong>왜 이렇게 분리하는가?</strong> 접촉 유지(피치 제어)는 미끄러짐을 즉시 교정해야 하므로 최고속(90Hz)이 필요하다. 반면 의미 분할(SAM/CLIP)은 계산이 무거워 1Hz로 충분하다 — 식물은 정적이라 지도가 빠르게 변하지 않는다. 오도메트리(3.75Hz)는 depth(30Hz)를 서브샘플해 계산 부하와 정확도를 절충한다. 이 <strong>주파수 계층 분리</strong>는 초경량 임베디드 플랫폼(67g)의 제한된 연산 자원을 효율 배분하는 설계 원칙이다.</p>
 <h3>4.2 피치 피드백 제어 (ToF-based PID)</h3>
 <p>ToF 센서(VL6180X)로 줄기 표면까지 거리를 재고, 설정점 <code>d_ToF</code>(16–21mm)를 유지하도록 PID로 피치를 제어한다:</p>
-<pre><code>   e(t) = d_ToF − d_measured(t)
+<pre class="codeblock"><code>   e(t) = d_ToF − d_measured(t)
    u_pitch(t) = Kp·e(t) + Kd·ė(t) + Ki·∫e dt
                 (Kp=20, Kd=5, Ki=0.1, 90Hz)
 </code></pre>
 <p>이 피드백 루프가 로봇을 줄기 표면에 <strong>일정 거리로 밀착</strong>시켜 순응 바퀴의 그립을 유지한다. 큰 <code>Kp</code>(20)는 빠른 접촉 회복을, 작은 <code>Ki</code>(0.1)는 정상상태 오차 제거를 담당한다. 플래너(A*)가 &quot;어디로 갈지&quot;를 결정하면, 이 저수준 PID가 &quot;어떻게 붙어있을지&quot;를 담당하는 <strong>2계층 제어 분리</strong>다.</p>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 / 실험 대상 (Specimens)</h3>
 <p>실물 식물 표본 <strong>4종</strong>(시뮬레이션이 아닌 실 로봇 실험):</p>
 <ul>
@@ -402,13 +488,13 @@ footer {
 <h3>5.5 결과 해석 및 실패 모드 분석</h3>
 <p><strong>Chamfer 거리의 함의.</strong> 인공 식물 3.85mm vs 살아있는 식물 13.36mm의 3.5배 격차는 단순히 &quot;살아있는 식물이 어렵다&quot;를 넘어, <strong>플래너의 상한 성능이 인지 품질에 종속</strong>됨을 보여준다. 매니폴드 A*의 상태 투영(k-d tree NN)과 PCA 법선/가지 추정이 모두 OcTree 복셀 위치에 의존하므로, 13mm급 매핑 오차는 곧 13mm급 경로 오차로 전파된다. 특히 traversable 클래스 오차 37.56mm는 δ_linear(0.1–0.2mm)·d_goal(0.01m=10mm) 같은 플래너 정밀도 파라미터보다 훨씬 커, <strong>인지 오차가 플래닝 해상도를 압도</strong>하는 역전 현상이 관찰된다.</p>
 <p><strong>세 가지 실패 모드의 계층.</strong> 논문이 정성 서술한 실패 모드는 시스템 계층별로 대응된다:</p>
-<pre><code>   (a) depth 카메라 오차     → 인지 계층 (OcTree 오염)
+<pre class="codeblock"><code>   (a) depth 카메라 오차     → 인지 계층 (OcTree 오염)
    (b) PIN-SLAM 추적 손실    → 상태추정 계층 (오도메트리 발산)
    (c) 하드웨어 이동 실패     → 구동 계층 (순응 바퀴 미끄러짐)
 </code></pre>
 <p>주목할 점은 <strong>세 실패 모드가 모두 플래너 자체(A*)가 아니라 그 입력(지도·상태)이나 출력(구동)에서 발생</strong>한다는 것이다. 즉 매니폴드 A* 알고리즘은 주어진 정확한 매니폴드에서는 견실하나, 시스템 전체의 신뢰성은 인지·상태추정·구동의 약한 고리에 의해 결정된다. 이는 §4의 &quot;인지-플래닝 긴밀 결합&quot;이 양날의 검임을 재확인한다 — 결합이 강할수록 인지 오차가 플래너로 직결된다.</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <ol>
 <li><p><strong>초경량 순응형 등반 로봇(67g)</strong>: 실리콘 순응 바퀴(EcoFlex 00-45)+4절 링크+수동 스프링 클램핑으로 7–33mm 줄기를 3-DOF(수직/요/피치)로 안정 등반. Under-canopy 미시 공간 접근이라는 새 폼팩터.</p>
 </li>
@@ -426,7 +512,7 @@ footer {
 </li>
 </ol>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <p><strong>주요 하이퍼파라미터:</strong></p>
 <div class="table-wrap"><table>
 <thead>
@@ -505,7 +591,7 @@ footer {
 </tr>
 </tbody></table></div>
 <p><strong>코드베이스 구조</strong> (github.com/UM-ARM-Lab/stembot, C++ 50.5% / Python 44.6% / CMake):</p>
-<pre><code>├── catkin_ws / ROS 워크스페이스     # 노드, 런치, 통합
+<pre class="diagram"><code>├── catkin_ws / ROS 워크스페이스     # 노드, 런치, 통합
 ├── perception/                      # PIN-SLAM 연동, SAM/CLIP 의미 분할
 ├── mapping/                         # 확률적 의미 OcTree (Bayesian log-odds)
 ├── scripts/plan.py                  # 독립 실행 가능한 매니폴드 A* 플래너
@@ -520,7 +606,7 @@ footer {
 </ul>
 <p><strong>코드 검증.</strong> browser로 확인 결과 placeholder가 아닌 실제 실행 가능한 ROS 시스템(펌웨어·Docker·독립 플래너 포함)임을 확인.</p>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 (Scalability)</h3>
 <ul>
 <li><strong>더 큰/복잡한 식물</strong>: 현재 4종·단순 분기 구조. 조밀한 실제 작물 캐노피(옥수수·토마토 하우스)에서 다중 분기·잎 밀집 시 의미 OcTree 오분류(37.56mm)가 누적되어 매니폴드 품질이 저하될 수 있다.</li>
@@ -550,13 +636,13 @@ footer {
 <h3>8.5 매니폴드 플래닝 vs 자유공간 플래닝 — 이론적 위치</h3>
 <p>전통적 모션 플래닝(RRT, PRM, 자유공간 A*)은 <code>SE(2)</code>/<code>SE(3)</code> 자유공간에서 충돌 없는 경로를 찾는다. STEMbot은 근본적으로 다른 <strong>구속 매니폴드 플래닝(constrained manifold planning)</strong> 계열에 속한다 — 로봇은 자유공간을 나는 것이 아니라 저차원 곡면(줄기 표면)에 물리적으로 붙어 있어야 한다. 이는 로보틱스에서 <strong>task-constrained motion planning</strong>(예: 문 손잡이를 돌리며 이동, 표면을 닦으며 이동) 문헌과 맞닿는다.</p>
 <p>핵심 차이를 정리하면:</p>
-<pre><code>   자유공간 플래닝:  q ∈ C_free ⊂ SE(3),   충돌회피가 유일 제약
+<pre class="codeblock"><code>   자유공간 플래닝:  q ∈ C_free ⊂ SE(3),   충돌회피가 유일 제약
    매니폴드 플래닝:  q ∈ M ⊂ SE(3),  dim(M) &lt; dim(SE(3))
                      추가로 곡면 접촉·법선정렬·전이가능성 제약
 </code></pre>
 <p>STEMbot의 기여는 이 추상적 매니폴드 제약을 <strong>실물 하드웨어의 운동학</strong>(순응 바퀴 그립, 4절 링크, 90Hz ToF 피치제어)과 <strong>실시간 인지</strong>(의미 OcTree)에 연결하여, 이론적 정식화를 실 로봇에서 작동시켰다는 데 있다. Berenson 그룹의 제약 기반 플래닝(constrained planning) 계보가 식물 등반이라는 극한 응용으로 구체화된 사례로 읽힌다.</p>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <p>STEMbot은 코퍼스 내 Planner 리뷰들과 <strong>문제 도메인(곡면 구속 등반)</strong> 에서 독보적이다. 그러나 기법 축에서는 (a) 실 로봇 지역 플래닝(NeuPAN), (b) 의미/주행가능성 매핑 기반 그래프 탐색(TRG-Planner), (c) 목표 조향 탐색(VisualRRT)과 비교 가능하다.</p>
 <div class="table-wrap"><table>
@@ -673,7 +759,7 @@ footer {
 <p>Berenson(ARM Lab)의 모션 플래닝 계보에서 나온 이 연구는, 매니폴드 제약 플래닝을 <strong>실물 순응 등반 로봇</strong>에 적용한 시스템 통합의 모범 사례다. 성공률 정량화·속도 개선·인지 강건화가 뒷받침되면, under-canopy 로보틱스라는 신생 분야의 기준점(reference platform)이 될 잠재력이 크다. 코드·펌웨어·Docker의 완전 공개는 후속 연구의 재현·확장을 크게 낮춘다.</p>
 <p><strong>요약 평가.</strong> STEMbot의 진정한 기여는 개별 구성요소의 참신성보다 <strong>하드웨어(순응 메커니즘)·인지(의미 OcTree)·플래닝(매니폴드 A*)·제어(다중속도 PID)를 하나의 작동하는 시스템으로 통합</strong>하고, 이를 실 식물 4종에서 실증했다는 시스템적 완결성에 있다. NeuPAN이 알고리즘 참신성(엔드투엔드 미분가능 플래닝), TRG-Planner가 지형 표현(주행가능성 그래프)에서 두드러진다면, STEMbot은 <strong>극한 폼팩터에서의 시스템 통합</strong>에서 두드러진다. 세 논문은 모두 실 로봇 검증이라는 코퍼스 상위 기준을 충족하며, 상호 보완적 문제 영역을 커버한다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li>STEMbot: A Compliant Robot for Under-Canopy Plant Navigation. IROS 2026. arXiv:2607.07873. (UM-ARM Lab, incl. D. Berenson)</li>
 <li>Pan, Y. et al. &quot;PIN-SLAM: LiDAR SLAM Using a Point-Based Implicit Neural Representation.&quot; T-RO 2024.</li>
@@ -685,16 +771,111 @@ footer {
 <li>TRG-Planner: Traversability-aware Graph Planner. RA-L 2025. (코퍼스 내 비교 대상)</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p><strong>혁신성.</strong> STEMbot은 67g 초경량 순응형 등반 로봇과 <strong>매니폴드 제약 A* 모션 플래닝</strong>을 공동 설계하여, 지상 로봇·드론이 접근 못하던 under-canopy 미시 공간을 개척한다. 상태를 <code>{위치, 법선, 가지방향}</code>으로 정의해 곡면 구속을 명시 인코딩하고, 등반 가능 복셀 k-d tree 투영과 외적 기반 가지 전이 제약(<code>|m·b|&lt;ε</code>)으로 순응 등반의 물리적 실현성을 우아하게 보장한다. PIN-SLAM + SAM/CLIP 의미 OcTree가 인지와 플래닝을 긴밀히 결합한다.</p>
 <p><strong>실용적 의의.</strong> 실 식물 4종(살아있는 2 + 인공 2)에서 7–33mm 줄기, 90° 분기, 50mm 곡률을 자율 등반·검사한 실증은, 정밀농업·식물 표현형·생태 모니터링의 근접 관측이라는 새 응용을 연다. 가시성 제약 목표(피보나치 구 샘플링)는 &quot;대상을 안 가리는 관측점&quot;을 자동 계산해 검사 임무에 특화된다. 코드·펌웨어·Docker 완전 공개(LICENSE pending)는 재현·확장을 크게 낮춘다.</p>
 <p><strong>한계와 향후 방향.</strong> 정량적 성공률 부재, 살아있는 식물 인지 오차(37.56mm) 의존, stop-and-go의 느린 속도가 명확한 한계다. 성공률 벤치마크 수립, 의미 분할 강건화, 연속 제어로의 속도 개선, 다양한 실제 작물 일반화가 뒷받침되면, STEMbot의 매니폴드 제약 플래닝 프레임워크는 식물 항해를 넘어 파이프·선체·구조물 등 곡면 구속 로봇 일반으로 확장될 수 있는 개척적 시스템 기여로 평가된다.</p>
 <p><strong>종합.</strong> Planner 트랙의 관점에서 STEMbot의 핵심 가치는 <strong>매니폴드 제약 A* 라는 고전적 탐색 알고리즘을, 의미 인지(OcTree)와 초경량 순응 하드웨어에 결합하여 실물에서 작동시킨 시스템 통합</strong>에 있다. 알고리즘의 개별 요소(A*, PCA 법선, log-odds OcTree, 피보나치 샘플링)는 각각 잘 알려진 기법이지만, 이들을 곡면 등반이라는 극한 제약 하에서 하나로 엮어 낸 통합 설계와 실 로봇 실증이 이 논문을 IROS 게재 수준의 기여로 만든다. 코드·펌웨어·Docker의 완전 공개는 under-canopy 로보틱스라는 신생 분야에 재현 가능한 출발점을 제공하며, 후속 연구가 각 계층(인지 강건화, 연속 제어, 다중 로봇)을 독립적으로 개선할 수 있는 모듈러 기반을 마련한다.</p>
 <hr>
 <p><em>리뷰 작성: 2026-07-11 | 트랙: Planner | 발표처: IROS 2026 | 코드: ✅ 공개(LICENSE pending) | 프로젝트: ✅</em></p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="STEMbot: A Compliant Robot for Under-Canopy Plant Navigation: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

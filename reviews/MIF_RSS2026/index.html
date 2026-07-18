@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>MIF: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2605.21935">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">RSS 2026 (Robotics: Science and Systems) — Accepted</div>
-    <h1>Learning to Evolve: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2605.21935">arXiv:2605.21935</a></span>
-      <span>리뷰 2026-05-24</span>
-      <span>47분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">MIF_RSS2026</span>
     </div>
+    <h1 class="doc-title">Learning to Evolve: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">RSS 2026 (Robotics: Science and Systems) — Accepted</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2605.21935">2605.21935</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">Coming Soon</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://ziya-jiang.github.io/MIF-homepage/">ziya-jiang.github.io/MIF-homepage/</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-05-24</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">45KB · 약 47분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>Learning to Evolve: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: Learning to Evolve: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments</li>
@@ -158,7 +244,7 @@ footer {
 <p><strong>차원 2 — 환경 동적 변화에 대한 씬 메모리 적응 (Scene Memory Adaptation to Environment Changes)</strong>:
 실세계 환경은 사람이 물체를 이동시키거나, 문이 열리고 닫히는 등의 변화가 빈번하게 발생한다. 기존의 정적 씬 표현 방법은 이러한 변화를 감지하지 못하여 오래된(stale) 정보를 기반으로 내비게이션하게 된다. 특히, <strong>보행 중 발생하는 진동 아티팩트</strong>와 <strong>실제 환경 변화</strong> 사이를 구별하는 것이 매우 중요하다 — 전자는 무시해야 하고 후자는 메모리에 반영해야 하지만, 기존 방법들은 이 둘을 구분하지 못한다.</p>
 <p>핵심 연구 질문:</p>
-<pre><code>&quot;인간형 로봇이 이족보행으로 이동하면서 발생하는
+<pre class="codeblock"><code>&quot;인간형 로봇이 이족보행으로 이동하면서 발생하는
  지각 왜곡과 환경 변화를 모두 처리하는
  강건한 씬 메모리를 어떻게 구축할 것인가?
 
@@ -166,7 +252,7 @@ footer {
  목표 물체까지 안전하게 내비게이션할 수 있는가?&quot;
 </code></pre>
 <p>MIF(Multi-modal Interactive Fields)의 핵심 통찰:</p>
-<pre><code>통찰 1: 씬 메모리를 세 가지 상호보완적 필드로 분리
+<pre class="codeblock"><code>통찰 1: 씬 메모리를 세 가지 상호보완적 필드로 분리
   - Appearance Field (F_app): 신뢰도 인식 3D Gaussian Splatting
   - Spatial Field (F_spat): 계층적 씬 그래프 (시맨틱 관계)
   - Geometry Field (F_geom): 상호작용 안전성을 위한 메시 재구성
@@ -180,11 +266,11 @@ footer {
   - Spatial Field에 대한 계층적 시맨틱 그라운딩
 </code></pre>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 이족보행 기인 시각적 불안정성 (Locomotion-Induced Visual Instability)</h4>
 <p>인간형 로봇은 이족보행 특성상 카메라 흔들림이 불가피하다:</p>
-<pre><code>[보행 주기별 카메라 운동 패턴]
+<pre class="diagram"><code>[보행 주기별 카메라 운동 패턴]
 
 보행 단계: 지지기(Stance) ─── 유각기(Swing) ─── 지지기(Stance)
 수직 이동:     최소              최대 (수 cm)       최소
@@ -207,7 +293,7 @@ Roll/Pitch:     ~0°              ~3-8°              ~0°
 </ul>
 <h4>B. 동적 환경 변화와 보행 아티팩트의 혼동 (False Alarm Problem)</h4>
 <p>씬 메모리를 동적으로 업데이트할 때 핵심 어려움:</p>
-<pre><code>[두 유형의 씬 변화 비교]
+<pre class="codeblock"><code>[두 유형의 씬 변화 비교]
 
 유형 1 — 보행 아티팩트 (무시해야 함):
   원인: 이족보행 진동, 모션 블러, 일시적 가림(occlusion)
@@ -232,7 +318,7 @@ Roll/Pitch:     ~0°              ~3-8°              ~0°
 </code></pre>
 <h4>C. 기존 씬 그래프 방법들의 한계</h4>
 <p>최신 씬 그래프 기반 내비게이션 방법들이 인간형 로봇에 직접 적용 불가한 이유:</p>
-<pre><code>[기존 방법 비교]
+<pre class="diagram"><code>[기존 방법 비교]
 
 방법               | 보행 블러 처리 | 동적 변화 | 실제 로봇 | 조작 안전성
 ─────────────────────────────────────────────────────────────────
@@ -248,7 +334,7 @@ MIF (본 논문)     | ✅ (신뢰도 게이팅) | ✅        | Unitree G1 인�
 </code></pre>
 <h4>D. 조작 지향 내비게이션의 안전성 요구사항</h4>
 <p>단순한 이동 내비게이션과 달리, 물체를 집거나 상호작용하기 위한 내비게이션은 추가적인 제약이 있다:</p>
-<pre><code>[목표 도달 시 요구사항]
+<pre class="codeblock"><code>[목표 도달 시 요구사항]
 
 일반 내비게이션:
   목표 위치에 도달하면 완료
@@ -266,12 +352,12 @@ G1 로봇의 제약:
   - 이 제약 내에서 종단 포즈를 계획해야 함
 </code></pre>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 Appearance Field (F_app) — 신뢰도 인식 3D Gaussian Splatting</h3>
 <p>Appearance Field는 MIF의 시각 표현 기반(backbone)으로, 보행 중 발생하는 모션 블러와 진동에 강건한 3D 씬 표현을 제공한다.</p>
 <h4>3.1.1 신뢰도 인식 3DGS의 동기</h4>
 <p>표준 3D Gaussian Splatting(3DGS)은 각 원시 요소(primitive)에 대해 위치, 크기, 방향, 색상, 불투명도(opacity)를 최적화한다. 그러나 보행 중 블러된 프레임에서 추정된 원시 요소들은 다음과 같은 문제를 보인다:</p>
-<pre><code>[블러된 프레임 기반 3DGS의 문제]
+<pre class="codeblock"><code>[블러된 프레임 기반 3DGS의 문제]
 
 블러 없는 프레임:
   Gaussian 원시 요소: gradient가 명확 → 경계가 선명한 구조 학습
@@ -289,7 +375,7 @@ G1 로봇의 제약:
 </code></pre>
 <h4>3.1.2 신뢰도 점수 산출 메커니즘</h4>
 <p>MIF의 Appearance Field는 각 Gaussian 원시 요소에 <strong>신뢰도 점수 c_i</strong>를 부여한다:</p>
-<pre><code>[신뢰도 점수 c_i 계산]
+<pre class="codeblock"><code>[신뢰도 점수 c_i 계산]
 
 c_i = σ( w₁ · ‖∇L_i‖ + w₂ · α_i )
 
@@ -308,7 +394,7 @@ c_i = σ( w₁ · ‖∇L_i‖ + w₂ · α_i )
 </code></pre>
 <h4>3.1.3 신뢰도 게이팅된 렌더링</h4>
 <p>실시간 사용을 위해 Appearance Field는 저신뢰도 primitives를 렌더링에서 제외하는 선택적 렌더링을 수행한다:</p>
-<pre><code>[선택적 렌더링 알고리즘]
+<pre class="codeblock"><code>[선택적 렌더링 알고리즘]
 
 Input:  전체 Gaussian primitives {G_1, ..., G_N}
 Output: 신뢰도 게이팅된 렌더링 뷰 I_stable
@@ -330,7 +416,7 @@ Output: 신뢰도 게이팅된 렌더링 뷰 I_stable
 </code></pre>
 <h4>3.1.4 점진적 Map 업데이트 전략</h4>
 <p>Appearance Field는 탐색 중 새로운 영역이 발견될 때 점진적으로 업데이트된다. 단, 모든 새 프레임이 통합되지 않고 신뢰도 임계값 이상의 프레임만 통합된다:</p>
-<pre><code>[점진적 업데이트 정책]
+<pre class="codeblock"><code>[점진적 업데이트 정책]
 
 새 관측 프레임 I_t 도착 시:
   1. 프레임 품질 평가:
@@ -353,7 +439,7 @@ Output: 신뢰도 게이팅된 렌더링 뷰 I_stable
 <h3>3.2 Spatial Field (F_spat) — 보행 안정화된 계층적 씬 그래프</h3>
 <p>Spatial Field는 로봇의 환경 이해를 위한 구조화된 표현으로, Appearance Field의 안정화된 렌더링을 입력으로 받아 구성된다. 이는 기존 씬 그래프 방법들이 raw egocentric 프레임을 직접 사용하는 것과 달리, 블러 아티팩트를 이미 제거한 렌더링을 사용한다는 점에서 근본적인 차이가 있다.</p>
 <h4>3.2.1 씬 그래프 구조</h4>
-<pre><code>[Spatial Field 계층 구조]
+<pre class="diagram"><code>[Spatial Field 계층 구조]
 
 레벨 3 (환경 수준):
   ┌─────────────────────────────────────────┐
@@ -391,7 +477,7 @@ Output: 신뢰도 게이팅된 렌더링 뷰 I_stable
 </code></pre>
 <h4>3.2.2 노드 특성 표현</h4>
 <p>각 노드는 다음 정보를 포함한다:</p>
-<pre><code>[씬 그래프 노드 표현]
+<pre class="codeblock"><code>[씬 그래프 노드 표현]
 
 물체 노드 O = {
   label:      CLIP embedding (512D) — open-vocabulary 분류
@@ -418,7 +504,7 @@ Output: 신뢰도 게이팅된 렌더링 뷰 I_stable
 </code></pre>
 <h4>3.2.3 보행 안정화된 씬 그래프 구성</h4>
 <p>핵심 차별화 요소: Spatial Field는 raw egocentric 프레임 대신 Appearance Field의 안정화된 렌더링으로부터 구성된다:</p>
-<pre><code>[씬 그래프 구성 파이프라인]
+<pre class="codeblock"><code>[씬 그래프 구성 파이프라인]
 
 단계 1 — 안정화된 뷰 생성:
   raw_frame_t → Appearance Field → I_stable_t
@@ -446,7 +532,7 @@ Output: 신뢰도 게이팅된 렌더링 뷰 I_stable
 <p>Geometry Field는 로봇이 목표 물체에 도달했을 때, 안전하고 운동학적으로 실현 가능한(kinematically feasible) 종단 포즈(terminal pose)를 결정하기 위한 on-demand 3D 재구성 모듈이다.</p>
 <h4>3.3.1 Flow Matching 기반 3D 재구성</h4>
 <p>MIF는 목표 물체에 근접했을 때 Geometry Field를 활성화하여 정밀한 3D 메시를 생성한다:</p>
-<pre><code>[Geometry Field 활성화 조건]
+<pre class="codeblock"><code>[Geometry Field 활성화 조건]
 
 활성화 트리거:
   dist(robot_pos, target_object_pos) &lt; d_threshold = 1.5m
@@ -458,7 +544,7 @@ Output: 신뢰도 게이팅된 렌더링 뷰 I_stable
   4. 안전 종단 포즈 선택
 </code></pre>
 <p>Flow Matching 기반 메시 생성의 핵심 수식:</p>
-<pre><code>[Flow Matching 기반 표면 재구성]
+<pre class="codeblock"><code>[Flow Matching 기반 표면 재구성]
 
 Continuous Normalizing Flow를 사용:
   점군(point cloud) P₀ ~ p₀  →  메시 포인트 P₁ ~ p₁
@@ -479,7 +565,7 @@ v_θ(P, t) = 학습된 속도장 (Flow Matching으로 학습)
 </code></pre>
 <h4>3.3.2 Interaction Pose Safety (IPS) 검증</h4>
 <p>생성된 메시를 사용하여 로봇의 종단 포즈 후보들을 평가한다:</p>
-<pre><code>[IPS 검증 알고리즘]
+<pre class="codeblock"><code>[IPS 검증 알고리즘]
 
 입력:
   M:        목표 물체의 3D 메시 (Geometry Field 생성)
@@ -520,7 +606,7 @@ v_θ(P, t) = 학습된 속도장 (Flow Matching으로 학습)
 <h3>3.4 불일치 감지 메커니즘 (Discrepancy Detection Mechanism)</h3>
 <p>불일치 감지는 MIF의 적응형 씬 메모리 관리의 핵심이다. 이 메커니즘은 보행 아티팩트와 실제 환경 변화를 구별하여 선택적 메모리 업데이트를 수행한다.</p>
 <h4>3.4.1 다중 모달 불일치 점수 (Multi-modal Discrepancy Score)</h4>
-<pre><code>[불일치 점수 D 계산]
+<pre class="codeblock"><code>[불일치 점수 D 계산]
 
 현재 관측에서 지역 그래프 G_local 구성:
   (현재 카메라 뷰에서 감지된 물체들의 로컬 씬 그래프)
@@ -552,7 +638,7 @@ D_rel (관계 불일치):
 </code></pre>
 <h4>3.4.2 신뢰도 게이팅된 업데이트 (Confidence-Gated Update)</h4>
 <p>불일치가 감지되면 전역 재매핑 대신 지역적 업데이트를 수행한다:</p>
-<pre><code>[선택적 지역 업데이트 알고리즘]
+<pre class="codeblock"><code>[선택적 지역 업데이트 알고리즘]
 
 1. 영향 범위 결정:
    affected_region ← Voronoi cell around changed node
@@ -579,7 +665,7 @@ D_rel (관계 불일치):
 <hr>
 <h3>3.5 자연어 내비게이션 인터페이스</h3>
 <h4>3.5.1 언어 목표 파싱 (Language Goal Parsing)</h4>
-<pre><code>[자연어 목표 → 구조화된 트리플렛 변환]
+<pre class="codeblock"><code>[자연어 목표 → 구조화된 트리플렛 변환]
 
 입력 예시:
   &quot;창가 책상 위의 파란 물병을 가져와&quot;
@@ -609,7 +695,7 @@ LLM (GPT-4V) 파싱:
    (또는 Geometry Field 기반 IPS 검증 후 terminal_pose*)
 </code></pre>
 <h4>3.5.2 계층적 내비게이션 전략</h4>
-<pre><code>[전체 내비게이션 파이프라인]
+<pre class="diagram"><code>[전체 내비게이션 파이프라인]
 
 언어 목표 I → 파싱 → ⟨R, L, O⟩
                            │
@@ -637,9 +723,9 @@ LLM (GPT-4V) 파싱:
             조작 실행
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <h3>4.1 전체 파이프라인</h3>
-<pre><code>┌─────────────────────────────────────────────────────────────────────┐
+<pre class="diagram"><code>┌─────────────────────────────────────────────────────────────────────┐
 │                    MIF 시스템 아키텍처                               │
 ├─────────────┬───────────────────────────────────────────────────────┤
 │  입력층     │  RGB 카메라 스트림 (Unitree G1 머리 카메라)              │
@@ -682,7 +768,7 @@ LLM (GPT-4V) 파싱:
 └─────────────┴───────────────────────────────────────────────────────┘
 </code></pre>
 <h3>4.2 하드웨어 플랫폼</h3>
-<pre><code>[Unitree G1 사양]
+<pre class="codeblock"><code>[Unitree G1 사양]
 
 로봇 플랫폼:
   키: 127cm, 무게: 35kg
@@ -704,10 +790,10 @@ LLM (GPT-4V) 파싱:
   제어된 동적 변화: 물체 재배치 (&gt;1.5m), 삭제, 추가
 </code></pre>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
 <p>본 논문은 기존 벤치마크를 사용하지 않고 <strong>자체 구축한 실세계 동적 환경 데이터셋</strong>을 사용한다:</p>
-<pre><code>[실험 환경 구성]
+<pre class="codeblock"><code>[실험 환경 구성]
 
 환경:
   면적: 100m² 사무실
@@ -727,7 +813,7 @@ LLM (GPT-4V) 파싱:
   Geometry Field: ShapeNet + CO3Dv2 (Flow Matching 메시 생성)
 </code></pre>
 <h3>5.2 평가 지표 (Evaluation Metrics)</h3>
-<pre><code>[주요 평가 지표]
+<pre class="codeblock"><code>[주요 평가 지표]
 
 시맨틱 위치 파악 (Semantic Localization):
   SR_loc: 목표 물체 위치 파악 성공률 (오차 &lt; 0.5m)
@@ -794,7 +880,7 @@ LLM (GPT-4V) 파싱:
 <td>0.31</td>
 <td>✅</td>
 </tr>
-<tr>
+<tr class="ours">
 <td><strong>MIF (본 논문)</strong></td>
 <td><strong>92</strong></td>
 <td><strong>0.18</strong></td>
@@ -864,7 +950,7 @@ LLM (GPT-4V) 파싱:
 <li>메모리 풋프린트: HOV-SG 대비 <strong>-91.4%</strong> 감소</li>
 </ul>
 <h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
-<pre><code>[실제 Unitree G1 로봇 실험 상세]
+<pre class="codeblock"><code>[실제 Unitree G1 로봇 실험 상세]
 
 실험 1 — 순찰 내비게이션 (Patrol):
   시나리오: 사무실 내 5개 랜드마크 순차 방문
@@ -890,10 +976,10 @@ LLM (GPT-4V) 파싱:
   평균 종단 포즈 오차: 0.12m
 </code></pre>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>6.1 이족보행 로봇을 위한 신뢰도 인식 3DGS (Contribution 1)</h3>
 <p><strong>기존 방법들의 맹점 해소</strong>: 기존 3DGS 기반 씬 표현은 정적 카메라를 가정하였다. MIF는 각 Gaussian primitive에 신뢰도 점수를 부여하여 보행 중 블러된 프레임에서 추정된 원시 요소를 자동으로 필터링한다.</p>
-<pre><code>핵심 혁신:
+<pre class="codeblock"><code>핵심 혁신:
   c_i = σ(w₁·‖∇L_i‖ + w₂·α_i)
 
   블러 프레임 기반 primitives: 자동 제외
@@ -914,8 +1000,8 @@ LLM (GPT-4V) 파싱:
 <h3>6.4 Flow Matching 기반 On-demand 메시 재구성 (Contribution 4)</h3>
 <p><strong>조작 지향 내비게이션의 새로운 마일스톤</strong>: 기존 내비게이션 논문들은 &quot;물체 근처 도달&quot;을 성공으로 정의했다. MIF는 실제 팔이 닿을 수 있는 정밀한 종단 포즈까지 계획하여 조작 성공률을 극적으로 향상시킨다 (IPS 94%, 충돌 0%).</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
-<pre><code>[하이퍼파라미터 및 학습 설정]
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<pre class="codeblock"><code>[하이퍼파라미터 및 학습 설정]
 
 Appearance Field:
   기반 모델: 3DGS (Kerbl et al., 2023)
@@ -959,9 +1045,9 @@ Geometry Field:
   처리 주기: Appearance/Spatial Field 1Hz, 제어 루프 100Hz
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 분석</h3>
-<pre><code>[환경 규모별 성능 (추정)]
+<pre class="codeblock"><code>[환경 규모별 성능 (추정)]
 
 100m² (실험 환경):
   Gaussian primitives: ~250K
@@ -979,7 +1065,7 @@ Geometry Field:
       → 대규모 환경에서도 업데이트 시간 일정 유지
 </code></pre>
 <h3>8.2 한계점</h3>
-<pre><code>[현재 시스템의 한계]
+<pre class="codeblock"><code>[현재 시스템의 한계]
 
 한계 1 — 강한 조명 변화:
   역광 또는 급격한 조도 변화 시 감지 실패 (2/22 케이스)
@@ -1002,7 +1088,7 @@ Geometry Field:
   해결 방향: 대화형 명확화(interactive clarification) 모듈
 </code></pre>
 <h3>8.3 향후 연구 방향</h3>
-<pre><code>[MIF 기반 향후 연구]
+<pre class="codeblock"><code>[MIF 기반 향후 연구]
 
 방향 1 — 멀티 로봇 확장:
   여러 인간형 로봇이 씬 메모리를 분산 공유
@@ -1022,7 +1108,7 @@ Geometry Field:
   Geometry Field를 조작 정책과 직접 통합
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -1111,7 +1197,7 @@ Geometry Field:
 </li>
 </ol>
 <h3>9.3 실적용 가능성 평가</h3>
-<pre><code>[실제 로봇 배포 관점 평가]
+<pre class="codeblock"><code>[실제 로봇 배포 관점 평가]
 
 장점:
   ✅ Unitree G1 실제 로봇에서 검증 (시뮬레이션 아님)
@@ -1138,7 +1224,7 @@ Geometry Field:
 </ul>
 <p>이는 씬 그래프 기반 내비게이션 분야의 자연스러운 발전 방향이며, 향후 인간형 로봇 배포의 핵심 기술이 될 것으로 평가한다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li>Kerbl et al. &quot;3D Gaussian Splatting for Real-Time Radiance Field Rendering.&quot; SIGGRAPH 2023.</li>
 <li>Werby et al. &quot;HOV-SG: Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation.&quot; RSS 2024.</li>
@@ -1152,7 +1238,7 @@ Geometry Field:
 <li>Guo et al. &quot;AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation.&quot; CVPR 2026.</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p>MIF(Multi-modal Interactive Fields)는 인간형 로봇의 실세계 배포라는 시급한 문제를 삼중 필드 씬 메모리로 우아하게 해결한 RSS 2026 논문이다.</p>
 <p><strong>혁신성</strong>:
 이족보행 특유의 보행 유도 시각 왜곡 문제를 Gaussian primitive별 신뢰도 점수로 해결한 것은 단순하지만 매우 효과적이다. 더 중요하게는, 보행 아티팩트와 실제 환경 변화를 다중 모달 불일치 점수로 구별하는 접근법은 동적 씬 메모리 문제에 대한 실용적 해법을 제시한다.</p>
@@ -1161,9 +1247,104 @@ Geometry Field:
 <p><strong>향후 연구 방향</strong>:
 온-로봇 처리 가능한 경량화, R2R/REVERIE 등 표준 VLN 벤치마크 적용, 그리고 멀티 로봇 분산 씬 메모리 공유가 가장 중요한 후속 과제다. MIF가 제안한 삼중 필드 아키텍처는 이 모든 확장 방향에서 기반이 될 수 있는 충분한 모듈성을 갖추고 있다.</p>
 <p>기존 VLN 연구가 R2R 등 그래프 기반 시뮬레이션에 치중한 것과 달리, MIF는 진정한 실세계 인간형 로봇 내비게이션의 미래를 제시한다는 점에서 높이 평가한다.</p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="Learning to Evolve: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

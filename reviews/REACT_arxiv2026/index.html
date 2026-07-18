@@ -6,133 +6,220 @@
 <meta name="color-scheme" content="light dark">
 <title>REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2605.18441">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">arXiv 2026</div>
-    <h1>REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2605.18441">arXiv:2605.18441</a></span>
-      <span>리뷰 2026-05-19</span>
-      <span>43분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">REACT_arxiv2026</span>
     </div>
+    <h1 class="doc-title">REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2605.18441">2605.18441</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">❌ 미공개</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://dongjh20.github.io/REACT-website">dongjh20.github.io/REACT-website</a> (데모 영상 포함)</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-05-19</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">41KB · 약 43분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 12개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">9</span><span class="toc-title">5 심화 기술 비교 (Deep Technical Comparison)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-11"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots</li>
@@ -151,7 +238,7 @@ footer {
 </ul>
 <h3>1.2 연구 목표 (Research Objective)</h3>
 <p>REACT는 <strong>복잡한 실세계 환경에서 다수의 바퀴 달린 이동 로봇(Wheeled Mobile Robots, WMR)이 대형(formation)을 유지하면서 연속적으로 항법하는 문제</strong>를 해결한다.</p>
-<pre><code>핵심 문제:
+<pre class="diagram"><code>핵심 문제:
 &quot;복수의 WMR이 장애물이 있는 환경에서 최적의 대형을 동적으로
  적응하면서 실시간으로 충돌 없이 목적지까지 이동하는 방법은?&quot;
 
@@ -172,12 +259,12 @@ REACT의 핵심 기여:
   3. 계층적 구조: 중앙집중 대형 생성 + 분산 대형 유지
 </code></pre>
 <p><strong>실증 결과</strong>: 7대의 Ackermann 조향 WMR으로 실세계 검증 — 기존 방법 대비 <strong>55-97%의 실행시간 단축</strong>, <strong>13-75%의 대형 오차 감소</strong>.</p>
-<p><img src="figures/fig_01_02.jpeg" alt="REACT 시스템 개요" loading="lazy"></p>
+<figure><img src="figures/fig_01_02.jpeg" alt="REACT 시스템 개요" loading="lazy"><figcaption>REACT 시스템 개요</figcaption></figure>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>도전과제 1: 대형 전환 시 로봇-목표 배정의 조합적 복잡성</h4>
-<pre><code>[문제 설명]
+<pre class="codeblock"><code>[문제 설명]
 
 N개의 WMR, M개의 목표 위치가 있을 때:
   - 각 로봇이 어느 목표로 이동해야 하는가?
@@ -190,7 +277,7 @@ N개의 WMR, M개의 목표 위치가 있을 때:
   - 충돌 해결 반복이 더해지면 실시간성 위협
 </code></pre>
 <h4>도전과제 2: 비홀로노믹 제약 하의 궤적 계획</h4>
-<pre><code>[Ackermann 조향 모델 제약]
+<pre class="codeblock"><code>[Ackermann 조향 모델 제약]
 
 키네마틱 모델 (bicycle model):
   ẋ = v·cos(ψ)
@@ -209,7 +296,7 @@ N개의 WMR, M개의 목표 위치가 있을 때:
   - 좁은 공간에서의 기동성 제한
 </code></pre>
 <h4>도전과제 3: 공간-시간 분리의 한계</h4>
-<pre><code>[기존 공간만 최적화의 문제]
+<pre class="codeblock"><code>[기존 공간만 최적화의 문제]
 
 시나리오: 2대 WMR이 좁은 통로를 순서대로 통과해야 함
 
@@ -224,7 +311,7 @@ N개의 WMR, M개의 목표 위치가 있을 때:
 결론: 공간 경로만으로는 부족, 시간 조율이 필수
 </code></pre>
 <h4>도전과제 4: 분산 vs 중앙집중의 트레이드오프</h4>
-<pre><code>[대형 제어의 구조적 딜레마]
+<pre class="codeblock"><code>[대형 제어의 구조적 딜레마]
 
 완전 중앙집중:
   ✅ 전역 최적 보장 가능
@@ -260,11 +347,11 @@ REACT의 계층 구조:
 </tr>
 </tbody></table></div>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 TCF-R2T: 궤적 충돌 없는 로봇-목표 배정</h3>
 <p>TCF-R2T는 <strong>최소 비용 최대 흐름(Minimum-Cost Maximum-Flow, MCMF)</strong> 기반으로 다항식 시간 내에 충돌 없는 배정을 해결한다.</p>
 <h4>3.1.1 문제 형식화</h4>
-<pre><code>[TCF-R2T 입력/출력]
+<pre class="codeblock"><code>[TCF-R2T 입력/출력]
 
 입력:
   - N개의 로봇 현재 위치 R = {r_1, ..., r_N}
@@ -280,7 +367,7 @@ REACT의 계층 구조:
 </code></pre>
 <h4>3.1.2 시간-확장 네트워크 (Time-Expanded Network)</h4>
 <p>TCF-R2T의 핵심은 2D 격자를 3D 시공간으로 확장하는 것:</p>
-<pre><code>[격자 구조]
+<pre class="diagram"><code>[격자 구조]
 
 대형 레이아웃:
   열 방향: 종방향 (longitudinal, 이동 방향)
@@ -296,7 +383,7 @@ REACT의 계층 구조:
            |     |     |
   [row=3]  o ─── o ─── o
 </code></pre>
-<pre><code>[시간-확장 네트워크 구성]
+<pre class="codeblock"><code>[시간-확장 네트워크 구성]
 
 레이어 수: 2T_max + 1
   T_max = N + l_max - 1  (N: 로봇 수, l_max: 최대 쌍별 거리)
@@ -317,7 +404,7 @@ REACT의 계층 구조:
   최소 비용 = Σ 총 이동 비용 최소화
 </code></pre>
 <h4>3.1.3 비용 설계</h4>
-<pre><code>[MCMF 비용 함수]
+<pre class="codeblock"><code>[MCMF 비용 함수]
 
 이동 비용:
   열 방향 이동: Δx_max  (큰 비용 → 종방향 재정렬 기피)
@@ -334,7 +421,7 @@ REACT의 계층 구조:
   불가피 시: 인접 열로 이동 (비용 Δx_max)
 </code></pre>
 <h4>3.1.4 전처리: 종방향 정렬</h4>
-<pre><code>[사전 처리 단계]
+<pre class="codeblock"><code>[사전 처리 단계]
 
 로봇 집합 R과 목표 집합 T를 종방향으로 정렬:
   → 로봇 r_i의 종방향 위치 x_i로 정렬
@@ -347,7 +434,7 @@ REACT의 계층 구조:
   실제로는 행(row) 내 재배정만 고려하면 됨
 </code></pre>
 <h4>3.1.5 복잡도 분석</h4>
-<pre><code>[계산 복잡도]
+<pre class="codeblock"><code>[계산 복잡도]
 
 그래프 크기:
   노드 수: |격자| × (2T_max + 1) = O(N × T_max)
@@ -366,7 +453,7 @@ MCMF 알고리즘 (SPFA + 증분 경로):
 <h3>3.2 JSTP: 공간-시간 동시 궤적 최적화</h3>
 <p>JSTP는 대형 유지, 장애물 회피, 동적 제약을 동시에 최적화하는 통합 궤적 계획 알고리즘.</p>
 <h4>3.2.1 궤적 표현 (MINCO)</h4>
-<pre><code>[다항식 궤적 표현]
+<pre class="codeblock"><code>[다항식 궤적 표현]
 
 M-구간 5차 다항식 (piecewise polynomial):
   p(t) = c_i^T β(t),  t ∈ [T_{i-1}, T_i]
@@ -390,7 +477,7 @@ MINCO 변환 (Minimum Control):
   - 기울기 역전파 효율적
 </code></pre>
 <h4>3.2.2 통합 비용 함수</h4>
-<pre><code>[JSTP 최적화 문제]
+<pre class="codeblock"><code>[JSTP 최적화 문제]
 
 최소화:
   J(q, T) = λ_inter·P_inter + λ_obs·P_obs + λ_dyn·P_dyn
@@ -401,7 +488,7 @@ MINCO 변환 (Minimum Control):
 </code></pre>
 <h4>3.2.3 각 비용 항 상세</h4>
 <p><strong>P_obs: 정적 장애물 회피</strong></p>
-<pre><code>[장애물 회피 비용]
+<pre class="codeblock"><code>[장애물 회피 비용]
 
 거리 패널티:
   g_obs(p(t_j)) = max{d²_thr - d²(p(t_j), p_obs), 0}²
@@ -417,7 +504,7 @@ MINCO 변환 (Minimum Control):
   t_j = T_{i-1} + j·(T_i - T_{i-1})/K_i (균등 샘플링)
 </code></pre>
 <p><strong>P_inter: 로봇 간 충돌 회피</strong></p>
-<pre><code>[로봇 간 거리 비용]
+<pre class="codeblock"><code>[로봇 간 거리 비용]
 
 비대칭 거리 함수:
   d̂(p_i, p_j) = ||E(p_i - p_j)||₂
@@ -431,7 +518,7 @@ MINCO 변환 (Minimum Control):
   g_inter = max{d²_thr_wmr - d̂(p_i, p_j)², 0}²
 </code></pre>
 <p><strong>P_dyn: 동적 가능성 (비홀로노믹 제약)</strong></p>
-<pre><code>[속도, 가속도, 곡률 제약]
+<pre class="codeblock"><code>[속도, 가속도, 곡률 제약]
 
 속도 제약:
   g_v(t) = max{||ṗ(t)||² - v²_max, 0}²
@@ -445,7 +532,7 @@ MINCO 변환 (Minimum Control):
   κ_max = tan(δ_max) / L  (조향각 → 최대 곡률)
 </code></pre>
 <p><strong>P_form: 대형 유지 비용</strong></p>
-<pre><code>[Laplacian 행렬 기반 대형 오차]
+<pre class="codeblock"><code>[Laplacian 행렬 기반 대형 오차]
 
 대형 오차:
   f_e = ||L̃ - L̃*||²_F
@@ -464,7 +551,7 @@ Laplacian 행렬:
   - 전역 대형 오차를 단일 스칼라로 표현
 </code></pre>
 <p><strong>P_ctrl + P_time: 제어 노력 + 이동 시간</strong></p>
-<pre><code>[P_ctrl: 저크(jerk) 최소화]
+<pre class="codeblock"><code>[P_ctrl: 저크(jerk) 최소화]
   P_ctrl = Σ_i ∫_{T_{i-1}}^{T_i} ||p⃛(t)||² dt
   → 부드러운 궤적 생성
 
@@ -473,7 +560,7 @@ Laplacian 행렬:
   → 불필요한 시간 낭비 방지
 </code></pre>
 <h4>3.2.4 최적화 알고리즘</h4>
-<pre><code>[L-BFGS 준-뉴턴 최적화]
+<pre class="codeblock"><code>[L-BFGS 준-뉴턴 최적화]
 
 변수: θ = (q, T)
   q ∈ R^{(M-1)×2}: 중간 웨이포인트
@@ -489,8 +576,8 @@ T의 양수 보장:
 수렴: 보통 50-200 이터레이션
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>┌─────────────────────────────────────────────────────────────────────┐
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>┌─────────────────────────────────────────────────────────────────────┐
 │                       REACT 계층적 아키텍처                           │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
@@ -542,9 +629,9 @@ T의 양수 보장:
 │ └──────────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
 </code></pre>
-<p><img src="figures/fig_04_01.jpeg" alt="REACT 실험 결과" loading="lazy"></p>
+<figure><img src="figures/fig_04_01.jpeg" alt="REACT 실험 결과" loading="lazy"><figcaption>REACT 실험 결과</figcaption></figure>
 <h3>4.1 대형 구조 (Formation Structure)</h3>
-<pre><code>[인터레이스 대형 (Interlaced Formation)]
+<pre class="diagram"><code>[인터레이스 대형 (Interlaced Formation)]
 
 기본 구조: 열(column) 기반 균등 배치
 
@@ -568,7 +655,7 @@ T의 양수 보장:
   좁은 통로: 2열로 자동 전환
 </code></pre>
 <h3>4.2 AEB: 자율 비상 제동 (Autonomous Emergency Braking)</h3>
-<pre><code>[안전 Fallback]
+<pre class="codeblock"><code>[안전 Fallback]
 
 트리거 조건:
   시간-충돌(TTC) &lt; τ_AEB
@@ -587,9 +674,9 @@ T의 양수 보장:
   최후 안전망
 </code></pre>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 실험 플랫폼 (Platform)</h3>
-<pre><code>[하드웨어 사양]
+<pre class="codeblock"><code>[하드웨어 사양]
 
 WMR 플랫폼:
   - 대수: 7개 Ackermann 조향 WMR
@@ -714,7 +801,7 @@ WMR 플랫폼:
 <li><strong>시공간 동시 최적화의 기여</strong>: JSTP-Spatial 대비 <strong>13% 추가 개선</strong></li>
 </ul>
 <h4>시간적 최적화 기여 (JSTP vs JSTP-Spatial)</h4>
-<pre><code>[시공간 동시 최적화 효과]
+<pre class="codeblock"><code>[시공간 동시 최적화 효과]
 
 좁은 통로 통과 시나리오:
   JSTP-Spatial: 공간 경로만 최적화
@@ -727,7 +814,7 @@ WMR 플랫폼:
     → 13% 추가 대형 오차 감소
 </code></pre>
 <h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
-<pre><code>[실세계 시나리오 1: 동적 장애물 회피]
+<pre class="codeblock"><code>[실세계 시나리오 1: 동적 장애물 회피]
 
 설정: 7개 WMR이 이동 중인 다른 로봇(동적 장애물) 주변 통과
 결과:
@@ -752,11 +839,11 @@ WMR 플랫폼:
   - JSTP의 P_obs와 P_inter의 동시 최적화로 충돌 방지
   - 평균 대형 오차 기준선 대비 75% 감소
 </code></pre>
-<p><img src="figures/fig_08_01.jpeg" alt="REACT 실세계 실험 결과" loading="lazy"></p>
+<figure><img src="figures/fig_08_01.jpeg" alt="REACT 실세계 실험 결과" loading="lazy"><figcaption>REACT 실세계 실험 결과</figcaption></figure>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>기여 1: REACT 계층적 아키텍처 — 중앙집중 + 분산의 최적 결합</h3>
-<pre><code>기존 접근의 한계:
+<pre class="codeblock"><code>기존 접근의 한계:
   완전 중앙집중: 확장성 없음, 단일 실패점
   완전 분산: 전역 대형 일관성 보장 어려움
 
@@ -770,7 +857,7 @@ REACT의 혁신:
   - 통신 효율: 상위→하위 목표 위치만 전송 (O(N) 메시지)
 </code></pre>
 <h3>기여 2: TCF-R2T — 충돌 없는 최적 배정을 다항식 시간에</h3>
-<pre><code>기존 방법:
+<pre class="codeblock"><code>기존 방법:
   헝가리안: 비용 최적, 그러나 충돌 후 반복 수정 필요
   탐욕적 배정: 빠르지만 비최적, 충돌 가능
 
@@ -784,7 +871,7 @@ TCF-R2T:
 결과: 8 WMR에서 0.7ms (헝가리안 28.4ms의 2.5%)
 </code></pre>
 <h3>기여 3: JSTP — 대형 탐색을 위한 최초 공간-시간 동시 최적화</h3>
-<pre><code>기존 대형 계획:
+<pre class="codeblock"><code>기존 대형 계획:
   공간 최적화: 각 로봇 공간 경로만 계획
               시간 조율은 별도 처리
 
@@ -800,7 +887,7 @@ JSTP:
 결과: JSTP-Spatial 대비 13% 추가 대형 오차 감소
 </code></pre>
 <h3>기여 4: 실세계 7-WMR 검증</h3>
-<pre><code>기존 다중 로봇 대형 제어 논문의 한계:
+<pre class="codeblock"><code>기존 다중 로봇 대형 제어 논문의 한계:
   - 시뮬레이션 전용 또는 2-3대 소규모 실험
   - 실세계에서의 센서 잡음, 통신 지연 미반영
 
@@ -810,9 +897,9 @@ REACT:
   3가지 실세계 시나리오: 동적 장애물 + 대형 전환 + 장애물 밀집
 </code></pre>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 궤적 파라미터</h3>
-<pre><code>[MINCO 설정]
+<pre class="codeblock"><code>[MINCO 설정]
 
 다항식 차수: n = 5 (5차)
 공간 차원: m = 2 (x, y 평면)
@@ -827,7 +914,7 @@ REACT:
   실제 값: 논문 보충 자료 참조 필요
 </code></pre>
 <h3>7.2 비홀로노믹 제약 파라미터</h3>
-<pre><code>[Ackermann WMR 제약]
+<pre class="codeblock"><code>[Ackermann WMR 제약]
 
 최대 속도: v_max (WMR 사양에 따름)
 최대 가속도: a_max
@@ -840,7 +927,7 @@ REACT:
   b의 선택: 종방향 대비 횡방향 안전 거리 비율
 </code></pre>
 <h3>7.3 TCF-R2T 파라미터</h3>
-<pre><code>[시간-확장 네트워크]
+<pre class="codeblock"><code>[시간-확장 네트워크]
 
 최대 시간 스텝: T_max = N + l_max - 1
   N: 로봇 수
@@ -855,7 +942,7 @@ MCMF 알고리즘:
   증분 경로 탐색으로 최소 비용 최대 흐름
 </code></pre>
 <h3>7.4 실행 환경</h3>
-<pre><code>[소프트웨어 스택]
+<pre class="codeblock"><code>[소프트웨어 스택]
 
 미들웨어: ROS (Robot Operating System)
 통신: ROS 토픽/서비스 (상위→하위 목표 브로드캐스트)
@@ -864,9 +951,9 @@ MCMF 알고리즘:
 배정 트리거: 대형 변경 감지 시 (이벤트 기반)
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 비홀로노믹 제약과 JSTP의 관계</h3>
-<pre><code>[비홀로노믹 시스템에서의 차별 평탄성]
+<pre class="codeblock"><code>[비홀로노믹 시스템에서의 차별 평탄성]
 
 Ackermann WMR의 차별 평탄성:
   평탄 출력: (x, y) — 2D 위치
@@ -882,7 +969,7 @@ MINCO와의 시너지:
   → 제약 검증과 기울기 계산이 매우 효율적
 </code></pre>
 <h3>8.2 확장성: 로봇 수 증가</h3>
-<pre><code>[스케일링 분석]
+<pre class="codeblock"><code>[스케일링 분석]
 
 TCF-R2T:
   복잡도: O(N³) [T_max = O(N)일 때]
@@ -897,7 +984,7 @@ JSTP:
 결론: REACT는 수십 대 규모까지 실용적으로 확장 가능
 </code></pre>
 <h3>8.3 동적 장애물 처리</h3>
-<pre><code>[현재 접근]
+<pre class="codeblock"><code>[현재 접근]
 
 예측: LiDAR로 동적 장애물 실시간 탐지
      속도 추정으로 단기 경로 예측
@@ -913,7 +1000,7 @@ JSTP:
   → AEB fallback이 최후 안전망으로 보완
 </code></pre>
 <h3>8.4 한계 및 향후 방향</h3>
-<pre><code>[현재 한계]
+<pre class="codeblock"><code>[현재 한계]
 
 1. 2D 평면 가정:
    경사, 계단, 3D 환경 미지원
@@ -940,7 +1027,7 @@ JSTP:
   - 대규모 검증 (50대 이상)
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <h4>Planner 트랙 기존 리뷰 논문들과의 비교</h4>
 <div class="table-wrap"><table>
@@ -1069,7 +1156,7 @@ JSTP:
 </tbody></table></div>
 <h3>9.2 장단점 분석</h3>
 <p><strong>장점 (Strengths)</strong>:</p>
-<pre><code>1. 문제 독창성:
+<pre class="codeblock"><code>1. 문제 독창성:
    다중 로봇 대형 항법 + 시공간 최적화는 기존 리뷰 논문 중
    어디에도 없는 조합. WayPlan은 LLM 기반 조율, PRoID는
    탐색 릴레이이므로 REACT와 직접 겹치지 않음.
@@ -1087,7 +1174,7 @@ JSTP:
    하위 계층이 O(N) 병렬 확장 → 수십 대 로봇 시스템에 적용 가능
 </code></pre>
 <p><strong>단점 (Weaknesses)</strong>:</p>
-<pre><code>1. 코드 미공개:
+<pre class="codeblock"><code>1. 코드 미공개:
    WayPlan, TinySDP, UGE-MPC 등 주요 기존 리뷰 논문 대부분
    코드 공개 — REACT는 영상만 있는 프로젝트 페이지 제공
 
@@ -1103,7 +1190,7 @@ JSTP:
    실외, 계단, 경사 등 3D 환경 미지원
 </code></pre>
 <h3>9.3 실적용 가능성 평가</h3>
-<pre><code>[다중 로봇 실용화 관점]
+<pre class="codeblock"><code>[다중 로봇 실용화 관점]
 
 단기 (1-2년):
   ✅ 적용 가능한 분야:
@@ -1125,7 +1212,7 @@ JSTP:
   REACT: 대형 제어 특화 → 가장 실용적인 다중 로봇 대형 솔루션
 </code></pre>
 <h3>9.4 연구 방향성 평가</h3>
-<pre><code>[연구 트렌드 맥락]
+<pre class="codeblock"><code>[연구 트렌드 맥락]
 
 2025-2026 다중 로봇 경로 계획 트렌드:
   1. LLM 기반 조율 (WayPlan, PRoID)
@@ -1146,9 +1233,9 @@ REACT의 방향성:
 → REACT는 기존 리뷰 논문 공간에서 독자적 틈새를 채움
 </code></pre>
 <hr>
-<h2>9.5 심화 기술 비교 (Deep Technical Comparison)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="9. 5 심화 기술 비교">9.5 심화 기술 비교 (Deep Technical Comparison)</h2>
 <h3>WayPlan (arxiv2026)과의 다중 로봇 조율 비교</h3>
-<pre><code>[LLM 기반 조율 vs 수학적 최적화]
+<pre class="codeblock"><code>[LLM 기반 조율 vs 수학적 최적화]
 
 WayPlan:
   방법: 2계층 LLM (GPL 플래너 + 웨이포인트 생성자)
@@ -1176,7 +1263,7 @@ REACT:
   → 계층적 통합이 이상적 방향
 </code></pre>
 <h3>PRoID (arxiv2026)와의 다중 로봇 탐색 비교</h3>
-<pre><code>[탐색 전략 vs 대형 제어]
+<pre class="codeblock"><code>[탐색 전략 vs 대형 제어]
 
 PRoID:
   핵심: 다중 로봇 탐색 + 정보 릴레이
@@ -1200,7 +1287,7 @@ REACT:
   → 탐색 임무에서 함께 사용 가능
 </code></pre>
 <h3>TinySDP (RSS2026)와의 비홀로노믹 제약 처리 비교</h3>
-<pre><code>[SDP 기반 vs 다항식 최적화]
+<pre class="codeblock"><code>[SDP 기반 vs 다항식 최적화]
 
 TinySDP:
   문제: 단일 로봇, 비볼록 장애물 회피 MPC
@@ -1222,7 +1309,7 @@ REACT:
   → 임베디드 다중 로봇 대형 제어에 두 기법 통합 가능
 </code></pre>
 <h3>REACT의 MAPF (Multi-Agent Path Finding) 연구와의 관계</h3>
-<pre><code>[MAPF와 REACT의 연결]
+<pre class="codeblock"><code>[MAPF와 REACT의 연결]
 
 고전 MAPF:
   목표: 다중 에이전트 충돌 없는 경로 계획
@@ -1245,7 +1332,7 @@ REACT의 TCF-R2T:
   → 위 방법들 모두 단일 로봇, REACT만 다중 로봇 대형
 </code></pre>
 <h3>물류 로봇 시스템에서의 실용성 심화 분석</h3>
-<pre><code>[실제 물류 창고 시나리오]
+<pre class="codeblock"><code>[실제 물류 창고 시나리오]
 
 Amazon 창고 스타일 (Kiva 시스템과의 비교):
   Kiva: 고정된 격자 경로, 사전 프로그래밍된 대형
@@ -1266,7 +1353,7 @@ REACT의 물류 한계:
   REACT는 소규모 실내 물류 로봇 대형 제어의 강력한 출발점
   글로벌 계획 통합 시 실용화 가능성 높음
 </code></pre>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">9. 5 심화 기술 비교 →</a></div><h2 id="sec-10" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li><strong>WayPlan</strong>: &quot;WayPlan: Waypoint-Based Bi-Level Planning for Multi-Robot Systems&quot;, arXiv:2604.21138</li>
 <li><strong>TinySDP</strong>: &quot;TinySDP: Real Time Semidefinite Optimization for Certifiable and Agile Edge Robotics&quot;, RSS 2026. arXiv:2605.13748</li>
@@ -1281,15 +1368,110 @@ REACT의 물류 한계:
 <li><strong>MCMF</strong>: Ahuja, R.K. et al., &quot;Network Flows: Theory, Algorithms, and Applications&quot;, Prentice Hall, 1993.</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">10. 참고 문헌 →</a></div><h2 id="sec-11" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p>REACT는 다중 바퀴 달린 이동 로봇의 대형 항법 문제에 대한 체계적이고 실용적인 해법을 제시한다. TCF-R2T와 JSTP의 결합은 대형 제어의 두 핵심 문제 — 충돌 없는 배정과 시공간 궤적 최적화 — 를 각각 효율적으로 해결한다.</p>
 <p><strong>혁신성</strong>: 기존 리뷰 논문(WayPlan, PRoID, TinySDP, Muninn 등)이 각각 LLM 조율, 탐색 효율, 단일 로봇 경로 계획에 초점을 맞추는 반면, REACT는 <strong>다중 로봇 대형 제어의 시공간 동시 최적화</strong>라는 독자적인 문제 공간을 탐구한다. 특히 TCF-R2T의 시간-확장 네트워크 접근은 MAPF의 아이디어를 대형 배정에 창의적으로 응용한 것이다.</p>
 <p><strong>실용적 의의</strong>: 7대 실세계 WMR로 55-97% 실행시간 단축과 13-75% 대형 오차 감소를 검증한 것은 물류 창고, 환경 모니터링, 수색 구조 등 다중 로봇 응용에서의 즉각적인 적용 가능성을 보여준다. JSTP의 20 Hz 분산 실행은 실용적인 실시간성도 확보한다.</p>
 <p><strong>향후 과제</strong>: 코드 공개, 글로벌 경로 계획 통합, 3D 환경 확장, 탑티어 학회 채택이 이 연구의 영향력을 더욱 확대할 것이다. REACT가 제안하는 계층적 대형 제어 프레임워크는 향후 대규모 다중 로봇 시스템 연구의 중요한 기반이 될 것이다.</p>
-<p><img src="figures/fig_08_02.jpeg" alt="REACT 실세계 실험 상세" loading="lazy"></p>
-
+<figure><img src="figures/fig_08_02.jpeg" alt="REACT 실세계 실험 상세" loading="lazy"><figcaption>REACT 실세계 실험 상세</figcaption></figure>
+<div class="secnav"><a href="#sec-9">← 9. 5 심화 기술 비교</a><a href="#sec-11">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>iCrowdNav: Intention-Aware Scene Representations for Visual Crowd Navigation · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2606.26047">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">IEEE Robotics and Automation Letters (RA-L) 2026 — 게재 확정(탑티어)</div>
-    <h1>iCrowdNav: Intention-Aware Scene Representations for Visual Crowd Navigation</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2606.26047">arXiv:2606.26047</a></span>
-      <span>리뷰 2026-06-26</span>
-      <span>40분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">iCrowdNav_RAL2026</span>
     </div>
+    <h1 class="doc-title">iCrowdNav: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">IEEE Robotics and Automation Letters (RA-L) 2026 — 게재 확정(탑티어)</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2606.26047">2606.26047</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">❌ 미공개 (논문·프로젝트에서 코드 링크 확인 불가, 2026-06-26 기준)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">별도 프로젝트 페이지 미확인</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-06-26</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">40KB · 약 40분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>iCrowdNav: 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: iCrowdNav: Intention-Aware Scene Representations for Visual Crowd Navigation</li>
@@ -154,7 +240,7 @@ footer {
 <li>시뮬레이션에서 학습한 시각 인코더가 <strong>도메인 갭을 넘어 실세계로 zero-shot 전이</strong>되는가?</li>
 </ol>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <p><strong>(C1) 보행자 의도의 관측 불가능성(partial observability of intent).</strong>
 군중 내비게이션의 본질적 어려움은 보행자의 미래 궤적이 <strong>로봇에게 직접 관측되지 않는 잠재 변수</strong>라는 점이다. 전통적 접근(ORCA, Social Force Model, CADRL 등)은 보행자를 등속 직선 운동하는 점으로 가정하거나, 상호작용을 단순 반발력으로 모델링한다. 그러나 실제 보행자는 비선형적·예측적으로 움직이며, 이 가정의 오차가 누적되면 로봇은 &quot;freezing robot problem&quot;(과도하게 보수적이 되어 정지) 또는 반대로 충돌 위험 행동을 보인다.</p>
@@ -168,7 +254,7 @@ LiDAR 없이 RGB-D만 쓰면 시야각(FOV)이 좁고, 밀집 군중에서는 �
 벽·기둥·가구 같은 정적 장애물과, 움직이는 보행자를 <strong>하나의 일관된 표현 공간</strong>에 담아야 정책이 둘을 동시에 고려할 수 있다. 둘을 분리된 채널로 처리하면 융합 시점에서 정합(alignment) 문제가 생긴다.</p>
 <h3>2.2 핵심 해결책</h3>
 <p>iCrowdNav의 해법은 <strong>&quot;의도-인지 장면 표현(intention-aware scene representation)&quot;</strong> 이라는 이중 스트림 인코더로 요약된다:</p>
-<pre><code>                        ┌─────────────────────────────────────┐
+<pre class="diagram"><code>                        ┌─────────────────────────────────────┐
   RGB-D 시퀀스 ───────▶│  Spatio-Temporal Encoder (환경 스트림) │──┐
   (다중 카메라)         │  → 시간정렬 BEV 점유 z^t_bev          │  │
                         └─────────────────────────────────────┘  │
@@ -185,10 +271,10 @@ LiDAR 없이 RGB-D만 쓰면 시야각(FOV)이 좁고, 밀집 군중에서는 �
 <li><strong>가림 처리</strong>: 가려진 관절을 <strong>0-패딩(zero-padding)</strong> 하고 어텐션이 유효 관절에 집중. (C4 부분 완화)</li>
 </ul>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 의도-인지 장면 표현: 인간 포즈에서 의도로</h3>
 <p>iCrowdNav의 출발점은 <strong>보행자를 점이 아니라 17개 3D 관절의 골격(skeleton)으로 표현</strong>하는 것이다. 파이프라인은:</p>
-<pre><code>RGB-D ──[Ultralytics YOLO]──▶ 2D 포즈(17 keypoints) ──[depth 리프팅]──▶ 3D 포즈
+<pre class="diagram"><code>RGB-D ──[Ultralytics YOLO]──▶ 2D 포즈(17 keypoints) ──[depth 리프팅]──▶ 3D 포즈
                                                                           │
                                                           Θ^t ∈ ℝ^(Np × 17 × 3)
 </code></pre>
@@ -202,12 +288,12 @@ LiDAR 없이 RGB-D만 쓰면 시야각(FOV)이 좁고, 밀집 군중에서는 �
 <p>I2Former는 네 개 하위 모듈로 구성된다.</p>
 <h4>(a) Pose Encoder</h4>
 <p>원시 3D 좌표를 임베딩으로 사상하는 MLP. <strong>가려진 관절은 0-패딩</strong> 처리한다:</p>
-<pre><code>Θ̂^t = PoseEncoder(Θ^t),   가려진 관절 j: Θ^t[:, j, :] = 0
+<pre class="codeblock"><code>Θ̂^t = PoseEncoder(Θ^t),   가려진 관절 j: Θ^t[:, j, :] = 0
 </code></pre>
 <p>이 단순한 0-패딩 전략은 (C4) 가림 문제에 대한 실용적 절충이다. 가려진 관절을 명시적으로 마스킹하는 대신, 0 입력 + 후속 어텐션이 유효 관절에 자연히 가중되도록 학습에 맡긴다.</p>
 <h4>(b) IntentFormer — 관절 내 자기-어텐션</h4>
 <p>멀티헤드 자기-어텐션(MHSA)으로 한 사람 내부의 관절 관계를 포착한다:</p>
-<pre><code>f̂^t_ped = LN( MHSA(Θ̂^t) + Θ̂^t )
+<pre class="codeblock"><code>f̂^t_ped = LN( MHSA(Θ̂^t) + Θ̂^t )
 </code></pre>
 <ul>
 <li><code>MHSA</code>: multi-head self-attention — 관절 간 상관(예: 어깨 회전과 골반 회전의 연동)을 학습</li>
@@ -216,7 +302,7 @@ LiDAR 없이 RGB-D만 쓰면 시야각(FOV)이 좁고, 밀집 군중에서는 �
 </ul>
 <h4>(c) InteractFormer — 로봇-보행자 교차-어텐션</h4>
 <p><strong>로봇 상태가 질의(query)가 되어 보행자 특징을 키/값으로 조회</strong>하는 멀티헤드 교차-어텐션(MHCA):</p>
-<pre><code>ẑ^t_interact = LN( MHCA(e^t_robot, f^t_ped) + e^t_robot )
+<pre class="codeblock"><code>ẑ^t_interact = LN( MHCA(e^t_robot, f^t_ped) + e^t_robot )
 </code></pre>
 <ul>
 <li><code>e^t_robot</code>: 로봇 상태 임베딩 (질의)</li>
@@ -226,7 +312,7 @@ LiDAR 없이 RGB-D만 쓰면 시야각(FOV)이 좁고, 밀집 군중에서는 �
 <p>이 교차-어텐션 구조가 iCrowdNav의 핵심 차별점이다. 다수 군중 정책은 보행자 특징을 max/mean 풀링으로 집계하여 <strong>로봇 자신의 상태와 무관하게</strong> 군중을 요약한다. iCrowdNav는 로봇 상태를 질의로 삼아 <strong>로봇-중심 상호작용(robot-centric interaction)</strong> 을 명시적으로 모델링한다.</p>
 <h4>(d) Attention Pooling</h4>
 <p>관절 중요도를 적응적으로 가중하여 보행자별 특징을 고정 차원 벡터로 풀링. 모든 보행자 특징을 종합해 <code>z^t_interact</code> 산출.</p>
-<pre><code>ASCII: I2Former 데이터 흐름
+<pre class="diagram"><code>ASCII: I2Former 데이터 흐름
   Θ^t (Np×17×3)
      │ PoseEncoder(MLP, 0-pad 가림)
      ▼
@@ -242,7 +328,7 @@ LiDAR 없이 RGB-D만 쓰면 시야각(FOV)이 좁고, 밀집 군중에서는 �
 </code></pre>
 <h3>3.3 Spatio-Temporal Encoder — RGB-D에서 시간정렬 BEV로</h3>
 <p>환경 스트림은 RGB-D 관측을 <strong>조감도 점유(BEV occupancy)</strong> 로 변환하고, 시간 축을 따라 정렬·인코딩한다.</p>
-<pre><code>단계 1: 다중 뷰 RGB → ResNet-18(사전학습) → e^t ∈ ℝ^(Nc × C × Hc × Wc)
+<pre class="codeblock"><code>단계 1: 다중 뷰 RGB → ResNet-18(사전학습) → e^t ∈ ℝ^(Nc × C × Hc × Wc)
 단계 2: depth 다운샘플 → d^t ∈ ℝ^(Nc × Hc × Wc)
 단계 3: 3D 투영 → 자아중심 프레임 → sum pooling으로 BEV 축약
             x^t_bev ∈ ℝ^(C × 120 × 200)
@@ -258,7 +344,7 @@ LiDAR 없이 RGB-D만 쓰면 시야각(FOV)이 좁고, 밀집 군중에서는 �
 </ul>
 <h3>3.4 상태 융합과 DRL 정책</h3>
 <p>세 스트림(환경 BEV, 상호작용, 로봇 자기상태)을 연결하여 최종 상태 임베딩을 만든다 (식 10):</p>
-<pre><code>z^t = ϕ_f( Concat( z^t_bev , z^t_interact , z^t_state ) )
+<pre class="codeblock"><code>z^t = ϕ_f( Concat( z^t_bev , z^t_interact , z^t_state ) )
 </code></pre>
 <ul>
 <li><code>z^t_bev</code>: 시간정렬 BEV 점유 (환경 스트림)</li>
@@ -269,7 +355,7 @@ LiDAR 없이 RGB-D만 쓰면 시야각(FOV)이 좁고, 밀집 군중에서는 �
 <p>이 융합 표현 <code>z^t</code>가 PPO 정책 네트워크에 입력되어 <strong>선·각속도(linear/angular velocity)</strong> 행동을 출력한다.</p>
 <h4>보상 함수 설계 (식 11–12)</h4>
 <p>iCrowdNav의 보상은 <strong>희소 종단 신호 + 조밀 진행 신호 + 사회적 거리 페널티 + 평활화 페널티</strong>의 결합이다:</p>
-<pre><code>R^t = R_terminal + R_progress + R_social + R_smooth
+<pre class="codeblock"><code>R^t = R_terminal + R_progress + R_social + R_smooth
 
 R_terminal = +20      if d^t_g ≤ ρ_robot        (성공: 목표 도달)
            = -20      if d^t_min ≤ ρ_robot       (충돌: 보행자/장애물 최소거리 위반)
@@ -288,7 +374,7 @@ R_smooth   = −0.1 · |ω_z|           if |ω_z| &gt; 1.0 rad/s  (과도 각속
 </ul>
 <h4>학습 알고리즘</h4>
 <p><strong>PPO(Proximal Policy Optimization)</strong> 사용. 사전학습 백본(ResNet-18, 시간 인코더)은 동결, 학습 모듈(I2Former, 융합, 정책 헤드)만 공동 최적화. 이 부분 동결 전략은 (i) 학습 안정성, (ii) sim-to-real 견고성, (iii) 샘플 효율을 동시에 노린 설계다.</p>
-<pre><code>ASCII: 전체 학습/추론 파이프라인
+<pre class="diagram"><code>ASCII: 전체 학습/추론 파이프라인
   ┌──────────── 관측 ────────────┐
   │ 다중뷰 RGB-D 시퀀스           │     │ 3D 포즈(YOLO+depth)        │
   └──────────────┬───────────────┘     └──────────┬────────────────┘
@@ -306,9 +392,9 @@ R_smooth   = −0.1 · |ω_z|           if |ω_z| &gt; 1.0 rad/s  (과도 각속
                         보상 R^t(식11-12)  ◀── 환경(Isaac Sim)
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <p>전체 파이프라인은 <strong>3단계</strong>로 구성된다 (Figure 2 기준):</p>
-<pre><code>[단계 1] 특징 추출 (Feature Extraction) — 병렬
+<pre class="diagram"><code>[단계 1] 특징 추출 (Feature Extraction) — 병렬
   ├─ 환경 경로: RGB-D 시퀀스 → ResNet-18 → 3D 투영 → BEV → 시간정렬 → 3D CNN → z_bev
   └─ 의도 경로: 3D 포즈 → PoseEncoder → IntentFormer(MHSA) → InteractFormer(MHCA) → AttnPool → z_interact
 
@@ -326,7 +412,7 @@ R_smooth   = −0.1 · |ω_z|           if |ω_z| &gt; 1.0 rad/s  (과도 각속
 </li>
 </ol>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 / 시뮬레이션 환경 (Datasets)</h3>
 <ul>
 <li><strong>시뮬레이터</strong>: <strong>Isaac Sim</strong> (NVIDIA), 사진현실적(photo-realistic) 렌더링</li>
@@ -462,7 +548,7 @@ R_smooth   = −0.1 · |ω_z|           if |ω_z| &gt; 1.0 rad/s  (과도 각속
 <p><strong>절제 연구의 통찰</strong>: 두 스트림은 <strong>상보적(complementary)</strong> 이다. BEV는 &quot;어디가 막혔는가(공간 안전)&quot;를, I2Former는 &quot;사람들이 어디로 갈 것인가(사회적 편안함)&quot;를 담당한다. 둘 중 하나만으로는 안전하면서도 정중한 내비게이션이 불가능하다.</p>
 <h3>5.6 환경 간 견고성의 해석 (Cross-Environment Robustness)</h3>
 <p>세 환경(Office 7.0m / Hospital 4.0m / Warehouse 2.5m)의 결과를 <strong>통로 폭의 함수</strong>로 읽으면 iCrowdNav의 작동 원리가 더 선명해진다.</p>
-<pre><code>통로 폭(m):   7.0 ────────── 4.0 ────────── 2.5
+<pre class="diagram"><code>통로 폭(m):   7.0 ────────── 4.0 ────────── 2.5
 SR:          0.95          0.88           0.87
 TPZ(s):      0.92          1.98           1.83
 NT(s):       9.03          9.82           9.77
@@ -474,7 +560,7 @@ NT(s):       9.03          9.82           9.77
 </ul>
 <p>이 분석은 iCrowdNav를 실배치할 때 <strong>폭 4m 안팎의 중간 통로(병원 복도, 사무실 통로)가 comfort 관점에서 가장 주의가 필요한 구간</strong>임을 시사한다 — 가장 좁은 곳이 아니라 가장 모호한 곳이 사회적 마찰을 만든다.</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <ol>
 <li><p><strong>인간 포즈를 의도의 1차 시각 단서로 격상한 표현 학습.</strong>
 보행자를 점/원판이 아니라 17관절 3D 골격으로 표현하고, IntentFormer(자기-어텐션)로 관절-수준 운동 패턴을, InteractFormer(로봇-중심 교차-어텐션)로 로봇-보행자 상호작용을 인코딩. 이는 &quot;위치+속도&quot; 추상화가 버리는 선행 운동 신호(몸통 방향, 보폭 변화)를 복원한다.</p>
@@ -493,7 +579,7 @@ TPZ 지표로 장거리에서 1.70s(vs SARL* 7.96s, 4.7배 우수)를 달성. �
 </li>
 </ol>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 핵심 하이퍼파라미터 / 설정</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -591,7 +677,7 @@ TPZ 지표로 장거리에서 1.70s(vs SARL* 7.96s, 4.7배 우수)를 달성. �
 <li><strong>보상의 균형</strong>: ±20 종단 신호가 너무 크면 조밀 보상이 묻히고, 너무 작으면 freezing이 생긴다. 진행 계수 3.2와 종단 ±20의 비(약 1:6)는 &quot;충돌은 절대 안 되지만, 가만히 있는 것도 손해&quot;라는 균형점을 인코딩한다.</li>
 </ul>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 (Scalability)</h3>
 <p>iCrowdNav의 의도 스트림은 <strong>보행자 수 Np에 대해 어텐션 비용이 증가</strong>한다. I2Former의 InteractFormer는 로봇 질의 × Np 보행자 키/값이므로 비용은 O(Np)에 가깝고, IntentFormer의 관절 내 자기-어텐션은 보행자당 O(17²)로 상수다. 따라서 보행자 수에 선형 확장이 기대되나, <strong>초고밀도(0.2 명/m² 이상)에서는 검출/가림이 병목</strong>이 된다(아래 8.4).</p>
 <p>환경 스트림의 BEV(120×200)는 보행자 수와 무관한 고정 비용이므로, 군중이 아무리 밀집해도 환경 표현 비용은 일정하다. 이 비대칭(환경=상수, 의도=선형)은 좋은 설계 균형이다.</p>
@@ -661,7 +747,7 @@ TPZ 지표로 장거리에서 1.70s(vs SARL* 7.96s, 4.7배 우수)를 달성. �
 <p>iCrowdNav는 <strong>표현 학습(representation learning)</strong> 의 관점에서 군중 내비게이션을 재정의한다. 전통 군중 내비게이션은 &quot;어떤 정책/제어 법칙이 충돌을 피하는가&quot;(ORCA, RVO, CADRL, SARL)에 집중했다. iCrowdNav는 질문을 한 단계 앞으로 옮긴다: <strong>&quot;정책에 무엇을 입력해야 하는가.&quot;</strong> 즉 정책 구조보다 <strong>입력 표현(state representation)</strong> 의 설계가 사회적 내비게이션 품질을 결정한다는 가설이다.</p>
 <p>이 입장은 절제 연구로 강하게 뒷받침된다 — 같은 PPO 정책이라도 I2Former 입력 유무에 따라 TPZ가 2배 이상 갈린다. <strong>&quot;표현이 정책을 결정한다(representation determines policy)&quot;</strong> 는 명제가 군중 내비게이션에서 실증된 사례로 볼 수 있다.</p>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <p>같은 Planner 트랙의 선행 리뷰 중 <strong>사회/군중 내비게이션</strong>과 가장 가까운 세 편과 비교한다:</p>
 <ul>
@@ -761,7 +847,7 @@ TPZ 지표로 장거리에서 1.70s(vs SARL* 7.96s, 4.7배 우수)를 달성. �
 <h3>9.5 일반화 가능성 (Generalization)</h3>
 <p>iCrowdNav의 핵심 아이디어인 <strong>&quot;행위자(agent)의 자세/골격을 의도 단서로 인코딩&quot;</strong> 는 보행자에 국한되지 않는다. 동일 원리를 (i) 다른 로봇/차량의 자세(휠 각도, 차체 방향), (ii) 동물, (iii) 자전거/킥보드 같은 마이크로모빌리티에 확장 가능하다. 즉 iCrowdNav는 <strong>&quot;상호작용 행위자의 운동학적 자세를 표현으로 끌어올린다&quot;</strong> 는 일반 레시피의 보행자 인스턴스다. 이 일반화 잠재력이 단일 논문의 군중 내비게이션 성과를 넘어서는 가치다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ul>
 <li>iCrowdNav, <em>IEEE Robotics and Automation Letters (RA-L)</em>, 2026. DOI: 10.1109/LRA.2026.3677748. arXiv:2606.26047.</li>
 <li>비교 대상 (본 코퍼스):<ul>
@@ -773,7 +859,7 @@ TPZ 지표로 장거리에서 1.70s(vs SARL* 7.96s, 4.7배 우수)를 달성. �
 <li>관련 기법: PPO (Schulman et al., 2017), ResNet (He et al., 2016), Social Force Model (Helbing &amp; Molnár, 1995), SARL/CADRL 계열 군중 내비게이션, nuScenes (Caesar et al., 2020), Ultralytics YOLO.</li>
 </ul>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>혁신성</h3>
 <p>iCrowdNav의 핵심 혁신은 <strong>보행자를 &quot;점&quot;이 아니라 &quot;의도를 가진 골격&quot;으로 본다</strong>는 표현론적 전환이다. IntentFormer(관절 자기-어텐션)와 InteractFormer(로봇-중심 교차-어텐션)로 3D 포즈에서 운동 의도를 추출하고, 시간정렬 BEV 점유로 환경을 통합 표현하여, 같은 PPO 정책이라도 <strong>사회적 편안함(TPZ)에서 2배 이상의 차이</strong>를 만든다. 이는 &quot;표현이 정책을 결정한다&quot;는 명제의 강한 실증이다.</p>
 <h3>실용적 의의</h3>
@@ -782,9 +868,104 @@ TPZ 지표로 장거리에서 1.70s(vs SARL* 7.96s, 4.7배 우수)를 달성. �
 <p>한계는 명확히 인지(perception) 측에 있다 — 140° FOV의 사각과 초고밀도 가림이 의도 추론을 무력화한다. 따라서 (i) 전방위 센서/희소 LiDAR 융합으로 FOV·가림 완화, (ii) 명시적 보행자 궤적 예측으로 해석가능성·선제성 강화, (iii) 비-SFM 실세계 보행자 분포로의 일반화 검증이 다음 단계다. 더 근본적으로, iCrowdNav가 제시한 <strong>&quot;상호작용 행위자의 운동학적 자세를 표현으로 격상&quot;</strong> 이라는 레시피는 군중 내비게이션을 넘어 다양한 동적 행위자 회피 문제로 확장될 잠재력을 가진다.</p>
 <hr>
 <p><em>본 리뷰는 PhD 수준 상세 분석이며, 코드 미공개(2026-06-26 기준)로 인해 방법론 분석은 논문 본문(arXiv HTML)의 수식·실험표·아키텍처 기술에 기반한다.</em></p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="iCrowdNav: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

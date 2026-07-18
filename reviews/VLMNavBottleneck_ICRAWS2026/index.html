@@ -6,133 +6,220 @@
 <meta name="color-scheme" content="light dark">
 <title>Exploring Bottlenecks in VLM-LLM Navigation: How 3D Scene Understanding Capability Impacts Zero-Shot VLN · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2605.14801">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">ICRA 2026 Workshop on Multimodal-Spatial AI (Oral Presentation)</div>
-    <h1>Exploring Bottlenecks in VLM-LLM Navigation: How 3D Scene Understanding Capability Impacts Zero-Shot VLN</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2605.14801">arXiv:2605.14801</a></span>
-      <span>리뷰 2026-05-16</span>
-      <span>39분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">VLMNavBottleneck_ICRAWS2026</span>
     </div>
+    <h1 class="doc-title">Exploring Bottlenecks in VLM-LLM Navigation: 3D 장면 이해 능력이 Zero-Shot VLN에 미치는 영향 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">ICRA 2026 Workshop on Multimodal-Spatial AI (Oral Presentation)</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2605.14801">2605.14801</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">❌ 미공개</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">❌ 없음</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-05-16</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">39KB · 약 39분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 12개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-11"><span class="toc-num">A</span><span class="toc-title">부록 A: Zero-Shot VLN 패러다임 심층 분석</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>Exploring Bottlenecks in VLM-LLM Navigation: 3D 장면 이해 능력이 Zero-Shot VLN에 미치는 영향 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: Exploring Bottlenecks in VLM-LLM Navigation: How 3D Scene Understanding Capability Impacts Zero-Shot VLN</li>
@@ -147,7 +234,7 @@ footer {
 <h3>1.2 연구 목표 (Research Objective)</h3>
 <p>본 논문은 <strong>VLM(Vision-Language Model)과 LLM(Large Language Model)의 결합으로 구동되는 제로샷 Vision-Language Navigation(Zero-Shot VLN) 시스템에서, 3D 장면 인식(3D scene understanding) 능력이 내비게이션 성공률에 미치는 영향</strong>을 체계적으로 분석한다.</p>
 <p>핵심 문제 의식:</p>
-<pre><code>[제로샷 VLN 파이프라인의 구조적 문제]
+<pre class="codeblock"><code>[제로샷 VLN 파이프라인의 구조적 문제]
 
 기존 VLM-LLM 기반 제로샷 VLN 시스템:
   시각 입력 → [3D 인식 모델] → 장면 표현 → [LLM 플래너] → 행동
@@ -165,11 +252,11 @@ footer {
 </code></pre>
 <p>이 논문은 &quot;인식(perception)이 좋아지면 내비게이션도 좋아진다&quot;는 단순 가정을 깨뜨리고, <strong>인식 포화 현상(Perception Saturation Phenomenon)</strong>을 발견하며, 실제 내비게이션에 중요한 인식 특성이 무엇인지를 실험적으로 규명한다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 3D 인식 모델과 내비게이션 요구사항의 불일치</h4>
 <p>현재 3D 인식 모델들은 픽셀 수준 정확도를 최우선으로 학습하지만, VLN은 전혀 다른 특성을 요구한다:</p>
-<pre><code>[인식 모델 최적화 목표 vs. VLN 요구사항]
+<pre class="codeblock"><code>[인식 모델 최적화 목표 vs. VLN 요구사항]
 
 3D 인식 모델 최적화:
   ✓ 모든 객체의 높은 분할 정확도 (AP, IoU 최대화)
@@ -188,7 +275,7 @@ VLN이 실제로 필요로 하는 것:
 </code></pre>
 <p>이 불일치는 두 가지 구체적인 실패 모드를 만든다:</p>
 <p><strong>실패 모드 1 — Slow LLM Planner에서의 오탐지(False Positive)</strong>:</p>
-<pre><code>3D 인식 모델이 200개 클래스 중 관련 없는 객체들을 
+<pre class="codeblock"><code>3D 인식 모델이 200개 클래스 중 관련 없는 객체들을 
 다수 탐지 → 위상 지도(topological map)에 노이즈 증가
 → LLM이 관련 없는 객체들을 랜드마크로 혼동
 → 잘못된 경로 결정
@@ -198,7 +285,7 @@ VLN이 실제로 필요로 하는 것:
 무관한 오탐지가 의사결정을 방해함
 </code></pre>
 <p><strong>실패 모드 2 — Fast Reactive Navigator에서의 바운딩 박스 왜곡</strong>:</p>
-<pre><code>목표 객체(예: &quot;문&quot;)의 바운딩 박스가 가로세로 비율 왜곡
+<pre class="codeblock"><code>목표 객체(예: &quot;문&quot;)의 바운딩 박스가 가로세로 비율 왜곡
 → 에이전트가 객체까지의 실제 거리/방향을 잘못 추정
 → 충돌하거나 목표에 도달하지 못함
 
@@ -207,7 +294,7 @@ VLN이 실제로 필요로 하는 것:
 추정 통과 경로: 중심점 기준 → 실제 통과 가능 경로: 양측 기준
 </code></pre>
 <h4>B. 계산 자원과 실시간 요구사항 충돌</h4>
-<pre><code>[3D 인식 모델의 계산 비용 vs. VLN 실시간 요구]
+<pre class="codeblock"><code>[3D 인식 모델의 계산 비용 vs. VLN 실시간 요구]
 
 ESAM (Efficient Segment Anything Model) 계열:
   - 단일 뷰포인트에서 40프레임 360° 스캔 처리 필요
@@ -229,10 +316,10 @@ VLN 실시간 요구사항:
 <li><strong>핵심 설계 원칙 제시</strong>: 정밀도보다 커버리지 핵심 어휘(navigation-critical vocabulary)가 중요함을 실험으로 증명</li>
 </ol>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 시스템 기반: SFCo-Nav 프레임워크 분석</h3>
 <p>이 논문의 분석 대상은 SFCo-Nav 아키텍처로, Slow/Fast 이중 플래너 구조를 채택한다:</p>
-<pre><code>[SFCo-Nav 전체 파이프라인]
+<pre class="diagram"><code>[SFCo-Nav 전체 파이프라인]
 
 입력: 자연어 지시 I, 현재 시각 관측 {v_1, ..., v_T}
       ↓
@@ -254,7 +341,7 @@ VLN 실시간 요구사항:
 <h3>3.2 인식 품질 파라미터화 (Perception Quality Parameterization)</h3>
 <h4>3.2.1 이상적 관측 (Ideal Observation)</h4>
 <p>시점 v에서의 이상적 관측은 N개 객체의 완전 정보:</p>
-<pre><code>O_gt^v = {o_1, o_2, ..., o_N}
+<pre class="codeblock"><code>O_gt^v = {o_1, o_2, ..., o_N}
 
 각 객체 o_i:
   - semantic label: l_i ∈ L (정확한 카테고리)
@@ -263,7 +350,7 @@ VLN 실시간 요구사항:
 </code></pre>
 <h4>3.2.2 Slow Planner용 탐지율 (Retention Ratio) ρ_ret</h4>
 <p>Slow LLM Planner는 위상적 시간-객체 이분 그래프(Temporal-Object Bipartite Graph) G를 구성한다:</p>
-<pre><code>G = (T, V_obj, E)
+<pre class="codeblock"><code>G = (T, V_obj, E)
 
 T: 궤적 상의 시간 노드들 {t_1, ..., t_K}
 V_obj: 탐지된 의미론적 객체들
@@ -281,7 +368,7 @@ E: 간선 집합, (t, o) ∈ E ↔ 시간 t에 객체 o가 관측됨
   λ = 0.5 (균등 가중치)
 </code></pre>
 <p>탐지율 파라미터:</p>
-<pre><code>O_slow^v = {o_1, ..., o_K},  K = floor(ρ_ret · N)
+<pre class="codeblock"><code>O_slow^v = {o_1, ..., o_K},  K = floor(ρ_ret · N)
 
 포함 규칙 (중첩 부분집합 속성):
   ρ_1 &lt; ρ_2 ⟹ O(ρ_1) ⊂ O(ρ_2)
@@ -292,7 +379,7 @@ E: 간선 집합, (t, o) ∈ E ↔ 시간 t에 객체 o가 관측됨
 <p>이 중첩 속성은 <strong>실험의 일관성을 보장</strong>한다: 낮은 품질의 탐지 결과가 높은 품질 결과의 부분집합이 되도록 강제함.</p>
 <h4>3.2.3 Fast Navigator용 바운딩 박스 IoU (φ_iou)</h4>
 <p>Fast Reactive Navigator는 객체의 공간 좌표와 BB를 직접 활용한다. BB 품질은 φ_iou로 파라미터화:</p>
-<pre><code>노이즈 BB 생성 방법:
+<pre class="codeblock"><code>노이즈 BB 생성 방법:
   b_noise의 중심점: c_noise = c_ideal + Δ
   제약 조건: IoU(b_noise, b_ideal) = φ_iou
 
@@ -304,7 +391,7 @@ E: 간선 집합, (t, o) ∈ E ↔ 시간 t에 객체 o가 관측됨
 <p>Fast Navigator는 두 가지 기하학적 스킬로 목표에 접근한다:</p>
 <h4>3.3.1 접근 스킬 (Approach Skill) — 고체 표면용</h4>
 <p>탁자, 의자, 카운터 등 고체 물체에 접근할 때:</p>
-<pre><code>목표 위치 계산:
+<pre class="codeblock"><code>목표 위치 계산:
   p_target = c_noise - u · (r_coll + δ_safe)
 
   c_noise: 노이즈가 포함된 객체 중심
@@ -317,7 +404,7 @@ E: 간선 집합, (t, o) ∈ E ↔ 시간 t에 객체 o가 관측됨
 </code></pre>
 <h4>3.3.2 통과 스킬 (Through Skill) — 문/통로용</h4>
 <p>문, 복도 입구 등 통과 가능한 구조물을 위해:</p>
-<pre><code>통과 축 결정:
+<pre class="codeblock"><code>통과 축 결정:
   j = argmin_i(s_i)    // 가장 얇은 차원 = 통과 축
   n = R[:, j]          // 통과 방향의 법선 벡터
 
@@ -332,14 +419,14 @@ E: 간선 집합, (t, o) ∈ E ↔ 시간 t에 객체 o가 관측됨
 </code></pre>
 <h4>3.3.3 뷰포인트 선택</h4>
 <p>목표 위치 계산 후:</p>
-<pre><code>v* = argmin_{v ∈ V_nav} || p_target - pos(v) ||
+<pre class="codeblock"><code>v* = argmin_{v ∈ V_nav} || p_target - pos(v) ||
 
 V_nav: 내비게이션 가능한 뷰포인트 집합
 v*: 목표에 가장 가까운 뷰포인트 선택
 </code></pre>
 <h3>3.4 ESAM (Efficient Segment Anything Model) 훈련 분석</h3>
 <p>ESAM은 ScanNet200 데이터셋에서 훈련되며, 이 논문에서는 5개 변형을 비교한다:</p>
-<pre><code>[ESAM 훈련 변형 비교]
+<pre class="diagram"><code>[ESAM 훈련 변형 비교]
 
 ┌──────────┬──────────┬──────────┬──────────┬───────┬───────┬───────┬─────┐
 │ 변형     │ SV Iter  │ MV Iter  │ 총 Iter  │ IoU   │ AP@25 │ AP@50 │ AP  │
@@ -360,9 +447,9 @@ MV: Multi-View (멀티뷰 훈련 — 장거리 관계 학습)
   → 내비게이션 핵심 어휘만 학습해도 충분함을 시사
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <h3>4.1 전체 분석 파이프라인</h3>
-<pre><code>[인식-내비게이션 병목 분석 파이프라인]
+<pre class="codeblock"><code>[인식-내비게이션 병목 분석 파이프라인]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 단계 1: 통계적 시뮬레이션 (Statistical Simulation)
@@ -405,7 +492,7 @@ ESAM 5개 변형으로 실제 3D 탐지 수행
 </code></pre>
 <h3>4.2 데이터 흐름 상세</h3>
 <h4>Slow LLM Planner 경로</h4>
-<pre><code>ESAM 탐지 결과
+<pre class="codeblock"><code>ESAM 탐지 결과
     ↓
 [객체 필터링: ρ_ret 적용]
   N개 탐지 객체 중 K = floor(ρ_ret × N)개 선택
@@ -423,7 +510,7 @@ ESAM 5개 변형으로 실제 3D 탐지 수행
 내비게이션 행동 실행
 </code></pre>
 <h4>Fast Reactive Navigator 경로</h4>
-<pre><code>ESAM 탐지 결과
+<pre class="codeblock"><code>ESAM 탐지 결과
     ↓
 [목표 객체 BB 추출: φ_iou 적용]
   b_noise = perturb(b_ideal, φ_iou)
@@ -441,7 +528,7 @@ ESAM 5개 변형으로 실제 3D 탐지 수행
 내비게이션 행동 실행
 </code></pre>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
 <ul>
 <li><p><strong>R2R (Room-to-Room)</strong>: 실내 내비게이션 표준 벤치마크</p>
@@ -459,13 +546,13 @@ ESAM 5개 변형으로 실제 3D 탐지 수행
 </li>
 </ul>
 <h3>5.2 평가 지표 (Evaluation Metrics)</h3>
-<pre><code>SR (Success Rate): 목표 지점 3m 이내 도달 성공률
+<pre class="codeblock"><code>SR (Success Rate): 목표 지점 3m 이내 도달 성공률
 OSR (Oracle Success Rate): 경로 상 어느 시점에서든 3m 이내 접근한 비율
 SPL (Success Path Length): 경로 효율성 가중 성공률
   SPL = SR × (최단경로 / 실제경로)
 </code></pre>
 <h3>5.3 정량적 결과 — Slow LLM Planner (Table II)</h3>
-<pre><code>[이상적 인식 조건에서 ρ_ret 변화에 따른 성능]
+<pre class="diagram"><code>[이상적 인식 조건에서 ρ_ret 변화에 따른 성능]
 ┌──────────────────┬───────┬───────┬───────┬───────┐
 │ 인식 소스        │ ρ_ret │  SR   │  OSR  │  SPL  │
 ├──────────────────┼───────┼───────┼───────┼───────┤
@@ -489,7 +576,7 @@ SPL (Success Path Length): 경로 효율성 가중 성공률
       → 격차의 주원인: false positive로 인한 그래프 노이즈
 </code></pre>
 <h3>5.4 정량적 결과 — Fast Reactive Navigator (Table III)</h3>
-<pre><code>[이상적 인식 조건에서 φ_iou 변화에 따른 성능]
+<pre class="diagram"><code>[이상적 인식 조건에서 φ_iou 변화에 따른 성능]
 ┌──────────────────┬────────┬───────┬───────┬───────┐
 │ 인식 소스        │ φ_iou  │  SR   │  OSR  │  SPL  │
 ├──────────────────┼────────┼───────┼───────┼───────┤
@@ -515,7 +602,7 @@ SPL (Success Path Length): 경로 효율성 가중 성공률
       이상적 최고 36.0% 대비 -9.6%p 격차
 </code></pre>
 <h3>5.5 어휘 크기 비교 (20-class vs 200-class)</h3>
-<pre><code>[핵심 발견: 내비게이션 어휘 충분성]
+<pre class="codeblock"><code>[핵심 발견: 내비게이션 어휘 충분성]
 
 ESAM 200-class (Heavy) vs. ESAM 20-class 비교:
 
@@ -536,9 +623,9 @@ Slow LLM Planner:
   200개 클래스의 오탐지가 성능을 오히려 해침
 </code></pre>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>6.1 인식 포화 현상 발견 (Perception Saturation Phenomenon)</h3>
-<pre><code>[인식 포화 현상의 수학적 이해]
+<pre class="codeblock"><code>[인식 포화 현상의 수학적 이해]
 
 이상적 상황에서의 SR-ρ_ret 관계 (Slow Planner):
   ρ_ret: 0.20 → 0.80 (4배 증가)
@@ -556,7 +643,7 @@ Slow LLM Planner:
 </code></pre>
 <h3>6.2 플래너별 인식 실패 원인 특정</h3>
 <p><strong>Slow LLM Planner 실패 원인</strong>:</p>
-<pre><code>주요 원인: False Positive 과다
+<pre class="codeblock"><code>주요 원인: False Positive 과다
   현상: ρ_ret 증가 시 관련 없는 객체도 함께 증가
   결과: 그래프 노이즈 → LLM 혼란 → 잘못된 경로 결정
 
@@ -568,7 +655,7 @@ Slow LLM Planner:
   → ρ_ret는 높지만 S_match (그래프 무결성)은 낮음
 </code></pre>
 <p><strong>Fast Reactive Navigator 실패 원인</strong>:</p>
-<pre><code>주요 원인: 바운딩 박스 가로세로 비율 왜곡
+<pre class="codeblock"><code>주요 원인: 바운딩 박스 가로세로 비율 왜곡
   현상: ESAM의 BB가 실제 객체 형태를 정확히 반영하지 못함
   특히 문/통로: 세로 길쭉한 구조물을 정사각형 BB로 탐지
 
@@ -586,7 +673,7 @@ Slow LLM Planner:
   높은 φ_iou(≈0.80): 형태도 맞고 위치도 맞음 → 성능 회복
 </code></pre>
 <h3>6.3 내비게이션 특화 어휘 충분성 증명</h3>
-<pre><code>[20-class vs. 200-class 실험의 의미]
+<pre class="codeblock"><code>[20-class vs. 200-class 실험의 의미]
 
 증명한 것:
   ① 내비게이션 성공에 필요한 핵심 어휘 = ~20개 클래스
@@ -598,7 +685,7 @@ Slow LLM Planner:
    내비게이션 핵심 어휘의 정밀한 바운딩 박스 추정을 최적화해야 한다&quot;
 </code></pre>
 <h3>6.4 통계적 SR 상한 프레임워크</h3>
-<pre><code>[상한 도출 방법론의 가치]
+<pre class="codeblock"><code>[상한 도출 방법론의 가치]
 
 기존 VLN 연구의 한계:
   실제 시스템 성능 측정 → 어느 요소가 병목인지 불명확
@@ -616,9 +703,9 @@ Slow LLM Planner:
 이 프레임워크는 미래 연구의 최적화 방향을 제시
 </code></pre>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 환경 및 도구</h3>
-<pre><code>시뮬레이터: Habitat 2.0
+<pre class="codeblock"><code>시뮬레이터: Habitat 2.0
 데이터셋: R2R (Room-to-Room)
 3D 인식: ESAM (Efficient Segment Anything Model)
   - ScanNet200 데이터로 훈련
@@ -628,14 +715,14 @@ LLM 플래너: GPT-4o (Slow Planner)
 Fast Navigator: 기하학적 규칙 기반 (학습 불필요)
 </code></pre>
 <h3>7.2 핵심 하이퍼파라미터</h3>
-<pre><code>그래프 무결성 가중치: λ = 0.5 (S_obj : S_edge = 50:50)
+<pre class="codeblock"><code>그래프 무결성 가중치: λ = 0.5 (S_obj : S_edge = 50:50)
 탐지율 실험 범위: ρ_ret ∈ {0.20, 0.40, 0.60, 0.80}
 BB IoU 실험 범위: φ_iou ∈ {0.05, 0.20, 0.40, 0.60, 0.80}
 안전 여유 버퍼: δ_safe (객체 크기 비례)
 통과 여유 거리: δ_pass (고정 상수)
 </code></pre>
 <h3>7.3 ESAM 훈련 세부사항</h3>
-<pre><code>훈련 데이터: ScanNet200
+<pre class="codeblock"><code>훈련 데이터: ScanNet200
     단일 뷰 (SV): 1개 카메라 뷰 기반 분할
     멀티 뷰 (MV): 다수 카메라 뷰의 3D 일관성 학습
 
@@ -645,9 +732,9 @@ BB IoU 실험 범위: φ_iou ∈ {0.05, 0.20, 0.40, 0.60, 0.80}
   (~20개 R2R 지시문에 자주 등장하는 랜드마크)
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 인식 포화 현상의 이론적 배경</h3>
-<pre><code>[왜 인식 포화가 발생하는가?]
+<pre class="codeblock"><code>[왜 인식 포화가 발생하는가?]
 
 VLN의 의사결정 구조:
   내비게이션 성공 여부는 연속적이 아닌 이진적 (도달/미달)
@@ -665,7 +752,7 @@ VLN의 의사결정 구조:
   4. False positive가 실제 성공을 방해하는 상쇄 효과
 </code></pre>
 <h3>8.2 비단조적 SR-φ_iou 관계 설명</h3>
-<pre><code>[Fast Navigator에서 φ_iou ≈ 0.20-0.60이 최악인 이유]
+<pre class="codeblock"><code>[Fast Navigator에서 φ_iou ≈ 0.20-0.60이 최악인 이유]
 
 φ_iou 범위별 BB 왜곡 특성:
   φ_iou ≈ 0.05: BB 완전 엉뚱 → 에이전트가 다른 전략 채택
@@ -680,7 +767,7 @@ VLN의 의사결정 구조:
   → Semi-reliable information can be more harmful than no information
 </code></pre>
 <h3>8.3 실용적 설계 가이드라인</h3>
-<pre><code>[이 연구에서 도출된 3D 인식 시스템 설계 원칙]
+<pre class="codeblock"><code>[이 연구에서 도출된 3D 인식 시스템 설계 원칙]
 
 원칙 1: 어휘 최적화 (Vocabulary Optimization)
   ❌ 범용 분할 (ScanNet200 200개 클래스 전부)
@@ -701,7 +788,7 @@ VLN의 의사결정 구조:
   → 관련 없는 객체 탐지를 줄이는 것이 우선
 </code></pre>
 <h3>8.4 한계점</h3>
-<pre><code>[논문의 한계]
+<pre class="codeblock"><code>[논문의 한계]
 
 1. 분석 대상 시스템: SFCo-Nav 단일 프레임워크
    → 다른 VLM-LLM VLN 아키텍처에 일반화 여부 미검증
@@ -717,7 +804,7 @@ VLN의 의사결정 구조:
 5. 코드/데이터 미공개: 재현 불가능
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -781,7 +868,7 @@ VLN의 의사결정 구조:
 </tbody></table></div>
 <h3>9.2 장단점 분석</h3>
 <p><strong>장점</strong>:</p>
-<pre><code>1. 연구 참신성: &quot;더 좋은 인식 = 더 좋은 내비게이션&quot; 가정에 반하는
+<pre class="codeblock"><code>1. 연구 참신성: &quot;더 좋은 인식 = 더 좋은 내비게이션&quot; 가정에 반하는
    인식 포화 현상을 최초로 실험적으로 규명
    
 2. 설계 가이드라인의 실용성: 향후 VLN 시스템 설계에 명확한 방향 제시
@@ -793,7 +880,7 @@ VLN의 의사결정 구조:
 4. 이상적-실제 비교 프레임워크: 상한과 실제의 격차로 병목 정량화
 </code></pre>
 <p><strong>단점</strong>:</p>
-<pre><code>1. 실세계 검증 없음: 시뮬레이션 분석만 수행
+<pre class="codeblock"><code>1. 실세계 검증 없음: 시뮬레이션 분석만 수행
    → 실제 로봇 센서 노이즈, 조명 변화 등 고려 없음
 
 2. 단일 아키텍처 분석: SFCo-Nav만 대상
@@ -805,7 +892,7 @@ VLN의 의사결정 구조:
 4. 코드/데이터 미공개: 재현 불가능, 확장 연구 어려움
 </code></pre>
 <h3>9.3 실적용 가능성 평가</h3>
-<pre><code>[실용화 관점 평가]
+<pre class="codeblock"><code>[실용화 관점 평가]
 
 즉시 활용 가능한 가이드라인:
   ✓ 기존 VLM-LLM VLN 시스템의 인식 모듈 최적화에 즉시 적용 가능
@@ -821,7 +908,7 @@ VLN의 의사결정 구조:
       실제 시스템 개선은 후속 연구 필요
 </code></pre>
 <h3>9.4 연구 방향성 평가</h3>
-<pre><code>[이 논문이 제시하는 연구 방향의 타당성]
+<pre class="codeblock"><code>[이 논문이 제시하는 연구 방향의 타당성]
 
 긍정적 측면:
   인식과 내비게이션의 공동 최적화(joint optimization) 필요성 명시
@@ -838,7 +925,7 @@ VLN의 의사결정 구조:
   4. 실세계 로봇에서의 검증
 </code></pre>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ul>
 <li>Room-to-Room (R2R): Anderson et al., 2018 — Vision-and-Language Navigation 기준 벤치마크</li>
 <li>ScanNet200: Rozenberszki et al., 2022 — 실내 3D 장면 분할 데이터셋</li>
@@ -851,10 +938,10 @@ VLN의 의사결정 구조:
 <li>SAGE (ICML 2026): VLM 기반 구현화 내비게이션</li>
 </ul>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>혁신성 평가</h3>
 <p>이 논문의 가장 중요한 공헌은 <strong>인식 포화 현상(Perception Saturation Phenomenon)의 발견</strong>이다. 이 발견은 VLN 연구 커뮤니티에서 당연시해온 &quot;더 좋은 인식 = 더 좋은 내비게이션&quot;이라는 가정을 실험적으로 반박한다.</p>
-<pre><code>[논문의 핵심 메시지 요약]
+<pre class="codeblock"><code>[논문의 핵심 메시지 요약]
 
 3D 인식 품질 ↑ (ρ_ret: 0.2 → 0.8)
               ↓
@@ -877,7 +964,7 @@ VLN 성공률 ↑ 폭: 고작 3.3%p (이상적 조건에서도)
 <li><strong>실시간 경량 인식이 정밀 인식보다 유용할 수 있음</strong>: 인식 포화 임계점 이상에서</li>
 </ol>
 <h3>향후 연구 방향</h3>
-<pre><code>단기 과제:
+<pre class="codeblock"><code>단기 과제:
   1. 내비게이션 핵심 어휘 자동 발견 알고리즘
   2. BB 형태-인식 공동 손실 함수 설계
   3. 분석 결과를 실세계 로봇으로 검증
@@ -892,9 +979,9 @@ VLN 성공률 ↑ 폭: 고작 3.3%p (이상적 조건에서도)
 </code></pre>
 <p><strong>총평</strong>: 방법 제안 논문이 아닌 분석 논문임에도 불구하고, 발견한 인식 포화 현상은 VLN 분야 전체의 연구 방향에 영향을 줄 수 있는 중요한 기여다. ICRA 워크숍 구두 발표 채택은 이 가치를 인정받은 것이다. 다만 코드와 실세계 검증이 없어 실용적 영향은 제한적이며, 후속 연구의 활성화가 이 논문의 진정한 가치를 결정할 것이다.</p>
 <hr>
-<h2>부록 A: Zero-Shot VLN 패러다임 심층 분석</h2>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div><h2 id="sec-11" data-label="부록 A: Zero-Shot VLN 패러다임 심층 분석">부록 A: Zero-Shot VLN 패러다임 심층 분석</h2>
 <h3>A.1 Zero-Shot VLN의 진화</h3>
-<pre><code>[Zero-Shot VLN 패러다임의 역사적 변화]
+<pre class="codeblock"><code>[Zero-Shot VLN 패러다임의 역사적 변화]
 
 1세대 (2020-2022): 규칙 기반 탐색
   - 미리 구축된 지도 + A* 탐색
@@ -913,7 +1000,7 @@ VLN 성공률 ↑ 폭: 고작 3.3%p (이상적 조건에서도)
     → 본 논문이 이 질문에 처음으로 체계적 답변
 </code></pre>
 <h3>A.2 SFCo-Nav 프레임워크와의 관계</h3>
-<pre><code>[SFCo-Nav: 분석 대상 시스템의 세부 설계]
+<pre class="codeblock"><code>[SFCo-Nav: 분석 대상 시스템의 세부 설계]
 
 SFCo-Nav (Slow-Fast Cooperative Navigation):
   설계 원칙: 인간의 이중 처리 이론에서 영감
@@ -936,7 +1023,7 @@ VLN에 적용:
   각각 다른 측면(탐지율 vs. BB 형태)에 민감
 </code></pre>
 <h3>A.3 인식 포화의 정보 이론적 해석</h3>
-<pre><code>[인식 포화의 정보 이론적 배경]
+<pre class="codeblock"><code>[인식 포화의 정보 이론적 배경]
 
 내비게이션 성공에 필요한 정보량:
   I_nav = H(목표 위치) - H(목표 위치 | 탐지된 랜드마크)
@@ -956,7 +1043,7 @@ VLN에 적용:
 이것이 인식 포화의 정보 이론적 기반임
 </code></pre>
 <h3>A.4 타 VLN 벤치마크로의 일반화 가능성</h3>
-<pre><code>[R2R 이외 VLN 벤치마크에서의 예상 결과]
+<pre class="codeblock"><code>[R2R 이외 VLN 벤치마크에서의 예상 결과]
 
 RxR (Room-Across-Room):
   - 더 긴 지시문, 더 많은 랜드마크 참조
@@ -977,7 +1064,7 @@ NavBench (실외 내비게이션):
   - BB 형태 정확성에 더 민감할 것으로 예상
 </code></pre>
 <h3>A.5 향후 인식 모델 설계를 위한 상세 가이드라인</h3>
-<pre><code>[VLN 최적화 3D 인식 모델 설계 원칙]
+<pre class="codeblock"><code>[VLN 최적화 3D 인식 모델 설계 원칙]
 
 원칙 1: Navigation-Vocabulary-First 설계
   현재 접근: ImageNet/ScanNet200 사전학습 → VLN 파인튜닝
@@ -1009,7 +1096,7 @@ NavBench (실외 내비게이션):
     자원 부족: ρ_ret = 0.40 (빠른 처리, 성능 거의 동일)
 </code></pre>
 <h3>A.6 이 연구가 VLN 평가 패러다임에 주는 함의</h3>
-<pre><code>[VLN 벤치마킹의 재고]
+<pre class="codeblock"><code>[VLN 벤치마킹의 재고]
 
 현재 VLN 평가 방식의 한계:
   SR, SPL만으로는 어느 요소가 병목인지 불명확
@@ -1034,9 +1121,104 @@ NavBench (실외 내비게이션):
      
 이 프레임워크로 VLN 시스템 최적화 방향을 명확히 특정 가능
 </code></pre>
-
+<div class="secnav"><a href="#sec-9">← 10. 참고 문헌</a><a href="#sec-11">부록 A: Zero-Shot VLN 패러다임 심층 분석 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="Exploring Bottlenecks in VLM-LLM Navigation: 3D 장면 이해 능력이 Zero-Shot VLN에 미치는 영향 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

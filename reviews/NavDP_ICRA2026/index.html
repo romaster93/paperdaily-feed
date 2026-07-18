@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2505.08712">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">ICRA 2026</div>
-    <h1>NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2505.08712">arXiv:2505.08712</a></span>
-      <span>리뷰 2026-06-29</span>
-      <span>43분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">NavDP_ICRA2026</span>
     </div>
+    <h1 class="doc-title">NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">ICRA 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2505.08712">2505.08712</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval"><a href="https://github.com/OpenRobotLab/NavDP">github.com/OpenRobotLab/NavDP</a></span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://wzcai99.github.io/navigation-diffusion-policy.github.io/">wzcai99.github.io/navigation-diffusion-policy.github.io/</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-06-29</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">42KB · 약 43분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance</li>
@@ -150,7 +236,7 @@ footer {
 <h3>1.2 연구 목표 (Research Objective)</h3>
 <p>NavDP는 <strong>시뮬레이션에서만 학습하여 제로샷(zero-shot) 심-투-리얼(sim-to-real) 전이를 달성하는 엔드-투-엔드 맵리스(mapless) 로컬 내비게이션 정책</strong>을 구현하는 연구다. 핵심은 <strong>확산 정책(Diffusion Policy)으로 궤적을 생성</strong>하고, <strong>특권 정보(Privileged Information) 기반 비평(Critic) 네트워크로 궤적의 안전성을 평가</strong>하여 단일 모델에서 생성-평가를 통합하는 것이다.</p>
 <p>핵심 연구 질문:</p>
-<pre><code>&quot;실제 로봇 데이터를 단 한 건도 쓰지 않고, 시뮬레이션에서만
+<pre class="codeblock"><code>&quot;실제 로봇 데이터를 단 한 건도 쓰지 않고, 시뮬레이션에서만
  (단, 시뮬레이션에서만 접근 가능한 ESDF 맵·충돌 정보 같은
  &#39;특권 정보&#39;를 학습 신호로 활용하여) 학습한 로컬 내비게이션
  정책이, 재학습 없이 여러 형태의 실제 로봇(바퀴형/사족/휴머노이드)
@@ -178,11 +264,11 @@ footer {
 </tbody></table></div>
 <p>NavDP는 <strong>확산(다중 모드 궤적 분포) + 비평(안전성 점수) + 대규모 심 데이터 엔진</strong>을 결합하여, iPlanner/ViPlanner 대비 sim·real 양쪽에서 우위를 보이고 NoMaD 대비 탐색 효율을 큰 폭으로 개선한다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 실로봇 데이터 수집의 비용·확장성 문제</h4>
 <p>GNM/ViNT/NoMaD 계열은 실제 로봇을 텔레옵하여 수집한 RGB 궤적으로 학습한다. 이 접근은 데이터 다양성과 규모에 본질적 제약이 있다:</p>
-<pre><code>[실로봇 데이터 학습의 구조적 한계]
+<pre class="codeblock"><code>[실로봇 데이터 학습의 구조적 한계]
 
 수집 비용:
   - 사람이 직접 로봇을 운전하여 궤적 수집
@@ -201,7 +287,7 @@ footer {
 </code></pre>
 <h4>B. 결정론적 로컬 플래너의 단일 모드 문제</h4>
 <p>iPlanner, ViPlanner는 심에서 학습한 로컬 플래너지만, 관측 → 단일 궤적의 결정론적 회귀를 수행한다:</p>
-<pre><code>[결정론적 회귀의 다중 모드 붕괴 (mode collapse)]
+<pre class="codeblock"><code>[결정론적 회귀의 다중 모드 붕괴 (mode collapse)]
 
 상황: 전방에 장애물, 좌/우 둘 다 통과 가능
 
@@ -218,7 +304,7 @@ footer {
 <p>기존 방법은 &quot;어디로 갈지(생성)&quot;와 &quot;그 길이 안전한지(평가)&quot;를 별도 모듈로 처리하거나, 평가 자체가 없다. NavDP는 이 둘을 <strong>단일 트랜스포머 백본에서 actor head + critic head로 통합</strong>하려 한다. 단, 안전성을 학습하려면 임의 궤적에 대한 충돌 라벨이 필요한데, 실세계에서는 이를 조밀하게 얻을 수 없다 → <strong>특권 정보(ESDF)</strong>가 필요한 이유.</p>
 <h4>D. Sim-to-Real 도메인 갭</h4>
 <p>심에서만 학습한 정책이 실제 로봇에서 동작하려면 시각/동역학 갭을 넘어야 한다:</p>
-<pre><code>[Sim-to-Real 갭의 원천]
+<pre class="codeblock"><code>[Sim-to-Real 갭의 원천]
 
 시각 도메인 갭:
   - 렌더링 vs 실제 카메라 노이즈/조명/텍스처
@@ -234,7 +320,7 @@ footer {
 </code></pre>
 <h3>2.2 핵심 해결책</h3>
 <p>NavDP의 세 가지 핵심 혁신:</p>
-<pre><code>[NavDP의 혁신 요소 3가지]
+<pre class="codeblock"><code>[NavDP의 혁신 요소 3가지]
 
 혁신 1: 확산 기반 궤적 생성 (Diffusion Actor)
   로컬 RGB-D 관측 → 노이즈 제거 과정으로 미래 궤적(24 waypoint) 생성
@@ -252,10 +338,10 @@ footer {
   A* 전역 최적 + 큐빅 스플라인 + 도메인 랜덤화
 </code></pre>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 확산 정책 액터 (Diffusion Policy Actor)</h3>
 <p>NavDP의 액터는 <strong>DDPM 스케줄을 사용하는 조건부 확산 모델</strong>로, 노이즈가 섞인 궤적에서 주입된 노이즈를 예측(noise prediction)하여 궤적을 복원한다. 궤적은 미래 M=24개 웨이포인트의 시퀀스이며, 입력은 최근 N=8 프레임의 RGB-D 히스토리다.</p>
-<pre><code>[확산 액터 손실 — Point-Goal 조건]
+<pre class="codeblock"><code>[확산 액터 손실 — Point-Goal 조건]
 
 L_act^pg = E[ || ε_k − ε_θ( τ + ε_{k+1}, k, g_t, d_t, I_{t−N:t} ) ||² ]
 
@@ -273,7 +359,7 @@ L_act^pg = E[ || ε_k − ε_θ( τ + ε_{k+1}, k, g_t, d_t, I_{t−N:t} ) ||² 
 </code></pre>
 <p>이 손실은 태스크 조건을 바꿔 가며 (point-goal <code>g_t</code>, image-goal, no-goal 등) <strong>네 가지 태스크 조건을 단일 액터에서 통합 학습</strong>한다. no-goal(목표 없음)은 조건 토큰을 비우고 탐색적 궤적을 생성하는 보조 태스크로 작동한다.</p>
 <p><strong>아키텍처 — 크로스 어텐션 구조</strong>:</p>
-<pre><code>[액터 head의 토큰 흐름]
+<pre class="diagram"><code>[액터 head의 토큰 흐름]
 
 노이즈 궤적 임베딩 (M=24 waypoint)  ──► Query
 RGB-D 융합 토큰 (256+256 patch)     ──► Key / Value
@@ -287,7 +373,7 @@ RGB-D 융합 토큰 (256+256 patch)     ──► Key / Value
 </code></pre>
 <h3>3.2 비전 백본 (Vision Backbone)</h3>
 <p>NavDP는 RGB와 Depth를 분리된 인코더로 처리한 뒤 토큰을 융합한다:</p>
-<pre><code>[RGB-D 인코딩]
+<pre class="codeblock"><code>[RGB-D 인코딩]
 
 RGB 인코더:
   - 사전학습된 DepthAnything ViT 인코더
@@ -304,7 +390,7 @@ Depth 인코더:
 <p>DepthAnything 인코더 채택은 단순한 ImageNet ViT 대신 <strong>기하학적 사전학습이 된 시각 표현</strong>을 쓴다는 점에서 sim-to-real 시각 갭에 강건한 핵심 설계다.</p>
 <h3>3.3 특권 정보 기반 비평 네트워크 (Privileged Critic)</h3>
 <p>NavDP의 두 번째 head는 <strong>궤적의 안전성을 점수화하는 비평 네트워크</strong>다. 핵심은 <strong>시뮬레이션에서만 얻을 수 있는 ESDF(Euclidean Signed Distance Field)</strong>로 임의 궤적의 안전성 라벨을 자동 생성하는 것이다.</p>
-<pre><code>[비평 값 정의 (Eq. 2)]
+<pre class="codeblock"><code>[비평 값 정의 (Eq. 2)]
 
 V(τ̂) = − Σ_{k=0}^{T} 𝕀( d_τ̂^k &lt; d_safe )
         + α · Σ_{k=0}^{T−1} ( d_τ̂^{k+1} − d_τ̂^k )
@@ -324,7 +410,7 @@ V(τ̂) = − Σ_{k=0}^{T} 𝕀( d_τ̂^k &lt; d_safe )
              → 더 멀리/전진하는 궤적에 가점 (진행성)
 </code></pre>
 <p><strong>비평 손실</strong>:</p>
-<pre><code>[비평 손실 (Eq. 3)]
+<pre class="codeblock"><code>[비평 손실 (Eq. 3)]
 
 L_critic = E[ ( V(τ̂) − V_θ( I_{t−N:t}, D_t, τ̂ ) )² ]
 
@@ -339,7 +425,7 @@ L_critic = E[ ( V(τ̂) − V_θ( I_{t−N:t}, D_t, τ̂ ) )² ]
 <p>이것이 NavDP 설계의 가장 영리한 부분이다. &quot;특권 정보를 실세계에서 어떻게 얻는가?&quot;라는 우려는 <strong>사실 무의미</strong>하다 — 특권 정보(ESDF)는 오직 <strong>학습 라벨 생성</strong>에만 쓰이고, 배포된 비평 네트워크 <code>V_θ</code>는 순수 RGB-D 관측만으로 안전 점수를 추정하기 때문이다(privileged learning / teacher-student의 표준 형태).</p>
 <h3>3.4 대조적 궤적 증강 (Contrastive Trajectory Augmentation)</h3>
 <p>비평 네트워크가 &quot;안전 vs 위험&quot;을 학습하려면 위험 궤적(negative) 샘플도 필요하다. NavDP는 충돌 데이터를 실제로 수집하지 않고, <strong>정답 궤적을 변형하여 위험 궤적을 합성</strong>한다:</p>
-<pre><code>[음성(negative) 궤적 합성]
+<pre class="codeblock"><code>[음성(negative) 궤적 합성]
 
 1) 원본 정답 궤적 τ에 random rotation 적용 → 회전된 경로 τ_r
 2) 가중치 β ~ Uniform(0, 1) 랜덤 샘플
@@ -354,7 +440,7 @@ L_critic = E[ ( V(τ̂) − V_θ( I_{t−N:t}, D_t, τ̂ ) )² ]
 </code></pre>
 <p>이 증강은 <strong>연속적인 안전성 스펙트럼</strong>(완전 안전 ~ 충돌)을 생성하여, 비평 네트워크가 미세한 안전 마진을 학습하게 한다. 어블레이션에서 대조적 증강은 +3.0% 성공률 기여로 확인됐다.</p>
 <h3>3.5 추론 시 생성-평가 통합 (Inference: Generate-then-Evaluate)</h3>
-<pre><code>[NavDP 추론 파이프라인]
+<pre class="codeblock"><code>[NavDP 추론 파이프라인]
 
 1) 관측 인코딩:
    RGB(N=8 frame) → DepthAnything ViT → 256 token
@@ -378,7 +464,7 @@ L_critic = E[ ( V(τ̂) − V_θ( I_{t−N:t}, D_t, τ̂ ) )² ]
 <p>비평 기반 궤적 선택은 어블레이션에서 +7.8% 성공률 기여 — NavDP에서 단일 가장 큰 성능 요소 중 하나다.</p>
 <h3>3.6 확산 정책이 내비게이션에 적합한 이유 (Why Diffusion for Navigation)</h3>
 <p>NavDP가 결정론적 회귀 대신 확산 정책을 선택한 근거를 내비게이션 도메인 특성과 함께 정리한다:</p>
-<pre><code>[내비게이션에서 확산 vs 결정론적 회귀]
+<pre class="codeblock"><code>[내비게이션에서 확산 vs 결정론적 회귀]
 
 특성 1: 다중 모드 데모 (Multimodal Demonstrations)
   내비게이션은 본질적으로 다중 해를 갖는다.
@@ -404,8 +490,8 @@ L_critic = E[ ( V(τ̂) − V_θ( I_{t−N:t}, D_t, τ̂ ) )² ]
 </code></pre>
 <p>이는 NoMaD(ICRA2024)가 확산을 내비게이션에 처음 도입한 통찰을 계승하되, NavDP는 여기에 <strong>비평 기반 후처리 선택</strong>을 추가하여 &quot;다중 모드 생성&quot;의 이점을 &quot;안전한 단일 실행 궤적&quot;으로 안전하게 환원한다.</p>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>[NavDP 전체 파이프라인]
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>[NavDP 전체 파이프라인]
 
 ═══════════════ 학습 (Simulation Only) ═══════════════
 
@@ -473,7 +559,7 @@ L_critic = E[ ( V(τ̂) − V_θ( I_{t−N:t}, D_t, τ̂ ) )² ]
 <li>다음 관측 획득, 반복(&gt; 10 Hz)</li>
 </ol>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -484,7 +570,7 @@ L_critic = E[ ( V(τ̂) − V_θ( I_{t−N:t}, D_t, τ̂ ) )² ]
 </thead>
 <tbody><tr>
 <td><strong>학습 scene</strong></td>
-<td>3,154개 (3D-Front, HSSD, HM3D, Replica, Gibson, Matterport3D 통합)</td>
+<td class="longcell">3,154개 (3D-Front, HSSD, HM3D, Replica, Gibson, Matterport3D 통합)</td>
 </tr>
 <tr>
 <td><strong>궤적 수</strong></td>
@@ -556,7 +642,7 @@ L_critic = E[ ( V(τ̂) − V_θ( I_{t−N:t}, D_t, τ̂ ) )² ]
 <td>58.6</td>
 <td>53.3</td>
 </tr>
-<tr>
+<tr class="ours">
 <td><strong>NavDP (ours)</strong></td>
 <td><strong>67.2</strong></td>
 <td><strong>62.6</strong></td>
@@ -664,7 +750,7 @@ L_critic = E[ ( V(τ̂) − V_θ( I_{t−N:t}, D_t, τ̂ ) )² ]
 </ul>
 <h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
 <p>NavDP는 <strong>실로봇 데이터 0건</strong>으로 학습했음에도 제로샷 실세계 배포에서 강한 성능을 보였다:</p>
-<pre><code>[실세계 실험 요약]
+<pre class="codeblock"><code>[실세계 실험 요약]
 
 플랫폼: Turtlebot4(바퀴), Unitree Go2(사족), Unitree G1(휴머노이드)
 태스크: Point-Goal(목표 좌표 도달), No-Goal(탐색)
@@ -686,7 +772,7 @@ No-Goal 실세계 탐색 시간: 112.9s (NoMaD 29.3s, 3.8×)
 <p><strong>한계</strong>: 사족/휴머노이드(Go2/G1) 7/10로 바퀴형(9/10)보다 낮음 — 보행 로봇의 카메라 흔들림/시점 변동이 잔여 갭으로 남음.</p>
 <h3>5.5 결과의 함의 — sim-to-real 갭 반전 현상 분석</h3>
 <p>NavDP 결과에서 가장 주목할 점은 <strong>point-goal에서 실세계 SR(76.7%)이 시뮬레이션 SR(67.2%)보다 높다</strong>는 것이다. 일반적으로 sim-only 학습 정책은 실세계에서 성능이 하락(positive sim-to-real gap)하는데, NavDP는 반대다. 가능한 해석:</p>
-<pre><code>[sim &gt; real 가 아닌 real &gt; sim 인 이유 (분석)]
+<pre class="codeblock"><code>[sim &gt; real 가 아닌 real &gt; sim 인 이유 (분석)]
 
 가설 1: 평가 분포 차이
   시뮬레이션 벤치마크가 의도적으로 더 어려운 케이스
@@ -708,10 +794,10 @@ No-Goal 실세계 탐색 시간: 112.9s (NoMaD 29.3s, 3.8×)
 </code></pre>
 <p>이 반전 현상은 NavDP의 핵심 설계 결정(DepthAnything 인코더 + Depth 우선 + 비평 안전 선택 + 도메인 랜덤화)이 결합되어 sim-to-real 강건성을 만든다는 강력한 방증이다. 다만 실세계 에피소드 수(로봇당 10)가 제한적이라, 더 큰 규모의 실세계 평가가 이 반전 현상을 확증하는 데 필요하다.</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>기여 1: 확산 정책의 내비게이션 적용 + 비평 통합</h3>
 <p>NavDP는 확산 정책(다중 모드 궤적 생성)과 특권 정보 비평(안전 선택)을 <strong>단일 트랜스포머 백본</strong>에서 통합한 최초의 실용적 로컬 내비게이션 프레임워크다. 결정론적 회귀(iPlanner/ViPlanner)의 averaging 문제를 확산으로 회피하고, 생성된 다중 후보를 비평으로 선별한다.</p>
-<pre><code>[기존 방법 대비 통합의 가치]
+<pre class="codeblock"><code>[기존 방법 대비 통합의 가치]
 
 iPlanner/ViPlanner (결정론적):
   관측 → 단일 궤적 (안전 평가 없음 or 분리)
@@ -728,9 +814,9 @@ NavDP (확산 + 비평):
 <h3>기여 4: 제로샷 Sim-to-Real Cross-Embodiment</h3>
 <p>실로봇 데이터 0건으로 학습한 단일 정책이 바퀴형(Turtlebot4)·사족(Go2)·휴머노이드(G1) 3종에 제로샷 전이됨을 실증했다. 임베디먼트 랜덤화의 효과(20%→90%)를 어블레이션으로 직접 입증했다.</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 모델 아키텍처</h3>
-<pre><code>[주요 아키텍처 사양]
+<pre class="codeblock"><code>[주요 아키텍처 사양]
 
 RGB 인코더:     DepthAnything ViT (사전학습) → 256 patch token
 Depth 인코더:   scratch ViT                  → 256 patch token
@@ -743,7 +829,7 @@ RGB 히스토리:   N = 8 frame
 태스크 조건:    4종 (point-goal / image-goal / no-goal / etc.)
 </code></pre>
 <h3>7.2 학습 설정</h3>
-<pre><code>[학습 하이퍼파라미터]
+<pre class="codeblock"><code>[학습 하이퍼파라미터]
 
 학습 GPU:       32× NVIDIA A100
 배치 크기:      2,048
@@ -759,7 +845,7 @@ ESDF voxel:     0.05 m (다운샘플 0.2 m for planning)
 추론 속도:      &gt; 10 Hz (실시간)
 </code></pre>
 <h3>7.3 데이터 엔진 파이프라인</h3>
-<pre><code>[데이터 엔진 상세]
+<pre class="codeblock"><code>[데이터 엔진 상세]
 
 1) Scene 로드: 3,154 scene (6개 데이터셋 통합)
 2) 목표 샘플: scene당 100 start-goal 쌍
@@ -774,7 +860,7 @@ ESDF voxel:     0.05 m (다운샘플 0.2 m for planning)
 산출: 1M+ m, 40M RGB-D 이미지
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 분석</h3>
 <p><strong>더 많은 임베디먼트로의 확장</strong>:</p>
 <p>NavDP의 cross-embodiment 일반화는 데이터 엔진의 임베디먼트 랜덤화에 직접 비례한다. 어블레이션(저높이 20% → 랜덤화 90%)은 <strong>새 로봇 형태를 추가하려면 데이터 엔진에 해당 카메라 높이/바디 반경 분포를 추가하면 된다</strong>는 명확한 레시피를 제공한다. 이는 ManiSkill/IsaacLab 류의 절차적 임베디먼트 생성과 결합 시 임의 형태로 확장 가능성을 시사한다.</p>
@@ -794,7 +880,7 @@ ESDF voxel:     0.05 m (다운샘플 0.2 m for planning)
 <p><strong>한계 5: 통합 손실 식 부재</strong></p>
 <p>actor 손실(Eq.1)과 critic 손실(Eq.3)이 <strong>별도로</strong> 정의되며, 단일 가중 통합 손실 식이 명시되지 않는다. 두 head의 그래디언트 상호작용/가중 스케줄에 대한 분석이 부족하다.</p>
 <h3>8.3 향후 연구 방향</h3>
-<pre><code>[향후 연구 방향]
+<pre class="codeblock"><code>[향후 연구 방향]
 
 방향 1: 동적 환경 비평
   정적 ESDF → 시공간 SDF / 사람 궤적 예측 기반 안전 점수
@@ -815,7 +901,7 @@ ESDF voxel:     0.05 m (다운샘플 0.2 m for planning)
   게이트 없는 체크포인트 + 상업 친화 라이선스
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <p>NavDP는 <strong>로컬 내비게이션 정책</strong>(목표 좌표/이미지/탐색 조건)이라는 점에서, 자연어 지시 기반 VLN(AwareVLN, StreamVLN)과는 입력 모달이 다르지만, &quot;관측 → 내비게이션 행동 생성&quot;이라는 같은 트랙에 속한다. 가장 가까운 형제 논문 3편과 비교한다:</p>
 <div class="table-wrap"><table>
@@ -935,7 +1021,7 @@ ESDF voxel:     0.05 m (다운샘플 0.2 m for planning)
 <li><strong>IsaacSim 4.2 + IsaacLab 1.2</strong> 무거운 의존성 → 재현/확장 진입장벽</li>
 </ul>
 <p><strong>배포 권장사항</strong>:</p>
-<pre><code>추천 환경: 정적/준정적 실내 (창고, 가정, 사무실)
+<pre class="codeblock"><code>추천 환경: 정적/준정적 실내 (창고, 가정, 사무실)
 추천 플랫폼: RGB-D 카메라 탑재 바퀴형 모바일 로봇 (최적)
             사족/휴머노이드도 가능하나 추가 검증 권장
 GPU: RTX 4090/5080 급 온보드 (&gt;10Hz 실시간)
@@ -950,7 +1036,7 @@ GPU: RTX 4090/5080 급 온보드 (&gt;10Hz 실시간)
 </ol>
 <p>중장기 관점에서, NavDP의 확산+비평 프레임워크에 자연어 조건과 동적 안전성을 추가하면, <strong>언어로 지시받고 안전하게 실시간 이동하는 범용 내비게이션 정책</strong>으로 발전할 수 있다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li>Cai et al. (2026). NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance. ICRA 2026. arXiv:2505.08712.</li>
 <li>Shah et al. (2023). GNM: A General Navigation Model to Drive Any Robot. ICRA 2023.</li>
@@ -967,7 +1053,7 @@ GPU: RTX 4090/5080 급 온보드 (&gt;10Hz 실시간)
 <li>Savva et al. (2019). Habitat: A Platform for Embodied AI Research. ICCV 2019.</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>혁신성 평가</h3>
 <p>NavDP는 로컬 내비게이션 정책 분야에서 세 가지 요소를 결합하여 ICRA 2026에 채택된 견고한 시스템 논문이다.</p>
 <p>첫째, <strong>확산 정책과 특권 정보 비평을 단일 백본에서 통합</strong>했다. 결정론적 회귀(iPlanner/ViPlanner)의 다중 모드 평균화와 sim-to-real 취약성(real SR 16.7%)을, 확산의 다중 모드 생성과 비평의 안전 선택으로 극복하여 real SR 76.7%를 달성했다. 비평 선택이 단일 최대 어블레이션 기여(+7.8%)라는 점은 &quot;생성 후 선택&quot; 구조의 가치를 직접 입증한다.</p>
@@ -977,7 +1063,7 @@ GPU: RTX 4090/5080 급 온보드 (&gt;10Hz 실시간)
 <p>실로봇 데이터 0건으로 학습한 단일 정책이 바퀴형(9/10)·사족(7/10)·휴머노이드(7/10)에 제로샷 전이되고, 랩탑 GPU에서 &gt;10Hz로 동작한다는 것은 실용적 내비게이션 시스템 구축 비용을 근본적으로 낮춘다. 특히 sim→real 갭이 음(real 76.7% &gt; sim 67.2%)인 결과는 DepthAnything 인코더 + 비평 안전 선택 + 도메인 랜덤화의 조합이 갖는 강건성을 방증한다.</p>
 <h3>향후 연구 방향</h3>
 <p>가장 중요한 과제는 <strong>동적 환경 안전성</strong>(정적 ESDF의 한계 극복)과 <strong>자연어 조건 통합</strong>(VLN화)이다. NavDP의 안전 확산 정책을 AwareVLN/StreamVLN류의 고수준 언어 추론과 계층 결합하면, &quot;언어로 지시받아 안전하게 실시간 이동하는&quot; 풀스택 내비게이션이 가능할 것이다. 부재한 ImageGoal 정량 검증과 게이트 없는 완전 오픈 재현도 후속 과제다.</p>
-<pre><code>[NavDP 종합 평가]
+<pre class="codeblock"><code>[NavDP 종합 평가]
 
 혁신성:          ⭐⭐⭐⭐   (확산+특권비평+심엔진의 효과적 결합)
 기술 완성도:     ⭐⭐⭐⭐   (체계적 어블레이션, 명확한 수식)
@@ -987,9 +1073,104 @@ GPU: RTX 4090/5080 급 온보드 (&gt;10Hz 실시간)
 종합:            Strong — ICRA 2026 수준의 견고한 sim-to-real 시스템 논문
 </code></pre>
 <p>NavDP는 &quot;실로봇 데이터 없이도, 특권 정보를 영리하게 학습 신호로만 쓰고 확산+비평으로 안전을 보장하면, 다양한 로봇에 제로샷 전이되는 실시간 내비게이션 정책을 만들 수 있다&quot;는 것을 설득력 있게 입증한 논문이다.</p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2605.19958">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">arXiv 2026</div>
-    <h1>TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2605.19958">arXiv:2605.19958</a></span>
-      <span>리뷰 2026-05-20</span>
-      <span>44분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">TravExplorer_arxiv2026</span>
     </div>
+    <h1 class="doc-title">TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2605.19958">2605.19958</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval"><a href="https://github.com/wuyi2121/TravExplorer">github.com/wuyi2121/TravExplorer</a> (공개 예정)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">없음</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-05-20</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">43KB · 약 44분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning</li>
@@ -147,7 +233,7 @@ footer {
 <h3>1.2 연구 목표 (Research Objective)</h3>
 <p>TravExplorer는 <strong>Zero-shot Object Navigation(ZSON) 문제를 다층(multi-floor) 실내 환경으로 확장</strong>하는 크로스 플로어 구현화 탐색 프레임워크다. 기존 대부분의 ZSON 시스템이 단층(single-floor) 평면 내비게이션을 가정하는 데 반해, 실제 건물은 계단, 층계참, 수직 중첩 공간 등을 포함한 복잡한 3차원 구조를 갖는다.</p>
 <p>핵심 연구 질문:</p>
-<pre><code>&quot;사전 지도 없이 미지의 다층 건물 환경에서,
+<pre class="codeblock"><code>&quot;사전 지도 없이 미지의 다층 건물 환경에서,
  자연어(카테고리) 목표를 가진 사족 보행 로봇이
  어떻게 Zero-shot으로 목표 물체를 탐색할 수 있는가?&quot;
 </code></pre>
@@ -159,11 +245,11 @@ footer {
 </ol>
 <p><strong>실증 결과</strong>: HM3D+MP3D 4,195 에피소드 시뮬레이션에서 SOTA, Unitree Go2 실세계 50회 실험에서 64.0% 성공률 달성.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 2D 내비게이션의 구조적 한계</h4>
 <p>기존 ZSON 시스템의 대표적인 방법들(ESC, L3MVN, VLFM, SG-Nav, ApexNav)은 모두 단층 평면 그리드 맵이나 2D 시맨틱 맵을 기반으로 한다. 이 접근법은 단층 환경에서 잘 동작하지만, 다층 환경에서 다음과 같은 구조적 실패를 일으킨다:</p>
-<pre><code>[2D 내비게이션의 다층 환경 실패 모드]
+<pre class="codeblock"><code>[2D 내비게이션의 다층 환경 실패 모드]
 
 실패 유형 1: 계단 표현 불가
   2D 점유 맵: 계단 → 장애물로 표현됨
@@ -223,7 +309,7 @@ footer {
 </tbody></table></div>
 <h4>C. 사족보행 로봇의 계단 이동 제약</h4>
 <p>일반 바퀴형 로봇과 달리 사족보행 로봇(예: Unitree Go2)은 계단 이동이 가능하다. 그러나 이는 추가적인 계획 복잡성을 야기한다:</p>
-<pre><code>[사족보행 로봇 계단 이동의 특수 제약]
+<pre class="codeblock"><code>[사족보행 로봇 계단 이동의 특수 제약]
 
 기하학적 제약:
   - 발디딤 최소 면적: 계단 깊이 &gt; 발 크기
@@ -240,7 +326,7 @@ footer {
 </code></pre>
 <h3>2.2 핵심 해결책</h3>
 <p>TravExplorer의 4대 해결 원리:</p>
-<pre><code>[TravExplorer 설계 원리]
+<pre class="codeblock"><code>[TravExplorer 설계 원리]
 
 원리 1 — 통과 가능성 분리 (Traversability Decoupling):
   기존: 복셀 = 빈(free) | 점유(occupied)
@@ -264,11 +350,11 @@ footer {
   효과: 목표 지향적 탐색 + 체계적 층간 이동
 </code></pre>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 적응형 통과 가능성 매핑 (Adaptive Traversability Mapping)</h3>
 <h4>3.1.1 체적 맵 구조</h4>
 <p>TravExplorer는 체적 복셀 맵 V를 기반으로 동작한다. 각 복셀 v ∈ V는 다음 값을 가진다:</p>
-<pre><code>[복셀 상태 정의]
+<pre class="codeblock"><code>[복셀 상태 정의]
 
 로그 오즈 점유 값 (log-odds occupancy):
   L(v) = log(p(v=occupied) / p(v=free))
@@ -288,7 +374,7 @@ footer {
   단, O_inf = 장애물 팽창(inflation)된 점유 공간
 </code></pre>
 <h4>3.1.2 이중 모드 매핑</h4>
-<pre><code class="language-python"># TravExplorer 이중 모드 매핑 의사코드
+<pre class="codeblock"><code class="language-python"># TravExplorer 이중 모드 매핑 의사코드
 
 class DualLayerMapper:
     def __init__(self):
@@ -345,7 +431,7 @@ class DualLayerMapper:
 </code></pre>
 <h4>3.1.3 증분식 장애물 팽창 (Incremental Obstacle Inflation)</h4>
 <p>표준 팽창 알고리즘은 맵 전체를 재처리하는 O(V) 비용이 발생한다. TravExplorer는 <strong>이방성(anisotropic) 팽창 커널</strong>과 <strong>증분식 업데이트</strong>로 이를 최적화한다:</p>
-<pre><code>[이방성 팽창 커널 설계]
+<pre class="codeblock"><code>[이방성 팽창 커널 설계]
 
 XY 평면 팽창: 반경 r_xy (고정, 로봇 폭 기반)
 Z 방향 팽창: 하향만 (downward-only), 반경 r_z
@@ -363,7 +449,7 @@ Z 방향 팽창: 하향만 (downward-only), 반경 r_z
 <hr>
 <h3>3.2 통과 가능한 프런티어 추출 (Traversable Frontier Extraction)</h3>
 <p>프런티어는 탐색된 공간과 미탐색 공간의 경계로, 탐색 방향을 결정하는 핵심 요소다. TravExplorer는 3D 통과 가능성 레이어에서 프런티어를 추출한다:</p>
-<pre><code>[TravExplorer 프런티어 추출 조건]
+<pre class="codeblock"><code>[TravExplorer 프런티어 추출 조건]
 
 복셀 v가 통과 가능한 프런티어(traversable frontier)가 되는 조건:
 
@@ -392,7 +478,7 @@ Z 방향 팽창: 하향만 (downward-only), 반경 r_z
 <h3>3.3 시야각 인식 능동 지각 (FOV-Aware Active Perception)</h3>
 <p>고정된 카메라 방향은 계단 환경에서 두 가지 사각지대를 생성한다. TravExplorer는 이를 자동으로 감지하고 카메라를 능동적으로 조정한다:</p>
 <h4>3.3.1 맹점 프런티어 처리 (Blind-Spot Frontier)</h4>
-<pre><code>[맹점 프런티어 발생 원리]
+<pre class="codeblock"><code>[맹점 프런티어 발생 원리]
 
 카메라의 최소 관측 거리: d_blind (전방 근거리 미관측)
 프런티어가 d_i &lt; d_blind에 위치할 때:
@@ -405,7 +491,7 @@ TravExplorer 처리:
     → 근거리 지면/계단 관측 가능
 </code></pre>
 <h4>3.3.2 계단 하강 감지 (Descent Stair Detection)</h4>
-<pre><code>[계단 하강 사각지대 원리]
+<pre class="codeblock"><code>[계단 하강 사각지대 원리]
 
 수평 고정 카메라로 하강 계단 접근 시:
   - 계단 윗 면만 보임, 아래 면/높이 미관측
@@ -428,7 +514,7 @@ TravExplorer 감지 방법:
 <hr>
 <h3>3.4 확률론적 인스턴스 맵 (Probabilistic Instance Map)</h3>
 <p>오픈-보캐뷸러리 세그멘테이션(SAM 3)으로 감지된 물체는 누적 증거를 통해 확률론적으로 추적된다:</p>
-<pre><code>[인스턴스 맵 업데이트 수식]
+<pre class="codeblock"><code>[인스턴스 맵 업데이트 수식]
 
 관측 t에서 감지된 물체 후보 집합:
   D_t = {d_1, d_2, ..., d_k} (각각 카테고리 + 3D 중심점 + 신뢰도)
@@ -459,7 +545,7 @@ TravExplorer 감지 방법:
 <hr>
 <h3>3.5 공간 가치 맵 (Spatial Value Map, BLIP-2)</h3>
 <p>목표 카테고리 언어 지시를 공간적 탐색 가치로 변환한다:</p>
-<pre><code>[공간 가치 맵 구성]
+<pre class="codeblock"><code>[공간 가치 맵 구성]
 
 입력: 목표 카테고리 텍스트 q (예: &quot;chair&quot;, &quot;sofa&quot;)
       각 타임스텝 t의 RGB 이미지 I_t
@@ -482,7 +568,7 @@ FOV 코사인 가중치:
 <hr>
 <h3>3.6 계층적 탐색 계획 (Hierarchical Exploration Planning)</h3>
 <h4>3.6.1 Open-ATSP 기반 목표-프런티어-계단 최적 방문 순서</h4>
-<pre><code>[우선순위 체계]
+<pre class="codeblock"><code>[우선순위 체계]
 
 렉시코그래픽(Lexicographic) 우선순위:
   P1: 목표 물체 가설 (O_tar에서 신뢰도 높은 인스턴스)
@@ -507,7 +593,7 @@ LKH(Helsgott-Karp) 솔버:
 </code></pre>
 <h4>3.6.2 발디딤 안내 3D 경로 탐색 (Foothold-Guided 3D Search)</h4>
 <p>일반 A*는 연속 공간의 최단 경로를 찾지만, 사족보행 로봇의 계단 이동에는 발디딤 가능 여부를 고려해야 한다:</p>
-<pre><code>[Foothold-Guided A* 설계]
+<pre class="codeblock"><code>[Foothold-Guided A* 설계]
 
 이웃 공간 정의:
   표준 A*: 26-이웃 (3D 인접 복셀)
@@ -524,7 +610,7 @@ LKH(Helsgott-Karp) 솔버:
 </code></pre>
 <h4>3.6.3 실행-검토 루프 (Execute-Review Loop)</h4>
 <p>계획 실행 중 막힘(blockage)이 발생하면 재계획한다:</p>
-<pre><code>[막힘 감지 및 재계획]
+<pre class="codeblock"><code>[막힘 감지 및 재계획]
 
 정상 이동:
   실제 이동 거리 ≈ 예측 이동 거리
@@ -545,7 +631,7 @@ LKH(Helsgott-Karp) 솔버:
 <hr>
 <h3>3.7 로컬 궤적 최적화 (Local Trajectory Optimization)</h3>
 <p>계층적 계획이 생성한 글로벌 경로를 로봇이 실행 가능한 부드러운 궤적으로 변환한다:</p>
-<pre><code>[큐빅 B-스플라인 궤적 최적화]
+<pre class="codeblock"><code>[큐빅 B-스플라인 궤적 최적화]
 
 파라미터화:
   T(t) = B-spline(control_points, t) ∈ SE(3)
@@ -572,9 +658,9 @@ LKH(Helsgott-Karp) 솔버:
   → 계단 이동 시 Z 방향이 최적화로 인해 비현실적으로 변형되는 것 방지
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <h3>4.1 전체 파이프라인</h3>
-<pre><code>[TravExplorer 전체 시스템 파이프라인]
+<pre class="diagram"><code>[TravExplorer 전체 시스템 파이프라인]
 
 입력:
   ┌─────────────────────────────────────────────────────────────┐
@@ -674,7 +760,7 @@ LKH(Helsgott-Karp) 솔버:
 </tr>
 </tbody></table></div>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -820,7 +906,7 @@ LKH(Helsgott-Karp) 솔버:
 <td align="center">44.5</td>
 <td align="center">15.5</td>
 </tr>
-<tr>
+<tr class="ours">
 <td><strong>TravExplorer (ours)</strong></td>
 <td align="center">✓</td>
 <td align="center">✓</td>
@@ -980,7 +1066,7 @@ LKH(Helsgott-Karp) 솔버:
 </ul>
 <p><strong>빌라 환경 SPT가 낮은 이유:</strong> 300 m² 2층 구조에서 계단 탐색에 추가 시간이 필요하여 평균 시간이 203초로 다른 환경 대비 약 4배 증가</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>기여 1: Zero-shot 크로스 플로어 ZSON의 최초 완전 실증</h3>
 <p>기존의 MFNP, ASCENT와 달리 TravExplorer는 다층 내비게이션을 단순히 시뮬레이션에 제한하지 않고 <strong>실세계 사족보행 로봇으로 50회 실험</strong>을 통해 검증했다. 특히 4개 서로 다른 환경(빌라, 아파트, 복층, 오피스)에서 64% SR을 달성한 것은 실용적 의의가 크다.</p>
 <h3>기여 2: 적응형 이중 모드 통과 가능성 매핑</h3>
@@ -992,7 +1078,7 @@ LKH(Helsgott-Karp) 솔버:
 <h3>기여 5: 수직 구속 로컬 궤적 최적화</h3>
 <p>표준 궤적 최적화를 그대로 적용하면 Z 방향 경로가 최적화 과정에서 왜곡된다. 수직 방향에 별도의 구속을 두어 계단 프로파일을 보존하는 것은 실세계 적용을 위한 실용적 기여다.</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 중요 상수 및 하이퍼파라미터</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -1073,7 +1159,7 @@ LKH(Helsgott-Karp) 솔버:
 </tr>
 </tbody></table></div>
 <h3>7.3 계산 아키텍처</h3>
-<pre><code>[마스터-슬레이브 분산 컴퓨팅]
+<pre class="codeblock"><code>[마스터-슬레이브 분산 컴퓨팅]
 
 마스터 (RTX 4090 + i9-14900HX):
   - 체적 맵 유지 관리 (메모리 집약)
@@ -1091,10 +1177,10 @@ LKH(Helsgott-Karp) 솔버:
   지연 보상: 슬레이브의 로컬 실행으로 통신 지연 영향 최소화
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 다층 내비게이션의 계획 복잡성</h3>
 <p>단층 내비게이션은 2D 그래프에서의 최단 경로 문제로 환원되어 A* 등의 알고리즘으로 효율적으로 풀린다. 다층 내비게이션은 3D 그래프 + 수직 이동 추가로 계획 공간이 확장된다:</p>
-<pre><code>[계획 복잡성 비교]
+<pre class="codeblock"><code>[계획 복잡성 비교]
 
 단층 (N×N 그리드):
   상태 공간: O(N²)
@@ -1111,7 +1197,7 @@ LKH(Helsgott-Karp) 솔버:
 <p>TravExplorer는 실시간 계획을 위해 LKH의 근사 솔버를 사용하며, 이는 최적성을 약간 포기하는 대신 계산 시간을 다항식으로 제한한다.</p>
 <h3>8.2 시맨틱 오탐(False Positive)의 근본 원인</h3>
 <p>실패 분석에서 오탐이 22-26%를 차지하는 것은 오픈-보캐뷸러리 세그멘테이션(SAM3)의 한계를 반영한다:</p>
-<pre><code>[오탐 발생 시나리오]
+<pre class="codeblock"><code>[오탐 발생 시나리오]
 
 시나리오 1: 시각적 유사성 오탐
   목표: &quot;chair&quot;
@@ -1132,7 +1218,7 @@ LKH(Helsgott-Karp) 솔버:
 </code></pre>
 <h3>8.3 스케일링 한계: 대규모 환경에서의 도전</h3>
 <p>빌라 환경(300 m², 2층)에서 AT = 203.0초는 다른 환경(46-102초) 대비 2-4배 길다. 이는 대규모 다층 환경에서 TravExplorer의 계획이 점차 비효율화되는 현상을 반영한다:</p>
-<pre><code>[대규모 환경 비효율화 원인]
+<pre class="codeblock"><code>[대규모 환경 비효율화 원인]
 
 원인 1: 프런티어 폭발
   환경 크기 ∝ 프런티어 수
@@ -1148,7 +1234,7 @@ LKH(Helsgott-Karp) 솔버:
   → 오탐 인스턴스에 시간 낭비
 </code></pre>
 <h3>8.4 향후 연구 방향</h3>
-<pre><code>[저자 제시 + 추가 제안]
+<pre class="codeblock"><code>[저자 제시 + 추가 제안]
 
 저자 제시:
   - 일반 에이전트 프레임워크: 대형 VLM으로 고수준 추론/예측 통합
@@ -1170,7 +1256,7 @@ LKH(Helsgott-Karp) 솔버:
      현재 마스터 의존도 감소 → 완전 자율 배포
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -1243,7 +1329,7 @@ LKH(Helsgott-Karp) 솔버:
 </ol>
 <h3>9.2 장단점 분석</h3>
 <p><strong>장점 (Advantages):</strong></p>
-<pre><code>1. 학습 불필요 (Training-Free):
+<pre class="codeblock"><code>1. 학습 불필요 (Training-Free):
    - 새 환경에 즉시 배포 가능
    - 도메인 격차(sim-to-real) 문제 없음
    - 소규모 팀도 즉시 활용 가능
@@ -1263,7 +1349,7 @@ LKH(Helsgott-Karp) 솔버:
    - SAM3 → 더 나은 모델로 교체 가능
 </code></pre>
 <p><strong>단점 (Disadvantages):</strong></p>
-<pre><code>1. 오탐 비율 22-26%:
+<pre class="codeblock"><code>1. 오탐 비율 22-26%:
    - 성공률의 주요 병목
    - 오픈-보캐뷸러리 세그멘테이션 한계
    - 세밀한 인스턴스 식별 부재
@@ -1296,7 +1382,7 @@ LKH(Helsgott-Karp) 솔버:
 <li>목표 물체가 숨겨진/폐색된 경우 처리 미흡</li>
 </ul>
 <p><strong>경쟁 대비 실용성:</strong></p>
-<pre><code>실내 단층 배달 로봇:  기존 2D ZSON 방법이 더 성숙, 충분
+<pre class="codeblock"><code>실내 단층 배달 로봇:  기존 2D ZSON 방법이 더 성숙, 충분
 실내 다층 탐색:       TravExplorer가 현재 최적 (경쟁자 없음)
 실외 구조 임무:       아직 실외 확장 미검증, 주의 필요
 </code></pre>
@@ -1304,7 +1390,7 @@ LKH(Helsgott-Karp) 솔버:
 <p>TravExplorer는 기존 ZSON 연구의 <strong>자연스러운 다음 단계</strong>를 구현한다. 기존 연구들이 단층 내비게이션을 고도화하는 데 집중한 반면, TravExplorer는 &quot;실제 건물은 여러 층으로 이루어졌다&quot;는 간단하지만 중요한 현실을 수용하고 이를 해결한다는 점에서 연구 방향이 옳다.</p>
 <p>그러나 학습 기반 접근(SAGE, NavOL 등)이 더 도전적인 환경(비정형 구조물, 동적 장애물)에 대한 적응성에서 장기적으로 유리할 수 있다. TravExplorer의 모듈형 구조가 학습 기반 컴포넌트와 통합되는 방향이 이상적이다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li>SemExp (Chaplot et al., 2020) — Goal-Oriented Semantic Exploration</li>
 <li>ZSON (Majumdar et al., 2022) — Zero-Shot Object-Goal Navigation</li>
@@ -1322,7 +1408,7 @@ LKH(Helsgott-Karp) 솔버:
 <li>Unitree Go2 — 사족보행 로봇 플랫폼</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>혁신성 평가</h3>
 <p>TravExplorer는 ZSON 문제를 다층 환경으로 확장하는 <strong>실질적이고 실용적인 혁신</strong>을 달성했다. 기존 연구들이 단층 환경의 성능을 소수점 단위로 개선하는 데 집중하는 동안, TravExplorer는 실제 건물에서의 내비게이션이라는 더 중요한 문제를 정면으로 다루었다.</p>
 <p>기술적 혁신의 핵심은 <strong>통과 가능성 개념의 3D 확장</strong>이다. 이는 단순한 구현 변경이 아니라, 내비게이션 맵의 기본 표현을 &quot;점유/비점유&quot;에서 &quot;점유/비점유/통과가능&quot;으로 재정의하는 개념적 전환이다.</p>
@@ -1336,9 +1422,104 @@ LKH(Helsgott-Karp) 솔버:
 <li><strong>동적 환경</strong>: 사람이나 움직이는 물체가 있는 실제 운영 환경 대응</li>
 </ol>
 <p>TravExplorer는 ZSON 연구의 <strong>다음 장을 여는 연구</strong>로 평가할 수 있으며, 다층 내비게이션이 향후 이 분야의 표준 과제가 될 것임을 시사한다.</p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

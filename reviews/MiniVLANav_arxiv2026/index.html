@@ -6,133 +6,220 @@
 <meta name="color-scheme" content="light dark">
 <title>MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2605.00397">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">arXiv 2026</div>
-    <h1>MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2605.00397">arXiv:2605.00397</a></span>
-      <span>리뷰 2026-06-29</span>
-      <span>50분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">MiniVLANav_arxiv2026</span>
     </div>
+    <h1 class="doc-title">MiniVLA-Nav v1: Language-Conditioned Robot Navigation Dataset — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2605.00397">2605.00397</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">데이터셋은 HuggingFace에 실제 공개되어 로딩 예제(NumPy/PIL) 포함. **데이터 생성 파이프라인의 별도 GitHub 레포는 본 시점에 확인되지 않음**(데이터셋 ✅ / 파이프라인 코드 미확인).</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-06-29</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">48KB · 약 50분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 13개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-11"><span class="toc-num">12</span><span class="toc-title">심화 분석: VLN 데이터셋 생태계에서의 위치 (Deep Dive: Positioning in VLN Dataset Ecosystem)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-12"><span class="toc-num">13</span><span class="toc-title">한국어 키워드 및 용어 정리</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>MiniVLA-Nav v1: Language-Conditioned Robot Navigation Dataset — 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation</li>
@@ -157,11 +244,11 @@ footer {
 <p>이 데이터셋은 <strong>NVIDIA Isaac Sim</strong> 기반 4개의 포토리얼리스틱 실내 씬(사무실, 병원, 전체 창고, 다중 선반 창고)에서 수집된 <strong>1,174개 에피소드</strong>로 구성되며, NVIDIA Nova Carter 차동 구동 로봇이 자연어 지시에 따라 지정된 객체에서 <strong>1m 이내</strong>에 정지하는 과제를 수행한다. 각 에피소드는 지시문과 동기화된 <strong>640×640 RGB</strong>, <strong>미터 단위 float32 깊이 맵</strong>, <strong>인스턴스 세그멘테이션 마스크</strong>, 그리고 연속 (v, ω) 및 7×7 토큰화 전문가 행동을 <strong>60Hz</strong>로 함께 제공한다.</p>
 <p>이 논문의 위치를 한 문장으로 요약하면: <em>기존 VLN/ObjNav가 다루지 못한 &quot;자연어 지시 + 실제 차동 구동 속도 레이블 + 멀티씬 + 멀티모달 + OOD 평가&quot;의 다섯 가지 축을 한 데이터셋 안에서 동시에 제공하는 작지만(이름 그대로 &quot;Mini&quot;) 정밀하게 큐레이션된 데이터 자원</em>이다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>도전과제 1: 연속 행동 레이블의 희소성</h4>
 <p>기존 VLN 연구의 핵심 데이터 격차는 실세계 차동 구동 로봇에서 직접 사용 가능한 <strong>연속 속도 명령(continuous velocity commands)</strong> 레이블을 제공하는 데이터셋의 부재이다. R2R, RxR, HM3D-ObjNav 등 주류 벤치마크는 파노라마 그래프 위의 이산 노드 점프 또는 <code>[forward 0.25m / turn-left / turn-right / stop]</code> 같은 토큰을 행동으로 사용한다. 이는 토폴로지 그래프 위의 계획에는 적합하지만, 실제 차륜 로봇이 받는 입력인 (선속도 v, 각속도 ω) 명령과는 표현 자체가 다르다.</p>
-<pre><code>기존 R2R / ObjNav 데이터셋의 행동 공간:
+<pre class="codeblock"><code>기존 R2R / ObjNav 데이터셋의 행동 공간:
   [앞으로 0.25m 이동] [왼쪽 회전] [오른쪽 회전] [정지]
   → 이산 파노라마/그래프 행동 (discrete panoramic actions)
   → 실제 차동 구동 로봇에 직접 적용 불가 (속도 레이블 없음)
@@ -208,10 +295,10 @@ MiniVLA-Nav의 행동 공간:
 </tr>
 </tbody></table></div>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 LCOA 과제 정의</h3>
 <p><strong>Language-Conditioned Object Approach (LCOA)</strong>는 기존 VLN과 ObjNav의 중간 지점에 위치하는 과제로 정의된다:</p>
-<pre><code>입력: 자연어 지시 l ∈ L, 현재 관찰 oₜ = (RGB_t, D_t, Seg_t)
+<pre class="codeblock"><code>입력: 자연어 지시 l ∈ L, 현재 관찰 oₜ = (RGB_t, D_t, Seg_t)
 목표: 지정된 객체 인스턴스 o* 로부터 1m 이내에 정지
        d(robot, o*) ≤ 1.0m (유클리드 거리)
 
@@ -228,7 +315,7 @@ MiniVLA-Nav의 행동 공간:
 </ul>
 <h3>3.2 데이터 수집 파이프라인</h3>
 <p>전체 파이프라인은 완전 자동화된 4단계 구조로 설계되었다:</p>
-<pre><code>┌──────────────────────────────────────────────────────────────────┐
+<pre class="diagram"><code>┌──────────────────────────────────────────────────────────────────┐
 │              MiniVLA-Nav 데이터 생성 파이프라인                    │
 ├──────────────────────────────────────────────────────────────────┤
 │                                                                    │
@@ -253,7 +340,7 @@ MiniVLA-Nav의 행동 공간:
 </code></pre>
 <p><strong>전문가 제어기 상세 설계 (논문의 실제 수식):</strong></p>
 <p>전문가는 타깃 세그멘테이션 마스크가 <strong>32픽셀 이상</strong> 보일 때(가시 모드)와 보이지 않을 때(비가시 탐색 모드)를 구분하는 비례 제어기다. 핵심 수식은 다음과 같다.</p>
-<pre><code>[가시 모드] — 타깃 마스크가 ≥ 32 px 보일 때
+<pre class="codeblock"><code>[가시 모드] — 타깃 마스크가 ≥ 32 px 보일 때
   cx     : 타깃 마스크의 수평 중심 (픽셀)
   W      : 이미지 폭 (640)
   d̂_t    : 타깃 마스크 영역의 중앙값(median) 깊이
@@ -280,7 +367,7 @@ MiniVLA-Nav의 행동 공간:
 </code></pre>
 <p>가시 모드의 각속도 항 <code>-k_ω·(cx - W/2)/(W/2)</code>는 타깃을 이미지 중앙으로 끌어오는 <strong>시각 서보잉(visual servoing)</strong> 항이며, 정규화 <code>/(W/2)</code>로 인해 입력이 [-1, 1] 범위로 스케일된다. 선속도 항 <code>k_v·(d̂_t - r_success)</code>는 타깃이 멀수록 빠르게 전진하다가 1m에 가까워질수록 0으로 수렴해 부드러운 정지를 만든다. 비가시 모드는 마스크가 없으므로 특권 정보인 헤딩 오차 Δψ로 회전하여 타깃을 시야에 다시 들이는 탐색 휴리스틱이다.</p>
 <p><strong>행동 토큰화 (7×7 = 49 토큰):</strong></p>
-<pre><code>연속 행동 범위:
+<pre class="codeblock"><code>연속 행동 범위:
   v ∈ [0, 1] m/s        →  7단계 등간격 분할
   ω ∈ [-1.5, 1.5] rad/s →  7단계 등간격 분할
 
@@ -292,7 +379,7 @@ MiniVLA-Nav의 행동 공간:
 <h3>3.3 언어 지시 생성 시스템</h3>
 <p>언어 다양성은 두 가지 레이어로 설계된다:</p>
 <p><strong>레이어 1: 훈련 템플릿 (18개)</strong></p>
-<pre><code>&quot;Go to the {object}&quot;
+<pre class="codeblock"><code>&quot;Go to the {object}&quot;
 &quot;Drive to the {object} and stop&quot;
 &quot;Navigate to the {object}&quot;
 &quot;Approach the {object}&quot;
@@ -300,7 +387,7 @@ MiniVLA-Nav의 행동 공간:
 ... (총 18개 기본 훈련 템플릿)
 </code></pre>
 <p><strong>레이어 2: 패러프레이즈 OOD 템플릿 (12개)</strong></p>
-<pre><code>&quot;Make your way to the {object}&quot;
+<pre class="codeblock"><code>&quot;Make your way to the {object}&quot;
 &quot;Proceed to the {object}&quot;
 &quot;Find the {object} and come to a stop&quot;
 ... (훈련 분포 외 표현 12개)
@@ -313,7 +400,7 @@ MiniVLA-Nav의 행동 공간:
 </ul>
 <h3>3.4 티어 기반 스폰 샘플링</h3>
 <p>궤적 다양성을 위한 3단계 거리 티어와 <strong>실제 수집된 분포</strong>:</p>
-<pre><code>                 스폰 거리 분포 (의도 비율 vs 실제 수집)
+<pre class="diagram"><code>                 스폰 거리 분포 (의도 비율 vs 실제 수집)
             ┌──────────┬───────────────┬───────────────┐
             │  Near    │      Mid      │     Far       │
             │ 의도 30% │   의도 40%    │   의도 30%    │
@@ -329,9 +416,9 @@ MiniVLA-Nav의 행동 공간:
 </code></pre>
 <p>주목할 점은 <strong>의도한 30/40/30 비율과 실제 수집 분포(54.5/44.3/1.2%)가 크게 어긋난다</strong>는 것이다. Far 티어는 전역 큐레이션 유효 포인트에서 샘플링하는데, 그런 포인트가 드물어 14개(1.2%)만 수집되었다. 이는 장거리 일반화 평가의 명백한 한계로, 논문도 이를 솔직히 보고한다. Near 티어가 절반 이상을 차지하는 편중은 모델 학습 시 단거리 접근에 과적합될 위험을 시사한다.</p>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <p>전체 MiniVLA-Nav 생태계 아키텍처:</p>
-<pre><code>┌─────────────────────────────────────────────────────────────────────┐
+<pre class="diagram"><code>┌─────────────────────────────────────────────────────────────────────┐
 │                     MiniVLA-Nav v1 생태계                             │
 ├──────────────────┬──────────────────────┬───────────────────────────┤
 │   데이터 생성    │   데이터 구조         │   활용 방법               │
@@ -358,7 +445,7 @@ MiniVLA-Nav의 행동 공간:
 └──────────────────┴──────────────────────┴───────────────────────────┘
 </code></pre>
 <p><strong>데이터 흐름 (단일 에피소드):</strong></p>
-<pre><code>① 씬 로딩 (Isaac Sim)
+<pre class="diagram"><code>① 씬 로딩 (Isaac Sim)
       │
       ▼
 ② 스폰 포인트 샘플링 (Near/Mid/Far 티어)
@@ -386,7 +473,7 @@ MiniVLA-Nav의 행동 공간:
 </code></pre>
 <p>각 모달리티는 동기화된 프레임 인덱스로 저장되어, 학습 시 <code>(RGB_t, D_t, Seg_t, l) → (v_t, ω_t)</code> 또는 <code>→ token_t</code> 매핑을 바로 구성할 수 있다.</p>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <blockquote>
 <p>본 논문은 <strong>데이터셋 논문</strong>이므로 &quot;모델 성능 표&quot;가 아니라 <strong>데이터셋 통계 표(7개)</strong>가 핵심 산출물이다. 아래는 논문의 실제 표 수치를 정리한 것이다.</p>
 </blockquote>
@@ -427,7 +514,7 @@ MiniVLA-Nav의 행동 공간:
 </tbody></table></div>
 <p><strong>씬 간 에피소드 불균형이 매우 크다</strong>: Office가 700편(전체의 59.6%)으로 압도적이고 Hospital은 52편(4.4%)에 불과하다. 이는 씬별 전문가 성공률과 유효 스폰 포인트 밀도 차이에서 비롯된 것으로, 씬 간 균형 학습 시 가중 샘플링 등의 보정이 필요함을 시사한다.</p>
 <h3>5.2 평가 지표 (Evaluation Metrics)</h3>
-<pre><code>① Success Rate (SR): d(robot, object) ≤ 1.0m 달성률
+<pre class="codeblock"><code>① Success Rate (SR): d(robot, object) ≤ 1.0m 달성률
 ② Navigation Error (NE): 에피소드 종료 시점의 로봇-객체 거리 (m)
 ③ Mean Trajectory Length (TL): 평균 궤적 길이 (m)
 ④ Mean Steps: 평균 에피소드 스텝 수 (60Hz 기준)
@@ -519,7 +606,7 @@ MiniVLA-Nav의 행동 공간:
 </tbody></table></div>
 <p>티어가 멀어질수록 궤적 길이와 스텝 수가 단조 증가하며, Mid는 Near 대비 궤적 2.65×·스텝 2.21×, Far는 스텝 3.23×에 달한다. 이 명확한 단조성이 r=0.94의 높은 상관을 만든다. 다만 Far가 14편뿐이라 장거리 통계의 신뢰구간은 넓을 수밖에 없다.</p>
 <p><strong>객체 카테고리 분포 (불균형):</strong></p>
-<pre><code>주요 카테고리 (전체 1,174편 중):
+<pre class="diagram"><code>주요 카테고리 (전체 1,174편 중):
   Monitor : 339편 (28.9%)   ← 최다
   Rack    : 258편 (22.0%)
   Crate   : 131편 (11.2%)
@@ -530,7 +617,7 @@ MiniVLA-Nav의 행동 공간:
 <p>상위 3개 카테고리(Monitor/Rack/Crate)가 전체의 62%를 차지하는 롱테일 분포는, 모델이 이 다수 카테고리에 편향될 위험을 내포한다. 동시에 이는 객체 카테고리 OOD 분할(<code>test_ood_obj</code>)의 필요성을 강화하는 근거이기도 하다.</p>
 <h3>5.4 리얼월드 실험</h3>
 <p>MiniVLA-Nav v1은 <strong>순수 시뮬레이션 데이터셋으로 실세계 실험을 포함하지 않는다.</strong> 저자들은 이를 향후 연구 과제로 명시하며 Sim-to-Real 격차를 한계점으로 인정한다:</p>
-<pre><code>실세계 격차 요인:
+<pre class="codeblock"><code>실세계 격차 요인:
   1. 시각적 외관 차이: 합성 RTX 렌더링 vs. 실제 조명/텍스처
   2. 깊이 센서 아티팩트: 반사 표면, 측정 노이즈 (시뮬 깊이는 완벽)
   3. 바닥 동역학 가변성: 카펫, 불균일 표면, 슬립
@@ -538,7 +625,7 @@ MiniVLA-Nav의 행동 공간:
 </code></pre>
 <p>단, 플랫폼이 실제 판매되는 <strong>NVIDIA Nova Carter</strong>(동일 차동 구동 인터페이스)이고 연속 (v,ω) 레이블을 제공하므로, 실세계 동일 로봇으로의 전이 경로 자체는 비교적 직접적이라는 점이 강점이다.</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>기여 1: 멀티씬 연속-행동 언어조건부 내비게이션 데이터셋</h3>
 <p>기존 데이터셋과의 핵심 차별점:</p>
 <div class="table-wrap"><table>
@@ -586,7 +673,7 @@ MiniVLA-Nav의 행동 공간:
 </tr>
 </tbody></table></div>
 <h3>기여 2: 자동화 생성 파이프라인 + 표준 에피소드 포맷</h3>
-<pre><code>에피소드 단위 표준 포맷:
+<pre class="codeblock"><code>에피소드 단위 표준 포맷:
   episodes/ep_{N:06d}/
     rgb/*.png      (640×640 uint8)
     depth/*.npy    (640×640 float32, 미터)
@@ -599,7 +686,7 @@ MiniVLA-Nav의 행동 공간:
 <p>이 파이프라인은 커스텀 씬 추가, 새 객체 카테고리 확장, 언어 템플릿 수정이 용이하도록 설계되었다.</p>
 <h3>기여 3: 5분할 평가 프로토콜 (ID 3종 + OOD 2축)</h3>
 <p>ID(In-Distribution)와 OOD(Out-Of-Distribution) 두 축에 걸친 체계적 평가 프로토콜:</p>
-<pre><code>ID 평가:
+<pre class="codeblock"><code>ID 평가:
   train_id (716) / val_id (114) / test_id (121)
   → 동일 분포, 완전 별도 에피소드
 
@@ -611,7 +698,7 @@ OOD 평가 (두 가지 직교 축):
   새로운 표현 + 새로운 객체 (극단적 일반화)
 </code></pre>
 <h3>기여 4: 듀얼 행동 레이블 (연속 + 토큰화)</h3>
-<pre><code>레이블 1: (v, ω) ∈ ℝ² — 회귀 기반 모델 (CNN, RNN, Diffusion Policy)
+<pre class="codeblock"><code>레이블 1: (v, ω) ∈ ℝ² — 회귀 기반 모델 (CNN, RNN, Diffusion Policy)
 레이블 2: tok ∈ {0..48} — 분류 기반 VLA 모델 (OpenVLA, RT-2 스타일)
 
 두 레이블 동시 제공 → 다양한 모델 아키텍처 수용
@@ -619,9 +706,9 @@ OOD 평가 (두 가지 직교 축):
 <h3>기여 5: 편향의 정직한 정량 보고</h3>
 <p>전문가 성공률(개방 80–90% vs 협소 40–60%), 씬 불균형(Office 700 vs Hospital 52), 카테고리 롱테일(상위 3종 62%), Far 티어 희소(1.2%)를 모두 숫자로 공개한다. 데이터셋의 약점을 은폐하지 않고 표로 노출하여, 사용자가 가중 샘플링·재균형 전략을 사전에 설계할 수 있게 한다 — 데이터셋 논문으로서 모범적인 투명성이다.</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 시뮬레이션 환경</h3>
-<pre><code>엔진: NVIDIA Isaac Sim (포토리얼리스틱)
+<pre class="codeblock"><code>엔진: NVIDIA Isaac Sim (포토리얼리스틱)
   - 물리: GPU 가속 PhysX
   - 렌더링: RTX 광선 추적
 
@@ -637,7 +724,7 @@ OOD 평가 (두 가지 직교 축):
   - Warehouse with Multiple Shelves (68 ep)
 </code></pre>
 <h3>7.2 데이터 저장 형식</h3>
-<pre><code>miniVLA-Nav/
+<pre class="diagram"><code>miniVLA-Nav/
 └── episodes/
     └── ep_000123/
         ├── rgb/    0000.png ...  (640×640 uint8 RGB)
@@ -649,7 +736,7 @@ OOD 평가 (두 가지 직교 축):
         └── meta.json             {scene, object, tier, instruction, ...}
 </code></pre>
 <h3>7.3 전문가 제어기 하이퍼파라미터 (논문 보고값)</h3>
-<pre><code>k_ω        = 1.4  rad⁻¹   (마스크 중심 정렬 게인)
+<pre class="codeblock"><code>k_ω        = 1.4  rad⁻¹   (마스크 중심 정렬 게인)
 k_v        = 0.7  s⁻¹     (깊이 오차 → 선속도 게인)
 r_success  = 1.0 m        (목표 정지 거리)
 가시 임계   = 32 px        (타깃 마스크 가시 판정)
@@ -662,7 +749,7 @@ r_success  = 1.0 m        (목표 정지 거리)
   joint vocab = 7×7 = 49 토큰
 </code></pre>
 <h3>7.4 데이터 접근</h3>
-<pre><code class="language-python"># HuggingFace 데이터셋 로딩 (개념 예시)
+<pre class="codeblock"><code class="language-python"># HuggingFace 데이터셋 로딩 (개념 예시)
 from datasets import load_dataset
 import numpy as np
 from PIL import Image
@@ -683,10 +770,10 @@ v, w  = ep[&quot;action&quot;]                               # 연속 (v, ω)
 tok   = ep[&quot;token&quot;]                                # 49-토큰
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 데이터 편향이 학습에 미치는 영향 분석</h3>
 <p>이 데이터셋은 네 종류의 구조적 편향을 동시에 갖는다. 각 편향이 다운스트림 모델 학습에 어떻게 작용하는지 분석한다:</p>
-<pre><code>편향 1) 씬 불균형 (Office 59.6% vs Hospital 4.4%)
+<pre class="codeblock"><code>편향 1) 씬 불균형 (Office 59.6% vs Hospital 4.4%)
   → 모델이 사무실 외관/레이아웃에 과적합
   → 완화책: 씬별 역빈도 가중 샘플링, 또는 씬 균형 미니배치
 
@@ -704,7 +791,7 @@ tok   = ep[&quot;token&quot;]                                # 49-토큰
 </code></pre>
 <h3>8.2 Sim-to-Real 전이 가능성</h3>
 <p>MiniVLA-Nav v1은 시뮬레이션 전용이지만, 실세계 전이를 위한 잠재적 경로가 존재한다:</p>
-<pre><code>경로 1: Domain Randomization
+<pre class="codeblock"><code>경로 1: Domain Randomization
   - Isaac Sim의 RTX 렌더링 파라미터 랜덤화 (조명/텍스처)
   - 깊이 센서 노이즈 모델 주입 (시뮬 깊이는 완벽 → 노이즈 추가 필요)
 
@@ -719,7 +806,7 @@ tok   = ep[&quot;token&quot;]                                # 49-토큰
 <p>플랫폼이 실제 Nova Carter이고 (v,ω) 인터페이스가 동일하므로, R2R 같은 그래프 기반 데이터셋보다 전이 경로가 직접적이라는 점은 분명한 장점이다.</p>
 <h3>8.3 VLA 모델과의 통합</h3>
 <p>49-토큰 행동 설계는 현대 VLA 모델과의 통합을 목표로 한다:</p>
-<pre><code>지원 가능한 모델 아키텍처:
+<pre class="codeblock"><code>지원 가능한 모델 아키텍처:
   - OpenVLA: 7B LLM + 행동 토큰 생성 헤드
   - RT-2: VLM + 로봇 행동 토큰
   - 경량 BC: ViT/ConvNet + BERT + 49-way 분류 헤드
@@ -758,7 +845,7 @@ tok   = ep[&quot;token&quot;]                                # 49-토큰
 <li>실세계 검증 없음, Sim-to-Real 격차 미해소</li>
 </ul>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <p>같은 VLN 트랙에서 코퍼스에 이미 리뷰된 인접 논문들과 비교한다. 비교 대상은 (a) 시뮬-실세계 연속 내비게이션을 다룬 <em>NavDP</em>, (b) 자기인식 추론 기반 VLN인 <em>AwareVLN</em>, (c) 그래프 기반 다단계 지시 VLN의 대표인 <em>R2R/RxR 계열 모델</em>이다.</p>
 <div class="table-wrap"><table>
@@ -850,7 +937,7 @@ tok   = ep[&quot;token&quot;]                                # 49-토큰
 <p><strong>AwareVLN 대비 핵심 차이</strong>: AwareVLN은 단안 RGB에서 자기인식 추론으로 다단계 지시를 따르는 <em>모델</em>이다. MiniVLA-Nav는 그런 모델을 학습/평가할 <em>데이터</em>다. AwareVLN의 추론 모듈을 MiniVLA-Nav의 LCOA 과제에 적용해, &quot;왜 이 객체로 접근하는가&quot;를 설명하는 추론 증강 LCOA 모델을 만드는 것이 자연스러운 후속 연구다.</p>
 <h3>9.3 실적용 가능성 평가</h3>
 <p><strong>MiniVLA-Nav v1의 실적용 가능성: 중간 (★★★☆☆)</strong></p>
-<pre><code>장점:
+<pre class="codeblock"><code>장점:
   ✅ NVIDIA Nova Carter → 실세계 차동 구동 로봇과 동일 제어 인터페이스
   ✅ 60Hz 제어 주기 → 실시간 제어 가능
   ✅ 연속 (v,ω) 레이블 → 직접 제어 명령으로 사용 가능
@@ -872,7 +959,7 @@ tok   = ep[&quot;token&quot;]                                # 49-토큰
 <p>MiniVLA-Nav v1은 VLN 연구의 실용적 공백을 채우는 데이터셋이다. 기존 VLN 연구가 R2R/RxR의 파노라마 이산 행동 공간에 집중된 반면, 실제 차동 구동 로봇 제어에 필요한 연속 (v,ω) 행동 레이블을 자연어 조건과 함께 제공하는 멀티씬·멀티모달 데이터셋이다.</p>
 <p>다만 현재 규모(1,174편)와 시뮬 전용성, 네 종류의 불균형은 명백한 제약이다. 그러나 <strong>편향을 숨기지 않고 표로 공개한 점</strong>과 <strong>확장 가능한 표준 포맷</strong>은, 커뮤니티가 이 데이터 위에서 재균형·증강·실세계 확장을 점진적으로 쌓아 올릴 수 있게 한다. NavDP·AwareVLN 같은 모델 중심 연구가 공정한 비교 기준 위에서 발전하도록 돕는 <em>데이터 인프라</em>로서의 가치가 핵심이며, v2에서의 규모 확장과 실세계 통합이 이뤄지면 LCOA 과제의 표준 벤치마크로 자리잡을 잠재력이 있다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ul>
 <li>Al-Bustami &amp; Kwon, &quot;MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation,&quot; arXiv:2605.00397, 2026</li>
 <li>Anderson et al., &quot;Vision-and-Language Navigation: Interpreting Visually-Grounded Navigation Instructions in Real Environments,&quot; CVPR 2018 (R2R)</li>
@@ -885,7 +972,7 @@ tok   = ep[&quot;token&quot;]                                # 49-토큰
 <li>HuggingFace 데이터셋: <a href="https://huggingface.co/datasets/alibustami/miniVLA-Nav">https://huggingface.co/datasets/alibustami/miniVLA-Nav</a></li>
 </ul>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p>MiniVLA-Nav v1은 Vision-Language Navigation 연구의 실용화를 위한 데이터 기반을 제공한다. 핵심 혁신은 세 가지이다:</p>
 <ol>
 <li><strong>연속 + 토큰 이중 행동 레이블</strong>: 기존 이산 행동 데이터셋에서 벗어나 실제 차동 구동 로봇에 직접 적용 가능한 (v,ω) 레이블과, VLA 호환 49-토큰을 함께 제공</li>
@@ -895,10 +982,10 @@ tok   = ep[&quot;token&quot;]                                # 49-토큰
 <p>실용적 의의: NavDP 등 실세계 배포를 목표로 하는 VLN 연구에서, MiniVLA-Nav는 시뮬레이션 사전 훈련을 위한 공개 표준 데이터셋으로 활용될 수 있다. 특히 연속 행동 레이블과 VLA 호환 토큰화의 조합은 OpenVLA, RT-2 등 최신 VLA 모델을 내비게이션 과제에 파인튜닝하는 연구를 직접 지원한다.</p>
 <p>향후 연구 방향: (1) 데이터 규모 확장 및 씬·카테고리·티어 재균형, (2) 동적 장애물·색상 어트리뷰트 도입, (3) 실세계 Nova Carter 데이터 통합을 통한 Sim-to-Real 검증, (4) 훈련 베이스라인 공개. 이들이 이뤄지면 LCOA(언어 조건부 객체 접근)는 VLN과 ObjNav 사이의 실용적 과제로 자리매김할 수 있다.</p>
 <hr>
-<h2>12. 심화 분석: VLN 데이터셋 생태계에서의 위치 (Deep Dive: Positioning in VLN Dataset Ecosystem)</h2>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div><h2 id="sec-11" data-label="12. 심화 분석: VLN 데이터셋 생태계에서의 위치">12. 심화 분석: VLN 데이터셋 생태계에서의 위치 (Deep Dive: Positioning in VLN Dataset Ecosystem)</h2>
 <h3>12.1 기존 VLN 데이터셋 계보 분석</h3>
 <p>Vision-Language Navigation 연구는 지난 8년간 여러 데이터셋 세대를 거쳐 발전해왔다:</p>
-<pre><code>1세대 (2018–2020): 파노라마 이산 행동
+<pre class="codeblock"><code>1세대 (2018–2020): 파노라마 이산 행동
   R2R (Anderson et al., 2018):
     - 환경: Matterport3D 스캔 90개 씬
     - 행동: 파노라마 그래프 위 이산 이동
@@ -933,7 +1020,7 @@ tok   = ep[&quot;token&quot;]                                # 49-토큰
     - &quot;Mini&quot;: 소규모지만 멀티씬 + 멀티모달
 </code></pre>
 <p><strong>MiniVLA-Nav의 계보에서의 위치:</strong></p>
-<pre><code>데이터셋 공간 2D 매핑:
+<pre class="diagram"><code>데이터셋 공간 2D 매핑:
 
 행동 연속성
     ↑
@@ -948,7 +1035,7 @@ tok   = ep[&quot;token&quot;]                                # 49-토큰
 </code></pre>
 <h3>12.2 LCOA vs 기존 ObjNav 과제 심층 비교</h3>
 <p><strong>Object Goal Navigation (ObjNav)과의 비교:</strong></p>
-<pre><code>전통 ObjNav (HM3D, Gibson 기반):
+<pre class="codeblock"><code>전통 ObjNav (HM3D, Gibson 기반):
   입력: &quot;find a chair&quot; (카테고리만)
   목표: 임의의 의자 인스턴스 발견
   행동: [앞 0.25m] [왼 10°] [오 10°] [정지]
@@ -969,7 +1056,7 @@ LCOA (MiniVLA-Nav):
 <h3>12.3 데이터 수집 파이프라인 확장성 분석</h3>
 <p>MiniVLA-Nav의 파이프라인은 v1의 한계를 넘어 여러 방향으로 확장 가능하다:</p>
 <p><strong>확장 방향 1: 씬 다양성 확장</strong></p>
-<pre><code class="language-python"># 새 씬 추가 (파이프라인 재사용, 개념 예시)
+<pre class="codeblock"><code class="language-python"># 새 씬 추가 (파이프라인 재사용, 개념 예시)
 new_scene_config = {
     &quot;name&quot;: &quot;School&quot;,
     &quot;usd_path&quot;: &quot;/path/to/school.usd&quot;,
@@ -981,7 +1068,7 @@ pipeline.add_scene(new_scene_config)
 pipeline.generate(n_episodes=300)
 </code></pre>
 <p><strong>확장 방향 2: 동적 장애물 추가</strong></p>
-<pre><code>현재 v1: 정적 씬 (객체 위치 고정)
+<pre class="codeblock"><code>현재 v1: 정적 씬 (객체 위치 고정)
 v2 계획: 동적 씬
   - 사람이 걸어다니는 병원 복도
   - 포크리프트가 이동하는 창고
@@ -992,7 +1079,7 @@ v2 계획: 동적 씬
   - 동적 장면에서의 전문가 제어기 강화
 </code></pre>
 <p><strong>확장 방향 3: 실세계 데이터 통합 + 색상 어트리뷰트 복원</strong></p>
-<pre><code>목표: Sim + Real 혼합 데이터셋 + 색상 조건부 지시
+<pre class="codeblock"><code>목표: Sim + Real 혼합 데이터셋 + 색상 조건부 지시
   - 동일 에피소드 포맷으로 실세계 Nova Carter 수집
   - RealSense 깊이 → 640×640 float32 동일 저장
   - color=&#39;unknown&#39; 해제 → &quot;the red chair&quot; 등 색상 슬롯 활성화
@@ -1001,7 +1088,7 @@ v2 계획: 동적 씬
 <h3>12.4 베이스라인 모델 설계 방향 (예고된 컴패니언 연구)</h3>
 <p>논문은 데이터셋만 제공하므로, 이 데이터 위에서 동작할 베이스라인 후보를 정리한다:</p>
 <p><strong>베이스라인 1: 순수 모방 학습 (Behavior Cloning)</strong></p>
-<pre><code class="language-python">class BCNavModel(nn.Module):
+<pre class="codeblock"><code class="language-python">class BCNavModel(nn.Module):
     def __init__(self):
         self.vision_encoder = ViT_B16()   # 640×640 RGB
         self.depth_encoder  = ConvNet()    # 깊이 맵
@@ -1015,7 +1102,7 @@ v2 계획: 동적 씬
         return self.action_head(f)         # token ∈ {0..48}
 </code></pre>
 <p><strong>베이스라인 2: VLA 기반 (OpenVLA 파인튜닝)</strong></p>
-<pre><code class="language-python">model = OpenVLA.from_pretrained(&quot;openvla-7b&quot;)
+<pre class="codeblock"><code class="language-python">model = OpenVLA.from_pretrained(&quot;openvla-7b&quot;)
 model.finetune(
     dataset=miniVLANav_train,                 # train_id 716
     task=&quot;LCOA: navigate to named object&quot;,
@@ -1023,13 +1110,13 @@ model.finetune(
 )
 </code></pre>
 <p><strong>베이스라인 3: 시퀀스 모델 (Transformer)</strong></p>
-<pre><code>과거 T 타임스텝 관찰 → Transformer 인코더
+<pre class="codeblock"><code>과거 T 타임스텝 관찰 → Transformer 인코더
 현재 언어 지시 → Cross-Attention
 → 행동 토큰 자기회귀 예측
 장점: 장기 의존성 (먼 목표까지 경로)  / 단점: 데이터 요구량 ↑
 </code></pre>
 <h3>12.5 데이터셋을 활용한 비교 실험 설계 (미래 연구)</h3>
-<pre><code>실험 1: 언어 조건의 기여 검증
+<pre class="codeblock"><code>실험 1: 언어 조건의 기여 검증
   A: 올바른 지시 / B: 랜덤 지시 / C: 언어 없음(PointNav)
   → SR 차이로 언어 기여도 측정
 
@@ -1049,7 +1136,7 @@ model.finetune(
   시뮬 훈련 → 실제 Nova Carter 배포 → Zero-Shot/파인튜닝 SR
 </code></pre>
 <h3>12.6 MiniVLA-Nav와 NavDP의 시너지 가능성</h3>
-<pre><code>NavDP의 데이터 전략:
+<pre class="codeblock"><code>NavDP의 데이터 전략:
   - 자체 시뮬 데이터 (비공개, 다수 씬)
   - 연속 궤적 생성 (Diffusion Policy)
   - PointNav 목적 (좌표 기반)
@@ -1066,7 +1153,7 @@ MiniVLA-Nav의 보완점:
      자연어 기반 객체 접근에 적용
 </code></pre>
 <hr>
-<h2>13. 한국어 키워드 및 용어 정리</h2>
+<div class="secnav"><a href="#sec-9">← 10. 참고 문헌</a><a href="#sec-11">12. 심화 분석: VLN 데이터셋 생태계에서의 위치 →</a></div><h2 id="sec-12" data-label="13. 한국어 키워드 및 용어 정리">13. 한국어 키워드 및 용어 정리</h2>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -1151,9 +1238,104 @@ MiniVLA-Nav의 보완점:
 <td>NVIDIA 차동 구동 연구용 로봇 플랫폼</td>
 </tr>
 </tbody></table></div>
-
+<div class="secnav"><a href="#sec-10">← 11. 결론</a><a href="#sec-12">13. 한국어 키워드 및 용어 정리 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="MiniVLA-Nav v1: Language-Conditioned Robot Navigation Dataset — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

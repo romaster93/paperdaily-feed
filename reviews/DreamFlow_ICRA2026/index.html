@@ -6,133 +6,218 @@
 <meta name="color-scheme" content="light dark">
 <title>DreamFlow: Local Navigation Beyond Observation via Conditional Flow Matching in the Latent Space · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2603.02976">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">ICRA 2026</div>
-    <h1>DreamFlow: Local Navigation Beyond Observation via Conditional Flow Matching in the Latent Space</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2603.02976">arXiv:2603.02976</a></span>
-      <span>리뷰 2026-06-29</span>
-      <span>42분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">DreamFlow_ICRA2026</span>
     </div>
+    <h1 class="doc-title">DreamFlow: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">ICRA 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2603.02976">2603.02976</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">❌ **미공개** — 프로젝트 페이지(<a href="https://dreamflow-icra.github.io">dreamflow-icra.github.io</a>)는 존재하나 GitHub 링크 없음, 논문 PDF는 &quot;TBD&quot; 표기, 데모 영상(YouTube)만 게시. 코드 공개 약속(coming soon)조차 명시되지 않음.</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-06-29</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">41KB · 약 42분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>DreamFlow: 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: DreamFlow: Local Navigation Beyond Observation via Conditional Flow Matching in the Latent Space</li>
@@ -166,7 +251,7 @@ footer {
 <li>시뮬레이션 성능이 <strong>실제 사족보행 로봇(Unitree Go2)</strong> 으로 전이되는가?</li>
 </ul>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <p><strong>(C1) 제한된 지각 범위로 인한 로컬 미니마.</strong>
 로컬 플래너는 본질적으로 로봇의 즉각 관측 <code>o^e_t</code>(로컬 높이맵)만 본다. U자형 함정의 경우, 로봇이 함정 입구에 진입하기 전에는 그것이 막다른 길임을 알 수 없다. 함정 안으로 깊이 들어간 뒤에야 벽을 인지하고, 이미 늦은 상태에서 후퇴하면 목표 방향 보상이 감소하여 <strong>정책이 진동하거나 정지</strong>한다. 이는 그래디언트 기반·반응형 플래너 모두의 구조적 약점이다.</p>
@@ -180,7 +265,7 @@ footer {
 잠재 예측이 내비게이션 루프(10Hz) 안에 들어가야 하므로 추론은 밀리초 단위여야 한다. 확산 모델은 품질은 좋으나 수십~수백 스텝의 반복 샘플링으로 느리고 불안정하다. 또 시뮬(완벽한 높이맵)에서 학습한 모델이 실세계 LiDAR 노이즈 하에서도 동작해야 한다.</p>
 <h3>2.2 핵심 해결책</h3>
 <p>DreamFlow의 해법은 <strong>&quot;잠재 공간 CFM 외삽 + 비대칭 Actor-Critic + 2단계 학습&quot;</strong> 의 결합이다:</p>
-<pre><code>                    ┌─────────────────────────────────────────────┐
+<pre class="diagram"><code>                    ┌─────────────────────────────────────────────┐
  로컬 높이맵 o^e ─▶ VAE 인코더 H^e ─▶ 로컬 잠재 z^e_t              │
                     │                                              │
  고유감각 관측  ─▶ CENet ─▶ 컨텍스트 c_t ─┐                        │  배포(deploy)
@@ -201,11 +286,11 @@ footer {
 <li><strong>실로봇 검증(C5)</strong>: Unitree Go2 + Livox Mid-360 ×2에서 정성적 시연.</li>
 </ul>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 플로우 매칭(Flow Matching)의 기초와 동기</h3>
 <p>플로우 매칭(FM, Lipman et al. 2023)은 <strong>연속 정규화 플로우(Continuous Normalizing Flow)</strong> 를 시뮬레이션 없이(simulation-free) 학습하는 생성 모델링 프레임워크다. 핵심 아이디어는 소스 분포 <code>p_0</code>의 샘플을 타겟 분포 <code>p_1</code>의 샘플로 옮기는 <strong>속도장(velocity field) <code>v_θ</code></strong> 를 학습하고, 추론 시 그 속도장을 따라 ODE를 적분하는 것이다.</p>
 <p><strong>식 (1): 기본 속도장 ODE</strong></p>
-<pre><code>dz/dτ = v_θ(τ, z)
+<pre class="codeblock"><code>dz/dτ = v_θ(τ, z)
 </code></pre>
 <ul>
 <li><code>τ ∈ [0,1]</code>은 <strong>흐름의 진행 단계</strong>(물리 시간이 아닌 보간 파라미터). <code>τ=0</code>에서 소스, <code>τ=1</code>에서 타겟.</li>
@@ -216,14 +301,14 @@ footer {
 <h3>3.2 조건부 플로우 매칭(CFM)으로의 확장 — 다중 모달성 해결</h3>
 <p>단순 FM의 문제는 <strong>동일한 로컬 관측 <code>z^e_t</code>에 대해 여러 확장 환경 <code>z^E_t</code>가 존재<strong>한다는 점이다(2.1 C4). 비조건부 FM은 이 다중 모달 분포의 평균으로 수렴해 흐릿하고 부정확한 예측을 낸다. CFM은 </strong>컨텍스트 <code>c_t</code></strong> 를 속도장에 조건으로 주입하여 이를 해결한다.</p>
 <p><strong>식 (2): 조건부 속도장 ODE</strong></p>
-<pre><code>dz/dτ = v_θ(τ, c_t, z)
+<pre class="codeblock"><code>dz/dτ = v_θ(τ, c_t, z)
 </code></pre>
 <ul>
 <li><code>c_t</code>(컨텍스트 벡터, 32차원): 목표 위치·헤딩 명령·이전 행동·IMU·관절 상태 등 고유감각/명령 정보를 CENet으로 압축한 벡터.</li>
 <li>직관: &quot;로컬에 벽 한 조각만 보여도, <strong>목표가 오른쪽이고 직전에 우회전 중이었다</strong>는 컨텍스트가 주어지면 확장 환경의 모호성이 줄어 유일한 <code>z^E_t</code>로 수렴한다.&quot;</li>
 </ul>
 <p>이 컨텍스트 조건화의 효과는 Table I에서 정량적으로 드러난다: 비조건부 FM의 OOD 코사인 유사도는 0.784인 반면, CFM은 <strong>0.973</strong> 으로 도약한다. 즉 <code>c_t</code> 조건화가 OOD 일반화의 결정적 요인이다.</p>
-<pre><code>ASCII: 다중 모달성과 컨텍스트 조건화
+<pre class="diagram"><code>ASCII: 다중 모달성과 컨텍스트 조건화
   로컬 잠재 z^e_t (벽 한 조각만 관측)
         │
         ├── (조건 없음, FM) ──▶ z^E_t 후보 A, B, C ... 의 평균 → 흐릿
@@ -233,17 +318,17 @@ footer {
 <h3>3.3 CFM 학습 목표 — 선형 보간과 손실</h3>
 <p>FM의 우아함은 ODE를 시뮬레이션하지 않고도 속도장을 학습할 수 있다는 데 있다. 소스 <code>z_0</code>와 타겟 <code>z_1</code> 사이를 <strong>직선으로 보간</strong>하고, 그 직선의 미분(상수 속도)을 회귀 타겟으로 삼는다.</p>
 <p><strong>식 (4): 선형 보간</strong></p>
-<pre><code>z_τ = (1 − τ)·z_0 + τ·z_1
+<pre class="codeblock"><code>z_τ = (1 − τ)·z_0 + τ·z_1
 </code></pre>
 <ul>
 <li>임의의 중간 지점 <code>τ</code>에서의 잠재. 이 직선 경로의 시간 미분이 곧 목표 속도장.</li>
 </ul>
 <p><strong>식 (3): CFM 손실 (일반형)</strong></p>
-<pre><code>L(θ) = E_{τ, z_0∼p_0(c_t), z_1∼q(z|c_t)} [ ‖v_θ(τ, c_t, z_τ) − u_τ(z|c_t)‖² ]
+<pre class="codeblock"><code>L(θ) = E_{τ, z_0∼p_0(c_t), z_1∼q(z|c_t)} [ ‖v_θ(τ, c_t, z_τ) − u_τ(z|c_t)‖² ]
        단,  u_τ(z|c_t) = z_1 − z_0   (직선 경로의 상수 속도장)
 </code></pre>
 <p><strong>식 (5): DreamFlow 구체적 손실</strong></p>
-<pre><code>L_DreamFlow(θ) = E_{τ∼U[0,1], (z^e_t, z^E_t, c_t)∼D} [ ‖v_θ(τ, c_t, z_τ) − (z^E_t − z^e_t)‖² ]
+<pre class="codeblock"><code>L_DreamFlow(θ) = E_{τ∼U[0,1], (z^e_t, z^E_t, c_t)∼D} [ ‖v_θ(τ, c_t, z_τ) − (z^E_t − z^e_t)‖² ]
        단,  z_τ = (1 − τ)·z^e_t + τ·z^E_t
 </code></pre>
 <ul>
@@ -252,7 +337,7 @@ footer {
 <li>데이터셋 <code>D</code>: IsaacGym에서 다중 에이전트 롤아웃으로 수집한 <strong>400만(4M) 샘플</strong>의 <code>(z^e_t, z^E_t, c_t)</code> 삼중쌍. ID/OOD 테스트셋 각 6.4만(64K) 샘플.</li>
 </ul>
 <p><strong>왜 이 손실이 효율적인가</strong>: 확산 모델은 각 노이즈 레벨에서 점수(score)를 학습하고 추론 시 수십~수백 스텝을 역적분해야 한다. FM은 보간 직선의 상수 속도만 맞추면 되므로, (i) 학습이 단순 회귀로 환원되고, (ii) 추론 시 직선에 가까운 경로라 적은 스텝(K=10)으로 충분하다.</p>
-<pre><code>ASCII: CFM 학습 한 스텝
+<pre class="diagram"><code>ASCII: CFM 학습 한 스텝
   배치에서 (z^e_t, z^E_t, c_t) 추출,  τ ~ U[0,1] 샘플
         │
   z_τ = (1−τ)z^e_t + τz^E_t   (보간점 생성)
@@ -265,16 +350,16 @@ footer {
 <h3>3.4 추론 — Euler 적분에 의한 잠재 외삽</h3>
 <p>학습된 속도장 <code>v_θ</code>로, 배포 시에는 로컬 잠재에서 출발해 ODE를 수치 적분하여 확장 잠재를 <em>상상</em>한다.</p>
 <p><strong>식 (6): 적분형 정의</strong></p>
-<pre><code>ẑ^e_t = z^e_t + ∫₀¹ v_θ(τ, c_t, z_τ) dτ
+<pre class="codeblock"><code>ẑ^e_t = z^e_t + ∫₀¹ v_θ(τ, c_t, z_τ) dτ
 </code></pre>
 <p><strong>식 (7): Euler 이산 적분 (배포)</strong></p>
-<pre><code>ẑ^e_t ≈ z^e_t + Σ_{k=0}^{K-1} Δτ · v_θ(τ_k, c_t, z_{τ_k}),   Δτ = 1/K,  τ_k = k/K,  K = 10
+<pre class="codeblock"><code>ẑ^e_t ≈ z^e_t + Σ_{k=0}^{K-1} Δτ · v_θ(τ_k, c_t, z_{τ_k}),   Δτ = 1/K,  τ_k = k/K,  K = 10
 </code></pre>
 <ul>
 <li>스텝 크기 <code>Δτ = 0.1</code>. 10번의 신경망 평가로 잠재 외삽 완료.</li>
 <li>측정된 추론 시간 <strong>0.0122ms</strong>(Table I) — 확산(0.0218ms) 대비 약 1.8배 빠르고, 10Hz 내비게이션 루프에 여유롭게 적합.</li>
 </ul>
-<pre><code>ASCII: 추론 시 Euler 외삽
+<pre class="diagram"><code>ASCII: 추론 시 Euler 외삽
   z_{τ0}=z^e_t
      │ +Δτ·v_θ(τ0, c_t, ·)
      ▼
@@ -287,7 +372,7 @@ footer {
 </code></pre>
 <h3>3.5 비대칭 Actor-Critic과 특권 학습(Privileged Learning)</h3>
 <p>DreamFlow의 DRL 정책은 <strong>비대칭(asymmetric) Actor-Critic</strong> 구조로 PPO로 학습된다. 이 구조가 &quot;메모리 없이 공간 외삽 능력을 정책에 주입&quot;하는 핵심 메커니즘이다.</p>
-<pre><code>ASCII: 비대칭 Actor-Critic
+<pre class="diagram"><code>ASCII: 비대칭 Actor-Critic
   [배포/Actor 경로]                      [훈련 전용/Critic 경로]
   로컬 높이맵 o^e_t (3×2m)               확장 높이맵 o^E_t (6×4m)  ← 특권 정보
         │ VAE H^e                              │ VAE H^E
@@ -305,7 +390,7 @@ footer {
 <p><strong>제약 조건</strong>: 높이맵 크기는 로컬 &lt; 확장 (<code>3×2 &lt; 6×4</code>), 잠재는 VAE로 동일 차원(128). VAE 인코더(<code>H^e</code>, <code>H^E</code>)는 각각의 높이맵을 128차원 잠재로 압축하는 MLP 기반 인코더이며, CFM 속도장 <code>v_θ</code>는 256 은닉 유닛의 MLP다(컨텍스트 32차원 조건). VAE는 내비게이션 정책 학습 전 <strong>3,000 에폭</strong>으로 사전 학습된다.</p>
 <h3>3.6 전체 2단계 학습 파이프라인</h3>
 <p>DreamFlow는 <strong>2단계(non-end-to-end)</strong> 로 학습된다:</p>
-<pre><code>[1단계] VAE + CFM 사전 학습
+<pre class="diagram"><code>[1단계] VAE + CFM 사전 학습
   - VAE(H^e, H^E): 높이맵 → 128차원 잠재 (3,000 에폭, ~2.5시간)
   - CFM(v_θ): (z^e_t, z^E_t, c_t) 4M 샘플로 외삽 학습
               (1,000 에폭, 배치 512, A5000, ~3시간)
@@ -321,7 +406,7 @@ footer {
 <p>이 2단계 분리는 학습을 안정화하지만(잠재 예측 품질을 먼저 확보), 8장에서 논하듯 <strong>최적화 불일치</strong>라는 대가를 치른다.</p>
 <h3>3.7 워크드 예시 — Hallway(좁은 통로)에서의 한 사이클</h3>
 <p>Table II에서 가장 극적인 격차(DreamFlow 89.8% vs Baseline 35.8%)를 보인 Hallway를 추적하면:</p>
-<pre><code>1) 로봇이 좁은 통로 입구 진입. 로컬 높이맵(3×2m)에는 양옆 벽 일부만 관측
+<pre class="codeblock"><code>1) 로봇이 좁은 통로 입구 진입. 로컬 높이맵(3×2m)에는 양옆 벽 일부만 관측
    → Baseline(로컬만): 통로 전체 폭/길이를 모름. 통과 가능한 간격을 대형
      장애물로 오인하거나, 통로 끝 막힘 여부를 몰라 진입을 주저/진동
 2) DreamFlow: VAE로 z^e_t 인코딩 → c_t(목표=통로 너머, 직전행동=직진)
@@ -331,9 +416,9 @@ footer {
 </code></pre>
 <p>Baseline이 35.8%에 그친 이유는 2)가 없기 때문 — 본 것만으로 판단하니 통로 안에서 로컬 미니마에 빠진다. DreamFlow는 <strong>안 본 공간을 채워</strong> 선제적으로 행동한다.</p>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <p>DreamFlow는 <strong>계층적(hierarchical) 제어 구조</strong>로, 고수준 내비게이션(10Hz)과 저수준 보행(50Hz)을 분리한다. 전체 데이터 흐름:</p>
-<pre><code>═══════════════════════ 배포 시 전체 파이프라인 ═══════════════════════
+<pre class="diagram"><code>═══════════════════════ 배포 시 전체 파이프라인 ═══════════════════════
 
  [센서]                  [인식]                [표현]              [의사결정]
  Livox Mid-360 ×2 ─▶ FAST-LIO(오도메트리)      
@@ -373,7 +458,7 @@ footer {
 </ol>
 <p><strong>훈련 시 추가 경로(Critic)</strong>: 시뮬레이터에서 실제 확장 높이맵 <code>o^E_t</code>(6×4m)를 VAE로 인코딩한 진짜 <code>z^E_t</code>와 특권 상태 <code>s^p_t</code>를 Critic이 사용. 배포 시에는 이 경로가 제거되고 CFM의 <code>ẑ^e_t</code>가 대체한다.</p>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
 <ul>
 <li><strong>CFM 학습 데이터</strong>: IsaacGym 다중 에이전트 롤아웃으로 수집한 <code>(z^e_t, z^E_t, c_t)</code> 삼중쌍 <strong>400만(4M) 샘플</strong>. 8×8m 평지에 다양한 크기의 박스 장애물을 무작위 배치하고 커리큘럼으로 복잡도 증가.</li>
@@ -416,7 +501,7 @@ footer {
 </tr>
 </tbody></table></div>
 <p><strong>식 (8): SPL</strong></p>
-<pre><code>SPL = (1/N) Σ_{i=1}^N S_i · L_i / max(P_i, L_i)
+<pre class="codeblock"><code>SPL = (1/N) Σ_{i=1}^N S_i · L_i / max(P_i, L_i)
 </code></pre>
 <ul>
 <li><code>S_i</code>: 성공 여부(0/1), <code>L_i</code>: 최적 경로 길이, <code>P_i</code>: 실제 이동 거리. 성공해도 크게 우회하면 점수가 깎인다.</li>
@@ -538,7 +623,7 @@ footer {
 </ul>
 <h4>Table I·II 교차 분석 — &quot;예측 정확도 ≠ 내비게이션 성능&quot;</h4>
 <p>두 표를 함께 읽으면 중요한 비자명한 통찰이 나온다. 잠재 예측 정확도(Table I)와 최종 내비 성능(Table II)이 <strong>단조적으로 연결되지 않는다</strong>:</p>
-<pre><code>ASCII: 잠재 정확도(OOD Cos.) vs 내비 성능(Maze Hard SR)
+<pre class="diagram"><code>ASCII: 잠재 정확도(OOD Cos.) vs 내비 성능(Maze Hard SR)
   CFM        : Cos 0.973 ──▶ SR 83.1   (정확+우수, 일관)
   Diffusion  : Cos 0.919 ──▶ SR 68.9*  (정확하나 분산 큼 → 내비 저하)
   FM(무조건) : Cos 0.784 ──▶ (Table II 미포함, ablation)
@@ -565,7 +650,7 @@ footer {
 </ul>
 <p><strong>중대한 한계</strong>: 실세계 실험은 <strong>정성적 시연(성공/실패 비교 영상·사진)에 그치며, SR/SPL/CR 등 정량 수치·시도 횟수·반복 통계가 보고되지 않는다.</strong> Zhang et al.·Diffusion과의 실세계 정량 비교도 부재. 따라서 sim-to-real 전이 정도는 정량적으로 미확인 상태다.</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <ol>
 <li><p><strong>&quot;관측 너머&quot; 로컬 내비게이션 프레임워크 (DreamFlow)</strong>: 센서 범위의 제약으로 인한 로컬 미니마 문제를, 글로벌 맵·시간 메모리 없이 <strong>잠재 공간 생성 외삽</strong>으로 해결하는 DRL 프레임워크. Hallway SR 89.8%(Baseline 35.8% 대비 +54%p)로 좁은 통로 내비게이션에서 결정적 개선.</p>
 </li>
@@ -577,7 +662,7 @@ footer {
 </li>
 </ol>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -666,7 +751,7 @@ footer {
 <p><strong>표기 주의</strong>: arXiv HTML 추출에서 일부 네트워크가 &quot;33-layer&quot;로 파싱되나, 이는 &quot;3-layer&quot;의 추출 오류로 보이며 본 리뷰는 256 은닉 유닛 MLP/128-d VAE라는 합리적 해석을 따른다. 정확한 층수는 코드 미공개로 확인 불가.</p>
 </blockquote>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 저자 제시 한계·향후 방향</h3>
 <p>저자는 세 가지 미래 방향을 제시하며 현재 한계를 암묵적으로 인정한다:</p>
 <ol>
@@ -687,7 +772,7 @@ footer {
 <li><strong>불확실성 인지 행동</strong>: CFM 예측 분산을 행동 보수성에 연결.</li>
 </ul>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <p>같은 Planner 트랙에서 <strong>생성 모델 기반 내비게이션·부분 관측 하의 외삽</strong>이라는 토픽이 가장 가까운 선행 리뷰 세 편을 골라 비교한다:</p>
 <ul>
 <li><strong>ReliaDiffNav</strong> — <em>&quot;Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation&quot;</em> (확산 기반 항공 내비, 생성 모델로 경로 분포 생성)</li>
@@ -784,7 +869,7 @@ footer {
 <h3>9.4 연구 방향성 평가</h3>
 <p>DreamFlow는 &quot;<strong>생성 모델로 행동이 아닌 지각을 확장</strong>한다&quot;는 신선한 프레이밍을 제시한다. 이는 ReliaDiffNav/VOiLA의 &quot;생성 모델 = 정책/계획기&quot; 패러다임과 직교하며, 두 흐름의 결합(외삽된 표현 위에서 확산 계획)이 유망한 후속 방향이다. 다만 2단계 분리 학습·정적 가정·정량 검증 부재는 후속 연구가 메워야 할 명확한 공백이다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ul>
 <li>Lipman et al., &quot;Flow Matching for Generative Modeling,&quot; ICLR 2023.</li>
 <li>Albergo &amp; Vanden-Eijnden, &quot;Building Normalizing Flows with Stochastic Interpolants,&quot; 2023.</li>
@@ -801,14 +886,109 @@ footer {
 <li>DreamFlow arXiv: <a href="https://arxiv.org/abs/2603.02976">https://arxiv.org/abs/2603.02976</a></li>
 </ul>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <p>DreamFlow는 로컬 내비게이션의 고질적 실패 모드인 <strong>로컬 미니마</strong>를, &quot;센서 범위 밖의 공간을 조건부 플로우 매칭으로 <em>상상</em>한다&quot;는 신선한 발상으로 공략한다. 핵심 혁신은 CFM을 로보틱스 관행대로 <em>행동</em>이 아니라 <strong>환경 표현(잠재) 외삽</strong>에 적용했다는 점이며, 컨텍스트 조건화로 다중 모달성을 해소해 OOD 코사인 0.973±0.017이라는 정확도·안정성을 동시에 달성했다. 확산 모델 대비 K=10 Euler 적분으로 1.8배 빠른 0.0122ms 추론은 10Hz 내비 루프에 자연스럽게 안착한다.</p>
 <p><strong>실용적 의의</strong>: 시뮬레이션에서 세 시나리오 전 지표 SOTA(특히 Hallway SR +54%p, Maze Hard에서 시간메모리 방법 대비 +77.7%p)는 &quot;관측 너머 외삽&quot;의 가치를 분명히 입증한다. 글로벌 맵·SLAM·시간 메모리 없이 동작하는 단순한 배포 스택은 사족보행 로봇 현장 적용에 매력적이다.</p>
 <p><strong>한계와 향후 연구</strong>: 그러나 (1) <strong>코드 미공개로 재현성 미확보</strong>, (2) <strong>실세계 정량 검증 부재</strong>(정성 시연만), (3) 정적 환경 가정, (4) 2단계 분리 학습의 최적화 불일치, (5) 높이맵 지각의 내재적 사각(유리벽·동일높이 장애물)이 명확한 공백으로 남는다. 가장 시급한 것은 실세계 SR/CR 정량 보고와 코드 공개다. 동적 환경 확장, 엔드투엔드 공동 학습, 적응적 예측 범위, 불확실성 인지 행동이 자연스러운 후속 방향이며, TRG-Planner 같은 글로벌 플래너와의 계층 결합은 장거리 자율 미션으로의 확장 경로를 제시한다.</p>
 <p>종합적으로 DreamFlow는 <strong>&quot;생성 모델로 지각을 확장한다&quot;</strong> 는 직교적이고 우아한 아이디어를 정량적으로 뒷받침한 ICRA 2026 수준의 견고한 연구이나, 재현성·실세계 정량성에서 한 걸음 더 나아가야 그 가치가 완성될 것이다.</p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="DreamFlow: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

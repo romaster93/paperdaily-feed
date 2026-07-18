@@ -6,133 +6,220 @@
 <meta name="color-scheme" content="light dark">
 <title>HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial Vision-and-Language Navigation · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2604.08883">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">arXiv 프리프린트</div>
-    <h1>HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial Vision-and-Language Navigation</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2604.08883">arXiv:2604.08883</a></span>
-      <span>리뷰 2026-04-14</span>
-      <span>42분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">HTNav_arxiv2026</span>
     </div>
+    <h1 class="doc-title">HTNav: 계층적 하이브리드 IL-RL 항공 VLN 프레임워크</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 프리프린트</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2604.08883">2604.08883</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">❌ 미공개</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">❌ 미확인</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-04-14</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">40KB · 약 42분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 12개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">9</span><span class="toc-title">5 항공 VLN 연구 지형도 (Research Landscape)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-11"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>HTNav: 계층적 하이브리드 IL-RL 항공 VLN 프레임워크 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial Vision-and-Language Navigation</li>
@@ -152,18 +239,18 @@ footer {
 <p>이를 해결하기 위해 HTNav는 <strong>모방 학습(IL)과 강화 학습(RL)을 결합한 하이브리드 훈련 체계</strong>, <strong>계층적 의사결정 메커니즘(MacroPlanner + MicroActor)</strong>, 그리고 <strong>공간 연속성 맵 학습 모듈(SCConv)</strong>을 통합한 항공 VLN 프레임워크를 제안한다.</p>
 <p>CityNav 벤치마크에서 모든 장면 레벨 및 난이도에서 최신 최고 성능(SOTA)을 달성하였으며, 특히 수정된 CityNav* 평가셋에서 내비게이션 오차(NE)를 61.4m → 40.3m으로 대폭 감소시켰다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. 미탐색 환경 일반화 (Generalization to Unseen Scenes)</h4>
 <p>항공 VLN에서 가장 큰 병목 중 하나는 훈련 도시와 다른 새로운 도시에서의 성능 저하다. 기존 모방 학습 기반 방법(예: MGP)은 전문가 궤적을 직접 학습하므로:</p>
-<pre><code>문제: 훈련 도시 A → 테스트 도시 B 시 성능 급락
+<pre class="codeblock"><code>문제: 훈련 도시 A → 테스트 도시 B 시 성능 급락
 MGP Test Unseen NE: 82.6m (vs. 인간 NE: 9.8m)
 원인: 분포 외(OOD) 장면에서 학습된 패턴 과적합
 </code></pre>
 <p>강화 학습만 사용하면 보상 설계의 어려움과 훈련 불안정성이 발생하고, 모방 학습만 사용하면 탐색 능력이 제한된다. 두 접근을 유기적으로 결합하는 것이 핵심 과제다.</p>
 <h4>B. 장거리 경로 계획 (Long-Range Path Planning)</h4>
 <p>도심 항공 환경에서 목표물(상점, 랜드마크, 건물 등)은 수백 미터 떨어져 있을 수 있다. 단일 정책으로 전체 경로를 한 번에 계획하면:</p>
-<pre><code>문제: 먼 목표물에 대한 미세 조정 어려움
+<pre class="codeblock"><code>문제: 먼 목표물에 대한 미세 조정 어려움
 단일 정책의 한계:
   - 고차원 행동 공간에서 탐색 비효율
   - 국소 최적점(local optima)에 빠질 위험
@@ -172,7 +259,7 @@ MGP Test Unseen NE: 82.6m (vs. 인간 NE: 9.8m)
 <p>계층적 의사결정 없이는 에이전트가 단기적 장애물 회피와 장기적 목표 도달을 동시에 효과적으로 처리할 수 없다.</p>
 <h4>C. 공간 연속성 이해 (Spatial Continuity Understanding)</h4>
 <p>항공 내비게이션 맵은 위성 이미지나 항공 사진으로 구성되어 독특한 특성을 가진다:</p>
-<pre><code>항공 맵의 특성:
+<pre class="codeblock"><code>항공 맵의 특성:
   - 지상 레벨과 다른 시점 (top-down 또는 oblique)
   - 도시 블록 단위의 대규모 공간적 연속성
   - 건물, 도로, 공원 등의 공간 패턴 인식 필요
@@ -187,12 +274,12 @@ MGP Test Unseen NE: 82.6m (vs. 인간 NE: 9.8m)
 <li><strong>SCConv 맵 표현 학습</strong>: 공간-채널 정보를 통합하는 특수 합성곱으로 항공 맵의 공간 연속성 포착</li>
 </ol>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 하이브리드 IL-RL 훈련 체계 (Hybrid IL-RL Framework)</h3>
 <p>HTNav의 훈련은 2단계로 나뉜다:</p>
 <h4>Stage 1: 모방 학습 (Imitation Learning)</h4>
 <p>전문가 궤적으로부터 기본 내비게이션 전략을 학습하는 멀티태스크 목표 예측기:</p>
-<pre><code>입력: 현재 맵 피처 m_t, UAV 포즈 s_t = (p_t, θ_t), 텍스트 지시 d
+<pre class="codeblock"><code>입력: 현재 맵 피처 m_t, UAV 포즈 s_t = (p_t, θ_t), 텍스트 지시 d
 
 출력 헤드 3개:
   1. 목표 위치 예측: ĝ = f_goal(m_t, s_t, d)
@@ -206,7 +293,7 @@ IL 손실:
 <p>멀티태스크 학습은 다양한 보조 신호를 통해 더 풍부한 표현을 학습하고, Stage 2 RL 초기화의 품질을 높인다.</p>
 <h4>Stage 2: 강화 학습 (Reinforcement Learning via PPO)</h4>
 <p>Stage 1의 가치 네트워크 가중치로 PPO를 초기화하여 훈련 안정성 확보:</p>
-<pre><code>PPO 클리핑 목표:
+<pre class="codeblock"><code>PPO 클리핑 목표:
   L_RL = E_t[min(r_t(θ) * A_t, clip(r_t(θ), 1-ε, 1+ε) * A_t)]
 
 여기서:
@@ -230,13 +317,13 @@ IL 손실:
   r_min = -1, r_max = 5
 </code></pre>
 <p>전체 훈련 손실:</p>
-<pre><code>L_total = L_IL + L_V + λ_RL * L_RL
+<pre class="codeblock"><code>L_total = L_IL + L_V + λ_RL * L_RL
 
 λ_RL = 0 (Stage 1, IL만)
 λ_RL = 0.20 (Stage 2, 최적값)
 </code></pre>
 <p>λ_RL 민감도 분석 결과, 0.20이 최적이며 0.30 이상에서 성능 저하 발생 (RL 신호 과도로 인한 불안정):</p>
-<pre><code>λ_RL  |  NE(m) ↓  |  SR(%) ↑
+<pre class="codeblock"><code>λ_RL  |  NE(m) ↓  |  SR(%) ↑
 ------|-----------|----------
 0.00  |   53.0    |  18.90
 0.10  |   44.2    |  23.12
@@ -247,7 +334,7 @@ IL 손실:
 <h3>3.2 계층적 의사결정 메커니즘 (Tiered Decision Mechanism)</h3>
 <p>HTNav의 핵심 혁신은 항공 VLN을 두 레벨로 분해하는 것이다:</p>
 <h4>MacroPlanner (고차원 경로 계획)</h4>
-<pre><code>입력: 
+<pre class="codeblock"><code>입력: 
   - 맵 피처 m = MapEncoder(aerial_image)
   - UAV 포즈 s_t = (p_t, θ_t)  ← 3D 위치 + 방향
   - 자연어 지시 d = TextEncoder(instruction)
@@ -266,7 +353,7 @@ IL 손실:
 </code></pre>
 <p>MacroPlanner는 A* 등의 전통적 경로 계획기와 달리, 학습된 정책으로 자연어 조건부 경유점을 생성한다. 이는 &quot;공원 옆 카페&quot;처럼 의미론적으로 복잡한 지시를 처리할 수 있게 한다.</p>
 <h4>MicroActor (세부 행동 제어)</h4>
-<pre><code>입력:
+<pre class="codeblock"><code>입력:
   - RGB 관측 o_t (현재 카메라 프레임)
   - UAV 포즈 s_t = (p_t, θ_t)
   - 현재 경유점 w_k
@@ -284,7 +371,7 @@ IL 손실:
   - RGB 관측 기반 시각적 피드백 통합
 </code></pre>
 <p>두 레벨의 협업 메커니즘:</p>
-<pre><code>전체 내비게이션 루프:
+<pre class="diagram"><code>전체 내비게이션 루프:
                                     
   자연어 지시 + 맵
        ↓
@@ -307,7 +394,7 @@ IL 손실:
 <h3>3.3 맵 표현 학습 모듈 (Map Representation Learning Module)</h3>
 <p>항공 맵의 공간 연속성을 포착하기 위한 특수 인코더:</p>
 <h4>Residual Encoder (기본 구조)</h4>
-<pre><code class="language-python"># 잔차 연결로 그래디언트 소실 방지
+<pre class="codeblock"><code class="language-python"># 잔차 연결로 그래디언트 소실 방지
 def ResidualBlock(F_l, kernel_size=3):
     conv_out = Conv2d(F_l, padding=&#39;same&#39;)
     bn_out = BatchNorm2d(conv_out)
@@ -321,7 +408,7 @@ def ResidualBlock(F_l, kernel_size=3):
 <p>잔차 연결은 도심 항공 맵의 고주파 세부 특징(도로 경계, 건물 윤곽)이 깊은 레이어까지 전달되도록 보장한다.</p>
 <h4>SCConv (Spatial-Channel Convolution)</h4>
 <p>SCConv는 공간적 자기상관(spatial autocorrelation)과 채널 간 의존성(channel dependency)을 동시에 모델링하는 핵심 구성요소:</p>
-<pre><code class="language-python">def SCConv(F_in, reduction_ratio=4):
+<pre class="codeblock"><code class="language-python">def SCConv(F_in, reduction_ratio=4):
     # 1. 공간 압축 (Spatial Compression)
     U = SpatialConv(F_in)  
     # SpatialConv: 채널 축소 후 공간 정보 집약
@@ -348,7 +435,7 @@ def ResidualBlock(F_l, kernel_size=3):
 <li>공간-채널 정보의 동시 압축/융합으로 이를 효과적으로 인코딩</li>
 </ul>
 <h4>최종 맵 인코더 아키텍처</h4>
-<pre><code>항공 이미지 (H×W×3)
+<pre class="codeblock"><code>항공 이미지 (H×W×3)
     ↓
 ConvStem (3×3, stride=2)
     ↓
@@ -363,8 +450,8 @@ GlobalAvgPool
 맵 피처 벡터 m ∈ R^{512}
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>┌─────────────────────────────────────────────────────────┐
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>┌─────────────────────────────────────────────────────────┐
 │                    HTNav 전체 파이프라인                  │
 └─────────────────────────────────────────────────────────┘
 
@@ -416,10 +503,10 @@ GlobalAvgPool
 <li><strong>실행 루프</strong>: 행동 실행 → 환경 업데이트 → 다음 관측 → 반복</li>
 </ol>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (CityNav Benchmark)</h3>
 <p>CityNav는 도심 항공 VLN 평가를 위한 대규모 벤치마크:</p>
-<pre><code>CityNav 통계:
+<pre class="codeblock"><code>CityNav 통계:
   - 목표 객체: 5,850개 (랜드마크, 상점, 건물 등)
   - 지시-궤적 쌍: 32,637개 (원본), 32,326개 (검수 후)
   - 도시 수: 여러 도시 (훈련/평가 분리)
@@ -432,7 +519,7 @@ GlobalAvgPool
 <li><strong>수정 CityNav* (HTNav*)</strong>: 저자가 데이터 품질 향상을 위해 수정한 버전</li>
 </ul>
 <h3>5.2 평가 지표 (Evaluation Metrics)</h3>
-<pre><code>NE  (Navigation Error):       목표까지의 최소 거리 (m), 낮을수록 좋음
+<pre class="codeblock"><code>NE  (Navigation Error):       목표까지의 최소 거리 (m), 낮을수록 좋음
 SR  (Success Rate):           NE &lt; 20m인 비율 (%), 높을수록 좋음
 OSR (Oracle Success Rate):    최적 경로 상 20m 내 접근 비율 (%)
 SPL (Success weighted by
@@ -614,17 +701,17 @@ SPL (Success weighted by
 <p><strong>없음.</strong> HTNav의 모든 실험은 CityNav 시뮬레이션 환경에서만 수행되었다. 실제 UAV를 이용한 물리적 실험이나 실제 도시 환경 테스트는 포함되지 않는다.</p>
 <p>이는 논문의 중요한 한계점으로, 현실 시뮬레이션 갭(sim-to-real gap), 바람 등 외란, GPS 오차, 통신 지연 등의 현실적 제약 조건이 고려되지 않았다.</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>기여 1: 하이브리드 IL-RL 스테이지 훈련 체계</h3>
 <p><strong>IL 선행 학습의 중요성</strong>: 기존 RL-only 방식은 광활한 도심 항공 환경에서 보상 희소성(sparse reward) 문제로 인해 수렴이 매우 어렵다. HTNav는 IL로 기본 탐색 전략을 먼저 학습시킨 후 RL로 미세 조정함으로써:</p>
-<pre><code>IL → 안정적인 기본 정책 학습 (보상 희소성 문제 회피)
+<pre class="codeblock"><code>IL → 안정적인 기본 정책 학습 (보상 희소성 문제 회피)
 RL → 환경 탐색 능력 향상 (distribution shift 적응)
 결합 → IL의 안정성 + RL의 탐험성
 </code></pre>
 <p>특히 PPO 가치 네트워크를 IL의 상태 가치 추정기로 초기화하는 것이 훈련 초기 안정성에 크게 기여한다.</p>
 <h3>기여 2: 계층적 의사결정으로 장거리 내비게이션 해결</h3>
 <p>MacroPlanner + MicroActor 아키텍처는 장거리 항공 VLN의 구조적 도전을 해결한다:</p>
-<pre><code>전통 방식: 단일 정책 → 고차원 행동 공간 탐색 비효율
+<pre class="codeblock"><code>전통 방식: 단일 정책 → 고차원 행동 공간 탐색 비효율
 HTNav: 
   MacroPlanner → 의미 수준에서 경유점 선택 (수백 m 스케일)
   MicroActor → 세밀한 비행 제어 (수 m 스케일)
@@ -634,7 +721,7 @@ HTNav:
 <p>이는 인간 파일럿이 먼저 전반적인 경로를 계획하고(거시적), 이후 세부 기동을 수행하는(미시적) 방식을 모사한 것이다.</p>
 <h3>기여 3: SCConv 기반 항공 맵 특화 인코더</h3>
 <p>도심 항공 맵의 독특한 공간-채널 구조를 포착하는 SCConv는:</p>
-<pre><code>표준 Conv2d:
+<pre class="codeblock"><code>표준 Conv2d:
   - 채널 독립적 공간 필터링
   - 채널 간 상관관계 암묵적 학습에 의존
 
@@ -646,7 +733,7 @@ SCConv:
 <p>잔차 연결과 SCConv의 조합은 도심 항공 내비게이션 맵의 고주파 공간 정보(도로 경계, 건물 윤곽)와 저주파 의미 정보(상업 지구, 공원 등)를 동시에 효과적으로 인코딩한다.</p>
 <h3>기여 4: CityNav 벤치마크에서의 SOTA 달성</h3>
 <p>HTNav는 원본 및 수정 CityNav 데이터셋의 모든 장면 레벨과 난이도에서 이전 최고 성능(FlightGPT)을 초과:</p>
-<pre><code>원본 CityNav Test Unseen:
+<pre class="codeblock"><code>원본 CityNav Test Unseen:
   NE: 76.2m → 68.5m (10.1% 감소)
   SR: 21.20% → 22.23% (+1.03%p)
   OSR: 35.38% → 41.02% (+5.64%p)
@@ -657,9 +744,9 @@ SCConv:
   OSR: 42.17% → 48.82% (+6.65%p)
 </code></pre>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>훈련 하이퍼파라미터</h3>
-<pre><code class="language-python"># Stage 1: 모방 학습
+<pre class="codeblock"><code class="language-python"># Stage 1: 모방 학습
 learning_rate_IL = 1e-4
 batch_size_IL = 64
 epochs_IL = 50
@@ -690,7 +777,7 @@ epsilon = 5.0   # 미터 단위
 T_max = 400     # 에피소드당 최대 행동 수
 </code></pre>
 <h3>모델 아키텍처 세부사항</h3>
-<pre><code class="language-python"># 맵 인코더
+<pre class="codeblock"><code class="language-python"># 맵 인코더
 MapEncoder:
   - ConvStem: Conv2d(3, 64, 3×3, stride=2) + BN + ReLU
   - ResBlock × 2: [Conv2d(64,64,3×3) + BN + skip]
@@ -714,7 +801,7 @@ PolicyNetwork:
   - MLP: 512 → 256 → 6 (소프트맥스)
 </code></pre>
 <h3>환경 설정</h3>
-<pre><code>시뮬레이터: CityNav 환경 (자체 구축)
+<pre class="codeblock"><code>시뮬레이터: CityNav 환경 (자체 구축)
 항공 이미지: 1m/픽셀 해상도 위성 이미지
 UAV 비행 높이: 15-50m (가변)
 행동 단위 거리: 5m (전진)
@@ -723,10 +810,10 @@ UAV 비행 높이: 15-50m (가변)
 GPU: NVIDIA A100 (Stage 1: 24h, Stage 2: 48h)
 </code></pre>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 분석</h3>
 <p>HTNav의 계층적 구조는 대규모 도시 환경으로의 확장성을 지원:</p>
-<pre><code>확장 시나리오:
+<pre class="codeblock"><code>확장 시나리오:
   소도시 (5km×5km) → 대도시 (50km×50km)
 
 MacroPlanner:
@@ -740,7 +827,7 @@ MicroActor:
 <p>그러나 대규모 환경에서 MacroPlanner의 전역 맵 인코딩은 계산 복잡도가 O(H×W) 증가하는 문제가 있다. 계층적 맵 표현이나 타일 기반 접근이 필요할 수 있다.</p>
 <h3>8.2 한계점 (Limitations)</h3>
 <h4>A. 시뮬레이션-현실 갭 (Sim-to-Real Gap)</h4>
-<pre><code>시뮬레이션 환경 가정:
+<pre class="codeblock"><code>시뮬레이션 환경 가정:
   ✓ 완벽한 UAV 위치 정보 (GPS 오차 없음)
   ✓ 확정적 환경 (바람, 난기류 없음)
   ✓ 정적 장애물 (새, 다른 드론 없음)
@@ -756,14 +843,14 @@ MicroActor:
 <h4>B. 코드 미공개</h4>
 <p>현재 GitHub 코드가 공개되지 않아 재현성 검증이 불가능하다. CityNav 벤치마크의 커뮤니티 채택을 위해서는 공식 코드 공개가 필수적이다.</p>
 <h4>C. 인간 대비 성능 갭</h4>
-<pre><code>최고 성능 (HTNav*, SR=25.49%) vs. 인간 (SR=87.86%)
+<pre class="codeblock"><code>최고 성능 (HTNav*, SR=25.49%) vs. 인간 (SR=87.86%)
 갭: 62.37%p
 </code></pre>
 <p>이는 자연어 이해와 3D 공간 추론 능력에서 현재 AI의 본질적 한계를 반영한다. 특히 &quot;파란 지붕 건물 오른쪽의 녹색 카페&quot;와 같은 복잡한 관계형 지시에서 인간과의 차이가 크다.</p>
 <h4>D. 평가 환경 제한</h4>
 <p>CityNav는 특정 도시들의 위성 이미지를 기반으로 하는데, 이 도시들이 실제 배포 환경을 대표하는지에 대한 검증이 필요하다. 특히 위성 이미지의 계절/날씨 변화에 대한 강건성이 미검증 상태다.</p>
 <h3>8.3 향후 연구 방향</h3>
-<pre><code>단기 과제:
+<pre class="codeblock"><code>단기 과제:
   1. 코드 공개 및 커뮤니티 재현 지원
   2. 실제 UAV 테스트베드에서 검증
   3. 동적 장애물 회피 통합
@@ -781,7 +868,7 @@ MicroActor:
 <h3>8.4 관련 연구와의 기술적 연결 (Technical Connections)</h3>
 <p>HTNav의 각 구성요소는 선행 연구와 긴밀하게 연결된다:</p>
 <h4>IL-RL 결합 방법론 계보</h4>
-<pre><code>IL-only 방식 (전통적):
+<pre class="codeblock"><code>IL-only 방식 (전통적):
   DAGGER (2011): 데이터 집계로 분포 불일치 극복
   GAIL (2016): GAN으로 전문가 분포 모방
   한계: 새 환경 탐색 능력 부족, 분포 외 일반화 어려움
@@ -804,7 +891,7 @@ HTNav의 차별점:
   → 항공 VLN의 보상 희소성을 IL 기반으로 극복
 </code></pre>
 <h4>계층적 VLN 방법론 계보</h4>
-<pre><code>단일 정책 기반 (Flat):
+<pre class="codeblock"><code>단일 정책 기반 (Flat):
   SeqToSeq (2018): LSTM 기반 단일 정책
   PREVALENT (2020): BERT로 멀티모달 사전학습
   한계: 장거리에서 경로 이탈, 메모리 부족
@@ -824,7 +911,7 @@ HTNav의 차별점:
   장거리 목표: 수백m 규모의 계획 필요 → 계층화 당연
 </code></pre>
 <h3>8.5 CityNav 벤치마크 심층 분석</h3>
-<pre><code>CityNav의 현재 한계점:
+<pre class="codeblock"><code>CityNav의 현재 한계점:
 
 1. 정적 환경 가정:
    - 다른 드론, 새, 차량이 없는 환경
@@ -852,7 +939,7 @@ CityNav* (수정 버전)의 의미:
   더 신뢰할 수 있는 평가 결과로 해석된다.
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <h4>HTNav vs. 지상 기반 VLN 방법들</h4>
 <p>기존 리뷰된 VLN 논문들은 모두 지상 로봇을 대상으로 했으나, HTNav는 <strong>UAV 항공 내비게이션</strong>에 특화된 유일한 리뷰 논문이다:</p>
@@ -975,7 +1062,7 @@ CityNav* (수정 버전)의 의미:
 <h4>장점 (Strengths)</h4>
 <p><strong>1. 도메인 특화 설계</strong>
 항공 VLN은 지상 VLN과 근본적으로 다른 도전을 가진다. HTNav의 세 가지 구성요소는 각각 이 도전에 맞춰 설계되었다:</p>
-<pre><code>항공 VLN 도전 → HTNav 솔루션
+<pre class="codeblock"><code>항공 VLN 도전 → HTNav 솔루션
 장거리 목표 → MacroPlanner (경유점 기반 분해)
 넓은 탐색 공간 → 하이브리드 IL-RL (탐험 능력)
 위성 맵 이해 → SCConv (공간-채널 통합)
@@ -994,7 +1081,7 @@ CityNav의 모든 평가 지표에서 이전 SOTA 달성. 특히 수정된 CityN
 <p><strong>4. CityNav 의존성</strong>
 단일 벤치마크 평가. R2R, AerialVLN 등 타 벤치마크로의 일반화 검증 미흡.</p>
 <h3>9.3 실적용 가능성 평가</h3>
-<pre><code>물류 배송 드론:
+<pre class="codeblock"><code>물류 배송 드론:
   적합도: ★★☆☆☆ (2/5)
   이유: 실시간 안전성, GPS 정밀도, 규제 미고려
   필요 추가 작업: 동적 장애물 회피, 배터리 관리, 비행 허가 통합
@@ -1012,9 +1099,9 @@ CityNav의 모든 평가 지표에서 이전 SOTA 달성. 특히 수정된 CityN
 <p>HTNav는 <strong>항공 VLN이라는 중요하지만 덜 탐구된 서브 필드</strong>를 개척한다. 드론 배송, 도시 점검, 탐색 및 구조 등 실용적 응용 수요가 증가하는 상황에서 이 연구 방향의 가치는 높다.</p>
 <p>기존 리뷰 논문들이 모두 지상 로봇에 집중된 반면, HTNav는 3D 행동 공간(고도 포함), 광역 항공 시점, 빠른 이동 속도 등 항공 도메인의 고유한 도전을 정면으로 다룬다. 향후 실제 UAV 실험과 코드 공개가 이루어진다면 커뮤니티에 큰 기여가 될 것이다.</p>
 <hr>
-<h2>9.5 항공 VLN 연구 지형도 (Research Landscape)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="9. 5 항공 VLN 연구 지형도">9.5 항공 VLN 연구 지형도 (Research Landscape)</h2>
 <p>항공 VLN은 지상 VLN의 하위 분야이면서도, 독자적인 도전 과제와 방법론적 요구를 가진다. HTNav를 이 맥락에서 위치시키면:</p>
-<pre><code>VLN 연구 지형도:
+<pre class="codeblock"><code>VLN 연구 지형도:
 
 지상 실내 VLN (Indoor Ground VLN):
   - R2R (Room-to-Room): VLN의 원조 벤치마크
@@ -1038,7 +1125,7 @@ CityNav의 모든 평가 지표에서 이전 SOTA 달성. 특히 수정된 CityN
 <p>HTNav는 <strong>도심 규모 항공 VLN</strong>이라는 가장 도전적인 설정에서 연구를 수행한다. CityNav는 5,850개 랜드마크와 32,637개 지시-궤적 쌍을 포함하여, 기존 항공 VLN 데이터셋보다 훨씬 규모가 크다.</p>
 <h3>9.6 Tiered 구조의 이론적 배경</h3>
 <p>HTNav의 MacroPlanner + MicroActor 계층 구조는 계층적 강화학습(Hierarchical RL, HRL)의 원리에 기반한다:</p>
-<pre><code>Hierarchical RL 계보:
+<pre class="codeblock"><code>Hierarchical RL 계보:
   HIRO (2019): 고수준 목표 생성 + 저수준 행동
   HAC (2019): 계층적 Actor-Critic
   HHER (2018): 계층 + 힌트 경험 재플레이
@@ -1056,7 +1143,7 @@ HTNav의 연결:
 <p>이 계층 구조는 VLN에서 자주 보이는 <strong>&quot;탐색(explore) vs. 목표 도달(exploit)&quot;</strong> 트레이드오프를 해결하는 우아한 방법이다. MacroPlanner가 탐색 방향을 결정하면, MicroActor는 안전하고 효율적인 기동을 수행한다.</p>
 <h3>9.7 SCConv의 수학적 분석</h3>
 <p>SCConv의 핵심 아이디어를 수학적으로 분석하면:</p>
-<pre><code>표준 컨볼루션:
+<pre class="codeblock"><code>표준 컨볼루션:
   F_out[h,w,c] = Σ_{i,j,k} F_in[h+i, w+j, k] * K[i,j,k,c]
   → 채널 c가 독립적으로 공간 필터링
   → 채널 간 상호작용은 전적으로 필터 K에 의존
@@ -1084,7 +1171,7 @@ SCConv:
 </code></pre>
 <h3>9.8 CityNav 벤치마크 심층 분석</h3>
 <p>CityNav의 데이터 구조를 분석하면 HTNav 성능의 의미를 더 깊이 이해할 수 있다:</p>
-<pre><code>CityNav 데이터 특성:
+<pre class="codeblock"><code>CityNav 데이터 특성:
   지시 유형 분포 (추정):
     - 랜드마크 기반: &quot;빨간 지붕의 카페를 찾아&quot; (~40%)
     - 방향 기반: &quot;북쪽으로 100m 직진 후 좌회전&quot; (~30%)
@@ -1106,7 +1193,7 @@ SCConv:
 </code></pre>
 <p>이 역설적 결과는 HTNav의 MacroPlanner가 장거리 계획에서 특히 강점을 발휘함을 시사한다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">9. 5 항공 VLN 연구 지형도 →</a></div><h2 id="sec-10" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li>HTNav paper: arXiv:2604.08883v1 (2026)</li>
 <li>CityNav benchmark: CityNav: A Dataset for Vision-and-Language Navigation in Aerial Views (NUAA, 2025)</li>
@@ -1123,7 +1210,7 @@ SCConv:
 <li>WorldMAP: arXiv:2604.07957 (arXiv 2026) — 리뷰 완료</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">10. 참고 문헌 →</a></div><h2 id="sec-11" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>혁신성 평가</h3>
 <p>HTNav는 항공 VLN 분야에서 중요한 방법론적 기여를 한다. 기존 지상 VLN 방법들이 단일 정책 기반의 평면적 구조를 사용하는 것과 달리, HTNav는 <strong>계층적 의사결정(MacroPlanner + MicroActor)과 단계적 훈련(IL → RL)을 결합</strong>하여 항공 내비게이션의 본질적 어려움인 장거리 계획과 세밀한 비행 제어를 동시에 해결한다.</p>
 <p>SCConv 기반 맵 인코더는 항공 시점의 위성 이미지에서 공간-채널 정보를 효과적으로 포착하는 새로운 접근이다. 이 세 가지 구성요소의 결합은 CityNav 벤치마크에서 이전 SOTA 대비 의미 있는 성능 향상을 달성했다.</p>
@@ -1136,9 +1223,104 @@ SCConv:
 <hr>
 <p><em>리뷰 작성: 2026-04-14</em>
 <em>리뷰어: NanoClaw Paper Bot</em></p>
-
+<div class="secnav"><a href="#sec-9">← 9. 5 항공 VLN 연구 지형도</a><a href="#sec-11">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="HTNav: 계층적 하이브리드 IL-RL 항공 VLN 프레임워크">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

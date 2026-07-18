@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2501.01806">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">RA-L 2025</div>
-    <h1>TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation</h1>
-    <div class="meta-row">
-      <span class="chip">Planner</span>
-      <span><a href="https://arxiv.org/abs/2501.01806">arXiv:2501.01806</a></span>
-      <span>리뷰 2026-06-29</span>
-      <span>49분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">TRG-Planner_RAL2025</span>
     </div>
+    <h1 class="doc-title">TRG-planner: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">RA-L 2025</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2501.01806">2501.01806</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">**❌ 미공개 (확인 불가)** — 프로젝트 페이지(<a href="https://trg-planner.github.io/">trg-planner.github.io/</a>)와 url-kaist GitHub 조직(<a href="https://github.com/orgs/url-kaist/repositories">github.com/orgs/url-kaist/repositories</a>) 양쪽을 검증한 결과, *TRG-planner 자체의 소스 저장소는 공개되어 있지 않다*. 프로젝트 페이지의 GitHub 링크는 전부 (i) 저자 개인 프로필(Dongkyu Lee, I Made Aswin Nahrendra, Minho Oh) 또는 (ii) 웹사이트 템플릿(nerfies.github.io)으로만 연결되며, 코드 저장소 버튼은 존재하지 않는다. 따라서 **본 리뷰의 &quot;코드&quot;는 공개 구현체가 아니라 논문 본문의 수식·의사논리·아키텍처 기술에 근거**하며, 실제 코드 스니펫은 인용하지 않는다(날조 금지).</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">✅ <a href="https://trg-planner.github.io/">trg-planner.github.io/</a> (실/시뮬 실험 영상·그림 포함, abstract 리다이렉트 아님 — 독립 페이지로 확인)</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-06-29</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">51KB · 약 49분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>TRG-planner: 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation</li>
@@ -155,7 +241,7 @@ footer {
 </ul>
 <p>논문은 이 셋 모두에 긍정으로 답하며, 그 정점으로 <strong>ICRA 2023 Quadruped Robot Challenge(QRC) 우승 팀(DreamSTEP)의 전역 경로 계획기</strong>로 채택된 실증을 든다.</p>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <p><strong>(C1) 해상도-연산량 트레이드오프 (Grid 기반의 근본 한계).</strong>
 2.5D elevation map이나 3D voxel 위에 traversability를 계산하면, 안전한 계획을 위해 고해상도가 필요하지만 해상도를 올릴수록 셀 수가 제곱/세제곱으로 늘어 탐색 비용이 폭증한다. 83m×151m급 산악 환경을 0.05m 해상도로 풀 그리드 A*로 풀면 수 초~수십 초가 걸려 실시간 재계획 루프에 들어갈 수 없다(논문 Table 3에서 Vanilla A*가 Long 시나리오 2980ms를 기록).</p>
@@ -169,7 +255,7 @@ footer {
 &quot;얼마나 보수적으로 안전을 우선할 것인가&quot;는 응용마다 다르다(정찰 vs 구조). 이 트레이드오프를 <em>단일하고 해석 가능한 파라미터</em> 로 노출해야 현장 적용성이 높아진다.</p>
 <h3>2.2 핵심 해결책</h3>
 <p>TRG-planner의 해법은 <strong>&quot;방향성 위험 그래프(TRG) + wavefront 구성 + 계층적 관리 + 위험 인지 A*&quot;</strong> 의 4중 결합이다:</p>
-<pre><code>                         ┌───────────────────────────────────────────────┐
+<pre class="diagram"><code>                         ┌───────────────────────────────────────────────┐
  Elevation Map ─────────▶│ TRG 구성                                       │
  (LiDAR/포인트클라우드)   │  • 노드: stability g(c) ∧ reachability r(E)    │
                          │  • 엣지: PCA 타원평면 → 방향위험 R_lon,R_lat   │
@@ -194,30 +280,30 @@ footer {
 <li><strong>안전 계수 Γ(C5 해결)</strong>: Γ=1(낙관)/3(균형)/10(보수)으로 단일 파라미터 트레이드오프.</li>
 </ul>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <h3>3.1 TRG 노드 정의 — 안정성과 도달 가능성</h3>
 <p>TRG의 각 노드 <code>v_i = (p_i, s_i, E_i)</code> 는 로봇이 발을 디딜 수 있는 지형 영역을 나타낸다. <code>p_i</code>는 3D 위치, <code>s_i</code>는 상태(valid/invalid), <code>E_i</code>는 연결된 엣지 집합이다. 노드의 유효성은 <strong>두 이진 지표의 논리곱</strong>으로 판정된다.</p>
 <h4>기하 안정성 (Geometric Stability)</h4>
 <p>노드 중심 <code>c_i</code> 주변(로봇 내접원 반경 <code>r_robot</code> 내) elevation map 높이들이 중앙값 <code>h_mid</code>로부터 임계값 <code>h_max</code> 이내에 머무는지 확인:</p>
-<pre><code>g(c_i) = 𝟙{ ∀ h(x_k, y_k) ∈ N(c_i) :  | h(x_k, y_k) − h_mid | &lt; h_max }
+<pre class="codeblock"><code>g(c_i) = 𝟙{ ∀ h(x_k, y_k) ∈ N(c_i) :  | h(x_k, y_k) − h_mid | &lt; h_max }
 </code></pre>
 <ul>
 <li><code>𝟙{·}</code>: 지시함수(indicator) — 조건 만족 시 1, 아니면 0.</li>
 <li>직관: 로봇 발판 영역의 높이 변동(거칠기·단차)이 <code>h_max</code>(=0.16m, 로봇이 극복 가능한 최대 높이)를 넘으면 그 지점은 불안정 → 노드 무효.</li>
 </ul>
 <h4>도달 가능성 (Reachability)</h4>
-<pre><code>r(E_i) = 𝟙{ n(E_i) &gt; 0 }
+<pre class="codeblock"><code>r(E_i) = 𝟙{ n(E_i) &gt; 0 }
 </code></pre>
 <ul>
 <li><code>n(E_i)</code>: 노드 <code>i</code>에 연결된 <em>유효 엣지</em> 의 개수.</li>
 <li>직관: 안정적이어도 어떤 valid 엣지로도 닿을 수 없으면(고립 섬) 도달 불가 → 노드 무효. 이것이 stability만으로는 잡지 못하는 &quot;갈 수 있는가&quot;를 보장한다.</li>
 </ul>
 <h4>노드 상태 분류</h4>
-<pre><code>s_i = { valid,    if g(c_i) ∧ r(E_i)
+<pre class="codeblock"><code>s_i = { valid,    if g(c_i) ∧ r(E_i)
       { invalid,  otherwise
 </code></pre>
 <p>이 <strong>이중 게이팅(stability ∧ reachability)</strong> 이 C3을 해결한다. &quot;안전하게 설 수 있고(stability) + 실제로 닿을 수 있는(reachability)&quot; 지점만 경로 후보가 된다.</p>
-<pre><code>ASCII: 노드 유효성 판정
+<pre class="diagram"><code>ASCII: 노드 유효성 판정
   elevation map N(c_i)
         │ 높이 편차 검사 (|h − h_mid| &lt; h_max ?)
         ▼
@@ -237,20 +323,20 @@ footer {
 </ul>
 <h4>방향별 위험도 (중력 내적)</h4>
 <p>위험도는 각 주방향 고유벡터와 <strong>중력 벡터 <code>g = [0, 0, −1]</code></strong> 의 음의 내적으로 정의된다:</p>
-<pre><code>R^ξ_dir = − ê^ξ_dir · g ,     dir ∈ { lon, lat }
+<pre class="codeblock"><code>R^ξ_dir = − ê^ξ_dir · g ,     dir ∈ { lon, lat }
 </code></pre>
 <ul>
 <li>직관(기하적 의미): 고유벡터가 <em>수평</em> 이면(평지) <code>ê·g ≈ 0</code> → 위험도 ≈ 0. 고유벡터가 <em>기울어질수록</em> 중력 성분이 커져 위험도가 커진다. 즉 <strong><code>R_dir</code>는 해당 방향의 경사 가파름을 직접 정량화</strong>한다.</li>
 <li>&quot;기운 경로일수록 로봇이 넘어질 가능성이 크다&quot;는 물리 직관을 내적 한 번으로 인코딩.</li>
 </ul>
 <h4>결합 엣지 가중치</h4>
-<pre><code>w_ij = γ · R^ξ_lon + (1 − γ) · R^ξ_lat ,     γ ∈ [0, 1]
+<pre class="codeblock"><code>w_ij = γ · R^ξ_lon + (1 − γ) · R^ξ_lat ,     γ ∈ [0, 1]
 </code></pre>
 <ul>
 <li><code>γ = 0.2</code> (논문 Table 1): <strong>종방향에 0.2, 횡방향에 0.8 가중</strong>. 이는 &quot;횡방향 경사가 종방향보다 훨씬 위험하다&quot;는 사족보행 로봇의 물리적 현실을 반영한다. 로봇이 경사를 <em>정면으로</em> 오를 땐 안정적이지만, <em>옆으로</em> 가로지르면 전복 위험이 크기 때문이다.</li>
 <li>이 비대칭이 바로 C2의 해법이다: 동일 지형이라도 진입 방향(엣지 방향)에 따라 <code>R_lon</code>/<code>R_lat</code> 비율이 달라져 <strong>방향 의존적 위험도</strong> 가 나온다.</li>
 </ul>
-<pre><code>ASCII: 경사면 진입 방향에 따른 위험도 비대칭
+<pre class="diagram"><code>ASCII: 경사면 진입 방향에 따른 위험도 비대칭
         경사면 (15° 기울기)
    ┌────────────────────┐
    │ ↑ 정면 등반        │  R_lon 지배 → γ=0.2 가중 → 낮은 w
@@ -266,12 +352,12 @@ footer {
 <li>모든 높이 편차 &lt; <code>h_max</code>,</li>
 <li>경사각 제약:</li>
 </ol>
-<pre><code>tan⁻¹( | p_i(z) − p_j(z) | / ‖ p_i(x,y) − p_j(x,y) ‖ )  &lt;  tan⁻¹( h_max / r_robot )
+<pre class="codeblock"><code>tan⁻¹( | p_i(z) − p_j(z) | / ‖ p_i(x,y) − p_j(x,y) ‖ )  &lt;  tan⁻¹( h_max / r_robot )
 </code></pre>
 <p>즉 두 노드를 잇는 직선의 경사가, 로봇이 극복 가능한 한계 경사(<code>h_max</code>를 내접원 반경 <code>r_robot</code>에 걸쳐 올라가는 각도) 미만일 때만 엣지가 유효하다.</p>
 <h3>3.3 Wavefront Propagation — &quot;갈 수 있는 영역만&quot; 점진 구성</h3>
 <p>전역 그리드를 다 채우는 대신, TRG는 <strong>파면(wavefront)이 퍼지듯</strong> 로봇 현재 위치에서 바깥으로 노드를 점진 샘플링한다. 이것이 C1(해상도-연산량 폭증)의 해법이다.</p>
-<pre><code>ASCII: Wavefront 전파
+<pre class="diagram"><code>ASCII: Wavefront 전파
    기준노드 v_ref 중심, 반경 r_exp 원 위에 균일 샘플
         v_ref ──● ──● ──●   (반경 r_exp = 0.6m)
               ●        ●
@@ -293,7 +379,7 @@ footer {
 <p>대규모 환경에서 매 갱신마다 전역 그래프를 재구성하면 비용이 감당 불가다(C4). TRG는 <strong>로컬 갱신 → 전역 통합</strong> 의 계층 구조로 이를 해결한다.</p>
 <h4>로컬 그래프 추출과 프론티어 식별</h4>
 <p>로봇 위치 주변에서 전역 그래프 <code>G</code>의 부분집합 <code>V_l</code>(로컬 노드)을 추출한다. 그중 <strong>프론티어 노드(아직 탐색 안 된 경계)</strong> 를 식별:</p>
-<pre><code>V_f = ⋃_{v_i ∈ V_l} { v_i  |  s_i = valid  ∧  u_i ∉ Q_G }
+<pre class="codeblock"><code>V_f = ⋃_{v_i ∈ V_l} { v_i  |  s_i = valid  ∧  u_i ∉ Q_G }
 
 여기서  u_i = p_i + 2·r_robot · (p_i − p_cur) / ‖ p_i − p_cur ‖
 </code></pre>
@@ -304,13 +390,13 @@ footer {
 </ul>
 <h4>전역 통합</h4>
 <p>로컬에서 갱신된 노드·엣지를 전역 그래프에 병합:</p>
-<pre><code>V ← V ∪ V_l
+<pre class="codeblock"><code>V ← V ∪ V_l
 E ← E ∪ { e_ij | v_i, v_j ∈ V_l }
 </code></pre>
 <p>이로써 로봇이 이동하며 새로 관측한 지형만 점진적으로 전역 그래프에 누적되어, <strong>재구성 없이 증분(incremental) 확장</strong> 이 이뤄진다. 경로가 무효화되면(예: 이전에 valid였던 엣지가 새 관측으로 invalid가 됨) 재계획이 트리거된다.</p>
 <h3>3.5 Risk-Aware A* — 안전 계수 Γ로 트레이드오프 제어</h3>
 <p>구성된 TRG 위에서 <strong>위험 인지 비용함수를 가진 수정 A*</strong> 로 경로를 탐색한다. 누적 비용과 평가함수:</p>
-<pre><code>C(v_{i+1}) = C(v_i) + d_{i+1,i} · ( Γ · w_{i+1,i} + 1 )
+<pre class="codeblock"><code>C(v_{i+1}) = C(v_i) + d_{i+1,i} · ( Γ · w_{i+1,i} + 1 )
 J(v_{i+1}) = C(v_{i+1}) + ‖ p_{i+1} − p_goal ‖
 </code></pre>
 <ul>
@@ -321,7 +407,7 @@ J(v_{i+1}) = C(v_{i+1}) + ‖ p_{i+1} − p_goal ‖
 <li><code>‖p_{i+1} − p_goal‖</code>: 목표까지 유클리드 거리 휴리스틱.</li>
 </ul>
 <p><code>Γ·w + 1</code> 항의 의미: 위험도가 0이면 비용 = 거리(<code>d·1</code>)로 순수 최단경로. <code>Γ</code>가 클수록 위험한 엣지(<code>w</code> 큼)의 비용이 부풀려져 우회를 유도한다.</p>
-<pre><code>Γ = 1.0  (Optimistic, 낙관)   → 위험을 거의 무시, 최단 경로 선호, 낮은 주행 안전
+<pre class="codeblock"><code>Γ = 1.0  (Optimistic, 낙관)   → 위험을 거의 무시, 최단 경로 선호, 낮은 주행 안전
 Γ = 3.0  (Balanced,  균형)    → 안전과 거리의 최적 균형 (논문 권장값)
 Γ = 10.0 (Conservative, 보수) → 안전 최우선, 과도한 우회 감수
 </code></pre>
@@ -337,7 +423,7 @@ J(v_{i+1}) = C(v_{i+1}) + ‖ p_{i+1} − p_goal ‖
 <li><strong>장점</strong>: 계산이 가볍고(공분산 + 고유분해), 방향 분해가 자연스럽다. 스칼라 셀 비용이 못 잡는 진입 방향 의존성을 잡아낸다.</li>
 <li><strong>한계(8장에서 상술)</strong>: PCA는 영역 분산을 <em>단일 평면</em> 으로 근사하므로, <strong>비볼록 지형(V자 도랑, 돌출 바위)이나 bimodal 높이 분포</strong>에서는 평면 근사가 실제 위험을 과소/과대평가할 수 있다. 또한 설명된 분산비(explained variance ratio)가 낮을 때(평면 근사가 나쁠 때)에 대한 신뢰도 가중이 없다.</li>
 </ul>
-<pre><code>ASCII: 같은 엣지, 두 진입 방향의 위험도
+<pre class="diagram"><code>ASCII: 같은 엣지, 두 진입 방향의 위험도
    엣지 영역 → PCA → 타원평면 ξ
         ê_lon (이동축)            ê_lat (직교축)
           │                          │
@@ -347,9 +433,9 @@ J(v_{i+1}) = C(v_{i+1}) + ‖ p_{i+1} − p_goal ‖
    ⇒ 옆구리 경사(R_lat)가 4배 가중 → 횡단 회피 유도
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <p>전체 파이프라인은 <strong>지각(perception) → TRG 구성 → 계획 → 추종</strong> 의 4단으로 흐른다:</p>
-<pre><code>[센서: LiDAR + 포즈추정]
+<pre class="diagram"><code>[센서: LiDAR + 포즈추정]
         │
         ▼
 [Elevation Map 구축]  ρ_map = 0.05m 해상도 2.5D 높이맵
@@ -379,7 +465,7 @@ J(v_{i+1}) = C(v_{i+1}) + ‖ p_{i+1} − p_goal ‖
 <p><strong>데이터 흐름의 핵심</strong>: 시스템은 2Hz로 동작하며(Intel Core i7-11700K), 로봇이 이동할 때마다 (i) elevation map이 갱신되고, (ii) 로컬 TRG가 재평가되어 전역 그래프에 통합되며, (iii) 경로가 무효화되면 risk-aware A*가 재실행된다. <strong>wavefront + 계층 관리</strong> 덕에 이 전체 루프가 ms 단위로 끝나, 대규모 산악 환경에서도 실시간 재계획이 유지된다.</p>
 <p><strong>모듈 책임 분리</strong>: 지형 표현(TRG)과 탐색(A*)이 깔끔히 분리되어 있다. TRG는 &quot;어디가 안전하고 닿을 수 있는가&quot;를 그래프로 제공하고, A*는 그 위에서 <code>Γ</code>로 조절되는 비용 최소 경로를 찾는다. 이 분리 덕에 동일 TRG 위에서 <code>Γ</code>만 바꿔 낙관/균형/보수 전략을 즉시 전환할 수 있다.</p>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 / 실험 환경 (Datasets &amp; Environments)</h3>
 <p><strong>시뮬레이션 — 산악 지형</strong>:</p>
 <ul>
@@ -662,7 +748,7 @@ J(v_{i+1}) = C(v_{i+1}) + ‖ p_{i+1} − p_goal ‖
 <li><strong>ICRA 2023 Quadruped Robot Challenge 우승</strong>. 통제된 실험을 넘어 <em>경쟁적 실전 대회</em> 에서 전역 플래너로 검증된 점이 본 연구의 실용성을 가장 강하게 뒷받침한다.</li>
 </ul>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <ol>
 <li><p><strong>방향성 횡단 위험 그래프(TRG) 표현.</strong>
 PCA 타원 평면 + 중력 내적으로 엣지 위험을 종/횡방향(<code>R_lon</code>, <code>R_lat</code>)으로 분해하고 <code>w_ij = γR_lon + (1−γ)R_lat</code>로 결합(γ=0.2). 같은 지형이라도 <em>진입 방향에 따라 비대칭 위험</em> 을 부여 — 스칼라 traversability 맵이 못 잡는 방향 의존성을 그래프 엣지에 직접 인코딩한다.</p>
@@ -685,7 +771,7 @@ Unitree Go1로 245m 산악 주행, 둔덕 안전 진입 방향 자동 선택, �
 <li><strong>RA-L 2025 게재(탑티어)</strong> + 실전 대회 우승이라는 <em>학술·실전 양면 검증</em> 을 동시 충족. 다만 코드 미공개(1.1 참조)로 재현성 측면에서는 코퍼스 내 코드 공개 논문(예: BOWConnect, NeuPAN) 대비 한 칸 낮다.</li>
 </ul>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 핵심 파라미터 (Table 1)</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -747,7 +833,7 @@ Unitree Go1로 245m 산악 주행, 둔덕 안전 진입 방향 자동 선택, �
 <li><strong>DreamWaQ 보행제어 결합</strong>: TRG는 <em>전역 경로</em> 만 제공하고, 실제 발 디딤·균형은 별도 보행 제어기(DreamWaQ)가 담당. 즉 TRG의 &quot;안전 경로&quot;는 보행기가 따라갈 수 있다는 전제 하에 유효.</li>
 </ul>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 (Scalability)</h3>
 <p>TRG의 확장성은 <strong>wavefront 희소성 + 계층적 증분 갱신</strong> 에서 나온다. 전역 그리드 A*가 환경 면적에 비례(또는 제곱)해 비용이 증가하는 반면, TRG는 &quot;갈 수 있는 영역의 노드 수&quot;에만 비례한다. 83m×151m 산악 환경에서도 ms 단위 탐색이 유지된 것이 그 증거다. 다만:</p>
 <ul>
@@ -818,7 +904,7 @@ Unitree Go1로 245m 산악 주행, 둔덕 안전 진입 방향 자동 선택, �
 <h3>8.7 이론적 위치짓기</h3>
 <p>TRG-planner는 <strong>&quot;지형 표현(terrain representation)과 그래프 탐색을 통합한 traversability-aware 전역 플래너&quot;</strong> 계열에 속한다. 전통적으로 traversability 분석(셀별 비용)과 경로 탐색(A*/RRT)은 분리된 단계였다. TRG의 기여는 이 둘을 <em>방향성 그래프</em> 라는 단일 구조로 융합한 것 — 노드가 stability/reachability를, 엣지가 방향성 위험을 담아, 탐색기가 곧바로 &quot;안전 경로&quot;를 찾게 한다. 이는 cost-map 위 탐색(분리형)과 샘플링 그래프(위험 표현력 부족)의 <strong>중간 지점을 차지</strong> 하는 하이브리드다.</p>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <p>같은 Planner 트랙에서 <strong>비정형 지형 + 그래프/전역 계획 + 사족보행</strong> 에 가장 가까운 선행 리뷰 세 편과 비교한다:</p>
 <ul>
@@ -932,7 +1018,7 @@ Unitree Go1로 245m 산악 주행, 둔덕 안전 진입 방향 자동 선택, �
 <h3>9.5 일반화 가능성</h3>
 <p>TRG의 &quot;PCA 방향분해 + 중력 내적 방향위험&quot;은 사족보행에 국한되지 않는다. <strong>방향 의존적 안정성을 갖는 모든 지상 플랫폼</strong>(험지 차륜 로버, 추적식 UGV, 행성 탐사 로버)에 이식 가능하다. 핵심 레시피 — <em>&quot;엣지 영역을 PCA로 방향 분해하고, 진입 방향별 위험을 그래프 가중에 직접 싣는다&quot;</em> — 는 traversability-aware 전역 계획의 일반 패턴으로 재사용될 수 있다. 다만 플랫폼별로 종/횡 위험 비대칭(<code>γ</code>)과 한계 경사(<code>h_max</code>)는 재보정이 필요하다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ul>
 <li>TRG-planner, <em>IEEE RA-L 2025</em>, Vol.10 No.2 pp.1736–1743. arXiv:2501.01806. DOI:10.1109/LRA.2024.3524910. 프로젝트: <a href="https://trg-planner.github.io/">https://trg-planner.github.io/</a> (코드 미공개)</li>
 <li>비교 대상 (본 코퍼스):<ul>
@@ -945,7 +1031,7 @@ Unitree Go1로 245m 산악 주행, 둔덕 안전 진입 방향 자동 선택, �
 <li>검증 출처: ICRA 2023 Quadruped Robot Challenge (DreamSTEP 팀 우승), IEEE Xplore 문서 10819646.</li>
 </ul>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>혁신성</h3>
 <p>TRG-planner의 핵심 혁신은 <strong>지형 횡단성을 &quot;방향성 위험 그래프(TRG)&quot;라는 단일 구조로 통합</strong> 한 것이다. 노드는 stability(<code>g(c)</code>)와 reachability(<code>r(E)</code>)의 논리곱으로, 엣지는 PCA 타원 평면의 종/횡 고유벡터와 중력 내적(<code>R=−ê·g</code>)으로 방향별 위험을 인코딩하고, <code>w_ij=γR_lon+(1−γ)R_lat</code>(γ=0.2)로 결합한다. 여기에 wavefront 희소 구성과 계층적 증분 갱신을 결합해 대규모 비정형 환경에서 ms 단위 실시간 계획을 달성하며, risk-aware A*의 단일 안전 계수 <code>Γ</code>로 안전-효율 트레이드오프를 직관적으로 제어한다. <strong>&quot;같은 지형이라도 진입 방향에 따라 위험이 다르다&quot;</strong> 는 물리 직관을 그래프 엣지에 직접 실은 것이 본질적 기여다.</p>
 <h3>실용적 의의</h3>
@@ -956,9 +1042,104 @@ Unitree Go1로 245m 산악 주행, 둔덕 안전 진입 방향 자동 선택, �
 <p>TRG-planner는 비정형 지형 전역 계획의 오랜 난제 — &quot;스칼라 traversability cost-map은 진입 방향 의존 위험을 표현하지 못한다&quot; — 를, <strong>PCA 방향분해 + 중력 내적</strong> 이라는 가볍고 명료한 모델로 정면 돌파한다. 둔덕 실험에서 <em>전역적으로 안전한 진입 방향을 자동 선택</em> 한 거동은 이 방향성 위험 모델의 가치를 가장 선명히 보여준다. 평가 측면에서도 시뮬레이션 정량 비교(Table 2~4)에 그치지 않고 <strong>사족보행 실로봇 + 경쟁 실전 대회(ICRA QRC) 우승</strong> 이라는 이중 검증을 충족해, RA-L 2025 탑티어 게재에 걸맞은 완성도를 갖췄다. 다만 (i) 코드 미공개로 재현성이 코퍼스의 오픈소스 논문 대비 낮고, (ii) 위험 모델이 기하에 머물러 저마찰·동적·다층 환경에서의 물리적 충실도가 입증되지 않았으며, (iii) ~80% 주행 성공률의 실패 분석이 빠진 점은 후속 연구가 메워야 할 빈칸이다. 그럼에도 &quot;방향성 위험을 그래프 엣지에 직접 싣는다&quot;는 명료한 레시피와 실전 우승 검증은, 본 논문을 사족보행 험지 내비게이션 흐름에서 주목할 가치가 높은 결과로 만든다.</p>
 <hr>
 <p><em>본 리뷰는 PhD 수준 상세 분석이며, 논문 본문(arXiv HTML / IEEE RA-L)의 수식·실험표·실로봇 기술에 기반한다. <strong>코드는 공개되지 않았으므로</strong>(프로젝트 페이지·url-kaist 조직 검증) 실제 구현 스니펫은 인용하지 않고, 방법론은 본문 수식·의사논리로부터 재구성했다.</em></p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="TRG-planner: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>

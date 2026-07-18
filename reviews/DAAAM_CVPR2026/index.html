@@ -6,133 +6,219 @@
 <meta name="color-scheme" content="light dark">
 <title>Describe Anything, Anywhere, at Any Moment (DAAAM) · PaperDaily</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
 :root {
   --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
-  --secondary: #5F5849; --muted: #6E675B; --label: #A39A88;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
   --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
   --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
-  --code-bg: #F8F4EC; --tag-text: #8A8073;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
-    --secondary: #A69D8C; --muted: #8F8677; --label: #7A7263;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
     --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
     --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
-    --code-bg: #221D15; --tag-text: #9A9182;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
   }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--body);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 15.5px; line-height: 1.75;
-  padding: 0 20px;
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
 }
-.serif { font-family: "Iowan Old Style", "Palatino", "Newsreader", Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif; }
-.mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { max-width: 720px; margin: 0 auto; }
 a { color: var(--accent-deep); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { color: #8f4023; text-decoration: underline; }
 
-.site-header { padding: 34px 0 22px; border-bottom: 1px solid var(--border); }
-.site-header .kicker {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-deep);
-  margin-bottom: 10px;
-}
-.site-header h1 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); font-size: 27px; line-height: 1.32; letter-spacing: -0.02em;
-}
-.meta-row {
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 12px; color: var(--tag-text);
-}
-.meta-row a { color: var(--accent-deep); }
-.chip {
-  display: inline-block; padding: 2px 9px; border-radius: 999px;
-  background: var(--accent-soft); border: 1px solid var(--accent-soft-border); color: var(--accent-deep);
-  font-size: 11px;
-}
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
 
-article { padding: 26px 0 40px; overflow-wrap: anywhere; }
-article h1, article h2, article h3, article h4 {
-  font-family: "Iowan Old Style", "Palatino", Georgia, "Apple SD Gothic Neo", serif;
-  font-weight: 500; color: var(--ink); letter-spacing: -0.01em; line-height: 1.35;
-  margin: 2.1em 0 0.7em;
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
 }
-article h1 { font-size: 24px; }
-article h2 { font-size: 21px; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
-article h3 { font-size: 18px; }
-article h4 { font-size: 16px; }
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
 article p { margin: 0.9em 0; }
 article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
 article li { margin: 0.35em 0; }
 article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
 article blockquote {
   margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
   background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
 }
 article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
 article code {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 0.86em; background: var(--track); border-radius: 5px; padding: 1px 5px;
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
 }
-article pre {
-  background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  padding: 14px 16px; overflow-x: auto; margin: 1.2em 0; line-height: 1.5;
-}
-article pre code {
-  background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal;
-}
-article code.math { background: var(--code-bg); border: 1px solid var(--divider); }
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
 article code.math-display {
-  display: block; text-align: center; margin: 1.2em 0; padding: 12px 16px;
-  border: 1px solid var(--card-border); border-radius: 12px;
-  white-space: nowrap; overflow-x: auto; font-size: 13px;
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
 }
-.table-wrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
-article table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; }
-article th, article td { padding: 8px 12px; border-bottom: 1px solid var(--divider); text-align: left; vertical-align: top; }
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
 article th {
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11.5px; letter-spacing: 0.04em; color: var(--label); white-space: nowrap;
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
 article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
 article img {
   max-width: 100%; height: auto; display: block; margin: 1.4em auto;
   border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
 }
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
 .fig-missing {
   margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
   background: var(--track); color: var(--muted);
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-size: 12px; text-align: center;
+  font-family: var(--mono); font-size: 12px; text-align: center;
 }
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
 footer {
-  padding: 26px 0 46px; border-top: 1px solid var(--border); text-align: center;
-  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
 </head>
 <body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2512.00565">arXiv ↗</a>
+</div>
 <div class="wrap">
-  <header class="site-header">
-    <div class="kicker">CVPR 2026</div>
-    <h1>Describe Anything, Anywhere, at Any Moment (DAAAM)</h1>
-    <div class="meta-row">
-      <span class="chip">VLN</span>
-      <span><a href="https://arxiv.org/abs/2512.00565">arXiv:2512.00565</a></span>
-      <span>리뷰 2026-06-29</span>
-      <span>49분 읽기</span>
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">DAAAM_CVPR2026</span>
     </div>
+    <h1 class="doc-title">DAAAM (Describe Anything, Anywhere, at Any Moment): 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">CVPR 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2512.00565">2512.00565</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval"><a href="https://github.com/MIT-SPARK/DAAAM">github.com/MIT-SPARK/DAAAM</a> (BSD-3-Clause License, Python 99.6% — 실제 소스 공개 확인)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://nicolasgorlo.com/DAAAM_25">nicolasgorlo.com/DAAAM_25</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-06-29</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">41KB · 약 49분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
   </header>
-  <article>
-<h1>DAAAM (Describe Anything, Anywhere, at Any Moment): 핵심 방법론 분석 (Core Methods Analysis)</h1>
-<h2>1. 개요 (Overview)</h2>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
 <h3>1.1 출판 정보 (Publication Information)</h3>
 <ul>
 <li><strong>논문 제목 (Paper Title)</strong>: Describe Anything, Anywhere, at Any Moment (DAAAM)</li>
@@ -150,7 +236,7 @@ footer {
 <h3>1.2 연구 목표 (Research Objective)</h3>
 <p>DAAAM은 <strong>대규모·실시간 4D 장면 이해(4D scene understanding)를 위한 시공간 메모리 프레임워크(spatio-temporal memory framework)</strong>다. 증강현실(AR)부터 대규모 환경에서의 로봇 자율성까지, 많은 컴퓨터비전·로봇 응용은 (a) 정확한 언어 그라운딩(language-grounding)을 위한 <strong>기하학적 구조(geometric structure)</strong>와 (b) 풍부한 <strong>의미적 디테일(semantic detail)</strong>을 동시에 요구한다.</p>
 <p>핵심 연구 질문:</p>
-<pre><code>&quot;개방 어휘(open-vocabulary)의 풍부한 description을 생성하면서도,
+<pre class="codeblock"><code>&quot;개방 어휘(open-vocabulary)의 풍부한 description을 생성하면서도,
  그것을 3D 공간에 실시간으로 그라운딩하는 것을 동시에 달성할 수 있는가?
  즉, &#39;rich description vs. real-time 3D grounding&#39; 트레이드오프를 깨뜨릴 수 있는가?&quot;
 </code></pre>
@@ -180,7 +266,7 @@ footer {
 </tr>
 </tbody></table></div>
 <p>DAAAM은 <strong>Khronos backbone 위에 DAM(Describe Anything Model) 기반의 localized captioning을 batch 처리로 얹어</strong>, 풍부한 description을 유지하면서도 <strong>10 Hz의 실시간 성능</strong>으로 hierarchical 4D scene graph를 구축하는 것을 목표로 한다.</p>
-<pre><code>[DAAAM이 깨려는 트레이드오프]
+<pre class="diagram"><code>[DAAAM이 깨려는 트레이드오프]
 
          풍부한 description ▲
                           │  ConceptGraphs ●  (0.075 Hz, 풍부)
@@ -192,11 +278,11 @@ footer {
                             느림              실시간 (10 Hz+)
 </code></pre>
 <hr>
-<h2>2. 문제 정의 (Problem Definition)</h2>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
 <h3>2.1 도전과제 (Challenges)</h3>
 <h4>A. Localized captioning model의 추론 비용</h4>
 <p>DAM(Describe Anything Model, NVIDIA) 같은 localized captioning 모델은 임의의 마스크(region)에 대해 &quot;이 객체는 빨간 손잡이가 깨진 머그컵&quot;처럼 fine-grained 자연어 description을 생성한다. 그러나:</p>
-<pre><code>[DAM을 naive하게 매 frame·매 region에 호출하면]
+<pre class="codeblock"><code>[DAM을 naive하게 매 frame·매 region에 호출하면]
 
 문제 1: frame 수 × region 수 = 폭발적 호출 횟수
   - 10 Hz × 수백 frame × frame당 수십 segment → 수만 회 forward
@@ -211,7 +297,7 @@ footer {
   - Khronos가 10 Hz로 돌아가야 하는데 DAM이 frame-rate를 점유
 </code></pre>
 <h4>B. closed-set SLAM과 open-vocab description의 양립</h4>
-<pre><code>[기존 SLAM backbone의 딜레마]
+<pre class="codeblock"><code>[기존 SLAM backbone의 딜레마]
 
 Hydra/Khronos (closed-set):
   장점: 실시간, 안정적 incremental 3D SG, factor-graph 최적화
@@ -226,7 +312,7 @@ ConceptGraphs (open-vocab):
 </code></pre>
 <h4>C. 시간 축(4D)의 일관된 표현</h4>
 <p>대규모·장시간(최대 35.8분, 1.64 km) 시퀀스에서는 객체가 나타났다 사라지고, 같은 객체가 여러 시점에 재관측된다. 단순 3D SG(스냅샷)로는 &quot;이 의자가 언제부터 언제까지 여기 있었는가&quot;를 답할 수 없다. <strong>시간적으로 일관된(temporally consistent) 메모리</strong>가 필요하다.</p>
-<pre><code>[시간 일관성 문제]
+<pre class="diagram"><code>[시간 일관성 문제]
 
 t=0:30  복도에 박스 관측  ─┐
 t=3:10  같은 박스 재관측    ├─► 같은 객체인가? 새 객체인가?
@@ -237,7 +323,7 @@ t=8:40  박스 사라짐         ┘    언제부터 언제까지 존재했는�
 </code></pre>
 <h3>2.2 핵심 해결책</h3>
 <p>DAAAM의 네 가지 핵심 아이디어:</p>
-<pre><code>[DAAAM의 해결 요소]
+<pre class="codeblock"><code>[DAAAM의 해결 요소]
 
 해결 1: Optimization-based Prompt Frame Selection
   set-cover + binary linear program으로 &quot;어떤 frame에서
@@ -257,11 +343,11 @@ t=8:40  박스 사라짐         ┘    언제부터 언제까지 존재했는�
   → NaVQA/SG3D/OC-NaVQA에서 spatio-temporal QA 수행
 </code></pre>
 <hr>
-<h2>3. 핵심 방법론 (Core Methods)</h2>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
 <p>DAAAM은 5개 주요 컴포넌트(A~E)로 구성된다. 각 단계를 수식·다이어그램과 함께 분석한다.</p>
 <h3>3.1 컴포넌트 A — Active Window &amp; 실시간 SG 구축</h3>
 <p>main loop는 센서 frame-rate(10 Hz)에 동기되어 돌아간다:</p>
-<pre><code>[Active Window 파이프라인]
+<pre class="diagram"><code>[Active Window 파이프라인]
 
 RGB-D ──► [Fast-SAM] ──► [Bot-Sort] ──► [Khronos 3D 복원]
           segmentation   tracking       3D shape @ 10 Hz
@@ -283,7 +369,7 @@ RGB-D ──► [Fast-SAM] ──► [Bot-Sort] ──► [Khronos 3D 복원]
 <p>이 단계가 논문의 <strong>진짜 main contribution</strong>이다. active window에 누적된 fragment 관측들에 대해, &quot;어떤 frame에서 DAM을 호출할 것인가&quot;를 <strong>2단계 최적화</strong>로 결정한다.</p>
 <h4>Step 1 — Set Cover (Equation 1)</h4>
 <p>모든 fragment를 적어도 한 번씩 관측하는 데 필요한 <strong>최소 frame 수 K</strong>*를 구한다. 이는 고전적 set-cover 문제다:</p>
-<pre><code>[Equation 1 — Set Cover]
+<pre class="codeblock"><code>[Equation 1 — Set Cover]
 
 universe U = {모든 fragment (track)}
 sets     S = {각 frame이 관측하는 fragment 집합}
@@ -298,7 +384,7 @@ sets     S = {각 frame이 관측하는 fragment 집합}
 </code></pre>
 <h4>Step 2 — Binary Linear Program (Equation 2)</h4>
 <p>K*가 결정되면, 그 frame 예산 안에서 <strong>annotation 품질(quality)을 최대화</strong>하도록 fragment를 frame에 할당한다:</p>
-<pre><code>[Equation 2 — Binary Linear Program]
+<pre class="codeblock"><code>[Equation 2 — Binary Linear Program]
 
 변수: x_ij ∈ {0,1}   (fragment i를 frame j에서 annotate?)
       y_j  ∈ {0,1}   (frame j 선택?)
@@ -315,7 +401,7 @@ subject to:
 <p>slack ε=1은 set-cover 최소해보다 frame 1장을 더 허용해 품질 향상의 여지를 준다.</p>
 <h4>Step 3 — Quality Score Heuristic (Equation 3)</h4>
 <p>할당의 quality <code>q_ij</code>는 위치 점수와 크기 점수의 가중합이다:</p>
-<pre><code>[Equation 3 — Quality Score]
+<pre class="codeblock"><code>[Equation 3 — Quality Score]
 
 q_ij = α · q^pos_ij + (1 − α) · q^size_ij      (α = 0.5)
 
@@ -334,7 +420,7 @@ q^size_ij (크기 점수):
 <p>→ <strong>정직한 평가</strong>: 논문이 &quot;novel optimization-based frontend&quot;라 표현하지만, 실체는 <strong>greedy set-cover + cvxpy MIP의 hybrid</strong>다. 알고리즘적 신규성은 표준 조합 최적화의 <em>적용</em>에 있으며, region quality(위치 entropy + 크기 tanh)를 명시적으로 객체화한 점이 실무적 기여다.</p>
 <h4>왜 2단계로 분리했는가 (설계 논리)</h4>
 <p>set-cover와 LP를 한 번에 풀지 않고 분리한 이유는 <strong>문제의 구조적 분해</strong> 때문이다:</p>
-<pre><code>[2단계 분리의 의도]
+<pre class="codeblock"><code>[2단계 분리의 의도]
 
 만약 단일 MIP로 &quot;최소 frame + 최대 quality&quot;를 동시에 풀면:
   → 목적함수가 multi-objective (frame 수 최소화 vs quality 최대화)
@@ -354,7 +440,7 @@ DAAAM의 분해:
 <p>이 분해는 실시간 robotics에서 자주 쓰는 패턴(feasibility 먼저, optimality 나중)의 깔끔한 사례다. quality heuristic을 제거하면 OC-NaVQA QA가 0.711→0.627로 가장 크게 떨어지므로(Table 5), Step2~3가 단순 장식이 아니라 실제 grounding 품질을 좌우함이 확인된다.</p>
 <h3>3.3 컴포넌트 C — Semantic Lifting (Batch DAM)</h3>
 <p>선택된 frame들을 <strong>batch로 묶어 DAM에 한 번에</strong> 통과시킨다. 이것이 &quot;1 order of magnitude speedup&quot;의 메커니즘이다:</p>
-<pre><code>[Batch Semantic Lifting]
+<pre class="diagram"><code>[Batch Semantic Lifting]
 
 선택된 frame들 (multi-image) + 각 frame의 마스크들 (multi-mask)
         │
@@ -381,7 +467,7 @@ DAAAM의 분해:
 <p>→ <strong>비판</strong>: DAM forward cost는 &quot;이미지 인코딩(frame 수)&quot; + &quot;region 디코딩(mask 수)&quot; 둘 다에 의존한다. frame selection은 frame 수를 줄이지만 mask 수는 그대로다. 따라서 &quot;1 order of magnitude&quot;는 <strong>이미지 인코딩이 dominant cost일 때</strong> 성립하는 수치다. batch가 클수록(48→128) 인코딩 amortization 효과가 커진다.</p>
 <h3>3.4 컴포넌트 D — Place Extraction</h3>
 <p>객체 레벨 위에 <strong>place(장소) 노드</strong> 레이어를 만든다:</p>
-<pre><code>[Place Extraction]
+<pre class="diagram"><code>[Place Extraction]
 
 ground traversability (지면 통행 가능성) 기반
         │
@@ -396,7 +482,7 @@ ground traversability (지면 통행 가능성) 기반
 직관: 객체 위의 추상 레이어 — &quot;여기가 어떤 종류의 공간인가&quot;
 </code></pre>
 <h3>3.5 컴포넌트 E — Global Optimization &amp; Region Clustering</h3>
-<pre><code>[Global Optimization &amp; Region Clustering]
+<pre class="codeblock"><code>[Global Optimization &amp; Region Clustering]
 
 (1) Factor Graph 최적화:
     node 위치를 continuous하게 최적화 (Khronos backbone)
@@ -415,7 +501,7 @@ ground traversability (지면 통행 가능성) 기반
 </code></pre>
 <h4>4D 시간 표현의 실체</h4>
 <p>&quot;4D&quot;는 별도의 시간 layer가 아니라, <strong>object node가 description history + lifespan timestamp를 누적</strong>하는 형태다:</p>
-<pre><code>[4D = object node의 시간 attribute]
+<pre class="codeblock"><code>[4D = object node의 시간 attribute]
 
 object o_j:
   description_history = [
@@ -431,8 +517,8 @@ object o_j:
 → Khronos의 first/last_observed 메커니즘 활용
 </code></pre>
 <hr>
-<h2>4. 시스템 아키텍처 (System Architecture)</h2>
-<pre><code>[DAAAM 전체 파이프라인]
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>[DAAAM 전체 파이프라인]
 
 입력: RGB-D 스트림 @ 10 Hz (depth는 stereo estimation)
   │
@@ -482,7 +568,7 @@ object o_j:
 </code></pre>
 <h3>4.1 데이터 흐름 — 비동기 분리가 핵심</h3>
 <p>DAAAM의 production-급 설계는 <strong>hot path(A)와 grounding(B~C)의 비동기 분리</strong>다:</p>
-<pre><code>[비동기 파이프라인 — frame-rate가 DAM latency에 묶이지 않는다]
+<pre class="codeblock"><code>[비동기 파이프라인 — frame-rate가 DAM latency에 묶이지 않는다]
 
 main loop (10 Hz 동기):
   A: segment + track + Khronos 3D
@@ -497,7 +583,7 @@ worker process (비동기, query_interval마다 트리거):
 → &quot;real-time mapping&quot;과 &quot;rich description&quot;이 시간상 겹쳐 동작
 </code></pre>
 <hr>
-<h2>5. 실험 결과 및 성능 (Experimental Results)</h2>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
 <h3>5.1 데이터셋 (Datasets)</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -719,7 +805,7 @@ worker process (비동기, query_interval마다 트리거):
 <p>DAM batch inference: batch 48~128 frame으로 single-frame 대비 <strong>약 10× 가속</strong>.</p>
 <h3>5.4 핵심 발견 — Ablation의 모순 (calibrated skepticism)</h3>
 <p>Table 5에서 <strong>DAM description을 빼면 question accuracy가 오히려 0.711 → 0.776으로 +6.5%p 상승</strong>한다. 이는 abstract가 강조한 &quot;rich semantic descriptions for accurate language grounding&quot;과 결이 다르다.</p>
-<pre><code>[Ablation이 말해주는 진짜 contribution attribution]
+<pre class="codeblock"><code>[Ablation이 말해주는 진짜 contribution attribution]
 
 w/o quality heuristic (frame selection 제거):
   0.711 → 0.627  (−8.4%p)  ← 가장 큰 하락
@@ -746,7 +832,7 @@ w/o region clustering:
 <p>→ <strong>한계</strong>: 이는 <em>데이터셋 재생(replay)</em> 기반 평가로, 로봇 위에서 closed-loop로 navigation을 수행한 것은 아니다. DAAAM은 navigation <strong>policy</strong>가 아니라 <strong>memory/mapping</strong> 시스템이므로, &quot;실로봇 주행 데이터로 대규모 4D SG를 실시간 구축·질의&quot;한 것이 실증의 핵심이다.</p>
 <h4>실데이터 평가가 의미하는 것 (시뮬레이션 평가와의 차이)</h4>
 <p>VLN 분야의 다수 논문(AwareVLN, NaVILA 등)이 Habitat-Sim 같은 <strong>합성 시뮬레이터</strong>에서 평가하는 것과 달리, DAAAM은 <strong>실제 캠퍼스에서 실로봇이 수집한 RGB-D 스트림</strong>을 입력으로 한다. 이는 다음을 의미한다:</p>
-<pre><code>[합성 vs. 실데이터 평가의 차이]
+<pre class="codeblock"><code>[합성 vs. 실데이터 평가의 차이]
 
 합성 시뮬 (Habitat 등):
   + 완벽한 depth, 정확한 odometry, 깨끗한 RGB
@@ -763,7 +849,7 @@ DAAAM의 CODa 실데이터:
 <h4>시간 구간별 성능 함의</h4>
 <p>CODa의 메모리 지속 구간(Short 1.2분 / Medium 4.4분 / Long 12.3분)과 OC-NaVQA의 최대 35.8분은, <strong>장시간일수록 description history와 lifespan 표현의 가치가 커짐</strong>을 보여준다. 짧은 시퀀스에서는 단순 3D 스냅샷으로도 충분하지만, 35.8분·1.64 km에서는 &quot;언제 무엇이 어디 있었나&quot;의 시간 질의가 핵심이 되며, 이것이 DAAAM이 ConceptGraphs(static, 시간 축 없음) 대비 갖는 본질적 우위다.</p>
 <hr>
-<h2>6. 핵심 기여점 (Key Contributions)</h2>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
 <h3>기여 1: Optimization-based Frame Selection Frontend</h3>
 <p>DAM 같은 localized captioning 모델을 실시간 SLAM에 통합할 때의 호출 폭발 문제를, <strong>set-cover(Eq.1) + binary LP(Eq.2) + quality heuristic(Eq.3)</strong> 2단계 최적화로 해결한다. ablation상 이것이 가장 큰 성능 기여(−8.4%p)를 하는 실질 main contribution이다.</p>
 <h3>기여 2: Batch Semantic Lifting (약 10× 가속)</h3>
@@ -773,9 +859,9 @@ DAAAM의 CODa 실데이터:
 <h3>기여 4: Tool-calling Agent 인터페이스 + OC-NaVQA 벤치마크</h3>
 <p>구축된 4D SG가 GPT-5-mini tool-calling agent와 자연스럽게 연동되어 spatio-temporal QA를 수행함을 보였고, 대규모·장시간 평가를 위한 <strong>OC-NaVQA</strong>(최대 35.8분, 1.64 km) 벤치마크를 새로 큐레이션·공개했다.</p>
 <hr>
-<h2>7. 구현 상세 (Implementation Details)</h2>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
 <h3>7.1 주요 컴포넌트·하이퍼파라미터</h3>
-<pre><code>[핵심 설정]
+<pre class="codeblock"><code>[핵심 설정]
 
 Segmentation:    Fast-SAM (strategy 패턴, SAM/SAM2 교체 가능)
 Tracking:        Bot-Sort (multi-object tracking)
@@ -793,7 +879,7 @@ Sensor rate:     10 Hz (RGB-D, depth는 stereo estimation)
 Batch size:      48 ~ 128 frame (DAM batch)
 </code></pre>
 <h3>7.2 측정된 latency (Table 6)</h3>
-<pre><code>frame selection:        1.2 ± 0.74 s
+<pre class="codeblock"><code>frame selection:        1.2 ± 0.74 s
 semantic annotation:    9.2 ± 1.4 s  (batch당)
 per-fragment:           0.18 ± 0.03 s  (≈ 55 fragments/sec)
 system throughput:      10 Hz (CODa)
@@ -801,7 +887,7 @@ DAM batch speedup:      ~10× (batch 48~128 vs single-frame)
 </code></pre>
 <h3>7.3 코드·라이선스 검증</h3>
 <p>GitHub(<a href="https://github.com/MIT-SPARK/DAAAM">https://github.com/MIT-SPARK/DAAAM</a>) 직접 확인 결과:</p>
-<pre><code>[Repo 구조]
+<pre class="diagram"><code>[Repo 구조]
 DAAAM/
 ├── INSTALL.md / RUNNING.md / CODEBASE.md   (문서 정비됨)
 ├── pyproject.toml / requirements.txt
@@ -843,9 +929,9 @@ DAAAM/
 </tbody></table></div>
 <p>→ DAAAM 코드는 <strong>실제 공개</strong>(placeholder 아님). ROS 2 래퍼는 별도 repo로 layering. DAM weights의 noncommercial 라이선스만 상업화 시 걸림.</p>
 <hr>
-<h2>8. 고급 주제 (Advanced Topics)</h2>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
 <h3>8.1 확장성 분석</h3>
-<pre><code>[확장성 관점]
+<pre class="codeblock"><code>[확장성 관점]
 
 대규모 환경:
   set-cover로 frame 수를 universe(fragment) 크기에 비례 제한
@@ -873,7 +959,7 @@ DAAAM/
 <p><strong>한계 4: closed-loop navigation 부재</strong></p>
 <p>CODa 데이터셋 replay 기반 평가로, 로봇 위에서 실시간 closed-loop navigation은 수행하지 않았다. DAAAM은 policy가 아닌 memory 시스템이라는 점이 본질적 scope다.</p>
 <h3>8.3 향후 연구 방향</h3>
-<pre><code>[향후 방향]
+<pre class="codeblock"><code>[향후 방향]
 
 방향 1: hallucination-robust captioning
   DAM을 더 큰 데이터로 fine-tune 또는 confidence-gating
@@ -891,7 +977,7 @@ DAAAM/
   더 공격적 frame selection + 경량 captioner
 </code></pre>
 <hr>
-<h2>9. 비교 분석 (Comparative Analysis)</h2>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
 <p>DAAAM은 VLN의 &quot;내비게이션 policy&quot;가 아니라 <strong>scene-graph / spatio-temporal memory</strong> 계보에 속한다. 같은 트랙(VLN)에서 open-vocab scene graph·메모리를 다룬 선행 리뷰들과 비교한다.</p>
 <h3>9.1 기존 리뷰 논문과의 비교</h3>
 <div class="table-wrap"><table>
@@ -957,7 +1043,7 @@ DAAAM/
 <h3>9.2 장단점 분석</h3>
 <p><strong>DAAAM 대 AwareVLN (Reasoning with Self-awareness for Vision-Language Navigation, CVPR2026)</strong>:</p>
 <p>AwareVLN은 단안 RGB로 자기인식 추론을 수행하는 <strong>navigation policy</strong>다. DAAAM은 반대로 navigation을 직접 하지 않고 <strong>세계를 기억하는 4D 지도</strong>를 만든다. 두 논문은 <strong>상보적</strong>이다:</p>
-<pre><code>AwareVLN: &quot;어디로 갈지&quot; 결정 (policy)
+<pre class="codeblock"><code>AwareVLN: &quot;어디로 갈지&quot; 결정 (policy)
   + 단안 RGB, 자기인식 추론, R2R/RxR SOTA
   - 명시적 장기 메모리 없음
 
@@ -1003,7 +1089,7 @@ DAAAM:    &quot;무엇이 어디에 언제 있었나&quot; 기억 (memory)
 <p><strong>DAAAM 대 ReMEmbR (baseline, 시공간 메모리 SOTA)</strong>:</p>
 <p>ReMEmbR(11.6 Hz)는 DAAAM(10 Hz)보다 오히려 빠르다. 따라서 DAAAM의 &quot;real-time&quot; 우위는 ReMEmbR이 아니라 <strong>ConceptGraphs(0.075 Hz) 대비</strong>로 읽어야 정확하다. DAAAM의 ReMEmbR 대비 진짜 우위는 <strong>속도가 아니라 정확도</strong>(OC-NaVQA 0.711 vs 0.463)와 <strong>정밀 3D position grounding</strong>(41.75 m vs 55.89 m)이다.</p>
 <h3>9.3 실적용 가능성 평가</h3>
-<pre><code>[VLN 연구자 관점 실적용]
+<pre class="codeblock"><code>[VLN 연구자 관점 실적용]
 
 ✅ 가져갈 가치 높은 것:
   • Frame-selection optimization (set-cover + LP) 패턴
@@ -1021,7 +1107,7 @@ DAAAM:    &quot;무엇이 어디에 언제 있었나&quot; 기억 (memory)
   • R2R 같은 static 벤치마크에 적용 (4D 시간 축이 활성화 안 됨)
 </code></pre>
 <p><strong>배포 권장사항</strong>:</p>
-<pre><code>추천: 대규모·장시간 실내외 mapping이 필요한 모바일 지상 로봇
+<pre class="codeblock"><code>추천: 대규모·장시간 실내외 mapping이 필요한 모바일 지상 로봇
 플랫폼: RGB-D(또는 stereo) 센서 탑재 ground robot
 GPU: DAM/SAM 구동을 위한 24GB+ VRAM 권장
 주의: 고속 aerial·VR엔 latency 부족, 상업화 시 DAM noncommercial 라이선스
@@ -1030,7 +1116,7 @@ GPU: DAM/SAM 구동을 위한 24GB+ VRAM 권장
 <p>DAAAM은 &quot;open-vocab description vs. real-time 3D grounding&quot; 트레이드오프를 <strong>frame-selection optimization + batch grounding</strong>으로 깬 점에서 의미있다. 이는 VLN scene-graph 계보에서 <strong>시간 축(4D)을 실시간으로 통합한 advanced version</strong>으로 위치한다. 다만 ablation이 보여준 &quot;DAM description이 QA엔 mixed signal&quot;이라는 사실은, <strong>dense caption이 항상 reasoning에 유리하지 않다</strong>는 외부 evidence로, sparse·선택적 표현을 지지하는 연구(AwareVLN의 선택적 추론 등)와 같은 방향을 가리킨다.</p>
 <p>중장기적으로 DAAAM 같은 4D memory와 AwareVLN 같은 self-aware policy의 <strong>결합</strong>이 신뢰성 있는 장기 자율 내비게이션의 유망한 경로다.</p>
 <hr>
-<h2>10. 참고 문헌 (References)</h2>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
 <ol>
 <li>Gorlo, Schmid, Carlone (2025). Describe Anything, Anywhere, at Any Moment (DAAAM). arXiv:2512.00565 (CVPR 2026).</li>
 <li>Schmid et al. (2024). Khronos: A Unified Approach for Spatio-Temporal Metric-Semantic SLAM in Dynamic Environments. RSS 2024.</li>
@@ -1046,7 +1132,7 @@ GPU: DAM/SAM 구동을 위한 24GB+ VRAM 권장
 <li>Zhang et al. (2024). SG3D: Sequential Task Grounding in 3D Scene Graphs.</li>
 </ol>
 <hr>
-<h2>11. 결론 (Conclusion)</h2>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
 <h3>혁신성 평가</h3>
 <p>DAAAM은 <strong>MIT-SPARK 스타일의 잘 통합된 실시간 4D scene-graph 시스템</strong>이다. 핵심 혁신은 두 가지다.</p>
 <p>첫째, <strong>optimization-based frame selection frontend</strong>(set-cover + binary LP + quality heuristic)로 localized captioning 모델(DAM)의 호출을 최소·최적화하여, &quot;풍부한 open-vocab description&quot;과 &quot;10 Hz 실시간 3D grounding&quot;의 트레이드오프를 깼다. ablation상 이것이 실질 main contribution(−8.4%p)이다.</p>
@@ -1055,7 +1141,7 @@ GPU: DAM/SAM 구동을 위한 24GB+ VRAM 권장
 <p>OC-NaVQA에서 ReMEmbR 대비 question accuracy +53.5%(relative), position error 41.75 m, ConceptGraphs 대비 ~133× 속도(10 Hz vs 0.075 Hz)를 달성했다. 데이터·코드를 BSD-3로 공개하고, 대규모·장시간(35.8분, 1.64 km) 실로봇 주행 데이터(CODa)에서 검증한 점은 실용적 가치가 높다.</p>
 <h3>비판적 균형</h3>
 <p>다만 abstract가 강조한 &quot;DAM-driven rich descriptions&quot;는 ablation에서 <strong>mixed signal</strong>(QA accuracy엔 negative, position grounding엔 positive)이고, 저자도 DAM의 hallucination을 인정한다. 진짜 main contribution은 frame-selection optimization이다. VLN 연구자, 특히 sparse 표현·선택적 추론을 베팅하는 입장에서는 <strong>시스템 전체 import보다 frame-selection 패턴과 batch-grounding 트릭을 차용</strong>하는 것이 ROI가 높다.</p>
-<pre><code>[DAAAM 종합 평가]
+<pre class="codeblock"><code>[DAAAM 종합 평가]
 
 신규성:        ⭐⭐⭐   (set-cover+MIP 적용 + 4D 통합, backbone은 Khronos)
 기술 완성도:   ⭐⭐⭐⭐  (비동기 큐, batch DAM, factor-graph — production 수준)
@@ -1069,9 +1155,104 @@ GPU: DAM/SAM 구동을 위한 24GB+ VRAM 권장
 <p>가장 중요한 과제는 (1) DAM description의 hallucination 완화, (2) description history의 bounded memory, (3) closed-loop navigation 통합이다. DAAAM의 4D memory를 AwareVLN 같은 self-aware navigation policy의 외부 memory backbone으로 결합한다면, 장기·대규모 환경에서 신뢰성 있는 자율 VLN 시스템으로 발전할 수 있다.</p>
 <hr>
 <p><em>리뷰 개정: 2026-06-29 · 1차 자료(arXiv abstract / HTML 본문 / GitHub repo) 직접 발췌 기반 · 코드 BSD-3 실공개 확인</em></p>
-
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
   </article>
   <footer>PaperDaily · 자동 생성 리뷰</footer>
 </div>
+<div class="rhead" id="rhead" data-title="DAAAM (Describe Anything, Anywhere, at Any Moment): 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
 </body>
 </html>
