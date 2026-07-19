@@ -1,143 +1,145 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-18T19:30:05.486Z",
+  "generatedAt": "2026-07-19T19:30:04.999Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 7. 19  일요일",
+    "date": "2026. 7. 20  월요일",
     "title": "오늘의 리뷰",
     "subtitle": "VLN·Planner 새 리뷰 5편 · 전체 92편"
   },
   "papers": [
     {
-      "id": "2512.00565",
-      "venue": "CVPR 2026",
-      "matchScore": 96,
-      "category": "VLN",
-      "feedTitle": "Describe Anything, Anywhere, at Any Moment (DAAAM)",
-      "authorsShort": "N. Gorlo, L. Schmid +1",
-      "feedAbstract": "DAAAM은 대규모·실시간 4D 장면 이해(4D scene understanding)를 위한 시공간 메모리 프레임워크(spatio-temporal memory framework)다. 증강현실(AR)부터 대규모 환경에서의 로봇 자율성까지, 많은 컴퓨터비전·로봇 응용은 (a) 정확한 언어…",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "Describe Anything, Anywhere, at Any Moment (DAAAM)",
-      "titleKO": "Describe Anything, Anywhere, at Any Moment (DAAAM)",
-      "authorsEN": "Nicolas Gorlo, Lukas Schmid, Luca Carlone",
-      "authorsKO": "Nicolas Gorlo, Lukas Schmid, Luca Carlone",
-      "abstractEN": "Computer vision and robotics applications ranging from augmented reality to robot autonomy in large-scale environments require spatio-temporal memory frameworks that capture both geometric structure for accurate language-grounding as well as semantic detail. Existing methods face a tradeoff, where producing rich open-vocabulary descriptions comes at the expense of real-time performance when these descriptions have to be grounded in 3D. To address these challenges, we propose Describe Anything, Anywhere, at Any Moment (DAAAM), a novel spatio-temporal memory framework for large-scale and real-time 4D scene understanding. DAAAM introduces a novel optimization-based frontend to infer detailed semantic descriptions from localized captioning models, such as the Describe Anything Model (DAM), leveraging batch processing to speed up inference by an order of magnitude for online processing. It leverages such semantic understanding to build a hierarchical 4D scene graph (SG), which acts as an effective globally spatially and temporally consistent memory representation. DAAAM constructs 4D SGs with detailed, geometrically grounded descriptions while maintaining real-time performance. We show that DAAAM's 4D SG interfaces well with a tool-calling agent for inference and reasoning. We thoroughly evaluate DAAAM in the complex task of spatio-temporal question answering on the NaVQA benchmark and show its generalization capabilities for sequential task grounding on the SG3D benchmark. We further curate an extended OC-NaVQA benchmark for large-scale and long-time evaluations. DAAAM achieves state-of-the-art results in both tasks, improving OC-NaVQA question accuracy by 53.6%, position errors by 21.9%, temporal errors by 21.6%, and SG3D task grounding accuracy by 27.8% over the most competitive baselines, respectively. We release our data and code open-source.",
-      "abstractKO": "DAAAM은 대규모·실시간 4D 장면 이해(4D scene understanding)를 위한 시공간 메모리 프레임워크(spatio-temporal memory framework)다. 증강현실(AR)부터 대규모 환경에서의 로봇 자율성까지, 많은 컴퓨터비전·로봇 응용은 (a) 정확한 언어 그라운딩(language-grounding)을 위한 기하학적 구조(geometric structure)와 (b) 풍부한 의미적 디테일(semantic detail)을 동시에 요구한다.",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2025",
-      "citations": 0,
-      "readMinutes": 49,
-      "reason": "DAAAM은 대규모·실시간 4D 장면 이해(4D scene understanding)를 위한 시공간 메모리 프레임워크(spatio-temporal memory framework)다. 증강현실(AR)부터 대규모 환경에서의 로봇 자율성까지, 많은 컴퓨터비전·로봇 응용은 (a) 정확한 언어 그라운딩(language-grounding)을 위한 기하학적 구조(geometric structure)와 (b) 풍부한 의미적 디테일(semantic detail)을 동시에 요구한다.",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/DAAAM_CVPR2026/index.html"
-    },
-    {
-      "id": "2603.02976",
-      "venue": "ICRA 2026",
-      "matchScore": 84,
-      "category": "Planner",
-      "feedTitle": "DreamFlow: Local Navigation Beyond Observation via Conditional Flow Matching in the Latent Space",
-      "authorsShort": "J. Park, D. Lee +4",
-      "feedAbstract": "DreamFlow는 밀집 장애물 환경에서의 로컬 내비게이션이 겪는 로컬 미니마(local minima) 문제를 정조준한다. 자율 이동 로봇(특히 사족보행 로봇)이 목표 지점으로 이동할 때, 로컬 플래너는 온보드 센서의 즉각적 지각 범위(field of view) 내 정보만으로 행동을 결정한다. 이 근시안적 지각 때문에…",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "DreamFlow: Local Navigation Beyond Observation via Conditional Flow Matching in the Latent Space",
-      "titleKO": "DreamFlow: Local Navigation Beyond Observation via Conditional Flow Matching in the Latent Space",
-      "authorsEN": "Jiwon Park, Dongkyu Lee, I Made Aswin Nahrendra, Jaeyoung Lim, Hyun Myung (: 공동 제1저자, Hyun Myung: 교신저자)",
-      "authorsKO": "Jiwon Park, Dongkyu Lee, I Made Aswin Nahrendra, Jaeyoung Lim, Hyun Myung (: 공동 제1저자, Hyun Myung: 교신저자)",
-      "abstractEN": "Local navigation in cluttered environments often suffers from dense obstacles and frequent local minima. Conventional local planners rely on heuristics and are prone to failure, while deep reinforcement learning(DRL)based approaches provide adaptability but are constrained by limited onboard sensing. These limitations lead to navigation failures because the robot cannot perceive structures outside its field of view. In this paper, we propose DreamFlow, a DRL-based local navigation framework that extends the robot's perceptual horizon through conditional flow matching(CFM). The proposed CFM based prediction module learns probabilistic mapping between local height map latent representation and broader spatial representation conditioned on navigation context. This enables the navigation policy to predict unobserved environmental features and proactively avoid potential local minima. Experimental results demonstrate that DreamFlow outperforms existing methods in terms of latent prediction accuracy and navigation performance in simulation. The proposed method was further validated in cluttered real world environments with a quadrupedal robot. The project page is available at https://dreamflow-icra.github.io.",
-      "abstractKO": "DreamFlow는 밀집 장애물 환경에서의 로컬 내비게이션이 겪는 로컬 미니마(local minima) 문제를 정조준한다. 자율 이동 로봇(특히 사족보행 로봇)이 목표 지점으로 이동할 때, 로컬 플래너는 온보드 센서의 즉각적 지각 범위(field of view) 내 정보만으로 행동을 결정한다. 이 근시안적 지각 때문에 U자형 장애물·막다른 통로·좁은 복도 같은 구조에서 로봇은 \"전진하면 충돌, 후퇴하면 목표에서 멀어짐\"의 딜레마에 빠진다.",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 42,
-      "reason": "DreamFlow는 밀집 장애물 환경에서의 로컬 내비게이션이 겪는 로컬 미니마(local minima) 문제를 정조준한다. 자율 이동 로봇(특히 사족보행 로봇)이 목표 지점으로 이동할 때, 로컬 플래너는 온보드 센서의 즉각적 지각 범위(field of view) 내 정보만으로 행동을 결정한다. 이 근시안적 지각 때문에 U자형 장애물·막다른 통로·좁은 복도 같은 구조에서 로봇은 \"전진하면 충돌, 후퇴하면 목표에서 멀어짐\"의 딜레마에 빠진다.",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/DreamFlow_ICRA2026/index.html"
-    },
-    {
-      "id": "2509.12863",
-      "venue": "IROS 2025",
-      "matchScore": 84,
-      "category": "Planner",
-      "feedTitle": "GRATE: a Graph transformer-based deep Reinforcement learning Approach for Time-efficient autonomous robot Exploration",
-      "authorsShort": "H. Ni, J. Liang +3",
-      "feedAbstract": "GRATE는 자율 로봇 탐색(Autonomous Robot Exploration, ARE) 문제, 즉 사전 지도가 없는 미지 환경을 로봇이 스스로 주행하며 완전한 지도를 만드는 과제를 다룬다. 핵심 목표는 단순히 \"주행 거리\"를 줄이는 것이 아니라 탐색을 완료하는 데 걸리는 실제 시간(time-efficiency) 을…",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "GRATE: a Graph transformer-based deep Reinforcement learning Approach for Time-efficient autonomous robot Exploration",
-      "titleKO": "GRATE: a Graph transformer-based deep Reinforcement learning Approach for Time-efficient autonomous robot Exploration",
-      "authorsEN": "Haozhan Ni, Jingsong Liang, Chenyu He, Yuhong Cao (교신저자), Guillaume Sartoretti",
-      "authorsKO": "Haozhan Ni, Jingsong Liang, Chenyu He, Yuhong Cao (교신저자), Guillaume Sartoretti",
-      "abstractEN": "Autonomous robot exploration (ARE) is the process of a robot autonomously navigating and mapping an unknown environment. Recent Reinforcement Learning (RL)-based approaches typically formulate ARE as a sequential decision-making problem defined on a collision-free informative graph. However, these methods often demonstrate limited reasoning ability over graph-structured data. Moreover, due to the insufficient consideration of robot motion, the resulting RL policies are generally optimized to minimize travel distance, while neglecting time efficiency. To overcome these limitations, we propose GRATE, a Deep Reinforcement Learning (DRL)-based approach that leverages a Graph Transformer to effectively capture both local structure patterns and global contextual dependencies of the informative graph, thereby enhancing the model's reasoning capability across the entire environment. In addition, we deploy a Kalman filter to smooth the waypoint outputs, ensuring that the resulting path is kinodynamically feasible for the robot to follow. Experimental results demonstrate that our method exhibits better exploration efficiency (up to 21.5% in distance and 21.3% in time to complete exploration) than state-of-the-art conventional and learning-based baselines in various simulation benchmarks. We also validate our planner in real-world scenarios.",
-      "abstractKO": "GRATE는 자율 로봇 탐색(Autonomous Robot Exploration, ARE) 문제, 즉 사전 지도가 없는 미지 환경을 로봇이 스스로 주행하며 완전한 지도를 만드는 과제를 다룬다. 핵심 목표는 단순히 \"주행 거리\"를 줄이는 것이 아니라 탐색을 완료하는 데 걸리는 실제 시간(time-efficiency) 을 줄이는 것이다. 이 둘은 같지 않다 — 거리가 짧아도 잦은 정지·회전·가속이 누적되면 시간은 길어진다.",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2025",
-      "citations": 0,
-      "readMinutes": 40,
-      "reason": "GRATE는 자율 로봇 탐색(Autonomous Robot Exploration, ARE) 문제, 즉 사전 지도가 없는 미지 환경을 로봇이 스스로 주행하며 완전한 지도를 만드는 과제를 다룬다. 핵심 목표는 단순히 \"주행 거리\"를 줄이는 것이 아니라 탐색을 완료하는 데 걸리는 실제 시간(time-efficiency) 을 줄이는 것이다. 이 둘은 같지 않다 — 거리가 짧아도 잦은 정지·회전·가속이 누적되면 시간은 길어진다.",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/GRATE_IROS2025/index.html"
-    },
-    {
-      "id": "2411.12150",
-      "venue": "T-ASE 2025",
-      "matchScore": 96,
-      "category": "Planner",
-      "feedTitle": "HEIGHT: Heterogeneous Interaction Graph Transformer for Robot Navigation in Crowded and Constrained Environments",
-      "authorsShort": "S. Liu, H. Xia +6",
-      "feedAbstract": "HEIGHT는 밀집된 동적 군중(crowd)과 복도·가구 같은 정적 제약(constraint)이 공존하는 실내 환경에서, 로봇이 충돌 없이 안전하고 효율적으로 목표점까지 이동하는 군중 내비게이션(crowd navigation) 문제를 다룬다. 이는 자연어 지시가 없는 점-목표(point-goal) 내비게이션이며, 본…",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "HEIGHT: Heterogeneous Interaction Graph Transformer for Robot Navigation in Crowded and Constrained Environments",
-      "titleKO": "HEIGHT: Heterogeneous Interaction Graph Transformer for Robot Navigation in Crowded and Constrained Environments",
-      "authorsEN": "Shuijing Liu, Haochen Xia, Fatemeh Cheraghi Pouria, Kaiwen Hong, Neeloy Chakraborty, Zichao Hu, Joydeep Biswas, Katherine Driggs-Campbell",
-      "authorsKO": "Shuijing Liu, Haochen Xia, Fatemeh Cheraghi Pouria, Kaiwen Hong, Neeloy Chakraborty, Zichao Hu, Joydeep Biswas, Katherine Driggs-Campbell",
-      "abstractEN": "We study the problem of robot navigation in dense and interactive crowds with static constraints such as corridors and furniture. Previous methods fail to consider all types of spatial and temporal interactions among agents and obstacles, leading to unsafe and inefficient robot paths. In this article, we leverage a graph-based representation of crowded and constrained scenarios and propose a structured framework to learn robot navigation policies with deep reinforcement learning. We first split the representations of different inputs and propose a heterogeneous spatio-temporal graph to model distinct interactions among humans, robots, and obstacles. Based on the heterogeneous spatio-temporal graph, we propose HEIGHT, a novel navigation policy network architecture with different components to capture heterogeneous interactions through space and time. HEIGHT utilizes attention mechanisms to prioritize important interactions and a recurrent network to track changes in the dynamic scene over time, encouraging the robot to avoid collisions adaptively. Through extensive simulation and real-world experiments, we demonstrate that HEIGHT outperforms state-of-the-art baselines in terms of success, navigation time, and generalization to domain shifts in challenging navigation scenarios. More information is available at https://sites.google.com/view/crowdnav-height/home.",
-      "abstractKO": "HEIGHT는 밀집된 동적 군중(crowd)과 복도·가구 같은 정적 제약(constraint)이 공존하는 실내 환경에서, 로봇이 충돌 없이 안전하고 효율적으로 목표점까지 이동하는 군중 내비게이션(crowd navigation) 문제를 다룬다. 이는 자연어 지시가 없는 점-목표(point-goal) 내비게이션이며, 본 코퍼스 분류상 Planner 트랙(로컬 모션 플래닝/장애물 회피·탐색 전략) 에 해당한다.",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2024",
-      "citations": 0,
-      "readMinutes": 47,
-      "reason": "HEIGHT는 밀집된 동적 군중(crowd)과 복도·가구 같은 정적 제약(constraint)이 공존하는 실내 환경에서, 로봇이 충돌 없이 안전하고 효율적으로 목표점까지 이동하는 군중 내비게이션(crowd navigation) 문제를 다룬다. 이는 자연어 지시가 없는 점-목표(point-goal) 내비게이션이며, 본 코퍼스 분류상 Planner 트랙(로컬 모션 플래닝/장애물 회피·탐색 전략) 에 해당한다.",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HEIGHT_TASE2025/index.html"
-    },
-    {
-      "id": "2510.19655",
+      "id": "2512.19629",
       "venue": "ICRA 2026",
       "venueDetail": "ICRA 2026",
       "matchScore": 96,
       "category": "VLN",
-      "feedTitle": "LaViRA: Language-Vision-Robot Actions Translation for Zero-Shot VLN",
-      "authorsShort": "H. Ding et al.",
-      "feedAbstract": "계층적 행동 분해(언어 행동→시각 행동→로봇 행동)를 통해 다양한 규모 MLLM의 강점을 활용하는 zero-shot VLN 프레임워크로, VLN-CE 벤치마크에서 SOTA 달성 및 우수한 일반화 능력 입증.",
+      "feedTitle": "LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry",
+      "authorsShort": "S. University et al.",
+      "feedAbstract": "메트릭 인식 시각 기하학을 통해 로컬리제이션된 네비게이션 정책으로 구조화되지 않은 환경에서 로봇의 궤적 계획 문제를 해결",
       "tags": [
         "#VLN"
       ],
-      "titleEN": "Language-Vision-Robot Actions Translation for Zero-Shot Vision Language Navigation in Continuous Environments",
-      "titleKO": "Language-Vision-Robot Actions Translation for Zero-Shot Vision Language Navigation in Continuous Environments",
-      "authorsEN": "Hongyu Ding et al.",
-      "authorsKO": "Hongyu Ding et al.",
-      "abstractEN": "LaViRA: Zero-shot Vision-and-Language Navigation in Continuous Environments (VLN-CE) requires an agent to navigate unseen environments based on natural language instructions without any prior training. Current methods face a critical trade-off: either rely on environment-specific waypoint predictors that limit scene generalization, or underutilize the reasoning capabilities of large models during navigation. We introduce LaViRA, a simple yet effective zero-shot framework that addresses this dilemma by decomposing action into a coarse-to-fine hierarchy: Language Action for high-level planning, Vision Action for middle-level perceptual grounding, and Robot Action for low-level control. This modular decomposition allows us to leverage the distinct strengths of different scales of Multimodal Large Language Models (MLLMs) at each stage, creating a system that is powerful in its reasoning, grounding and practical control. LaViRA significantly outperforms existing state-of-the-art methods on the VLN-CE benchmark, demonstrating superior generalization capabilities in unseen environments, while maintaining transparency and efficiency for real-world deployment. Project page: https://robo-lavira.github.io/lavira-zs-vln/",
-      "abstractKO": "계층적 행동 분해(언어 행동→시각 행동→로봇 행동)를 통해 다양한 규모 MLLM의 강점을 활용하는 zero-shot VLN 프레임워크로, VLN-CE 벤치마크에서 SOTA 달성 및 우수한 일반화 능력 입증.",
+      "titleEN": "LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry",
+      "titleKO": "LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry",
+      "authorsEN": "Steiner et al. (Tsinghua University, Shanghai AI Laboratory)",
+      "authorsKO": "Steiner et al. (Tsinghua University, Shanghai AI Laboratory)",
+      "abstractEN": "Trajectory planning in unstructured environments is a fundamental and challenging capability for mobile robots. Traditional modular pipelines suffer from latency and cascading errors across perception, localization, mapping, and planning modules. Recent end-to-end learning methods map raw visual observations directly to control signals or trajectories, promising greater performance and efficiency in open-world settings. However, most prior end-to-end approaches still rely on separate localization modules that depend on accurate sensor extrinsic calibration for self-state estimation, thereby limiting generalization across embodiments and environments. We introduce LoGoPlanner, a localization-grounded, end-to-end navigation framework that addresses these limitations by: (1) finetuning a long-horizon visual-geometry backbone to ground predictions with absolute metric scale, thereby providing implicit state estimation for accurate localization; (2) reconstructing surrounding scene geometry from historical observations to supply dense, fine-grained environmental awareness for reliable obstacle avoidance; and (3) conditioning the policy on implicit geometry bootstrapped by the aforementioned auxiliary tasks, thereby reducing error propagation. We evaluate LoGoPlanner in both simulation and real-world settings, where its fully end-to-end design reduces cumulative error while metric-aware geometry memory enhances planning consistency and obstacle avoidance, leading to more than a 27.3\\% improvement over oracle-localization baselines and strong generalization across embodiments and environments. The code and models have been made publicly available on the https://steinate.github.io/logoplanner.github.io.",
+      "abstractKO": "메트릭 인식 시각 기하학을 통해 로컬리제이션된 네비게이션 정책으로 구조화되지 않은 환경에서 로봇의 궤적 계획 문제를 해결",
       "detailTags": [
         "#VLN"
       ],
       "year": "2025",
       "citations": 0,
-      "readMinutes": 44,
-      "reason": "고수준 계획(언어 행동), 중간 수준 인식 그라운딩(시각 행동), 저수준 제어(로봇 행동) 계층적 분해\n서로 다른 규모 MLLM의 구별되는 강점을 각 단계에서 활용하는 모듈식 설계\nVLN-CE 벤치마크에서 SOTA 성능 달성 및 미지 환경에서 우수한 일반화 능력, 실제 배포를 위한 투명성과 효율성 확보",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/LaViRA_ICRA2026/index.html"
+      "readMinutes": 42,
+      "reason": "**Localization-Free Approach**: 기존의 자세한 로컬리제이션 정보 불필요\n**Metric-aware Visual Geometry**: 시각 정보에서 메트릭 기하학 정보 추출\n**End-to-End Navigation Policy**: 모듈식 파이프라인의 지연시간과 오류 누적 문제 해결\n**Unstructured Environment Support**: 일반적인 환경에서 높은 성능\n**Self-contained Distillation**: 이전 작업(NavDP)의 자체 포함된 증류",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/LoGoPlanner_ICRA2026/index.html"
+    },
+    {
+      "id": "2605.00397",
+      "venue": "arXiv 2026",
+      "matchScore": 84,
+      "category": "VLN",
+      "feedTitle": "MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation",
+      "authorsShort": "A. Al-Bustami, J. Kwon",
+      "feedAbstract": "언어 조건부 객체 접근(LCOA), 연속 행동 레이블, 5분할 OOD 평가, 4개 실내 씬, 1174 에피소드, HuggingFace 공개",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation",
+      "titleKO": "MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation",
+      "authorsEN": "Ali Al-Bustami, Jaerock Kwon",
+      "authorsKO": "Ali Al-Bustami, Jaerock Kwon",
+      "abstractEN": "We present MiniVLA-Nav v1, a simulation dataset for Language-Conditioned Object Approach (LCOA) navigation: given a short natural-language instruction, an NVIDIA Nova Carter differential-drive robot must navigate to the named object and stop within 1 m across four photorealistic Isaac Sim environments (Office, Hospital, Full Warehouse, and Warehouse with Multiple Shelves). Each of the 1,174 episodes pairs an instruction with synchronized 640x640 RGB images, metric depth maps (float32, metres), and instance segmentation masks, together with continuous (v,omega) and 7x7 tokenized expert action labels recorded at 60 Hz from a vision-based proportional controller. Trajectory diversity is ensured through three spawn-distance tiers (near: 1.5-3.5 m, mid: 3.5-7.0 m, far: global curated points; Pearson r=0.94 between spawn distance and trajectory length), 12 object categories, 18 training templates, and 12 paraphrase-OOD templates. Five evaluation splits support in-distribution accuracy, template-paraphrase robustness, and OOD object-category benchmarking. The dataset is publicly available at https://huggingface.co/datasets/alibustami/miniVLA-Nav",
+      "abstractKO": "언어 조건부 객체 접근(LCOA), 연속 행동 레이블, 5분할 OOD 평가, 4개 실내 씬, 1174 에피소드, HuggingFace 공개",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 50,
+      "reason": "언어 조건부 객체 접근(LCOA), 연속 행동 레이블, 5분할 OOD 평가, 4개 실내 씬, 1174 에피소드, HuggingFace 공개",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/MiniVLANav_arxiv2026/index.html"
+    },
+    {
+      "id": "2505.08712",
+      "venue": "ICRA 2026",
+      "venueDetail": "ICRA 2026",
+      "matchScore": 96,
+      "category": "VLN",
+      "feedTitle": "NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance",
+      "authorsShort": "저. group, S. Lab)",
+      "feedAbstract": "Diffusion 기반 궤적 생성과 critic 함수를 결합한 E2E 네비게이션 정책으로 시뮬레이션에서 학습하여 다양한 로봇 플랫폼으로 zero-shot 전이 가능",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance",
+      "titleKO": "NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance",
+      "authorsEN": "저자 정보 (Wenzhe Cai group, Shanghai AI Lab)",
+      "authorsKO": "저자 정보 (Wenzhe Cai group, Shanghai AI Lab)",
+      "abstractEN": "Learning to navigate in dynamic and complex open-world environments is a critical yet challenging capability for autonomous robots. Existing approaches often rely on cascaded modular frameworks, which require extensive hyperparameter tuning or learning from limited real-world demonstration data. In this paper, we propose Navigation Diffusion Policy (NavDP), an end-to-end network trained solely in simulation that enables zero-shot sim-to-real transfer across diverse environments and robot embodiments. The core of NavDP is a unified transformer-based architecture that jointly learns trajectory generation and trajectory evaluation, both conditioned solely on local RGB-D observation. By learning to predict critic values for contrastive trajectory samples, our proposed approach effectively leverages supervision from privileged information available in simulation, thereby fostering accurate spatial understanding and enabling the distinction between safe and dangerous behaviors. To support this, we develop an efficient data generation pipeline in simulation and construct a large-scale dataset encompassing over one million meters of navigation experience across 3,000 scenes. Empirical experiments in both simulated and real-world environments demonstrate that NavDP significantly outperforms prior state-of-the-art methods. Furthermore, we identify key factors influencing the generalization performance of NavDP. The dataset and code are publicly available at https://wzcai99.github.io/navigation-diffusion-policy.github.io.",
+      "abstractKO": "Diffusion 기반 궤적 생성과 critic 함수를 결합한 E2E 네비게이션 정책으로 시뮬레이션에서 학습하여 다양한 로봇 플랫폼으로 zero-shot 전이 가능",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2025",
+      "citations": 0,
+      "readMinutes": 43,
+      "reason": "**Diffusion-based Trajectory Generation**: 조건부 diffusion 모델을 통한 궤적 생성\n**Critic Function for Selection**: 생성된 궤적을 평가하고 선택하는 critic 네트워크\n**Local Observations Only**: 정확한 로컬리제이션과 맵핑 불필요 (local observation 기반만 사용)\n**Sim-to-Real Transfer**: 시뮬레이션에서만 학습하여 실제 로봇으로 zero-shot 전이 가능\n**다양한 로봇 체형 지원**: 서로 다른 embodiments에 대응",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NavDP_ICRA2026/index.html"
+    },
+    {
+      "id": "2412.04453",
+      "venue": "RSS 2025",
+      "matchScore": 96,
+      "category": "VLN",
+      "feedTitle": "NaVILA: Legged Robot Vision-Language-Action Model for Navigation",
+      "authorsShort": "A. Cheng, Y. Ji +8",
+      "feedAbstract": "NaVILA는 Vision-and-Language Navigation(VLN)을 사족·이족 보행 로봇(legged robot)으로 확장하는 연구다. 기존 VLN 연구는 대부분 바퀴형(wheeled) 로봇 또는 이상화된 포인트 에이전트를 가정하여, 자연언어 지시를 \"forward / turn / stop\"의 이산 행동으로…",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "NaVILA: Legged Robot Vision-Language-Action Model for Navigation",
+      "titleKO": "NaVILA: Legged Robot Vision-Language-Action Model for Navigation",
+      "authorsEN": "An-Chieh Cheng, Yandong Ji, Zhaojing Yang, Zaitian Gongye, Xueyan Zou, Jan Kautz, Erdem Bıyık, Hongxu Yin, Sifei Liu, Xiaolong Wang",
+      "authorsKO": "An-Chieh Cheng, Yandong Ji, Zhaojing Yang, Zaitian Gongye, Xueyan Zou, Jan Kautz, Erdem Bıyık, Hongxu Yin, Sifei Liu, Xiaolong Wang",
+      "abstractEN": "This paper proposes to solve the problem of Vision-and-Language Navigation with legged robots, which not only provides a flexible way for humans to command but also allows the robot to navigate through more challenging and cluttered scenes. However, it is non-trivial to translate human language instructions all the way to low-level leg joint actions. We propose NaVILA, a 2-level framework that unifies a Vision-Language-Action model (VLA) with locomotion skills. Instead of directly predicting low-level actions from VLA, NaVILA first generates mid-level actions with spatial information in the form of language, (e.g., \"moving forward 75cm\"), which serves as an input for a visual locomotion RL policy for execution. NaVILA substantially improves previous approaches on existing benchmarks. The same advantages are demonstrated in our newly developed benchmarks with IsaacLab, featuring more realistic scenes, low-level controls, and real-world robot experiments. We show more results at https://navila-bot.github.io/",
+      "abstractKO": "NaVILA는 Vision-and-Language Navigation(VLN)을 사족·이족 보행 로봇(legged robot)으로 확장하는 연구다. 기존 VLN 연구는 대부분 바퀴형(wheeled) 로봇 또는 이상화된 포인트 에이전트를 가정하여, 자연언어 지시를 \"forward / turn / stop\"의 이산 행동으로 매핑하는 데 집중했다. 그러나 다리형 로봇은 계단·문턱·좁은 틈·비정형 지형을 통과할 수 있는 잠재력이 있는 대신, 자연언어 지시를 12개 관절의 저수준 토크 명령으로 변환하는 것이라는 새로운 난제를 안는다.",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2024",
+      "citations": 0,
+      "readMinutes": 45,
+      "reason": "NaVILA는 Vision-and-Language Navigation(VLN)을 사족·이족 보행 로봇(legged robot)으로 확장하는 연구다. 기존 VLN 연구는 대부분 바퀴형(wheeled) 로봇 또는 이상화된 포인트 에이전트를 가정하여, 자연언어 지시를 \"forward / turn / stop\"의 이산 행동으로 매핑하는 데 집중했다. 그러나 다리형 로봇은 계단·문턱·좁은 틈·비정형 지형을 통과할 수 있는 잠재력이 있는 대신, 자연언어 지시를 12개 관절의 저수준 토크 명령으로 변환하는 것이라는 새로운 난제를 안는다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NaVILA_RSS2025/index.html"
+    },
+    {
+      "id": "2509.21189",
+      "venue": "CoRL 2025",
+      "venueDetail": "CoRL 2025",
+      "matchScore": 96,
+      "category": "VLN",
+      "feedTitle": "ReasonNav: Human-like Navigation in a World Built for Humans",
+      "authorsShort": "G. Wang et al.",
+      "feedAbstract": "VLM의 추론 능력을 활용하여 표지 읽기와 길 묻기 등 인간적 네비게이션 행동을 수행하며, 네비게이션 랜드마크 기반 컴팩트 I/O 추상화로 대규모 환경 효율적 탐색 실현.",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "Human-like Navigation in a World Built for Humans",
+      "titleKO": "Human-like Navigation in a World Built for Humans",
+      "authorsEN": "Gloria X. Wang et al.",
+      "authorsKO": "Gloria X. Wang et al.",
+      "abstractEN": "When navigating in a man-made environment they haven't visited before--like an office building--humans employ behaviors such as reading signs and asking others for directions. These behaviors help humans reach their destinations efficiently by reducing the need to search through large areas. Existing robot navigation systems lack the ability to execute such behaviors and are thus highly inefficient at navigating within large environments. We present ReasonNav, a modular navigation system which integrates these human-like navigation skills by leveraging the reasoning capabilities of a vision-language model (VLM). We design compact input and output abstractions based on navigation landmarks, allowing the VLM to focus on language understanding and reasoning. We evaluate ReasonNav on real and simulated navigation tasks and show that the agent successfully employs higher-order reasoning to navigate efficiently in large, complex buildings.",
+      "abstractKO": "VLM의 추론 능력을 활용하여 표지 읽기와 길 묻기 등 인간적 네비게이션 행동을 수행하며, 네비게이션 랜드마크 기반 컴팩트 I/O 추상화로 대규모 환경 효율적 탐색 실현.",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2025",
+      "citations": 0,
+      "readMinutes": 48,
+      "reason": "VLM의 고차 추론 능력을 활용한 표지 읽기, 길 묻기 등 인간적 네비게이션 행동 구현\n네비게이션 랜드마크 기반 컴팩트 I/O 추상화로 VLM이 언어 이해와 추론에 집중 가능하게 설계\nIsaac Sim 및 실제 네비게이션 작업에서 대규모 복잡 건물 효율적 탐색 검증",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ReasonNav_CoRL2025/index.html"
     }
   ],
   "archive": [
@@ -317,137 +319,135 @@
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/LeCropFollow_arxiv2026/index.html"
     },
     {
-      "id": "2512.19629",
-      "venue": "ICRA 2026",
-      "venueDetail": "ICRA 2026",
+      "id": "2512.00565",
+      "venue": "CVPR 2026",
       "matchScore": 96,
       "category": "VLN",
-      "feedTitle": "LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry",
-      "authorsShort": "S. University et al.",
-      "feedAbstract": "메트릭 인식 시각 기하학을 통해 로컬리제이션된 네비게이션 정책으로 구조화되지 않은 환경에서 로봇의 궤적 계획 문제를 해결",
+      "feedTitle": "Describe Anything, Anywhere, at Any Moment (DAAAM)",
+      "authorsShort": "N. Gorlo, L. Schmid +1",
+      "feedAbstract": "DAAAM은 대규모·실시간 4D 장면 이해(4D scene understanding)를 위한 시공간 메모리 프레임워크(spatio-temporal memory framework)다. 증강현실(AR)부터 대규모 환경에서의 로봇 자율성까지, 많은 컴퓨터비전·로봇 응용은 (a) 정확한 언어…",
       "tags": [
         "#VLN"
       ],
-      "titleEN": "LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry",
-      "titleKO": "LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry",
-      "authorsEN": "Steiner et al. (Tsinghua University, Shanghai AI Laboratory)",
-      "authorsKO": "Steiner et al. (Tsinghua University, Shanghai AI Laboratory)",
-      "abstractEN": "Trajectory planning in unstructured environments is a fundamental and challenging capability for mobile robots. Traditional modular pipelines suffer from latency and cascading errors across perception, localization, mapping, and planning modules. Recent end-to-end learning methods map raw visual observations directly to control signals or trajectories, promising greater performance and efficiency in open-world settings. However, most prior end-to-end approaches still rely on separate localization modules that depend on accurate sensor extrinsic calibration for self-state estimation, thereby limiting generalization across embodiments and environments. We introduce LoGoPlanner, a localization-grounded, end-to-end navigation framework that addresses these limitations by: (1) finetuning a long-horizon visual-geometry backbone to ground predictions with absolute metric scale, thereby providing implicit state estimation for accurate localization; (2) reconstructing surrounding scene geometry from historical observations to supply dense, fine-grained environmental awareness for reliable obstacle avoidance; and (3) conditioning the policy on implicit geometry bootstrapped by the aforementioned auxiliary tasks, thereby reducing error propagation. We evaluate LoGoPlanner in both simulation and real-world settings, where its fully end-to-end design reduces cumulative error while metric-aware geometry memory enhances planning consistency and obstacle avoidance, leading to more than a 27.3\\% improvement over oracle-localization baselines and strong generalization across embodiments and environments. The code and models have been made publicly available on the https://steinate.github.io/logoplanner.github.io.",
-      "abstractKO": "메트릭 인식 시각 기하학을 통해 로컬리제이션된 네비게이션 정책으로 구조화되지 않은 환경에서 로봇의 궤적 계획 문제를 해결",
+      "titleEN": "Describe Anything, Anywhere, at Any Moment (DAAAM)",
+      "titleKO": "Describe Anything, Anywhere, at Any Moment (DAAAM)",
+      "authorsEN": "Nicolas Gorlo, Lukas Schmid, Luca Carlone",
+      "authorsKO": "Nicolas Gorlo, Lukas Schmid, Luca Carlone",
+      "abstractEN": "Computer vision and robotics applications ranging from augmented reality to robot autonomy in large-scale environments require spatio-temporal memory frameworks that capture both geometric structure for accurate language-grounding as well as semantic detail. Existing methods face a tradeoff, where producing rich open-vocabulary descriptions comes at the expense of real-time performance when these descriptions have to be grounded in 3D. To address these challenges, we propose Describe Anything, Anywhere, at Any Moment (DAAAM), a novel spatio-temporal memory framework for large-scale and real-time 4D scene understanding. DAAAM introduces a novel optimization-based frontend to infer detailed semantic descriptions from localized captioning models, such as the Describe Anything Model (DAM), leveraging batch processing to speed up inference by an order of magnitude for online processing. It leverages such semantic understanding to build a hierarchical 4D scene graph (SG), which acts as an effective globally spatially and temporally consistent memory representation. DAAAM constructs 4D SGs with detailed, geometrically grounded descriptions while maintaining real-time performance. We show that DAAAM's 4D SG interfaces well with a tool-calling agent for inference and reasoning. We thoroughly evaluate DAAAM in the complex task of spatio-temporal question answering on the NaVQA benchmark and show its generalization capabilities for sequential task grounding on the SG3D benchmark. We further curate an extended OC-NaVQA benchmark for large-scale and long-time evaluations. DAAAM achieves state-of-the-art results in both tasks, improving OC-NaVQA question accuracy by 53.6%, position errors by 21.9%, temporal errors by 21.6%, and SG3D task grounding accuracy by 27.8% over the most competitive baselines, respectively. We release our data and code open-source.",
+      "abstractKO": "DAAAM은 대규모·실시간 4D 장면 이해(4D scene understanding)를 위한 시공간 메모리 프레임워크(spatio-temporal memory framework)다. 증강현실(AR)부터 대규모 환경에서의 로봇 자율성까지, 많은 컴퓨터비전·로봇 응용은 (a) 정확한 언어 그라운딩(language-grounding)을 위한 기하학적 구조(geometric structure)와 (b) 풍부한 의미적 디테일(semantic detail)을 동시에 요구한다.",
       "detailTags": [
         "#VLN"
       ],
       "year": "2025",
       "citations": 0,
-      "readMinutes": 42,
-      "reason": "**Localization-Free Approach**: 기존의 자세한 로컬리제이션 정보 불필요\n**Metric-aware Visual Geometry**: 시각 정보에서 메트릭 기하학 정보 추출\n**End-to-End Navigation Policy**: 모듈식 파이프라인의 지연시간과 오류 누적 문제 해결\n**Unstructured Environment Support**: 일반적인 환경에서 높은 성능\n**Self-contained Distillation**: 이전 작업(NavDP)의 자체 포함된 증류",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/LoGoPlanner_ICRA2026/index.html"
+      "readMinutes": 49,
+      "reason": "DAAAM은 대규모·실시간 4D 장면 이해(4D scene understanding)를 위한 시공간 메모리 프레임워크(spatio-temporal memory framework)다. 증강현실(AR)부터 대규모 환경에서의 로봇 자율성까지, 많은 컴퓨터비전·로봇 응용은 (a) 정확한 언어 그라운딩(language-grounding)을 위한 기하학적 구조(geometric structure)와 (b) 풍부한 의미적 디테일(semantic detail)을 동시에 요구한다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/DAAAM_CVPR2026/index.html"
     },
     {
-      "id": "2605.00397",
-      "venue": "arXiv 2026",
+      "id": "2603.02976",
+      "venue": "ICRA 2026",
       "matchScore": 84,
-      "category": "VLN",
-      "feedTitle": "MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation",
-      "authorsShort": "A. Al-Bustami, J. Kwon",
-      "feedAbstract": "언어 조건부 객체 접근(LCOA), 연속 행동 레이블, 5분할 OOD 평가, 4개 실내 씬, 1174 에피소드, HuggingFace 공개",
+      "category": "Planner",
+      "feedTitle": "DreamFlow: Local Navigation Beyond Observation via Conditional Flow Matching in the Latent Space",
+      "authorsShort": "J. Park, D. Lee +4",
+      "feedAbstract": "DreamFlow는 밀집 장애물 환경에서의 로컬 내비게이션이 겪는 로컬 미니마(local minima) 문제를 정조준한다. 자율 이동 로봇(특히 사족보행 로봇)이 목표 지점으로 이동할 때, 로컬 플래너는 온보드 센서의 즉각적 지각 범위(field of view) 내 정보만으로 행동을 결정한다. 이 근시안적 지각 때문에…",
       "tags": [
-        "#VLN"
+        "#Planner"
       ],
-      "titleEN": "MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation",
-      "titleKO": "MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation",
-      "authorsEN": "Ali Al-Bustami, Jaerock Kwon",
-      "authorsKO": "Ali Al-Bustami, Jaerock Kwon",
-      "abstractEN": "We present MiniVLA-Nav v1, a simulation dataset for Language-Conditioned Object Approach (LCOA) navigation: given a short natural-language instruction, an NVIDIA Nova Carter differential-drive robot must navigate to the named object and stop within 1 m across four photorealistic Isaac Sim environments (Office, Hospital, Full Warehouse, and Warehouse with Multiple Shelves). Each of the 1,174 episodes pairs an instruction with synchronized 640x640 RGB images, metric depth maps (float32, metres), and instance segmentation masks, together with continuous (v,omega) and 7x7 tokenized expert action labels recorded at 60 Hz from a vision-based proportional controller. Trajectory diversity is ensured through three spawn-distance tiers (near: 1.5-3.5 m, mid: 3.5-7.0 m, far: global curated points; Pearson r=0.94 between spawn distance and trajectory length), 12 object categories, 18 training templates, and 12 paraphrase-OOD templates. Five evaluation splits support in-distribution accuracy, template-paraphrase robustness, and OOD object-category benchmarking. The dataset is publicly available at https://huggingface.co/datasets/alibustami/miniVLA-Nav",
-      "abstractKO": "언어 조건부 객체 접근(LCOA), 연속 행동 레이블, 5분할 OOD 평가, 4개 실내 씬, 1174 에피소드, HuggingFace 공개",
+      "titleEN": "DreamFlow: Local Navigation Beyond Observation via Conditional Flow Matching in the Latent Space",
+      "titleKO": "DreamFlow: Local Navigation Beyond Observation via Conditional Flow Matching in the Latent Space",
+      "authorsEN": "Jiwon Park, Dongkyu Lee, I Made Aswin Nahrendra, Jaeyoung Lim, Hyun Myung (: 공동 제1저자, Hyun Myung: 교신저자)",
+      "authorsKO": "Jiwon Park, Dongkyu Lee, I Made Aswin Nahrendra, Jaeyoung Lim, Hyun Myung (: 공동 제1저자, Hyun Myung: 교신저자)",
+      "abstractEN": "Local navigation in cluttered environments often suffers from dense obstacles and frequent local minima. Conventional local planners rely on heuristics and are prone to failure, while deep reinforcement learning(DRL)based approaches provide adaptability but are constrained by limited onboard sensing. These limitations lead to navigation failures because the robot cannot perceive structures outside its field of view. In this paper, we propose DreamFlow, a DRL-based local navigation framework that extends the robot's perceptual horizon through conditional flow matching(CFM). The proposed CFM based prediction module learns probabilistic mapping between local height map latent representation and broader spatial representation conditioned on navigation context. This enables the navigation policy to predict unobserved environmental features and proactively avoid potential local minima. Experimental results demonstrate that DreamFlow outperforms existing methods in terms of latent prediction accuracy and navigation performance in simulation. The proposed method was further validated in cluttered real world environments with a quadrupedal robot. The project page is available at https://dreamflow-icra.github.io.",
+      "abstractKO": "DreamFlow는 밀집 장애물 환경에서의 로컬 내비게이션이 겪는 로컬 미니마(local minima) 문제를 정조준한다. 자율 이동 로봇(특히 사족보행 로봇)이 목표 지점으로 이동할 때, 로컬 플래너는 온보드 센서의 즉각적 지각 범위(field of view) 내 정보만으로 행동을 결정한다. 이 근시안적 지각 때문에 U자형 장애물·막다른 통로·좁은 복도 같은 구조에서 로봇은 \"전진하면 충돌, 후퇴하면 목표에서 멀어짐\"의 딜레마에 빠진다.",
       "detailTags": [
-        "#VLN"
+        "#Planner"
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 50,
-      "reason": "언어 조건부 객체 접근(LCOA), 연속 행동 레이블, 5분할 OOD 평가, 4개 실내 씬, 1174 에피소드, HuggingFace 공개",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/MiniVLANav_arxiv2026/index.html"
+      "readMinutes": 42,
+      "reason": "DreamFlow는 밀집 장애물 환경에서의 로컬 내비게이션이 겪는 로컬 미니마(local minima) 문제를 정조준한다. 자율 이동 로봇(특히 사족보행 로봇)이 목표 지점으로 이동할 때, 로컬 플래너는 온보드 센서의 즉각적 지각 범위(field of view) 내 정보만으로 행동을 결정한다. 이 근시안적 지각 때문에 U자형 장애물·막다른 통로·좁은 복도 같은 구조에서 로봇은 \"전진하면 충돌, 후퇴하면 목표에서 멀어짐\"의 딜레마에 빠진다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/DreamFlow_ICRA2026/index.html"
     },
     {
-      "id": "2505.08712",
+      "id": "2509.12863",
+      "venue": "IROS 2025",
+      "matchScore": 84,
+      "category": "Planner",
+      "feedTitle": "GRATE: a Graph transformer-based deep Reinforcement learning Approach for Time-efficient autonomous robot Exploration",
+      "authorsShort": "H. Ni, J. Liang +3",
+      "feedAbstract": "GRATE는 자율 로봇 탐색(Autonomous Robot Exploration, ARE) 문제, 즉 사전 지도가 없는 미지 환경을 로봇이 스스로 주행하며 완전한 지도를 만드는 과제를 다룬다. 핵심 목표는 단순히 \"주행 거리\"를 줄이는 것이 아니라 탐색을 완료하는 데 걸리는 실제 시간(time-efficiency) 을…",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "GRATE: a Graph transformer-based deep Reinforcement learning Approach for Time-efficient autonomous robot Exploration",
+      "titleKO": "GRATE: a Graph transformer-based deep Reinforcement learning Approach for Time-efficient autonomous robot Exploration",
+      "authorsEN": "Haozhan Ni, Jingsong Liang, Chenyu He, Yuhong Cao (교신저자), Guillaume Sartoretti",
+      "authorsKO": "Haozhan Ni, Jingsong Liang, Chenyu He, Yuhong Cao (교신저자), Guillaume Sartoretti",
+      "abstractEN": "Autonomous robot exploration (ARE) is the process of a robot autonomously navigating and mapping an unknown environment. Recent Reinforcement Learning (RL)-based approaches typically formulate ARE as a sequential decision-making problem defined on a collision-free informative graph. However, these methods often demonstrate limited reasoning ability over graph-structured data. Moreover, due to the insufficient consideration of robot motion, the resulting RL policies are generally optimized to minimize travel distance, while neglecting time efficiency. To overcome these limitations, we propose GRATE, a Deep Reinforcement Learning (DRL)-based approach that leverages a Graph Transformer to effectively capture both local structure patterns and global contextual dependencies of the informative graph, thereby enhancing the model's reasoning capability across the entire environment. In addition, we deploy a Kalman filter to smooth the waypoint outputs, ensuring that the resulting path is kinodynamically feasible for the robot to follow. Experimental results demonstrate that our method exhibits better exploration efficiency (up to 21.5% in distance and 21.3% in time to complete exploration) than state-of-the-art conventional and learning-based baselines in various simulation benchmarks. We also validate our planner in real-world scenarios.",
+      "abstractKO": "GRATE는 자율 로봇 탐색(Autonomous Robot Exploration, ARE) 문제, 즉 사전 지도가 없는 미지 환경을 로봇이 스스로 주행하며 완전한 지도를 만드는 과제를 다룬다. 핵심 목표는 단순히 \"주행 거리\"를 줄이는 것이 아니라 탐색을 완료하는 데 걸리는 실제 시간(time-efficiency) 을 줄이는 것이다. 이 둘은 같지 않다 — 거리가 짧아도 잦은 정지·회전·가속이 누적되면 시간은 길어진다.",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2025",
+      "citations": 0,
+      "readMinutes": 40,
+      "reason": "GRATE는 자율 로봇 탐색(Autonomous Robot Exploration, ARE) 문제, 즉 사전 지도가 없는 미지 환경을 로봇이 스스로 주행하며 완전한 지도를 만드는 과제를 다룬다. 핵심 목표는 단순히 \"주행 거리\"를 줄이는 것이 아니라 탐색을 완료하는 데 걸리는 실제 시간(time-efficiency) 을 줄이는 것이다. 이 둘은 같지 않다 — 거리가 짧아도 잦은 정지·회전·가속이 누적되면 시간은 길어진다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/GRATE_IROS2025/index.html"
+    },
+    {
+      "id": "2411.12150",
+      "venue": "T-ASE 2025",
+      "matchScore": 96,
+      "category": "Planner",
+      "feedTitle": "HEIGHT: Heterogeneous Interaction Graph Transformer for Robot Navigation in Crowded and Constrained Environments",
+      "authorsShort": "S. Liu, H. Xia +6",
+      "feedAbstract": "HEIGHT는 밀집된 동적 군중(crowd)과 복도·가구 같은 정적 제약(constraint)이 공존하는 실내 환경에서, 로봇이 충돌 없이 안전하고 효율적으로 목표점까지 이동하는 군중 내비게이션(crowd navigation) 문제를 다룬다. 이는 자연어 지시가 없는 점-목표(point-goal) 내비게이션이며, 본…",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "HEIGHT: Heterogeneous Interaction Graph Transformer for Robot Navigation in Crowded and Constrained Environments",
+      "titleKO": "HEIGHT: Heterogeneous Interaction Graph Transformer for Robot Navigation in Crowded and Constrained Environments",
+      "authorsEN": "Shuijing Liu, Haochen Xia, Fatemeh Cheraghi Pouria, Kaiwen Hong, Neeloy Chakraborty, Zichao Hu, Joydeep Biswas, Katherine Driggs-Campbell",
+      "authorsKO": "Shuijing Liu, Haochen Xia, Fatemeh Cheraghi Pouria, Kaiwen Hong, Neeloy Chakraborty, Zichao Hu, Joydeep Biswas, Katherine Driggs-Campbell",
+      "abstractEN": "We study the problem of robot navigation in dense and interactive crowds with static constraints such as corridors and furniture. Previous methods fail to consider all types of spatial and temporal interactions among agents and obstacles, leading to unsafe and inefficient robot paths. In this article, we leverage a graph-based representation of crowded and constrained scenarios and propose a structured framework to learn robot navigation policies with deep reinforcement learning. We first split the representations of different inputs and propose a heterogeneous spatio-temporal graph to model distinct interactions among humans, robots, and obstacles. Based on the heterogeneous spatio-temporal graph, we propose HEIGHT, a novel navigation policy network architecture with different components to capture heterogeneous interactions through space and time. HEIGHT utilizes attention mechanisms to prioritize important interactions and a recurrent network to track changes in the dynamic scene over time, encouraging the robot to avoid collisions adaptively. Through extensive simulation and real-world experiments, we demonstrate that HEIGHT outperforms state-of-the-art baselines in terms of success, navigation time, and generalization to domain shifts in challenging navigation scenarios. More information is available at https://sites.google.com/view/crowdnav-height/home.",
+      "abstractKO": "HEIGHT는 밀집된 동적 군중(crowd)과 복도·가구 같은 정적 제약(constraint)이 공존하는 실내 환경에서, 로봇이 충돌 없이 안전하고 효율적으로 목표점까지 이동하는 군중 내비게이션(crowd navigation) 문제를 다룬다. 이는 자연어 지시가 없는 점-목표(point-goal) 내비게이션이며, 본 코퍼스 분류상 Planner 트랙(로컬 모션 플래닝/장애물 회피·탐색 전략) 에 해당한다.",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2024",
+      "citations": 0,
+      "readMinutes": 47,
+      "reason": "HEIGHT는 밀집된 동적 군중(crowd)과 복도·가구 같은 정적 제약(constraint)이 공존하는 실내 환경에서, 로봇이 충돌 없이 안전하고 효율적으로 목표점까지 이동하는 군중 내비게이션(crowd navigation) 문제를 다룬다. 이는 자연어 지시가 없는 점-목표(point-goal) 내비게이션이며, 본 코퍼스 분류상 Planner 트랙(로컬 모션 플래닝/장애물 회피·탐색 전략) 에 해당한다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HEIGHT_TASE2025/index.html"
+    },
+    {
+      "id": "2510.19655",
       "venue": "ICRA 2026",
       "venueDetail": "ICRA 2026",
       "matchScore": 96,
       "category": "VLN",
-      "feedTitle": "NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance",
-      "authorsShort": "저. group, S. Lab)",
-      "feedAbstract": "Diffusion 기반 궤적 생성과 critic 함수를 결합한 E2E 네비게이션 정책으로 시뮬레이션에서 학습하여 다양한 로봇 플랫폼으로 zero-shot 전이 가능",
+      "feedTitle": "LaViRA: Language-Vision-Robot Actions Translation for Zero-Shot VLN",
+      "authorsShort": "H. Ding et al.",
+      "feedAbstract": "계층적 행동 분해(언어 행동→시각 행동→로봇 행동)를 통해 다양한 규모 MLLM의 강점을 활용하는 zero-shot VLN 프레임워크로, VLN-CE 벤치마크에서 SOTA 달성 및 우수한 일반화 능력 입증.",
       "tags": [
         "#VLN"
       ],
-      "titleEN": "NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance",
-      "titleKO": "NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance",
-      "authorsEN": "저자 정보 (Wenzhe Cai group, Shanghai AI Lab)",
-      "authorsKO": "저자 정보 (Wenzhe Cai group, Shanghai AI Lab)",
-      "abstractEN": "Learning to navigate in dynamic and complex open-world environments is a critical yet challenging capability for autonomous robots. Existing approaches often rely on cascaded modular frameworks, which require extensive hyperparameter tuning or learning from limited real-world demonstration data. In this paper, we propose Navigation Diffusion Policy (NavDP), an end-to-end network trained solely in simulation that enables zero-shot sim-to-real transfer across diverse environments and robot embodiments. The core of NavDP is a unified transformer-based architecture that jointly learns trajectory generation and trajectory evaluation, both conditioned solely on local RGB-D observation. By learning to predict critic values for contrastive trajectory samples, our proposed approach effectively leverages supervision from privileged information available in simulation, thereby fostering accurate spatial understanding and enabling the distinction between safe and dangerous behaviors. To support this, we develop an efficient data generation pipeline in simulation and construct a large-scale dataset encompassing over one million meters of navigation experience across 3,000 scenes. Empirical experiments in both simulated and real-world environments demonstrate that NavDP significantly outperforms prior state-of-the-art methods. Furthermore, we identify key factors influencing the generalization performance of NavDP. The dataset and code are publicly available at https://wzcai99.github.io/navigation-diffusion-policy.github.io.",
-      "abstractKO": "Diffusion 기반 궤적 생성과 critic 함수를 결합한 E2E 네비게이션 정책으로 시뮬레이션에서 학습하여 다양한 로봇 플랫폼으로 zero-shot 전이 가능",
+      "titleEN": "Language-Vision-Robot Actions Translation for Zero-Shot Vision Language Navigation in Continuous Environments",
+      "titleKO": "Language-Vision-Robot Actions Translation for Zero-Shot Vision Language Navigation in Continuous Environments",
+      "authorsEN": "Hongyu Ding et al.",
+      "authorsKO": "Hongyu Ding et al.",
+      "abstractEN": "LaViRA: Zero-shot Vision-and-Language Navigation in Continuous Environments (VLN-CE) requires an agent to navigate unseen environments based on natural language instructions without any prior training. Current methods face a critical trade-off: either rely on environment-specific waypoint predictors that limit scene generalization, or underutilize the reasoning capabilities of large models during navigation. We introduce LaViRA, a simple yet effective zero-shot framework that addresses this dilemma by decomposing action into a coarse-to-fine hierarchy: Language Action for high-level planning, Vision Action for middle-level perceptual grounding, and Robot Action for low-level control. This modular decomposition allows us to leverage the distinct strengths of different scales of Multimodal Large Language Models (MLLMs) at each stage, creating a system that is powerful in its reasoning, grounding and practical control. LaViRA significantly outperforms existing state-of-the-art methods on the VLN-CE benchmark, demonstrating superior generalization capabilities in unseen environments, while maintaining transparency and efficiency for real-world deployment. Project page: https://robo-lavira.github.io/lavira-zs-vln/",
+      "abstractKO": "계층적 행동 분해(언어 행동→시각 행동→로봇 행동)를 통해 다양한 규모 MLLM의 강점을 활용하는 zero-shot VLN 프레임워크로, VLN-CE 벤치마크에서 SOTA 달성 및 우수한 일반화 능력 입증.",
       "detailTags": [
         "#VLN"
       ],
       "year": "2025",
       "citations": 0,
-      "readMinutes": 43,
-      "reason": "**Diffusion-based Trajectory Generation**: 조건부 diffusion 모델을 통한 궤적 생성\n**Critic Function for Selection**: 생성된 궤적을 평가하고 선택하는 critic 네트워크\n**Local Observations Only**: 정확한 로컬리제이션과 맵핑 불필요 (local observation 기반만 사용)\n**Sim-to-Real Transfer**: 시뮬레이션에서만 학습하여 실제 로봇으로 zero-shot 전이 가능\n**다양한 로봇 체형 지원**: 서로 다른 embodiments에 대응",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NavDP_ICRA2026/index.html"
-    },
-    {
-      "id": "2412.04453",
-      "venue": "RSS 2025",
-      "matchScore": 96,
-      "category": "VLN",
-      "feedTitle": "NaVILA: Legged Robot Vision-Language-Action Model for Navigation",
-      "authorsShort": "A. Cheng, Y. Ji +8",
-      "feedAbstract": "NaVILA는 Vision-and-Language Navigation(VLN)을 사족·이족 보행 로봇(legged robot)으로 확장하는 연구다. 기존 VLN 연구는 대부분 바퀴형(wheeled) 로봇 또는 이상화된 포인트 에이전트를 가정하여, 자연언어 지시를 \"forward / turn / stop\"의 이산 행동으로…",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "NaVILA: Legged Robot Vision-Language-Action Model for Navigation",
-      "titleKO": "NaVILA: Legged Robot Vision-Language-Action Model for Navigation",
-      "authorsEN": "An-Chieh Cheng, Yandong Ji, Zhaojing Yang, Zaitian Gongye, Xueyan Zou, Jan Kautz, Erdem Bıyık, Hongxu Yin, Sifei Liu, Xiaolong Wang",
-      "authorsKO": "An-Chieh Cheng, Yandong Ji, Zhaojing Yang, Zaitian Gongye, Xueyan Zou, Jan Kautz, Erdem Bıyık, Hongxu Yin, Sifei Liu, Xiaolong Wang",
-      "abstractEN": "This paper proposes to solve the problem of Vision-and-Language Navigation with legged robots, which not only provides a flexible way for humans to command but also allows the robot to navigate through more challenging and cluttered scenes. However, it is non-trivial to translate human language instructions all the way to low-level leg joint actions. We propose NaVILA, a 2-level framework that unifies a Vision-Language-Action model (VLA) with locomotion skills. Instead of directly predicting low-level actions from VLA, NaVILA first generates mid-level actions with spatial information in the form of language, (e.g., \"moving forward 75cm\"), which serves as an input for a visual locomotion RL policy for execution. NaVILA substantially improves previous approaches on existing benchmarks. The same advantages are demonstrated in our newly developed benchmarks with IsaacLab, featuring more realistic scenes, low-level controls, and real-world robot experiments. We show more results at https://navila-bot.github.io/",
-      "abstractKO": "NaVILA는 Vision-and-Language Navigation(VLN)을 사족·이족 보행 로봇(legged robot)으로 확장하는 연구다. 기존 VLN 연구는 대부분 바퀴형(wheeled) 로봇 또는 이상화된 포인트 에이전트를 가정하여, 자연언어 지시를 \"forward / turn / stop\"의 이산 행동으로 매핑하는 데 집중했다. 그러나 다리형 로봇은 계단·문턱·좁은 틈·비정형 지형을 통과할 수 있는 잠재력이 있는 대신, 자연언어 지시를 12개 관절의 저수준 토크 명령으로 변환하는 것이라는 새로운 난제를 안는다.",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2024",
-      "citations": 0,
-      "readMinutes": 45,
-      "reason": "NaVILA는 Vision-and-Language Navigation(VLN)을 사족·이족 보행 로봇(legged robot)으로 확장하는 연구다. 기존 VLN 연구는 대부분 바퀴형(wheeled) 로봇 또는 이상화된 포인트 에이전트를 가정하여, 자연언어 지시를 \"forward / turn / stop\"의 이산 행동으로 매핑하는 데 집중했다. 그러나 다리형 로봇은 계단·문턱·좁은 틈·비정형 지형을 통과할 수 있는 잠재력이 있는 대신, 자연언어 지시를 12개 관절의 저수준 토크 명령으로 변환하는 것이라는 새로운 난제를 안는다.",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NaVILA_RSS2025/index.html"
-    },
-    {
-      "id": "2509.21189",
-      "venue": "CoRL 2025",
-      "venueDetail": "CoRL 2025",
-      "matchScore": 96,
-      "category": "VLN",
-      "feedTitle": "ReasonNav: Human-like Navigation in a World Built for Humans",
-      "authorsShort": "G. Wang et al.",
-      "feedAbstract": "VLM의 추론 능력을 활용하여 표지 읽기와 길 묻기 등 인간적 네비게이션 행동을 수행하며, 네비게이션 랜드마크 기반 컴팩트 I/O 추상화로 대규모 환경 효율적 탐색 실현.",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "Human-like Navigation in a World Built for Humans",
-      "titleKO": "Human-like Navigation in a World Built for Humans",
-      "authorsEN": "Gloria X. Wang et al.",
-      "authorsKO": "Gloria X. Wang et al.",
-      "abstractEN": "When navigating in a man-made environment they haven't visited before--like an office building--humans employ behaviors such as reading signs and asking others for directions. These behaviors help humans reach their destinations efficiently by reducing the need to search through large areas. Existing robot navigation systems lack the ability to execute such behaviors and are thus highly inefficient at navigating within large environments. We present ReasonNav, a modular navigation system which integrates these human-like navigation skills by leveraging the reasoning capabilities of a vision-language model (VLM). We design compact input and output abstractions based on navigation landmarks, allowing the VLM to focus on language understanding and reasoning. We evaluate ReasonNav on real and simulated navigation tasks and show that the agent successfully employs higher-order reasoning to navigate efficiently in large, complex buildings.",
-      "abstractKO": "VLM의 추론 능력을 활용하여 표지 읽기와 길 묻기 등 인간적 네비게이션 행동을 수행하며, 네비게이션 랜드마크 기반 컴팩트 I/O 추상화로 대규모 환경 효율적 탐색 실현.",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2025",
-      "citations": 0,
-      "readMinutes": 48,
-      "reason": "VLM의 고차 추론 능력을 활용한 표지 읽기, 길 묻기 등 인간적 네비게이션 행동 구현\n네비게이션 랜드마크 기반 컴팩트 I/O 추상화로 VLM이 언어 이해와 추론에 집중 가능하게 설계\nIsaac Sim 및 실제 네비게이션 작업에서 대규모 복잡 건물 효율적 탐색 검증",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ReasonNav_CoRL2025/index.html"
+      "readMinutes": 44,
+      "reason": "고수준 계획(언어 행동), 중간 수준 인식 그라운딩(시각 행동), 저수준 제어(로봇 행동) 계층적 분해\n서로 다른 규모 MLLM의 구별되는 강점을 각 단계에서 활용하는 모듈식 설계\nVLN-CE 벤치마크에서 SOTA 성능 달성 및 미지 환경에서 우수한 일반화 능력, 실제 배포를 위한 투명성과 효율성 확보",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/LaViRA_ICRA2026/index.html"
     },
     {
       "id": "2507.05240",
