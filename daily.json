@@ -1,145 +1,154 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-19T19:30:04.999Z",
+  "generatedAt": "2026-07-20T19:30:05.418Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 7. 20  월요일",
+    "date": "2026. 7. 21  화요일",
     "title": "오늘의 리뷰",
     "subtitle": "VLN·Planner 새 리뷰 5편 · 전체 92편"
   },
   "papers": [
     {
-      "id": "2512.19629",
+      "id": "2507.05240",
       "venue": "ICRA 2026",
       "venueDetail": "ICRA 2026",
       "matchScore": 96,
       "category": "VLN",
-      "feedTitle": "LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry",
-      "authorsShort": "S. University et al.",
-      "feedAbstract": "메트릭 인식 시각 기하학을 통해 로컬리제이션된 네비게이션 정책으로 구조화되지 않은 환경에서 로봇의 궤적 계획 문제를 해결",
+      "feedTitle": "StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling",
+      "authorsShort": "M. Wei, C. Wan +10",
+      "feedAbstract": "Vision-Language Navigation 에이전트가 연속 비디오 입력에서 온라인 방식으로 동작하도록 설계된 스트리밍 기반 VLM 네비게이션 프레임워크",
       "tags": [
         "#VLN"
       ],
-      "titleEN": "LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry",
-      "titleKO": "LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry",
-      "authorsEN": "Steiner et al. (Tsinghua University, Shanghai AI Laboratory)",
-      "authorsKO": "Steiner et al. (Tsinghua University, Shanghai AI Laboratory)",
-      "abstractEN": "Trajectory planning in unstructured environments is a fundamental and challenging capability for mobile robots. Traditional modular pipelines suffer from latency and cascading errors across perception, localization, mapping, and planning modules. Recent end-to-end learning methods map raw visual observations directly to control signals or trajectories, promising greater performance and efficiency in open-world settings. However, most prior end-to-end approaches still rely on separate localization modules that depend on accurate sensor extrinsic calibration for self-state estimation, thereby limiting generalization across embodiments and environments. We introduce LoGoPlanner, a localization-grounded, end-to-end navigation framework that addresses these limitations by: (1) finetuning a long-horizon visual-geometry backbone to ground predictions with absolute metric scale, thereby providing implicit state estimation for accurate localization; (2) reconstructing surrounding scene geometry from historical observations to supply dense, fine-grained environmental awareness for reliable obstacle avoidance; and (3) conditioning the policy on implicit geometry bootstrapped by the aforementioned auxiliary tasks, thereby reducing error propagation. We evaluate LoGoPlanner in both simulation and real-world settings, where its fully end-to-end design reduces cumulative error while metric-aware geometry memory enhances planning consistency and obstacle avoidance, leading to more than a 27.3\\% improvement over oracle-localization baselines and strong generalization across embodiments and environments. The code and models have been made publicly available on the https://steinate.github.io/logoplanner.github.io.",
-      "abstractKO": "메트릭 인식 시각 기하학을 통해 로컬리제이션된 네비게이션 정책으로 구조화되지 않은 환경에서 로봇의 궤적 계획 문제를 해결",
+      "titleEN": "StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling",
+      "titleKO": "StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling",
+      "authorsEN": "Meng Wei, Chenyang Wan, Xiqian Yu, Tai Wang, Yuqiang Yang, Xiaohan Mao, Chenming Zhu, Wenzhe Cai, Hanqing Wang, Yilun Chen, Xihui Liu, Jiangmiao Pang",
+      "authorsKO": "Meng Wei, Chenyang Wan, Xiqian Yu, Tai Wang, Yuqiang Yang, Xiaohan Mao, Chenming Zhu, Wenzhe Cai, Hanqing Wang, Yilun Chen, Xihui Liu, Jiangmiao Pang",
+      "abstractEN": "Vision-and-Language Navigation (VLN) in real-world settings requires agents to process continuous visual streams and generate actions with low latency grounded in language instructions. While Video-based Large Language Models (Video-LLMs) have driven recent progress, current VLN methods based on Video-LLM often face trade-offs among fine-grained visual understanding, long-term context modeling and computational efficiency. We introduce StreamVLN, a streaming VLN framework that employs a hybrid slow-fast context modeling strategy to support multi-modal reasoning over interleaved vision, language and action inputs. The fast-streaming dialogue context facilitates responsive action generation through a sliding-window of multi-turn dialogues, while the slow-updating memory context compresses historical visual states using a 3D-aware token pruning strategy. With this slow-fast design, StreamVLN achieves real-time dialogues through KV cache reuse, supporting long video streams with bounded context size and inference cost. Experiments on VLN-CE benchmarks show state-of-the-art performance with low latency, ensuring robustness and efficiency in real-world deployment. The project page is: https://streamvln.github.io/.",
+      "abstractKO": "Vision-Language Navigation 에이전트가 연속 비디오 입력에서 온라인 방식으로 동작하도록 설계된 스트리밍 기반 VLM 네비게이션 프레임워크",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2025",
+      "citations": 0,
+      "readMinutes": 44,
+      "reason": "**SlowFast Context Modeling**: 긴 시퀀스의 효율적인 컨텍스트 모델링을 위해 fast-streaming dialogue context (sliding-window KV cache)와 slow-updating memory (token pruning) 도입\n**Video-LLM 기반 E2E 아키텍처**: LLaVA-Video를 기반으로 하는 시각, 언어, 액션의 통합 모델링\n**대규모 데이터**: R2R, RxR, EnvDrop, ScaleVLN 등에서 450K+ 네비게이션 특화 데이터와 DAgger 수집을 통한 오류 교정\n**실제 로봇 배포**: Unitree Go2 로봇에서 실제 환경 배포 가이드 제공\n**멀티스테이지 트레이닝**: Navigation-specific + General multimodal (VQA, image-text) co-training",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/StreamVLN_ICRA2026/index.html"
+    },
+    {
+      "id": "2501.01806",
+      "venue": "RA-L 2025",
+      "matchScore": 87,
+      "category": "Planner",
+      "feedTitle": "TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation",
+      "authorsShort": "D. Lee, I. Nahrendra +3",
+      "feedAbstract": "TRG-planner는 산악·동굴·재난 현장 같은 비정형 지형(unstructured terrain)에서 지상 로봇(특히 사족보행 로봇)이 안전하면서도 거리 효율적인 전역 경로를 실시간으로 계획하는 문제를 다룬다. 핵심 통찰은 \"지형의 횡단성(traversability)을 그래프의 노드 유효성과 방향성 엣지…",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation",
+      "titleKO": "TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation",
+      "authorsEN": "Dongkyu Lee, I Made Aswin Nahrendra, Minho Oh, Byeongho Yu, Hyun Myung",
+      "authorsKO": "Dongkyu Lee, I Made Aswin Nahrendra, Minho Oh, Byeongho Yu, Hyun Myung",
+      "abstractEN": "Unstructured environments such as mountains, caves, construction sites, or disaster areas are challenging for autonomous navigation because of terrain irregularities. In particular, it is crucial to plan a path to avoid risky terrain and reach the goal quickly and safely. In this paper, we propose a method for safe and distance-efficient path planning, leveraging Traversal Risk Graph (TRG), a novel graph representation that takes into account geometric traversability of the terrain. TRG nodes represent stability and reachability of the terrain, while edges represent relative traversal risk-weighted path candidates. Additionally, TRG is constructed in a wavefront propagation manner and managed hierarchically, enabling real-time planning even in large-scale environments. Lastly, we formulate a graph optimization problem on TRG that leads the robot to navigate by prioritizing both safe and short paths. Our approach demonstrated superior safety, distance efficiency, and fast processing time compared to the conventional methods. It was also validated in several real-world experiments using a quadrupedal robot. Notably, TRG-planner contributed as the global path planner of an autonomous navigation framework for the DreamSTEP team, which won the Quadruped Robot Challenge at ICRA 2023. The project page is available at https://trg-planner.github.io .",
+      "abstractKO": "TRG-planner는 산악·동굴·재난 현장 같은 비정형 지형(unstructured terrain)에서 지상 로봇(특히 사족보행 로봇)이 안전하면서도 거리 효율적인 전역 경로를 실시간으로 계획하는 문제를 다룬다. 핵심 통찰은 \"지형의 횡단성(traversability)을 그래프의 노드 유효성과 방향성 엣지 위험도(directional edge traversal risk) 로 동시에 인코딩한다\"는 것이다.",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2025",
+      "citations": 0,
+      "readMinutes": 49,
+      "reason": "TRG-planner는 산악·동굴·재난 현장 같은 비정형 지형(unstructured terrain)에서 지상 로봇(특히 사족보행 로봇)이 안전하면서도 거리 효율적인 전역 경로를 실시간으로 계획하는 문제를 다룬다. 핵심 통찰은 \"지형의 횡단성(traversability)을 그래프의 노드 유효성과 방향성 엣지 위험도(directional edge traversal risk) 로 동시에 인코딩한다\"는 것이다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TRG-Planner_RAL2025/index.html"
+    },
+    {
+      "id": "2502.01536",
+      "venue": "RA-L 2025",
+      "venueDetail": "RA-L 2025",
+      "matchScore": 96,
+      "category": "VLN",
+      "feedTitle": "VR-Robo: Real-to-Sim-to-Real Framework for Visual Robot Navigation",
+      "authorsShort": "S. Zhu et al.",
+      "feedAbstract": "3D Gaussian Splatting 기반 장면 재구성으로 포토리얼리스틱 디지털 트윈 시뮬레이션을 생성하고, 에고센트릭 시각 인식을 지원하는 RL 정책 학습으로 RGB만 사용한 sim-to-real 정책 전이 실현.",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "Real-to-Sim-to-Real Framework for Visual Robot Navigation and Locomotion",
+      "titleKO": "Real-to-Sim-to-Real Framework for Visual Robot Navigation and Locomotion",
+      "authorsEN": "Shaoting Zhu et al.",
+      "authorsKO": "Shaoting Zhu et al.",
+      "abstractEN": "Recent success in legged robot locomotion is attributed to the integration of reinforcement learning and physical simulators. However, these policies often encounter challenges when deployed in real-world environments due to sim-to-real gaps, as simulators typically fail to replicate visual realism and complex real-world geometry. Moreover, the lack of realistic visual rendering limits the ability of these policies to support high-level tasks requiring RGB-based perception like ego-centric navigation. This paper presents a Real-to-Sim-to-Real framework that generates photorealistic and physically interactive \"digital twin\" simulation environments for visual navigation and locomotion learning. Our approach leverages 3D Gaussian Splatting (3DGS) based scene reconstruction from multi-view images and integrates these environments into simulations that support ego-centric visual perception and mesh-based physical interactions. To demonstrate its effectiveness, we train a reinforcement learning policy within the simulator to perform a visual goal-tracking task. Extensive experiments show that our framework achieves RGB-only sim-to-real policy transfer. Additionally, our framework facilitates the rapid adaptation of robot policies with effective exploration capability in complex new environments, highlighting its potential for applications in households and factories.",
+      "abstractKO": "3D Gaussian Splatting 기반 장면 재구성으로 포토리얼리스틱 디지털 트윈 시뮬레이션을 생성하고, 에고센트릭 시각 인식을 지원하는 RL 정책 학습으로 RGB만 사용한 sim-to-real 정책 전이 실현.",
       "detailTags": [
         "#VLN"
       ],
       "year": "2025",
       "citations": 0,
       "readMinutes": 42,
-      "reason": "**Localization-Free Approach**: 기존의 자세한 로컬리제이션 정보 불필요\n**Metric-aware Visual Geometry**: 시각 정보에서 메트릭 기하학 정보 추출\n**End-to-End Navigation Policy**: 모듈식 파이프라인의 지연시간과 오류 누적 문제 해결\n**Unstructured Environment Support**: 일반적인 환경에서 높은 성능\n**Self-contained Distillation**: 이전 작업(NavDP)의 자체 포함된 증류",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/LoGoPlanner_ICRA2026/index.html"
+      "reason": "3D Gaussian Splatting 기반 다시점 이미지 장면 재구성으로 포토리얼리스틱 물리 상호작용 시뮬레이션 생성\n에고센트릭 시각 인식과 메시 기반 물리 상호작용을 지원하는 통합 시뮬레이션 환경 구축\nRGB만 사용한 정책 전이와 새 환경에서의 신속한 정책 적응 능력 실증",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/VR-Robo_RAL2025/index.html"
     },
     {
-      "id": "2605.00397",
-      "venue": "arXiv 2026",
-      "matchScore": 84,
-      "category": "VLN",
-      "feedTitle": "MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation",
-      "authorsShort": "A. Al-Bustami, J. Kwon",
-      "feedAbstract": "언어 조건부 객체 접근(LCOA), 연속 행동 레이블, 5분할 OOD 평가, 4개 실내 씬, 1174 에피소드, HuggingFace 공개",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation",
-      "titleKO": "MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation",
-      "authorsEN": "Ali Al-Bustami, Jaerock Kwon",
-      "authorsKO": "Ali Al-Bustami, Jaerock Kwon",
-      "abstractEN": "We present MiniVLA-Nav v1, a simulation dataset for Language-Conditioned Object Approach (LCOA) navigation: given a short natural-language instruction, an NVIDIA Nova Carter differential-drive robot must navigate to the named object and stop within 1 m across four photorealistic Isaac Sim environments (Office, Hospital, Full Warehouse, and Warehouse with Multiple Shelves). Each of the 1,174 episodes pairs an instruction with synchronized 640x640 RGB images, metric depth maps (float32, metres), and instance segmentation masks, together with continuous (v,omega) and 7x7 tokenized expert action labels recorded at 60 Hz from a vision-based proportional controller. Trajectory diversity is ensured through three spawn-distance tiers (near: 1.5-3.5 m, mid: 3.5-7.0 m, far: global curated points; Pearson r=0.94 between spawn distance and trajectory length), 12 object categories, 18 training templates, and 12 paraphrase-OOD templates. Five evaluation splits support in-distribution accuracy, template-paraphrase robustness, and OOD object-category benchmarking. The dataset is publicly available at https://huggingface.co/datasets/alibustami/miniVLA-Nav",
-      "abstractKO": "언어 조건부 객체 접근(LCOA), 연속 행동 레이블, 5분할 OOD 평가, 4개 실내 씬, 1174 에피소드, HuggingFace 공개",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 50,
-      "reason": "언어 조건부 객체 접근(LCOA), 연속 행동 레이블, 5분할 OOD 평가, 4개 실내 씬, 1174 에피소드, HuggingFace 공개",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/MiniVLANav_arxiv2026/index.html"
-    },
-    {
-      "id": "2505.08712",
-      "venue": "ICRA 2026",
-      "venueDetail": "ICRA 2026",
+      "id": "2503.02247",
+      "venue": "IROS 2025",
+      "venueDetail": "IROS 2025 (Oral)",
       "matchScore": 96,
       "category": "VLN",
-      "feedTitle": "NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance",
-      "authorsShort": "저. group, S. Lab)",
-      "feedAbstract": "Diffusion 기반 궤적 생성과 critic 함수를 결합한 E2E 네비게이션 정책으로 시뮬레이션에서 학습하여 다양한 로봇 플랫폼으로 zero-shot 전이 가능",
+      "feedTitle": "WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation",
+      "authorsShort": "D. Nie, X. Guo +3",
+      "feedAbstract": "VLM을 기반으로 세계 모델을 구축하여 객체 탐색 네비게이션을 수행하는 프레임워크로, 할루시네이션을 줄이고 탐색 효율성을 높임.",
       "tags": [
         "#VLN"
       ],
-      "titleEN": "NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance",
-      "titleKO": "NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance",
-      "authorsEN": "저자 정보 (Wenzhe Cai group, Shanghai AI Lab)",
-      "authorsKO": "저자 정보 (Wenzhe Cai group, Shanghai AI Lab)",
-      "abstractEN": "Learning to navigate in dynamic and complex open-world environments is a critical yet challenging capability for autonomous robots. Existing approaches often rely on cascaded modular frameworks, which require extensive hyperparameter tuning or learning from limited real-world demonstration data. In this paper, we propose Navigation Diffusion Policy (NavDP), an end-to-end network trained solely in simulation that enables zero-shot sim-to-real transfer across diverse environments and robot embodiments. The core of NavDP is a unified transformer-based architecture that jointly learns trajectory generation and trajectory evaluation, both conditioned solely on local RGB-D observation. By learning to predict critic values for contrastive trajectory samples, our proposed approach effectively leverages supervision from privileged information available in simulation, thereby fostering accurate spatial understanding and enabling the distinction between safe and dangerous behaviors. To support this, we develop an efficient data generation pipeline in simulation and construct a large-scale dataset encompassing over one million meters of navigation experience across 3,000 scenes. Empirical experiments in both simulated and real-world environments demonstrate that NavDP significantly outperforms prior state-of-the-art methods. Furthermore, we identify key factors influencing the generalization performance of NavDP. The dataset and code are publicly available at https://wzcai99.github.io/navigation-diffusion-policy.github.io.",
-      "abstractKO": "Diffusion 기반 궤적 생성과 critic 함수를 결합한 E2E 네비게이션 정책으로 시뮬레이션에서 학습하여 다양한 로봇 플랫폼으로 zero-shot 전이 가능",
+      "titleEN": "WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation",
+      "titleKO": "WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation",
+      "authorsEN": "Dujun Nie, Xianda Guo, Yiqun Duan, Ruijun Zhang, Long Chen",
+      "authorsKO": "Dujun Nie, Xianda Guo, Yiqun Duan, Ruijun Zhang, Long Chen",
+      "abstractEN": "Object Goal Navigation-requiring an agent to locate a specific object in an unseen environment-remains a core challenge in embodied AI. Although recent progress in Vision-Language Model (VLM)-based agents has demonstrated promising perception and decision-making abilities through prompting, none has yet established a fully modular world model design that reduces risky and costly interactions with the environment by predicting the future state of the world. We introduce WMNav, a novel World Model-based Navigation framework powered by Vision-Language Models (VLMs). It predicts possible outcomes of decisions and builds memories to provide feedback to the policy module. To retain the predicted state of the environment, WMNav proposes the online maintained Curiosity Value Map as part of the world model memory to provide dynamic configuration for navigation policy. By decomposing according to a human-like thinking process, WMNav effectively alleviates the impact of model hallucination by making decisions based on the feedback difference between the world model plan and observation. To further boost efficiency, we implement a two-stage action proposer strategy: broad exploration followed by precise localization. Extensive evaluation on HM3D and MP3D validates WMNav surpasses existing zero-shot benchmarks in both success rate and exploration efficiency (absolute improvement: +3.2% SR and +3.2% SPL on HM3D, +13.5% SR and +1.1% SPL on MP3D). Project page: https://b0b8k1ng.github.io/WMNav/.",
+      "abstractKO": "VLM을 기반으로 세계 모델을 구축하여 객체 탐색 네비게이션을 수행하는 프레임워크로, 할루시네이션을 줄이고 탐색 효율성을 높임.",
       "detailTags": [
         "#VLN"
       ],
       "year": "2025",
       "citations": 0,
       "readMinutes": 43,
-      "reason": "**Diffusion-based Trajectory Generation**: 조건부 diffusion 모델을 통한 궤적 생성\n**Critic Function for Selection**: 생성된 궤적을 평가하고 선택하는 critic 네트워크\n**Local Observations Only**: 정확한 로컬리제이션과 맵핑 불필요 (local observation 기반만 사용)\n**Sim-to-Real Transfer**: 시뮬레이션에서만 학습하여 실제 로봇으로 zero-shot 전이 가능\n**다양한 로봇 체형 지원**: 서로 다른 embodiments에 대응",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NavDP_ICRA2026/index.html"
+      "reason": "VLM 기반 세계 모델 설계로 환경의 미래 상태 예측 및 메모리 구축\nCuriosity Value Map을 통한 동적 네비게이션 정책 설정\n인간과 유사한 사고 프로세스 분해로 모델 할루시네이션 감소\n2단계 행동 제안 전략: 광범위 탐색 → 정밀 위치 파악\nHM3D와 MP3D에서 기존 zero-shot 방식 대비 성능 향상 (+3.2% SR/SPL on HM3D, +13.5% SR on MP3D)",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/WMNav_IROS2025/index.html"
     },
     {
-      "id": "2412.04453",
-      "venue": "RSS 2025",
+      "id": "2604.16388",
+      "venue": "CVPR 2026",
+      "venueDetail": "IEEE/CVF CVPR 2026 — 채택 확정(탑티어)",
       "matchScore": 96,
-      "category": "VLN",
-      "feedTitle": "NaVILA: Legged Robot Vision-Language-Action Model for Navigation",
-      "authorsShort": "A. Cheng, Y. Ji +8",
-      "feedAbstract": "NaVILA는 Vision-and-Language Navigation(VLN)을 사족·이족 보행 로봇(legged robot)으로 확장하는 연구다. 기존 VLN 연구는 대부분 바퀴형(wheeled) 로봇 또는 이상화된 포인트 에이전트를 가정하여, 자연언어 지시를 \"forward / turn / stop\"의 이산 행동으로…",
+      "category": "Planner",
+      "feedTitle": "Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering",
+      "authorsShort": "S. Lee, J. Lee +4",
+      "feedAbstract": "목표를 명시적 구성(q_goal)이 아니라 이미지(I_goal) 로 주는 새로운 모션 플래닝 문제를 정의·해결. 로봇을 미분 가능 3D Gaussian Splatting으로 렌더링해 렌더링 손실 `‖I(q)−I_goal‖`의 구성공간 그래디언트(활용)와 RRT 무작위 스티어링(탐색)을 한 트리에서 융합. 프론티어 절단…",
       "tags": [
-        "#VLN"
+        "#Planner",
+        "#RRT계열",
+        "#미분가능렌더링",
+        "#실제로봇실험",
+        "#탑티어학회채택"
       ],
-      "titleEN": "NaVILA: Legged Robot Vision-Language-Action Model for Navigation",
-      "titleKO": "NaVILA: Legged Robot Vision-Language-Action Model for Navigation",
-      "authorsEN": "An-Chieh Cheng, Yandong Ji, Zhaojing Yang, Zaitian Gongye, Xueyan Zou, Jan Kautz, Erdem Bıyık, Hongxu Yin, Sifei Liu, Xiaolong Wang",
-      "authorsKO": "An-Chieh Cheng, Yandong Ji, Zhaojing Yang, Zaitian Gongye, Xueyan Zou, Jan Kautz, Erdem Bıyık, Hongxu Yin, Sifei Liu, Xiaolong Wang",
-      "abstractEN": "This paper proposes to solve the problem of Vision-and-Language Navigation with legged robots, which not only provides a flexible way for humans to command but also allows the robot to navigate through more challenging and cluttered scenes. However, it is non-trivial to translate human language instructions all the way to low-level leg joint actions. We propose NaVILA, a 2-level framework that unifies a Vision-Language-Action model (VLA) with locomotion skills. Instead of directly predicting low-level actions from VLA, NaVILA first generates mid-level actions with spatial information in the form of language, (e.g., \"moving forward 75cm\"), which serves as an input for a visual locomotion RL policy for execution. NaVILA substantially improves previous approaches on existing benchmarks. The same advantages are demonstrated in our newly developed benchmarks with IsaacLab, featuring more realistic scenes, low-level controls, and real-world robot experiments. We show more results at https://navila-bot.github.io/",
-      "abstractKO": "NaVILA는 Vision-and-Language Navigation(VLN)을 사족·이족 보행 로봇(legged robot)으로 확장하는 연구다. 기존 VLN 연구는 대부분 바퀴형(wheeled) 로봇 또는 이상화된 포인트 에이전트를 가정하여, 자연언어 지시를 \"forward / turn / stop\"의 이산 행동으로 매핑하는 데 집중했다. 그러나 다리형 로봇은 계단·문턱·좁은 틈·비정형 지형을 통과할 수 있는 잠재력이 있는 대신, 자연언어 지시를 12개 관절의 저수준 토크 명령으로 변환하는 것이라는 새로운 난제를 안는다.",
+      "titleEN": "Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering",
+      "titleKO": "Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering",
+      "authorsEN": "Sebin Lee, Jumin Lee, Taeyeon Kim, Youngju Na, Woobin Im, Sungeui Yoon",
+      "authorsKO": "Sebin Lee, Jumin Lee, Taeyeon Kim, Youngju Na, Woobin Im, Sungeui Yoon",
+      "abstractEN": "Rapidly-exploring random trees (RRTs) have been widely adopted for robot motion planning due to their robustness and theoretical guarantees. However, existing RRT-based planners require explicit goal configurations specified as numerical joint angles, while many practical applications provide goal specifications through visual observations such as images or demonstration videos where precise goal configurations are unavailable. In this paper, we propose visual-RRT (vRRT), a motion planner that enables visual-goal planning by unifying gradient-based exploitation from differentiable robot rendering with sampling-based exploration from RRTs. We further introduce (i) a frontier-based exploration-exploitation strategy that adaptively prioritizes visually promising search regions, and (ii) inertial gradient tree expansion that inherits optimization states across tree branches for momentum-consistent gradient exploitation. Extensive experiments across various robot manipulators including Franka, UR5e, and Fetch demonstrate that vRRT achieves effective visual-goal planning in both simulated and real-world settings, bridging the gap between sampling-based planning and vision-centric robot applications. Our code is available at https://sgvr.kaist.ac.kr/Visual-RRT.",
+      "abstractKO": "목표를 명시적 구성(q_goal)이 아니라 이미지(I_goal) 로 주는 새로운 모션 플래닝 문제를 정의·해결. 로봇을 미분 가능 3D Gaussian Splatting으로 렌더링해 렌더링 손실 `‖I(q)−I_goal‖`의 구성공간 그래디언트(활용)와 RRT 무작위 스티어링(탐색)을 한 트리에서 융합. 프론티어 절단 기하 분포 노드 선택 + 관성 그래디언트 트리 확장(노드가 부모 Adam 모멘트 상속)으로 그래디언트 단독의 지역 최소점과 샘플링 단독의 무방향성을 상호 보완. 성공률 약 3배(먼 목표 2%→41%), 실로봇 Fetch 80%.",
       "detailTags": [
-        "#VLN"
+        "#Planner",
+        "#RRT계열",
+        "#미분가능렌더링",
+        "#실제로봇실험",
+        "#탑티어학회채택"
       ],
-      "year": "2024",
+      "year": "2026",
       "citations": 0,
-      "readMinutes": 45,
-      "reason": "NaVILA는 Vision-and-Language Navigation(VLN)을 사족·이족 보행 로봇(legged robot)으로 확장하는 연구다. 기존 VLN 연구는 대부분 바퀴형(wheeled) 로봇 또는 이상화된 포인트 에이전트를 가정하여, 자연언어 지시를 \"forward / turn / stop\"의 이산 행동으로 매핑하는 데 집중했다. 그러나 다리형 로봇은 계단·문턱·좁은 틈·비정형 지형을 통과할 수 있는 잠재력이 있는 대신, 자연언어 지시를 12개 관절의 저수준 토크 명령으로 변환하는 것이라는 새로운 난제를 안는다.",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NaVILA_RSS2025/index.html"
-    },
-    {
-      "id": "2509.21189",
-      "venue": "CoRL 2025",
-      "venueDetail": "CoRL 2025",
-      "matchScore": 96,
-      "category": "VLN",
-      "feedTitle": "ReasonNav: Human-like Navigation in a World Built for Humans",
-      "authorsShort": "G. Wang et al.",
-      "feedAbstract": "VLM의 추론 능력을 활용하여 표지 읽기와 길 묻기 등 인간적 네비게이션 행동을 수행하며, 네비게이션 랜드마크 기반 컴팩트 I/O 추상화로 대규모 환경 효율적 탐색 실현.",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "Human-like Navigation in a World Built for Humans",
-      "titleKO": "Human-like Navigation in a World Built for Humans",
-      "authorsEN": "Gloria X. Wang et al.",
-      "authorsKO": "Gloria X. Wang et al.",
-      "abstractEN": "When navigating in a man-made environment they haven't visited before--like an office building--humans employ behaviors such as reading signs and asking others for directions. These behaviors help humans reach their destinations efficiently by reducing the need to search through large areas. Existing robot navigation systems lack the ability to execute such behaviors and are thus highly inefficient at navigating within large environments. We present ReasonNav, a modular navigation system which integrates these human-like navigation skills by leveraging the reasoning capabilities of a vision-language model (VLM). We design compact input and output abstractions based on navigation landmarks, allowing the VLM to focus on language understanding and reasoning. We evaluate ReasonNav on real and simulated navigation tasks and show that the agent successfully employs higher-order reasoning to navigate efficiently in large, complex buildings.",
-      "abstractKO": "VLM의 추론 능력을 활용하여 표지 읽기와 길 묻기 등 인간적 네비게이션 행동을 수행하며, 네비게이션 랜드마크 기반 컴팩트 I/O 추상화로 대규모 환경 효율적 탐색 실현.",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2025",
-      "citations": 0,
-      "readMinutes": 48,
-      "reason": "VLM의 고차 추론 능력을 활용한 표지 읽기, 길 묻기 등 인간적 네비게이션 행동 구현\n네비게이션 랜드마크 기반 컴팩트 I/O 추상화로 VLM이 언어 이해와 추론에 집중 가능하게 설계\nIsaac Sim 및 실제 네비게이션 작업에서 대규모 복잡 건물 효율적 탐색 검증",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ReasonNav_CoRL2025/index.html"
+      "readMinutes": 38,
+      "reason": "**Visual-Goal Path Planning 정식화**: 정확한 목표 구성 없이 이미지/데모/생성이미지로 비충돌 경로 탐색\n**미분 가능 렌더링 × 샘플링 융합**: 3DGS 로봇 렌더 그래디언트(활용) + RRT 탐색\n**관성 그래디언트 트리**: m=β₁m_p+(1−β₁)∇ℒ, v=β₂v_p+(1−β₂)∇ℒ², q_new=q_p−α·m̂/(√v̂+δ), β₁=β₂=0.9\n**프론티어 노드 선택**: p_frontier(k)=(1−κ)κ^k/(1−κ^M), 손실 랭킹 편향\n**인식+플래닝 통합**: 자세 추정도 부산물로 SOTA(실 이미지 0.083 rad)",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/VisualRRT_CVPR2026/index.html"
     }
   ],
   "archive": [
@@ -450,146 +459,137 @@
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/LaViRA_ICRA2026/index.html"
     },
     {
-      "id": "2507.05240",
+      "id": "2512.19629",
       "venue": "ICRA 2026",
       "venueDetail": "ICRA 2026",
       "matchScore": 96,
       "category": "VLN",
-      "feedTitle": "StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling",
-      "authorsShort": "M. Wei, C. Wan +10",
-      "feedAbstract": "Vision-Language Navigation 에이전트가 연속 비디오 입력에서 온라인 방식으로 동작하도록 설계된 스트리밍 기반 VLM 네비게이션 프레임워크",
+      "feedTitle": "LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry",
+      "authorsShort": "S. University et al.",
+      "feedAbstract": "메트릭 인식 시각 기하학을 통해 로컬리제이션된 네비게이션 정책으로 구조화되지 않은 환경에서 로봇의 궤적 계획 문제를 해결",
       "tags": [
         "#VLN"
       ],
-      "titleEN": "StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling",
-      "titleKO": "StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling",
-      "authorsEN": "Meng Wei, Chenyang Wan, Xiqian Yu, Tai Wang, Yuqiang Yang, Xiaohan Mao, Chenming Zhu, Wenzhe Cai, Hanqing Wang, Yilun Chen, Xihui Liu, Jiangmiao Pang",
-      "authorsKO": "Meng Wei, Chenyang Wan, Xiqian Yu, Tai Wang, Yuqiang Yang, Xiaohan Mao, Chenming Zhu, Wenzhe Cai, Hanqing Wang, Yilun Chen, Xihui Liu, Jiangmiao Pang",
-      "abstractEN": "Vision-and-Language Navigation (VLN) in real-world settings requires agents to process continuous visual streams and generate actions with low latency grounded in language instructions. While Video-based Large Language Models (Video-LLMs) have driven recent progress, current VLN methods based on Video-LLM often face trade-offs among fine-grained visual understanding, long-term context modeling and computational efficiency. We introduce StreamVLN, a streaming VLN framework that employs a hybrid slow-fast context modeling strategy to support multi-modal reasoning over interleaved vision, language and action inputs. The fast-streaming dialogue context facilitates responsive action generation through a sliding-window of multi-turn dialogues, while the slow-updating memory context compresses historical visual states using a 3D-aware token pruning strategy. With this slow-fast design, StreamVLN achieves real-time dialogues through KV cache reuse, supporting long video streams with bounded context size and inference cost. Experiments on VLN-CE benchmarks show state-of-the-art performance with low latency, ensuring robustness and efficiency in real-world deployment. The project page is: https://streamvln.github.io/.",
-      "abstractKO": "Vision-Language Navigation 에이전트가 연속 비디오 입력에서 온라인 방식으로 동작하도록 설계된 스트리밍 기반 VLM 네비게이션 프레임워크",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2025",
-      "citations": 0,
-      "readMinutes": 44,
-      "reason": "**SlowFast Context Modeling**: 긴 시퀀스의 효율적인 컨텍스트 모델링을 위해 fast-streaming dialogue context (sliding-window KV cache)와 slow-updating memory (token pruning) 도입\n**Video-LLM 기반 E2E 아키텍처**: LLaVA-Video를 기반으로 하는 시각, 언어, 액션의 통합 모델링\n**대규모 데이터**: R2R, RxR, EnvDrop, ScaleVLN 등에서 450K+ 네비게이션 특화 데이터와 DAgger 수집을 통한 오류 교정\n**실제 로봇 배포**: Unitree Go2 로봇에서 실제 환경 배포 가이드 제공\n**멀티스테이지 트레이닝**: Navigation-specific + General multimodal (VQA, image-text) co-training",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/StreamVLN_ICRA2026/index.html"
-    },
-    {
-      "id": "2501.01806",
-      "venue": "RA-L 2025",
-      "matchScore": 87,
-      "category": "Planner",
-      "feedTitle": "TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation",
-      "authorsShort": "D. Lee, I. Nahrendra +3",
-      "feedAbstract": "TRG-planner는 산악·동굴·재난 현장 같은 비정형 지형(unstructured terrain)에서 지상 로봇(특히 사족보행 로봇)이 안전하면서도 거리 효율적인 전역 경로를 실시간으로 계획하는 문제를 다룬다. 핵심 통찰은 \"지형의 횡단성(traversability)을 그래프의 노드 유효성과 방향성 엣지…",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation",
-      "titleKO": "TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation",
-      "authorsEN": "Dongkyu Lee, I Made Aswin Nahrendra, Minho Oh, Byeongho Yu, Hyun Myung",
-      "authorsKO": "Dongkyu Lee, I Made Aswin Nahrendra, Minho Oh, Byeongho Yu, Hyun Myung",
-      "abstractEN": "Unstructured environments such as mountains, caves, construction sites, or disaster areas are challenging for autonomous navigation because of terrain irregularities. In particular, it is crucial to plan a path to avoid risky terrain and reach the goal quickly and safely. In this paper, we propose a method for safe and distance-efficient path planning, leveraging Traversal Risk Graph (TRG), a novel graph representation that takes into account geometric traversability of the terrain. TRG nodes represent stability and reachability of the terrain, while edges represent relative traversal risk-weighted path candidates. Additionally, TRG is constructed in a wavefront propagation manner and managed hierarchically, enabling real-time planning even in large-scale environments. Lastly, we formulate a graph optimization problem on TRG that leads the robot to navigate by prioritizing both safe and short paths. Our approach demonstrated superior safety, distance efficiency, and fast processing time compared to the conventional methods. It was also validated in several real-world experiments using a quadrupedal robot. Notably, TRG-planner contributed as the global path planner of an autonomous navigation framework for the DreamSTEP team, which won the Quadruped Robot Challenge at ICRA 2023. The project page is available at https://trg-planner.github.io .",
-      "abstractKO": "TRG-planner는 산악·동굴·재난 현장 같은 비정형 지형(unstructured terrain)에서 지상 로봇(특히 사족보행 로봇)이 안전하면서도 거리 효율적인 전역 경로를 실시간으로 계획하는 문제를 다룬다. 핵심 통찰은 \"지형의 횡단성(traversability)을 그래프의 노드 유효성과 방향성 엣지 위험도(directional edge traversal risk) 로 동시에 인코딩한다\"는 것이다.",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2025",
-      "citations": 0,
-      "readMinutes": 49,
-      "reason": "TRG-planner는 산악·동굴·재난 현장 같은 비정형 지형(unstructured terrain)에서 지상 로봇(특히 사족보행 로봇)이 안전하면서도 거리 효율적인 전역 경로를 실시간으로 계획하는 문제를 다룬다. 핵심 통찰은 \"지형의 횡단성(traversability)을 그래프의 노드 유효성과 방향성 엣지 위험도(directional edge traversal risk) 로 동시에 인코딩한다\"는 것이다.",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TRG-Planner_RAL2025/index.html"
-    },
-    {
-      "id": "2502.01536",
-      "venue": "RA-L 2025",
-      "venueDetail": "RA-L 2025",
-      "matchScore": 96,
-      "category": "VLN",
-      "feedTitle": "VR-Robo: Real-to-Sim-to-Real Framework for Visual Robot Navigation",
-      "authorsShort": "S. Zhu et al.",
-      "feedAbstract": "3D Gaussian Splatting 기반 장면 재구성으로 포토리얼리스틱 디지털 트윈 시뮬레이션을 생성하고, 에고센트릭 시각 인식을 지원하는 RL 정책 학습으로 RGB만 사용한 sim-to-real 정책 전이 실현.",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "Real-to-Sim-to-Real Framework for Visual Robot Navigation and Locomotion",
-      "titleKO": "Real-to-Sim-to-Real Framework for Visual Robot Navigation and Locomotion",
-      "authorsEN": "Shaoting Zhu et al.",
-      "authorsKO": "Shaoting Zhu et al.",
-      "abstractEN": "Recent success in legged robot locomotion is attributed to the integration of reinforcement learning and physical simulators. However, these policies often encounter challenges when deployed in real-world environments due to sim-to-real gaps, as simulators typically fail to replicate visual realism and complex real-world geometry. Moreover, the lack of realistic visual rendering limits the ability of these policies to support high-level tasks requiring RGB-based perception like ego-centric navigation. This paper presents a Real-to-Sim-to-Real framework that generates photorealistic and physically interactive \"digital twin\" simulation environments for visual navigation and locomotion learning. Our approach leverages 3D Gaussian Splatting (3DGS) based scene reconstruction from multi-view images and integrates these environments into simulations that support ego-centric visual perception and mesh-based physical interactions. To demonstrate its effectiveness, we train a reinforcement learning policy within the simulator to perform a visual goal-tracking task. Extensive experiments show that our framework achieves RGB-only sim-to-real policy transfer. Additionally, our framework facilitates the rapid adaptation of robot policies with effective exploration capability in complex new environments, highlighting its potential for applications in households and factories.",
-      "abstractKO": "3D Gaussian Splatting 기반 장면 재구성으로 포토리얼리스틱 디지털 트윈 시뮬레이션을 생성하고, 에고센트릭 시각 인식을 지원하는 RL 정책 학습으로 RGB만 사용한 sim-to-real 정책 전이 실현.",
+      "titleEN": "LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry",
+      "titleKO": "LoGoPlanner: Localization Grounded Navigation Policy with Metric-aware Visual Geometry",
+      "authorsEN": "Steiner et al. (Tsinghua University, Shanghai AI Laboratory)",
+      "authorsKO": "Steiner et al. (Tsinghua University, Shanghai AI Laboratory)",
+      "abstractEN": "Trajectory planning in unstructured environments is a fundamental and challenging capability for mobile robots. Traditional modular pipelines suffer from latency and cascading errors across perception, localization, mapping, and planning modules. Recent end-to-end learning methods map raw visual observations directly to control signals or trajectories, promising greater performance and efficiency in open-world settings. However, most prior end-to-end approaches still rely on separate localization modules that depend on accurate sensor extrinsic calibration for self-state estimation, thereby limiting generalization across embodiments and environments. We introduce LoGoPlanner, a localization-grounded, end-to-end navigation framework that addresses these limitations by: (1) finetuning a long-horizon visual-geometry backbone to ground predictions with absolute metric scale, thereby providing implicit state estimation for accurate localization; (2) reconstructing surrounding scene geometry from historical observations to supply dense, fine-grained environmental awareness for reliable obstacle avoidance; and (3) conditioning the policy on implicit geometry bootstrapped by the aforementioned auxiliary tasks, thereby reducing error propagation. We evaluate LoGoPlanner in both simulation and real-world settings, where its fully end-to-end design reduces cumulative error while metric-aware geometry memory enhances planning consistency and obstacle avoidance, leading to more than a 27.3\\% improvement over oracle-localization baselines and strong generalization across embodiments and environments. The code and models have been made publicly available on the https://steinate.github.io/logoplanner.github.io.",
+      "abstractKO": "메트릭 인식 시각 기하학을 통해 로컬리제이션된 네비게이션 정책으로 구조화되지 않은 환경에서 로봇의 궤적 계획 문제를 해결",
       "detailTags": [
         "#VLN"
       ],
       "year": "2025",
       "citations": 0,
       "readMinutes": 42,
-      "reason": "3D Gaussian Splatting 기반 다시점 이미지 장면 재구성으로 포토리얼리스틱 물리 상호작용 시뮬레이션 생성\n에고센트릭 시각 인식과 메시 기반 물리 상호작용을 지원하는 통합 시뮬레이션 환경 구축\nRGB만 사용한 정책 전이와 새 환경에서의 신속한 정책 적응 능력 실증",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/VR-Robo_RAL2025/index.html"
+      "reason": "**Localization-Free Approach**: 기존의 자세한 로컬리제이션 정보 불필요\n**Metric-aware Visual Geometry**: 시각 정보에서 메트릭 기하학 정보 추출\n**End-to-End Navigation Policy**: 모듈식 파이프라인의 지연시간과 오류 누적 문제 해결\n**Unstructured Environment Support**: 일반적인 환경에서 높은 성능\n**Self-contained Distillation**: 이전 작업(NavDP)의 자체 포함된 증류",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/LoGoPlanner_ICRA2026/index.html"
     },
     {
-      "id": "2503.02247",
-      "venue": "IROS 2025",
-      "venueDetail": "IROS 2025 (Oral)",
-      "matchScore": 96,
+      "id": "2605.00397",
+      "venue": "arXiv 2026",
+      "matchScore": 84,
       "category": "VLN",
-      "feedTitle": "WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation",
-      "authorsShort": "D. Nie, X. Guo +3",
-      "feedAbstract": "VLM을 기반으로 세계 모델을 구축하여 객체 탐색 네비게이션을 수행하는 프레임워크로, 할루시네이션을 줄이고 탐색 효율성을 높임.",
+      "feedTitle": "MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation",
+      "authorsShort": "A. Al-Bustami, J. Kwon",
+      "feedAbstract": "언어 조건부 객체 접근(LCOA), 연속 행동 레이블, 5분할 OOD 평가, 4개 실내 씬, 1174 에피소드, HuggingFace 공개",
       "tags": [
         "#VLN"
       ],
-      "titleEN": "WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation",
-      "titleKO": "WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation",
-      "authorsEN": "Dujun Nie, Xianda Guo, Yiqun Duan, Ruijun Zhang, Long Chen",
-      "authorsKO": "Dujun Nie, Xianda Guo, Yiqun Duan, Ruijun Zhang, Long Chen",
-      "abstractEN": "Object Goal Navigation-requiring an agent to locate a specific object in an unseen environment-remains a core challenge in embodied AI. Although recent progress in Vision-Language Model (VLM)-based agents has demonstrated promising perception and decision-making abilities through prompting, none has yet established a fully modular world model design that reduces risky and costly interactions with the environment by predicting the future state of the world. We introduce WMNav, a novel World Model-based Navigation framework powered by Vision-Language Models (VLMs). It predicts possible outcomes of decisions and builds memories to provide feedback to the policy module. To retain the predicted state of the environment, WMNav proposes the online maintained Curiosity Value Map as part of the world model memory to provide dynamic configuration for navigation policy. By decomposing according to a human-like thinking process, WMNav effectively alleviates the impact of model hallucination by making decisions based on the feedback difference between the world model plan and observation. To further boost efficiency, we implement a two-stage action proposer strategy: broad exploration followed by precise localization. Extensive evaluation on HM3D and MP3D validates WMNav surpasses existing zero-shot benchmarks in both success rate and exploration efficiency (absolute improvement: +3.2% SR and +3.2% SPL on HM3D, +13.5% SR and +1.1% SPL on MP3D). Project page: https://b0b8k1ng.github.io/WMNav/.",
-      "abstractKO": "VLM을 기반으로 세계 모델을 구축하여 객체 탐색 네비게이션을 수행하는 프레임워크로, 할루시네이션을 줄이고 탐색 효율성을 높임.",
+      "titleEN": "MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation",
+      "titleKO": "MiniVLA-Nav v1: A Multi-Scene Simulation Dataset for Language-Conditioned Robot Navigation",
+      "authorsEN": "Ali Al-Bustami, Jaerock Kwon",
+      "authorsKO": "Ali Al-Bustami, Jaerock Kwon",
+      "abstractEN": "We present MiniVLA-Nav v1, a simulation dataset for Language-Conditioned Object Approach (LCOA) navigation: given a short natural-language instruction, an NVIDIA Nova Carter differential-drive robot must navigate to the named object and stop within 1 m across four photorealistic Isaac Sim environments (Office, Hospital, Full Warehouse, and Warehouse with Multiple Shelves). Each of the 1,174 episodes pairs an instruction with synchronized 640x640 RGB images, metric depth maps (float32, metres), and instance segmentation masks, together with continuous (v,omega) and 7x7 tokenized expert action labels recorded at 60 Hz from a vision-based proportional controller. Trajectory diversity is ensured through three spawn-distance tiers (near: 1.5-3.5 m, mid: 3.5-7.0 m, far: global curated points; Pearson r=0.94 between spawn distance and trajectory length), 12 object categories, 18 training templates, and 12 paraphrase-OOD templates. Five evaluation splits support in-distribution accuracy, template-paraphrase robustness, and OOD object-category benchmarking. The dataset is publicly available at https://huggingface.co/datasets/alibustami/miniVLA-Nav",
+      "abstractKO": "언어 조건부 객체 접근(LCOA), 연속 행동 레이블, 5분할 OOD 평가, 4개 실내 씬, 1174 에피소드, HuggingFace 공개",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 50,
+      "reason": "언어 조건부 객체 접근(LCOA), 연속 행동 레이블, 5분할 OOD 평가, 4개 실내 씬, 1174 에피소드, HuggingFace 공개",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/MiniVLANav_arxiv2026/index.html"
+    },
+    {
+      "id": "2505.08712",
+      "venue": "ICRA 2026",
+      "venueDetail": "ICRA 2026",
+      "matchScore": 96,
+      "category": "VLN",
+      "feedTitle": "NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance",
+      "authorsShort": "저. group, S. Lab)",
+      "feedAbstract": "Diffusion 기반 궤적 생성과 critic 함수를 결합한 E2E 네비게이션 정책으로 시뮬레이션에서 학습하여 다양한 로봇 플랫폼으로 zero-shot 전이 가능",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance",
+      "titleKO": "NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privileged Information Guidance",
+      "authorsEN": "저자 정보 (Wenzhe Cai group, Shanghai AI Lab)",
+      "authorsKO": "저자 정보 (Wenzhe Cai group, Shanghai AI Lab)",
+      "abstractEN": "Learning to navigate in dynamic and complex open-world environments is a critical yet challenging capability for autonomous robots. Existing approaches often rely on cascaded modular frameworks, which require extensive hyperparameter tuning or learning from limited real-world demonstration data. In this paper, we propose Navigation Diffusion Policy (NavDP), an end-to-end network trained solely in simulation that enables zero-shot sim-to-real transfer across diverse environments and robot embodiments. The core of NavDP is a unified transformer-based architecture that jointly learns trajectory generation and trajectory evaluation, both conditioned solely on local RGB-D observation. By learning to predict critic values for contrastive trajectory samples, our proposed approach effectively leverages supervision from privileged information available in simulation, thereby fostering accurate spatial understanding and enabling the distinction between safe and dangerous behaviors. To support this, we develop an efficient data generation pipeline in simulation and construct a large-scale dataset encompassing over one million meters of navigation experience across 3,000 scenes. Empirical experiments in both simulated and real-world environments demonstrate that NavDP significantly outperforms prior state-of-the-art methods. Furthermore, we identify key factors influencing the generalization performance of NavDP. The dataset and code are publicly available at https://wzcai99.github.io/navigation-diffusion-policy.github.io.",
+      "abstractKO": "Diffusion 기반 궤적 생성과 critic 함수를 결합한 E2E 네비게이션 정책으로 시뮬레이션에서 학습하여 다양한 로봇 플랫폼으로 zero-shot 전이 가능",
       "detailTags": [
         "#VLN"
       ],
       "year": "2025",
       "citations": 0,
       "readMinutes": 43,
-      "reason": "VLM 기반 세계 모델 설계로 환경의 미래 상태 예측 및 메모리 구축\nCuriosity Value Map을 통한 동적 네비게이션 정책 설정\n인간과 유사한 사고 프로세스 분해로 모델 할루시네이션 감소\n2단계 행동 제안 전략: 광범위 탐색 → 정밀 위치 파악\nHM3D와 MP3D에서 기존 zero-shot 방식 대비 성능 향상 (+3.2% SR/SPL on HM3D, +13.5% SR on MP3D)",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/WMNav_IROS2025/index.html"
+      "reason": "**Diffusion-based Trajectory Generation**: 조건부 diffusion 모델을 통한 궤적 생성\n**Critic Function for Selection**: 생성된 궤적을 평가하고 선택하는 critic 네트워크\n**Local Observations Only**: 정확한 로컬리제이션과 맵핑 불필요 (local observation 기반만 사용)\n**Sim-to-Real Transfer**: 시뮬레이션에서만 학습하여 실제 로봇으로 zero-shot 전이 가능\n**다양한 로봇 체형 지원**: 서로 다른 embodiments에 대응",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NavDP_ICRA2026/index.html"
     },
     {
-      "id": "2604.16388",
-      "venue": "CVPR 2026",
-      "venueDetail": "IEEE/CVF CVPR 2026 — 채택 확정(탑티어)",
+      "id": "2412.04453",
+      "venue": "RSS 2025",
       "matchScore": 96,
-      "category": "Planner",
-      "feedTitle": "Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering",
-      "authorsShort": "S. Lee, J. Lee +4",
-      "feedAbstract": "목표를 명시적 구성(q_goal)이 아니라 이미지(I_goal) 로 주는 새로운 모션 플래닝 문제를 정의·해결. 로봇을 미분 가능 3D Gaussian Splatting으로 렌더링해 렌더링 손실 `‖I(q)−I_goal‖`의 구성공간 그래디언트(활용)와 RRT 무작위 스티어링(탐색)을 한 트리에서 융합. 프론티어 절단…",
+      "category": "VLN",
+      "feedTitle": "NaVILA: Legged Robot Vision-Language-Action Model for Navigation",
+      "authorsShort": "A. Cheng, Y. Ji +8",
+      "feedAbstract": "NaVILA는 Vision-and-Language Navigation(VLN)을 사족·이족 보행 로봇(legged robot)으로 확장하는 연구다. 기존 VLN 연구는 대부분 바퀴형(wheeled) 로봇 또는 이상화된 포인트 에이전트를 가정하여, 자연언어 지시를 \"forward / turn / stop\"의 이산 행동으로…",
       "tags": [
-        "#Planner",
-        "#RRT계열",
-        "#미분가능렌더링",
-        "#실제로봇실험",
-        "#탑티어학회채택"
+        "#VLN"
       ],
-      "titleEN": "Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering",
-      "titleKO": "Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering",
-      "authorsEN": "Sebin Lee, Jumin Lee, Taeyeon Kim, Youngju Na, Woobin Im, Sungeui Yoon",
-      "authorsKO": "Sebin Lee, Jumin Lee, Taeyeon Kim, Youngju Na, Woobin Im, Sungeui Yoon",
-      "abstractEN": "Rapidly-exploring random trees (RRTs) have been widely adopted for robot motion planning due to their robustness and theoretical guarantees. However, existing RRT-based planners require explicit goal configurations specified as numerical joint angles, while many practical applications provide goal specifications through visual observations such as images or demonstration videos where precise goal configurations are unavailable. In this paper, we propose visual-RRT (vRRT), a motion planner that enables visual-goal planning by unifying gradient-based exploitation from differentiable robot rendering with sampling-based exploration from RRTs. We further introduce (i) a frontier-based exploration-exploitation strategy that adaptively prioritizes visually promising search regions, and (ii) inertial gradient tree expansion that inherits optimization states across tree branches for momentum-consistent gradient exploitation. Extensive experiments across various robot manipulators including Franka, UR5e, and Fetch demonstrate that vRRT achieves effective visual-goal planning in both simulated and real-world settings, bridging the gap between sampling-based planning and vision-centric robot applications. Our code is available at https://sgvr.kaist.ac.kr/Visual-RRT.",
-      "abstractKO": "목표를 명시적 구성(q_goal)이 아니라 이미지(I_goal) 로 주는 새로운 모션 플래닝 문제를 정의·해결. 로봇을 미분 가능 3D Gaussian Splatting으로 렌더링해 렌더링 손실 `‖I(q)−I_goal‖`의 구성공간 그래디언트(활용)와 RRT 무작위 스티어링(탐색)을 한 트리에서 융합. 프론티어 절단 기하 분포 노드 선택 + 관성 그래디언트 트리 확장(노드가 부모 Adam 모멘트 상속)으로 그래디언트 단독의 지역 최소점과 샘플링 단독의 무방향성을 상호 보완. 성공률 약 3배(먼 목표 2%→41%), 실로봇 Fetch 80%.",
+      "titleEN": "NaVILA: Legged Robot Vision-Language-Action Model for Navigation",
+      "titleKO": "NaVILA: Legged Robot Vision-Language-Action Model for Navigation",
+      "authorsEN": "An-Chieh Cheng, Yandong Ji, Zhaojing Yang, Zaitian Gongye, Xueyan Zou, Jan Kautz, Erdem Bıyık, Hongxu Yin, Sifei Liu, Xiaolong Wang",
+      "authorsKO": "An-Chieh Cheng, Yandong Ji, Zhaojing Yang, Zaitian Gongye, Xueyan Zou, Jan Kautz, Erdem Bıyık, Hongxu Yin, Sifei Liu, Xiaolong Wang",
+      "abstractEN": "This paper proposes to solve the problem of Vision-and-Language Navigation with legged robots, which not only provides a flexible way for humans to command but also allows the robot to navigate through more challenging and cluttered scenes. However, it is non-trivial to translate human language instructions all the way to low-level leg joint actions. We propose NaVILA, a 2-level framework that unifies a Vision-Language-Action model (VLA) with locomotion skills. Instead of directly predicting low-level actions from VLA, NaVILA first generates mid-level actions with spatial information in the form of language, (e.g., \"moving forward 75cm\"), which serves as an input for a visual locomotion RL policy for execution. NaVILA substantially improves previous approaches on existing benchmarks. The same advantages are demonstrated in our newly developed benchmarks with IsaacLab, featuring more realistic scenes, low-level controls, and real-world robot experiments. We show more results at https://navila-bot.github.io/",
+      "abstractKO": "NaVILA는 Vision-and-Language Navigation(VLN)을 사족·이족 보행 로봇(legged robot)으로 확장하는 연구다. 기존 VLN 연구는 대부분 바퀴형(wheeled) 로봇 또는 이상화된 포인트 에이전트를 가정하여, 자연언어 지시를 \"forward / turn / stop\"의 이산 행동으로 매핑하는 데 집중했다. 그러나 다리형 로봇은 계단·문턱·좁은 틈·비정형 지형을 통과할 수 있는 잠재력이 있는 대신, 자연언어 지시를 12개 관절의 저수준 토크 명령으로 변환하는 것이라는 새로운 난제를 안는다.",
       "detailTags": [
-        "#Planner",
-        "#RRT계열",
-        "#미분가능렌더링",
-        "#실제로봇실험",
-        "#탑티어학회채택"
+        "#VLN"
       ],
-      "year": "2026",
+      "year": "2024",
       "citations": 0,
-      "readMinutes": 38,
-      "reason": "**Visual-Goal Path Planning 정식화**: 정확한 목표 구성 없이 이미지/데모/생성이미지로 비충돌 경로 탐색\n**미분 가능 렌더링 × 샘플링 융합**: 3DGS 로봇 렌더 그래디언트(활용) + RRT 탐색\n**관성 그래디언트 트리**: m=β₁m_p+(1−β₁)∇ℒ, v=β₂v_p+(1−β₂)∇ℒ², q_new=q_p−α·m̂/(√v̂+δ), β₁=β₂=0.9\n**프론티어 노드 선택**: p_frontier(k)=(1−κ)κ^k/(1−κ^M), 손실 랭킹 편향\n**인식+플래닝 통합**: 자세 추정도 부산물로 SOTA(실 이미지 0.083 rad)",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/VisualRRT_CVPR2026/index.html"
+      "readMinutes": 45,
+      "reason": "NaVILA는 Vision-and-Language Navigation(VLN)을 사족·이족 보행 로봇(legged robot)으로 확장하는 연구다. 기존 VLN 연구는 대부분 바퀴형(wheeled) 로봇 또는 이상화된 포인트 에이전트를 가정하여, 자연언어 지시를 \"forward / turn / stop\"의 이산 행동으로 매핑하는 데 집중했다. 그러나 다리형 로봇은 계단·문턱·좁은 틈·비정형 지형을 통과할 수 있는 잠재력이 있는 대신, 자연언어 지시를 12개 관절의 저수준 토크 명령으로 변환하는 것이라는 새로운 난제를 안는다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NaVILA_RSS2025/index.html"
+    },
+    {
+      "id": "2509.21189",
+      "venue": "CoRL 2025",
+      "venueDetail": "CoRL 2025",
+      "matchScore": 96,
+      "category": "VLN",
+      "feedTitle": "ReasonNav: Human-like Navigation in a World Built for Humans",
+      "authorsShort": "G. Wang et al.",
+      "feedAbstract": "VLM의 추론 능력을 활용하여 표지 읽기와 길 묻기 등 인간적 네비게이션 행동을 수행하며, 네비게이션 랜드마크 기반 컴팩트 I/O 추상화로 대규모 환경 효율적 탐색 실현.",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "Human-like Navigation in a World Built for Humans",
+      "titleKO": "Human-like Navigation in a World Built for Humans",
+      "authorsEN": "Gloria X. Wang et al.",
+      "authorsKO": "Gloria X. Wang et al.",
+      "abstractEN": "When navigating in a man-made environment they haven't visited before--like an office building--humans employ behaviors such as reading signs and asking others for directions. These behaviors help humans reach their destinations efficiently by reducing the need to search through large areas. Existing robot navigation systems lack the ability to execute such behaviors and are thus highly inefficient at navigating within large environments. We present ReasonNav, a modular navigation system which integrates these human-like navigation skills by leveraging the reasoning capabilities of a vision-language model (VLM). We design compact input and output abstractions based on navigation landmarks, allowing the VLM to focus on language understanding and reasoning. We evaluate ReasonNav on real and simulated navigation tasks and show that the agent successfully employs higher-order reasoning to navigate efficiently in large, complex buildings.",
+      "abstractKO": "VLM의 추론 능력을 활용하여 표지 읽기와 길 묻기 등 인간적 네비게이션 행동을 수행하며, 네비게이션 랜드마크 기반 컴팩트 I/O 추상화로 대규모 환경 효율적 탐색 실현.",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2025",
+      "citations": 0,
+      "readMinutes": 48,
+      "reason": "VLM의 고차 추론 능력을 활용한 표지 읽기, 길 묻기 등 인간적 네비게이션 행동 구현\n네비게이션 랜드마크 기반 컴팩트 I/O 추상화로 VLM이 언어 이해와 추론에 집중 가능하게 설계\nIsaac Sim 및 실제 네비게이션 작업에서 대규모 복잡 건물 효율적 탐색 검증",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ReasonNav_CoRL2025/index.html"
     },
     {
       "id": "2606.27292",
