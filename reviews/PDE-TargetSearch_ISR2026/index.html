@@ -1,0 +1,857 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Polar Coordinate-based Differential Evolution for Moving Target Search Using Vision Sensor on UAVs · PaperDaily</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { color: #8f4023; text-decoration: underline; }
+
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
+
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
+}
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
+article code.math-display {
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
+}
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
+article th {
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
+article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: var(--mono); font-size: 12px; text-align: center;
+}
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
+footer {
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
+</head>
+<body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2607.17771">arXiv ↗</a>
+</div>
+<div class="wrap">
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">PDE-TargetSearch_ISR2026</span>
+    </div>
+    <h1 class="doc-title">Polar Coordinate-based Differential Evolution for Moving Target Search Using Vision Sensor on UAVs: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">Intelligent Service Robotics, Vol. 19, Art. 77 (2026) — Springer</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2607.17771">2607.17771</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">✅ <a href="https://github.com/thuhangkhuat/PDE_target_search">thuhangkhuat/PDE_target_search</a> (MATLAB 100%, 8 시나리오 스크립트)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">❌ (별도 페이지 없음)</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-07-22</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">39KB · 약 38분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
+  </header>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Polar Coordinate-based Differential Evolution for Moving Target Search Using Vision Sensor on Unmanned Aerial Vehicles</li>
+<li><strong>저자 (Authors)</strong>: Thu Hang Khuat, Duy-Nam Bui, Thuy Ngan Duong, Manh Duong Phung</li>
+<li><strong>소속 (Affiliation)</strong>: Vingroup Big Data Institute / VinUniversity (Vietnam), Ulsan National Institute of Science and Technology (UNIST, Korea)</li>
+<li><strong>발표처 (Published)</strong>: Intelligent Service Robotics, Vol. 19, Article 77 (2026) — Springer</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.1007/s11370-026-00738-x">https://doi.org/10.1007/s11370-026-00738-x</a></li>
+<li><strong>arXiv</strong>: arXiv:2607.17771v1 (2026-07-20)</li>
+<li><strong>코드/프로젝트</strong>: 공개 ✅ — <a href="https://github.com/thuhangkhuat/PDE%5C_target%5C_search">https://github.com/thuhangkhuat/PDE\_target\_search</a> (MATLAB 100%, 8개 시나리오 스크립트, 실 저장소 확인)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 연구는 <strong>비전 센서(vision sensor)를 탑재한 무인항공기(UAV)로 이동 표적(moving target)을 탐색하는 경로 계획(path planning)</strong> 문제를 다룬다. 탐색·구조(Search and Rescue, SAR) 작전에서는 표적이 생존해 있을 확률이 가장 높은 <strong>&quot;골든 타임(golden time)&quot;</strong> 이 존재하며, 이 시간 내에 표적을 발견할 확률(detection probability)을 최대화하는 것이 핵심이다.</p>
+<p>문제의 본질은 다음과 같다: UAV는 제한된 비행 시간·에너지 안에서, 카메라 시야(footprint)로 지면을 훑으며, <strong>이동하는 표적을 언제·어디를 봐야 발견 확률이 최대가 되는지</strong> 를 결정하는 비행 경로(waypoint 열)를 계획해야 한다. 표적이 정지해 있지 않고 확률적으로 움직이므로, 시간에 따라 갱신되는 표적 위치 확률 지도(belief map) 위에서 누적 발견 확률을 최대화하는 경로를 찾아야 한다.</p>
+<p>저자들은 이 문제를 (1) 표적 동역학을 <strong>마르코프 과정(Markov process)</strong> 으로, (2) 발견 가능도를 <strong>이미지 품질·관측자 시각에 기반한 베이지안(Bayesian) 모델</strong> 로 정식화하여 <strong>누적 발견 확률을 목적 함수(fitness)로 하는 NP-hard 최적화 문제</strong> 로 환원한다. 그리고 이를 풀기 위해 <strong>극좌표 기반 차분 진화(Polar Coordinate-based Differential Evolution, PDE)</strong> 알고리즘을 제안한다.</p>
+<p>PDE의 핵심 착상은 비행 경로의 waypoint를 데카르트 좌표(x, y)가 아니라 <strong>극좌표(스텝 길이 ρ, 요각 ψ)</strong> 로 인코딩하여, UAV의 <strong>운동학 제약(속도·요각 한계)을 단순 스칼라 클램핑으로 직접 강제</strong>하고 동시에 계산 효율을 확보하는 것이다. 6개 시나리오에서 표준 DE·GA·PSO·GWO·GSK 다섯 개 메타휴리스틱 대비 <strong>발견 확률과 실행 시간 모두에서 우수</strong>했으며, <strong>3DR Solo 드론 실물 비행</strong>으로 계획 경로가 실제 표적(보행자)을 시야에 포착함을 검증했다. MATLAB 구현이 공개되어 있다.</p>
+<hr>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p>이동 표적 탐색 경로 계획은 다음의 난제를 안는다:</p>
+<ol>
+<li><p><strong>이동 표적의 불확실성 (Moving target uncertainty)</strong>: 표적이 정지해 있지 않고 확률적으로 이동하므로, 표적 위치는 하나의 점이 아니라 시간에 따라 퍼지고 이동하는 <strong>확률 분포(belief)</strong> 다. 경로 계획은 이 분포의 진화를 예측하며 이뤄져야 한다.</p>
+</li>
+<li><p><strong>발견 확률 모델링 (Detection probability modeling)</strong>: 표적을 &quot;봤다&quot;고 무조건 발견하는 것이 아니라, 카메라와 표적 사이 거리·각도·이미지 품질에 따라 발견 확률이 달라진다. 현실적인 센서 모델이 필요하다.</p>
+</li>
+<li><p><strong>운동학 제약 (Kinematic constraints)</strong>: UAV는 임의의 경로를 날 수 없다 — 최대 속도, 요각(회전) 한계가 있다. 계획된 waypoint 열이 물리적으로 비행 가능해야 한다. 데카르트 좌표로 경로를 표현하면 이 제약을 부등식으로 걸어야 해 최적화가 복잡해진다.</p>
+</li>
+<li><p><strong>NP-hard 조합 최적화 (NP-hard optimization)</strong>: N개 waypoint에 걸쳐 누적 발견 확률을 최대화하는 것은 연속·비볼록·고차원 최적화이며, 저자들이 명시하듯 <strong>NP-hard</strong> 다. 전역 최적을 보장하는 정확한 해법은 실용 규모에서 불가능하다.</p>
+</li>
+<li><p><strong>실시간성 (Computational efficiency)</strong>: 골든 타임이 제한된 SAR에서 경로 계획 자체가 오래 걸리면 의미가 없다. 메타휴리스틱이 실행 시간 안에 좋은 해로 수렴해야 한다.</p>
+</li>
+</ol>
+<h3>2.2 핵심 해결책</h3>
+<p>논문의 해결책은 세 축으로 구성된다:</p>
+<ul>
+<li><p><strong>확률 지도 기반 목적 함수</strong>: 표적 동역학을 마르코프 과정으로, 발견을 베이지안 갱신으로 모델링하여, <strong>누적 발견 확률 <code>J = P_N = Σ p_k</code></strong> 를 최대화하는 목적 함수를 유도한다.</p>
+</li>
+<li><p><strong>극좌표 경로 인코딩(핵심)</strong>: 경로를 <code>U = (ρ_1, ψ_1, ..., ρ_N, ψ_N)</code> 로 인코딩한다. <code>ρ_k</code>(스텝 길이)는 속도에, <code>ψ_k</code>(요각)는 방향에 직접 대응하므로, 운동학 제약을 <code>ρ ∈ [ρ_min, ρ_max]</code>, <code>ψ ∈ (−π, π]</code> 라는 <strong>단순 스칼라 범위</strong>로 강제할 수 있다. 데카르트 표현의 복잡한 부등식 제약이 사라진다.</p>
+</li>
+<li><p><strong>차분 진화(DE) 최적화</strong>: 위 인코딩 위에서 표준 DE의 돌연변이(mutation)·교차(crossover)·선택(selection)을 적용해 발견 확률을 최대화하는 waypoint 열을 진화시킨다.</p>
+</li>
+</ul>
+<hr>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 표적 동역학: 마르코프 과정 (Target Dynamics)</h3>
+<p>표적의 현재 위치 <code>ξ^t_k</code>는 이전 위치 <code>ξ^t_{k-1}</code> 에만 의존하는 마르코프 성질을 가진다. 초기 표적 위치 믿음(belief)은 가우시안으로 모델링된다:</p>
+<pre class="codeblock"><code>p(s_k) = (1 / (2π σ_k²)) · exp( − ||s_k − ξ^t_k||² / (2 σ_k²) )
+</code></pre>
+<ul>
+<li><code>s_k</code> : 지도 상의 위치, <code>ξ^t_k</code> : 시각 k에서 표적의 (추정) 중심 위치, <code>σ_k</code> : 불확실성 표준편차(시간에 따라 확산)</li>
+</ul>
+<p>표적 궤적은 단순 운동학으로 전개된다:</p>
+<pre class="codeblock"><code>x^t_k = x^t_{k-1} + v_{k-1} · Δt · cos θ_{k-1}
+y^t_k = y^t_{k-1} + v_{k-1} · Δt · sin θ_{k-1}
+</code></pre>
+<p>즉 표적이 속도 <code>v</code>, 진행각 <code>θ</code>로 움직이며, 시간이 지날수록 믿음 분포가 이동·확산한다. 경로 계획기는 이 진화하는 분포를 &quot;쫓아가며&quot; 봐야 한다.</p>
+<h3>3.2 카메라 발자국(Footprint)과 센서 모델</h3>
+<p>UAV 카메라의 지면 투영은 <strong>사다리꼴(trapezoid)</strong> 발자국 ABCD로 계산된다. 짐벌 각 <code>ϕ</code>, 고도 <code>h</code>, 시야각 <code>α</code>(수평)·<code>β</code>(수직)로부터:</p>
+<pre class="codeblock"><code>d_1 = h · tan(ϕ − β/2)          # 근거리 경계
+d_2 = h · tan(ϕ + β/2)          # 원거리 경계
+w_1 = 2h · tan(α/2) / cos(ϕ − β/2)   # 근거리 폭
+</code></pre>
+<p>발견 확률은 <strong>NVESD(야시 센서) 모델</strong>을 따른다:</p>
+<pre class="codeblock"><code>p(D_k | ξ^t_k) = (V_k / V_50)^γ / ( 1 + (V_k / V_50)^γ )
+
+  γ   = 1.51 + 0.24 · (V_k / V_50)
+  V_k = TTP · √( S^t_k · cos²ϕ · tan(α/2) · g(ϕ,β) / S^fp_k )
+</code></pre>
+<ul>
+<li><code>V_k</code> : 표적에 대한 &quot;인지 사이클 수&quot;(가시성 지표), <code>V_50</code> : 50% 확률로 발견되는 기준값</li>
+<li><code>S^t_k</code> : 표적 투영 면적, <code>S^fp_k</code> : 발자국 면적, <code>TTP</code> : Targeting Task Performance 지표</li>
+<li>표적이 발자국 중심에 가깝고 크게 보일수록 <code>V_k</code>↑ → 발견 확률↑</li>
+</ul>
+<p>이 모델은 &quot;표적이 시야에 들어왔는가&quot;의 이진 판정이 아니라, <strong>거리·각도·이미지 품질에 따른 연속 발견 확률</strong>을 제공하여 현실성을 높인다.</p>
+<p><strong>NVESD 모델의 물리적 의미</strong>: <code>V_50</code>은 &quot;관측자(또는 자동 검출기)가 50% 확률로 표적을 인지하는 데 필요한 인지 사이클 수&quot;로, 표적의 난이도(위장·크기)를 반영하는 기준값이다. <code>V_k</code>는 현재 관측 조건에서 실제로 확보되는 사이클 수다. 지수 <code>γ = 1.51 + 0.24·(V_k/V_50)</code>가 <code>V_k</code>에 의존해 증가한다는 점이 중요한데, 이는 표적이 잘 보일수록(<code>V_k</code>↑) 발견 확률 곡선이 더 급격히 1로 포화됨을 의미한다. 즉 관측 품질이 임계 부근을 넘어서면 발견이 급속히 확실해지는 <strong>S자(sigmoid) 포화 특성</strong>을 갖는다. 이 비선형성 때문에 &quot;적당히 여러 곳을 얕게 보기&quot;보다 &quot;확률 높은 영역을 충분히 크게·가깝게 보기&quot;가 누적 발견 확률에 유리하며, 최적화가 belief 질량이 큰 영역으로 경로를 끌어당기는 근본 이유가 된다.</p>
+<p><strong>Footprint 기하의 최적화 영향</strong>: 사다리꼴 footprint는 짐벌 각 <code>ϕ</code>가 커질수록(더 비스듬히 볼수록) 지면 투영이 길고 얇게 늘어나 <code>S^fp_k</code>(면적)는 커지지만 표적 투영 <code>S^t_k</code>와 해상도는 떨어진다. <code>V_k ∝ √(S^t_k·cos²ϕ / S^fp_k)</code> 형태에서 <code>cos²ϕ</code>와 <code>S^fp_k</code> 증가가 동시에 <code>V_k</code>를 낮추므로, 넓게 훑기(큰 footprint)와 잘 보기(높은 <code>V_k</code>) 사이에 <strong>명시적 트레이드오프</strong>가 존재한다. 논문이 <code>ϕ=30°</code>를 택한 것은 이 균형점을 반영한 실험적 선택이다.</p>
+<h3>3.3 베이지안 지도 갱신 (Bayesian Map Update)</h3>
+<p>관측 <code>ζ_{1:k}</code> 이 주어졌을 때 표적 위치 사후 확률은 베이지안 갱신으로:</p>
+<pre class="codeblock"><code>p( ξ^t_k | ζ_{1:k} ) = K · p( ξ^t_k | ζ_{1:k−1} ) · p( ζ_k | ξ^t_k )
+</code></pre>
+<ul>
+<li><code>K</code> : 정규화 상수 (미발견 관측까지 반영)</li>
+<li>각 시각의 관측(발견/미발견)이 지도를 갱신 — 어떤 영역을 봤지만 발견 못 했으면 그 영역의 표적 확률이 낮아진다.</li>
+</ul>
+<p><strong>&quot;미발견의 정보 가치&quot;</strong>: 이 갱신의 핵심은 발견뿐 아니라 <strong>미발견(negative observation)도 정보</strong>라는 점이다. UAV가 belief 질량이 높은 영역을 훑었는데 표적을 못 봤다면, 그 영역의 사후 확률이 낮아지고 상대적으로 다른 영역의 확률이 올라간다. 따라서 최적 경로는 단순히 초기 belief 피크만 반복해서 보는 것이 아니라, <strong>아직 확인하지 않은 고확률 영역으로 belief 질량을 재분배</strong>하며 이동해야 한다. 표적이 마르코프 과정으로 이동·확산하는 것과 결합하면, belief 지도는 매 시각 &quot;발견 못 한 영역은 낮추고, 표적 이동으로 새로 커진 영역은 높이는&quot; 동적 지형이 되며, PDE는 이 시변 지형 위에서 누적 발견 확률이 최대가 되는 시공간 궤적을 찾는 셈이다.</p>
+<p><strong>베이지안 탐색 이론과의 연결</strong>: 이 정식화는 Koopman/Stone의 고전 최적 탐색 이론(optimal search theory)과 Bourgault 등의 베이지안 탐색 계획의 계보에 있다. 다만 본 논문은 해석적 최적 배분 대신, <strong>UAV 운동학 제약이 걸린 실제 비행 경로</strong>를 메타휴리스틱으로 직접 최적화한다는 점에서 실전 지향적이다.</p>
+<h3>3.4 누적 발견 확률과 목적 함수 (Fitness)</h3>
+<p>시각 k에서의 발견 확률 증분 <code>p_k</code>는 &quot;그 전까지 미발견&quot;과 &quot;이번에 발견&quot;의 곱으로:</p>
+<pre class="codeblock"><code>p_k = R_{k−1} · (1 − r_k)
+</code></pre>
+<ul>
+<li><code>r_k</code> : 시각 k에서 표적이 발견되지 <strong>않을</strong> 확률</li>
+<li><code>R_k</code> : 시각 1~k까지 계속 미발견일 결합 확률, <code>R_k = Π (해당 r_i)</code></li>
+</ul>
+<p>누적 발견 확률(목적 함수)은:</p>
+<pre class="codeblock"><code>J = P_N = Σ_{k=1}^{N} p_k
+</code></pre>
+<p>이 <code>J</code>를 최대화하는 waypoint 열 <code>U</code>를 찾는 것이 목표이며, 이는 NP-hard 최적화다.</p>
+<h3>3.5 극좌표 경로 인코딩 (Polar Encoding — 핵심 기여)</h3>
+<p>PDE의 핵심은 경로 표현이다. N개 waypoint를 <strong>극좌표 쌍의 열</strong>로 인코딩한다:</p>
+<pre class="codeblock"><code>U = ( ρ_1, ψ_1, ρ_2, ψ_2, ..., ρ_N, ψ_N )
+</code></pre>
+<p>각 waypoint는 이전 waypoint로부터 다음과 같이 전개된다:</p>
+<pre class="codeblock"><code>ξ_{k+1} = ξ_k + [ ρ_k · cos ψ_k ,  ρ_k · sin ψ_k ,  0 ]^T
+</code></pre>
+<ul>
+<li><code>ρ_k</code> : k번째 스텝의 이동 거리 → <strong>UAV 속도에 직접 대응</strong></li>
+<li><code>ψ_k</code> : k번째 스텝의 요각(방향) → <strong>UAV 회전에 직접 대응</strong></li>
+</ul>
+<p><strong>왜 극좌표인가?</strong> 데카르트 좌표 <code>(x_k, y_k)</code>로 경로를 표현하면, 속도 제약은 <code>√((x_{k+1}−x_k)² + (y_{k+1}−y_k)²) ≤ v_max·Δt</code> 같은 비선형 부등식이 되고, 요각 제약은 연속 스텝 간 방향차를 계산해야 한다. 반면 극좌표에서는:</p>
+<pre class="codeblock"><code>운동학 제약이 단순 스칼라 클램핑으로 환원:
+   ρ_k ∈ [ ρ_min, ρ_max ]        (속도 한계)
+   ψ_k ∈ ( −π, π ]              (요각 범위)
+</code></pre>
+<p>즉 <strong>각 변수를 자기 범위 안으로 자르기(clamp)만 하면 항상 운동학적으로 실현 가능한 경로</strong>가 보장된다. 이는 DE의 돌연변이/교차가 제약을 위반하는 자손을 만들 걱정을 없애, 탐색을 크게 단순화한다. 저자들의 표현대로 &quot;크기·각도 성분과 속도·요각 사이의 직접적 관계&quot;가 이 인코딩의 이점이다.</p>
+<pre class="diagram"><code>[극좌표 경로 인코딩 개념도]
+
+  데카르트: 경로 = (x1,y1)-(x2,y2)-...   제약: 비선형 부등식(속도·요각)
+                                          → DE 자손이 제약 위반 가능
+
+  극좌표:   경로 = (ρ1,ψ1)-(ρ2,ψ2)-...   제약: ρ∈[ρmin,ρmax], ψ∈(−π,π]
+                       │                   → 스칼라 클램핑만으로 항상 실현가능
+                       ▼
+             ξ_{k+1} = ξ_k + ρk·[cosψk, sinψk]
+        (각 스텝이 UAV의 한 번 이동=속도·방향에 1:1 대응)
+</code></pre>
+<h3>3.6 차분 진화 연산자 (Differential Evolution Operators)</h3>
+<p>극좌표 인코딩 위에서 표준 DE를 적용한다. 개체군(population) <code>N_p = 500</code>, 개체 <code>U_i</code>(하나의 후보 경로).</p>
+<p><strong>돌연변이 (Mutation)</strong> — 서로 다른 두 개체의 차분을 스케일링해 더함:</p>
+<pre class="codeblock"><code>X_{ij} = U_{ij} + F · ( U_{n1, j} − U_{n2, j} )
+</code></pre>
+<ul>
+<li><code>F ∈ [0.1, 0.4]</code> : 스케일 팩터(차분 가중), <code>n1, n2</code> : 무작위 선택된 서로 다른 개체 인덱스</li>
+<li>개체군의 다양성(차분)을 이용해 탐색 방향을 생성 — DE의 핵심 특징</li>
+</ul>
+<p><strong>교차 (Crossover)</strong> — 부모와 돌연변이 벡터를 성분별로 혼합:</p>
+<pre class="codeblock"><code>O_{ij} = X_{ij}    if rand_i(0,1) ≤ p_Cr
+       = U_{ij}    otherwise
+</code></pre>
+<ul>
+<li><code>p_Cr</code> : 교차 확률</li>
+</ul>
+<p><strong>선택 (Selection)</strong> — 자손이 부모보다 적합도가 높을 때만 대체(탐욕적 elitism):</p>
+<pre class="codeblock"><code>U_{i, j+1} = O_{ij}   if J( f(O_{ij}) ) &gt; J( f(U_{ij}) )
+           = U_{ij}   otherwise
+</code></pre>
+<ul>
+<li><code>f(·)</code> : 극좌표 인코딩을 실제 경로로 디코딩하는 함수, <code>J(·)</code> : 누적 발견 확률</li>
+<li>매 세대 적합도가 단조 비감소 — 수렴 안정성 확보</li>
+</ul>
+<p>이 과정을 최대 반복(iterations = 100)만큼 수행하여, 발견 확률을 최대화하는 극좌표 경로를 진화시킨다.</p>
+<h3>3.7 전체 알고리즘 (PDE)</h3>
+<pre class="diagram"><code>Algorithm: PDE (Polar-coordinate Differential Evolution) for Target Search
+──────────────────────────────────────────────────────────────────────────
+입력: 초기 표적 믿음지도 p(s_0), 센서 모델(footprint·NVESD),
+      UAV 시작 위치 ξ_0, waypoint 수 N, 개체군 N_p=500,
+      F∈[0.1,0.4], p_Cr, 최대반복 T=100, ρ∈[ρmin,ρmax], ψ∈(−π,π]
+출력: 최적 극좌표 경로 U* (발견 확률 J 최대)
+
+1  개체군 초기화: {U_i}_{i=1..Np}, 각 U_i = 무작위 (ρ,ψ) 열 (범위 내)
+2  각 U_i 디코딩 f(U_i)→경로, 지도 전개·베이지안 갱신으로 J(U_i) 평가
+3  for t = 1 to T:
+4      for each 개체 U_i:
+5          # 돌연변이
+6          n1,n2 ← 무작위 서로다른 인덱스
+7          X_i ← U_i + F·(U_{n1} − U_{n2})
+8          # 교차
+9          for each 성분 j:
+10             O_ij ← X_ij  (rand ≤ p_Cr)  else  U_ij
+11         # 운동학 제약: 스칼라 클램핑
+12         ρ 성분 ← clamp(ρ, ρmin, ρmax);  ψ 성분 ← wrap(ψ, −π, π]
+13         # 평가 + 탐욕 선택
+14         if J(f(O_i)) &gt; J(f(U_i)):  U_i ← O_i
+15     최적 개체 갱신 U* ← argmax_i J(U_i)
+16 return U*
+──────────────────────────────────────────────────────────────────────────
+</code></pre>
+<p>핵심은 11~12행: <strong>제약이 스칼라 클램핑 한 줄로 강제</strong>되어, 데카르트 표현이라면 필요했을 복잡한 실현가능성 복구(repair)가 사라진다는 점이다.</p>
+<hr>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>┌────────────────────────────────────────────────────────────────────┐
+│              PDE 이동표적 탐색 경로계획 파이프라인                    │
+└────────────────────────────────────────────────────────────────────┘
+
+  [입력] 초기 표적 믿음지도 p(s_0)   UAV 시작위치 ξ_0   센서 파라미터(α,β,ϕ,h)
+              │
+              ▼
+  ┌─────────────────────────────────────┐
+  │ 1. 확률 모델 (Probability Model)     │
+  │  - 표적 동역학: 마르코프 과정        │  ξ^t_k = f(ξ^t_{k-1}, v, θ)
+  │  - 카메라 footprint(사다리꼴 ABCD)   │  d1,d2,w1 (ϕ,h,α,β)
+  │  - NVESD 발견확률 p(D_k|ξ)           │  V_k / V_50
+  └─────────────────────────────────────┘
+              │
+              ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │ 2. DE 최적화 루프 (극좌표 인코딩)                          │
+  │   개체군 Np=500 × T=100 세대                              │
+  │   ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────────┐  │
+  │   │ 돌연변이 │→│  교차    │→│ 클램핑   │→│ 평가·선택  │  │
+  │   │ F·차분   │ │ p_Cr     │ │ ρ,ψ 범위 │ │ J=ΣP 최대  │  │
+  │   └──────────┘ └──────────┘ └──────────┘ └────────────┘  │
+  │        ▲                    베이지안 지도 갱신(미발견 반영)│
+  │        └─── 각 후보 경로 f(U) 디코딩 → 발견확률 J 평가 ───┘
+  └─────────────────────────────────────────────────────────┘
+              │
+              ▼
+  ┌─────────────────────────────────┐
+  │ 3. 최적 극좌표 경로 U* 출력      │  (ρ,ψ) 열 → UAV waypoint
+  └─────────────────────────────────┘
+              │
+              ▼
+  [실물] 3DR Solo 드론 + Hero4 카메라(α=80°,β=60°), 고도 6.5m
+         80×80m 구역, 보행자 표적(1.5 m/s) 시야 포착 검증
+</code></pre>
+<p><strong>데이터 흐름</strong>: (1) 표적 동역학·카메라 센서·발견 확률 모델로 belief 지도를 정의하고, (2) DE가 극좌표 경로 후보군을 진화시키되 각 후보를 디코딩해 지도 전개·베이지안 갱신으로 누적 발견 확률을 평가하며, (3) 최적 경로를 UAV waypoint로 출력한다. 최종적으로 3DR Solo 실물 드론으로 계획 경로가 실제 이동 표적을 포착함을 확인한다.</p>
+<hr>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 / 시나리오 (Scenarios)</h3>
+<ul>
+<li><strong>6개 시나리오</strong> — 지도 크기 500m×500m ~ 2000m×2000m, 경로 길이 30<del>200 waypoint. 소형</del>대형 탐색 구역을 포괄.</li>
+<li>파라미터: <code>F ∈ [0.1, 0.4]</code>, <code>N_p = 500</code>, iterations <code>= 100</code>, <code>α = 80°</code>, <code>β = 60°</code>, <code>ϕ = 30°</code>.</li>
+<li>코드 저장소에는 <strong>8개 시나리오</strong> 스크립트가 포함(논문 본문은 6개 보고).</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>적합도(Fitness) = 누적 발견 확률 J = P_N</strong> : 클수록 표적 발견 가능성이 높음.</li>
+<li><strong>실행 시간(Execution Time, s)</strong> : 경로 계획 수렴에 걸린 계산 시간.</li>
+<li>(정성) <strong>실물 비행에서 표적 포착 여부</strong>.</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>Table 4. 발견 확률(Fitness) — PDE vs 5개 baseline (대표 시나리오)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th align="center">시나리오</th>
+<th align="center"><strong>PDE (본 논문)</strong></th>
+<th align="center">PSO</th>
+<th align="center">GA</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Scenario 1</td>
+<td align="center"><strong>0.5291 ± 0.001</strong> (최고)</td>
+<td align="center">0.4365</td>
+<td align="center">0.4561</td>
+<td>소형 구역</td>
+</tr>
+<tr>
+<td align="center">Scenario 6</td>
+<td align="center"><strong>0.1041 ± 0.002</strong> (최고)</td>
+<td align="center">0.0912</td>
+<td align="center">0.0798</td>
+<td>대형 구역(2000²)</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>PDE가 전 시나리오에서 최고 발견 확률. Scenario 1에서 PSO 대비 +21%, GA 대비 +16% 상대 향상.</li>
+<li>대형·저확률 구역(Scenario 6)에서도 우위 유지 — 극좌표 인코딩의 제약 처리 효율이 큰 탐색 공간에서 유리.</li>
+</ul>
+<p><strong>Table 5. 실행 시간 — PDE가 6개 중 5개에서 최속</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th align="center">시나리오</th>
+<th align="center"><strong>PDE</strong></th>
+<th align="center">GA</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Scenario 1</td>
+<td align="center"><strong>246 ± 16 s</strong></td>
+<td align="center">249 s</td>
+<td>최속</td>
+</tr>
+<tr>
+<td align="center">Scenario 6</td>
+<td align="center"><strong>1668 ± 83 s</strong></td>
+<td align="center">1677 s</td>
+<td>최속</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>PDE는 발견 확률이 가장 높으면서 동시에 실행 시간도 대부분 최속 — 품질·속도 파레토 우위.</li>
+<li><strong>비교 대상 baseline (5종)</strong>: 표준 DE, 유전 알고리즘(GA), 입자 군집 최적화(PSO), 회색 늑대 최적화(GWO), Gaining-Sharing Knowledge(GSK).</li>
+</ul>
+<p><strong>baseline 선정의 타당성</strong>: 다섯 baseline은 모두 <strong>연속 공간 전역 최적화 메타휴리스틱</strong>으로, PDE와 같은 문제·같은 목적 함수·같은 waypoint 예산에서 비교된다. 중요한 것은 이들이 <strong>동일한 극좌표 목적 함수를 풀되 인코딩·연산자만 다르다</strong>는 통제 조건이다(표준 DE는 특히 극좌표 없이 데카르트로 푸는 대조군 역할). 따라서 PDE가 표준 DE를 앞선다면 그 이득은 대부분 <strong>극좌표 인코딩 자체</strong>에서 오는 것으로 귀속할 수 있으며, GA·PSO·GWO·GSK 대비 우위는 &quot;인코딩 + DE 차분 탐색&quot;의 결합 효과를 보인다. 이는 사실상 인코딩에 대한 준(準)-ablation을 겸한다.</p>
+<p><strong>통계적 신뢰성</strong>: 보고된 결과가 <code>0.5291 ± 0.001</code>, <code>246 ± 16 s</code>처럼 <strong>평균 ± 표준편차</strong> 형태라는 점은 다중 독립 실행(메타휴리스틱은 무작위성 포함)에 대한 통계를 취했음을 뜻한다. 표준편차가 작다(예: fitness ±0.001)는 것은 PDE의 수렴이 실행 간 안정적이라는 신호로, 무작위 시드에 민감해 결과가 요동치는 메타휴리스틱의 흔한 약점을 완화했음을 보인다.</p>
+<h3>5.4 baseline 대비 우위의 원인</h3>
+<p>극좌표 인코딩이 baseline 대비 우위를 만드는 이유는: (1) <strong>제약 처리</strong> — 데카르트 기반 GA/PSO는 속도·요각 제약 위반 자손을 벌점(penalty)이나 복구로 처리해 유효 탐색이 희석되지만, PDE는 클램핑으로 항상 실현가능 자손만 생성해 개체군 전체가 유효 경로에 집중된다. (2) <strong>DE의 차분 기반 탐색</strong> — 개체군 차분을 활용한 자기적응적 스텝이 국소최적 탈출에 유리. (3) <strong>속도·방향의 1:1 대응</strong> — <code>(ρ,ψ)</code>가 UAV 제어 입력과 직결되어, 최적화 변수 공간과 물리 실현 공간이 일치.</p>
+<h3>5.5 리얼월드 실험 (Real-world Experiments)</h3>
+<ul>
+<li><strong>플랫폼</strong>: 3DR Solo 드론 + GoPro Hero 4 카메라(<code>α=80°, β=60°</code>), 비행 고도 6.5m.</li>
+<li><strong>환경</strong>: 80m × 80m 실외 시험 구역.</li>
+<li><strong>표적</strong>: 보행자(pedestrian), 이동 속도 1.5 m/s.</li>
+<li><strong>결과</strong>: 실제 비행 경로가 계획 경로와 밀접하게 일치했으며, <strong>이동 표적이 카메라 시야(footprint) 안에 성공적으로 포착</strong>됨. 시뮬레이션 계획이 실물 UAV에서 실행 가능하고 유효함을 확인.</li>
+</ul>
+<p><strong>실물 검증의 의의</strong>: 극좌표 인코딩이 운동학적으로 실현가능한 경로만 생성하도록 설계됐다는 주장은, 실제로 3DR Solo가 계획 경로를 <strong>비행 제어 오차 범위 안에서 추종</strong>했다는 점으로 뒷받침된다. 즉 <code>ρ∈[ρmin,ρmax]</code>, <code>ψ∈(−π,π]</code> 클램핑이 단순히 최적화 편의를 넘어 <strong>실제 UAV가 따라갈 수 있는 경로</strong>를 보장했음을 실증한다. 이는 데카르트 기반 계획이 흔히 겪는 &quot;시뮬레이션에선 최적이나 실물이 추종 못 하는&quot; 실현가능성 격차(feasibility gap)를 인코딩 단계에서 원천 차단한 설계의 실전 이점을 보여준다. 표적이 1.5 m/s로 이동하는 동적 조건에서도 포착에 성공한 점은 belief 기반 시변 계획의 유효성을 확인한다.</p>
+<hr>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>극좌표 경로 인코딩</strong>: waypoint를 <code>(ρ, ψ)</code>(스텝 길이·요각)로 인코딩하여, UAV 운동학 제약을 <code>ρ∈[ρmin,ρmax]</code>, <code>ψ∈(−π,π]</code> 라는 <strong>단순 스칼라 클램핑</strong>으로 강제. 데카르트 기반의 복잡한 비선형 제약·복구를 제거한 것이 본 논문의 핵심 참신성.</p>
+</li>
+<li><p><strong>베이지안 발견 확률 정식화</strong>: 표적 동역학을 마르코프 과정으로, 발견을 NVESD 센서 모델 + 베이지안 지도 갱신으로 모델링하여, <strong>누적 발견 확률 <code>J = Σ p_k</code></strong> 를 최대화하는 목적 함수를 유도(NP-hard).</p>
+</li>
+<li><p><strong>DE와의 결합(PDE)</strong>: 극좌표 인코딩 위에서 차분 진화의 돌연변이·교차·탐욕 선택을 적용해, 실현가능 경로 공간에 집중된 효율적 탐색을 실현.</p>
+</li>
+<li><p><strong>다중 baseline 우위</strong>: 6개 시나리오에서 DE·GA·PSO·GWO·GSK 5종 대비 <strong>발견 확률 최고 + 실행 시간 대부분 최속</strong>의 파레토 우위 입증.</p>
+</li>
+<li><p><strong>실물 검증 + 코드 공개</strong>: 3DR Solo 드론으로 이동 보행자 포착을 실증하고, MATLAB 구현(github.com/thuhangkhuat/PDE_target_search)을 공개하여 재현성 확보.</p>
+</li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값 / 설정</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>개체군 크기 <code>N_p</code></td>
+<td>500</td>
+</tr>
+<tr>
+<td>최대 반복 <code>T</code></td>
+<td>100 세대</td>
+</tr>
+<tr>
+<td>스케일 팩터 <code>F</code></td>
+<td>[0.1, 0.4]</td>
+</tr>
+<tr>
+<td>교차 확률 <code>p_Cr</code></td>
+<td>(본문 명시)</td>
+</tr>
+<tr>
+<td>스텝 길이 범위 <code>ρ</code></td>
+<td>[ρ_min, ρ_max] (속도 한계)</td>
+</tr>
+<tr>
+<td>요각 범위 <code>ψ</code></td>
+<td>(−π, π]</td>
+</tr>
+<tr>
+<td>waypoint 수 <code>N</code></td>
+<td>30 ~ 200 (시나리오별)</td>
+</tr>
+<tr>
+<td>지도 크기</td>
+<td>500²m ~ 2000²m</td>
+</tr>
+<tr>
+<td>카메라 시야 <code>α</code> (수평)</td>
+<td>80°</td>
+</tr>
+<tr>
+<td>카메라 시야 <code>β</code> (수직)</td>
+<td>60°</td>
+</tr>
+<tr>
+<td>짐벌 각 <code>ϕ</code></td>
+<td>30°</td>
+</tr>
+<tr>
+<td>발견 모델</td>
+<td>NVESD (<code>γ = 1.51 + 0.24·V_k/V_50</code>)</td>
+</tr>
+<tr>
+<td>실물 드론</td>
+<td>3DR Solo + GoPro Hero 4, 고도 6.5m</td>
+</tr>
+<tr>
+<td>실물 표적</td>
+<td>보행자, 1.5 m/s</td>
+</tr>
+<tr>
+<td>구현 언어</td>
+<td>MATLAB 100% (<code>PDE.m</code> 메인, 8 시나리오)</td>
+</tr>
+</tbody></table></div>
+<p><strong>주요 상수 해석</strong>:</p>
+<ul>
+<li><strong>N_p = 500, T = 100</strong>: 개체군·세대 예산. 대형 지도(2000²)에서 실행 시간 1668s는 이 예산과 waypoint 200개(대형 시나리오)에 기인.</li>
+<li><strong>F ∈ [0.1, 0.4]</strong>: 낮은 편의 스케일 팩터 — 미세 조정 위주의 안정적 수렴을 선호(탐색보다 활용).</li>
+<li><strong>α=80°, β=60°, ϕ=30°</strong>: 카메라 시야·짐벌 각. footprint 사다리꼴 크기와 발견 확률을 결정하는 핵심 센서 파라미터.</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<ul>
+<li><strong>다중 UAV(multi-UAV) 협력 탐색</strong>: 현재는 단일 UAV. 여러 UAV가 구역을 분담·협력하면 발견 확률·시간을 크게 개선할 수 있으나, 경로 간 겹침 최소화·통신 제약이 추가 과제.</li>
+<li><strong>경로 길이 증가</strong>: waypoint 200개 대형 시나리오에서 1668s는 실시간과는 거리가 있다. 개체군/세대를 줄이면 빨라지지만 품질이 떨어지는 트레이드오프.</li>
+<li><strong>동적 재계획(replanning)</strong>: 비행 중 표적을 부분 관측하면 belief가 급변한다. 현재는 오프라인 1회 계획 — 온라인 재계획으로의 확장 여지.</li>
+</ul>
+<h3>8.2 한계점 (Limitations)</h3>
+<ul>
+<li><strong>표적 동역학 가정</strong>: 표적이 등속·마르코프로 움직인다고 가정. 급격한 방향 전환·정지·회피 행동은 모델을 벗어난다.</li>
+<li><strong>메타휴리스틱의 비보장성</strong>: DE는 전역 최적을 보장하지 않는다. 좋은 해에 수렴하나 최적성 증명은 없다(NP-hard의 본질적 한계).</li>
+<li><strong>계산 시간</strong>: 대형 구역에서 20~28분급 계획 시간은 골든 타임 관점에서 부담일 수 있다.</li>
+<li><strong>2D 평면 가정</strong>: 경로 전개가 <code>z=0</code>(고정 고도 평면). 고도 변화·3D 지형은 다루지 않는다.</li>
+</ul>
+<h3>8.3 알고리즘 위치: 왜 &quot;경로 계획&quot;인가</h3>
+<p>본 논문은 학습 기반이 아닌 <strong>고전 메타휴리스틱 경로 계획</strong>이다. 출력은 명확히 UAV의 비행 경로(waypoint 열)이며, 목적은 &quot;어디를 어떤 순서로 비행해 표적 발견 확률을 최대화할지&quot;라는 <strong>탐색 전략(search/coverage strategy)</strong> 계획이다. 이는 본 코퍼스 Planner 트랙의 명시 범위(&quot;경로 생성, 장애물 회피, 탐색 전략&quot;)에 정확히 부합한다. 특히 belief 지도 위에서 정보 획득을 최대화하는 계획이라는 점에서 정보 기반 계획(information-driven planning)·능동 지각(active perception) 계열과 맞닿는다.</p>
+<h3>8.4 메타휴리스틱 관점: DE가 GA·PSO보다 유리한 이유</h3>
+<p>DE가 이 문제에서 GA·PSO보다 우수한 데는 이론적 배경이 있다. <strong>(1) 자기적응적 스텝 크기</strong>: DE의 돌연변이 <code>F·(U_n1 − U_n2)</code>는 개체군의 현재 분포(차분)에 비례한다. 초기에 개체군이 넓게 퍼져 있으면 큰 스텝으로 탐색(exploration)하고, 수렴하며 개체군이 좁아지면 자연히 작은 스텝으로 정밀 조정(exploitation)한다 — 별도 스케줄 없이 탐색-활용 균형이 자동 조절된다. <strong>(2) 회전 불변성 경향</strong>: DE의 차분 벡터는 좌표축에 덜 종속적이어서, 변수 간 상관이 강한 belief 지형(waypoint들이 연쇄적으로 얽힘)에서 PSO의 축정렬 갱신보다 유리할 수 있다. <strong>(3) 탐욕적 elitism 선택</strong>: 자손이 부모보다 나을 때만 대체하므로 최적해 품질이 단조 비감소로 보존된다. 반면 GA의 세대 교체는 좋은 해를 잃을 위험이, PSO는 velocity 발산으로 제약을 벗어날 위험이 있다. 극좌표 클램핑이 이 위험들을 추가로 봉쇄한다.</p>
+<h3>8.5 향후 방향 (Future Directions)</h3>
+<ul>
+<li><strong>다중 UAV·이기종 센서 융합</strong>: 협력 탐색과 다양한 센서(적외선 등) 결합.</li>
+<li><strong>학습 기반 belief 예측</strong>: 표적 행동을 데이터로 학습해 마르코프 가정을 완화.</li>
+<li><strong>온라인 MPC식 재계획</strong>: 관측 갱신에 따라 수 초 내 경로를 재계획하는 receding-horizon 확장.</li>
+<li><strong>3D 경로·고도 최적화</strong>: footprint가 고도에 민감하므로 고도를 최적화 변수에 포함.</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>같은 Planner 트랙에서 <strong>탐색 전략(exploration/search)·센서 인지 계획</strong>에 가장 가까운 선행 리뷰로 <strong>GRATE(IROS 2025, 시간효율 자율탐색)</strong> 와 <strong>FLAP(FOV-Constrained Active Perception Planning, arXiv 2026)</strong> 를 선정해 비교한다. (인덱스 저비용 스캔 후 토픽 근접 2편만 정독 — 5단계 바운드 프로토콜 준수.) 두 선행은 모두 학습/그래프 기반인 반면, 본 논문은 고전 메타휴리스틱이라는 방법론적 대조를 이룬다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>GRATE (IROS 2025)</th>
+<th>FLAP (arXiv 2026)</th>
+<th><strong>PDE Target Search (본 논문, ISR 2026)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>계획 패러다임</td>
+<td>그래프 트랜스포머 + 심층 RL</td>
+<td>FOV 제약 능동 지각 계획</td>
+<td><strong>극좌표 차분 진화(메타휴리스틱)</strong></td>
+</tr>
+<tr>
+<td>문제 영역</td>
+<td>미지 환경 자율 탐색(coverage)</td>
+<td>사전지도 없는 3D 항해(지각)</td>
+<td><strong>이동 표적 탐색(detection 최대화)</strong></td>
+</tr>
+<tr>
+<td>목적</td>
+<td>탐사 시간 최소화</td>
+<td>시야 제약 하 지각 정보 최대</td>
+<td><strong>누적 발견 확률 최대화</strong></td>
+</tr>
+<tr>
+<td>표적/대상</td>
+<td>정적 환경 커버리지</td>
+<td>정적 3D 장면</td>
+<td><strong>이동하는 표적(보행자)</strong></td>
+</tr>
+<tr>
+<td>제약 처리</td>
+<td>학습된 정책이 암묵 처리</td>
+<td>FOV 제약 명시</td>
+<td><strong>극좌표 스칼라 클램핑(명시·단순)</strong></td>
+</tr>
+<tr>
+<td>학습 필요</td>
+<td>O (RL 학습)</td>
+<td>(계획 기반)</td>
+<td><strong>X (무학습 메타휴리스틱)</strong></td>
+</tr>
+<tr>
+<td>실물 검증</td>
+<td>(시뮬 중심)</td>
+<td>프라이어맵-프리 3D</td>
+<td><strong>3DR Solo 실물 비행, 표적 포착</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>공개</td>
+<td>❌</td>
+<td><strong>공개(MATLAB, github)</strong></td>
+</tr>
+<tr>
+<td>대표 성과</td>
+<td>시간효율 탐사 SOTA</td>
+<td>FOV 제약 항해</td>
+<td><strong>6 시나리오 5 baseline 대비 발견확률·시간 최고</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>PDE의 강점</strong>:</p>
+<ul>
+<li><strong>문제 특화 인코딩</strong>: GRATE가 학습으로, FLAP가 계획 구조로 제약을 다룬다면, PDE는 <strong>극좌표라는 표현 선택 하나로 운동학 제약을 무료로 해결</strong>한다. 단순하면서 효과적이다.</li>
+<li><strong>이동 표적 대응</strong>: 대부분의 탐색 계획이 정적 커버리지인데, PDE는 belief가 시간에 따라 이동·확산하는 <strong>이동 표적</strong>을 정면으로 다룬다.</li>
+<li><strong>무학습·재현성</strong>: 학습 데이터·GPU 없이 CPU 메타휴리스틱으로 동작하고 MATLAB 코드가 공개 — SAR 현장 적용·재현이 쉽다.</li>
+<li><strong>품질·속도 파레토 우위</strong>: 5개 baseline 대비 발견 확률과 시간을 동시에 개선.</li>
+</ul>
+<p><strong>PDE의 약점</strong>:</p>
+<ul>
+<li><strong>최적성 미보장·계산 시간</strong>: 메타휴리스틱이라 전역 최적 보장 없음. 대형 구역 20~28분은 학습 기반(추론 수 ms)이나 GRATE의 실시간성 대비 느리다.</li>
+<li><strong>모델 의존성</strong>: 마르코프·등속 표적 가정이 현실 행동과 어긋나면 성능 저하.</li>
+<li><strong>단일 UAV·2D</strong>: GRATE/FLAP가 3D·복합 환경을 다루는 데 비해 2D 평면·단일기.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>SAR(수색·구조)</strong>: 실종자·조난자 탐색에 즉시 적용 가능. 실물 보행자 포착 검증이 이를 뒷받침. 오프라인으로 경로를 계획한 뒤 비행하는 워크플로우가 현실적.</li>
+<li><strong>감시·정찰</strong>: 이동 대상(차량·인원) 탐색에 belief 기반 계획이 유용.</li>
+<li><strong>한계</strong>: 계획 시간이 골든 타임에 부담이면 개체군/waypoint를 줄이거나 다중 UAV로 분담 필요.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<ul>
+<li><strong>참신성</strong>: 극좌표 인코딩으로 운동학 제약을 클램핑화한 아이디어는 단순하지만 메타휴리스틱 경로 계획에서 실질적 이득을 주는 <strong>표현 수준의 기여</strong>다. 알고리즘(DE) 자체는 표준이나, 문제-표현 결합이 참신.</li>
+<li><strong>일반화 가능성</strong>: 극좌표 인코딩은 DE뿐 아니라 GA·PSO 등 다른 메타휴리스틱에도 이식 가능하며, 지상 로봇·USV의 운동학 제약 경로 계획으로 확장될 수 있다.</li>
+<li><strong>후속 연결</strong>: 다중 UAV 협력, 온라인 재계획, 학습 기반 belief 예측이 자연스러운 다음 단계.</li>
+</ul>
+<h3>9.5 코퍼스 내 위치 및 트랙 판정</h3>
+<p>본 코퍼스 Planner 트랙은 대부분 (a) 샘플링/최적화 기반 모션 플래닝(D-SafeMPC·Visual-RRT·CMG-RRT·STEMbot), (b) 학습 기반 항해/탐색(GRATE·LoGoPlanner·NavDP), (c) 다중 에이전트 경로 계획으로 구성된다. PDE는 이 중 <strong>정보 기반 탐색 전략(information-driven search)</strong> 이라는 상대적으로 드문 세부 영역을 채운다 — belief 지도 위에서 발견 확률(정보 획득)을 최대화하는 계획으로, 커버리지·능동 지각 계열(GRATE·FLAP)과 인접하되 &quot;이동 표적&quot;·&quot;메타휴리스틱&quot;이라는 두 축에서 차별화된다.</p>
+<p><strong>트랙 판정 근거</strong>: 플랫폼이 UAV이고 카메라 센서를 쓰지만, 이는 자율주행(AD)이나 드론 레이싱이 아니다 — 기여는 명백히 <strong>경로 생성 + 탐색 전략</strong>(어디를 어떤 순서로 비행할지 최적화)이며, VLA(행동 정책 학습)·매니퓰레이션·SLAM(자기위치추정)과 무관하다. 자연어 지시가 없으므로 VLN이 아니라 Planner가 정확한 트랙이다. 코퍼스의 명시 범위 &quot;경로 생성, 장애물 회피, <strong>탐색 전략</strong>&quot;에 직접 부합하며, 이는 D-SafeMPC(안전 모션 플래닝)·GRATE(자율 탐색)가 Planner로 등재된 것과 동일한 논리다.</p>
+<p><strong>차별적 가치</strong>: 코퍼스 대다수가 학습 기반(RL/확산/트랜스포머)인 가운데, PDE는 <strong>무학습 고전 메타휴리스틱</strong>으로 실물 검증·코드 공개까지 갖춘 드문 사례다. 학습 데이터·GPU 없이 CPU만으로 SAR 현장에 즉시 배치 가능한 실용 노선을 대표하며, 코퍼스에 방법론적 다양성을 더한다.</p>
+<hr>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
+<ol>
+<li>Khuat, T. H., Bui, D.-N., Duong, T. N., Phung, M. D. &quot;Polar Coordinate-based Differential Evolution for Moving Target Search Using Vision Sensor on Unmanned Aerial Vehicles.&quot; Intelligent Service Robotics, Vol. 19, Art. 77 (2026). DOI: 10.1007/s11370-026-00738-x. arXiv:2607.17771.</li>
+<li>Storn, R., Price, K. &quot;Differential Evolution — A Simple and Efficient Heuristic for Global Optimization over Continuous Spaces.&quot; J. Global Optimization, 1997.</li>
+<li>Kennedy, J., Eberhart, R. &quot;Particle Swarm Optimization (PSO).&quot; ICNN 1995.</li>
+<li>Mirjalili, S. et al. &quot;Grey Wolf Optimizer (GWO).&quot; Advances in Engineering Software, 2014.</li>
+<li>Mohamed, A. W. et al. &quot;Gaining-Sharing Knowledge based algorithm (GSK).&quot; Int. J. Machine Learning &amp; Cybernetics, 2020.</li>
+<li>NVESD/TTP 센서 성능 모델 (야시·표적 획득 성능 표준 모델).</li>
+<li>Bourgault, F. et al. &quot;Optimal Search for a Lost Target in a Bayesian World.&quot; (베이지안 탐색 이론 배경).</li>
+<li>(비교) GRATE: Graph Transformer-based deep RL for autonomous robot Exploration, IROS 2025 (본 코퍼스 리뷰).</li>
+<li>(비교) FLAP: FOV-Constrained Active Perception Planning for Prior-Map-Free 3D Navigation, arXiv 2026 (본 코퍼스 리뷰).</li>
+<li>코드: <a href="https://github.com/thuhangkhuat/PDE%5C_target%5C_search">https://github.com/thuhangkhuat/PDE\_target\_search</a></li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
+<p><strong>PDE(Polar Coordinate-based Differential Evolution)</strong> 는 비전 센서 탑재 UAV의 <strong>이동 표적 탐색 경로 계획</strong>을 다룬 연구로, 표적 동역학을 마르코프 과정으로·발견을 NVESD 베이지안 모델로 정식화하여 누적 발견 확률을 최대화하는 NP-hard 최적화를 구성하고, 이를 <strong>극좌표 경로 인코딩 + 차분 진화</strong>로 효율적으로 푼다.</p>
+<p><strong>혁신성</strong>: 이 논문의 핵심은 복잡한 새 알고리즘이 아니라 <strong>표현의 선택</strong> 이다. waypoint를 <code>(ρ, ψ)</code>(스텝 길이·요각)로 인코딩함으로써, UAV의 속도·요각 운동학 제약을 데카르트 표현의 비선형 부등식 대신 <strong>단순 스칼라 클램핑</strong>으로 강제한다. 이 한 가지 설계로 DE의 모든 자손이 항상 실현가능 경로가 되어, 개체군 전체가 유효 탐색에 집중되고, 결과적으로 6개 시나리오에서 DE·GA·PSO·GWO·GSK 5종 대비 <strong>발견 확률 최고 + 실행 시간 대부분 최속</strong>의 파레토 우위를 달성한다.</p>
+<p><strong>실용적 의의</strong>: 학습·GPU 없이 동작하는 무학습 메타휴리스틱이며 MATLAB 구현이 공개되어, 수색·구조(SAR)·감시 현장에서 재현·적용이 쉽다. 3DR Solo 드론으로 이동 보행자를 실제 포착한 검증이 실용성을 뒷받침한다.</p>
+<p><strong>향후 연구 방향</strong>: (1) 다중 UAV 협력 탐색과 이기종 센서 융합, (2) 관측 갱신에 따른 온라인 receding-horizon 재계획, (3) 표적 행동의 학습 기반 예측으로 마르코프 가정 완화, (4) 고도를 포함한 3D 경로 최적화. 극좌표 인코딩이라는 표현 수준의 기여는 다른 메타휴리스틱·지상/해상 로봇의 운동학 제약 경로 계획으로 확장될 잠재력을 지닌다.</p>
+<hr>
+<p><em>리뷰 작성: NanoClaw Paper Bot · 발견 2026-07-22 · 트랙: Planner (탐색 전략 / UAV 경로 계획)</em></p>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+<div class="rhead" id="rhead" data-title="Polar Coordinate-based Differential Evolution for Moving Target Search Using Vision Sensor on UAVs: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
+</body>
+</html>

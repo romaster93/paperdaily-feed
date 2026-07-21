@@ -1,154 +1,187 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-20T19:30:05.418Z",
+  "generatedAt": "2026-07-21T19:30:06.801Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 7. 21  화요일",
+    "date": "2026. 7. 22  수요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 새 리뷰 5편 · 전체 92편"
+    "subtitle": "VLN·Planner 새 리뷰 5편 · 전체 94편"
   },
   "papers": [
     {
-      "id": "2507.05240",
-      "venue": "ICRA 2026",
-      "venueDetail": "ICRA 2026",
-      "matchScore": 96,
-      "category": "VLN",
-      "feedTitle": "StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling",
-      "authorsShort": "M. Wei, C. Wan +10",
-      "feedAbstract": "Vision-Language Navigation 에이전트가 연속 비디오 입력에서 온라인 방식으로 동작하도록 설계된 스트리밍 기반 VLM 네비게이션 프레임워크",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling",
-      "titleKO": "StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling",
-      "authorsEN": "Meng Wei, Chenyang Wan, Xiqian Yu, Tai Wang, Yuqiang Yang, Xiaohan Mao, Chenming Zhu, Wenzhe Cai, Hanqing Wang, Yilun Chen, Xihui Liu, Jiangmiao Pang",
-      "authorsKO": "Meng Wei, Chenyang Wan, Xiqian Yu, Tai Wang, Yuqiang Yang, Xiaohan Mao, Chenming Zhu, Wenzhe Cai, Hanqing Wang, Yilun Chen, Xihui Liu, Jiangmiao Pang",
-      "abstractEN": "Vision-and-Language Navigation (VLN) in real-world settings requires agents to process continuous visual streams and generate actions with low latency grounded in language instructions. While Video-based Large Language Models (Video-LLMs) have driven recent progress, current VLN methods based on Video-LLM often face trade-offs among fine-grained visual understanding, long-term context modeling and computational efficiency. We introduce StreamVLN, a streaming VLN framework that employs a hybrid slow-fast context modeling strategy to support multi-modal reasoning over interleaved vision, language and action inputs. The fast-streaming dialogue context facilitates responsive action generation through a sliding-window of multi-turn dialogues, while the slow-updating memory context compresses historical visual states using a 3D-aware token pruning strategy. With this slow-fast design, StreamVLN achieves real-time dialogues through KV cache reuse, supporting long video streams with bounded context size and inference cost. Experiments on VLN-CE benchmarks show state-of-the-art performance with low latency, ensuring robustness and efficiency in real-world deployment. The project page is: https://streamvln.github.io/.",
-      "abstractKO": "Vision-Language Navigation 에이전트가 연속 비디오 입력에서 온라인 방식으로 동작하도록 설계된 스트리밍 기반 VLM 네비게이션 프레임워크",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2025",
-      "citations": 0,
-      "readMinutes": 44,
-      "reason": "**SlowFast Context Modeling**: 긴 시퀀스의 효율적인 컨텍스트 모델링을 위해 fast-streaming dialogue context (sliding-window KV cache)와 slow-updating memory (token pruning) 도입\n**Video-LLM 기반 E2E 아키텍처**: LLaVA-Video를 기반으로 하는 시각, 언어, 액션의 통합 모델링\n**대규모 데이터**: R2R, RxR, EnvDrop, ScaleVLN 등에서 450K+ 네비게이션 특화 데이터와 DAgger 수집을 통한 오류 교정\n**실제 로봇 배포**: Unitree Go2 로봇에서 실제 환경 배포 가이드 제공\n**멀티스테이지 트레이닝**: Navigation-specific + General multimodal (VQA, image-text) co-training",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/StreamVLN_ICRA2026/index.html"
-    },
-    {
-      "id": "2501.01806",
-      "venue": "RA-L 2025",
-      "matchScore": 87,
-      "category": "Planner",
-      "feedTitle": "TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation",
-      "authorsShort": "D. Lee, I. Nahrendra +3",
-      "feedAbstract": "TRG-planner는 산악·동굴·재난 현장 같은 비정형 지형(unstructured terrain)에서 지상 로봇(특히 사족보행 로봇)이 안전하면서도 거리 효율적인 전역 경로를 실시간으로 계획하는 문제를 다룬다. 핵심 통찰은 \"지형의 횡단성(traversability)을 그래프의 노드 유효성과 방향성 엣지…",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation",
-      "titleKO": "TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation",
-      "authorsEN": "Dongkyu Lee, I Made Aswin Nahrendra, Minho Oh, Byeongho Yu, Hyun Myung",
-      "authorsKO": "Dongkyu Lee, I Made Aswin Nahrendra, Minho Oh, Byeongho Yu, Hyun Myung",
-      "abstractEN": "Unstructured environments such as mountains, caves, construction sites, or disaster areas are challenging for autonomous navigation because of terrain irregularities. In particular, it is crucial to plan a path to avoid risky terrain and reach the goal quickly and safely. In this paper, we propose a method for safe and distance-efficient path planning, leveraging Traversal Risk Graph (TRG), a novel graph representation that takes into account geometric traversability of the terrain. TRG nodes represent stability and reachability of the terrain, while edges represent relative traversal risk-weighted path candidates. Additionally, TRG is constructed in a wavefront propagation manner and managed hierarchically, enabling real-time planning even in large-scale environments. Lastly, we formulate a graph optimization problem on TRG that leads the robot to navigate by prioritizing both safe and short paths. Our approach demonstrated superior safety, distance efficiency, and fast processing time compared to the conventional methods. It was also validated in several real-world experiments using a quadrupedal robot. Notably, TRG-planner contributed as the global path planner of an autonomous navigation framework for the DreamSTEP team, which won the Quadruped Robot Challenge at ICRA 2023. The project page is available at https://trg-planner.github.io .",
-      "abstractKO": "TRG-planner는 산악·동굴·재난 현장 같은 비정형 지형(unstructured terrain)에서 지상 로봇(특히 사족보행 로봇)이 안전하면서도 거리 효율적인 전역 경로를 실시간으로 계획하는 문제를 다룬다. 핵심 통찰은 \"지형의 횡단성(traversability)을 그래프의 노드 유효성과 방향성 엣지 위험도(directional edge traversal risk) 로 동시에 인코딩한다\"는 것이다.",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2025",
-      "citations": 0,
-      "readMinutes": 49,
-      "reason": "TRG-planner는 산악·동굴·재난 현장 같은 비정형 지형(unstructured terrain)에서 지상 로봇(특히 사족보행 로봇)이 안전하면서도 거리 효율적인 전역 경로를 실시간으로 계획하는 문제를 다룬다. 핵심 통찰은 \"지형의 횡단성(traversability)을 그래프의 노드 유효성과 방향성 엣지 위험도(directional edge traversal risk) 로 동시에 인코딩한다\"는 것이다.",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TRG-Planner_RAL2025/index.html"
-    },
-    {
-      "id": "2502.01536",
-      "venue": "RA-L 2025",
-      "venueDetail": "RA-L 2025",
-      "matchScore": 96,
-      "category": "VLN",
-      "feedTitle": "VR-Robo: Real-to-Sim-to-Real Framework for Visual Robot Navigation",
-      "authorsShort": "S. Zhu et al.",
-      "feedAbstract": "3D Gaussian Splatting 기반 장면 재구성으로 포토리얼리스틱 디지털 트윈 시뮬레이션을 생성하고, 에고센트릭 시각 인식을 지원하는 RL 정책 학습으로 RGB만 사용한 sim-to-real 정책 전이 실현.",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "Real-to-Sim-to-Real Framework for Visual Robot Navigation and Locomotion",
-      "titleKO": "Real-to-Sim-to-Real Framework for Visual Robot Navigation and Locomotion",
-      "authorsEN": "Shaoting Zhu et al.",
-      "authorsKO": "Shaoting Zhu et al.",
-      "abstractEN": "Recent success in legged robot locomotion is attributed to the integration of reinforcement learning and physical simulators. However, these policies often encounter challenges when deployed in real-world environments due to sim-to-real gaps, as simulators typically fail to replicate visual realism and complex real-world geometry. Moreover, the lack of realistic visual rendering limits the ability of these policies to support high-level tasks requiring RGB-based perception like ego-centric navigation. This paper presents a Real-to-Sim-to-Real framework that generates photorealistic and physically interactive \"digital twin\" simulation environments for visual navigation and locomotion learning. Our approach leverages 3D Gaussian Splatting (3DGS) based scene reconstruction from multi-view images and integrates these environments into simulations that support ego-centric visual perception and mesh-based physical interactions. To demonstrate its effectiveness, we train a reinforcement learning policy within the simulator to perform a visual goal-tracking task. Extensive experiments show that our framework achieves RGB-only sim-to-real policy transfer. Additionally, our framework facilitates the rapid adaptation of robot policies with effective exploration capability in complex new environments, highlighting its potential for applications in households and factories.",
-      "abstractKO": "3D Gaussian Splatting 기반 장면 재구성으로 포토리얼리스틱 디지털 트윈 시뮬레이션을 생성하고, 에고센트릭 시각 인식을 지원하는 RL 정책 학습으로 RGB만 사용한 sim-to-real 정책 전이 실현.",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2025",
-      "citations": 0,
-      "readMinutes": 42,
-      "reason": "3D Gaussian Splatting 기반 다시점 이미지 장면 재구성으로 포토리얼리스틱 물리 상호작용 시뮬레이션 생성\n에고센트릭 시각 인식과 메시 기반 물리 상호작용을 지원하는 통합 시뮬레이션 환경 구축\nRGB만 사용한 정책 전이와 새 환경에서의 신속한 정책 적응 능력 실증",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/VR-Robo_RAL2025/index.html"
-    },
-    {
-      "id": "2503.02247",
-      "venue": "IROS 2025",
-      "venueDetail": "IROS 2025 (Oral)",
-      "matchScore": 96,
-      "category": "VLN",
-      "feedTitle": "WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation",
-      "authorsShort": "D. Nie, X. Guo +3",
-      "feedAbstract": "VLM을 기반으로 세계 모델을 구축하여 객체 탐색 네비게이션을 수행하는 프레임워크로, 할루시네이션을 줄이고 탐색 효율성을 높임.",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation",
-      "titleKO": "WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation",
-      "authorsEN": "Dujun Nie, Xianda Guo, Yiqun Duan, Ruijun Zhang, Long Chen",
-      "authorsKO": "Dujun Nie, Xianda Guo, Yiqun Duan, Ruijun Zhang, Long Chen",
-      "abstractEN": "Object Goal Navigation-requiring an agent to locate a specific object in an unseen environment-remains a core challenge in embodied AI. Although recent progress in Vision-Language Model (VLM)-based agents has demonstrated promising perception and decision-making abilities through prompting, none has yet established a fully modular world model design that reduces risky and costly interactions with the environment by predicting the future state of the world. We introduce WMNav, a novel World Model-based Navigation framework powered by Vision-Language Models (VLMs). It predicts possible outcomes of decisions and builds memories to provide feedback to the policy module. To retain the predicted state of the environment, WMNav proposes the online maintained Curiosity Value Map as part of the world model memory to provide dynamic configuration for navigation policy. By decomposing according to a human-like thinking process, WMNav effectively alleviates the impact of model hallucination by making decisions based on the feedback difference between the world model plan and observation. To further boost efficiency, we implement a two-stage action proposer strategy: broad exploration followed by precise localization. Extensive evaluation on HM3D and MP3D validates WMNav surpasses existing zero-shot benchmarks in both success rate and exploration efficiency (absolute improvement: +3.2% SR and +3.2% SPL on HM3D, +13.5% SR and +1.1% SPL on MP3D). Project page: https://b0b8k1ng.github.io/WMNav/.",
-      "abstractKO": "VLM을 기반으로 세계 모델을 구축하여 객체 탐색 네비게이션을 수행하는 프레임워크로, 할루시네이션을 줄이고 탐색 효율성을 높임.",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2025",
-      "citations": 0,
-      "readMinutes": 43,
-      "reason": "VLM 기반 세계 모델 설계로 환경의 미래 상태 예측 및 메모리 구축\nCuriosity Value Map을 통한 동적 네비게이션 정책 설정\n인간과 유사한 사고 프로세스 분해로 모델 할루시네이션 감소\n2단계 행동 제안 전략: 광범위 탐색 → 정밀 위치 파악\nHM3D와 MP3D에서 기존 zero-shot 방식 대비 성능 향상 (+3.2% SR/SPL on HM3D, +13.5% SR on MP3D)",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/WMNav_IROS2025/index.html"
-    },
-    {
-      "id": "2604.16388",
-      "venue": "CVPR 2026",
-      "venueDetail": "IEEE/CVF CVPR 2026 — 채택 확정(탑티어)",
+      "id": "2607.17898",
+      "venue": "WAFR 2026",
+      "venueDetail": "WAFR 2026 (17th Int. Workshop on the Algorithmic Foundations of Robotics)",
       "matchScore": 96,
       "category": "Planner",
-      "feedTitle": "Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering",
-      "authorsShort": "S. Lee, J. Lee +4",
-      "feedAbstract": "목표를 명시적 구성(q_goal)이 아니라 이미지(I_goal) 로 주는 새로운 모션 플래닝 문제를 정의·해결. 로봇을 미분 가능 3D Gaussian Splatting으로 렌더링해 렌더링 손실 `‖I(q)−I_goal‖`의 구성공간 그래디언트(활용)와 RRT 무작위 스티어링(탐색)을 한 트리에서 융합. 프론티어 절단…",
+      "feedTitle": "Manifold-Guided Motion Planning for Tight Assemblies (CMG-RRT)",
+      "authorsShort": "D. Livnat, M. Bilevich +2",
+      "feedAbstract": "밀착 조립의 유효 경로가 \"접촉점이 최소 하나 있는 배치들의 임계 다양체(critical manifold, SDF 영집합)\" 근방에 놓인다는 관찰로, SDF 계층 세분(|F(center)|<D/2)으로 샘플을 다양체 근방에 집중시키는 RRT 변형(CMG-RRT) — Elk 퍼즐 최초 자동 해결, 표준 16 벤치마크…",
       "tags": [
         "#Planner",
-        "#RRT계열",
-        "#미분가능렌더링",
-        "#실제로봇실험",
-        "#탑티어학회채택"
+        "#샘플링기반계획",
+        "#좁은통로문제",
+        "#임계다양체안내",
+        "#밀착조립"
       ],
-      "titleEN": "Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering",
-      "titleKO": "Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering",
-      "authorsEN": "Sebin Lee, Jumin Lee, Taeyeon Kim, Youngju Na, Woobin Im, Sungeui Yoon",
-      "authorsKO": "Sebin Lee, Jumin Lee, Taeyeon Kim, Youngju Na, Woobin Im, Sungeui Yoon",
-      "abstractEN": "Rapidly-exploring random trees (RRTs) have been widely adopted for robot motion planning due to their robustness and theoretical guarantees. However, existing RRT-based planners require explicit goal configurations specified as numerical joint angles, while many practical applications provide goal specifications through visual observations such as images or demonstration videos where precise goal configurations are unavailable. In this paper, we propose visual-RRT (vRRT), a motion planner that enables visual-goal planning by unifying gradient-based exploitation from differentiable robot rendering with sampling-based exploration from RRTs. We further introduce (i) a frontier-based exploration-exploitation strategy that adaptively prioritizes visually promising search regions, and (ii) inertial gradient tree expansion that inherits optimization states across tree branches for momentum-consistent gradient exploitation. Extensive experiments across various robot manipulators including Franka, UR5e, and Fetch demonstrate that vRRT achieves effective visual-goal planning in both simulated and real-world settings, bridging the gap between sampling-based planning and vision-centric robot applications. Our code is available at https://sgvr.kaist.ac.kr/Visual-RRT.",
-      "abstractKO": "목표를 명시적 구성(q_goal)이 아니라 이미지(I_goal) 로 주는 새로운 모션 플래닝 문제를 정의·해결. 로봇을 미분 가능 3D Gaussian Splatting으로 렌더링해 렌더링 손실 `‖I(q)−I_goal‖`의 구성공간 그래디언트(활용)와 RRT 무작위 스티어링(탐색)을 한 트리에서 융합. 프론티어 절단 기하 분포 노드 선택 + 관성 그래디언트 트리 확장(노드가 부모 Adam 모멘트 상속)으로 그래디언트 단독의 지역 최소점과 샘플링 단독의 무방향성을 상호 보완. 성공률 약 3배(먼 목표 2%→41%), 실로봇 Fetch 80%.",
+      "titleEN": "Manifold-Guided Motion Planning for Tight Assemblies",
+      "titleKO": "Manifold-Guided Motion Planning for Tight Assemblies",
+      "authorsEN": "Dror Livnat, Michael M. Bilevich, Michal Kleinbort, Dan Halperin",
+      "authorsKO": "Dror Livnat, Michael M. Bilevich, Michal Kleinbort, Dan Halperin",
+      "abstractEN": "Motion planning for rigid-body assembly poses a fundamental challenge in robotics due to tight geometric constraints. In such scenarios, feasible motions often require passing through (near-)zero clearance configurations in which the parts are tightly constrained by contact. In this work, we introduce Critical-Manifold Guided RRT (CMG-RRT), a sampling-based planner designed specifically for tight assembly problems. Our key observation is that in tight assemblies, valid solution paths lie on or near a critical manifold: the subset of configuration space consisting of poses with at least one contact point between parts. CMG-RRT guides exploration by adaptively biasing sampling toward neighborhoods of the critical manifold using a hierarchical subdivision of the configuration space. We prove that CMG-RRT is probabilistically complete under standard clearance assumptions. Empirical evaluation on challenging rotational assembly benchmarks demonstrates a 100% success rate across all tested instances, including, to the best of our knowledge, the first fully automatic solution of the Elk disentanglement puzzle. Our open source software is available through our project page: https://www.cgl.cs.tau.ac.il/projects/tight-assembly-planning.",
+      "abstractKO": "밀착 조립의 유효 경로가 \"접촉점이 최소 하나 있는 배치들의 임계 다양체(critical manifold, SDF 영집합)\" 근방에 놓인다는 관찰로, SDF 계층 세분(|F(center)|<D/2)으로 샘플을 다양체 근방에 집중시키는 RRT 변형(CMG-RRT) — Elk 퍼즐 최초 자동 해결, 표준 16 벤치마크 100% 성공·평균 3.0분(TR-RRT 61.9분 대비 ~20배 가속).",
       "detailTags": [
         "#Planner",
-        "#RRT계열",
-        "#미분가능렌더링",
-        "#실제로봇실험",
-        "#탑티어학회채택"
+        "#샘플링기반계획",
+        "#좁은통로문제",
+        "#임계다양체안내",
+        "#밀착조립"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 39,
+      "reason": "**임계 다양체 정식화**: 유효 경로 ≈ 접촉 다양체 C = {x : F_{M2→M1}(x)=0} 근방\n**SDF 계층 세분**: `|F(Center(b))| < D/2` 박스만 유지(Lipschitz 보수적 커버) → 다양체 근방 집중 샘플링\n**접촉 인지 확장**: 선행 TR-RRT의 리만 최적화 확장 계승 + 세분과 결합\n**SE(3) 위상 존중**: 병진 유클리드+회전 대원거리 유사 거리 d_C, 주기적 무작위 회전으로 gimbal lock 회피\n**미해결 문제 최초 해결**: Elk disentanglement 퍼즐 최초 완전 자동 해결(156분)\n**오픈소스+실물**: TAU-CGL/cmg-rrt(MIT), UR5e 이중팔 \"az puzzle\" 실행",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/CMG-RRT_WAFR2026/index.html"
+    },
+    {
+      "id": "2607.17771",
+      "venue": "ISR 2026",
+      "venueDetail": "Intelligent Service Robotics, Vol. 19, Art. 77 (2026) — Springer",
+      "matchScore": 93,
+      "category": "Planner",
+      "feedTitle": "Polar Coordinate-based Differential Evolution for Moving Target Search Using Vision Sensor on UAVs",
+      "authorsShort": "T. Khuat, D. Bui +2",
+      "feedAbstract": "비전 센서 탑재 UAV의 이동 표적 탐색 경로 계획을, waypoint를 극좌표 (스텝길이 ρ, 요각 ψ)로 인코딩해 UAV 운동학 제약을 단순 스칼라 클램핑으로 강제하고 차분 진화(DE)로 누적 발견 확률을 최대화하는 PDE 알고리즘 — 마르코프 표적동역학+NVESD 베이지안 발견모델, 6 시나리오에서…",
+      "tags": [
+        "#Planner",
+        "#탐색전략",
+        "#정보기반계획",
+        "#UAV경로계획",
+        "#메타휴리스틱"
+      ],
+      "titleEN": "Polar Coordinate-based Differential Evolution for Moving Target Search Using Vision Sensor on Unmanned Aerial Vehicles",
+      "titleKO": "Polar Coordinate-based Differential Evolution for Moving Target Search Using Vision Sensor on Unmanned Aerial Vehicles",
+      "authorsEN": "Thu Hang Khuat, Duy-Nam Bui, Thuy Ngan Duong, Manh Duong Phung",
+      "authorsKO": "Thu Hang Khuat, Duy-Nam Bui, Thuy Ngan Duong, Manh Duong Phung",
+      "abstractEN": "In search and rescue operations, there is a period known as the \"golden time\" during which the probability of finding the target alive is highest. The objective of this work is to propose a new search algorithm for unmanned aerial vehicles (UAVs) with a focus on improving the detection probability and execution time. We approach this problem by first modeling target dynamics as a Markov process and the detection likelihood as a function of image quality and the observer's vision. We then employ Bayesian theory to derive a fitness function representing the probability distribution of the target's location over the search area. Finally, we introduce a new algorithm named polar coordinate-based differential evolution (PDE) to generate a UAV search path that maximizes this fitness function. The PDE algorithm utilizes polar coordinates to incorporate kinematic constraints and maneuver properties of the UAV, allowing for better exploration of the solution space. A series of simulations and comparative analyses have been conducted to evaluate the performance of the proposed algorithm. Experiments involving a real UAV have also been conducted. Results demonstrate that the PDE algorithm outperforms state-of-the-art algorithms in terms of detection probability and execution time across diverse search scenarios while remaining practical for real-world applications. The source code of the algorithm is available at https://github.com/thuhangkhuat/PDE_target_search.",
+      "abstractKO": "비전 센서 탑재 UAV의 이동 표적 탐색 경로 계획을, waypoint를 극좌표 (스텝길이 ρ, 요각 ψ)로 인코딩해 UAV 운동학 제약을 단순 스칼라 클램핑으로 강제하고 차분 진화(DE)로 누적 발견 확률을 최대화하는 PDE 알고리즘 — 마르코프 표적동역학+NVESD 베이지안 발견모델, 6 시나리오에서 DE·GA·PSO·GWO·GSK 5종 대비 발견확률·시간 대부분 최고, 3DR Solo 실물 드론으로 보행자(1.5m/s) 포착 검증.",
+      "detailTags": [
+        "#Planner",
+        "#탐색전략",
+        "#정보기반계획",
+        "#UAV경로계획",
+        "#메타휴리스틱"
       ],
       "year": "2026",
       "citations": 0,
       "readMinutes": 38,
-      "reason": "**Visual-Goal Path Planning 정식화**: 정확한 목표 구성 없이 이미지/데모/생성이미지로 비충돌 경로 탐색\n**미분 가능 렌더링 × 샘플링 융합**: 3DGS 로봇 렌더 그래디언트(활용) + RRT 탐색\n**관성 그래디언트 트리**: m=β₁m_p+(1−β₁)∇ℒ, v=β₂v_p+(1−β₂)∇ℒ², q_new=q_p−α·m̂/(√v̂+δ), β₁=β₂=0.9\n**프론티어 노드 선택**: p_frontier(k)=(1−κ)κ^k/(1−κ^M), 손실 랭킹 편향\n**인식+플래닝 통합**: 자세 추정도 부산물로 SOTA(실 이미지 0.083 rad)",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/VisualRRT_CVPR2026/index.html"
+      "reason": "**극좌표 경로 인코딩**: waypoint=(ρ,ψ) → 운동학 제약을 ρ∈[ρmin,ρmax], ψ∈(−π,π] 스칼라 클램핑으로 강제 (데카르트 비선형 제약·복구 제거)\n**베이지안 발견 정식화**: 표적=마르코프 과정, 발견=NVESD 센서모델+베이지안 지도갱신, 누적 발견확률 J=ΣP 최대화 (NP-hard)\n**PDE 알고리즘**: 극좌표 인코딩 위 DE 돌연변이 X=U+F(U_n1−U_n2)·교차·탐욕선택\n**다중 baseline 우위**: DE·GA·PSO·GWO·GSK 5종 대비 파레토 우위\n**실물 검증 + 코드 공개**: 3DR Solo 드론, MATLAB 오픈소스",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/PDE-TargetSearch_ISR2026/index.html"
+    },
+    {
+      "id": "2606.27292",
+      "venue": "IROS 2026",
+      "venueDetail": "IEEE/RSJ IROS 2026 — 채택 확정(탑티어)",
+      "matchScore": 87,
+      "category": "Planner",
+      "feedTitle": "BOWConnect: Parallel Bayesian Optimization over Windows with Learned Local Cost Maps for Sample-Efficient Kinodynamic Motion Planning",
+      "authorsShort": "S. Raxit, A. Newaz +2",
+      "feedAbstract": "kinodynamic 모션 플래닝의 트리 조향을 무작위 샘플링 대신 제약 베이지안 최적화(BOW)로 대체. 보상·제약을 분리된 두 GP로 학습하고 `α(u)=[μ_r−κσ_r]·P_feas` 곱셈 게이팅으로 안전을 능동 반영. 4차 RK 전파 + 양방향 병렬(N/2 forward + N/2 backward 워커, 각자…",
+      "tags": [
+        "#Planner",
+        "#샘플효율모션플래닝",
+        "#베이지안최적화",
+        "#양방향병렬탐색",
+        "#실제로봇실험"
+      ],
+      "titleEN": "BOWConnect: Parallel Bayesian Optimization over Windows with Learned Local Cost Maps for Sample-Efficient Kinodynamic Motion Planning",
+      "titleKO": "BOWConnect: Parallel Bayesian Optimization over Windows with Learned Local Cost Maps for Sample-Efficient Kinodynamic Motion Planning",
+      "authorsEN": "Sourav Raxit, Abdullah Al Redwan Newaz, Jose Fuentes, Leonardo Bobadilla",
+      "authorsKO": "Sourav Raxit, Abdullah Al Redwan Newaz, Jose Fuentes, Leonardo Bobadilla",
+      "abstractEN": "This paper presents BOWConnect, a bidirectional parallel kinodynamic motion planner that addresses three fundamental limitations of existing sampling-based methods: sample inefficiency in high-dimensional state spaces, unreliable cost heuristics under dynamic constraints, and poor performance in narrow passage environments. Unlike classical planners that rely on random control sampling and geometric distance heuristics, BOWConnect integrates Bayesian Optimization over Windows (BOW) as a learning-based steering function within a parallel tree-based exploration framework, enabling each worker to learn local cost maps and constraints to guide sampling toward dynamically feasible and collision-free controls. A bidirectional architecture simultaneously grows forward and backward trees from the start and goal regions in parallel threads, with a spatial hashing mechanism enabling fast connection queries and a boundary value problem solver generating kinodynamically consistent bridge trajectories. Extensive evaluations across ten benchmark environments demonstrate that BOWConnect achieves 100\\% success while delivering the fastest or near-fastest planning time in complex scenarios, including narrow passages and non-convex spaces where state-of-the-art planners fail or degrade substantially. Real-world deployment on a ground vehicle and a quadrotor confirms real-time planning with no collisions. Videos of real-world and simulated experiments, high-resolution versions of the figures, and the open-source code are available at https://bow-connect.github.io/.",
+      "abstractKO": "kinodynamic 모션 플래닝의 트리 조향을 무작위 샘플링 대신 제약 베이지안 최적화(BOW)로 대체. 보상·제약을 분리된 두 GP로 학습하고 `α(u)=[μ_r−κσ_r]·P_feas` 곱셈 게이팅으로 안전을 능동 반영. 4차 RK 전파 + 양방향 병렬(N/2 forward + N/2 backward 워커, 각자 MotionTree+BOW) + 공간 해싱 + BVP 비례제어 브릿지로, 좁은 통로·Bicycle 강제약에서 100% 성공·수백 배 빠른 속도 달성.",
+      "detailTags": [
+        "#Planner",
+        "#샘플효율모션플래닝",
+        "#베이지안최적화",
+        "#양방향병렬탐색",
+        "#실제로봇실험"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 38,
+      "reason": "**BOW(학습 조향)**: GP_r(보상 `r(u)=−‖p(T)−p_target‖`)·GP_c(제약) 이중 GP, `P_feas(u)=Φ(μ_c/σ_c)`, 획득함수 `α(u)=[μ_r−κσ_r]·P_feas` → 불확실성-인지 안전 조향\n**양방향 병렬**: forward/backward 워커가 각자 트리·BOW 보유, 포트폴리오 성공확률 `P_success=1−(1−p)^(N_f·N_b)`\n**공간 해싱**: `h(x)=⌊(x−x₀)/Δ⌋⊕...` 로 근접 노드 O(1) 조회 → 연결 후보 게이팅\n**BVP 비례제어 브릿지**: `ω=clamp(k_p·Δθ/Δt)` 로 forward·backward 트리 연결\n**학습 지역 비용맵**: 좁은 통로 등 난도 곡선 해석",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/BOWConnect_IROS2026/index.html"
+    },
+    {
+      "id": "2606.25393",
+      "venue": "TFR 2026",
+      "venueDetail": "IEEE Transactions on Field Robotics (T-FR), vol.3, pp.494–517, 2026 — 게재 확정(탑티어)",
+      "matchScore": 96,
+      "category": "Planner",
+      "feedTitle": "FLISP: Large-Scale Tunnel Air–Ground Collaboration With Fast LiDAR-IMU Synchronized Path Planner",
+      "authorsShort": "F. Guo, R. Shen +3",
+      "feedAbstract": "GPS·사전지도가 없고 기하적으로 퇴화된 수력발전 방류 터널에서, 단일 UGV-탑재 LiDAR-IMU 센서 스위트만으로 공중(UAV)·지상(UGV) 이종 팀의 경로를 동기 생성하는 mapless 협력 계획기. UGV는 동적 비닝+다항 적합 코리도어에 개선 반딧불 알고리즘(단면 1D 횡방향 회피)을, UAV는 통신반경…",
+      "tags": [
+        "#Planner",
+        "#이종공중-지상협력",
+        "#메타휴리스틱최적화",
+        "#실제로봇실험",
+        "#탑티어저널게재"
+      ],
+      "titleEN": "Large-Scale Tunnel Air–Ground Collaboration With FLISP: Fast LiDAR-IMU Synchronized Path Planner",
+      "titleKO": "Large-Scale Tunnel Air–Ground Collaboration With FLISP: Fast LiDAR-IMU Synchronized Path Planner",
+      "authorsEN": "Fenghe Guo, Runjie Shen, Chenyang Sun, Junrui Zhang, Quanxi Zhan 외",
+      "authorsKO": "Fenghe Guo, Runjie Shen, Chenyang Sun, Junrui Zhang, Quanxi Zhan 외",
+      "abstractEN": "Hydropower tunnel inspection is critical for infrastructure integrity yet remains inefficient and hazardous using manual methods. We propose FLISP (Fast LiDAR-IMU Synchronized Path Planner), a mapless planning framework for cooperative UGV-UAV inspection. Unlike traditional map-based paradigms, FLISP features three core contributions: (1) a unified architecture where a single UGV-mounted LiDAR-IMU suite drives synchronized path generation for both platforms; (2) platform-specific solvers utilizing an enhanced Firefly Algorithm for UGV obstacle avoidance and a dynamic iterative optimizer for UAV flight; and (3) a hierarchical refinement strategy ensuring kinematic feasibility without state estimation drift. Benchmarks in a 1.2 km operational tunnel demonstrate that FLISP circumvents structural bottlenecks of map-based methods, eliminating map rasterization overhead (Fast-LIO2 + A*) and sampling instability (LIO-SAM + RRT*). FLISP achieves a 100% success rate with 7 ms latency, representing a 7-fold speedup over grid-based and a three-order-of-magnitude improvement over sampling-based baselines. Validated in operational hydropower tunnels, this approach offers a scalable solution for robotic inspection in feature-degraded linear infrastructure. A demonstration video is available at https://youtu.be/Y_ezs1PfLJ4, and the code at https://github.com/ArchibaldGuo/FLISP.git.",
+      "abstractKO": "GPS·사전지도가 없고 기하적으로 퇴화된 수력발전 방류 터널에서, 단일 UGV-탑재 LiDAR-IMU 센서 스위트만으로 공중(UAV)·지상(UGV) 이종 팀의 경로를 동기 생성하는 mapless 협력 계획기. UGV는 동적 비닝+다항 적합 코리도어에 개선 반딧불 알고리즘(단면 1D 횡방향 회피)을, UAV는 통신반경 투영+극좌표 동적 반복 최적화를 적용해, 1.0–1.2km 가동 터널에서 100% 성공률·~7ms 지연·39.7MB RAM으로 실증.",
+      "detailTags": [
+        "#Planner",
+        "#이종공중-지상협력",
+        "#메타휴리스틱최적화",
+        "#실제로봇실험",
+        "#탑티어저널게재"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 39,
+      "reason": "**UGV-중심 계층적 협력**: 단일 센서 스위트가 인지를 담당하고 UAV 경로가 통신반경 투영(γ_i)으로 UGV에 종속 → \"Heterogeneous Lookahead Paradox\" 구조적 해소, SLAM 드리프트 누적 우회(mapless)\n**개선된 반딧불 알고리즘(1D)**: 터널 원통 단면을 활용해 회피 탐색을 횡방향 1차원으로 환원, 밝기 `I(y)=d_obs−w_tilt(|y|/R_pipe)²−w_center|y|`로 회피·전복방지·중앙유지 다목적 균형\n**동적 비닝 코리도어 + 베이지안 강건화**: 요각 기반 적응 스텝 Δs, 전·후진 보간 + 가우시안 사후확률로 이상치 보정(O(N))\n**UAV 동적 샘플링 최적화**: 극좌표 후보 + 4목적 비용 `J=αJ₁+βJ₂−ηJ₃+δJ₄`(안전/평활/진행/고도), 비균일 B-스플라인 곡률 시간 스케일\n**실 인프라 검증**: Ouster OS1-64 + DJI Mavic 3T, 가동 방류 터널 1km",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/FLISP_TFR2026/index.html"
+    },
+    {
+      "id": "2606.26047",
+      "venue": "RA-L 2026",
+      "venueDetail": "IEEE Robotics and Automation Letters (RA-L) 2026 — 게재 확정(탑티어)",
+      "matchScore": 84,
+      "category": "Planner",
+      "feedTitle": "iCrowdNav: Intention-Aware Scene Representations for Visual Crowd Navigation",
+      "authorsShort": "군. 기준)",
+      "feedAbstract": "밀집 군중에서 RGB-D만으로 목표 내비게이션하는 시각 기반 DRL 정책. 보행자를 점이 아니라 17관절 3D 골격으로 표현하여 의도(이동 방향)를 인코딩(I2Former: IntentFormer 자기-어텐션 + InteractFormer 로봇-중심 교차-어텐션)하고, 시간정렬 BEV 점유로 정적·동적 환경을 통합…",
+      "tags": [
+        "#Planner",
+        "#군중/사회적내비게이션",
+        "#심층강화학습",
+        "#시각기반",
+        "#표현학습"
+      ],
+      "titleEN": "iCrowdNav: Intention-Aware Scene Representations for Visual Crowd Navigation",
+      "titleKO": "iCrowdNav: Intention-Aware Scene Representations for Visual Crowd Navigation",
+      "authorsEN": "군중 내비게이션·시각 표현학습 연구진 (arXiv 메타 기준)",
+      "authorsKO": "군중 내비게이션·시각 표현학습 연구진 (arXiv 메타 기준)",
+      "abstractEN": "Robot crowd navigation requires the ability to infer human intentions while accounting for the structural constraints of the environment. Currently, deep reinforcement learning (DRL) provides a promising method for learning navigation policies that understand human intentions. However, most of them rely on limited scene representations, treating pedestrians as simple 2D points and ignoring rich visual cues from both humans and the environment. To address this issue, we introduce iCrowdNav, a novel visual crowd navigation method with intention-aware scene representations, to encode behavioral and structural context from egocentric visual observations. Our method employs two key components: a spatio-temporal encoder for extracting occupancy features of the scene, and Intent-Interact Former (I$^2$ Former), an attention-based module that encodes human poses to infer pedestrians' motion intentions. These features are integrated into a compact state embedding that supports effective DRL policy training. Extensive experiments show that our method achieves superior performance over baselines, and real-world deployment demonstrates vision-based crowd navigation.",
+      "abstractKO": "밀집 군중에서 RGB-D만으로 목표 내비게이션하는 시각 기반 DRL 정책. 보행자를 점이 아니라 17관절 3D 골격으로 표현하여 의도(이동 방향)를 인코딩(I2Former: IntentFormer 자기-어텐션 + InteractFormer 로봇-중심 교차-어텐션)하고, 시간정렬 BEV 점유로 정적·동적 환경을 통합 표현해 PPO 정책에 융합. 중간 표현+동결 백본으로 zero-shot sim-to-real 달성, 쇼핑몰 109.49m를 RTX 2060(15Hz)에서 실증.",
+      "detailTags": [
+        "#Planner",
+        "#군중/사회적내비게이션",
+        "#심층강화학습",
+        "#시각기반",
+        "#표현학습"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 40,
+      "reason": "**의도-인지 표현(I2Former)**: 3D 인간 포즈(17관절)를 IntentFormer(MHSA, 관절 내 운동패턴)+InteractFormer(MHCA, 로봇 상태가 보행자 질의)로 인코딩 → 위치+속도가 버리는 선행 운동 신호(몸통 방향·보폭) 복원\n**시간정렬 BEV 점유**: 다중뷰 RGB-D→ResNet-18→3D 투영→자아중심 BEV(120×200)→로봇 궤적 기하변환 시간정렬→3D CNN → LiDAR 없이 동적 점유 포착\n**zero-shot sim-to-real**: 저수준 픽셀 대신 중간 표현(BEV+골격) + 동결 백본 → 미세조정 없이 실세계 배치\n**사회적 편안함(TPZ) 최적화**: 0.8m 사적 영역 페널티 + 의도 인코딩으로 장거리 TPZ 1.70s (SARL* 7.96s 대비 4.7배 우수)\n**Isaac Sim 인간-중심 벤치마크**: 사무실·병원·창고 3종 × 2 밀도 × SFM 보행자",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/iCrowdNav_RAL2026/index.html"
     }
   ],
   "archive": [
@@ -592,109 +625,146 @@
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ReasonNav_CoRL2025/index.html"
     },
     {
-      "id": "2606.27292",
-      "venue": "IROS 2026",
-      "venueDetail": "IEEE/RSJ IROS 2026 — 채택 확정(탑티어)",
+      "id": "2507.05240",
+      "venue": "ICRA 2026",
+      "venueDetail": "ICRA 2026",
+      "matchScore": 96,
+      "category": "VLN",
+      "feedTitle": "StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling",
+      "authorsShort": "M. Wei, C. Wan +10",
+      "feedAbstract": "Vision-Language Navigation 에이전트가 연속 비디오 입력에서 온라인 방식으로 동작하도록 설계된 스트리밍 기반 VLM 네비게이션 프레임워크",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling",
+      "titleKO": "StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling",
+      "authorsEN": "Meng Wei, Chenyang Wan, Xiqian Yu, Tai Wang, Yuqiang Yang, Xiaohan Mao, Chenming Zhu, Wenzhe Cai, Hanqing Wang, Yilun Chen, Xihui Liu, Jiangmiao Pang",
+      "authorsKO": "Meng Wei, Chenyang Wan, Xiqian Yu, Tai Wang, Yuqiang Yang, Xiaohan Mao, Chenming Zhu, Wenzhe Cai, Hanqing Wang, Yilun Chen, Xihui Liu, Jiangmiao Pang",
+      "abstractEN": "Vision-and-Language Navigation (VLN) in real-world settings requires agents to process continuous visual streams and generate actions with low latency grounded in language instructions. While Video-based Large Language Models (Video-LLMs) have driven recent progress, current VLN methods based on Video-LLM often face trade-offs among fine-grained visual understanding, long-term context modeling and computational efficiency. We introduce StreamVLN, a streaming VLN framework that employs a hybrid slow-fast context modeling strategy to support multi-modal reasoning over interleaved vision, language and action inputs. The fast-streaming dialogue context facilitates responsive action generation through a sliding-window of multi-turn dialogues, while the slow-updating memory context compresses historical visual states using a 3D-aware token pruning strategy. With this slow-fast design, StreamVLN achieves real-time dialogues through KV cache reuse, supporting long video streams with bounded context size and inference cost. Experiments on VLN-CE benchmarks show state-of-the-art performance with low latency, ensuring robustness and efficiency in real-world deployment. The project page is: https://streamvln.github.io/.",
+      "abstractKO": "Vision-Language Navigation 에이전트가 연속 비디오 입력에서 온라인 방식으로 동작하도록 설계된 스트리밍 기반 VLM 네비게이션 프레임워크",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2025",
+      "citations": 0,
+      "readMinutes": 44,
+      "reason": "**SlowFast Context Modeling**: 긴 시퀀스의 효율적인 컨텍스트 모델링을 위해 fast-streaming dialogue context (sliding-window KV cache)와 slow-updating memory (token pruning) 도입\n**Video-LLM 기반 E2E 아키텍처**: LLaVA-Video를 기반으로 하는 시각, 언어, 액션의 통합 모델링\n**대규모 데이터**: R2R, RxR, EnvDrop, ScaleVLN 등에서 450K+ 네비게이션 특화 데이터와 DAgger 수집을 통한 오류 교정\n**실제 로봇 배포**: Unitree Go2 로봇에서 실제 환경 배포 가이드 제공\n**멀티스테이지 트레이닝**: Navigation-specific + General multimodal (VQA, image-text) co-training",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/StreamVLN_ICRA2026/index.html"
+    },
+    {
+      "id": "2501.01806",
+      "venue": "RA-L 2025",
       "matchScore": 87,
       "category": "Planner",
-      "feedTitle": "BOWConnect: Parallel Bayesian Optimization over Windows with Learned Local Cost Maps for Sample-Efficient Kinodynamic Motion Planning",
-      "authorsShort": "S. Raxit, A. Newaz +2",
-      "feedAbstract": "kinodynamic 모션 플래닝의 트리 조향을 무작위 샘플링 대신 제약 베이지안 최적화(BOW)로 대체. 보상·제약을 분리된 두 GP로 학습하고 `α(u)=[μ_r−κσ_r]·P_feas` 곱셈 게이팅으로 안전을 능동 반영. 4차 RK 전파 + 양방향 병렬(N/2 forward + N/2 backward 워커, 각자…",
+      "feedTitle": "TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation",
+      "authorsShort": "D. Lee, I. Nahrendra +3",
+      "feedAbstract": "TRG-planner는 산악·동굴·재난 현장 같은 비정형 지형(unstructured terrain)에서 지상 로봇(특히 사족보행 로봇)이 안전하면서도 거리 효율적인 전역 경로를 실시간으로 계획하는 문제를 다룬다. 핵심 통찰은 \"지형의 횡단성(traversability)을 그래프의 노드 유효성과 방향성 엣지…",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation",
+      "titleKO": "TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments for Safe and Efficient Navigation",
+      "authorsEN": "Dongkyu Lee, I Made Aswin Nahrendra, Minho Oh, Byeongho Yu, Hyun Myung",
+      "authorsKO": "Dongkyu Lee, I Made Aswin Nahrendra, Minho Oh, Byeongho Yu, Hyun Myung",
+      "abstractEN": "Unstructured environments such as mountains, caves, construction sites, or disaster areas are challenging for autonomous navigation because of terrain irregularities. In particular, it is crucial to plan a path to avoid risky terrain and reach the goal quickly and safely. In this paper, we propose a method for safe and distance-efficient path planning, leveraging Traversal Risk Graph (TRG), a novel graph representation that takes into account geometric traversability of the terrain. TRG nodes represent stability and reachability of the terrain, while edges represent relative traversal risk-weighted path candidates. Additionally, TRG is constructed in a wavefront propagation manner and managed hierarchically, enabling real-time planning even in large-scale environments. Lastly, we formulate a graph optimization problem on TRG that leads the robot to navigate by prioritizing both safe and short paths. Our approach demonstrated superior safety, distance efficiency, and fast processing time compared to the conventional methods. It was also validated in several real-world experiments using a quadrupedal robot. Notably, TRG-planner contributed as the global path planner of an autonomous navigation framework for the DreamSTEP team, which won the Quadruped Robot Challenge at ICRA 2023. The project page is available at https://trg-planner.github.io .",
+      "abstractKO": "TRG-planner는 산악·동굴·재난 현장 같은 비정형 지형(unstructured terrain)에서 지상 로봇(특히 사족보행 로봇)이 안전하면서도 거리 효율적인 전역 경로를 실시간으로 계획하는 문제를 다룬다. 핵심 통찰은 \"지형의 횡단성(traversability)을 그래프의 노드 유효성과 방향성 엣지 위험도(directional edge traversal risk) 로 동시에 인코딩한다\"는 것이다.",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2025",
+      "citations": 0,
+      "readMinutes": 49,
+      "reason": "TRG-planner는 산악·동굴·재난 현장 같은 비정형 지형(unstructured terrain)에서 지상 로봇(특히 사족보행 로봇)이 안전하면서도 거리 효율적인 전역 경로를 실시간으로 계획하는 문제를 다룬다. 핵심 통찰은 \"지형의 횡단성(traversability)을 그래프의 노드 유효성과 방향성 엣지 위험도(directional edge traversal risk) 로 동시에 인코딩한다\"는 것이다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TRG-Planner_RAL2025/index.html"
+    },
+    {
+      "id": "2502.01536",
+      "venue": "RA-L 2025",
+      "venueDetail": "RA-L 2025",
+      "matchScore": 96,
+      "category": "VLN",
+      "feedTitle": "VR-Robo: Real-to-Sim-to-Real Framework for Visual Robot Navigation",
+      "authorsShort": "S. Zhu et al.",
+      "feedAbstract": "3D Gaussian Splatting 기반 장면 재구성으로 포토리얼리스틱 디지털 트윈 시뮬레이션을 생성하고, 에고센트릭 시각 인식을 지원하는 RL 정책 학습으로 RGB만 사용한 sim-to-real 정책 전이 실현.",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "Real-to-Sim-to-Real Framework for Visual Robot Navigation and Locomotion",
+      "titleKO": "Real-to-Sim-to-Real Framework for Visual Robot Navigation and Locomotion",
+      "authorsEN": "Shaoting Zhu et al.",
+      "authorsKO": "Shaoting Zhu et al.",
+      "abstractEN": "Recent success in legged robot locomotion is attributed to the integration of reinforcement learning and physical simulators. However, these policies often encounter challenges when deployed in real-world environments due to sim-to-real gaps, as simulators typically fail to replicate visual realism and complex real-world geometry. Moreover, the lack of realistic visual rendering limits the ability of these policies to support high-level tasks requiring RGB-based perception like ego-centric navigation. This paper presents a Real-to-Sim-to-Real framework that generates photorealistic and physically interactive \"digital twin\" simulation environments for visual navigation and locomotion learning. Our approach leverages 3D Gaussian Splatting (3DGS) based scene reconstruction from multi-view images and integrates these environments into simulations that support ego-centric visual perception and mesh-based physical interactions. To demonstrate its effectiveness, we train a reinforcement learning policy within the simulator to perform a visual goal-tracking task. Extensive experiments show that our framework achieves RGB-only sim-to-real policy transfer. Additionally, our framework facilitates the rapid adaptation of robot policies with effective exploration capability in complex new environments, highlighting its potential for applications in households and factories.",
+      "abstractKO": "3D Gaussian Splatting 기반 장면 재구성으로 포토리얼리스틱 디지털 트윈 시뮬레이션을 생성하고, 에고센트릭 시각 인식을 지원하는 RL 정책 학습으로 RGB만 사용한 sim-to-real 정책 전이 실현.",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2025",
+      "citations": 0,
+      "readMinutes": 42,
+      "reason": "3D Gaussian Splatting 기반 다시점 이미지 장면 재구성으로 포토리얼리스틱 물리 상호작용 시뮬레이션 생성\n에고센트릭 시각 인식과 메시 기반 물리 상호작용을 지원하는 통합 시뮬레이션 환경 구축\nRGB만 사용한 정책 전이와 새 환경에서의 신속한 정책 적응 능력 실증",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/VR-Robo_RAL2025/index.html"
+    },
+    {
+      "id": "2503.02247",
+      "venue": "IROS 2025",
+      "venueDetail": "IROS 2025 (Oral)",
+      "matchScore": 96,
+      "category": "VLN",
+      "feedTitle": "WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation",
+      "authorsShort": "D. Nie, X. Guo +3",
+      "feedAbstract": "VLM을 기반으로 세계 모델을 구축하여 객체 탐색 네비게이션을 수행하는 프레임워크로, 할루시네이션을 줄이고 탐색 효율성을 높임.",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation",
+      "titleKO": "WMNav: Integrating Vision-Language Models into World Models for Object Goal Navigation",
+      "authorsEN": "Dujun Nie, Xianda Guo, Yiqun Duan, Ruijun Zhang, Long Chen",
+      "authorsKO": "Dujun Nie, Xianda Guo, Yiqun Duan, Ruijun Zhang, Long Chen",
+      "abstractEN": "Object Goal Navigation-requiring an agent to locate a specific object in an unseen environment-remains a core challenge in embodied AI. Although recent progress in Vision-Language Model (VLM)-based agents has demonstrated promising perception and decision-making abilities through prompting, none has yet established a fully modular world model design that reduces risky and costly interactions with the environment by predicting the future state of the world. We introduce WMNav, a novel World Model-based Navigation framework powered by Vision-Language Models (VLMs). It predicts possible outcomes of decisions and builds memories to provide feedback to the policy module. To retain the predicted state of the environment, WMNav proposes the online maintained Curiosity Value Map as part of the world model memory to provide dynamic configuration for navigation policy. By decomposing according to a human-like thinking process, WMNav effectively alleviates the impact of model hallucination by making decisions based on the feedback difference between the world model plan and observation. To further boost efficiency, we implement a two-stage action proposer strategy: broad exploration followed by precise localization. Extensive evaluation on HM3D and MP3D validates WMNav surpasses existing zero-shot benchmarks in both success rate and exploration efficiency (absolute improvement: +3.2% SR and +3.2% SPL on HM3D, +13.5% SR and +1.1% SPL on MP3D). Project page: https://b0b8k1ng.github.io/WMNav/.",
+      "abstractKO": "VLM을 기반으로 세계 모델을 구축하여 객체 탐색 네비게이션을 수행하는 프레임워크로, 할루시네이션을 줄이고 탐색 효율성을 높임.",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2025",
+      "citations": 0,
+      "readMinutes": 43,
+      "reason": "VLM 기반 세계 모델 설계로 환경의 미래 상태 예측 및 메모리 구축\nCuriosity Value Map을 통한 동적 네비게이션 정책 설정\n인간과 유사한 사고 프로세스 분해로 모델 할루시네이션 감소\n2단계 행동 제안 전략: 광범위 탐색 → 정밀 위치 파악\nHM3D와 MP3D에서 기존 zero-shot 방식 대비 성능 향상 (+3.2% SR/SPL on HM3D, +13.5% SR on MP3D)",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/WMNav_IROS2025/index.html"
+    },
+    {
+      "id": "2604.16388",
+      "venue": "CVPR 2026",
+      "venueDetail": "IEEE/CVF CVPR 2026 — 채택 확정(탑티어)",
+      "matchScore": 96,
+      "category": "Planner",
+      "feedTitle": "Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering",
+      "authorsShort": "S. Lee, J. Lee +4",
+      "feedAbstract": "목표를 명시적 구성(q_goal)이 아니라 이미지(I_goal) 로 주는 새로운 모션 플래닝 문제를 정의·해결. 로봇을 미분 가능 3D Gaussian Splatting으로 렌더링해 렌더링 손실 `‖I(q)−I_goal‖`의 구성공간 그래디언트(활용)와 RRT 무작위 스티어링(탐색)을 한 트리에서 융합. 프론티어 절단…",
       "tags": [
         "#Planner",
-        "#샘플효율모션플래닝",
-        "#베이지안최적화",
-        "#양방향병렬탐색",
-        "#실제로봇실험"
+        "#RRT계열",
+        "#미분가능렌더링",
+        "#실제로봇실험",
+        "#탑티어학회채택"
       ],
-      "titleEN": "BOWConnect: Parallel Bayesian Optimization over Windows with Learned Local Cost Maps for Sample-Efficient Kinodynamic Motion Planning",
-      "titleKO": "BOWConnect: Parallel Bayesian Optimization over Windows with Learned Local Cost Maps for Sample-Efficient Kinodynamic Motion Planning",
-      "authorsEN": "Sourav Raxit, Abdullah Al Redwan Newaz, Jose Fuentes, Leonardo Bobadilla",
-      "authorsKO": "Sourav Raxit, Abdullah Al Redwan Newaz, Jose Fuentes, Leonardo Bobadilla",
-      "abstractEN": "This paper presents BOWConnect, a bidirectional parallel kinodynamic motion planner that addresses three fundamental limitations of existing sampling-based methods: sample inefficiency in high-dimensional state spaces, unreliable cost heuristics under dynamic constraints, and poor performance in narrow passage environments. Unlike classical planners that rely on random control sampling and geometric distance heuristics, BOWConnect integrates Bayesian Optimization over Windows (BOW) as a learning-based steering function within a parallel tree-based exploration framework, enabling each worker to learn local cost maps and constraints to guide sampling toward dynamically feasible and collision-free controls. A bidirectional architecture simultaneously grows forward and backward trees from the start and goal regions in parallel threads, with a spatial hashing mechanism enabling fast connection queries and a boundary value problem solver generating kinodynamically consistent bridge trajectories. Extensive evaluations across ten benchmark environments demonstrate that BOWConnect achieves 100\\% success while delivering the fastest or near-fastest planning time in complex scenarios, including narrow passages and non-convex spaces where state-of-the-art planners fail or degrade substantially. Real-world deployment on a ground vehicle and a quadrotor confirms real-time planning with no collisions. Videos of real-world and simulated experiments, high-resolution versions of the figures, and the open-source code are available at https://bow-connect.github.io/.",
-      "abstractKO": "kinodynamic 모션 플래닝의 트리 조향을 무작위 샘플링 대신 제약 베이지안 최적화(BOW)로 대체. 보상·제약을 분리된 두 GP로 학습하고 `α(u)=[μ_r−κσ_r]·P_feas` 곱셈 게이팅으로 안전을 능동 반영. 4차 RK 전파 + 양방향 병렬(N/2 forward + N/2 backward 워커, 각자 MotionTree+BOW) + 공간 해싱 + BVP 비례제어 브릿지로, 좁은 통로·Bicycle 강제약에서 100% 성공·수백 배 빠른 속도 달성.",
+      "titleEN": "Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering",
+      "titleKO": "Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering",
+      "authorsEN": "Sebin Lee, Jumin Lee, Taeyeon Kim, Youngju Na, Woobin Im, Sungeui Yoon",
+      "authorsKO": "Sebin Lee, Jumin Lee, Taeyeon Kim, Youngju Na, Woobin Im, Sungeui Yoon",
+      "abstractEN": "Rapidly-exploring random trees (RRTs) have been widely adopted for robot motion planning due to their robustness and theoretical guarantees. However, existing RRT-based planners require explicit goal configurations specified as numerical joint angles, while many practical applications provide goal specifications through visual observations such as images or demonstration videos where precise goal configurations are unavailable. In this paper, we propose visual-RRT (vRRT), a motion planner that enables visual-goal planning by unifying gradient-based exploitation from differentiable robot rendering with sampling-based exploration from RRTs. We further introduce (i) a frontier-based exploration-exploitation strategy that adaptively prioritizes visually promising search regions, and (ii) inertial gradient tree expansion that inherits optimization states across tree branches for momentum-consistent gradient exploitation. Extensive experiments across various robot manipulators including Franka, UR5e, and Fetch demonstrate that vRRT achieves effective visual-goal planning in both simulated and real-world settings, bridging the gap between sampling-based planning and vision-centric robot applications. Our code is available at https://sgvr.kaist.ac.kr/Visual-RRT.",
+      "abstractKO": "목표를 명시적 구성(q_goal)이 아니라 이미지(I_goal) 로 주는 새로운 모션 플래닝 문제를 정의·해결. 로봇을 미분 가능 3D Gaussian Splatting으로 렌더링해 렌더링 손실 `‖I(q)−I_goal‖`의 구성공간 그래디언트(활용)와 RRT 무작위 스티어링(탐색)을 한 트리에서 융합. 프론티어 절단 기하 분포 노드 선택 + 관성 그래디언트 트리 확장(노드가 부모 Adam 모멘트 상속)으로 그래디언트 단독의 지역 최소점과 샘플링 단독의 무방향성을 상호 보완. 성공률 약 3배(먼 목표 2%→41%), 실로봇 Fetch 80%.",
       "detailTags": [
         "#Planner",
-        "#샘플효율모션플래닝",
-        "#베이지안최적화",
-        "#양방향병렬탐색",
-        "#실제로봇실험"
+        "#RRT계열",
+        "#미분가능렌더링",
+        "#실제로봇실험",
+        "#탑티어학회채택"
       ],
       "year": "2026",
       "citations": 0,
       "readMinutes": 38,
-      "reason": "**BOW(학습 조향)**: GP_r(보상 `r(u)=−‖p(T)−p_target‖`)·GP_c(제약) 이중 GP, `P_feas(u)=Φ(μ_c/σ_c)`, 획득함수 `α(u)=[μ_r−κσ_r]·P_feas` → 불확실성-인지 안전 조향\n**양방향 병렬**: forward/backward 워커가 각자 트리·BOW 보유, 포트폴리오 성공확률 `P_success=1−(1−p)^(N_f·N_b)`\n**공간 해싱**: `h(x)=⌊(x−x₀)/Δ⌋⊕...` 로 근접 노드 O(1) 조회 → 연결 후보 게이팅\n**BVP 비례제어 브릿지**: `ω=clamp(k_p·Δθ/Δt)` 로 forward·backward 트리 연결\n**학습 지역 비용맵**: 좁은 통로 등 난도 곡선 해석",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/BOWConnect_IROS2026/index.html"
-    },
-    {
-      "id": "2606.25393",
-      "venue": "TFR 2026",
-      "venueDetail": "IEEE Transactions on Field Robotics (T-FR), vol.3, pp.494–517, 2026 — 게재 확정(탑티어)",
-      "matchScore": 96,
-      "category": "Planner",
-      "feedTitle": "FLISP: Large-Scale Tunnel Air–Ground Collaboration With Fast LiDAR-IMU Synchronized Path Planner",
-      "authorsShort": "F. Guo, R. Shen +3",
-      "feedAbstract": "GPS·사전지도가 없고 기하적으로 퇴화된 수력발전 방류 터널에서, 단일 UGV-탑재 LiDAR-IMU 센서 스위트만으로 공중(UAV)·지상(UGV) 이종 팀의 경로를 동기 생성하는 mapless 협력 계획기. UGV는 동적 비닝+다항 적합 코리도어에 개선 반딧불 알고리즘(단면 1D 횡방향 회피)을, UAV는 통신반경…",
-      "tags": [
-        "#Planner",
-        "#이종공중-지상협력",
-        "#메타휴리스틱최적화",
-        "#실제로봇실험",
-        "#탑티어저널게재"
-      ],
-      "titleEN": "Large-Scale Tunnel Air–Ground Collaboration With FLISP: Fast LiDAR-IMU Synchronized Path Planner",
-      "titleKO": "Large-Scale Tunnel Air–Ground Collaboration With FLISP: Fast LiDAR-IMU Synchronized Path Planner",
-      "authorsEN": "Fenghe Guo, Runjie Shen, Chenyang Sun, Junrui Zhang, Quanxi Zhan 외",
-      "authorsKO": "Fenghe Guo, Runjie Shen, Chenyang Sun, Junrui Zhang, Quanxi Zhan 외",
-      "abstractEN": "Hydropower tunnel inspection is critical for infrastructure integrity yet remains inefficient and hazardous using manual methods. We propose FLISP (Fast LiDAR-IMU Synchronized Path Planner), a mapless planning framework for cooperative UGV-UAV inspection. Unlike traditional map-based paradigms, FLISP features three core contributions: (1) a unified architecture where a single UGV-mounted LiDAR-IMU suite drives synchronized path generation for both platforms; (2) platform-specific solvers utilizing an enhanced Firefly Algorithm for UGV obstacle avoidance and a dynamic iterative optimizer for UAV flight; and (3) a hierarchical refinement strategy ensuring kinematic feasibility without state estimation drift. Benchmarks in a 1.2 km operational tunnel demonstrate that FLISP circumvents structural bottlenecks of map-based methods, eliminating map rasterization overhead (Fast-LIO2 + A*) and sampling instability (LIO-SAM + RRT*). FLISP achieves a 100% success rate with 7 ms latency, representing a 7-fold speedup over grid-based and a three-order-of-magnitude improvement over sampling-based baselines. Validated in operational hydropower tunnels, this approach offers a scalable solution for robotic inspection in feature-degraded linear infrastructure. A demonstration video is available at https://youtu.be/Y_ezs1PfLJ4, and the code at https://github.com/ArchibaldGuo/FLISP.git.",
-      "abstractKO": "GPS·사전지도가 없고 기하적으로 퇴화된 수력발전 방류 터널에서, 단일 UGV-탑재 LiDAR-IMU 센서 스위트만으로 공중(UAV)·지상(UGV) 이종 팀의 경로를 동기 생성하는 mapless 협력 계획기. UGV는 동적 비닝+다항 적합 코리도어에 개선 반딧불 알고리즘(단면 1D 횡방향 회피)을, UAV는 통신반경 투영+극좌표 동적 반복 최적화를 적용해, 1.0–1.2km 가동 터널에서 100% 성공률·~7ms 지연·39.7MB RAM으로 실증.",
-      "detailTags": [
-        "#Planner",
-        "#이종공중-지상협력",
-        "#메타휴리스틱최적화",
-        "#실제로봇실험",
-        "#탑티어저널게재"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 39,
-      "reason": "**UGV-중심 계층적 협력**: 단일 센서 스위트가 인지를 담당하고 UAV 경로가 통신반경 투영(γ_i)으로 UGV에 종속 → \"Heterogeneous Lookahead Paradox\" 구조적 해소, SLAM 드리프트 누적 우회(mapless)\n**개선된 반딧불 알고리즘(1D)**: 터널 원통 단면을 활용해 회피 탐색을 횡방향 1차원으로 환원, 밝기 `I(y)=d_obs−w_tilt(|y|/R_pipe)²−w_center|y|`로 회피·전복방지·중앙유지 다목적 균형\n**동적 비닝 코리도어 + 베이지안 강건화**: 요각 기반 적응 스텝 Δs, 전·후진 보간 + 가우시안 사후확률로 이상치 보정(O(N))\n**UAV 동적 샘플링 최적화**: 극좌표 후보 + 4목적 비용 `J=αJ₁+βJ₂−ηJ₃+δJ₄`(안전/평활/진행/고도), 비균일 B-스플라인 곡률 시간 스케일\n**실 인프라 검증**: Ouster OS1-64 + DJI Mavic 3T, 가동 방류 터널 1km",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/FLISP_TFR2026/index.html"
-    },
-    {
-      "id": "2606.26047",
-      "venue": "RA-L 2026",
-      "venueDetail": "IEEE Robotics and Automation Letters (RA-L) 2026 — 게재 확정(탑티어)",
-      "matchScore": 84,
-      "category": "Planner",
-      "feedTitle": "iCrowdNav: Intention-Aware Scene Representations for Visual Crowd Navigation",
-      "authorsShort": "군. 기준)",
-      "feedAbstract": "밀집 군중에서 RGB-D만으로 목표 내비게이션하는 시각 기반 DRL 정책. 보행자를 점이 아니라 17관절 3D 골격으로 표현하여 의도(이동 방향)를 인코딩(I2Former: IntentFormer 자기-어텐션 + InteractFormer 로봇-중심 교차-어텐션)하고, 시간정렬 BEV 점유로 정적·동적 환경을 통합…",
-      "tags": [
-        "#Planner",
-        "#군중/사회적내비게이션",
-        "#심층강화학습",
-        "#시각기반",
-        "#표현학습"
-      ],
-      "titleEN": "iCrowdNav: Intention-Aware Scene Representations for Visual Crowd Navigation",
-      "titleKO": "iCrowdNav: Intention-Aware Scene Representations for Visual Crowd Navigation",
-      "authorsEN": "군중 내비게이션·시각 표현학습 연구진 (arXiv 메타 기준)",
-      "authorsKO": "군중 내비게이션·시각 표현학습 연구진 (arXiv 메타 기준)",
-      "abstractEN": "Robot crowd navigation requires the ability to infer human intentions while accounting for the structural constraints of the environment. Currently, deep reinforcement learning (DRL) provides a promising method for learning navigation policies that understand human intentions. However, most of them rely on limited scene representations, treating pedestrians as simple 2D points and ignoring rich visual cues from both humans and the environment. To address this issue, we introduce iCrowdNav, a novel visual crowd navigation method with intention-aware scene representations, to encode behavioral and structural context from egocentric visual observations. Our method employs two key components: a spatio-temporal encoder for extracting occupancy features of the scene, and Intent-Interact Former (I$^2$ Former), an attention-based module that encodes human poses to infer pedestrians' motion intentions. These features are integrated into a compact state embedding that supports effective DRL policy training. Extensive experiments show that our method achieves superior performance over baselines, and real-world deployment demonstrates vision-based crowd navigation.",
-      "abstractKO": "밀집 군중에서 RGB-D만으로 목표 내비게이션하는 시각 기반 DRL 정책. 보행자를 점이 아니라 17관절 3D 골격으로 표현하여 의도(이동 방향)를 인코딩(I2Former: IntentFormer 자기-어텐션 + InteractFormer 로봇-중심 교차-어텐션)하고, 시간정렬 BEV 점유로 정적·동적 환경을 통합 표현해 PPO 정책에 융합. 중간 표현+동결 백본으로 zero-shot sim-to-real 달성, 쇼핑몰 109.49m를 RTX 2060(15Hz)에서 실증.",
-      "detailTags": [
-        "#Planner",
-        "#군중/사회적내비게이션",
-        "#심층강화학습",
-        "#시각기반",
-        "#표현학습"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 40,
-      "reason": "**의도-인지 표현(I2Former)**: 3D 인간 포즈(17관절)를 IntentFormer(MHSA, 관절 내 운동패턴)+InteractFormer(MHCA, 로봇 상태가 보행자 질의)로 인코딩 → 위치+속도가 버리는 선행 운동 신호(몸통 방향·보폭) 복원\n**시간정렬 BEV 점유**: 다중뷰 RGB-D→ResNet-18→3D 투영→자아중심 BEV(120×200)→로봇 궤적 기하변환 시간정렬→3D CNN → LiDAR 없이 동적 점유 포착\n**zero-shot sim-to-real**: 저수준 픽셀 대신 중간 표현(BEV+골격) + 동결 백본 → 미세조정 없이 실세계 배치\n**사회적 편안함(TPZ) 최적화**: 0.8m 사적 영역 페널티 + 의도 인코딩으로 장거리 TPZ 1.70s (SARL* 7.96s 대비 4.7배 우수)\n**Isaac Sim 인간-중심 벤치마크**: 사무실·병원·창고 3종 × 2 밀도 × SFM 보행자",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/iCrowdNav_RAL2026/index.html"
+      "reason": "**Visual-Goal Path Planning 정식화**: 정확한 목표 구성 없이 이미지/데모/생성이미지로 비충돌 경로 탐색\n**미분 가능 렌더링 × 샘플링 융합**: 3DGS 로봇 렌더 그래디언트(활용) + RRT 탐색\n**관성 그래디언트 트리**: m=β₁m_p+(1−β₁)∇ℒ, v=β₂v_p+(1−β₂)∇ℒ², q_new=q_p−α·m̂/(√v̂+δ), β₁=β₂=0.9\n**프론티어 노드 선택**: p_frontier(k)=(1−κ)κ^k/(1−κ^M), 손실 랭킹 편향\n**인식+플래닝 통합**: 자세 추정도 부산물로 SOTA(실 이미지 0.083 rad)",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/VisualRRT_CVPR2026/index.html"
     },
     {
       "id": "2606.24101",
