@@ -1,13 +1,161 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-24T19:30:05.514Z",
+  "generatedAt": "2026-07-25T19:30:06.220Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 7. 25  토요일",
+    "date": "2026. 7. 26  일요일",
     "title": "오늘의 리뷰",
     "subtitle": "VLN·Planner 새 리뷰 5편 · 전체 95편"
   },
   "papers": [
+    {
+      "id": "2606.13494",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 2026 (학회 미확정)",
+      "matchScore": 87,
+      "category": "VLN",
+      "feedTitle": "NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation",
+      "authorsShort": "D. Azuma, T. Miyanishi +7",
+      "feedAbstract": "미래 관찰 예측·목표 진행도 가치·행동 청크를 9-프레임 latent canvas에서 공동 디퓨전 생성하는 통합 세계-행동 모델로, Cosmos Predict2 2B 백본 위에서 외부 CEM 플래너 없이 image-goal navigation을 수행하여 실제 로봇 79.2%(NWM 16.7%·OmniVLA 58.3%…",
+      "tags": [
+        "#VLN",
+        "#WorldModel",
+        "#실제로봇실험"
+      ],
+      "titleEN": "NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation",
+      "titleKO": "NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation",
+      "authorsEN": "Daichi Azuma, Taiki Miyanishi, Koya Sakamoto, Shuhei Kurita, Yaonan Zhu, Petr Khrapchenkov, Motoaki Kawanabe, Yusuke Iwasawa, Yutaka Matsuo",
+      "authorsKO": "Daichi Azuma, Taiki Miyanishi, Koya Sakamoto, Shuhei Kurita, Yaonan Zhu, Petr Khrapchenkov, Motoaki Kawanabe, Yusuke Iwasawa, Yutaka Matsuo",
+      "abstractEN": "Goal-conditioned visual navigation requires a robot to act under partial observability by anticipating how its motion will change the future egocentric view and whether that change brings it closer to the goal. Navigation world models provide such visual foresight, but they remain prediction modules that require an external planner to convert predicted futures into closed-loop control. We propose Navigation World Action Model (NavWAM), a diffusion-transformer policy that turns navigation world-model prediction into executable action by representing future observations, goal-progress values, and action chunks in a shared latent sequence. By learning future prediction jointly with the action and value targets that determine closed-loop behavior, NavWAM makes visual foresight directly usable for robot control. We build NavWAM through simulation pretraining and real-robot adaptation, and evaluate it on image-goal navigation against planning-based world models and a representative direct navigation policy. Across offline benchmarks and closed-loop real-robot deployment, NavWAM improves over planning-based world-model baselines in our evaluations while using the default policy mode without CEM-style action search. Project page: https://dachii-azm.github.io/navwam/",
+      "abstractKO": "미래 관찰 예측·목표 진행도 가치·행동 청크를 9-프레임 latent canvas에서 공동 디퓨전 생성하는 통합 세계-행동 모델로, Cosmos Predict2 2B 백본 위에서 외부 CEM 플래너 없이 image-goal navigation을 수행하여 실제 로봇 79.2%(NWM 16.7%·OmniVLA 58.3% 능가)를 ~5Hz로 달성.",
+      "detailTags": [
+        "#VLN",
+        "#WorldModel",
+        "#실제로봇실험"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 40,
+      "reason": "**Navigation World Action Model**: 세계 모델 예측 + 행동 생성 + 가치 추정을 단일 디퓨전 캔버스에서 공동 생성\n**외부 플래너 제거**: 행동을 직접 디노이징해 NWM CEM(≈14,521 TFLOPs/act) 대비 ≈4.45 TFLOPs/act로 3,000배↓, ~5Hz 온보드 실시간\n**비디오 prior 이식**: Cosmos Predict2 2B 백본 + 행동/가치 슬롯 + λ=5 업웨이트 + 3단계 커리큘럼\n**단일 가중치 다중 모드**: Policy/World-Model/Value (학습 50/25/25) 마스킹 멀티태스크\n**2B로 7B 경쟁**: OmniVLA-7B와 대등한 image-goal 성공률을 1/3.5 규모로 달성",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NavWAM_arxiv2026/index.html"
+    },
+    {
+      "id": "2605.21901",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 프리프린트 (cs.RO) — 미정",
+      "matchScore": 84,
+      "category": "Planner",
+      "feedTitle": "Higher Order Reasoning for Collaborative Communicationless Mobile Robot Operations",
+      "authorsShort": "J. Reasoner, N. Bezzo",
+      "feedAbstract": "Dynamic Epistemic Logic 기반 고차 믿음 입자(1~3차)와 Temporally Aware MPPI를 결합하여 통신 완전 차단 환경에서 이동 로봇 팀의 암묵적 조율(implicit coordination)을 달성, 임무 완료 시간 20.8%(시뮬) / 57.8%(실험) 단축.",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "Higher Order Reasoning for Collaborative Communicationless Mobile Robot Operations",
+      "titleKO": "Higher Order Reasoning for Collaborative Communicationless Mobile Robot Operations",
+      "authorsEN": "Jonathan Reasoner, Nicola Bezzo",
+      "authorsKO": "Jonathan Reasoner, Nicola Bezzo",
+      "abstractEN": "In communicationless environments, multi-robot systems must operate without the constant information exchange that many coordination strategies typically assume. This paper presents a novel dynamic epistemic planning framework that enables implicit coordination and long horizon planning through higher-order reasoning among robots. With our approach, robots form and propagate higher-order belief particles, update world beliefs using Bayesian inference, and select actions via a behavior tree that anticipates teammates' likely decisions. A temporally aware Model Predictive Path Integral (MPPI) controller integrates this reasoning into low-level execution, allowing robots to plan intercepts and adapt trajectories under partial observability. The proposed framework is evaluated in both simulations and physical experiments, where it consistently reduces task completion time compared to a first-order baseline, demonstrating that epistemic logic can serve as a robust foundation for resilient coordination in communication-restricted domains.",
+      "abstractKO": "Dynamic Epistemic Logic 기반 고차 믿음 입자(1~3차)와 Temporally Aware MPPI를 결합하여 통신 완전 차단 환경에서 이동 로봇 팀의 암묵적 조율(implicit coordination)을 달성, 임무 완료 시간 20.8%(시뮬) / 57.8%(실험) 단축.",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 42,
+      "reason": "Dynamic Epistemic Logic 기반 고차(1/2/3차) 믿음 입자 프레임워크\n2차 공감 입자(empathy particles)로 팀원에게 예측 가능한 행동 보장\n7가지 관측 이벤트 기반 Bayesian 믿음 업데이트\n시간 되감기 추론(time rewind)으로 팀원의 과거 행동 의도 재해석\nTemporally Aware MPPI: 이동 중인 팀원을 목표로 한 동적 인터셉트",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HigherOrderReasoning_arxiv2026/index.html"
+    },
+    {
+      "id": "2605.21935",
+      "venue": "RSS 2026",
+      "venueDetail": "RSS 2026 (Robotics: Science and Systems) — Accepted",
+      "matchScore": 87,
+      "category": "VLN",
+      "feedTitle": "MIF: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments",
+      "authorsShort": "P. Jiang, H. Liu +3",
+      "feedAbstract": "이족보행 인간형 로봇(Unitree G1)의 보행 유도 시각 왜곡과 동적 환경 변화를 삼중 필드(Appearance/Spatial/Geometry Field)로 처리하여 자연어 지시 기반 안전 내비게이션을 달성.",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "Learning to Evolve: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments",
+      "titleKO": "Learning to Evolve: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments",
+      "authorsEN": "Peifeng Jiang, Hong Liu, Jin Jin, Wenshuai Wang, Xia Li",
+      "authorsKO": "Peifeng Jiang, Hong Liu, Jin Jin, Wenshuai Wang, Xia Li",
+      "abstractEN": "Safe manipulation-oriented navigation for humanoid robots requires scene memory that remains reliable under locomotion-induced perceptual distortion, environmental changes, and interaction-level geometric safety constraints. Existing semantic mapping and scene-graph systems are difficult to deploy directly in this setting because they often assume stable camera trajectories, static environments, or coarse object geometry. We introduce the Multi-modal Interactive Field (MIF), a humanoid-oriented system that integrates confidence-aware semantic 3D Gaussian Splatting, discrepancy-triggered spatial memory updates, and task-driven geometric reconstruction within a closed-loop perception-adaptation pipeline. MIF couples three fields: an uncertainty-aware 3DGS Appearance Field that suppresses gait-induced blur, a Spatial Field that maintains topological memory, and a Geometry Field that supports Interaction Pose Safety (IPS) before manipulation. A discrepancy detection score is introduced to separate locomotion-induced false-positive changes from persistent changes and updates only locally inconsistent regions. On a Unitree-G1 humanoid in a real dynamic office, MIF improves relocation success in non-static environments from 12% to 94% compared with static scene-graph memory, while reducing semantic memory footprint by 91.4% through feature distillation for practical online operation. Project page and code: https://ziya-jiang.github.io/MIF-homepage/",
+      "abstractKO": "이족보행 인간형 로봇(Unitree G1)의 보행 유도 시각 왜곡과 동적 환경 변화를 삼중 필드(Appearance/Spatial/Geometry Field)로 처리하여 자연어 지시 기반 안전 내비게이션을 달성.",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 47,
+      "reason": "신뢰도 인식 3D Gaussian Splatting으로 보행 블러 자동 필터링\n계층적 씬 그래프(Spatial Field)로 자연어 목표의 ⟨Region, Landmark, Object⟩ 트리플렛 그라운딩\nFlow Matching 기반 on-demand 3D 메시 생성 + IPS 검증 (충돌률 0%)\n다중 모달 불일치 감지로 보행 아티팩트 vs 실제 환경 변화 구별 (2.3초 지역 업데이트)\n정적 맵 방법 대비 재배치 시나리오 성공률 12% → 94%",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/MIF_RSS2026/index.html"
+    },
+    {
+      "id": "2605.22816",
+      "venue": "CVPR 2026",
+      "venueDetail": "CVPR 2026",
+      "matchScore": 96,
+      "category": "VLN",
+      "feedTitle": "AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation",
+      "authorsShort": "W. Guo, X. Xu +8",
+      "feedAbstract": "VLN 에이전트가 Key Node(방 전환, 경로 이탈, 정지 오류)에서만 선택적으로 씬-진행도-계획 삼중 구조 추론을 수행하는 자기인식 프레임워크로, 단안 RGB만으로 R2R SR 65.4%, RxR SR 67.6% SOTA 달성.",
+      "tags": [
+        "#VLN",
+        "#LLM/VLM추론증강",
+        "#자기인식",
+        "#선택적추론",
+        "#코드공개"
+      ],
+      "titleEN": "AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation",
+      "titleKO": "AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation",
+      "authorsEN": "Wenxuan Guo, Xiuwei Xu, Yichen Liu, Xiangyu Li, Hang Yin, Huangxing Chen, Wenzhao Zheng, Jianjiang Feng, Jie Zhou, Jiwen Lu",
+      "authorsKO": "Wenxuan Guo, Xiuwei Xu, Yichen Liu, Xiangyu Li, Hang Yin, Huangxing Chen, Wenzhao Zheng, Jianjiang Feng, Jie Zhou, Jiwen Lu",
+      "abstractEN": "Vision-and-Language Navigation (VLN) requires an agent to ground language instructions to its own movement within a visual environment. While state-of-the-art methods leverage the reasoning capabilities of Vision-Language Models (VLMs) for end-to-end action prediction, they often lack an explicit and explainable understanding of the relationships between the agent, the instruction, and the scene. Conversely, explicitly building a scene map for heuristic planning is intuitively appealing but relies on additional 3D sensors and hinders large-scale vision-language pre-training. To bridge this gap, we propose AwareVLN, a novel framework that equips the navigation model with a self-aware reasoning mechanism, enabling it to understand the agent's state and task progress in a fully end-to-end and data-driven manner. Our approach features two key innovations: (1) a structural reasoning module that fosters spatial and task-oriented self-awareness, and (2) an automatic data engine with progress division for effective training. Extensive experiments on various datasets in Habitat simulator show our AwareVLN significantly outperforms previous state-of-the-art vision-language navigation methods. Project page: https://gwxuan.github.io/AwareVLN/.",
+      "abstractKO": "VLN 에이전트가 Key Node(방 전환, 경로 이탈, 정지 오류)에서만 선택적으로 씬-진행도-계획 삼중 구조 추론을 수행하는 자기인식 프레임워크로, 단안 RGB만으로 R2R SR 65.4%, RxR SR 67.6% SOTA 달성.",
+      "detailTags": [
+        "#VLN",
+        "#LLM/VLM추론증강",
+        "#자기인식",
+        "#선택적추론",
+        "#코드공개"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 52,
+      "reason": "**선택적 자기인식 추론**: Key Node(~23% 스텝)에서만 [REASON] 모드, 나머지는 경량 [ACT] 모드\n**삼중 구조 추론**: 씬 설명 + 진행도 평가 + 다음 단계 계획의 명시적 자기인식\n**자동 데이터 엔진**: Qwen-VL-Max + DAgger로 어노테이션 없이 추론 감독 데이터 생성\n**상대 스텝 융합**: R' = R ⊕ (t - t_prev)로 추론의 \"신선도\" 인코딩\n**단안 RGB SOTA**: Depth+Odometry 사용 방법(BEVBert, ETPNav)을 단안 RGB만으로 능가",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/AwareVLN_CVPR2026/index.html"
+    },
+    {
+      "id": "2605.22693",
+      "venue": "arXiv 2026",
+      "matchScore": 84,
+      "category": "Planner",
+      "feedTitle": "Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments",
+      "authorsShort": "H. Bui, A. Khanal +2",
+      "feedAbstract": "POMDP 기반 UAV+UGV 이종 팀 경로 계획, CTP 확장, IAP 정보 이득 행동 가지치기, GATv2 LIAP(96-218초→0.24-0.75초), 이동거리 31.9-49.9% 절감, arXiv 2026",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments",
+      "titleKO": "Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments",
+      "authorsEN": "Hoang-Dung Bui, Abhish Khanal, Raihan Islam Arnob, Gregory J. Stein",
+      "authorsKO": "Hoang-Dung Bui, Abhish Khanal, Raihan Islam Arnob, Gregory J. Stein",
+      "abstractEN": "Autonomous robot teams navigating partially known environments face costly backtracking when ground robots encounter blocked roads that are only revealed upon physical traversal. We address this with Scout-Assisted Planning, a heterogeneous planning framework in which scouting Unmanned Aerial Vehicles proactively gather environmental information to improve Unmanned Ground Vehicle navigation. To focus scouting on the most consequential edges, we propose Information Gain-based Action Pruning, which scores candidate scouting actions by their expected impact on ground robot behavior. Since exact Information Gain-based Action Pruning computation is prohibitively expensive, we develop a Graph Neural Network based model that predicts information gain values directly from graph structure and belief state, reducing planning time to real-time levels without sacrificing solution quality. Experiments across three environment types show that SAP with Information Gain Action Pruning reduces ground robot travel cost by 31.9--37.7% over the Canadian Traveler Problem baseline, and outperforms proximity-based scouting guidance by an additional 8--14%, confirming that principled information-gain-guided scouting is both more effective and computationally feasible for real-world deployment",
+      "abstractKO": "POMDP 기반 UAV+UGV 이종 팀 경로 계획, CTP 확장, IAP 정보 이득 행동 가지치기, GATv2 LIAP(96-218초→0.24-0.75초), 이동거리 31.9-49.9% 절감, arXiv 2026",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 59,
+      "reason": "POMDP 기반 UAV+UGV 이종 팀 경로 계획, CTP 확장, IAP 정보 이득 행동 가지치기, GATv2 LIAP(96-218초→0.24-0.75초), 이동거리 31.9-49.9% 절감, arXiv 2026",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ScoutAssistedPlanning_arxiv2026/index.html"
+    }
+  ],
+  "archive": [
     {
       "id": "2607.21400",
       "venue": "arXiv 2026",
@@ -43,126 +191,6 @@
       "reason": "**패러다임**: 언어 사전정보 제거 — 정책 π(·|h_t, 𝒱), 목표 뷰 𝒱={o_{T-2},o_{T-1},o_T} + 환경 내 시각 비컨 + 자기수용감각만으로 장거리(300~450m+) UAV 항해\n**벤치마크 VoLN-UAV**: UE/AirSim 17장면·7,210 에피소드(Train 5,047/VS 1,082/TU 1,081), 능동 비컨 3~5/궤적·수동 ~150/환경, 참조길이 Easy<300m/Normal/Hard≥450m 계층화\n**방법 VoLN-MLLM**: Stage I DINO ViT-B16→Adapter→CLIP 코사인 증류(ℒ_align=1−cos, Eq.4); Stage II 의미 뱅크 검색+confidence 임베딩 + Vicuna-7B-v1.5(LoRA r16), traj head H=8 wpts(ℓ1)+stop head(BCE), Δt=2s 폐루프 재계획\n**어블레이션**: No-Align(SR 5.7→2.3)·No-LoRA(EER 0.5→5.8%)·CLIP-Input(CT 1.42→1.98s)로 정렬·LoRA·DINO 인과 기여 분리",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/VoLN_arxiv2026/index.html"
     },
-    {
-      "id": "2606.16902",
-      "venue": "arXiv 2026",
-      "venueDetail": "arXiv 2026 (미확정, \"arXiv soon\")",
-      "matchScore": 96,
-      "category": "VLN",
-      "feedTitle": "Binary Tracking for Spatial QA and Navigation with Open Vision-Language Models",
-      "authorsShort": "D. Na, C. Kim +5",
-      "feedAbstract": "자연어 공간 질의에서 시간순 두 앵커를 뽑아 그 사이 주행 궤적 구간을 좌/우 절반씩 비교(VLM 4-뷰 앙상블)하며 O(log n) 이진 탐색으로 목표 지점을 찾고, LiDAR-SLAM 정합으로 미터 좌표(=항법 목표)를 반환하는 완전 오픈 VLM(Qwen2.5) 파이프라인…",
-      "tags": [
-        "#SpatialQA",
-        "#실외다회차벤치마크",
-        "#실제로봇데이터수집"
-      ],
-      "titleEN": "Binary Tracking for Spatial QA and Navigation with Open Vision-Language Models",
-      "titleKO": "Binary Tracking for Spatial QA and Navigation with Open Vision-Language Models",
-      "authorsEN": "Dongbin Na, Chanwoo Kim, Soonbin Rho, Giyun Choi, Gangbok Lee, Dooyoung Hong (equal, 교신)",
-      "authorsKO": "Dongbin Na, Chanwoo Kim, Soonbin Rho, Giyun Choi, Gangbok Lee, Dooyoung Hong (equal, 교신)",
-      "abstractEN": "This work addresses spatial question answering for service robots traversing long egocentric routes. Given a query such as \"where can I find a dry cleaner on the way back home?\", the system returns a metric coordinate that downstream navigation components can act on. Prior Spatial Question Answering approaches leverage retrieval-augmented agents built on closed-source models such as GPT-4o for path exploration. However, robots operating in the real world often cannot reliably depend on online closed-source models due to network instability, communication latency, and deployment cost. It creates a need for open-source based Spatial Question Answering approaches that can run onboard the robot, yet prior research in this direction remains limited. This work proposes BinTrack, a simple yet effective, fully open-source spatial-localization agent that leverages the temporal ordering of a robot's trajectory. BinTrack performs a binary search over the trajectory segments between two anchor landmarks identified from a query. It improves overall accuracy by up to 22.8% over other open-source implementations and even matches the reported closed-source model result on the global category of the SpaceLocQA benchmark, the most challenging setting that has so far required strong reasoning agents such as GPT-4o. Furthermore, its optimized inference strategy consistently yields more than a 1.5x inference speedup over previous approaches. Finally, this work releases GangnamLoop, a novel and practical multi-trip outdoor benchmark collected by deploying a real quadruped robot on public streets with the anonymization policy. It revisits the same locations under different outdoor conditions and pairs the robot's low viewpoint with the human owner's. The source codes and datasets are publicly available at https://github.com/ndb796/BinaryTracking",
-      "abstractKO": "자연어 공간 질의에서 시간순 두 앵커를 뽑아 그 사이 주행 궤적 구간을 좌/우 절반씩 비교(VLM 4-뷰 앙상블)하며 O(log n) 이진 탐색으로 목표 지점을 찾고, LiDAR-SLAM 정합으로 미터 좌표(=항법 목표)를 반환하는 완전 오픈 VLM(Qwen2.5) 파이프라인. closed-source(Meta-Memory)를 SpaceLocQA에서 추월하고, 서울 강남 실외 다회차 벤치마크 GangnamLoop를 신설.",
-      "detailTags": [
-        "#SpatialQA",
-        "#실외다회차벤치마크",
-        "#실제로봇데이터수집"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 39,
-      "reason": "**이진 추적 원시연산**: 시간순 앵커 사이 구간을 절반씩 좁혀 O(log n)으로 목표 탐색 (장기 궤적 정렬성 활용)\n**완전 오픈 파이프라인**: Qwen2.5-VL-7B(시각/검증) + Qwen2.5-32B-AWQ(계획) + mxbai-embed + Milvus, closed-source API 0 의존, 단일 GPU 온보드 지향\n**3종 캡션(full/center/detail) + 4-뷰 앙상블**: 질의 어구 다양성·검증 노이즈 대응\n**GangnamLoop 벤치마크**: 서울 강남 8왕복·4경로·주야 4쌍·221분·383,800프레임·이중시점, 단일 LiDAR-SLAM 정합 (HuggingFace 공개 예정)\n**자연어→미터 좌표 접지**: QA 답이 곧 항법 목표",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/BinTrack_arxiv2026/index.html"
-    },
-    {
-      "id": "2606.16232",
-      "venue": "RA-L 2026",
-      "venueDetail": "IEEE RA-L, Vol. 11, No. 7, pp. 8512–8519, July 2026 (DOI 10.1109/LRA.2026.3692083)",
-      "matchScore": 96,
-      "category": "Planner",
-      "feedTitle": "PolyMerge: Compressing 3D Gaussian Splats with Polytope Coverings for Provably Safe Resource-Constrained Navigation",
-      "authorsShort": "J. Hong, C. Chiu +2",
-      "feedAbstract": "무거운 3D Gaussian Splatting 장면을, 그 합집합이 원본 장애물을 증명 가능하게 과대근사하는 소수의 볼록 다면체로 압축하고(가중 집합 덮개 + 병합 이력 재생), 다면체 폐형 CBF로 충돌-없음을 형식 보장하여, 메모리 최대 10×·시뮬 ~100× 절감과 함께 실제 Crazyflie 마이크로 드론에서…",
-      "tags": [
-        "#실제로봇실험",
-        "#코드공개"
-      ],
-      "titleEN": "PolyMerge: Compressing 3D Gaussian Splats with Polytope Coverings for Provably Safe Resource-Constrained Navigation",
-      "titleKO": "PolyMerge: Compressing 3D Gaussian Splats with Polytope Coverings for Provably Safe Resource-Constrained Navigation",
-      "authorsEN": "Jihoon Hong, Chih-Yuan Chiu, Sara Fridovich-Keil, Glen Chou",
-      "authorsKO": "Jihoon Hong, Chih-Yuan Chiu, Sara Fridovich-Keil, Glen Chou",
-      "abstractEN": "Obstacle avoidance is essential for safe navigation and motion planning. Recent radiance field reconstruction methods enable object detection and modeling with high fidelity, but remain too memory- and compute-intensive for on-board perception-based path planning. To address these limitations, we propose PolyMerge to convert a large, photorealistic 3D Gaussian Splatting (3DGS) model of a scene into a lightweight representation of convex polytopes whose union provably over-approximates all obstacles in the original 3DGS model. PolyMerge tunes the polytope count to trade off conservativeness and compute cost, and integrates with control barrier functions (CBFs) to plan collision-free paths. We showcase PolyMerge in simulation and hardware experiments on a Crazyflie drone, which uses PolyMerge to compute and follow safe trajectories in real time under severe onboard compute constraints, outperforming baselines in speed while guaranteeing safety. For our code and videos, visit https://athlon76.github.io/PolyMerge-website/.",
-      "abstractKO": "무거운 3D Gaussian Splatting 장면을, 그 합집합이 원본 장애물을 증명 가능하게 과대근사하는 소수의 볼록 다면체로 압축하고(가중 집합 덮개 + 병합 이력 재생), 다면체 폐형 CBF로 충돌-없음을 형식 보장하여, 메모리 최대 10×·시뮬 ~100× 절감과 함께 실제 Crazyflie 마이크로 드론에서 125–500Hz 실시간 안전 항법을 달성한 자원 제약 항법 프레임워크.",
-      "detailTags": [
-        "#실제로봇실험",
-        "#코드공개"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 40,
-      "reason": "**안전-보존 압축**: 가중 집합 덮개의 weight를 과대근사 부피(헛부피)로 정의 → 압축과 형식 안전을 한 최적화로 융합(합집합 ⊇ 장애물 보장)\n**병합 이력 재생**: 응집 군집화 전체 이력 저장 → 재압축 없이 임의 다면체 개수 n으로 보수성↔연산비용 온라인 튜닝\n**다면체 폐형 CBF**: ψ(p)=min_k max_l n_kl^T(p−w_kl)를 CLF-CBF-QP 안전 필터에 직결, 전방 불변성으로 충돌-없음 형식 보장\n**자원 제약 실증**: mip-NeRF360 9장면 시뮬 + 실제 Crazyflie 2.1+ 비행, 오픈소스 Python 구현\n**탑티어**: IEEE RA-L 2026 게재",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/PolyMerge_RAL2026/index.html"
-    },
-    {
-      "id": "2606.14267",
-      "venue": "CVPR 2026",
-      "venueDetail": "CVPR 2026 (accepted)",
-      "matchScore": 87,
-      "category": "VLN",
-      "feedTitle": "FloVerse: Floor Plan-Guided Multi-Modal Navigation",
-      "authorsShort": "W. Huang, S. Dong +4",
-      "feedAbstract": "평면도(floor plan)를 조건으로 PointNav·ObjectNav·ImageNav를 단일 가중치로 통합하는 2단계 디퓨전 정책 ThreeDiff(Planner+Refiner)와, 메시에서 평면도·궤적을 자동 합성한 대규모 데이터셋 FloVerse-1.6K(1,627 평면도·240K 궤적·12M RGBD)를 제안…",
-      "tags": [
-        "#VLN",
-        "#FloorPlanPrior",
-        "#데이터셋기여"
-      ],
-      "titleEN": "FloVerse: Floor Plan-Guided Multi-Modal Navigation",
-      "titleKO": "FloVerse: Floor Plan-Guided Multi-Modal Navigation",
-      "authorsEN": "Weiqi Huang, Shuangyi Dong, Jiaxin Li, Yifei Guo, Zan Wang, Wei Liang",
-      "authorsKO": "Weiqi Huang, Shuangyi Dong, Jiaxin Li, Yifei Guo, Zan Wang, Wei Liang",
-      "abstractEN": "Floor plans encapsulate compact spatial priors, enabling agents to navigate unseen scenes more efficiently. While prior work has explored floor plan-guided navigation, it has focused mainly on PointNav and a limited set of environments. To bridge this gap, we introduce FloVerse, a new task for floor plan-guided embodied navigation that unifies PointNav, ObjectNav, and ImageNav. To support FloVerse, we assemble FloVerse-1.6K, a large-scale dataset of 1.6K scenes from HM3D and Gibson 4+, paired with corresponding floor plans, comprising 240K expert trajectories and 12M RGBD frames. We further propose ThreeDiff, a two-stage imitation learning policy comprising a planner, a diffusion-based multimodal goal-reasoning module trained via masked-modality modeling, and a refiner, a depth-based trajectory-refinement module for safe execution. Extensive experiments demonstrate that (1) floor-plan priors improve navigation performance across all goal modalities, and (2) ThreeDiff implicitly captures spatial information from floor plans. These results underscore the effectiveness of spatial priors and validate our proposed unified approach for floor plan-guided embodied navigation.",
-      "abstractKO": "평면도(floor plan)를 조건으로 PointNav·ObjectNav·ImageNav를 단일 가중치로 통합하는 2단계 디퓨전 정책 ThreeDiff(Planner+Refiner)와, 메시에서 평면도·궤적을 자동 합성한 대규모 데이터셋 FloVerse-1.6K(1,627 평면도·240K 궤적·12M RGBD)를 제안 — 평면도 사전정보가 세 양식 전부에서 SR을 +6~16%p 향상.",
-      "detailTags": [
-        "#VLN",
-        "#FloorPlanPrior",
-        "#데이터셋기여"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 41,
-      "reason": "**통합 과제 FloVerse**: Point/Object/Image 내비게이션을 평면도 가이드 단일 과제로 통합\n**ThreeDiff 2단계 디퓨전**: 마스킹 모델링(매 스텝 1개 양식만 ON)으로 단일 가중치 다중 양식 + Planner(전역 거친 궤적)/Refiner(깊이 SDF 충돌 회피) 분리\n**평면도 조건화**: EfficientNet-B0로 평면도 인코딩, 명시적 정합 없이 암묵적 공간 학습\n**FloVerse-1.6K**: 메시 1.25m 슬라이스 자동 평면도 생성 + A* 전문가 궤적 240K + SpatialLM 객체주석(325 카테고리)\n**평면도 보편 유효성 실증**: 세 양식 전부 향상(PointNav +16.2%p가 최대)",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/FloVerse_CVPR2026/index.html"
-    },
-    {
-      "id": "2606.13883",
-      "venue": "arXiv 2026",
-      "venueDetail": "arXiv 2026 (미확정)",
-      "matchScore": 84,
-      "category": "Planner",
-      "feedTitle": "Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation",
-      "authorsShort": "I. Valuev, I. Zhura +3",
-      "feedAbstract": "지각이 실패하는 영역(유리·거울·과노출)을 VLM(AnyTraverse)에서 경량 MiT-B0로 증류한 신뢰도 히트맵으로 포착하고, 이를 디퓨전 궤적 플래너의 조건 + training-free 2단계 ESDF 가이드(물리·가상 장애물 동등 취급)에 주입하여, 실제 쿼드로터에서 장애물 위반율 40.3→9.6%·주행 신뢰도…",
-      "tags": [
-        "#실제로봇실험"
-      ],
-      "titleEN": "Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation",
-      "titleKO": "Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation",
-      "authorsEN": "Ivan Valuev, Iana Zhura, Valerii Serpiva, Didar Seyidov, Dzmitry Tsetserukou",
-      "authorsKO": "Ivan Valuev, Iana Zhura, Valerii Serpiva, Didar Seyidov, Dzmitry Tsetserukou",
-      "abstractEN": "Autonomous UAV navigation is conventionally solved by pipelines that separate perception, mapping, and planning into distinct stages, which propagates errors, accumulates latency, and requires environment-specific retuning. End-to-end generative models remove these interfaces by mapping raw observations directly to trajectories, but inherit a subtle failure mode: trained on clean data, they cannot recognise when an observation is unreliable, and treat degraded regions such as glass, mirrors, and overexposed surfaces as valid evidence for planning. We present a reliability-aware diffusion planner for 3D UAV navigation. It conditions trajectory generation on the observation together with a scene-level reliability heatmap that marks where perception cannot be trusted, produced by a lightweight network that distils the open-vocabulary reasoning of a vision-language model within the real-time planning budget. To generalise to unseen environments without retraining, we steer the denoising process with a differentiable two-stage ESDF cost that treats physical obstacles from depth and virtual obstacles from highly unreliable regions on equal footing. In simulation and on a real quadrotor, our planner produces markedly safer trajectories than a state-of-the-art diffusion baseline, reducing the obstacle-violation rate from 40.3% to 9.6% and raising the mean reliability of traversed regions from 0.588 to 0.925. Ablating the reliability term alone drops mean reliability from 0.898 to 0.783, confirming it as the decisive component, while distillation runs the framework up to 2 times faster than the full vision-language model.",
-      "abstractKO": "지각이 실패하는 영역(유리·거울·과노출)을 VLM(AnyTraverse)에서 경량 MiT-B0로 증류한 신뢰도 히트맵으로 포착하고, 이를 디퓨전 궤적 플래너의 조건 + training-free 2단계 ESDF 가이드(물리·가상 장애물 동등 취급)에 주입하여, 실제 쿼드로터에서 장애물 위반율 40.3→9.6%·주행 신뢰도 0.588→0.925로 개선한 UAV 내비게이션 플래너.",
-      "detailTags": [
-        "#실제로봇실험"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 42,
-      "reason": "**신뢰도 1급 시민화**: 종단간 디퓨전 UAV 플래너에 지각 신뢰성을 조건·가이드 비용·학습손실 전 과정에 명시 주입\n**VLM 신뢰도 실시간 증류**: AnyTraverse 교사 → MiT-B0 학생(깊이 융합·DINOv2 감독·하드네거 w_max=4·SSIM), 최대 2× 가속\n**2단계 ESDF 가이드**: hard(M≤0.3 깊이 역투영→ESDF) / weak(0.3<M≤0.6 약한 CHOMP, η_perc>η_obs), 신뢰 불가 영역을 가상 장애물로 물질화\n**training-free 가이드**: ε̃_θ=ε_θ−s·∇C, clean-manifold 투영으로 미터좌표 그래디언트, 재학습 없이 새 기하 적응\n**실로봇 검증**: 8인치 커스텀 쿼드로터, RealSense D455, ArduPilot/MAVROS, off-board RTX 4070(500MB)",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ReliaDiffNav_arxiv2026/index.html"
-    }
-  ],
-  "archive": [
     {
       "id": "2607.17898",
       "venue": "WAFR 2026",
@@ -1246,150 +1274,122 @@
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/Qwen-RobotNav_arxiv2026/index.html"
     },
     {
-      "id": "2606.13494",
+      "id": "2606.16902",
       "venue": "arXiv 2026",
-      "venueDetail": "arXiv 2026 (학회 미확정)",
-      "matchScore": 87,
+      "venueDetail": "arXiv 2026 (미확정, \"arXiv soon\")",
+      "matchScore": 96,
       "category": "VLN",
-      "feedTitle": "NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation",
-      "authorsShort": "D. Azuma, T. Miyanishi +7",
-      "feedAbstract": "미래 관찰 예측·목표 진행도 가치·행동 청크를 9-프레임 latent canvas에서 공동 디퓨전 생성하는 통합 세계-행동 모델로, Cosmos Predict2 2B 백본 위에서 외부 CEM 플래너 없이 image-goal navigation을 수행하여 실제 로봇 79.2%(NWM 16.7%·OmniVLA 58.3%…",
+      "feedTitle": "Binary Tracking for Spatial QA and Navigation with Open Vision-Language Models",
+      "authorsShort": "D. Na, C. Kim +5",
+      "feedAbstract": "자연어 공간 질의에서 시간순 두 앵커를 뽑아 그 사이 주행 궤적 구간을 좌/우 절반씩 비교(VLM 4-뷰 앙상블)하며 O(log n) 이진 탐색으로 목표 지점을 찾고, LiDAR-SLAM 정합으로 미터 좌표(=항법 목표)를 반환하는 완전 오픈 VLM(Qwen2.5) 파이프라인…",
       "tags": [
-        "#VLN",
-        "#WorldModel",
-        "#실제로봇실험"
+        "#SpatialQA",
+        "#실외다회차벤치마크",
+        "#실제로봇데이터수집"
       ],
-      "titleEN": "NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation",
-      "titleKO": "NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation",
-      "authorsEN": "Daichi Azuma, Taiki Miyanishi, Koya Sakamoto, Shuhei Kurita, Yaonan Zhu, Petr Khrapchenkov, Motoaki Kawanabe, Yusuke Iwasawa, Yutaka Matsuo",
-      "authorsKO": "Daichi Azuma, Taiki Miyanishi, Koya Sakamoto, Shuhei Kurita, Yaonan Zhu, Petr Khrapchenkov, Motoaki Kawanabe, Yusuke Iwasawa, Yutaka Matsuo",
-      "abstractEN": "Goal-conditioned visual navigation requires a robot to act under partial observability by anticipating how its motion will change the future egocentric view and whether that change brings it closer to the goal. Navigation world models provide such visual foresight, but they remain prediction modules that require an external planner to convert predicted futures into closed-loop control. We propose Navigation World Action Model (NavWAM), a diffusion-transformer policy that turns navigation world-model prediction into executable action by representing future observations, goal-progress values, and action chunks in a shared latent sequence. By learning future prediction jointly with the action and value targets that determine closed-loop behavior, NavWAM makes visual foresight directly usable for robot control. We build NavWAM through simulation pretraining and real-robot adaptation, and evaluate it on image-goal navigation against planning-based world models and a representative direct navigation policy. Across offline benchmarks and closed-loop real-robot deployment, NavWAM improves over planning-based world-model baselines in our evaluations while using the default policy mode without CEM-style action search. Project page: https://dachii-azm.github.io/navwam/",
-      "abstractKO": "미래 관찰 예측·목표 진행도 가치·행동 청크를 9-프레임 latent canvas에서 공동 디퓨전 생성하는 통합 세계-행동 모델로, Cosmos Predict2 2B 백본 위에서 외부 CEM 플래너 없이 image-goal navigation을 수행하여 실제 로봇 79.2%(NWM 16.7%·OmniVLA 58.3% 능가)를 ~5Hz로 달성.",
+      "titleEN": "Binary Tracking for Spatial QA and Navigation with Open Vision-Language Models",
+      "titleKO": "Binary Tracking for Spatial QA and Navigation with Open Vision-Language Models",
+      "authorsEN": "Dongbin Na, Chanwoo Kim, Soonbin Rho, Giyun Choi, Gangbok Lee, Dooyoung Hong (equal, 교신)",
+      "authorsKO": "Dongbin Na, Chanwoo Kim, Soonbin Rho, Giyun Choi, Gangbok Lee, Dooyoung Hong (equal, 교신)",
+      "abstractEN": "This work addresses spatial question answering for service robots traversing long egocentric routes. Given a query such as \"where can I find a dry cleaner on the way back home?\", the system returns a metric coordinate that downstream navigation components can act on. Prior Spatial Question Answering approaches leverage retrieval-augmented agents built on closed-source models such as GPT-4o for path exploration. However, robots operating in the real world often cannot reliably depend on online closed-source models due to network instability, communication latency, and deployment cost. It creates a need for open-source based Spatial Question Answering approaches that can run onboard the robot, yet prior research in this direction remains limited. This work proposes BinTrack, a simple yet effective, fully open-source spatial-localization agent that leverages the temporal ordering of a robot's trajectory. BinTrack performs a binary search over the trajectory segments between two anchor landmarks identified from a query. It improves overall accuracy by up to 22.8% over other open-source implementations and even matches the reported closed-source model result on the global category of the SpaceLocQA benchmark, the most challenging setting that has so far required strong reasoning agents such as GPT-4o. Furthermore, its optimized inference strategy consistently yields more than a 1.5x inference speedup over previous approaches. Finally, this work releases GangnamLoop, a novel and practical multi-trip outdoor benchmark collected by deploying a real quadruped robot on public streets with the anonymization policy. It revisits the same locations under different outdoor conditions and pairs the robot's low viewpoint with the human owner's. The source codes and datasets are publicly available at https://github.com/ndb796/BinaryTracking",
+      "abstractKO": "자연어 공간 질의에서 시간순 두 앵커를 뽑아 그 사이 주행 궤적 구간을 좌/우 절반씩 비교(VLM 4-뷰 앙상블)하며 O(log n) 이진 탐색으로 목표 지점을 찾고, LiDAR-SLAM 정합으로 미터 좌표(=항법 목표)를 반환하는 완전 오픈 VLM(Qwen2.5) 파이프라인. closed-source(Meta-Memory)를 SpaceLocQA에서 추월하고, 서울 강남 실외 다회차 벤치마크 GangnamLoop를 신설.",
       "detailTags": [
-        "#VLN",
-        "#WorldModel",
-        "#실제로봇실험"
+        "#SpatialQA",
+        "#실외다회차벤치마크",
+        "#실제로봇데이터수집"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 39,
+      "reason": "**이진 추적 원시연산**: 시간순 앵커 사이 구간을 절반씩 좁혀 O(log n)으로 목표 탐색 (장기 궤적 정렬성 활용)\n**완전 오픈 파이프라인**: Qwen2.5-VL-7B(시각/검증) + Qwen2.5-32B-AWQ(계획) + mxbai-embed + Milvus, closed-source API 0 의존, 단일 GPU 온보드 지향\n**3종 캡션(full/center/detail) + 4-뷰 앙상블**: 질의 어구 다양성·검증 노이즈 대응\n**GangnamLoop 벤치마크**: 서울 강남 8왕복·4경로·주야 4쌍·221분·383,800프레임·이중시점, 단일 LiDAR-SLAM 정합 (HuggingFace 공개 예정)\n**자연어→미터 좌표 접지**: QA 답이 곧 항법 목표",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/BinTrack_arxiv2026/index.html"
+    },
+    {
+      "id": "2606.16232",
+      "venue": "RA-L 2026",
+      "venueDetail": "IEEE RA-L, Vol. 11, No. 7, pp. 8512–8519, July 2026 (DOI 10.1109/LRA.2026.3692083)",
+      "matchScore": 96,
+      "category": "Planner",
+      "feedTitle": "PolyMerge: Compressing 3D Gaussian Splats with Polytope Coverings for Provably Safe Resource-Constrained Navigation",
+      "authorsShort": "J. Hong, C. Chiu +2",
+      "feedAbstract": "무거운 3D Gaussian Splatting 장면을, 그 합집합이 원본 장애물을 증명 가능하게 과대근사하는 소수의 볼록 다면체로 압축하고(가중 집합 덮개 + 병합 이력 재생), 다면체 폐형 CBF로 충돌-없음을 형식 보장하여, 메모리 최대 10×·시뮬 ~100× 절감과 함께 실제 Crazyflie 마이크로 드론에서…",
+      "tags": [
+        "#실제로봇실험",
+        "#코드공개"
+      ],
+      "titleEN": "PolyMerge: Compressing 3D Gaussian Splats with Polytope Coverings for Provably Safe Resource-Constrained Navigation",
+      "titleKO": "PolyMerge: Compressing 3D Gaussian Splats with Polytope Coverings for Provably Safe Resource-Constrained Navigation",
+      "authorsEN": "Jihoon Hong, Chih-Yuan Chiu, Sara Fridovich-Keil, Glen Chou",
+      "authorsKO": "Jihoon Hong, Chih-Yuan Chiu, Sara Fridovich-Keil, Glen Chou",
+      "abstractEN": "Obstacle avoidance is essential for safe navigation and motion planning. Recent radiance field reconstruction methods enable object detection and modeling with high fidelity, but remain too memory- and compute-intensive for on-board perception-based path planning. To address these limitations, we propose PolyMerge to convert a large, photorealistic 3D Gaussian Splatting (3DGS) model of a scene into a lightweight representation of convex polytopes whose union provably over-approximates all obstacles in the original 3DGS model. PolyMerge tunes the polytope count to trade off conservativeness and compute cost, and integrates with control barrier functions (CBFs) to plan collision-free paths. We showcase PolyMerge in simulation and hardware experiments on a Crazyflie drone, which uses PolyMerge to compute and follow safe trajectories in real time under severe onboard compute constraints, outperforming baselines in speed while guaranteeing safety. For our code and videos, visit https://athlon76.github.io/PolyMerge-website/.",
+      "abstractKO": "무거운 3D Gaussian Splatting 장면을, 그 합집합이 원본 장애물을 증명 가능하게 과대근사하는 소수의 볼록 다면체로 압축하고(가중 집합 덮개 + 병합 이력 재생), 다면체 폐형 CBF로 충돌-없음을 형식 보장하여, 메모리 최대 10×·시뮬 ~100× 절감과 함께 실제 Crazyflie 마이크로 드론에서 125–500Hz 실시간 안전 항법을 달성한 자원 제약 항법 프레임워크.",
+      "detailTags": [
+        "#실제로봇실험",
+        "#코드공개"
       ],
       "year": "2026",
       "citations": 0,
       "readMinutes": 40,
-      "reason": "**Navigation World Action Model**: 세계 모델 예측 + 행동 생성 + 가치 추정을 단일 디퓨전 캔버스에서 공동 생성\n**외부 플래너 제거**: 행동을 직접 디노이징해 NWM CEM(≈14,521 TFLOPs/act) 대비 ≈4.45 TFLOPs/act로 3,000배↓, ~5Hz 온보드 실시간\n**비디오 prior 이식**: Cosmos Predict2 2B 백본 + 행동/가치 슬롯 + λ=5 업웨이트 + 3단계 커리큘럼\n**단일 가중치 다중 모드**: Policy/World-Model/Value (학습 50/25/25) 마스킹 멀티태스크\n**2B로 7B 경쟁**: OmniVLA-7B와 대등한 image-goal 성공률을 1/3.5 규모로 달성",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NavWAM_arxiv2026/index.html"
+      "reason": "**안전-보존 압축**: 가중 집합 덮개의 weight를 과대근사 부피(헛부피)로 정의 → 압축과 형식 안전을 한 최적화로 융합(합집합 ⊇ 장애물 보장)\n**병합 이력 재생**: 응집 군집화 전체 이력 저장 → 재압축 없이 임의 다면체 개수 n으로 보수성↔연산비용 온라인 튜닝\n**다면체 폐형 CBF**: ψ(p)=min_k max_l n_kl^T(p−w_kl)를 CLF-CBF-QP 안전 필터에 직결, 전방 불변성으로 충돌-없음 형식 보장\n**자원 제약 실증**: mip-NeRF360 9장면 시뮬 + 실제 Crazyflie 2.1+ 비행, 오픈소스 Python 구현\n**탑티어**: IEEE RA-L 2026 게재",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/PolyMerge_RAL2026/index.html"
     },
     {
-      "id": "2605.21901",
+      "id": "2606.14267",
+      "venue": "CVPR 2026",
+      "venueDetail": "CVPR 2026 (accepted)",
+      "matchScore": 87,
+      "category": "VLN",
+      "feedTitle": "FloVerse: Floor Plan-Guided Multi-Modal Navigation",
+      "authorsShort": "W. Huang, S. Dong +4",
+      "feedAbstract": "평면도(floor plan)를 조건으로 PointNav·ObjectNav·ImageNav를 단일 가중치로 통합하는 2단계 디퓨전 정책 ThreeDiff(Planner+Refiner)와, 메시에서 평면도·궤적을 자동 합성한 대규모 데이터셋 FloVerse-1.6K(1,627 평면도·240K 궤적·12M RGBD)를 제안…",
+      "tags": [
+        "#VLN",
+        "#FloorPlanPrior",
+        "#데이터셋기여"
+      ],
+      "titleEN": "FloVerse: Floor Plan-Guided Multi-Modal Navigation",
+      "titleKO": "FloVerse: Floor Plan-Guided Multi-Modal Navigation",
+      "authorsEN": "Weiqi Huang, Shuangyi Dong, Jiaxin Li, Yifei Guo, Zan Wang, Wei Liang",
+      "authorsKO": "Weiqi Huang, Shuangyi Dong, Jiaxin Li, Yifei Guo, Zan Wang, Wei Liang",
+      "abstractEN": "Floor plans encapsulate compact spatial priors, enabling agents to navigate unseen scenes more efficiently. While prior work has explored floor plan-guided navigation, it has focused mainly on PointNav and a limited set of environments. To bridge this gap, we introduce FloVerse, a new task for floor plan-guided embodied navigation that unifies PointNav, ObjectNav, and ImageNav. To support FloVerse, we assemble FloVerse-1.6K, a large-scale dataset of 1.6K scenes from HM3D and Gibson 4+, paired with corresponding floor plans, comprising 240K expert trajectories and 12M RGBD frames. We further propose ThreeDiff, a two-stage imitation learning policy comprising a planner, a diffusion-based multimodal goal-reasoning module trained via masked-modality modeling, and a refiner, a depth-based trajectory-refinement module for safe execution. Extensive experiments demonstrate that (1) floor-plan priors improve navigation performance across all goal modalities, and (2) ThreeDiff implicitly captures spatial information from floor plans. These results underscore the effectiveness of spatial priors and validate our proposed unified approach for floor plan-guided embodied navigation.",
+      "abstractKO": "평면도(floor plan)를 조건으로 PointNav·ObjectNav·ImageNav를 단일 가중치로 통합하는 2단계 디퓨전 정책 ThreeDiff(Planner+Refiner)와, 메시에서 평면도·궤적을 자동 합성한 대규모 데이터셋 FloVerse-1.6K(1,627 평면도·240K 궤적·12M RGBD)를 제안 — 평면도 사전정보가 세 양식 전부에서 SR을 +6~16%p 향상.",
+      "detailTags": [
+        "#VLN",
+        "#FloorPlanPrior",
+        "#데이터셋기여"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 41,
+      "reason": "**통합 과제 FloVerse**: Point/Object/Image 내비게이션을 평면도 가이드 단일 과제로 통합\n**ThreeDiff 2단계 디퓨전**: 마스킹 모델링(매 스텝 1개 양식만 ON)으로 단일 가중치 다중 양식 + Planner(전역 거친 궤적)/Refiner(깊이 SDF 충돌 회피) 분리\n**평면도 조건화**: EfficientNet-B0로 평면도 인코딩, 명시적 정합 없이 암묵적 공간 학습\n**FloVerse-1.6K**: 메시 1.25m 슬라이스 자동 평면도 생성 + A* 전문가 궤적 240K + SpatialLM 객체주석(325 카테고리)\n**평면도 보편 유효성 실증**: 세 양식 전부 향상(PointNav +16.2%p가 최대)",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/FloVerse_CVPR2026/index.html"
+    },
+    {
+      "id": "2606.13883",
       "venue": "arXiv 2026",
-      "venueDetail": "arXiv 프리프린트 (cs.RO) — 미정",
+      "venueDetail": "arXiv 2026 (미확정)",
       "matchScore": 84,
       "category": "Planner",
-      "feedTitle": "Higher Order Reasoning for Collaborative Communicationless Mobile Robot Operations",
-      "authorsShort": "J. Reasoner, N. Bezzo",
-      "feedAbstract": "Dynamic Epistemic Logic 기반 고차 믿음 입자(1~3차)와 Temporally Aware MPPI를 결합하여 통신 완전 차단 환경에서 이동 로봇 팀의 암묵적 조율(implicit coordination)을 달성, 임무 완료 시간 20.8%(시뮬) / 57.8%(실험) 단축.",
+      "feedTitle": "Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation",
+      "authorsShort": "I. Valuev, I. Zhura +3",
+      "feedAbstract": "지각이 실패하는 영역(유리·거울·과노출)을 VLM(AnyTraverse)에서 경량 MiT-B0로 증류한 신뢰도 히트맵으로 포착하고, 이를 디퓨전 궤적 플래너의 조건 + training-free 2단계 ESDF 가이드(물리·가상 장애물 동등 취급)에 주입하여, 실제 쿼드로터에서 장애물 위반율 40.3→9.6%·주행 신뢰도…",
       "tags": [
-        "#Planner"
+        "#실제로봇실험"
       ],
-      "titleEN": "Higher Order Reasoning for Collaborative Communicationless Mobile Robot Operations",
-      "titleKO": "Higher Order Reasoning for Collaborative Communicationless Mobile Robot Operations",
-      "authorsEN": "Jonathan Reasoner, Nicola Bezzo",
-      "authorsKO": "Jonathan Reasoner, Nicola Bezzo",
-      "abstractEN": "In communicationless environments, multi-robot systems must operate without the constant information exchange that many coordination strategies typically assume. This paper presents a novel dynamic epistemic planning framework that enables implicit coordination and long horizon planning through higher-order reasoning among robots. With our approach, robots form and propagate higher-order belief particles, update world beliefs using Bayesian inference, and select actions via a behavior tree that anticipates teammates' likely decisions. A temporally aware Model Predictive Path Integral (MPPI) controller integrates this reasoning into low-level execution, allowing robots to plan intercepts and adapt trajectories under partial observability. The proposed framework is evaluated in both simulations and physical experiments, where it consistently reduces task completion time compared to a first-order baseline, demonstrating that epistemic logic can serve as a robust foundation for resilient coordination in communication-restricted domains.",
-      "abstractKO": "Dynamic Epistemic Logic 기반 고차 믿음 입자(1~3차)와 Temporally Aware MPPI를 결합하여 통신 완전 차단 환경에서 이동 로봇 팀의 암묵적 조율(implicit coordination)을 달성, 임무 완료 시간 20.8%(시뮬) / 57.8%(실험) 단축.",
+      "titleEN": "Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation",
+      "titleKO": "Guided Diffusion with Distilled Vision-Language Reliability for Aerial Navigation",
+      "authorsEN": "Ivan Valuev, Iana Zhura, Valerii Serpiva, Didar Seyidov, Dzmitry Tsetserukou",
+      "authorsKO": "Ivan Valuev, Iana Zhura, Valerii Serpiva, Didar Seyidov, Dzmitry Tsetserukou",
+      "abstractEN": "Autonomous UAV navigation is conventionally solved by pipelines that separate perception, mapping, and planning into distinct stages, which propagates errors, accumulates latency, and requires environment-specific retuning. End-to-end generative models remove these interfaces by mapping raw observations directly to trajectories, but inherit a subtle failure mode: trained on clean data, they cannot recognise when an observation is unreliable, and treat degraded regions such as glass, mirrors, and overexposed surfaces as valid evidence for planning. We present a reliability-aware diffusion planner for 3D UAV navigation. It conditions trajectory generation on the observation together with a scene-level reliability heatmap that marks where perception cannot be trusted, produced by a lightweight network that distils the open-vocabulary reasoning of a vision-language model within the real-time planning budget. To generalise to unseen environments without retraining, we steer the denoising process with a differentiable two-stage ESDF cost that treats physical obstacles from depth and virtual obstacles from highly unreliable regions on equal footing. In simulation and on a real quadrotor, our planner produces markedly safer trajectories than a state-of-the-art diffusion baseline, reducing the obstacle-violation rate from 40.3% to 9.6% and raising the mean reliability of traversed regions from 0.588 to 0.925. Ablating the reliability term alone drops mean reliability from 0.898 to 0.783, confirming it as the decisive component, while distillation runs the framework up to 2 times faster than the full vision-language model.",
+      "abstractKO": "지각이 실패하는 영역(유리·거울·과노출)을 VLM(AnyTraverse)에서 경량 MiT-B0로 증류한 신뢰도 히트맵으로 포착하고, 이를 디퓨전 궤적 플래너의 조건 + training-free 2단계 ESDF 가이드(물리·가상 장애물 동등 취급)에 주입하여, 실제 쿼드로터에서 장애물 위반율 40.3→9.6%·주행 신뢰도 0.588→0.925로 개선한 UAV 내비게이션 플래너.",
       "detailTags": [
-        "#Planner"
+        "#실제로봇실험"
       ],
       "year": "2026",
       "citations": 0,
       "readMinutes": 42,
-      "reason": "Dynamic Epistemic Logic 기반 고차(1/2/3차) 믿음 입자 프레임워크\n2차 공감 입자(empathy particles)로 팀원에게 예측 가능한 행동 보장\n7가지 관측 이벤트 기반 Bayesian 믿음 업데이트\n시간 되감기 추론(time rewind)으로 팀원의 과거 행동 의도 재해석\nTemporally Aware MPPI: 이동 중인 팀원을 목표로 한 동적 인터셉트",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HigherOrderReasoning_arxiv2026/index.html"
-    },
-    {
-      "id": "2605.21935",
-      "venue": "RSS 2026",
-      "venueDetail": "RSS 2026 (Robotics: Science and Systems) — Accepted",
-      "matchScore": 87,
-      "category": "VLN",
-      "feedTitle": "MIF: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments",
-      "authorsShort": "P. Jiang, H. Liu +3",
-      "feedAbstract": "이족보행 인간형 로봇(Unitree G1)의 보행 유도 시각 왜곡과 동적 환경 변화를 삼중 필드(Appearance/Spatial/Geometry Field)로 처리하여 자연어 지시 기반 안전 내비게이션을 달성.",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "Learning to Evolve: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments",
-      "titleKO": "Learning to Evolve: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments",
-      "authorsEN": "Peifeng Jiang, Hong Liu, Jin Jin, Wenshuai Wang, Xia Li",
-      "authorsKO": "Peifeng Jiang, Hong Liu, Jin Jin, Wenshuai Wang, Xia Li",
-      "abstractEN": "Safe manipulation-oriented navigation for humanoid robots requires scene memory that remains reliable under locomotion-induced perceptual distortion, environmental changes, and interaction-level geometric safety constraints. Existing semantic mapping and scene-graph systems are difficult to deploy directly in this setting because they often assume stable camera trajectories, static environments, or coarse object geometry. We introduce the Multi-modal Interactive Field (MIF), a humanoid-oriented system that integrates confidence-aware semantic 3D Gaussian Splatting, discrepancy-triggered spatial memory updates, and task-driven geometric reconstruction within a closed-loop perception-adaptation pipeline. MIF couples three fields: an uncertainty-aware 3DGS Appearance Field that suppresses gait-induced blur, a Spatial Field that maintains topological memory, and a Geometry Field that supports Interaction Pose Safety (IPS) before manipulation. A discrepancy detection score is introduced to separate locomotion-induced false-positive changes from persistent changes and updates only locally inconsistent regions. On a Unitree-G1 humanoid in a real dynamic office, MIF improves relocation success in non-static environments from 12% to 94% compared with static scene-graph memory, while reducing semantic memory footprint by 91.4% through feature distillation for practical online operation. Project page and code: https://ziya-jiang.github.io/MIF-homepage/",
-      "abstractKO": "이족보행 인간형 로봇(Unitree G1)의 보행 유도 시각 왜곡과 동적 환경 변화를 삼중 필드(Appearance/Spatial/Geometry Field)로 처리하여 자연어 지시 기반 안전 내비게이션을 달성.",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 47,
-      "reason": "신뢰도 인식 3D Gaussian Splatting으로 보행 블러 자동 필터링\n계층적 씬 그래프(Spatial Field)로 자연어 목표의 ⟨Region, Landmark, Object⟩ 트리플렛 그라운딩\nFlow Matching 기반 on-demand 3D 메시 생성 + IPS 검증 (충돌률 0%)\n다중 모달 불일치 감지로 보행 아티팩트 vs 실제 환경 변화 구별 (2.3초 지역 업데이트)\n정적 맵 방법 대비 재배치 시나리오 성공률 12% → 94%",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/MIF_RSS2026/index.html"
-    },
-    {
-      "id": "2605.22816",
-      "venue": "CVPR 2026",
-      "venueDetail": "CVPR 2026",
-      "matchScore": 96,
-      "category": "VLN",
-      "feedTitle": "AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation",
-      "authorsShort": "W. Guo, X. Xu +8",
-      "feedAbstract": "VLN 에이전트가 Key Node(방 전환, 경로 이탈, 정지 오류)에서만 선택적으로 씬-진행도-계획 삼중 구조 추론을 수행하는 자기인식 프레임워크로, 단안 RGB만으로 R2R SR 65.4%, RxR SR 67.6% SOTA 달성.",
-      "tags": [
-        "#VLN",
-        "#LLM/VLM추론증강",
-        "#자기인식",
-        "#선택적추론",
-        "#코드공개"
-      ],
-      "titleEN": "AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation",
-      "titleKO": "AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation",
-      "authorsEN": "Wenxuan Guo, Xiuwei Xu, Yichen Liu, Xiangyu Li, Hang Yin, Huangxing Chen, Wenzhao Zheng, Jianjiang Feng, Jie Zhou, Jiwen Lu",
-      "authorsKO": "Wenxuan Guo, Xiuwei Xu, Yichen Liu, Xiangyu Li, Hang Yin, Huangxing Chen, Wenzhao Zheng, Jianjiang Feng, Jie Zhou, Jiwen Lu",
-      "abstractEN": "Vision-and-Language Navigation (VLN) requires an agent to ground language instructions to its own movement within a visual environment. While state-of-the-art methods leverage the reasoning capabilities of Vision-Language Models (VLMs) for end-to-end action prediction, they often lack an explicit and explainable understanding of the relationships between the agent, the instruction, and the scene. Conversely, explicitly building a scene map for heuristic planning is intuitively appealing but relies on additional 3D sensors and hinders large-scale vision-language pre-training. To bridge this gap, we propose AwareVLN, a novel framework that equips the navigation model with a self-aware reasoning mechanism, enabling it to understand the agent's state and task progress in a fully end-to-end and data-driven manner. Our approach features two key innovations: (1) a structural reasoning module that fosters spatial and task-oriented self-awareness, and (2) an automatic data engine with progress division for effective training. Extensive experiments on various datasets in Habitat simulator show our AwareVLN significantly outperforms previous state-of-the-art vision-language navigation methods. Project page: https://gwxuan.github.io/AwareVLN/.",
-      "abstractKO": "VLN 에이전트가 Key Node(방 전환, 경로 이탈, 정지 오류)에서만 선택적으로 씬-진행도-계획 삼중 구조 추론을 수행하는 자기인식 프레임워크로, 단안 RGB만으로 R2R SR 65.4%, RxR SR 67.6% SOTA 달성.",
-      "detailTags": [
-        "#VLN",
-        "#LLM/VLM추론증강",
-        "#자기인식",
-        "#선택적추론",
-        "#코드공개"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 52,
-      "reason": "**선택적 자기인식 추론**: Key Node(~23% 스텝)에서만 [REASON] 모드, 나머지는 경량 [ACT] 모드\n**삼중 구조 추론**: 씬 설명 + 진행도 평가 + 다음 단계 계획의 명시적 자기인식\n**자동 데이터 엔진**: Qwen-VL-Max + DAgger로 어노테이션 없이 추론 감독 데이터 생성\n**상대 스텝 융합**: R' = R ⊕ (t - t_prev)로 추론의 \"신선도\" 인코딩\n**단안 RGB SOTA**: Depth+Odometry 사용 방법(BEVBert, ETPNav)을 단안 RGB만으로 능가",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/AwareVLN_CVPR2026/index.html"
-    },
-    {
-      "id": "2605.22693",
-      "venue": "arXiv 2026",
-      "matchScore": 84,
-      "category": "Planner",
-      "feedTitle": "Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments",
-      "authorsShort": "H. Bui, A. Khanal +2",
-      "feedAbstract": "POMDP 기반 UAV+UGV 이종 팀 경로 계획, CTP 확장, IAP 정보 이득 행동 가지치기, GATv2 LIAP(96-218초→0.24-0.75초), 이동거리 31.9-49.9% 절감, arXiv 2026",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments",
-      "titleKO": "Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments",
-      "authorsEN": "Hoang-Dung Bui, Abhish Khanal, Raihan Islam Arnob, Gregory J. Stein",
-      "authorsKO": "Hoang-Dung Bui, Abhish Khanal, Raihan Islam Arnob, Gregory J. Stein",
-      "abstractEN": "Autonomous robot teams navigating partially known environments face costly backtracking when ground robots encounter blocked roads that are only revealed upon physical traversal. We address this with Scout-Assisted Planning, a heterogeneous planning framework in which scouting Unmanned Aerial Vehicles proactively gather environmental information to improve Unmanned Ground Vehicle navigation. To focus scouting on the most consequential edges, we propose Information Gain-based Action Pruning, which scores candidate scouting actions by their expected impact on ground robot behavior. Since exact Information Gain-based Action Pruning computation is prohibitively expensive, we develop a Graph Neural Network based model that predicts information gain values directly from graph structure and belief state, reducing planning time to real-time levels without sacrificing solution quality. Experiments across three environment types show that SAP with Information Gain Action Pruning reduces ground robot travel cost by 31.9--37.7% over the Canadian Traveler Problem baseline, and outperforms proximity-based scouting guidance by an additional 8--14%, confirming that principled information-gain-guided scouting is both more effective and computationally feasible for real-world deployment",
-      "abstractKO": "POMDP 기반 UAV+UGV 이종 팀 경로 계획, CTP 확장, IAP 정보 이득 행동 가지치기, GATv2 LIAP(96-218초→0.24-0.75초), 이동거리 31.9-49.9% 절감, arXiv 2026",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 59,
-      "reason": "POMDP 기반 UAV+UGV 이종 팀 경로 계획, CTP 확장, IAP 정보 이득 행동 가지치기, GATv2 LIAP(96-218초→0.24-0.75초), 이동거리 31.9-49.9% 절감, arXiv 2026",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ScoutAssistedPlanning_arxiv2026/index.html"
+      "reason": "**신뢰도 1급 시민화**: 종단간 디퓨전 UAV 플래너에 지각 신뢰성을 조건·가이드 비용·학습손실 전 과정에 명시 주입\n**VLM 신뢰도 실시간 증류**: AnyTraverse 교사 → MiT-B0 학생(깊이 융합·DINOv2 감독·하드네거 w_max=4·SSIM), 최대 2× 가속\n**2단계 ESDF 가이드**: hard(M≤0.3 깊이 역투영→ESDF) / weak(0.3<M≤0.6 약한 CHOMP, η_perc>η_obs), 신뢰 불가 영역을 가상 장애물로 물질화\n**training-free 가이드**: ε̃_θ=ε_θ−s·∇C, clean-manifold 투영으로 미터좌표 그래디언트, 재학습 없이 새 기하 적응\n**실로봇 검증**: 8인치 커스텀 쿼드로터, RealSense D455, ArduPilot/MAVROS, off-board RTX 4070(500MB)",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ReliaDiffNav_arxiv2026/index.html"
     },
     {
       "id": "2403.17846",
