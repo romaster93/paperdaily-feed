@@ -1,158 +1,142 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-25T19:30:06.220Z",
+  "generatedAt": "2026-07-26T19:30:06.046Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 7. 26  일요일",
+    "date": "2026. 7. 27  월요일",
     "title": "오늘의 리뷰",
     "subtitle": "VLN·Planner 새 리뷰 5편 · 전체 95편"
   },
   "papers": [
     {
-      "id": "2606.13494",
-      "venue": "arXiv 2026",
-      "venueDetail": "arXiv 2026 (학회 미확정)",
-      "matchScore": 87,
-      "category": "VLN",
-      "feedTitle": "NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation",
-      "authorsShort": "D. Azuma, T. Miyanishi +7",
-      "feedAbstract": "미래 관찰 예측·목표 진행도 가치·행동 청크를 9-프레임 latent canvas에서 공동 디퓨전 생성하는 통합 세계-행동 모델로, Cosmos Predict2 2B 백본 위에서 외부 CEM 플래너 없이 image-goal navigation을 수행하여 실제 로봇 79.2%(NWM 16.7%·OmniVLA 58.3%…",
-      "tags": [
-        "#VLN",
-        "#WorldModel",
-        "#실제로봇실험"
-      ],
-      "titleEN": "NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation",
-      "titleKO": "NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation",
-      "authorsEN": "Daichi Azuma, Taiki Miyanishi, Koya Sakamoto, Shuhei Kurita, Yaonan Zhu, Petr Khrapchenkov, Motoaki Kawanabe, Yusuke Iwasawa, Yutaka Matsuo",
-      "authorsKO": "Daichi Azuma, Taiki Miyanishi, Koya Sakamoto, Shuhei Kurita, Yaonan Zhu, Petr Khrapchenkov, Motoaki Kawanabe, Yusuke Iwasawa, Yutaka Matsuo",
-      "abstractEN": "Goal-conditioned visual navigation requires a robot to act under partial observability by anticipating how its motion will change the future egocentric view and whether that change brings it closer to the goal. Navigation world models provide such visual foresight, but they remain prediction modules that require an external planner to convert predicted futures into closed-loop control. We propose Navigation World Action Model (NavWAM), a diffusion-transformer policy that turns navigation world-model prediction into executable action by representing future observations, goal-progress values, and action chunks in a shared latent sequence. By learning future prediction jointly with the action and value targets that determine closed-loop behavior, NavWAM makes visual foresight directly usable for robot control. We build NavWAM through simulation pretraining and real-robot adaptation, and evaluate it on image-goal navigation against planning-based world models and a representative direct navigation policy. Across offline benchmarks and closed-loop real-robot deployment, NavWAM improves over planning-based world-model baselines in our evaluations while using the default policy mode without CEM-style action search. Project page: https://dachii-azm.github.io/navwam/",
-      "abstractKO": "미래 관찰 예측·목표 진행도 가치·행동 청크를 9-프레임 latent canvas에서 공동 디퓨전 생성하는 통합 세계-행동 모델로, Cosmos Predict2 2B 백본 위에서 외부 CEM 플래너 없이 image-goal navigation을 수행하여 실제 로봇 79.2%(NWM 16.7%·OmniVLA 58.3% 능가)를 ~5Hz로 달성.",
-      "detailTags": [
-        "#VLN",
-        "#WorldModel",
-        "#실제로봇실험"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 40,
-      "reason": "**Navigation World Action Model**: 세계 모델 예측 + 행동 생성 + 가치 추정을 단일 디퓨전 캔버스에서 공동 생성\n**외부 플래너 제거**: 행동을 직접 디노이징해 NWM CEM(≈14,521 TFLOPs/act) 대비 ≈4.45 TFLOPs/act로 3,000배↓, ~5Hz 온보드 실시간\n**비디오 prior 이식**: Cosmos Predict2 2B 백본 + 행동/가치 슬롯 + λ=5 업웨이트 + 3단계 커리큘럼\n**단일 가중치 다중 모드**: Policy/World-Model/Value (학습 50/25/25) 마스킹 멀티태스크\n**2B로 7B 경쟁**: OmniVLA-7B와 대등한 image-goal 성공률을 1/3.5 규모로 달성",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NavWAM_arxiv2026/index.html"
-    },
-    {
-      "id": "2605.21901",
-      "venue": "arXiv 2026",
-      "venueDetail": "arXiv 프리프린트 (cs.RO) — 미정",
-      "matchScore": 84,
-      "category": "Planner",
-      "feedTitle": "Higher Order Reasoning for Collaborative Communicationless Mobile Robot Operations",
-      "authorsShort": "J. Reasoner, N. Bezzo",
-      "feedAbstract": "Dynamic Epistemic Logic 기반 고차 믿음 입자(1~3차)와 Temporally Aware MPPI를 결합하여 통신 완전 차단 환경에서 이동 로봇 팀의 암묵적 조율(implicit coordination)을 달성, 임무 완료 시간 20.8%(시뮬) / 57.8%(실험) 단축.",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "Higher Order Reasoning for Collaborative Communicationless Mobile Robot Operations",
-      "titleKO": "Higher Order Reasoning for Collaborative Communicationless Mobile Robot Operations",
-      "authorsEN": "Jonathan Reasoner, Nicola Bezzo",
-      "authorsKO": "Jonathan Reasoner, Nicola Bezzo",
-      "abstractEN": "In communicationless environments, multi-robot systems must operate without the constant information exchange that many coordination strategies typically assume. This paper presents a novel dynamic epistemic planning framework that enables implicit coordination and long horizon planning through higher-order reasoning among robots. With our approach, robots form and propagate higher-order belief particles, update world beliefs using Bayesian inference, and select actions via a behavior tree that anticipates teammates' likely decisions. A temporally aware Model Predictive Path Integral (MPPI) controller integrates this reasoning into low-level execution, allowing robots to plan intercepts and adapt trajectories under partial observability. The proposed framework is evaluated in both simulations and physical experiments, where it consistently reduces task completion time compared to a first-order baseline, demonstrating that epistemic logic can serve as a robust foundation for resilient coordination in communication-restricted domains.",
-      "abstractKO": "Dynamic Epistemic Logic 기반 고차 믿음 입자(1~3차)와 Temporally Aware MPPI를 결합하여 통신 완전 차단 환경에서 이동 로봇 팀의 암묵적 조율(implicit coordination)을 달성, 임무 완료 시간 20.8%(시뮬) / 57.8%(실험) 단축.",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 42,
-      "reason": "Dynamic Epistemic Logic 기반 고차(1/2/3차) 믿음 입자 프레임워크\n2차 공감 입자(empathy particles)로 팀원에게 예측 가능한 행동 보장\n7가지 관측 이벤트 기반 Bayesian 믿음 업데이트\n시간 되감기 추론(time rewind)으로 팀원의 과거 행동 의도 재해석\nTemporally Aware MPPI: 이동 중인 팀원을 목표로 한 동적 인터셉트",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HigherOrderReasoning_arxiv2026/index.html"
-    },
-    {
-      "id": "2605.21935",
-      "venue": "RSS 2026",
-      "venueDetail": "RSS 2026 (Robotics: Science and Systems) — Accepted",
-      "matchScore": 87,
-      "category": "VLN",
-      "feedTitle": "MIF: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments",
-      "authorsShort": "P. Jiang, H. Liu +3",
-      "feedAbstract": "이족보행 인간형 로봇(Unitree G1)의 보행 유도 시각 왜곡과 동적 환경 변화를 삼중 필드(Appearance/Spatial/Geometry Field)로 처리하여 자연어 지시 기반 안전 내비게이션을 달성.",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "Learning to Evolve: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments",
-      "titleKO": "Learning to Evolve: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments",
-      "authorsEN": "Peifeng Jiang, Hong Liu, Jin Jin, Wenshuai Wang, Xia Li",
-      "authorsKO": "Peifeng Jiang, Hong Liu, Jin Jin, Wenshuai Wang, Xia Li",
-      "abstractEN": "Safe manipulation-oriented navigation for humanoid robots requires scene memory that remains reliable under locomotion-induced perceptual distortion, environmental changes, and interaction-level geometric safety constraints. Existing semantic mapping and scene-graph systems are difficult to deploy directly in this setting because they often assume stable camera trajectories, static environments, or coarse object geometry. We introduce the Multi-modal Interactive Field (MIF), a humanoid-oriented system that integrates confidence-aware semantic 3D Gaussian Splatting, discrepancy-triggered spatial memory updates, and task-driven geometric reconstruction within a closed-loop perception-adaptation pipeline. MIF couples three fields: an uncertainty-aware 3DGS Appearance Field that suppresses gait-induced blur, a Spatial Field that maintains topological memory, and a Geometry Field that supports Interaction Pose Safety (IPS) before manipulation. A discrepancy detection score is introduced to separate locomotion-induced false-positive changes from persistent changes and updates only locally inconsistent regions. On a Unitree-G1 humanoid in a real dynamic office, MIF improves relocation success in non-static environments from 12% to 94% compared with static scene-graph memory, while reducing semantic memory footprint by 91.4% through feature distillation for practical online operation. Project page and code: https://ziya-jiang.github.io/MIF-homepage/",
-      "abstractKO": "이족보행 인간형 로봇(Unitree G1)의 보행 유도 시각 왜곡과 동적 환경 변화를 삼중 필드(Appearance/Spatial/Geometry Field)로 처리하여 자연어 지시 기반 안전 내비게이션을 달성.",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 47,
-      "reason": "신뢰도 인식 3D Gaussian Splatting으로 보행 블러 자동 필터링\n계층적 씬 그래프(Spatial Field)로 자연어 목표의 ⟨Region, Landmark, Object⟩ 트리플렛 그라운딩\nFlow Matching 기반 on-demand 3D 메시 생성 + IPS 검증 (충돌률 0%)\n다중 모달 불일치 감지로 보행 아티팩트 vs 실제 환경 변화 구별 (2.3초 지역 업데이트)\n정적 맵 방법 대비 재배치 시나리오 성공률 12% → 94%",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/MIF_RSS2026/index.html"
-    },
-    {
-      "id": "2605.22816",
-      "venue": "CVPR 2026",
-      "venueDetail": "CVPR 2026",
+      "id": "2403.17846",
+      "venue": "RSS 2024",
       "matchScore": 96,
       "category": "VLN",
-      "feedTitle": "AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation",
-      "authorsShort": "W. Guo, X. Xu +8",
-      "feedAbstract": "VLN 에이전트가 Key Node(방 전환, 경로 이탈, 정지 오류)에서만 선택적으로 씬-진행도-계획 삼중 구조 추론을 수행하는 자기인식 프레임워크로, 단안 RGB만으로 R2R SR 65.4%, RxR SR 67.6% SOTA 달성.",
+      "feedTitle": "Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation",
+      "authorsShort": "A. Werby, C. Huang +3",
+      "feedAbstract": "문제의식: 기존 open-vocabulary robot mapping 방법들은 RGB-D 데이터로부터 CLIP과 같은 vision-language feature를 결합해 dense geometric map을 생성하지만, 다음 두 가지 근본적인 한계가 있다:",
       "tags": [
-        "#VLN",
-        "#LLM/VLM추론증강",
-        "#자기인식",
-        "#선택적추론",
-        "#코드공개"
+        "#VLN"
       ],
-      "titleEN": "AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation",
-      "titleKO": "AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation",
-      "authorsEN": "Wenxuan Guo, Xiuwei Xu, Yichen Liu, Xiangyu Li, Hang Yin, Huangxing Chen, Wenzhao Zheng, Jianjiang Feng, Jie Zhou, Jiwen Lu",
-      "authorsKO": "Wenxuan Guo, Xiuwei Xu, Yichen Liu, Xiangyu Li, Hang Yin, Huangxing Chen, Wenzhao Zheng, Jianjiang Feng, Jie Zhou, Jiwen Lu",
-      "abstractEN": "Vision-and-Language Navigation (VLN) requires an agent to ground language instructions to its own movement within a visual environment. While state-of-the-art methods leverage the reasoning capabilities of Vision-Language Models (VLMs) for end-to-end action prediction, they often lack an explicit and explainable understanding of the relationships between the agent, the instruction, and the scene. Conversely, explicitly building a scene map for heuristic planning is intuitively appealing but relies on additional 3D sensors and hinders large-scale vision-language pre-training. To bridge this gap, we propose AwareVLN, a novel framework that equips the navigation model with a self-aware reasoning mechanism, enabling it to understand the agent's state and task progress in a fully end-to-end and data-driven manner. Our approach features two key innovations: (1) a structural reasoning module that fosters spatial and task-oriented self-awareness, and (2) an automatic data engine with progress division for effective training. Extensive experiments on various datasets in Habitat simulator show our AwareVLN significantly outperforms previous state-of-the-art vision-language navigation methods. Project page: https://gwxuan.github.io/AwareVLN/.",
-      "abstractKO": "VLN 에이전트가 Key Node(방 전환, 경로 이탈, 정지 오류)에서만 선택적으로 씬-진행도-계획 삼중 구조 추론을 수행하는 자기인식 프레임워크로, 단안 RGB만으로 R2R SR 65.4%, RxR SR 67.6% SOTA 달성.",
+      "titleEN": "Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation",
+      "titleKO": "Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation",
+      "authorsEN": "Abdelrhman Werby, Chenguang Huang, Martin Büchner, Abhinav Valada, Wolfram Burgard",
+      "authorsKO": "Abdelrhman Werby, Chenguang Huang, Martin Büchner, Abhinav Valada, Wolfram Burgard",
+      "abstractEN": "Recent open-vocabulary robot mapping methods enrich dense geometric maps with pre-trained visual-language features. While these maps allow for the prediction of point-wise saliency maps when queried for a certain language concept, large-scale environments and abstract queries beyond the object level still pose a considerable hurdle, ultimately limiting language-grounded robotic navigation. In this work, we present HOV-SG, a hierarchical open-vocabulary 3D scene graph mapping approach for language-grounded robot navigation. Leveraging open-vocabulary vision foundation models, we first obtain state-of-the-art open-vocabulary segment-level maps in 3D and subsequently construct a 3D scene graph hierarchy consisting of floor, room, and object concepts, each enriched with open-vocabulary features. Our approach is able to represent multi-story buildings and allows robotic traversal of those using a cross-floor Voronoi graph. HOV-SG is evaluated on three distinct datasets and surpasses previous baselines in open-vocabulary semantic accuracy on the object, room, and floor level while producing a 75% reduction in representation size compared to dense open-vocabulary maps. In order to prove the efficacy and generalization capabilities of HOV-SG, we showcase successful long-horizon language-conditioned robot navigation within real-world multi-storage environments. We provide code and trial video data at http://hovsg.github.io/.",
+      "abstractKO": "문제의식: 기존 open-vocabulary robot mapping 방법들은 RGB-D 데이터로부터 CLIP과 같은 vision-language feature를 결합해 dense geometric map을 생성하지만, 다음 두 가지 근본적인 한계가 있다:",
       "detailTags": [
-        "#VLN",
-        "#LLM/VLM추론증강",
-        "#자기인식",
-        "#선택적추론",
-        "#코드공개"
+        "#VLN"
       ],
-      "year": "2026",
+      "year": "2024",
       "citations": 0,
-      "readMinutes": 52,
-      "reason": "**선택적 자기인식 추론**: Key Node(~23% 스텝)에서만 [REASON] 모드, 나머지는 경량 [ACT] 모드\n**삼중 구조 추론**: 씬 설명 + 진행도 평가 + 다음 단계 계획의 명시적 자기인식\n**자동 데이터 엔진**: Qwen-VL-Max + DAgger로 어노테이션 없이 추론 감독 데이터 생성\n**상대 스텝 융합**: R' = R ⊕ (t - t_prev)로 추론의 \"신선도\" 인코딩\n**단안 RGB SOTA**: Depth+Odometry 사용 방법(BEVBert, ETPNav)을 단안 RGB만으로 능가",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/AwareVLN_CVPR2026/index.html"
+      "readMinutes": 60,
+      "reason": "문제의식: 기존 open-vocabulary robot mapping 방법들은 RGB-D 데이터로부터 CLIP과 같은 vision-language feature를 결합해 dense geometric map을 생성하지만, 다음 두 가지 근본적인 한계가 있다:",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HOV-SG_RSS2024/index.html"
     },
     {
-      "id": "2605.22693",
-      "venue": "arXiv 2026",
+      "id": "2605.19209",
+      "venue": "ICRA 2026",
       "matchScore": 84,
       "category": "Planner",
-      "feedTitle": "Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments",
-      "authorsShort": "H. Bui, A. Khanal +2",
-      "feedAbstract": "POMDP 기반 UAV+UGV 이종 팀 경로 계획, CTP 확장, IAP 정보 이득 행동 가지치기, GATv2 LIAP(96-218초→0.24-0.75초), 이동거리 31.9-49.9% 절감, arXiv 2026",
+      "feedTitle": "Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning (GATP)",
+      "authorsShort": "M. Goarin, Y. Zhou +1",
+      "feedAbstract": "다중 쿼드로터, 라벨없는 모션 계획, GATP(GAT+f1), NMPC+ECBF 하드 안전 보장, 50대 확장 시뮬, 4대 실세계, D≤200ms 지연 강건, ICRA 2026",
       "tags": [
         "#Planner"
       ],
-      "titleEN": "Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments",
-      "titleKO": "Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments",
-      "authorsEN": "Hoang-Dung Bui, Abhish Khanal, Raihan Islam Arnob, Gregory J. Stein",
-      "authorsKO": "Hoang-Dung Bui, Abhish Khanal, Raihan Islam Arnob, Gregory J. Stein",
-      "abstractEN": "Autonomous robot teams navigating partially known environments face costly backtracking when ground robots encounter blocked roads that are only revealed upon physical traversal. We address this with Scout-Assisted Planning, a heterogeneous planning framework in which scouting Unmanned Aerial Vehicles proactively gather environmental information to improve Unmanned Ground Vehicle navigation. To focus scouting on the most consequential edges, we propose Information Gain-based Action Pruning, which scores candidate scouting actions by their expected impact on ground robot behavior. Since exact Information Gain-based Action Pruning computation is prohibitively expensive, we develop a Graph Neural Network based model that predicts information gain values directly from graph structure and belief state, reducing planning time to real-time levels without sacrificing solution quality. Experiments across three environment types show that SAP with Information Gain Action Pruning reduces ground robot travel cost by 31.9--37.7% over the Canadian Traveler Problem baseline, and outperforms proximity-based scouting guidance by an additional 8--14%, confirming that principled information-gain-guided scouting is both more effective and computationally feasible for real-world deployment",
-      "abstractKO": "POMDP 기반 UAV+UGV 이종 팀 경로 계획, CTP 확장, IAP 정보 이득 행동 가지치기, GATv2 LIAP(96-218초→0.24-0.75초), 이동거리 31.9-49.9% 절감, arXiv 2026",
+      "titleEN": "Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning (GATP)",
+      "titleKO": "Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning (GATP)",
+      "authorsEN": "Manohari Goarin, Yang Zhou, Giuseppe Loianno",
+      "authorsKO": "Manohari Goarin, Yang Zhou, Giuseppe Loianno",
+      "abstractEN": "The multi-robot unlabeled motion planning problem of concurrently assigning robots to goals and generating safe trajectories is central in many collaborative tasks. Recent Graph Neural Network methods offer scalable decentralized solutions but rely on simplified dynamics and simulation environments, overlooking key challenges of real-world deployment such as dynamic feasibility and communication constraints. To address these gaps, we propose a hierarchical framework that combines a Graph ATtention Planner (GATP) with a decentralized Nonlinear Model Predictive Controller (NMPC). GATP provides intermediate subgoals through multi-robot cooperation, and the NMPC enforces safety under nonlinear dynamics and actuation constraints. We evaluate our framework in both simulation and real-world quadrotor experiments. Thanks to attention mechanisms and minimal communication requirements, we demonstrate improved generalization to larger teams, robustness to communication delays up to 200 ms and practical feasibility with decentralized on-board inference.",
+      "abstractKO": "다중 쿼드로터, 라벨없는 모션 계획, GATP(GAT+f1), NMPC+ECBF 하드 안전 보장, 50대 확장 시뮬, 4대 실세계, D≤200ms 지연 강건, ICRA 2026",
       "detailTags": [
         "#Planner"
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 59,
-      "reason": "POMDP 기반 UAV+UGV 이종 팀 경로 계획, CTP 확장, IAP 정보 이득 행동 가지치기, GATv2 LIAP(96-218초→0.24-0.75초), 이동거리 31.9-49.9% 절감, arXiv 2026",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ScoutAssistedPlanning_arxiv2026/index.html"
+      "readMinutes": 44,
+      "reason": "다중 쿼드로터, 라벨없는 모션 계획, GATP(GAT+f1), NMPC+ECBF 하드 안전 보장, 50대 확장 시뮬, 4대 실세계, D≤200ms 지연 강건, ICRA 2026",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/GATP_ICRA2026/index.html"
+    },
+    {
+      "id": "2605.19958",
+      "venue": "arXiv 2026",
+      "matchScore": 93,
+      "category": "VLN",
+      "feedTitle": "TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning",
+      "authorsShort": "H. Zheng, Z. Chen +5",
+      "feedAbstract": "크로스 플로어 ZSON, 3D 통과 가능성 매핑, 이중 모드(기하+시맨틱), FOV 능동 지각, Open-ATSP 계층 계획, HM3D 70.0% SR, Unitree Go2 실세계 64.0% SR",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning",
+      "titleKO": "TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning",
+      "authorsEN": "Han Zheng, Zhe Chen, Yudong Huang, Haoran Liu, Jinghao Wang, Ming Yang, Tong Qin",
+      "authorsKO": "Han Zheng, Zhe Chen, Yudong Huang, Haoran Liu, Jinghao Wang, Ming Yang, Tong Qin",
+      "abstractEN": "Zero-shot Object Navigation (ZSON) has shown promise for open-vocabulary target search in unseen environments, yet most existing systems remain tied to planar representations and single-floor assumptions. These assumptions become inadequate in real buildings, where navigation involves floors, stairs, landings, and vertically overlapping spaces. This article presents TravExplorer, a cross-floor embodied exploration framework that couples zero-shot semantic guidance with traversability-aware 3-D planning. TravExplorer maintains a unified volumetric map that distinguishes occupied structures from robot-reachable support surfaces and extracts traversable frontiers from connected support surfaces, including floors, stairs, and landings. A FOV-aware active perception strategy further resolves incomplete observations during cross-floor traversal. To reduce semantic-reasoning latency, a lightweight guidance module aligns a probabilistic instance map from online open-vocabulary segmentation with a spatial value map from fast image-to-text matching. Based on these geometric and semantic memories, a hierarchical planner performs target-aware frontier touring over object hypotheses, traversable frontiers, and stair landmarks, and generates executable cross-floor motions through foothold-guided 3-D search and vertically constrained local trajectory optimization. Experiments over 4,195 simulated episodes on HM3D and MP3D demonstrate consistent advantages over representative ObjectNav baselines. Fifty real-world trials on a Unitree Go2 further validate open-vocabulary target search across single-floor and cross-floor indoor environments without prior maps or human intervention. The code will be released at https://github.com/wuyi2121/TravExplorer.",
+      "abstractKO": "크로스 플로어 ZSON, 3D 통과 가능성 매핑, 이중 모드(기하+시맨틱), FOV 능동 지각, Open-ATSP 계층 계획, HM3D 70.0% SR, Unitree Go2 실세계 64.0% SR",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 44,
+      "reason": "크로스 플로어 ZSON, 3D 통과 가능성 매핑, 이중 모드(기하+시맨틱), FOV 능동 지각, Open-ATSP 계층 계획, HM3D 70.0% SR, Unitree Go2 실세계 64.0% SR",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TravExplorer_arxiv2026/index.html"
+    },
+    {
+      "id": "2605.18441",
+      "venue": "arXiv 2026",
+      "matchScore": 87,
+      "category": "Planner",
+      "feedTitle": "REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots",
+      "authorsShort": "J. Dong, Y. Zhang +6",
+      "feedAbstract": "다중 로봇 대형 항법, TCF-R2T (MCMF 시간-확장), JSTP (공간-시간 동시 최적화), MINCO 5차, 7-WMR 실세계, 97.4% 실행시간 단축, 75% 대형 오차 감소, Tsinghua/NUS",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots",
+      "titleKO": "REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots",
+      "authorsEN": "Jianghong Dong, Yifeng Zhang, Jiawei Wang, Mengchi Cai, Keqiang Li, Guillaume Sartoretti (Tsinghua, NUS, U-Michigan)",
+      "authorsKO": "Jianghong Dong, Yifeng Zhang, Jiawei Wang, Mengchi Cai, Keqiang Li, Guillaume Sartoretti (Tsinghua, NUS, U-Michigan)",
+      "abstractEN": "Formation control of wheeled mobile robots (WMRs) has been extensively studied due to its broad applications in fields such as logistics transportation, environmental monitoring, and search and rescue. However, most existing works mainly focus on tracking predefined formations, which limits their adaptability to complex real-world environments. To address this, we propose REACT (Real-time Environment-Adaptive architecture for Continuous formation navigaTion), a hierarchical architecture integrating centralized formation generation and distributed formation maintenance. Specifically, our upper layer generates new environment-adaptive formations when necessary and uses our proposed TCF-R2T (Trajectory-Conflict-Free Robot-to-Target assignment) algorithm to compute conflict-free WMR-to-target assignments in polynomial time, enabling timely formation transitions without trajectory conflicts. At the lower layer, each WMR executes our developed JSTP (Joint Spatio-Temporal trajectory Planning) method to maintain the generated formation by simultaneously optimizing spatial positions and temporal durations, thereby enhancing coordination among WMRs and enabling continuous navigation in obstacle-rich environments and dynamic-obstacle scenarios. Both simulation and real-world experiments validate the effectiveness and practical applicability of REACT. Experimental videos are available on our project website: https://dongjh20.github.io/REACT-website.",
+      "abstractKO": "다중 로봇 대형 항법, TCF-R2T (MCMF 시간-확장), JSTP (공간-시간 동시 최적화), MINCO 5차, 7-WMR 실세계, 97.4% 실행시간 단축, 75% 대형 오차 감소, Tsinghua/NUS",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 43,
+      "reason": "다중 로봇 대형 항법, TCF-R2T (MCMF 시간-확장), JSTP (공간-시간 동시 최적화), MINCO 5차, 7-WMR 실세계, 97.4% 실행시간 단축, 75% 대형 오차 감소, Tsinghua/NUS",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/REACT_arxiv2026/index.html"
+    },
+    {
+      "id": "2605.18729",
+      "venue": "arXiv 2026",
+      "matchScore": 87,
+      "category": "VLN",
+      "feedTitle": "Robo-Cortex: A Self-Evolving Embodied Agent via Dual-Grain Cognitive Memory and Autonomous Knowledge Induction",
+      "authorsShort": "N. Chan, Y. Zhang +7",
+      "feedAbstract": "자기진화 에이전트, 경험 기억상실, AKI, 이중 입도 메모리, 세계 모델 상상, IGNav/AR/AEQA, +15.30% SPL, HM3D/MP3D",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "Robo-Cortex: A Self-Evolving Embodied Agent via Dual-Grain Cognitive Memory and Autonomous Knowledge Induction",
+      "titleKO": "Robo-Cortex: A Self-Evolving Embodied Agent via Dual-Grain Cognitive Memory and Autonomous Knowledge Induction",
+      "authorsEN": "Nga Teng Chan, Yi Zhang, Yechi Liu, Renwen Cui, Fanhu Zeng, Qifeng Chen 외 (HKUST, X-Humanoid, CAS, BUAA)",
+      "authorsKO": "Nga Teng Chan, Yi Zhang, Yechi Liu, Renwen Cui, Fanhu Zeng, Qifeng Chen 외 (HKUST, X-Humanoid, CAS, BUAA)",
+      "abstractEN": "The ability to navigate and interact with complex environments is central to real-world embodied agents, yet navigation in unseen environments remains challenging due to \"experiential amnesia,\" where existing trajectory-driven or reactive policies fail to synthesize generalizable strategies from past interactions. We propose Robo-Cortex, a self-evolving framework that enables robots to autonomously induce navigation heuristics and refine cognitive strategies through a continuous reflection-adaptation loop. By abstracting success patterns and failure pitfalls into natural-language heuristics, Robo-Cortex enables a transition from passive execution to active strategy evolution. Our core innovation is an Autonomous Knowledge Induction (AKI) mechanism that distills multimodal trajectories into a structured Navigation Heuristic Library for knowledge generalization. The architecture further incorporates a Dual-Grain Cognitive Memory system, comprising a Short-term Reflective Memory (SRM) for real-time local progress analysis, and a Long-term Principle Memory (LPM) that abstracts past trajectories into reusable guiding and cautionary principles. To ensure robust decision-making, we introduce a multimodal Imagine-then-Verify loop, where a world model simulates potential outcomes and a VLM-based evaluator validates action plans. Extensive evaluations on IGNav, AR, and AEQA show that Robo-Cortex consistently outperforms strong baselines in both task success and exploration efficiency, with gains of up to +4.16% SPL over the strongest prior method and up to +15.30% SPL under heuristic transfer to unseen environments. Preliminary real-world robotic experiments further support the effectiveness of Robo-Cortex in physical settings.",
+      "abstractKO": "자기진화 에이전트, 경험 기억상실, AKI, 이중 입도 메모리, 세계 모델 상상, IGNav/AR/AEQA, +15.30% SPL, HM3D/MP3D",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 43,
+      "reason": "자기진화 에이전트, 경험 기억상실, AKI, 이중 입도 메모리, 세계 모델 상상, IGNav/AR/AEQA, +15.30% SPL, HM3D/MP3D",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/RoboCortex_arxiv2026/index.html"
     }
   ],
   "archive": [
@@ -1392,134 +1376,150 @@
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ReliaDiffNav_arxiv2026/index.html"
     },
     {
-      "id": "2403.17846",
-      "venue": "RSS 2024",
-      "matchScore": 96,
+      "id": "2606.13494",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 2026 (학회 미확정)",
+      "matchScore": 87,
       "category": "VLN",
-      "feedTitle": "Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation",
-      "authorsShort": "A. Werby, C. Huang +3",
-      "feedAbstract": "문제의식: 기존 open-vocabulary robot mapping 방법들은 RGB-D 데이터로부터 CLIP과 같은 vision-language feature를 결합해 dense geometric map을 생성하지만, 다음 두 가지 근본적인 한계가 있다:",
+      "feedTitle": "NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation",
+      "authorsShort": "D. Azuma, T. Miyanishi +7",
+      "feedAbstract": "미래 관찰 예측·목표 진행도 가치·행동 청크를 9-프레임 latent canvas에서 공동 디퓨전 생성하는 통합 세계-행동 모델로, Cosmos Predict2 2B 백본 위에서 외부 CEM 플래너 없이 image-goal navigation을 수행하여 실제 로봇 79.2%(NWM 16.7%·OmniVLA 58.3%…",
       "tags": [
-        "#VLN"
+        "#VLN",
+        "#WorldModel",
+        "#실제로봇실험"
       ],
-      "titleEN": "Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation",
-      "titleKO": "Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation",
-      "authorsEN": "Abdelrhman Werby, Chenguang Huang, Martin Büchner, Abhinav Valada, Wolfram Burgard",
-      "authorsKO": "Abdelrhman Werby, Chenguang Huang, Martin Büchner, Abhinav Valada, Wolfram Burgard",
-      "abstractEN": "Recent open-vocabulary robot mapping methods enrich dense geometric maps with pre-trained visual-language features. While these maps allow for the prediction of point-wise saliency maps when queried for a certain language concept, large-scale environments and abstract queries beyond the object level still pose a considerable hurdle, ultimately limiting language-grounded robotic navigation. In this work, we present HOV-SG, a hierarchical open-vocabulary 3D scene graph mapping approach for language-grounded robot navigation. Leveraging open-vocabulary vision foundation models, we first obtain state-of-the-art open-vocabulary segment-level maps in 3D and subsequently construct a 3D scene graph hierarchy consisting of floor, room, and object concepts, each enriched with open-vocabulary features. Our approach is able to represent multi-story buildings and allows robotic traversal of those using a cross-floor Voronoi graph. HOV-SG is evaluated on three distinct datasets and surpasses previous baselines in open-vocabulary semantic accuracy on the object, room, and floor level while producing a 75% reduction in representation size compared to dense open-vocabulary maps. In order to prove the efficacy and generalization capabilities of HOV-SG, we showcase successful long-horizon language-conditioned robot navigation within real-world multi-storage environments. We provide code and trial video data at http://hovsg.github.io/.",
-      "abstractKO": "문제의식: 기존 open-vocabulary robot mapping 방법들은 RGB-D 데이터로부터 CLIP과 같은 vision-language feature를 결합해 dense geometric map을 생성하지만, 다음 두 가지 근본적인 한계가 있다:",
+      "titleEN": "NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation",
+      "titleKO": "NavWAM: A Navigation World Action Model for Goal-Conditioned Visual Navigation",
+      "authorsEN": "Daichi Azuma, Taiki Miyanishi, Koya Sakamoto, Shuhei Kurita, Yaonan Zhu, Petr Khrapchenkov, Motoaki Kawanabe, Yusuke Iwasawa, Yutaka Matsuo",
+      "authorsKO": "Daichi Azuma, Taiki Miyanishi, Koya Sakamoto, Shuhei Kurita, Yaonan Zhu, Petr Khrapchenkov, Motoaki Kawanabe, Yusuke Iwasawa, Yutaka Matsuo",
+      "abstractEN": "Goal-conditioned visual navigation requires a robot to act under partial observability by anticipating how its motion will change the future egocentric view and whether that change brings it closer to the goal. Navigation world models provide such visual foresight, but they remain prediction modules that require an external planner to convert predicted futures into closed-loop control. We propose Navigation World Action Model (NavWAM), a diffusion-transformer policy that turns navigation world-model prediction into executable action by representing future observations, goal-progress values, and action chunks in a shared latent sequence. By learning future prediction jointly with the action and value targets that determine closed-loop behavior, NavWAM makes visual foresight directly usable for robot control. We build NavWAM through simulation pretraining and real-robot adaptation, and evaluate it on image-goal navigation against planning-based world models and a representative direct navigation policy. Across offline benchmarks and closed-loop real-robot deployment, NavWAM improves over planning-based world-model baselines in our evaluations while using the default policy mode without CEM-style action search. Project page: https://dachii-azm.github.io/navwam/",
+      "abstractKO": "미래 관찰 예측·목표 진행도 가치·행동 청크를 9-프레임 latent canvas에서 공동 디퓨전 생성하는 통합 세계-행동 모델로, Cosmos Predict2 2B 백본 위에서 외부 CEM 플래너 없이 image-goal navigation을 수행하여 실제 로봇 79.2%(NWM 16.7%·OmniVLA 58.3% 능가)를 ~5Hz로 달성.",
       "detailTags": [
-        "#VLN"
+        "#VLN",
+        "#WorldModel",
+        "#실제로봇실험"
       ],
-      "year": "2024",
+      "year": "2026",
       "citations": 0,
-      "readMinutes": 60,
-      "reason": "문제의식: 기존 open-vocabulary robot mapping 방법들은 RGB-D 데이터로부터 CLIP과 같은 vision-language feature를 결합해 dense geometric map을 생성하지만, 다음 두 가지 근본적인 한계가 있다:",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HOV-SG_RSS2024/index.html"
+      "readMinutes": 40,
+      "reason": "**Navigation World Action Model**: 세계 모델 예측 + 행동 생성 + 가치 추정을 단일 디퓨전 캔버스에서 공동 생성\n**외부 플래너 제거**: 행동을 직접 디노이징해 NWM CEM(≈14,521 TFLOPs/act) 대비 ≈4.45 TFLOPs/act로 3,000배↓, ~5Hz 온보드 실시간\n**비디오 prior 이식**: Cosmos Predict2 2B 백본 + 행동/가치 슬롯 + λ=5 업웨이트 + 3단계 커리큘럼\n**단일 가중치 다중 모드**: Policy/World-Model/Value (학습 50/25/25) 마스킹 멀티태스크\n**2B로 7B 경쟁**: OmniVLA-7B와 대등한 image-goal 성공률을 1/3.5 규모로 달성",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NavWAM_arxiv2026/index.html"
     },
     {
-      "id": "2605.19209",
-      "venue": "ICRA 2026",
+      "id": "2605.21901",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 프리프린트 (cs.RO) — 미정",
       "matchScore": 84,
       "category": "Planner",
-      "feedTitle": "Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning (GATP)",
-      "authorsShort": "M. Goarin, Y. Zhou +1",
-      "feedAbstract": "다중 쿼드로터, 라벨없는 모션 계획, GATP(GAT+f1), NMPC+ECBF 하드 안전 보장, 50대 확장 시뮬, 4대 실세계, D≤200ms 지연 강건, ICRA 2026",
+      "feedTitle": "Higher Order Reasoning for Collaborative Communicationless Mobile Robot Operations",
+      "authorsShort": "J. Reasoner, N. Bezzo",
+      "feedAbstract": "Dynamic Epistemic Logic 기반 고차 믿음 입자(1~3차)와 Temporally Aware MPPI를 결합하여 통신 완전 차단 환경에서 이동 로봇 팀의 암묵적 조율(implicit coordination)을 달성, 임무 완료 시간 20.8%(시뮬) / 57.8%(실험) 단축.",
       "tags": [
         "#Planner"
       ],
-      "titleEN": "Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning (GATP)",
-      "titleKO": "Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning (GATP)",
-      "authorsEN": "Manohari Goarin, Yang Zhou, Giuseppe Loianno",
-      "authorsKO": "Manohari Goarin, Yang Zhou, Giuseppe Loianno",
-      "abstractEN": "The multi-robot unlabeled motion planning problem of concurrently assigning robots to goals and generating safe trajectories is central in many collaborative tasks. Recent Graph Neural Network methods offer scalable decentralized solutions but rely on simplified dynamics and simulation environments, overlooking key challenges of real-world deployment such as dynamic feasibility and communication constraints. To address these gaps, we propose a hierarchical framework that combines a Graph ATtention Planner (GATP) with a decentralized Nonlinear Model Predictive Controller (NMPC). GATP provides intermediate subgoals through multi-robot cooperation, and the NMPC enforces safety under nonlinear dynamics and actuation constraints. We evaluate our framework in both simulation and real-world quadrotor experiments. Thanks to attention mechanisms and minimal communication requirements, we demonstrate improved generalization to larger teams, robustness to communication delays up to 200 ms and practical feasibility with decentralized on-board inference.",
-      "abstractKO": "다중 쿼드로터, 라벨없는 모션 계획, GATP(GAT+f1), NMPC+ECBF 하드 안전 보장, 50대 확장 시뮬, 4대 실세계, D≤200ms 지연 강건, ICRA 2026",
+      "titleEN": "Higher Order Reasoning for Collaborative Communicationless Mobile Robot Operations",
+      "titleKO": "Higher Order Reasoning for Collaborative Communicationless Mobile Robot Operations",
+      "authorsEN": "Jonathan Reasoner, Nicola Bezzo",
+      "authorsKO": "Jonathan Reasoner, Nicola Bezzo",
+      "abstractEN": "In communicationless environments, multi-robot systems must operate without the constant information exchange that many coordination strategies typically assume. This paper presents a novel dynamic epistemic planning framework that enables implicit coordination and long horizon planning through higher-order reasoning among robots. With our approach, robots form and propagate higher-order belief particles, update world beliefs using Bayesian inference, and select actions via a behavior tree that anticipates teammates' likely decisions. A temporally aware Model Predictive Path Integral (MPPI) controller integrates this reasoning into low-level execution, allowing robots to plan intercepts and adapt trajectories under partial observability. The proposed framework is evaluated in both simulations and physical experiments, where it consistently reduces task completion time compared to a first-order baseline, demonstrating that epistemic logic can serve as a robust foundation for resilient coordination in communication-restricted domains.",
+      "abstractKO": "Dynamic Epistemic Logic 기반 고차 믿음 입자(1~3차)와 Temporally Aware MPPI를 결합하여 통신 완전 차단 환경에서 이동 로봇 팀의 암묵적 조율(implicit coordination)을 달성, 임무 완료 시간 20.8%(시뮬) / 57.8%(실험) 단축.",
       "detailTags": [
         "#Planner"
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 44,
-      "reason": "다중 쿼드로터, 라벨없는 모션 계획, GATP(GAT+f1), NMPC+ECBF 하드 안전 보장, 50대 확장 시뮬, 4대 실세계, D≤200ms 지연 강건, ICRA 2026",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/GATP_ICRA2026/index.html"
+      "readMinutes": 42,
+      "reason": "Dynamic Epistemic Logic 기반 고차(1/2/3차) 믿음 입자 프레임워크\n2차 공감 입자(empathy particles)로 팀원에게 예측 가능한 행동 보장\n7가지 관측 이벤트 기반 Bayesian 믿음 업데이트\n시간 되감기 추론(time rewind)으로 팀원의 과거 행동 의도 재해석\nTemporally Aware MPPI: 이동 중인 팀원을 목표로 한 동적 인터셉트",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HigherOrderReasoning_arxiv2026/index.html"
     },
     {
-      "id": "2605.19958",
-      "venue": "arXiv 2026",
-      "matchScore": 93,
-      "category": "VLN",
-      "feedTitle": "TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning",
-      "authorsShort": "H. Zheng, Z. Chen +5",
-      "feedAbstract": "크로스 플로어 ZSON, 3D 통과 가능성 매핑, 이중 모드(기하+시맨틱), FOV 능동 지각, Open-ATSP 계층 계획, HM3D 70.0% SR, Unitree Go2 실세계 64.0% SR",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning",
-      "titleKO": "TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning",
-      "authorsEN": "Han Zheng, Zhe Chen, Yudong Huang, Haoran Liu, Jinghao Wang, Ming Yang, Tong Qin",
-      "authorsKO": "Han Zheng, Zhe Chen, Yudong Huang, Haoran Liu, Jinghao Wang, Ming Yang, Tong Qin",
-      "abstractEN": "Zero-shot Object Navigation (ZSON) has shown promise for open-vocabulary target search in unseen environments, yet most existing systems remain tied to planar representations and single-floor assumptions. These assumptions become inadequate in real buildings, where navigation involves floors, stairs, landings, and vertically overlapping spaces. This article presents TravExplorer, a cross-floor embodied exploration framework that couples zero-shot semantic guidance with traversability-aware 3-D planning. TravExplorer maintains a unified volumetric map that distinguishes occupied structures from robot-reachable support surfaces and extracts traversable frontiers from connected support surfaces, including floors, stairs, and landings. A FOV-aware active perception strategy further resolves incomplete observations during cross-floor traversal. To reduce semantic-reasoning latency, a lightweight guidance module aligns a probabilistic instance map from online open-vocabulary segmentation with a spatial value map from fast image-to-text matching. Based on these geometric and semantic memories, a hierarchical planner performs target-aware frontier touring over object hypotheses, traversable frontiers, and stair landmarks, and generates executable cross-floor motions through foothold-guided 3-D search and vertically constrained local trajectory optimization. Experiments over 4,195 simulated episodes on HM3D and MP3D demonstrate consistent advantages over representative ObjectNav baselines. Fifty real-world trials on a Unitree Go2 further validate open-vocabulary target search across single-floor and cross-floor indoor environments without prior maps or human intervention. The code will be released at https://github.com/wuyi2121/TravExplorer.",
-      "abstractKO": "크로스 플로어 ZSON, 3D 통과 가능성 매핑, 이중 모드(기하+시맨틱), FOV 능동 지각, Open-ATSP 계층 계획, HM3D 70.0% SR, Unitree Go2 실세계 64.0% SR",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 44,
-      "reason": "크로스 플로어 ZSON, 3D 통과 가능성 매핑, 이중 모드(기하+시맨틱), FOV 능동 지각, Open-ATSP 계층 계획, HM3D 70.0% SR, Unitree Go2 실세계 64.0% SR",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TravExplorer_arxiv2026/index.html"
-    },
-    {
-      "id": "2605.18441",
-      "venue": "arXiv 2026",
+      "id": "2605.21935",
+      "venue": "RSS 2026",
+      "venueDetail": "RSS 2026 (Robotics: Science and Systems) — Accepted",
       "matchScore": 87,
+      "category": "VLN",
+      "feedTitle": "MIF: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments",
+      "authorsShort": "P. Jiang, H. Liu +3",
+      "feedAbstract": "이족보행 인간형 로봇(Unitree G1)의 보행 유도 시각 왜곡과 동적 환경 변화를 삼중 필드(Appearance/Spatial/Geometry Field)로 처리하여 자연어 지시 기반 안전 내비게이션을 달성.",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "Learning to Evolve: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments",
+      "titleKO": "Learning to Evolve: Multi-modal Interactive Fields for Robust Humanoid Navigation in Dynamic Environments",
+      "authorsEN": "Peifeng Jiang, Hong Liu, Jin Jin, Wenshuai Wang, Xia Li",
+      "authorsKO": "Peifeng Jiang, Hong Liu, Jin Jin, Wenshuai Wang, Xia Li",
+      "abstractEN": "Safe manipulation-oriented navigation for humanoid robots requires scene memory that remains reliable under locomotion-induced perceptual distortion, environmental changes, and interaction-level geometric safety constraints. Existing semantic mapping and scene-graph systems are difficult to deploy directly in this setting because they often assume stable camera trajectories, static environments, or coarse object geometry. We introduce the Multi-modal Interactive Field (MIF), a humanoid-oriented system that integrates confidence-aware semantic 3D Gaussian Splatting, discrepancy-triggered spatial memory updates, and task-driven geometric reconstruction within a closed-loop perception-adaptation pipeline. MIF couples three fields: an uncertainty-aware 3DGS Appearance Field that suppresses gait-induced blur, a Spatial Field that maintains topological memory, and a Geometry Field that supports Interaction Pose Safety (IPS) before manipulation. A discrepancy detection score is introduced to separate locomotion-induced false-positive changes from persistent changes and updates only locally inconsistent regions. On a Unitree-G1 humanoid in a real dynamic office, MIF improves relocation success in non-static environments from 12% to 94% compared with static scene-graph memory, while reducing semantic memory footprint by 91.4% through feature distillation for practical online operation. Project page and code: https://ziya-jiang.github.io/MIF-homepage/",
+      "abstractKO": "이족보행 인간형 로봇(Unitree G1)의 보행 유도 시각 왜곡과 동적 환경 변화를 삼중 필드(Appearance/Spatial/Geometry Field)로 처리하여 자연어 지시 기반 안전 내비게이션을 달성.",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 47,
+      "reason": "신뢰도 인식 3D Gaussian Splatting으로 보행 블러 자동 필터링\n계층적 씬 그래프(Spatial Field)로 자연어 목표의 ⟨Region, Landmark, Object⟩ 트리플렛 그라운딩\nFlow Matching 기반 on-demand 3D 메시 생성 + IPS 검증 (충돌률 0%)\n다중 모달 불일치 감지로 보행 아티팩트 vs 실제 환경 변화 구별 (2.3초 지역 업데이트)\n정적 맵 방법 대비 재배치 시나리오 성공률 12% → 94%",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/MIF_RSS2026/index.html"
+    },
+    {
+      "id": "2605.22816",
+      "venue": "CVPR 2026",
+      "venueDetail": "CVPR 2026",
+      "matchScore": 96,
+      "category": "VLN",
+      "feedTitle": "AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation",
+      "authorsShort": "W. Guo, X. Xu +8",
+      "feedAbstract": "VLN 에이전트가 Key Node(방 전환, 경로 이탈, 정지 오류)에서만 선택적으로 씬-진행도-계획 삼중 구조 추론을 수행하는 자기인식 프레임워크로, 단안 RGB만으로 R2R SR 65.4%, RxR SR 67.6% SOTA 달성.",
+      "tags": [
+        "#VLN",
+        "#LLM/VLM추론증강",
+        "#자기인식",
+        "#선택적추론",
+        "#코드공개"
+      ],
+      "titleEN": "AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation",
+      "titleKO": "AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation",
+      "authorsEN": "Wenxuan Guo, Xiuwei Xu, Yichen Liu, Xiangyu Li, Hang Yin, Huangxing Chen, Wenzhao Zheng, Jianjiang Feng, Jie Zhou, Jiwen Lu",
+      "authorsKO": "Wenxuan Guo, Xiuwei Xu, Yichen Liu, Xiangyu Li, Hang Yin, Huangxing Chen, Wenzhao Zheng, Jianjiang Feng, Jie Zhou, Jiwen Lu",
+      "abstractEN": "Vision-and-Language Navigation (VLN) requires an agent to ground language instructions to its own movement within a visual environment. While state-of-the-art methods leverage the reasoning capabilities of Vision-Language Models (VLMs) for end-to-end action prediction, they often lack an explicit and explainable understanding of the relationships between the agent, the instruction, and the scene. Conversely, explicitly building a scene map for heuristic planning is intuitively appealing but relies on additional 3D sensors and hinders large-scale vision-language pre-training. To bridge this gap, we propose AwareVLN, a novel framework that equips the navigation model with a self-aware reasoning mechanism, enabling it to understand the agent's state and task progress in a fully end-to-end and data-driven manner. Our approach features two key innovations: (1) a structural reasoning module that fosters spatial and task-oriented self-awareness, and (2) an automatic data engine with progress division for effective training. Extensive experiments on various datasets in Habitat simulator show our AwareVLN significantly outperforms previous state-of-the-art vision-language navigation methods. Project page: https://gwxuan.github.io/AwareVLN/.",
+      "abstractKO": "VLN 에이전트가 Key Node(방 전환, 경로 이탈, 정지 오류)에서만 선택적으로 씬-진행도-계획 삼중 구조 추론을 수행하는 자기인식 프레임워크로, 단안 RGB만으로 R2R SR 65.4%, RxR SR 67.6% SOTA 달성.",
+      "detailTags": [
+        "#VLN",
+        "#LLM/VLM추론증강",
+        "#자기인식",
+        "#선택적추론",
+        "#코드공개"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 52,
+      "reason": "**선택적 자기인식 추론**: Key Node(~23% 스텝)에서만 [REASON] 모드, 나머지는 경량 [ACT] 모드\n**삼중 구조 추론**: 씬 설명 + 진행도 평가 + 다음 단계 계획의 명시적 자기인식\n**자동 데이터 엔진**: Qwen-VL-Max + DAgger로 어노테이션 없이 추론 감독 데이터 생성\n**상대 스텝 융합**: R' = R ⊕ (t - t_prev)로 추론의 \"신선도\" 인코딩\n**단안 RGB SOTA**: Depth+Odometry 사용 방법(BEVBert, ETPNav)을 단안 RGB만으로 능가",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/AwareVLN_CVPR2026/index.html"
+    },
+    {
+      "id": "2605.22693",
+      "venue": "arXiv 2026",
+      "matchScore": 84,
       "category": "Planner",
-      "feedTitle": "REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots",
-      "authorsShort": "J. Dong, Y. Zhang +6",
-      "feedAbstract": "다중 로봇 대형 항법, TCF-R2T (MCMF 시간-확장), JSTP (공간-시간 동시 최적화), MINCO 5차, 7-WMR 실세계, 97.4% 실행시간 단축, 75% 대형 오차 감소, Tsinghua/NUS",
+      "feedTitle": "Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments",
+      "authorsShort": "H. Bui, A. Khanal +2",
+      "feedAbstract": "POMDP 기반 UAV+UGV 이종 팀 경로 계획, CTP 확장, IAP 정보 이득 행동 가지치기, GATv2 LIAP(96-218초→0.24-0.75초), 이동거리 31.9-49.9% 절감, arXiv 2026",
       "tags": [
         "#Planner"
       ],
-      "titleEN": "REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots",
-      "titleKO": "REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots",
-      "authorsEN": "Jianghong Dong, Yifeng Zhang, Jiawei Wang, Mengchi Cai, Keqiang Li, Guillaume Sartoretti (Tsinghua, NUS, U-Michigan)",
-      "authorsKO": "Jianghong Dong, Yifeng Zhang, Jiawei Wang, Mengchi Cai, Keqiang Li, Guillaume Sartoretti (Tsinghua, NUS, U-Michigan)",
-      "abstractEN": "Formation control of wheeled mobile robots (WMRs) has been extensively studied due to its broad applications in fields such as logistics transportation, environmental monitoring, and search and rescue. However, most existing works mainly focus on tracking predefined formations, which limits their adaptability to complex real-world environments. To address this, we propose REACT (Real-time Environment-Adaptive architecture for Continuous formation navigaTion), a hierarchical architecture integrating centralized formation generation and distributed formation maintenance. Specifically, our upper layer generates new environment-adaptive formations when necessary and uses our proposed TCF-R2T (Trajectory-Conflict-Free Robot-to-Target assignment) algorithm to compute conflict-free WMR-to-target assignments in polynomial time, enabling timely formation transitions without trajectory conflicts. At the lower layer, each WMR executes our developed JSTP (Joint Spatio-Temporal trajectory Planning) method to maintain the generated formation by simultaneously optimizing spatial positions and temporal durations, thereby enhancing coordination among WMRs and enabling continuous navigation in obstacle-rich environments and dynamic-obstacle scenarios. Both simulation and real-world experiments validate the effectiveness and practical applicability of REACT. Experimental videos are available on our project website: https://dongjh20.github.io/REACT-website.",
-      "abstractKO": "다중 로봇 대형 항법, TCF-R2T (MCMF 시간-확장), JSTP (공간-시간 동시 최적화), MINCO 5차, 7-WMR 실세계, 97.4% 실행시간 단축, 75% 대형 오차 감소, Tsinghua/NUS",
+      "titleEN": "Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments",
+      "titleKO": "Scout-Assisted Planning for Heterogeneous Robot Teams under Partially Known Environments",
+      "authorsEN": "Hoang-Dung Bui, Abhish Khanal, Raihan Islam Arnob, Gregory J. Stein",
+      "authorsKO": "Hoang-Dung Bui, Abhish Khanal, Raihan Islam Arnob, Gregory J. Stein",
+      "abstractEN": "Autonomous robot teams navigating partially known environments face costly backtracking when ground robots encounter blocked roads that are only revealed upon physical traversal. We address this with Scout-Assisted Planning, a heterogeneous planning framework in which scouting Unmanned Aerial Vehicles proactively gather environmental information to improve Unmanned Ground Vehicle navigation. To focus scouting on the most consequential edges, we propose Information Gain-based Action Pruning, which scores candidate scouting actions by their expected impact on ground robot behavior. Since exact Information Gain-based Action Pruning computation is prohibitively expensive, we develop a Graph Neural Network based model that predicts information gain values directly from graph structure and belief state, reducing planning time to real-time levels without sacrificing solution quality. Experiments across three environment types show that SAP with Information Gain Action Pruning reduces ground robot travel cost by 31.9--37.7% over the Canadian Traveler Problem baseline, and outperforms proximity-based scouting guidance by an additional 8--14%, confirming that principled information-gain-guided scouting is both more effective and computationally feasible for real-world deployment",
+      "abstractKO": "POMDP 기반 UAV+UGV 이종 팀 경로 계획, CTP 확장, IAP 정보 이득 행동 가지치기, GATv2 LIAP(96-218초→0.24-0.75초), 이동거리 31.9-49.9% 절감, arXiv 2026",
       "detailTags": [
         "#Planner"
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 43,
-      "reason": "다중 로봇 대형 항법, TCF-R2T (MCMF 시간-확장), JSTP (공간-시간 동시 최적화), MINCO 5차, 7-WMR 실세계, 97.4% 실행시간 단축, 75% 대형 오차 감소, Tsinghua/NUS",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/REACT_arxiv2026/index.html"
-    },
-    {
-      "id": "2605.18729",
-      "venue": "arXiv 2026",
-      "matchScore": 87,
-      "category": "VLN",
-      "feedTitle": "Robo-Cortex: A Self-Evolving Embodied Agent via Dual-Grain Cognitive Memory and Autonomous Knowledge Induction",
-      "authorsShort": "N. Chan, Y. Zhang +7",
-      "feedAbstract": "자기진화 에이전트, 경험 기억상실, AKI, 이중 입도 메모리, 세계 모델 상상, IGNav/AR/AEQA, +15.30% SPL, HM3D/MP3D",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "Robo-Cortex: A Self-Evolving Embodied Agent via Dual-Grain Cognitive Memory and Autonomous Knowledge Induction",
-      "titleKO": "Robo-Cortex: A Self-Evolving Embodied Agent via Dual-Grain Cognitive Memory and Autonomous Knowledge Induction",
-      "authorsEN": "Nga Teng Chan, Yi Zhang, Yechi Liu, Renwen Cui, Fanhu Zeng, Qifeng Chen 외 (HKUST, X-Humanoid, CAS, BUAA)",
-      "authorsKO": "Nga Teng Chan, Yi Zhang, Yechi Liu, Renwen Cui, Fanhu Zeng, Qifeng Chen 외 (HKUST, X-Humanoid, CAS, BUAA)",
-      "abstractEN": "The ability to navigate and interact with complex environments is central to real-world embodied agents, yet navigation in unseen environments remains challenging due to \"experiential amnesia,\" where existing trajectory-driven or reactive policies fail to synthesize generalizable strategies from past interactions. We propose Robo-Cortex, a self-evolving framework that enables robots to autonomously induce navigation heuristics and refine cognitive strategies through a continuous reflection-adaptation loop. By abstracting success patterns and failure pitfalls into natural-language heuristics, Robo-Cortex enables a transition from passive execution to active strategy evolution. Our core innovation is an Autonomous Knowledge Induction (AKI) mechanism that distills multimodal trajectories into a structured Navigation Heuristic Library for knowledge generalization. The architecture further incorporates a Dual-Grain Cognitive Memory system, comprising a Short-term Reflective Memory (SRM) for real-time local progress analysis, and a Long-term Principle Memory (LPM) that abstracts past trajectories into reusable guiding and cautionary principles. To ensure robust decision-making, we introduce a multimodal Imagine-then-Verify loop, where a world model simulates potential outcomes and a VLM-based evaluator validates action plans. Extensive evaluations on IGNav, AR, and AEQA show that Robo-Cortex consistently outperforms strong baselines in both task success and exploration efficiency, with gains of up to +4.16% SPL over the strongest prior method and up to +15.30% SPL under heuristic transfer to unseen environments. Preliminary real-world robotic experiments further support the effectiveness of Robo-Cortex in physical settings.",
-      "abstractKO": "자기진화 에이전트, 경험 기억상실, AKI, 이중 입도 메모리, 세계 모델 상상, IGNav/AR/AEQA, +15.30% SPL, HM3D/MP3D",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 43,
-      "reason": "자기진화 에이전트, 경험 기억상실, AKI, 이중 입도 메모리, 세계 모델 상상, IGNav/AR/AEQA, +15.30% SPL, HM3D/MP3D",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/RoboCortex_arxiv2026/index.html"
+      "readMinutes": 59,
+      "reason": "POMDP 기반 UAV+UGV 이종 팀 경로 계획, CTP 확장, IAP 정보 이득 행동 가지치기, GATv2 LIAP(96-218초→0.24-0.75초), 이동거리 31.9-49.9% 절감, arXiv 2026",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ScoutAssistedPlanning_arxiv2026/index.html"
     },
     {
       "id": "2605.13748",
