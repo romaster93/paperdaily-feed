@@ -1,142 +1,158 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-26T19:30:06.046Z",
+  "generatedAt": "2026-07-27T19:30:05.408Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 7. 27  월요일",
+    "date": "2026. 7. 28  화요일",
     "title": "오늘의 리뷰",
     "subtitle": "VLN·Planner 새 리뷰 5편 · 전체 95편"
   },
   "papers": [
     {
-      "id": "2403.17846",
-      "venue": "RSS 2024",
+      "id": "2605.13748",
+      "venue": "RSS 2026",
+      "venueDetail": "Robotics: Science and Systems (RSS) 2026, Sydney, Australia",
+      "matchScore": 96,
+      "category": "Planner",
+      "feedTitle": "TinySDP: Real Time Semidefinite Optimization for Certifiable and Agile Edge Robotics",
+      "authorsShort": "I. Mahajan, J. Arrizabalaga +5",
+      "feedAbstract": "임베디드 마이크로컨트롤러(STM32F405 @ 168MHz, 192KB SRAM)에서 비볼록 장애물 회피 MPC를 25Hz 실시간으로 실현하는 최초의 반정치 프로그래밍(SDP) 솔버로, RPCBF 대비 경로 73% 단축, 목표 도달 정밀도 15배 향상을 달성하고 Crazyflie 쿼드로터에서 실증함.",
+      "tags": [
+        "#Planner",
+        "#비볼록장애물회피",
+        "#임베디드MPC",
+        "#반정치프로그래밍",
+        "#실시간최적화제어"
+      ],
+      "titleEN": "TinySDP: Real Time Semidefinite Optimization for Certifiable and Agile Edge Robotics",
+      "titleKO": "TinySDP: Real Time Semidefinite Optimization for Certifiable and Agile Edge Robotics",
+      "authorsEN": "Ishaan Mahajan, Jon Arrizabalaga, Andrea Grillo, Fausto Vega, James Anderson, Zachary Manchester, Brian Plancher",
+      "authorsKO": "Ishaan Mahajan, Jon Arrizabalaga, Andrea Grillo, Fausto Vega, James Anderson, Zachary Manchester, Brian Plancher",
+      "abstractEN": "Semidefinite programming (SDP) provides a principled framework for convex relaxations of nonconvex geometric constraints in motion planning, yet existing solvers are too computationally expensive for real-time control, particularly on resource-constrained embedded systems. To address this gap, we introduce TinySDP, the first semidefinite programming solver designed for embedded systems, enabling real-time model-predictive control (MPC) on microcontrollers for problems with nonconvex obstacle constraints. Our approach integrates positive-semidefinite cone projections into a cached-Riccati-based ADMM solver, leveraging computational structure for embedded tractability. We pair this solver with an a posteriori rank-1 certificate that converts relaxed solutions into explicit geometric guarantees at each timestep. On challenging benchmarks, e.g., cul-de-sac and dynamic obstacle avoidance scenarios that induce failures in local methods, TinySDP achieves collision-free navigation with up to 73% shorter paths than state-of-the-art baselines. We validate our approach on a Crazyflie quadrotor, demonstrating that semidefinite constraints can be enforced at real-time rates for agile embedded robotics.",
+      "abstractKO": "임베디드 마이크로컨트롤러(STM32F405 @ 168MHz, 192KB SRAM)에서 비볼록 장애물 회피 MPC를 25Hz 실시간으로 실현하는 최초의 반정치 프로그래밍(SDP) 솔버로, RPCBF 대비 경로 73% 단축, 목표 도달 정밀도 15배 향상을 달성하고 Crazyflie 쿼드로터에서 실증함.",
+      "detailTags": [
+        "#Planner",
+        "#비볼록장애물회피",
+        "#임베디드MPC",
+        "#반정치프로그래밍",
+        "#실시간최적화제어"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 42,
+      "reason": "**최초의 임베디드 SDP 솔버**: 192 KB SRAM에서 비볼록 MPC 실시간 실현 (세계 최초)\n**SDP 리프팅**: 비볼록 keep-out 제약 → Kronecker 모멘트 행렬 리프팅 → 볼록 PSD 제약 변환\n**캐시된 리카티 ADMM**: 오프라인 P_∞, K_∞ 캐시 + 온라인 PSD 원뿔 투영으로 실시간 해결\n**사후 rank-1 인증서**: Δ_k ≤ η_k^{min} 조건으로 실제 기하학적 안전 보장\n**73% 경로 단축**: RPCBF 대비 정적 U자형 장애물에서 최대 73% 짧은 경로\n**실시간 하드웨어 검증**: Crazyflie 2.1에서 14.842ms 최대 풀이 시간, 5회 독립 시험 성공",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TinySDP_RSS2026/index.html"
+    },
+    {
+      "id": "2605.14801",
+      "venue": "ICRA 2026 WS",
+      "venueDetail": "ICRA 2026 Workshop on Multimodal-Spatial AI (Oral Presentation)",
+      "matchScore": 84,
+      "category": "VLN",
+      "feedTitle": "Exploring Bottlenecks in VLM-LLM Navigation: How 3D Scene Understanding Capability Impacts Zero-Shot VLN",
+      "authorsShort": "Z. Xia, C. Xiong +3",
+      "feedAbstract": "VLM-LLM 제로샷 VLN 시스템에서 3D 인식 품질이 내비게이션 성공률에 미치는 영향을 체계적으로 분석하여, 인식 포화 현상(Perception Saturation)을 최초로 발견하고 내비게이션 핵심 어휘 20개로 충분함을 증명한 분석 논문.",
+      "tags": [
+        "#VLN",
+        "#Zero-ShotVLN분석",
+        "#3D장면이해/인식모델",
+        "#VLM-LLM통합분석"
+      ],
+      "titleEN": "Exploring Bottlenecks in VLM-LLM Navigation: How 3D Scene Understanding Capability Impacts Zero-Shot VLN",
+      "titleKO": "Exploring Bottlenecks in VLM-LLM Navigation: How 3D Scene Understanding Capability Impacts Zero-Shot VLN",
+      "authorsEN": "Ziyi Xia, Chaoran Xiong, Litao Wei, Xinhao Hu, Ling Pei (공동 1저자)",
+      "authorsKO": "Ziyi Xia, Chaoran Xiong, Litao Wei, Xinhao Hu, Ling Pei (공동 1저자)",
+      "abstractEN": "Zero-shot vision-and-language navigation (VLN) has gained significant attention due to its minimal data collection costs and inherent generalization. This paradigm is typically driven by the integration of pre-trained Vision-Language Models (VLMs) and Large Language Models (LLMs), where VLMs construct 3D scene graphs while LLMs handle high-level reasoning and decision-making. However, a critical bottleneck exists in this system: current 3D perception models prioritize pixel-level accuracy, directly conflicting with the strict computational limits and real-time efficiency demanded by embodied navigation. To address this gap, this paper quantifies the actual impact of 3D scene understanding capability on VLN performance. Based on typical VLM-LLM frameworks, we propose statistical success rate (SR) upper bounds for two core subsystems: 1) the slow LLM planner, which relies on topological mapping semantics, and 2) the fast reactive navigator, which utilizes spatial coordinates and bounding boxes to execute LLM decisions. Evaluations using state-of-the-art 3D scene understanding models validate our proposed bounds and reveal a perception saturation phenomenon, indicating that improvements in perception accuracy beyond a certain threshold yield diminishing returns in navigation success. Our findings suggest that 3D scene understanding for VLN should pivot away from strict pixel-level precision, prioritizing instead navigation-relevant core vocabularies and accurate bounding box proportions.",
+      "abstractKO": "VLM-LLM 제로샷 VLN 시스템에서 3D 인식 품질이 내비게이션 성공률에 미치는 영향을 체계적으로 분석하여, 인식 포화 현상(Perception Saturation)을 최초로 발견하고 내비게이션 핵심 어휘 20개로 충분함을 증명한 분석 논문.",
+      "detailTags": [
+        "#VLN",
+        "#Zero-ShotVLN분석",
+        "#3D장면이해/인식모델",
+        "#VLM-LLM통합분석"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 39,
+      "reason": "**인식 포화 현상 발견**: 3D 인식 정확도 향상이 특정 임계점 이상에서 VLN 성공률에 거의 기여하지 않음 증명\n**통계적 SR 상한 프레임워크**: 이상적 인식 조건에서 Slow/Fast 플래너의 최대 성능 상한 도출\n**플래너별 실패 원인 특정**: Slow 플래너→False Positive, Fast 플래너→BB 가로세로 비율 왜곡\n**핵심 어휘 충분성 증명**: 200개 클래스 대신 ~20개 내비게이션 핵심 클래스만으로 동등 성능\n**설계 원칙 제시**: 정밀도보다 핵심 어휘 커버리지와 BB 형태 정확성 우선 설계 권장",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/VLMNavBottleneck_ICRAWS2026/index.html"
+    },
+    {
+      "id": "2605.13321",
+      "venue": "arXiv 2026",
       "matchScore": 96,
       "category": "VLN",
-      "feedTitle": "Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation",
-      "authorsShort": "A. Werby, C. Huang +3",
-      "feedAbstract": "문제의식: 기존 open-vocabulary robot mapping 방법들은 RGB-D 데이터로부터 CLIP과 같은 vision-language feature를 결합해 dense geometric map을 생성하지만, 다음 두 가지 근본적인 한계가 있다:",
+      "feedTitle": "HCSG: Human-Centric Semantic-Geometric Reasoning for Vision-Language Navigation",
+      "authorsShort": "H. Xu, T. Li +8",
+      "feedAbstract": "인간 중심 VLN, LSTM 자세+궤적 예측, Qwen3-VL-2B 행동 이해, 사회적 거리 손실, HA-VLNCE SOTA (CR 0.36/-34.5%, SR 0.24/+14.3%), NXROBO Leo 실세계 82% SR",
       "tags": [
         "#VLN"
       ],
-      "titleEN": "Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation",
-      "titleKO": "Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation",
-      "authorsEN": "Abdelrhman Werby, Chenguang Huang, Martin Büchner, Abhinav Valada, Wolfram Burgard",
-      "authorsKO": "Abdelrhman Werby, Chenguang Huang, Martin Büchner, Abhinav Valada, Wolfram Burgard",
-      "abstractEN": "Recent open-vocabulary robot mapping methods enrich dense geometric maps with pre-trained visual-language features. While these maps allow for the prediction of point-wise saliency maps when queried for a certain language concept, large-scale environments and abstract queries beyond the object level still pose a considerable hurdle, ultimately limiting language-grounded robotic navigation. In this work, we present HOV-SG, a hierarchical open-vocabulary 3D scene graph mapping approach for language-grounded robot navigation. Leveraging open-vocabulary vision foundation models, we first obtain state-of-the-art open-vocabulary segment-level maps in 3D and subsequently construct a 3D scene graph hierarchy consisting of floor, room, and object concepts, each enriched with open-vocabulary features. Our approach is able to represent multi-story buildings and allows robotic traversal of those using a cross-floor Voronoi graph. HOV-SG is evaluated on three distinct datasets and surpasses previous baselines in open-vocabulary semantic accuracy on the object, room, and floor level while producing a 75% reduction in representation size compared to dense open-vocabulary maps. In order to prove the efficacy and generalization capabilities of HOV-SG, we showcase successful long-horizon language-conditioned robot navigation within real-world multi-storage environments. We provide code and trial video data at http://hovsg.github.io/.",
-      "abstractKO": "문제의식: 기존 open-vocabulary robot mapping 방법들은 RGB-D 데이터로부터 CLIP과 같은 vision-language feature를 결합해 dense geometric map을 생성하지만, 다음 두 가지 근본적인 한계가 있다:",
+      "titleEN": "HCSG: Human-Centric Semantic-Geometric Reasoning for Vision-Language Navigation",
+      "titleKO": "HCSG: Human-Centric Semantic-Geometric Reasoning for Vision-Language Navigation",
+      "authorsEN": "Haoxuan Xu, Tianfu Li, Wenbo Chen, Yi Liu, Jin Wu, Huashuo Lei, Yunfan Lou, Lujia Wang, Hesheng Wang, Haoang Li (교신저자)",
+      "authorsKO": "Haoxuan Xu, Tianfu Li, Wenbo Chen, Yi Liu, Jin Wu, Huashuo Lei, Yunfan Lou, Lujia Wang, Hesheng Wang, Haoang Li (교신저자)",
+      "abstractEN": "VLN has achieved remarkable progress by scaling data and model capacity. However, the assumption of a static environment breaks down in real-world indoor scenarios, where robots inevitably encounter dynamic pedestrians. Existing human-aware approaches typically treat humans merely as moving obstacles based on implicit visual cues, lacking the explicit reasoning required to interpret human intentions or maintain social norms. To address this, we propose HCSG, the first human-centric framework for VLN. This framework provides a robust foundation for safe, socially intelligent navigation in dynamic human-robot environments that shifts the paradigm from passive collision avoidance to active human behavior understanding. Specifically, HCSG introduces a unified Human Understanding Module that synergizes two key capabilities: (i) geometric forecasting, which predicts human pose and trajectory to anticipate future motion dynamics; and (ii) semantic interpretation, which leverages a Vision-Language Model (VLM) to generate natural language descriptions of human actions and intentions. These semantic-geometric representations are fused into the agent's topological map for instruction-conditioned planning. Furthermore, a social distance loss is introduced to enforce socially compliant interaction distances. Extensive experiments on the HA-VLNCE benchmark demonstrate that HCSG significantly outperforms state-of-the-art methods, achieving a 14% improvement in Success Rate and a 34% reduction in Collision Rate. Our project can be seen at https://haoxuanxu1024.github.io/HCSG/.",
+      "abstractKO": "인간 중심 VLN, LSTM 자세+궤적 예측, Qwen3-VL-2B 행동 이해, 사회적 거리 손실, HA-VLNCE SOTA (CR 0.36/-34.5%, SR 0.24/+14.3%), NXROBO Leo 실세계 82% SR",
       "detailTags": [
         "#VLN"
       ],
-      "year": "2024",
+      "year": "2026",
       "citations": 0,
-      "readMinutes": 60,
-      "reason": "문제의식: 기존 open-vocabulary robot mapping 방법들은 RGB-D 데이터로부터 CLIP과 같은 vision-language feature를 결합해 dense geometric map을 생성하지만, 다음 두 가지 근본적인 한계가 있다:",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HOV-SG_RSS2024/index.html"
+      "readMinutes": 43,
+      "reason": "인간 중심 VLN, LSTM 자세+궤적 예측, Qwen3-VL-2B 행동 이해, 사회적 거리 손실, HA-VLNCE SOTA (CR 0.36/-34.5%, SR 0.24/+14.3%), NXROBO Leo 실세계 82% SR",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HCSG_arxiv2026/index.html"
     },
     {
-      "id": "2605.19209",
-      "venue": "ICRA 2026",
+      "id": "2605.13328",
+      "venue": "arXiv 2026",
+      "matchScore": 96,
+      "category": "VLN",
+      "feedTitle": "What Limits Vision-and-Language Navigation? (StereoNav)",
+      "authorsShort": "Y. Wang, Y. Fang +10",
+      "feedAbstract": "Sim-to-Real VLN, Target-Location Priors, 스테레오 통합 이해, InternViT+DINOv2+FoundationStereo, R2R-CE SOTA (81.1% SR/68.3% SPL), RxR-CE SOTA (67.5% SR), Unitree G1 실세계 60.6% SR",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "What Limits Vision-and-Language Navigation? (StereoNav)",
+      "titleKO": "What Limits Vision-and-Language Navigation? (StereoNav)",
+      "authorsEN": "Yunheng Wang, Yuetong Fang, Taowen Wang, Lusong Li, Kun Liu, Junzhe Xu, Zizhao Yuan, Yixiao Feng, Jiaxi Zhang, Wei Lu, Zecui Zeng, Renjing Xu",
+      "authorsKO": "Yunheng Wang, Yuetong Fang, Taowen Wang, Lusong Li, Kun Liu, Junzhe Xu, Zizhao Yuan, Yixiao Feng, Jiaxi Zhang, Wei Lu, Zecui Zeng, Renjing Xu",
+      "abstractEN": "Vision-and-Language Navigation (VLN) is a cornerstone of embodied intelligence. However, current agents often suffer from significant performance degradation when transitioning from simulation to real-world deployment, primarily due to perceptual instability (e.g., lighting variations and motion blur) and under-specified instructions. While existing methods attempt to bridge this gap by scaling up model size and training data, we argue that the bottleneck lies in the lack of robust spatial grounding and cross-domain priors. In this paper, we propose StereoNav, a robust Vision-Language-Action framework designed to enhance real-world navigation consistency. To address the inherent gap between synthetic training and physical execution, we introduce Target-Location Priors as a persistent bridge. These priors provide stable visual guidance that remains invariant across domains, effectively grounding the agent even when instructions are vague. Furthermore, to mitigate visual disturbances like motion blur and illumination shifts, StereoNav leverages stereo vision to construct a unified representation of semantics and geometry, enabling precise action prediction through enhanced depth awareness. Extensive experiments on R2R-CE and RxR-CE demonstrate that StereoNav achieves state-of-the-art egocentric RGB performance, with SR and SPL scores of 81.1% and 68.3%, and 67.5% and 52.0%, respectively, while using significantly fewer parameters and less training data than prior scaling-based approaches. More importantly, real-world robotic deployments confirm that StereoNav substantially improves navigation reliability in complex, unstructured environments. Project page: https://yunheng-wang.github.io/stereonav-public.github.io.",
+      "abstractKO": "Sim-to-Real VLN, Target-Location Priors, 스테레오 통합 이해, InternViT+DINOv2+FoundationStereo, R2R-CE SOTA (81.1% SR/68.3% SPL), RxR-CE SOTA (67.5% SR), Unitree G1 실세계 60.6% SR",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 44,
+      "reason": "Sim-to-Real VLN, Target-Location Priors, 스테레오 통합 이해, InternViT+DINOv2+FoundationStereo, R2R-CE SOTA (81.1% SR/68.3% SPL), RxR-CE SOTA (67.5% SR), Unitree G1 실세계 60.6% SR",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/StereoNav_arxiv2026/index.html"
+    },
+    {
+      "id": "2605.11119",
+      "venue": "arXiv 2026",
       "matchScore": 84,
       "category": "Planner",
-      "feedTitle": "Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning (GATP)",
-      "authorsShort": "M. Goarin, Y. Zhou +1",
-      "feedAbstract": "다중 쿼드로터, 라벨없는 모션 계획, GATP(GAT+f1), NMPC+ECBF 하드 안전 보장, 50대 확장 시뮬, 4대 실세계, D≤200ms 지연 강건, ICRA 2026",
+      "feedTitle": "ASIP-Planner: Adaptive Planning for UAV Surface Inspection in Partially Known Indoor Environments",
+      "authorsShort": "H. Jin, Z. Xu +4",
+      "feedAbstract": "부분 공지 환경 UAV 점검, 세그먼트 기반 커버리지, 코사인 가중 뷰앵글 적응, 경로 35-40% 단축, ΔYaw 65-72% 감소, CMU, 후쿠시마 터널 실증",
       "tags": [
         "#Planner"
       ],
-      "titleEN": "Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning (GATP)",
-      "titleKO": "Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning (GATP)",
-      "authorsEN": "Manohari Goarin, Yang Zhou, Giuseppe Loianno",
-      "authorsKO": "Manohari Goarin, Yang Zhou, Giuseppe Loianno",
-      "abstractEN": "The multi-robot unlabeled motion planning problem of concurrently assigning robots to goals and generating safe trajectories is central in many collaborative tasks. Recent Graph Neural Network methods offer scalable decentralized solutions but rely on simplified dynamics and simulation environments, overlooking key challenges of real-world deployment such as dynamic feasibility and communication constraints. To address these gaps, we propose a hierarchical framework that combines a Graph ATtention Planner (GATP) with a decentralized Nonlinear Model Predictive Controller (NMPC). GATP provides intermediate subgoals through multi-robot cooperation, and the NMPC enforces safety under nonlinear dynamics and actuation constraints. We evaluate our framework in both simulation and real-world quadrotor experiments. Thanks to attention mechanisms and minimal communication requirements, we demonstrate improved generalization to larger teams, robustness to communication delays up to 200 ms and practical feasibility with decentralized on-board inference.",
-      "abstractKO": "다중 쿼드로터, 라벨없는 모션 계획, GATP(GAT+f1), NMPC+ECBF 하드 안전 보장, 50대 확장 시뮬, 4대 실세계, D≤200ms 지연 강건, ICRA 2026",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 44,
-      "reason": "다중 쿼드로터, 라벨없는 모션 계획, GATP(GAT+f1), NMPC+ECBF 하드 안전 보장, 50대 확장 시뮬, 4대 실세계, D≤200ms 지연 강건, ICRA 2026",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/GATP_ICRA2026/index.html"
-    },
-    {
-      "id": "2605.19958",
-      "venue": "arXiv 2026",
-      "matchScore": 93,
-      "category": "VLN",
-      "feedTitle": "TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning",
-      "authorsShort": "H. Zheng, Z. Chen +5",
-      "feedAbstract": "크로스 플로어 ZSON, 3D 통과 가능성 매핑, 이중 모드(기하+시맨틱), FOV 능동 지각, Open-ATSP 계층 계획, HM3D 70.0% SR, Unitree Go2 실세계 64.0% SR",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning",
-      "titleKO": "TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning",
-      "authorsEN": "Han Zheng, Zhe Chen, Yudong Huang, Haoran Liu, Jinghao Wang, Ming Yang, Tong Qin",
-      "authorsKO": "Han Zheng, Zhe Chen, Yudong Huang, Haoran Liu, Jinghao Wang, Ming Yang, Tong Qin",
-      "abstractEN": "Zero-shot Object Navigation (ZSON) has shown promise for open-vocabulary target search in unseen environments, yet most existing systems remain tied to planar representations and single-floor assumptions. These assumptions become inadequate in real buildings, where navigation involves floors, stairs, landings, and vertically overlapping spaces. This article presents TravExplorer, a cross-floor embodied exploration framework that couples zero-shot semantic guidance with traversability-aware 3-D planning. TravExplorer maintains a unified volumetric map that distinguishes occupied structures from robot-reachable support surfaces and extracts traversable frontiers from connected support surfaces, including floors, stairs, and landings. A FOV-aware active perception strategy further resolves incomplete observations during cross-floor traversal. To reduce semantic-reasoning latency, a lightweight guidance module aligns a probabilistic instance map from online open-vocabulary segmentation with a spatial value map from fast image-to-text matching. Based on these geometric and semantic memories, a hierarchical planner performs target-aware frontier touring over object hypotheses, traversable frontiers, and stair landmarks, and generates executable cross-floor motions through foothold-guided 3-D search and vertically constrained local trajectory optimization. Experiments over 4,195 simulated episodes on HM3D and MP3D demonstrate consistent advantages over representative ObjectNav baselines. Fifty real-world trials on a Unitree Go2 further validate open-vocabulary target search across single-floor and cross-floor indoor environments without prior maps or human intervention. The code will be released at https://github.com/wuyi2121/TravExplorer.",
-      "abstractKO": "크로스 플로어 ZSON, 3D 통과 가능성 매핑, 이중 모드(기하+시맨틱), FOV 능동 지각, Open-ATSP 계층 계획, HM3D 70.0% SR, Unitree Go2 실세계 64.0% SR",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 44,
-      "reason": "크로스 플로어 ZSON, 3D 통과 가능성 매핑, 이중 모드(기하+시맨틱), FOV 능동 지각, Open-ATSP 계층 계획, HM3D 70.0% SR, Unitree Go2 실세계 64.0% SR",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TravExplorer_arxiv2026/index.html"
-    },
-    {
-      "id": "2605.18441",
-      "venue": "arXiv 2026",
-      "matchScore": 87,
-      "category": "Planner",
-      "feedTitle": "REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots",
-      "authorsShort": "J. Dong, Y. Zhang +6",
-      "feedAbstract": "다중 로봇 대형 항법, TCF-R2T (MCMF 시간-확장), JSTP (공간-시간 동시 최적화), MINCO 5차, 7-WMR 실세계, 97.4% 실행시간 단축, 75% 대형 오차 감소, Tsinghua/NUS",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots",
-      "titleKO": "REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots",
-      "authorsEN": "Jianghong Dong, Yifeng Zhang, Jiawei Wang, Mengchi Cai, Keqiang Li, Guillaume Sartoretti (Tsinghua, NUS, U-Michigan)",
-      "authorsKO": "Jianghong Dong, Yifeng Zhang, Jiawei Wang, Mengchi Cai, Keqiang Li, Guillaume Sartoretti (Tsinghua, NUS, U-Michigan)",
-      "abstractEN": "Formation control of wheeled mobile robots (WMRs) has been extensively studied due to its broad applications in fields such as logistics transportation, environmental monitoring, and search and rescue. However, most existing works mainly focus on tracking predefined formations, which limits their adaptability to complex real-world environments. To address this, we propose REACT (Real-time Environment-Adaptive architecture for Continuous formation navigaTion), a hierarchical architecture integrating centralized formation generation and distributed formation maintenance. Specifically, our upper layer generates new environment-adaptive formations when necessary and uses our proposed TCF-R2T (Trajectory-Conflict-Free Robot-to-Target assignment) algorithm to compute conflict-free WMR-to-target assignments in polynomial time, enabling timely formation transitions without trajectory conflicts. At the lower layer, each WMR executes our developed JSTP (Joint Spatio-Temporal trajectory Planning) method to maintain the generated formation by simultaneously optimizing spatial positions and temporal durations, thereby enhancing coordination among WMRs and enabling continuous navigation in obstacle-rich environments and dynamic-obstacle scenarios. Both simulation and real-world experiments validate the effectiveness and practical applicability of REACT. Experimental videos are available on our project website: https://dongjh20.github.io/REACT-website.",
-      "abstractKO": "다중 로봇 대형 항법, TCF-R2T (MCMF 시간-확장), JSTP (공간-시간 동시 최적화), MINCO 5차, 7-WMR 실세계, 97.4% 실행시간 단축, 75% 대형 오차 감소, Tsinghua/NUS",
+      "titleEN": "ASIP-Planner: Adaptive Planning for UAV Surface Inspection in Partially Known Indoor Environments",
+      "titleKO": "ASIP-Planner: Adaptive Planning for UAV Surface Inspection in Partially Known Indoor Environments",
+      "authorsEN": "Hanyu Jin, Zhefan Xu, Haoyu Shen, Xinming Han, Kanlong Ye, Kenji Shimada",
+      "authorsKO": "Hanyu Jin, Zhefan Xu, Haoyu Shen, Xinming Han, Kanlong Ye, Kenji Shimada",
+      "abstractEN": "Indoor infrastructure inspection, such as tunnels and industrial facilities, requires systematic surface coverage to ensure that all inspection targets are properly observed. Unmanned Aerial Vehicles (UAVs) offer an alternative to manual inspection by conducting map-guided surface inspection using prior structural models. However, in practice, indoor inspection often relies on floorplan-derived reference maps that may not reflect unforeseen obstacles, such as temporary structures or equipment, leading to occluded viewpoints and degraded inspection quality. Existing coverage planning methods typically assume a fully known inspection environment and perform deterministic global viewpoint optimization based on accurate prior maps, making them vulnerable to environmental discrepancies during execution. This work presents an adaptive UAV inspection framework for partially known structured indoor environments. The proposed method integrates a segment-based global coverage planner with an inspection-oriented local view-angle adaptation module. The global planner organizes planar inspection targets into surface-aligned clusters to generate compact viewpoint sequences with improved orientation consistency. The local planner generates collision-free trajectories and adjusts the viewing direction online to mitigate occlusion-induced coverage loss while preserving the planned trajectory structure. The simulation results across randomized scene configurations demonstrate that the proposed global planner achieves near-complete coverage while reducing trajectory length compared to representative baselines. Real-world flight experiments further validate that the framework produces usable inspection data for downstream analysis. These results indicate that the proposed framework improves inspection efficiency and adaptability in partially known structured indoor environments.",
+      "abstractKO": "부분 공지 환경 UAV 점검, 세그먼트 기반 커버리지, 코사인 가중 뷰앵글 적응, 경로 35-40% 단축, ΔYaw 65-72% 감소, CMU, 후쿠시마 터널 실증",
       "detailTags": [
         "#Planner"
       ],
       "year": "2026",
       "citations": 0,
       "readMinutes": 43,
-      "reason": "다중 로봇 대형 항법, TCF-R2T (MCMF 시간-확장), JSTP (공간-시간 동시 최적화), MINCO 5차, 7-WMR 실세계, 97.4% 실행시간 단축, 75% 대형 오차 감소, Tsinghua/NUS",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/REACT_arxiv2026/index.html"
-    },
-    {
-      "id": "2605.18729",
-      "venue": "arXiv 2026",
-      "matchScore": 87,
-      "category": "VLN",
-      "feedTitle": "Robo-Cortex: A Self-Evolving Embodied Agent via Dual-Grain Cognitive Memory and Autonomous Knowledge Induction",
-      "authorsShort": "N. Chan, Y. Zhang +7",
-      "feedAbstract": "자기진화 에이전트, 경험 기억상실, AKI, 이중 입도 메모리, 세계 모델 상상, IGNav/AR/AEQA, +15.30% SPL, HM3D/MP3D",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "Robo-Cortex: A Self-Evolving Embodied Agent via Dual-Grain Cognitive Memory and Autonomous Knowledge Induction",
-      "titleKO": "Robo-Cortex: A Self-Evolving Embodied Agent via Dual-Grain Cognitive Memory and Autonomous Knowledge Induction",
-      "authorsEN": "Nga Teng Chan, Yi Zhang, Yechi Liu, Renwen Cui, Fanhu Zeng, Qifeng Chen 외 (HKUST, X-Humanoid, CAS, BUAA)",
-      "authorsKO": "Nga Teng Chan, Yi Zhang, Yechi Liu, Renwen Cui, Fanhu Zeng, Qifeng Chen 외 (HKUST, X-Humanoid, CAS, BUAA)",
-      "abstractEN": "The ability to navigate and interact with complex environments is central to real-world embodied agents, yet navigation in unseen environments remains challenging due to \"experiential amnesia,\" where existing trajectory-driven or reactive policies fail to synthesize generalizable strategies from past interactions. We propose Robo-Cortex, a self-evolving framework that enables robots to autonomously induce navigation heuristics and refine cognitive strategies through a continuous reflection-adaptation loop. By abstracting success patterns and failure pitfalls into natural-language heuristics, Robo-Cortex enables a transition from passive execution to active strategy evolution. Our core innovation is an Autonomous Knowledge Induction (AKI) mechanism that distills multimodal trajectories into a structured Navigation Heuristic Library for knowledge generalization. The architecture further incorporates a Dual-Grain Cognitive Memory system, comprising a Short-term Reflective Memory (SRM) for real-time local progress analysis, and a Long-term Principle Memory (LPM) that abstracts past trajectories into reusable guiding and cautionary principles. To ensure robust decision-making, we introduce a multimodal Imagine-then-Verify loop, where a world model simulates potential outcomes and a VLM-based evaluator validates action plans. Extensive evaluations on IGNav, AR, and AEQA show that Robo-Cortex consistently outperforms strong baselines in both task success and exploration efficiency, with gains of up to +4.16% SPL over the strongest prior method and up to +15.30% SPL under heuristic transfer to unseen environments. Preliminary real-world robotic experiments further support the effectiveness of Robo-Cortex in physical settings.",
-      "abstractKO": "자기진화 에이전트, 경험 기억상실, AKI, 이중 입도 메모리, 세계 모델 상상, IGNav/AR/AEQA, +15.30% SPL, HM3D/MP3D",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 43,
-      "reason": "자기진화 에이전트, 경험 기억상실, AKI, 이중 입도 메모리, 세계 모델 상상, IGNav/AR/AEQA, +15.30% SPL, HM3D/MP3D",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/RoboCortex_arxiv2026/index.html"
+      "reason": "부분 공지 환경 UAV 점검, 세그먼트 기반 커버리지, 코사인 가중 뷰앵글 적응, 경로 35-40% 단축, ΔYaw 65-72% 감소, CMU, 후쿠시마 터널 실증",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ASIP-Planner_arxiv2026/index.html"
     }
   ],
   "archive": [
@@ -1522,150 +1538,134 @@
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ScoutAssistedPlanning_arxiv2026/index.html"
     },
     {
-      "id": "2605.13748",
-      "venue": "RSS 2026",
-      "venueDetail": "Robotics: Science and Systems (RSS) 2026, Sydney, Australia",
+      "id": "2403.17846",
+      "venue": "RSS 2024",
       "matchScore": 96,
-      "category": "Planner",
-      "feedTitle": "TinySDP: Real Time Semidefinite Optimization for Certifiable and Agile Edge Robotics",
-      "authorsShort": "I. Mahajan, J. Arrizabalaga +5",
-      "feedAbstract": "임베디드 마이크로컨트롤러(STM32F405 @ 168MHz, 192KB SRAM)에서 비볼록 장애물 회피 MPC를 25Hz 실시간으로 실현하는 최초의 반정치 프로그래밍(SDP) 솔버로, RPCBF 대비 경로 73% 단축, 목표 도달 정밀도 15배 향상을 달성하고 Crazyflie 쿼드로터에서 실증함.",
+      "category": "VLN",
+      "feedTitle": "Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation",
+      "authorsShort": "A. Werby, C. Huang +3",
+      "feedAbstract": "문제의식: 기존 open-vocabulary robot mapping 방법들은 RGB-D 데이터로부터 CLIP과 같은 vision-language feature를 결합해 dense geometric map을 생성하지만, 다음 두 가지 근본적인 한계가 있다:",
       "tags": [
-        "#Planner",
-        "#비볼록장애물회피",
-        "#임베디드MPC",
-        "#반정치프로그래밍",
-        "#실시간최적화제어"
+        "#VLN"
       ],
-      "titleEN": "TinySDP: Real Time Semidefinite Optimization for Certifiable and Agile Edge Robotics",
-      "titleKO": "TinySDP: Real Time Semidefinite Optimization for Certifiable and Agile Edge Robotics",
-      "authorsEN": "Ishaan Mahajan, Jon Arrizabalaga, Andrea Grillo, Fausto Vega, James Anderson, Zachary Manchester, Brian Plancher",
-      "authorsKO": "Ishaan Mahajan, Jon Arrizabalaga, Andrea Grillo, Fausto Vega, James Anderson, Zachary Manchester, Brian Plancher",
-      "abstractEN": "Semidefinite programming (SDP) provides a principled framework for convex relaxations of nonconvex geometric constraints in motion planning, yet existing solvers are too computationally expensive for real-time control, particularly on resource-constrained embedded systems. To address this gap, we introduce TinySDP, the first semidefinite programming solver designed for embedded systems, enabling real-time model-predictive control (MPC) on microcontrollers for problems with nonconvex obstacle constraints. Our approach integrates positive-semidefinite cone projections into a cached-Riccati-based ADMM solver, leveraging computational structure for embedded tractability. We pair this solver with an a posteriori rank-1 certificate that converts relaxed solutions into explicit geometric guarantees at each timestep. On challenging benchmarks, e.g., cul-de-sac and dynamic obstacle avoidance scenarios that induce failures in local methods, TinySDP achieves collision-free navigation with up to 73% shorter paths than state-of-the-art baselines. We validate our approach on a Crazyflie quadrotor, demonstrating that semidefinite constraints can be enforced at real-time rates for agile embedded robotics.",
-      "abstractKO": "임베디드 마이크로컨트롤러(STM32F405 @ 168MHz, 192KB SRAM)에서 비볼록 장애물 회피 MPC를 25Hz 실시간으로 실현하는 최초의 반정치 프로그래밍(SDP) 솔버로, RPCBF 대비 경로 73% 단축, 목표 도달 정밀도 15배 향상을 달성하고 Crazyflie 쿼드로터에서 실증함.",
+      "titleEN": "Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation",
+      "titleKO": "Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation",
+      "authorsEN": "Abdelrhman Werby, Chenguang Huang, Martin Büchner, Abhinav Valada, Wolfram Burgard",
+      "authorsKO": "Abdelrhman Werby, Chenguang Huang, Martin Büchner, Abhinav Valada, Wolfram Burgard",
+      "abstractEN": "Recent open-vocabulary robot mapping methods enrich dense geometric maps with pre-trained visual-language features. While these maps allow for the prediction of point-wise saliency maps when queried for a certain language concept, large-scale environments and abstract queries beyond the object level still pose a considerable hurdle, ultimately limiting language-grounded robotic navigation. In this work, we present HOV-SG, a hierarchical open-vocabulary 3D scene graph mapping approach for language-grounded robot navigation. Leveraging open-vocabulary vision foundation models, we first obtain state-of-the-art open-vocabulary segment-level maps in 3D and subsequently construct a 3D scene graph hierarchy consisting of floor, room, and object concepts, each enriched with open-vocabulary features. Our approach is able to represent multi-story buildings and allows robotic traversal of those using a cross-floor Voronoi graph. HOV-SG is evaluated on three distinct datasets and surpasses previous baselines in open-vocabulary semantic accuracy on the object, room, and floor level while producing a 75% reduction in representation size compared to dense open-vocabulary maps. In order to prove the efficacy and generalization capabilities of HOV-SG, we showcase successful long-horizon language-conditioned robot navigation within real-world multi-storage environments. We provide code and trial video data at http://hovsg.github.io/.",
+      "abstractKO": "문제의식: 기존 open-vocabulary robot mapping 방법들은 RGB-D 데이터로부터 CLIP과 같은 vision-language feature를 결합해 dense geometric map을 생성하지만, 다음 두 가지 근본적인 한계가 있다:",
       "detailTags": [
-        "#Planner",
-        "#비볼록장애물회피",
-        "#임베디드MPC",
-        "#반정치프로그래밍",
-        "#실시간최적화제어"
+        "#VLN"
       ],
-      "year": "2026",
+      "year": "2024",
       "citations": 0,
-      "readMinutes": 42,
-      "reason": "**최초의 임베디드 SDP 솔버**: 192 KB SRAM에서 비볼록 MPC 실시간 실현 (세계 최초)\n**SDP 리프팅**: 비볼록 keep-out 제약 → Kronecker 모멘트 행렬 리프팅 → 볼록 PSD 제약 변환\n**캐시된 리카티 ADMM**: 오프라인 P_∞, K_∞ 캐시 + 온라인 PSD 원뿔 투영으로 실시간 해결\n**사후 rank-1 인증서**: Δ_k ≤ η_k^{min} 조건으로 실제 기하학적 안전 보장\n**73% 경로 단축**: RPCBF 대비 정적 U자형 장애물에서 최대 73% 짧은 경로\n**실시간 하드웨어 검증**: Crazyflie 2.1에서 14.842ms 최대 풀이 시간, 5회 독립 시험 성공",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TinySDP_RSS2026/index.html"
+      "readMinutes": 60,
+      "reason": "문제의식: 기존 open-vocabulary robot mapping 방법들은 RGB-D 데이터로부터 CLIP과 같은 vision-language feature를 결합해 dense geometric map을 생성하지만, 다음 두 가지 근본적인 한계가 있다:",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HOV-SG_RSS2024/index.html"
     },
     {
-      "id": "2605.14801",
-      "venue": "ICRA 2026 WS",
-      "venueDetail": "ICRA 2026 Workshop on Multimodal-Spatial AI (Oral Presentation)",
+      "id": "2605.19209",
+      "venue": "ICRA 2026",
       "matchScore": 84,
-      "category": "VLN",
-      "feedTitle": "Exploring Bottlenecks in VLM-LLM Navigation: How 3D Scene Understanding Capability Impacts Zero-Shot VLN",
-      "authorsShort": "Z. Xia, C. Xiong +3",
-      "feedAbstract": "VLM-LLM 제로샷 VLN 시스템에서 3D 인식 품질이 내비게이션 성공률에 미치는 영향을 체계적으로 분석하여, 인식 포화 현상(Perception Saturation)을 최초로 발견하고 내비게이션 핵심 어휘 20개로 충분함을 증명한 분석 논문.",
+      "category": "Planner",
+      "feedTitle": "Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning (GATP)",
+      "authorsShort": "M. Goarin, Y. Zhou +1",
+      "feedAbstract": "다중 쿼드로터, 라벨없는 모션 계획, GATP(GAT+f1), NMPC+ECBF 하드 안전 보장, 50대 확장 시뮬, 4대 실세계, D≤200ms 지연 강건, ICRA 2026",
       "tags": [
-        "#VLN",
-        "#Zero-ShotVLN분석",
-        "#3D장면이해/인식모델",
-        "#VLM-LLM통합분석"
+        "#Planner"
       ],
-      "titleEN": "Exploring Bottlenecks in VLM-LLM Navigation: How 3D Scene Understanding Capability Impacts Zero-Shot VLN",
-      "titleKO": "Exploring Bottlenecks in VLM-LLM Navigation: How 3D Scene Understanding Capability Impacts Zero-Shot VLN",
-      "authorsEN": "Ziyi Xia, Chaoran Xiong, Litao Wei, Xinhao Hu, Ling Pei (공동 1저자)",
-      "authorsKO": "Ziyi Xia, Chaoran Xiong, Litao Wei, Xinhao Hu, Ling Pei (공동 1저자)",
-      "abstractEN": "Zero-shot vision-and-language navigation (VLN) has gained significant attention due to its minimal data collection costs and inherent generalization. This paradigm is typically driven by the integration of pre-trained Vision-Language Models (VLMs) and Large Language Models (LLMs), where VLMs construct 3D scene graphs while LLMs handle high-level reasoning and decision-making. However, a critical bottleneck exists in this system: current 3D perception models prioritize pixel-level accuracy, directly conflicting with the strict computational limits and real-time efficiency demanded by embodied navigation. To address this gap, this paper quantifies the actual impact of 3D scene understanding capability on VLN performance. Based on typical VLM-LLM frameworks, we propose statistical success rate (SR) upper bounds for two core subsystems: 1) the slow LLM planner, which relies on topological mapping semantics, and 2) the fast reactive navigator, which utilizes spatial coordinates and bounding boxes to execute LLM decisions. Evaluations using state-of-the-art 3D scene understanding models validate our proposed bounds and reveal a perception saturation phenomenon, indicating that improvements in perception accuracy beyond a certain threshold yield diminishing returns in navigation success. Our findings suggest that 3D scene understanding for VLN should pivot away from strict pixel-level precision, prioritizing instead navigation-relevant core vocabularies and accurate bounding box proportions.",
-      "abstractKO": "VLM-LLM 제로샷 VLN 시스템에서 3D 인식 품질이 내비게이션 성공률에 미치는 영향을 체계적으로 분석하여, 인식 포화 현상(Perception Saturation)을 최초로 발견하고 내비게이션 핵심 어휘 20개로 충분함을 증명한 분석 논문.",
+      "titleEN": "Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning (GATP)",
+      "titleKO": "Graph Neural Planning and Predictive Control for Multi-Robot Communication-Constrained Unlabeled Motion Planning (GATP)",
+      "authorsEN": "Manohari Goarin, Yang Zhou, Giuseppe Loianno",
+      "authorsKO": "Manohari Goarin, Yang Zhou, Giuseppe Loianno",
+      "abstractEN": "The multi-robot unlabeled motion planning problem of concurrently assigning robots to goals and generating safe trajectories is central in many collaborative tasks. Recent Graph Neural Network methods offer scalable decentralized solutions but rely on simplified dynamics and simulation environments, overlooking key challenges of real-world deployment such as dynamic feasibility and communication constraints. To address these gaps, we propose a hierarchical framework that combines a Graph ATtention Planner (GATP) with a decentralized Nonlinear Model Predictive Controller (NMPC). GATP provides intermediate subgoals through multi-robot cooperation, and the NMPC enforces safety under nonlinear dynamics and actuation constraints. We evaluate our framework in both simulation and real-world quadrotor experiments. Thanks to attention mechanisms and minimal communication requirements, we demonstrate improved generalization to larger teams, robustness to communication delays up to 200 ms and practical feasibility with decentralized on-board inference.",
+      "abstractKO": "다중 쿼드로터, 라벨없는 모션 계획, GATP(GAT+f1), NMPC+ECBF 하드 안전 보장, 50대 확장 시뮬, 4대 실세계, D≤200ms 지연 강건, ICRA 2026",
       "detailTags": [
-        "#VLN",
-        "#Zero-ShotVLN분석",
-        "#3D장면이해/인식모델",
-        "#VLM-LLM통합분석"
+        "#Planner"
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 39,
-      "reason": "**인식 포화 현상 발견**: 3D 인식 정확도 향상이 특정 임계점 이상에서 VLN 성공률에 거의 기여하지 않음 증명\n**통계적 SR 상한 프레임워크**: 이상적 인식 조건에서 Slow/Fast 플래너의 최대 성능 상한 도출\n**플래너별 실패 원인 특정**: Slow 플래너→False Positive, Fast 플래너→BB 가로세로 비율 왜곡\n**핵심 어휘 충분성 증명**: 200개 클래스 대신 ~20개 내비게이션 핵심 클래스만으로 동등 성능\n**설계 원칙 제시**: 정밀도보다 핵심 어휘 커버리지와 BB 형태 정확성 우선 설계 권장",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/VLMNavBottleneck_ICRAWS2026/index.html"
+      "readMinutes": 44,
+      "reason": "다중 쿼드로터, 라벨없는 모션 계획, GATP(GAT+f1), NMPC+ECBF 하드 안전 보장, 50대 확장 시뮬, 4대 실세계, D≤200ms 지연 강건, ICRA 2026",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/GATP_ICRA2026/index.html"
     },
     {
-      "id": "2605.13321",
+      "id": "2605.19958",
       "venue": "arXiv 2026",
-      "matchScore": 96,
+      "matchScore": 93,
       "category": "VLN",
-      "feedTitle": "HCSG: Human-Centric Semantic-Geometric Reasoning for Vision-Language Navigation",
-      "authorsShort": "H. Xu, T. Li +8",
-      "feedAbstract": "인간 중심 VLN, LSTM 자세+궤적 예측, Qwen3-VL-2B 행동 이해, 사회적 거리 손실, HA-VLNCE SOTA (CR 0.36/-34.5%, SR 0.24/+14.3%), NXROBO Leo 실세계 82% SR",
+      "feedTitle": "TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning",
+      "authorsShort": "H. Zheng, Z. Chen +5",
+      "feedAbstract": "크로스 플로어 ZSON, 3D 통과 가능성 매핑, 이중 모드(기하+시맨틱), FOV 능동 지각, Open-ATSP 계층 계획, HM3D 70.0% SR, Unitree Go2 실세계 64.0% SR",
       "tags": [
         "#VLN"
       ],
-      "titleEN": "HCSG: Human-Centric Semantic-Geometric Reasoning for Vision-Language Navigation",
-      "titleKO": "HCSG: Human-Centric Semantic-Geometric Reasoning for Vision-Language Navigation",
-      "authorsEN": "Haoxuan Xu, Tianfu Li, Wenbo Chen, Yi Liu, Jin Wu, Huashuo Lei, Yunfan Lou, Lujia Wang, Hesheng Wang, Haoang Li (교신저자)",
-      "authorsKO": "Haoxuan Xu, Tianfu Li, Wenbo Chen, Yi Liu, Jin Wu, Huashuo Lei, Yunfan Lou, Lujia Wang, Hesheng Wang, Haoang Li (교신저자)",
-      "abstractEN": "VLN has achieved remarkable progress by scaling data and model capacity. However, the assumption of a static environment breaks down in real-world indoor scenarios, where robots inevitably encounter dynamic pedestrians. Existing human-aware approaches typically treat humans merely as moving obstacles based on implicit visual cues, lacking the explicit reasoning required to interpret human intentions or maintain social norms. To address this, we propose HCSG, the first human-centric framework for VLN. This framework provides a robust foundation for safe, socially intelligent navigation in dynamic human-robot environments that shifts the paradigm from passive collision avoidance to active human behavior understanding. Specifically, HCSG introduces a unified Human Understanding Module that synergizes two key capabilities: (i) geometric forecasting, which predicts human pose and trajectory to anticipate future motion dynamics; and (ii) semantic interpretation, which leverages a Vision-Language Model (VLM) to generate natural language descriptions of human actions and intentions. These semantic-geometric representations are fused into the agent's topological map for instruction-conditioned planning. Furthermore, a social distance loss is introduced to enforce socially compliant interaction distances. Extensive experiments on the HA-VLNCE benchmark demonstrate that HCSG significantly outperforms state-of-the-art methods, achieving a 14% improvement in Success Rate and a 34% reduction in Collision Rate. Our project can be seen at https://haoxuanxu1024.github.io/HCSG/.",
-      "abstractKO": "인간 중심 VLN, LSTM 자세+궤적 예측, Qwen3-VL-2B 행동 이해, 사회적 거리 손실, HA-VLNCE SOTA (CR 0.36/-34.5%, SR 0.24/+14.3%), NXROBO Leo 실세계 82% SR",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 43,
-      "reason": "인간 중심 VLN, LSTM 자세+궤적 예측, Qwen3-VL-2B 행동 이해, 사회적 거리 손실, HA-VLNCE SOTA (CR 0.36/-34.5%, SR 0.24/+14.3%), NXROBO Leo 실세계 82% SR",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HCSG_arxiv2026/index.html"
-    },
-    {
-      "id": "2605.13328",
-      "venue": "arXiv 2026",
-      "matchScore": 96,
-      "category": "VLN",
-      "feedTitle": "What Limits Vision-and-Language Navigation? (StereoNav)",
-      "authorsShort": "Y. Wang, Y. Fang +10",
-      "feedAbstract": "Sim-to-Real VLN, Target-Location Priors, 스테레오 통합 이해, InternViT+DINOv2+FoundationStereo, R2R-CE SOTA (81.1% SR/68.3% SPL), RxR-CE SOTA (67.5% SR), Unitree G1 실세계 60.6% SR",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "What Limits Vision-and-Language Navigation? (StereoNav)",
-      "titleKO": "What Limits Vision-and-Language Navigation? (StereoNav)",
-      "authorsEN": "Yunheng Wang, Yuetong Fang, Taowen Wang, Lusong Li, Kun Liu, Junzhe Xu, Zizhao Yuan, Yixiao Feng, Jiaxi Zhang, Wei Lu, Zecui Zeng, Renjing Xu",
-      "authorsKO": "Yunheng Wang, Yuetong Fang, Taowen Wang, Lusong Li, Kun Liu, Junzhe Xu, Zizhao Yuan, Yixiao Feng, Jiaxi Zhang, Wei Lu, Zecui Zeng, Renjing Xu",
-      "abstractEN": "Vision-and-Language Navigation (VLN) is a cornerstone of embodied intelligence. However, current agents often suffer from significant performance degradation when transitioning from simulation to real-world deployment, primarily due to perceptual instability (e.g., lighting variations and motion blur) and under-specified instructions. While existing methods attempt to bridge this gap by scaling up model size and training data, we argue that the bottleneck lies in the lack of robust spatial grounding and cross-domain priors. In this paper, we propose StereoNav, a robust Vision-Language-Action framework designed to enhance real-world navigation consistency. To address the inherent gap between synthetic training and physical execution, we introduce Target-Location Priors as a persistent bridge. These priors provide stable visual guidance that remains invariant across domains, effectively grounding the agent even when instructions are vague. Furthermore, to mitigate visual disturbances like motion blur and illumination shifts, StereoNav leverages stereo vision to construct a unified representation of semantics and geometry, enabling precise action prediction through enhanced depth awareness. Extensive experiments on R2R-CE and RxR-CE demonstrate that StereoNav achieves state-of-the-art egocentric RGB performance, with SR and SPL scores of 81.1% and 68.3%, and 67.5% and 52.0%, respectively, while using significantly fewer parameters and less training data than prior scaling-based approaches. More importantly, real-world robotic deployments confirm that StereoNav substantially improves navigation reliability in complex, unstructured environments. Project page: https://yunheng-wang.github.io/stereonav-public.github.io.",
-      "abstractKO": "Sim-to-Real VLN, Target-Location Priors, 스테레오 통합 이해, InternViT+DINOv2+FoundationStereo, R2R-CE SOTA (81.1% SR/68.3% SPL), RxR-CE SOTA (67.5% SR), Unitree G1 실세계 60.6% SR",
+      "titleEN": "TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning",
+      "titleKO": "TravExplorer: Cross-Floor Embodied Exploration via Traversability-Aware 3-D Planning",
+      "authorsEN": "Han Zheng, Zhe Chen, Yudong Huang, Haoran Liu, Jinghao Wang, Ming Yang, Tong Qin",
+      "authorsKO": "Han Zheng, Zhe Chen, Yudong Huang, Haoran Liu, Jinghao Wang, Ming Yang, Tong Qin",
+      "abstractEN": "Zero-shot Object Navigation (ZSON) has shown promise for open-vocabulary target search in unseen environments, yet most existing systems remain tied to planar representations and single-floor assumptions. These assumptions become inadequate in real buildings, where navigation involves floors, stairs, landings, and vertically overlapping spaces. This article presents TravExplorer, a cross-floor embodied exploration framework that couples zero-shot semantic guidance with traversability-aware 3-D planning. TravExplorer maintains a unified volumetric map that distinguishes occupied structures from robot-reachable support surfaces and extracts traversable frontiers from connected support surfaces, including floors, stairs, and landings. A FOV-aware active perception strategy further resolves incomplete observations during cross-floor traversal. To reduce semantic-reasoning latency, a lightweight guidance module aligns a probabilistic instance map from online open-vocabulary segmentation with a spatial value map from fast image-to-text matching. Based on these geometric and semantic memories, a hierarchical planner performs target-aware frontier touring over object hypotheses, traversable frontiers, and stair landmarks, and generates executable cross-floor motions through foothold-guided 3-D search and vertically constrained local trajectory optimization. Experiments over 4,195 simulated episodes on HM3D and MP3D demonstrate consistent advantages over representative ObjectNav baselines. Fifty real-world trials on a Unitree Go2 further validate open-vocabulary target search across single-floor and cross-floor indoor environments without prior maps or human intervention. The code will be released at https://github.com/wuyi2121/TravExplorer.",
+      "abstractKO": "크로스 플로어 ZSON, 3D 통과 가능성 매핑, 이중 모드(기하+시맨틱), FOV 능동 지각, Open-ATSP 계층 계획, HM3D 70.0% SR, Unitree Go2 실세계 64.0% SR",
       "detailTags": [
         "#VLN"
       ],
       "year": "2026",
       "citations": 0,
       "readMinutes": 44,
-      "reason": "Sim-to-Real VLN, Target-Location Priors, 스테레오 통합 이해, InternViT+DINOv2+FoundationStereo, R2R-CE SOTA (81.1% SR/68.3% SPL), RxR-CE SOTA (67.5% SR), Unitree G1 실세계 60.6% SR",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/StereoNav_arxiv2026/index.html"
+      "reason": "크로스 플로어 ZSON, 3D 통과 가능성 매핑, 이중 모드(기하+시맨틱), FOV 능동 지각, Open-ATSP 계층 계획, HM3D 70.0% SR, Unitree Go2 실세계 64.0% SR",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TravExplorer_arxiv2026/index.html"
     },
     {
-      "id": "2605.11119",
+      "id": "2605.18441",
       "venue": "arXiv 2026",
-      "matchScore": 84,
+      "matchScore": 87,
       "category": "Planner",
-      "feedTitle": "ASIP-Planner: Adaptive Planning for UAV Surface Inspection in Partially Known Indoor Environments",
-      "authorsShort": "H. Jin, Z. Xu +4",
-      "feedAbstract": "부분 공지 환경 UAV 점검, 세그먼트 기반 커버리지, 코사인 가중 뷰앵글 적응, 경로 35-40% 단축, ΔYaw 65-72% 감소, CMU, 후쿠시마 터널 실증",
+      "feedTitle": "REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots",
+      "authorsShort": "J. Dong, Y. Zhang +6",
+      "feedAbstract": "다중 로봇 대형 항법, TCF-R2T (MCMF 시간-확장), JSTP (공간-시간 동시 최적화), MINCO 5차, 7-WMR 실세계, 97.4% 실행시간 단축, 75% 대형 오차 감소, Tsinghua/NUS",
       "tags": [
         "#Planner"
       ],
-      "titleEN": "ASIP-Planner: Adaptive Planning for UAV Surface Inspection in Partially Known Indoor Environments",
-      "titleKO": "ASIP-Planner: Adaptive Planning for UAV Surface Inspection in Partially Known Indoor Environments",
-      "authorsEN": "Hanyu Jin, Zhefan Xu, Haoyu Shen, Xinming Han, Kanlong Ye, Kenji Shimada",
-      "authorsKO": "Hanyu Jin, Zhefan Xu, Haoyu Shen, Xinming Han, Kanlong Ye, Kenji Shimada",
-      "abstractEN": "Indoor infrastructure inspection, such as tunnels and industrial facilities, requires systematic surface coverage to ensure that all inspection targets are properly observed. Unmanned Aerial Vehicles (UAVs) offer an alternative to manual inspection by conducting map-guided surface inspection using prior structural models. However, in practice, indoor inspection often relies on floorplan-derived reference maps that may not reflect unforeseen obstacles, such as temporary structures or equipment, leading to occluded viewpoints and degraded inspection quality. Existing coverage planning methods typically assume a fully known inspection environment and perform deterministic global viewpoint optimization based on accurate prior maps, making them vulnerable to environmental discrepancies during execution. This work presents an adaptive UAV inspection framework for partially known structured indoor environments. The proposed method integrates a segment-based global coverage planner with an inspection-oriented local view-angle adaptation module. The global planner organizes planar inspection targets into surface-aligned clusters to generate compact viewpoint sequences with improved orientation consistency. The local planner generates collision-free trajectories and adjusts the viewing direction online to mitigate occlusion-induced coverage loss while preserving the planned trajectory structure. The simulation results across randomized scene configurations demonstrate that the proposed global planner achieves near-complete coverage while reducing trajectory length compared to representative baselines. Real-world flight experiments further validate that the framework produces usable inspection data for downstream analysis. These results indicate that the proposed framework improves inspection efficiency and adaptability in partially known structured indoor environments.",
-      "abstractKO": "부분 공지 환경 UAV 점검, 세그먼트 기반 커버리지, 코사인 가중 뷰앵글 적응, 경로 35-40% 단축, ΔYaw 65-72% 감소, CMU, 후쿠시마 터널 실증",
+      "titleEN": "REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots",
+      "titleKO": "REACT: Environment-Adaptive Architecture for Continuous Formation Navigation of Wheeled Mobile Robots",
+      "authorsEN": "Jianghong Dong, Yifeng Zhang, Jiawei Wang, Mengchi Cai, Keqiang Li, Guillaume Sartoretti (Tsinghua, NUS, U-Michigan)",
+      "authorsKO": "Jianghong Dong, Yifeng Zhang, Jiawei Wang, Mengchi Cai, Keqiang Li, Guillaume Sartoretti (Tsinghua, NUS, U-Michigan)",
+      "abstractEN": "Formation control of wheeled mobile robots (WMRs) has been extensively studied due to its broad applications in fields such as logistics transportation, environmental monitoring, and search and rescue. However, most existing works mainly focus on tracking predefined formations, which limits their adaptability to complex real-world environments. To address this, we propose REACT (Real-time Environment-Adaptive architecture for Continuous formation navigaTion), a hierarchical architecture integrating centralized formation generation and distributed formation maintenance. Specifically, our upper layer generates new environment-adaptive formations when necessary and uses our proposed TCF-R2T (Trajectory-Conflict-Free Robot-to-Target assignment) algorithm to compute conflict-free WMR-to-target assignments in polynomial time, enabling timely formation transitions without trajectory conflicts. At the lower layer, each WMR executes our developed JSTP (Joint Spatio-Temporal trajectory Planning) method to maintain the generated formation by simultaneously optimizing spatial positions and temporal durations, thereby enhancing coordination among WMRs and enabling continuous navigation in obstacle-rich environments and dynamic-obstacle scenarios. Both simulation and real-world experiments validate the effectiveness and practical applicability of REACT. Experimental videos are available on our project website: https://dongjh20.github.io/REACT-website.",
+      "abstractKO": "다중 로봇 대형 항법, TCF-R2T (MCMF 시간-확장), JSTP (공간-시간 동시 최적화), MINCO 5차, 7-WMR 실세계, 97.4% 실행시간 단축, 75% 대형 오차 감소, Tsinghua/NUS",
       "detailTags": [
         "#Planner"
       ],
       "year": "2026",
       "citations": 0,
       "readMinutes": 43,
-      "reason": "부분 공지 환경 UAV 점검, 세그먼트 기반 커버리지, 코사인 가중 뷰앵글 적응, 경로 35-40% 단축, ΔYaw 65-72% 감소, CMU, 후쿠시마 터널 실증",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ASIP-Planner_arxiv2026/index.html"
+      "reason": "다중 로봇 대형 항법, TCF-R2T (MCMF 시간-확장), JSTP (공간-시간 동시 최적화), MINCO 5차, 7-WMR 실세계, 97.4% 실행시간 단축, 75% 대형 오차 감소, Tsinghua/NUS",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/REACT_arxiv2026/index.html"
+    },
+    {
+      "id": "2605.18729",
+      "venue": "arXiv 2026",
+      "matchScore": 87,
+      "category": "VLN",
+      "feedTitle": "Robo-Cortex: A Self-Evolving Embodied Agent via Dual-Grain Cognitive Memory and Autonomous Knowledge Induction",
+      "authorsShort": "N. Chan, Y. Zhang +7",
+      "feedAbstract": "자기진화 에이전트, 경험 기억상실, AKI, 이중 입도 메모리, 세계 모델 상상, IGNav/AR/AEQA, +15.30% SPL, HM3D/MP3D",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "Robo-Cortex: A Self-Evolving Embodied Agent via Dual-Grain Cognitive Memory and Autonomous Knowledge Induction",
+      "titleKO": "Robo-Cortex: A Self-Evolving Embodied Agent via Dual-Grain Cognitive Memory and Autonomous Knowledge Induction",
+      "authorsEN": "Nga Teng Chan, Yi Zhang, Yechi Liu, Renwen Cui, Fanhu Zeng, Qifeng Chen 외 (HKUST, X-Humanoid, CAS, BUAA)",
+      "authorsKO": "Nga Teng Chan, Yi Zhang, Yechi Liu, Renwen Cui, Fanhu Zeng, Qifeng Chen 외 (HKUST, X-Humanoid, CAS, BUAA)",
+      "abstractEN": "The ability to navigate and interact with complex environments is central to real-world embodied agents, yet navigation in unseen environments remains challenging due to \"experiential amnesia,\" where existing trajectory-driven or reactive policies fail to synthesize generalizable strategies from past interactions. We propose Robo-Cortex, a self-evolving framework that enables robots to autonomously induce navigation heuristics and refine cognitive strategies through a continuous reflection-adaptation loop. By abstracting success patterns and failure pitfalls into natural-language heuristics, Robo-Cortex enables a transition from passive execution to active strategy evolution. Our core innovation is an Autonomous Knowledge Induction (AKI) mechanism that distills multimodal trajectories into a structured Navigation Heuristic Library for knowledge generalization. The architecture further incorporates a Dual-Grain Cognitive Memory system, comprising a Short-term Reflective Memory (SRM) for real-time local progress analysis, and a Long-term Principle Memory (LPM) that abstracts past trajectories into reusable guiding and cautionary principles. To ensure robust decision-making, we introduce a multimodal Imagine-then-Verify loop, where a world model simulates potential outcomes and a VLM-based evaluator validates action plans. Extensive evaluations on IGNav, AR, and AEQA show that Robo-Cortex consistently outperforms strong baselines in both task success and exploration efficiency, with gains of up to +4.16% SPL over the strongest prior method and up to +15.30% SPL under heuristic transfer to unseen environments. Preliminary real-world robotic experiments further support the effectiveness of Robo-Cortex in physical settings.",
+      "abstractKO": "자기진화 에이전트, 경험 기억상실, AKI, 이중 입도 메모리, 세계 모델 상상, IGNav/AR/AEQA, +15.30% SPL, HM3D/MP3D",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 43,
+      "reason": "자기진화 에이전트, 경험 기억상실, AKI, 이중 입도 메모리, 세계 모델 상상, IGNav/AR/AEQA, +15.30% SPL, HM3D/MP3D",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/RoboCortex_arxiv2026/index.html"
     },
     {
       "id": "2605.11762",
