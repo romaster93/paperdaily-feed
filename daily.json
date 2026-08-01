@@ -1,13 +1,146 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-31T19:30:05.504Z",
+  "generatedAt": "2026-08-01T19:30:05.538Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 8. 1  토요일",
+    "date": "2026. 8. 2  일요일",
     "title": "오늘의 리뷰",
     "subtitle": "VLN·Planner 새 리뷰 5편 · 전체 96편"
   },
   "papers": [
+    {
+      "id": "2604.21363",
+      "venue": "arXiv 2026",
+      "venueDetail": "ICRA 2026 (Under Review / arXiv)",
+      "matchScore": 93,
+      "category": "VLN",
+      "feedTitle": "HiCo-Nav: A Deployable Embodied Vision-Language Navigation System with Hierarchical Cognition and Context-Aware Exploration",
+      "authorsShort": "X. Xu, H. Wei +3",
+      "feedAbstract": "인지 메모리 그래프(CMG)와 계층적 비동기 3계층 아키텍처로 고수준 추론과 실시간 성능을 동시에 달성한 배포 가능한 VLN 시스템.",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "A Deployable Embodied Vision-Language Navigation System with Hierarchical Cognition and Context-Aware Exploration",
+      "titleKO": "A Deployable Embodied Vision-Language Navigation System with Hierarchical Cognition and Context-Aware Exploration",
+      "authorsEN": "Xukuan Xu, Haoqian Wei, Yaoming Wang, Lei Zhang, Ye Li",
+      "authorsKO": "Xukuan Xu, Haoqian Wei, Yaoming Wang, Lei Zhang, Ye Li",
+      "abstractEN": "Bridging the gap between embodied intelligence and embedded deployment remains a key challenge in intelligent robotic systems, where perception, reasoning, and planning must operate under strict constraints on computation, memory, energy, and real-time execution. In vision-and-language navigation (VLN), existing approaches often face a trade-off between reasoning capability and deployment efficiency on real-world platforms. In this paper, we present a deployable embodied VLN system that achieves both high efficiency and strong high-level reasoning on real-world robots. The system is decomposed into a fast perception-action layer and a deep reasoning layer running asynchronously at different time scales, with a shared memory layer enabling efficient interaction between them. To support long-horizon reasoning, we incrementally construct a compact memory graph and progressively feed decomposed subgraphs into a vision-language model (VLM). Furthermore, we formulate exploration as a Weighted Traveling Repairman Problem (WTRP) by jointly considering reasoning outcomes and the spatial distribution of candidate regions. Extensive experiments in simulation and real-world environments demonstrate improved navigation success and efficiency over existing VLN approaches while maintaining real-time performance on resource-constrained hardware. Code and additional real-world experiments are available at https://github.com/xukuanHIT/HiCo-Nav.",
+      "abstractKO": "인지 메모리 그래프(CMG)와 계층적 비동기 3계층 아키텍처로 고수준 추론과 실시간 성능을 동시에 달성한 배포 가능한 VLN 시스템.",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 46,
+      "reason": "이분 그래프 기반 인지 메모리 그래프(CMG): 시각 앵커 + 객체 노드 + ILP 메모리 압축\nWTRP(가중 여행 수리공 문제) 기반 컨텍스트 인식 탐색 순서 최적화\n비동기 3계층 아키텍처: 인식(10Hz) / 메모리(1-2Hz) / 추론(0.1-0.5Hz)\nUnitree 사족보행 로봇 실세계 배포: 95%(소형 목표) + 65%(소형 목표) 성공률\nSG-Nav 대비 26.5배 빠른 실행 속도 (21.5s vs 569.3s)",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HiCoNav_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.20799",
+      "venue": "arXiv 2026",
+      "matchScore": 84,
+      "category": "Planner",
+      "feedTitle": "HoughGPMap: A Hough Transform Approach to Safety-Aware Scalar Field Mapping Using Gaussian Processes",
+      "authorsShort": "M. Qureshi, T. Satharasi +3",
+      "feedAbstract": "GP 베이지안 매핑, 허프 변환, 최대 분산 샘플링, RRT* 안전 경로, 실세계 검증",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "HoughGPMap: A Hough Transform Approach to Safety-Aware Scalar Field Mapping Using Gaussian Processes",
+      "titleKO": "HoughGPMap: A Hough Transform Approach to Safety-Aware Scalar Field Mapping Using Gaussian Processes",
+      "authorsEN": "Muzaffar Qureshi, Trivikram Satharasi, Tochukwu E. Ogri, Kyle Volle, Rushikesh Kamalapurkar",
+      "authorsKO": "Muzaffar Qureshi, Trivikram Satharasi, Tochukwu E. Ogri, Kyle Volle, Rushikesh Kamalapurkar",
+      "abstractEN": "This paper presents a framework for mapping unknown scalar fields using a sensor-equipped autonomous robot operating in unsafe environments. The unsafe regions are defined as regions of high-intensity, where the field value exceeds a predefined safety threshold. For safe and efficient mapping of the scalar field, the sensor-equipped robot must avoid high-intensity regions during the measurement process. In this paper, the scalar field is modeled as a sample from a Gaussian process (GP), which enables Bayesian inference and provides closed-form expressions for both the predictive mean and the uncertainty. Concurrently, the spatial structure of the high-intensity regions is estimated in real-time using the Hough transform (HT), leveraging the evolving GP posterior. A safe sampling strategy is then employed to guide the robot towards safe measurement locations, using probabilistic safety guarantees on the evolving GP posterior. The estimated high-intensity regions also facilitate the design of safe motion plans for the robot. The effectiveness of the approach is verified through two numerical simulation studies and an indoor experiment for mapping a light-intensity field using a wheeled mobile robot.",
+      "abstractKO": "GP 베이지안 매핑, 허프 변환, 최대 분산 샘플링, RRT* 안전 경로, 실세계 검증",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 45,
+      "reason": "GP 베이지안 매핑, 허프 변환, 최대 분산 샘플링, RRT* 안전 경로, 실세계 검증",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HoughGPMap_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.07945",
+      "venue": "arXiv 2026",
+      "matchScore": 84,
+      "category": "Planner",
+      "feedTitle": "IRRL: Incremental Residual Reinforcement Learning Toward Real-World Learning for Social Navigation",
+      "authorsShort": "H. Nagahisa, K. Matsumoto +3",
+      "feedAbstract": "Social Force Model 기반 정책에 GATv2 잔차 정책을 결합해, 리플레이 버퍼 없이 단일 스텝 온라인 업데이트만으로 실세계에서 소셜 내비게이션을 학습하는 증분 잔차 강화학습(IRRL) 프레임워크. 페널티메이트 정규화와 온라인 분산 기반 TD 오차 정규화로 학습을 안정화해 시뮬레이션에서 98.8%…",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "IRRL: Incremental Residual Reinforcement Learning Toward Real-World Learning for Social Navigation",
+      "titleKO": "IRRL: 소셜 내비게이션의 실세계 학습을 위한 증분 잔차 강화학습",
+      "authorsEN": "Haruto Nagahisa, Kohei Matsumoto, Yuki Tomita, Yuki Hyodo, Ryo Kurazume",
+      "authorsKO": "Haruto Nagahisa, Kohei Matsumoto, Yuki Tomita, Yuki Hyodo, Ryo Kurazume",
+      "abstractEN": "As the demand for mobile robots continues to increase, social navigation has emerged as a critical task, driving active research into deep reinforcement learning (RL) approaches. However, because pedestrian dynamics and social conventions vary widely across different regions, simulations cannot easily encompass all possible real-world scenarios. Real-world RL, in which agents learn while operating directly in physical environments, presents a promising solution to this issue. Nevertheless, this approach faces significant challenges, particularly regarding constrained computational resources on edge devices and learning efficiency. In this study, we propose incremental residual RL (IRRL). This method integrates incremental learning, which is a lightweight process that operates without a replay buffer or batch updates, with residual RL, which enhances learning efficiency by training only on the residuals relative to a base policy. Through the simulation experiments, we demonstrated that, despite lacking a replay buffer, IRRL achieved performance comparable to those of conventional replay buffer-based methods and outperformed existing incremental learning approaches. Furthermore, the real-world experiments confirmed that IRRL can enable robots to effectively adapt to previously unseen environments through the real-world learning.",
+      "abstractKO": "Social Force Model 기반 정책에 GATv2 잔차 정책을 결합해, 리플레이 버퍼 없이 단일 스텝 온라인 업데이트만으로 실세계에서 소셜 내비게이션을 학습하는 증분 잔차 강화학습(IRRL) 프레임워크. 페널티메이트 정규화와 온라인 분산 기반 TD 오차 정규화로 학습을 안정화해 시뮬레이션에서 98.8% 성공률(SFM 80.6% 대비)을 달성했고, Jetson AGX Orin 온보드 실세계 온라인 학습으로 성공률을 40%에서 60%로 끌어올렸다.",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 42,
+      "reason": "Social Force Model 기반 정책에 GATv2 잔차 정책을 결합해, 리플레이 버퍼 없이 단일 스텝 온라인 업데이트만으로 실세계에서 소셜 내비게이션을 학습하는 증분 잔차 강화학습(IRRL) 프레임워크. 페널티메이트 정규화와 온라인 분산 기반 TD 오차 정규화로 학습을 안정화해 시뮬레이션에서 98.8% 성공률(SFM 80.6% 대비)을 달성했고, Jetson AGX Orin 온보드 실세계 온라인 학습으로 성공률을 40%에서 60%로 끌어올렸다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/IRRL_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.19536",
+      "venue": "arXiv 2026",
+      "matchScore": 93,
+      "category": "VLN",
+      "feedTitle": "LiveVLN: Breaking the Stop-and-Go Loop in Vision-Language Navigation",
+      "authorsShort": "X. Wang, W. Zhu +6",
+      "feedAbstract": "VLN 런타임 최적화, 비동기 실행, Training-Free, 배포 연속성",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "LiveVLN: Breaking the Stop-and-Go Loop in Vision-Language Navigation",
+      "titleKO": "LiveVLN: Breaking the Stop-and-Go Loop in Vision-Language Navigation",
+      "authorsEN": "Xiangchen Wang, Weiye Zhu, Teng Wang, TianTian Geng, Zekai Zhang, Zhiyuan Qi, Jinyu Yang, Feng Zheng",
+      "authorsKO": "Xiangchen Wang, Weiye Zhu, Teng Wang, TianTian Geng, Zekai Zhang, Zhiyuan Qi, Jinyu Yang, Feng Zheng",
+      "abstractEN": "Recent navigation systems achieve strong benchmark results, yet real-world deployment often remains visibly stop-and-go. This bottleneck arises because the sense-inference-execution loop is still blocking: after each new observation, the controller must wait for sensing, transmission, and inference before motion can continue. Reducing action-generation cost alone therefore does not remove redundant waiting. To address this issue, we present LiveVLN, a training-free framework for more continuous embodied navigation by augmenting pretrained VLM navigators with multi-step action continuation. Instead of pausing for each full sense-and-inference round, LiveVLN overlaps execution with the processing of newly arrived observations, allowing refreshed future actions to be handed off before the current executable prefix is exhausted. This design keeps actions continuously available during motion, reducing idle waiting and enabling smoother online execution. The framework operates at runtime and can be integrated with compatible pretrained VLM navigators. Across R2R and RxR, LiveVLN preserves benchmark performance while reducing waiting time and improving action availability. In real-world deployments, it cuts average episode waiting time by up to $77.7\\%$ and shortens wall-clock episode time by $12.6\\%$ on StreamVLN and $19.6\\%$ on NaVIDA, yielding more coherent execution during deployment. Code is available at https://github.com/NIneeeeeem/LiveVLN.",
+      "abstractKO": "VLN 런타임 최적화, 비동기 실행, Training-Free, 배포 연속성",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 47,
+      "reason": "VLN 런타임 최적화, 비동기 실행, Training-Free, 배포 연속성",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/LiveVLN_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.15076",
+      "venue": "GECCO 2026",
+      "matchScore": 93,
+      "category": "Planner",
+      "feedTitle": "NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning",
+      "authorsShort": "H. Meliani, K. Slimani +1",
+      "feedAbstract": "뇨로진화, NEAT, 생물 영감, 경로 계획, GECCO2026",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning",
+      "titleKO": "NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning",
+      "authorsEN": "Hibatallah Meliani, Khadija Slimani, Samira Khoulji",
+      "authorsKO": "Hibatallah Meliani, Khadija Slimani, Samira Khoulji",
+      "abstractEN": "To navigate a space, the brain makes an internal representation of the environment using different cells such as place cells, grid cells, head direction cells, border cells, and speed cells. All these cells, along with sensory inputs, enable an organism to explore the space around it. Inspired by these biological principles, we developed NEATNC, a Neuro-Evolution of Augmenting Topology guided Navigation Cells. The goal of the paper is to improve NEAT algorithm performance in path planning in dynamic environments using spatial cognitive cells. This approach uses navigation cells as inputs and evolves recurrent neural networks, representing the hippocampus part of the brain. The performance of the proposed algorithm is evaluated in different static and dynamic scenarios. This study highlights NEAT's adaptability to complex and different environments, showcasing the utility of biological theories. This suggests that our approach is well-suited for real-time dynamic path planning for robotics and games.",
+      "abstractKO": "뇨로진화, NEAT, 생물 영감, 경로 계획, GECCO2026",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 40,
+      "reason": "뇨로진화, NEAT, 생물 영감, 경로 계획, GECCO2026",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NEATNC_GECCO2026/index.html"
+    }
+  ],
+  "archive": [
     {
       "id": "2607.28560",
       "venue": "arXiv 2026",
@@ -43,112 +176,6 @@
       "reason": "**GQRM**: 확산 RL을 정책 그래디언트가 아닌 \"그룹 Q-스코어로 재가중된 score matching\"으로 재정식화 → 우도 미분 회피, 안정적·데이터 효율적 후처리\n**사전 보존 자기-부트스트랩 탐색**: 사전 정책 다중모드 + 역확산 중간단계 섭동으로 사전 붕괴 없이 데드엔드 탈출·긴 우회 신행동 발견\n**그룹 Q-스코어 정규화(값망 프리)**: 상태별 그룹 내 상대 가치(GRPO류)로 어드밴티지 계산 → 별도 크리틱 불필요\n**크로스-임베디먼트 통합 정책**: 임베디먼트 조건화 변조 + 이종 분산 온라인 RL로 Dingo/Go2/G1 단일 정책 SOTA\n**완전 공개**: 학습·평가·사전학습 가중치 코드 + 프로젝트 페이지(MIT)",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/X-NavDP_arxiv2026/index.html"
     },
-    {
-      "id": "2604.20428",
-      "venue": "arXiv 2026",
-      "matchScore": 84,
-      "category": "Planner",
-      "feedTitle": "Lexicographic Minimum-Violation Motion Planning using Signal Temporal Logic (LexSTL)",
-      "authorsShort": "P. Halder, L. Kiltz +3",
-      "feedAbstract": "STL, 어휘 최소 위반, MPPI, 비트 시프팅, 우선순위 명세, IEEE OJ-ITS",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "Lexicographic Minimum-Violation Motion Planning using Signal Temporal Logic (LexSTL)",
-      "titleKO": "Lexicographic Minimum-Violation Motion Planning using Signal Temporal Logic (LexSTL)",
-      "authorsEN": "Patrick Halder, Lothar Kiltz, Hannes Homburger, Johannes Reuter, Matthias Althoff",
-      "authorsKO": "Patrick Halder, Lothar Kiltz, Hannes Homburger, Johannes Reuter, Matthias Althoff",
-      "abstractEN": "Motion planning for autonomous vehicles often requires satisfying multiple conditionally conflicting specifications. In situations where not all specifications can be met simultaneously, minimum-violation motion planning maintains system operation by minimizing violations of specifications in accordance with their priorities. Signal temporal logic (STL) provides a formal language for rigorously defining these specifications and enables the quantitative evaluation of their violations. However, a total ordering of specifications yields a lexicographic optimization problem, which is typically computationally expensive to solve using standard methods. We address this problem by transforming the multi-objective lexicographic optimization problem into a single-objective scalar optimization problem using non-uniform quantization and bit-shifting. Specifically, we extend a deterministic model predictive path integral (MPPI) solver to efficiently solve optimization problems without quadratic input cost. Additionally, a novel predicate-robustness measure that combines spatial and temporal violations is introduced. Our results show that the proposed method offers an interpretable and scalable solution for lexicographic STL minimum-violation motion planning within a single-objective solver framework.",
-      "abstractKO": "STL, 어휘 최소 위반, MPPI, 비트 시프팅, 우선순위 명세, IEEE OJ-ITS",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 43,
-      "reason": "STL, 어휘 최소 위반, MPPI, 비트 시프팅, 우선순위 명세, IEEE OJ-ITS",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/LexSTL_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.11587",
-      "venue": "arXiv 2026",
-      "matchScore": 93,
-      "category": "Planner",
-      "feedTitle": "BTIT*: Optimal Kinodynamic Motion Planning Through Anytime Bidirectional Heuristic Search with Tight Termination Condition",
-      "authorsShort": "Y. Wang, B. (교신저자) +2",
-      "feedAbstract": "키노다이나믹, 배치 샘플링, 양방향 탐색, MM-최적성",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "BTIT*: Optimal Kinodynamic Motion Planning Through Anytime Bidirectional Heuristic Search with Tight Termination Condition",
-      "titleKO": "BTIT*: Optimal Kinodynamic Motion Planning Through Anytime Bidirectional Heuristic Search with Tight Termination Condition",
-      "authorsEN": "Yi Wang, Bingxian Mu (교신저자), Shahab Shokouhi, May-Win Thein",
-      "authorsKO": "Yi Wang, Bingxian Mu (교신저자), Shahab Shokouhi, May-Win Thein",
-      "abstractEN": "This paper introduces Bidirectional Tight Informed Trees (BTIT*), an asymptotically optimal kinodynamic sampling-based motion planning algorithm that integrates an anytime bidirectional heuristic search (Bi-HS) and ensures the \\emph{meet-in-the-middle} property (MMP) and optimality (MM-optimality). BTIT* is the first anytime MEET-style algorithm to utilize termination conditions that are efficient to evaluate and enable early termination \\emph{on-the-fly} in batch-wise sampling-based motion planning. Experiments show that BTIT* achieves strongly faster time-to-first-solution and improved convergence than representative \\emph{non-lazy} informed batch planners on two kinodynamic benchmarks: a 4D double-integrator model and a 10D linearized Quadrotor. The source code is available here.",
-      "abstractKO": "키노다이나믹, 배치 샘플링, 양방향 탐색, MM-최적성",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 44,
-      "reason": "키노다이나믹, 배치 샘플링, 양방향 탐색, MM-최적성",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/BTIT_star_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.12486",
-      "venue": "arXiv 2026",
-      "matchScore": 84,
-      "category": "VLN",
-      "feedTitle": "DeCoNav: Dialog enhanced Long-Horizon Collaborative Vision-Language Navigation",
-      "authorsShort": "S. Zhou, Y. Wu +6",
-      "feedAbstract": "협력 VLN, 멀티로봇, 이벤트 기반 대화, 장거리 릴레이",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "DeCoNav: Dialog enhanced Long-Horizon Collaborative Vision-Language Navigation",
-      "titleKO": "DeCoNav: Dialog enhanced Long-Horizon Collaborative Vision-Language Navigation",
-      "authorsEN": "Sunyao Zhou, Yunzi Wu, Tianhang Wang, Xinhai Li, Guang Chen, Lizheng Liu, Chenjia Bai, Xuelong Li",
-      "authorsKO": "Sunyao Zhou, Yunzi Wu, Tianhang Wang, Xinhai Li, Guang Chen, Lizheng Liu, Chenjia Bai, Xuelong Li",
-      "abstractEN": "Long-horizon collaborative vision-language navigation (VLN) is critical for multi-robot systems to accomplish complex tasks beyond the capability of a single agent. CoNavBench takes a first step by introducing the first collaborative long-horizon VLN benchmark with relay-style multi-robot tasks, a collaboration taxonomy, along with graph-grounded generation and evaluation to model handoffs and rendezvous in shared environments. However, existing benchmarks and evaluations often do not enforce strictly synchronized dual-robot rollout on a shared world timeline, and they typically rely on static coordination policies that cannot adapt when new cross-agent evidence emerges. We present Dialog enhanced Long-Horizon Collaborative Vision-Language Navigation (DeCoNav), a decentralized framework that couples event-triggered dialogue with dynamic task allocation and replanning for real-time, adaptive coordination. In DeCoNav, robots exchange compact semantic states via dialogue without a central controller. When informative events such as new evidence, uncertainty, or conflicts arise, dialogue is triggered to dynamically reassign subgoals and replan under synchronized execution. Implemented in DeCoNavBench with 1,213 tasks across 176 HM3D scenes, DeCoNav improves the both-success rate (BSR) by 69.2%, demonstrating the effectiveness of dialogue-driven, dynamically reallocated planning for multi-robot collaboration.",
-      "abstractKO": "협력 VLN, 멀티로봇, 이벤트 기반 대화, 장거리 릴레이",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 42,
-      "reason": "협력 VLN, 멀티로봇, 이벤트 기반 대화, 장거리 릴레이",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/DeCoNav_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.14965",
-      "venue": "arXiv 2026",
-      "matchScore": 87,
-      "category": "VLN",
-      "feedTitle": "POMDP-based Object Search with Growing State Space and Hybrid Action Domain",
-      "authorsShort": "Y. Chen, H. Wang +2",
-      "feedAbstract": "POMDP, MCTS, 성장 상태 공간, 객체 탐색, 실세계",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "POMDP-based Object Search with Growing State Space and Hybrid Action Domain",
-      "titleKO": "POMDP-based Object Search with Growing State Space and Hybrid Action Domain",
-      "authorsEN": "Yongbo Chen, Hesheng Wang, Shoudong Huang, Hanna Kurniawati",
-      "authorsKO": "Yongbo Chen, Hesheng Wang, Shoudong Huang, Hanna Kurniawati",
-      "abstractEN": "Efficiently locating target objects in complex indoor environments with diverse furniture, such as shelves, tables, and beds, is a significant challenge for mobile robots. This difficulty arises from factors like localization errors, limited fields of view, and visual occlusion. We address this by framing the object-search task as a highdimensional Partially Observable Markov Decision Process (POMDP) with a growing state space and hybrid (continuous and discrete) action spaces in 3D environments. Based on a meticulously designed perception module, a novel online POMDP solver named the growing neural process filtered k-center clustering tree (GNPF-kCT) is proposed to tackle this problem. Optimal actions are selected using Monte Carlo Tree Search (MCTS) with belief tree reuse for growing state space, a neural process network to filter useless primitive actions, and k-center clustering hypersphere discretization for efficient refinement of high-dimensional action spaces. A modified upper-confidence bound (UCB), informed by belief differences and action value functions within cells of estimated diameters, guides MCTS expansion. Theoretical analysis validates the convergence and performance potential of our method. To address scenarios with limited information or rewards, we also introduce a guessed target object with a grid-world model as a key strategy to enhance search efficiency. Extensive Gazebo simulations with Fetch and Stretch robots demonstrate faster and more reliable target localization than POMDP-based baselines and state-of-the-art (SOTA) non-POMDP-based solvers, especially large language model (LLM) based methods, in object search under the same computational constraints and perception systems. Real-world tests in office environments confirm the practical applicability of our approach. Project page: https://sites.google.com/view/gnpfkct.",
-      "abstractKO": "POMDP, MCTS, 성장 상태 공간, 객체 탐색, 실세계",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 41,
-      "reason": "POMDP, MCTS, 성장 상태 공간, 객체 탐색, 실세계",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/GNPFkCT_arxiv2026/index.html"
-    }
-  ],
-  "archive": [
     {
       "id": "2607.21400",
       "venue": "arXiv 2026",
@@ -2255,135 +2282,108 @@
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/AmelPred_arxiv2026/index.html"
     },
     {
-      "id": "2604.21363",
+      "id": "2604.20428",
       "venue": "arXiv 2026",
-      "venueDetail": "ICRA 2026 (Under Review / arXiv)",
+      "matchScore": 84,
+      "category": "Planner",
+      "feedTitle": "Lexicographic Minimum-Violation Motion Planning using Signal Temporal Logic (LexSTL)",
+      "authorsShort": "P. Halder, L. Kiltz +3",
+      "feedAbstract": "STL, 어휘 최소 위반, MPPI, 비트 시프팅, 우선순위 명세, IEEE OJ-ITS",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "Lexicographic Minimum-Violation Motion Planning using Signal Temporal Logic (LexSTL)",
+      "titleKO": "Lexicographic Minimum-Violation Motion Planning using Signal Temporal Logic (LexSTL)",
+      "authorsEN": "Patrick Halder, Lothar Kiltz, Hannes Homburger, Johannes Reuter, Matthias Althoff",
+      "authorsKO": "Patrick Halder, Lothar Kiltz, Hannes Homburger, Johannes Reuter, Matthias Althoff",
+      "abstractEN": "Motion planning for autonomous vehicles often requires satisfying multiple conditionally conflicting specifications. In situations where not all specifications can be met simultaneously, minimum-violation motion planning maintains system operation by minimizing violations of specifications in accordance with their priorities. Signal temporal logic (STL) provides a formal language for rigorously defining these specifications and enables the quantitative evaluation of their violations. However, a total ordering of specifications yields a lexicographic optimization problem, which is typically computationally expensive to solve using standard methods. We address this problem by transforming the multi-objective lexicographic optimization problem into a single-objective scalar optimization problem using non-uniform quantization and bit-shifting. Specifically, we extend a deterministic model predictive path integral (MPPI) solver to efficiently solve optimization problems without quadratic input cost. Additionally, a novel predicate-robustness measure that combines spatial and temporal violations is introduced. Our results show that the proposed method offers an interpretable and scalable solution for lexicographic STL minimum-violation motion planning within a single-objective solver framework.",
+      "abstractKO": "STL, 어휘 최소 위반, MPPI, 비트 시프팅, 우선순위 명세, IEEE OJ-ITS",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 43,
+      "reason": "STL, 어휘 최소 위반, MPPI, 비트 시프팅, 우선순위 명세, IEEE OJ-ITS",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/LexSTL_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.11587",
+      "venue": "arXiv 2026",
       "matchScore": 93,
+      "category": "Planner",
+      "feedTitle": "BTIT*: Optimal Kinodynamic Motion Planning Through Anytime Bidirectional Heuristic Search with Tight Termination Condition",
+      "authorsShort": "Y. Wang, B. (교신저자) +2",
+      "feedAbstract": "키노다이나믹, 배치 샘플링, 양방향 탐색, MM-최적성",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "BTIT*: Optimal Kinodynamic Motion Planning Through Anytime Bidirectional Heuristic Search with Tight Termination Condition",
+      "titleKO": "BTIT*: Optimal Kinodynamic Motion Planning Through Anytime Bidirectional Heuristic Search with Tight Termination Condition",
+      "authorsEN": "Yi Wang, Bingxian Mu (교신저자), Shahab Shokouhi, May-Win Thein",
+      "authorsKO": "Yi Wang, Bingxian Mu (교신저자), Shahab Shokouhi, May-Win Thein",
+      "abstractEN": "This paper introduces Bidirectional Tight Informed Trees (BTIT*), an asymptotically optimal kinodynamic sampling-based motion planning algorithm that integrates an anytime bidirectional heuristic search (Bi-HS) and ensures the \\emph{meet-in-the-middle} property (MMP) and optimality (MM-optimality). BTIT* is the first anytime MEET-style algorithm to utilize termination conditions that are efficient to evaluate and enable early termination \\emph{on-the-fly} in batch-wise sampling-based motion planning. Experiments show that BTIT* achieves strongly faster time-to-first-solution and improved convergence than representative \\emph{non-lazy} informed batch planners on two kinodynamic benchmarks: a 4D double-integrator model and a 10D linearized Quadrotor. The source code is available here.",
+      "abstractKO": "키노다이나믹, 배치 샘플링, 양방향 탐색, MM-최적성",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 44,
+      "reason": "키노다이나믹, 배치 샘플링, 양방향 탐색, MM-최적성",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/BTIT_star_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.12486",
+      "venue": "arXiv 2026",
+      "matchScore": 84,
       "category": "VLN",
-      "feedTitle": "HiCo-Nav: A Deployable Embodied Vision-Language Navigation System with Hierarchical Cognition and Context-Aware Exploration",
-      "authorsShort": "X. Xu, H. Wei +3",
-      "feedAbstract": "인지 메모리 그래프(CMG)와 계층적 비동기 3계층 아키텍처로 고수준 추론과 실시간 성능을 동시에 달성한 배포 가능한 VLN 시스템.",
+      "feedTitle": "DeCoNav: Dialog enhanced Long-Horizon Collaborative Vision-Language Navigation",
+      "authorsShort": "S. Zhou, Y. Wu +6",
+      "feedAbstract": "협력 VLN, 멀티로봇, 이벤트 기반 대화, 장거리 릴레이",
       "tags": [
         "#VLN"
       ],
-      "titleEN": "A Deployable Embodied Vision-Language Navigation System with Hierarchical Cognition and Context-Aware Exploration",
-      "titleKO": "A Deployable Embodied Vision-Language Navigation System with Hierarchical Cognition and Context-Aware Exploration",
-      "authorsEN": "Xukuan Xu, Haoqian Wei, Yaoming Wang, Lei Zhang, Ye Li",
-      "authorsKO": "Xukuan Xu, Haoqian Wei, Yaoming Wang, Lei Zhang, Ye Li",
-      "abstractEN": "Bridging the gap between embodied intelligence and embedded deployment remains a key challenge in intelligent robotic systems, where perception, reasoning, and planning must operate under strict constraints on computation, memory, energy, and real-time execution. In vision-and-language navigation (VLN), existing approaches often face a trade-off between reasoning capability and deployment efficiency on real-world platforms. In this paper, we present a deployable embodied VLN system that achieves both high efficiency and strong high-level reasoning on real-world robots. The system is decomposed into a fast perception-action layer and a deep reasoning layer running asynchronously at different time scales, with a shared memory layer enabling efficient interaction between them. To support long-horizon reasoning, we incrementally construct a compact memory graph and progressively feed decomposed subgraphs into a vision-language model (VLM). Furthermore, we formulate exploration as a Weighted Traveling Repairman Problem (WTRP) by jointly considering reasoning outcomes and the spatial distribution of candidate regions. Extensive experiments in simulation and real-world environments demonstrate improved navigation success and efficiency over existing VLN approaches while maintaining real-time performance on resource-constrained hardware. Code and additional real-world experiments are available at https://github.com/xukuanHIT/HiCo-Nav.",
-      "abstractKO": "인지 메모리 그래프(CMG)와 계층적 비동기 3계층 아키텍처로 고수준 추론과 실시간 성능을 동시에 달성한 배포 가능한 VLN 시스템.",
+      "titleEN": "DeCoNav: Dialog enhanced Long-Horizon Collaborative Vision-Language Navigation",
+      "titleKO": "DeCoNav: Dialog enhanced Long-Horizon Collaborative Vision-Language Navigation",
+      "authorsEN": "Sunyao Zhou, Yunzi Wu, Tianhang Wang, Xinhai Li, Guang Chen, Lizheng Liu, Chenjia Bai, Xuelong Li",
+      "authorsKO": "Sunyao Zhou, Yunzi Wu, Tianhang Wang, Xinhai Li, Guang Chen, Lizheng Liu, Chenjia Bai, Xuelong Li",
+      "abstractEN": "Long-horizon collaborative vision-language navigation (VLN) is critical for multi-robot systems to accomplish complex tasks beyond the capability of a single agent. CoNavBench takes a first step by introducing the first collaborative long-horizon VLN benchmark with relay-style multi-robot tasks, a collaboration taxonomy, along with graph-grounded generation and evaluation to model handoffs and rendezvous in shared environments. However, existing benchmarks and evaluations often do not enforce strictly synchronized dual-robot rollout on a shared world timeline, and they typically rely on static coordination policies that cannot adapt when new cross-agent evidence emerges. We present Dialog enhanced Long-Horizon Collaborative Vision-Language Navigation (DeCoNav), a decentralized framework that couples event-triggered dialogue with dynamic task allocation and replanning for real-time, adaptive coordination. In DeCoNav, robots exchange compact semantic states via dialogue without a central controller. When informative events such as new evidence, uncertainty, or conflicts arise, dialogue is triggered to dynamically reassign subgoals and replan under synchronized execution. Implemented in DeCoNavBench with 1,213 tasks across 176 HM3D scenes, DeCoNav improves the both-success rate (BSR) by 69.2%, demonstrating the effectiveness of dialogue-driven, dynamically reallocated planning for multi-robot collaboration.",
+      "abstractKO": "협력 VLN, 멀티로봇, 이벤트 기반 대화, 장거리 릴레이",
       "detailTags": [
         "#VLN"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 46,
-      "reason": "이분 그래프 기반 인지 메모리 그래프(CMG): 시각 앵커 + 객체 노드 + ILP 메모리 압축\nWTRP(가중 여행 수리공 문제) 기반 컨텍스트 인식 탐색 순서 최적화\n비동기 3계층 아키텍처: 인식(10Hz) / 메모리(1-2Hz) / 추론(0.1-0.5Hz)\nUnitree 사족보행 로봇 실세계 배포: 95%(소형 목표) + 65%(소형 목표) 성공률\nSG-Nav 대비 26.5배 빠른 실행 속도 (21.5s vs 569.3s)",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HiCoNav_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.20799",
-      "venue": "arXiv 2026",
-      "matchScore": 84,
-      "category": "Planner",
-      "feedTitle": "HoughGPMap: A Hough Transform Approach to Safety-Aware Scalar Field Mapping Using Gaussian Processes",
-      "authorsShort": "M. Qureshi, T. Satharasi +3",
-      "feedAbstract": "GP 베이지안 매핑, 허프 변환, 최대 분산 샘플링, RRT* 안전 경로, 실세계 검증",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "HoughGPMap: A Hough Transform Approach to Safety-Aware Scalar Field Mapping Using Gaussian Processes",
-      "titleKO": "HoughGPMap: A Hough Transform Approach to Safety-Aware Scalar Field Mapping Using Gaussian Processes",
-      "authorsEN": "Muzaffar Qureshi, Trivikram Satharasi, Tochukwu E. Ogri, Kyle Volle, Rushikesh Kamalapurkar",
-      "authorsKO": "Muzaffar Qureshi, Trivikram Satharasi, Tochukwu E. Ogri, Kyle Volle, Rushikesh Kamalapurkar",
-      "abstractEN": "This paper presents a framework for mapping unknown scalar fields using a sensor-equipped autonomous robot operating in unsafe environments. The unsafe regions are defined as regions of high-intensity, where the field value exceeds a predefined safety threshold. For safe and efficient mapping of the scalar field, the sensor-equipped robot must avoid high-intensity regions during the measurement process. In this paper, the scalar field is modeled as a sample from a Gaussian process (GP), which enables Bayesian inference and provides closed-form expressions for both the predictive mean and the uncertainty. Concurrently, the spatial structure of the high-intensity regions is estimated in real-time using the Hough transform (HT), leveraging the evolving GP posterior. A safe sampling strategy is then employed to guide the robot towards safe measurement locations, using probabilistic safety guarantees on the evolving GP posterior. The estimated high-intensity regions also facilitate the design of safe motion plans for the robot. The effectiveness of the approach is verified through two numerical simulation studies and an indoor experiment for mapping a light-intensity field using a wheeled mobile robot.",
-      "abstractKO": "GP 베이지안 매핑, 허프 변환, 최대 분산 샘플링, RRT* 안전 경로, 실세계 검증",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 45,
-      "reason": "GP 베이지안 매핑, 허프 변환, 최대 분산 샘플링, RRT* 안전 경로, 실세계 검증",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HoughGPMap_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.07945",
-      "venue": "arXiv 2026",
-      "matchScore": 84,
-      "category": "Planner",
-      "feedTitle": "IRRL: Incremental Residual Reinforcement Learning Toward Real-World Learning for Social Navigation",
-      "authorsShort": "H. Nagahisa, K. Matsumoto +3",
-      "feedAbstract": "Social Force Model 기반 정책에 GATv2 잔차 정책을 결합해, 리플레이 버퍼 없이 단일 스텝 온라인 업데이트만으로 실세계에서 소셜 내비게이션을 학습하는 증분 잔차 강화학습(IRRL) 프레임워크. 페널티메이트 정규화와 온라인 분산 기반 TD 오차 정규화로 학습을 안정화해 시뮬레이션에서 98.8%…",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "IRRL: Incremental Residual Reinforcement Learning Toward Real-World Learning for Social Navigation",
-      "titleKO": "IRRL: 소셜 내비게이션의 실세계 학습을 위한 증분 잔차 강화학습",
-      "authorsEN": "Haruto Nagahisa, Kohei Matsumoto, Yuki Tomita, Yuki Hyodo, Ryo Kurazume",
-      "authorsKO": "Haruto Nagahisa, Kohei Matsumoto, Yuki Tomita, Yuki Hyodo, Ryo Kurazume",
-      "abstractEN": "As the demand for mobile robots continues to increase, social navigation has emerged as a critical task, driving active research into deep reinforcement learning (RL) approaches. However, because pedestrian dynamics and social conventions vary widely across different regions, simulations cannot easily encompass all possible real-world scenarios. Real-world RL, in which agents learn while operating directly in physical environments, presents a promising solution to this issue. Nevertheless, this approach faces significant challenges, particularly regarding constrained computational resources on edge devices and learning efficiency. In this study, we propose incremental residual RL (IRRL). This method integrates incremental learning, which is a lightweight process that operates without a replay buffer or batch updates, with residual RL, which enhances learning efficiency by training only on the residuals relative to a base policy. Through the simulation experiments, we demonstrated that, despite lacking a replay buffer, IRRL achieved performance comparable to those of conventional replay buffer-based methods and outperformed existing incremental learning approaches. Furthermore, the real-world experiments confirmed that IRRL can enable robots to effectively adapt to previously unseen environments through the real-world learning.",
-      "abstractKO": "Social Force Model 기반 정책에 GATv2 잔차 정책을 결합해, 리플레이 버퍼 없이 단일 스텝 온라인 업데이트만으로 실세계에서 소셜 내비게이션을 학습하는 증분 잔차 강화학습(IRRL) 프레임워크. 페널티메이트 정규화와 온라인 분산 기반 TD 오차 정규화로 학습을 안정화해 시뮬레이션에서 98.8% 성공률(SFM 80.6% 대비)을 달성했고, Jetson AGX Orin 온보드 실세계 온라인 학습으로 성공률을 40%에서 60%로 끌어올렸다.",
-      "detailTags": [
-        "#Planner"
       ],
       "year": "2026",
       "citations": 0,
       "readMinutes": 42,
-      "reason": "Social Force Model 기반 정책에 GATv2 잔차 정책을 결합해, 리플레이 버퍼 없이 단일 스텝 온라인 업데이트만으로 실세계에서 소셜 내비게이션을 학습하는 증분 잔차 강화학습(IRRL) 프레임워크. 페널티메이트 정규화와 온라인 분산 기반 TD 오차 정규화로 학습을 안정화해 시뮬레이션에서 98.8% 성공률(SFM 80.6% 대비)을 달성했고, Jetson AGX Orin 온보드 실세계 온라인 학습으로 성공률을 40%에서 60%로 끌어올렸다.",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/IRRL_arxiv2026/index.html"
+      "reason": "협력 VLN, 멀티로봇, 이벤트 기반 대화, 장거리 릴레이",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/DeCoNav_arxiv2026/index.html"
     },
     {
-      "id": "2604.19536",
+      "id": "2604.14965",
       "venue": "arXiv 2026",
-      "matchScore": 93,
+      "matchScore": 87,
       "category": "VLN",
-      "feedTitle": "LiveVLN: Breaking the Stop-and-Go Loop in Vision-Language Navigation",
-      "authorsShort": "X. Wang, W. Zhu +6",
-      "feedAbstract": "VLN 런타임 최적화, 비동기 실행, Training-Free, 배포 연속성",
+      "feedTitle": "POMDP-based Object Search with Growing State Space and Hybrid Action Domain",
+      "authorsShort": "Y. Chen, H. Wang +2",
+      "feedAbstract": "POMDP, MCTS, 성장 상태 공간, 객체 탐색, 실세계",
       "tags": [
         "#VLN"
       ],
-      "titleEN": "LiveVLN: Breaking the Stop-and-Go Loop in Vision-Language Navigation",
-      "titleKO": "LiveVLN: Breaking the Stop-and-Go Loop in Vision-Language Navigation",
-      "authorsEN": "Xiangchen Wang, Weiye Zhu, Teng Wang, TianTian Geng, Zekai Zhang, Zhiyuan Qi, Jinyu Yang, Feng Zheng",
-      "authorsKO": "Xiangchen Wang, Weiye Zhu, Teng Wang, TianTian Geng, Zekai Zhang, Zhiyuan Qi, Jinyu Yang, Feng Zheng",
-      "abstractEN": "Recent navigation systems achieve strong benchmark results, yet real-world deployment often remains visibly stop-and-go. This bottleneck arises because the sense-inference-execution loop is still blocking: after each new observation, the controller must wait for sensing, transmission, and inference before motion can continue. Reducing action-generation cost alone therefore does not remove redundant waiting. To address this issue, we present LiveVLN, a training-free framework for more continuous embodied navigation by augmenting pretrained VLM navigators with multi-step action continuation. Instead of pausing for each full sense-and-inference round, LiveVLN overlaps execution with the processing of newly arrived observations, allowing refreshed future actions to be handed off before the current executable prefix is exhausted. This design keeps actions continuously available during motion, reducing idle waiting and enabling smoother online execution. The framework operates at runtime and can be integrated with compatible pretrained VLM navigators. Across R2R and RxR, LiveVLN preserves benchmark performance while reducing waiting time and improving action availability. In real-world deployments, it cuts average episode waiting time by up to $77.7\\%$ and shortens wall-clock episode time by $12.6\\%$ on StreamVLN and $19.6\\%$ on NaVIDA, yielding more coherent execution during deployment. Code is available at https://github.com/NIneeeeeem/LiveVLN.",
-      "abstractKO": "VLN 런타임 최적화, 비동기 실행, Training-Free, 배포 연속성",
+      "titleEN": "POMDP-based Object Search with Growing State Space and Hybrid Action Domain",
+      "titleKO": "POMDP-based Object Search with Growing State Space and Hybrid Action Domain",
+      "authorsEN": "Yongbo Chen, Hesheng Wang, Shoudong Huang, Hanna Kurniawati",
+      "authorsKO": "Yongbo Chen, Hesheng Wang, Shoudong Huang, Hanna Kurniawati",
+      "abstractEN": "Efficiently locating target objects in complex indoor environments with diverse furniture, such as shelves, tables, and beds, is a significant challenge for mobile robots. This difficulty arises from factors like localization errors, limited fields of view, and visual occlusion. We address this by framing the object-search task as a highdimensional Partially Observable Markov Decision Process (POMDP) with a growing state space and hybrid (continuous and discrete) action spaces in 3D environments. Based on a meticulously designed perception module, a novel online POMDP solver named the growing neural process filtered k-center clustering tree (GNPF-kCT) is proposed to tackle this problem. Optimal actions are selected using Monte Carlo Tree Search (MCTS) with belief tree reuse for growing state space, a neural process network to filter useless primitive actions, and k-center clustering hypersphere discretization for efficient refinement of high-dimensional action spaces. A modified upper-confidence bound (UCB), informed by belief differences and action value functions within cells of estimated diameters, guides MCTS expansion. Theoretical analysis validates the convergence and performance potential of our method. To address scenarios with limited information or rewards, we also introduce a guessed target object with a grid-world model as a key strategy to enhance search efficiency. Extensive Gazebo simulations with Fetch and Stretch robots demonstrate faster and more reliable target localization than POMDP-based baselines and state-of-the-art (SOTA) non-POMDP-based solvers, especially large language model (LLM) based methods, in object search under the same computational constraints and perception systems. Real-world tests in office environments confirm the practical applicability of our approach. Project page: https://sites.google.com/view/gnpfkct.",
+      "abstractKO": "POMDP, MCTS, 성장 상태 공간, 객체 탐색, 실세계",
       "detailTags": [
         "#VLN"
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 47,
-      "reason": "VLN 런타임 최적화, 비동기 실행, Training-Free, 배포 연속성",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/LiveVLN_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.15076",
-      "venue": "GECCO 2026",
-      "matchScore": 93,
-      "category": "Planner",
-      "feedTitle": "NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning",
-      "authorsShort": "H. Meliani, K. Slimani +1",
-      "feedAbstract": "뇨로진화, NEAT, 생물 영감, 경로 계획, GECCO2026",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning",
-      "titleKO": "NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning",
-      "authorsEN": "Hibatallah Meliani, Khadija Slimani, Samira Khoulji",
-      "authorsKO": "Hibatallah Meliani, Khadija Slimani, Samira Khoulji",
-      "abstractEN": "To navigate a space, the brain makes an internal representation of the environment using different cells such as place cells, grid cells, head direction cells, border cells, and speed cells. All these cells, along with sensory inputs, enable an organism to explore the space around it. Inspired by these biological principles, we developed NEATNC, a Neuro-Evolution of Augmenting Topology guided Navigation Cells. The goal of the paper is to improve NEAT algorithm performance in path planning in dynamic environments using spatial cognitive cells. This approach uses navigation cells as inputs and evolves recurrent neural networks, representing the hippocampus part of the brain. The performance of the proposed algorithm is evaluated in different static and dynamic scenarios. This study highlights NEAT's adaptability to complex and different environments, showcasing the utility of biological theories. This suggests that our approach is well-suited for real-time dynamic path planning for robotics and games.",
-      "abstractKO": "뇨로진화, NEAT, 생물 영감, 경로 계획, GECCO2026",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 40,
-      "reason": "뇨로진화, NEAT, 생물 영감, 경로 계획, GECCO2026",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NEATNC_GECCO2026/index.html"
+      "readMinutes": 41,
+      "reason": "POMDP, MCTS, 성장 상태 공간, 객체 탐색, 실세계",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/GNPFkCT_arxiv2026/index.html"
     },
     {
       "id": "2604.19148",
