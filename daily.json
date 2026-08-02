@@ -1,143 +1,142 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-01T19:30:05.538Z",
+  "generatedAt": "2026-08-02T19:30:05.855Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 8. 2  일요일",
+    "date": "2026. 8. 3  월요일",
     "title": "오늘의 리뷰",
     "subtitle": "VLN·Planner 새 리뷰 5편 · 전체 96편"
   },
   "papers": [
     {
-      "id": "2604.21363",
-      "venue": "arXiv 2026",
-      "venueDetail": "ICRA 2026 (Under Review / arXiv)",
-      "matchScore": 93,
-      "category": "VLN",
-      "feedTitle": "HiCo-Nav: A Deployable Embodied Vision-Language Navigation System with Hierarchical Cognition and Context-Aware Exploration",
-      "authorsShort": "X. Xu, H. Wei +3",
-      "feedAbstract": "인지 메모리 그래프(CMG)와 계층적 비동기 3계층 아키텍처로 고수준 추론과 실시간 성능을 동시에 달성한 배포 가능한 VLN 시스템.",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "A Deployable Embodied Vision-Language Navigation System with Hierarchical Cognition and Context-Aware Exploration",
-      "titleKO": "A Deployable Embodied Vision-Language Navigation System with Hierarchical Cognition and Context-Aware Exploration",
-      "authorsEN": "Xukuan Xu, Haoqian Wei, Yaoming Wang, Lei Zhang, Ye Li",
-      "authorsKO": "Xukuan Xu, Haoqian Wei, Yaoming Wang, Lei Zhang, Ye Li",
-      "abstractEN": "Bridging the gap between embodied intelligence and embedded deployment remains a key challenge in intelligent robotic systems, where perception, reasoning, and planning must operate under strict constraints on computation, memory, energy, and real-time execution. In vision-and-language navigation (VLN), existing approaches often face a trade-off between reasoning capability and deployment efficiency on real-world platforms. In this paper, we present a deployable embodied VLN system that achieves both high efficiency and strong high-level reasoning on real-world robots. The system is decomposed into a fast perception-action layer and a deep reasoning layer running asynchronously at different time scales, with a shared memory layer enabling efficient interaction between them. To support long-horizon reasoning, we incrementally construct a compact memory graph and progressively feed decomposed subgraphs into a vision-language model (VLM). Furthermore, we formulate exploration as a Weighted Traveling Repairman Problem (WTRP) by jointly considering reasoning outcomes and the spatial distribution of candidate regions. Extensive experiments in simulation and real-world environments demonstrate improved navigation success and efficiency over existing VLN approaches while maintaining real-time performance on resource-constrained hardware. Code and additional real-world experiments are available at https://github.com/xukuanHIT/HiCo-Nav.",
-      "abstractKO": "인지 메모리 그래프(CMG)와 계층적 비동기 3계층 아키텍처로 고수준 추론과 실시간 성능을 동시에 달성한 배포 가능한 VLN 시스템.",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 46,
-      "reason": "이분 그래프 기반 인지 메모리 그래프(CMG): 시각 앵커 + 객체 노드 + ILP 메모리 압축\nWTRP(가중 여행 수리공 문제) 기반 컨텍스트 인식 탐색 순서 최적화\n비동기 3계층 아키텍처: 인식(10Hz) / 메모리(1-2Hz) / 추론(0.1-0.5Hz)\nUnitree 사족보행 로봇 실세계 배포: 95%(소형 목표) + 65%(소형 목표) 성공률\nSG-Nav 대비 26.5배 빠른 실행 속도 (21.5s vs 569.3s)",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HiCoNav_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.20799",
+      "id": "2604.19148",
       "venue": "arXiv 2026",
       "matchScore": 84,
       "category": "Planner",
-      "feedTitle": "HoughGPMap: A Hough Transform Approach to Safety-Aware Scalar Field Mapping Using Gaussian Processes",
-      "authorsShort": "M. Qureshi, T. Satharasi +3",
-      "feedAbstract": "GP 베이지안 매핑, 허프 변환, 최대 분산 샘플링, RRT* 안전 경로, 실세계 검증",
+      "feedTitle": "Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP)",
+      "authorsShort": "A. Beaudin, B. Kristiansen +5",
+      "feedAbstract": "GP 정보 경로 계획, BCM 근사, 환경 모니터링, 해양 ASV, 실세계 실험",
       "tags": [
         "#Planner"
       ],
-      "titleEN": "HoughGPMap: A Hough Transform Approach to Safety-Aware Scalar Field Mapping Using Gaussian Processes",
-      "titleKO": "HoughGPMap: A Hough Transform Approach to Safety-Aware Scalar Field Mapping Using Gaussian Processes",
-      "authorsEN": "Muzaffar Qureshi, Trivikram Satharasi, Tochukwu E. Ogri, Kyle Volle, Rushikesh Kamalapurkar",
-      "authorsKO": "Muzaffar Qureshi, Trivikram Satharasi, Tochukwu E. Ogri, Kyle Volle, Rushikesh Kamalapurkar",
-      "abstractEN": "This paper presents a framework for mapping unknown scalar fields using a sensor-equipped autonomous robot operating in unsafe environments. The unsafe regions are defined as regions of high-intensity, where the field value exceeds a predefined safety threshold. For safe and efficient mapping of the scalar field, the sensor-equipped robot must avoid high-intensity regions during the measurement process. In this paper, the scalar field is modeled as a sample from a Gaussian process (GP), which enables Bayesian inference and provides closed-form expressions for both the predictive mean and the uncertainty. Concurrently, the spatial structure of the high-intensity regions is estimated in real-time using the Hough transform (HT), leveraging the evolving GP posterior. A safe sampling strategy is then employed to guide the robot towards safe measurement locations, using probabilistic safety guarantees on the evolving GP posterior. The estimated high-intensity regions also facilitate the design of safe motion plans for the robot. The effectiveness of the approach is verified through two numerical simulation studies and an indoor experiment for mapping a light-intensity field using a wheeled mobile robot.",
-      "abstractKO": "GP 베이지안 매핑, 허프 변환, 최대 분산 샘플링, RRT* 안전 경로, 실세계 검증",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 45,
-      "reason": "GP 베이지안 매핑, 허프 변환, 최대 분산 샘플링, RRT* 안전 경로, 실세계 검증",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HoughGPMap_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.07945",
-      "venue": "arXiv 2026",
-      "matchScore": 84,
-      "category": "Planner",
-      "feedTitle": "IRRL: Incremental Residual Reinforcement Learning Toward Real-World Learning for Social Navigation",
-      "authorsShort": "H. Nagahisa, K. Matsumoto +3",
-      "feedAbstract": "Social Force Model 기반 정책에 GATv2 잔차 정책을 결합해, 리플레이 버퍼 없이 단일 스텝 온라인 업데이트만으로 실세계에서 소셜 내비게이션을 학습하는 증분 잔차 강화학습(IRRL) 프레임워크. 페널티메이트 정규화와 온라인 분산 기반 TD 오차 정규화로 학습을 안정화해 시뮬레이션에서 98.8%…",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "IRRL: Incremental Residual Reinforcement Learning Toward Real-World Learning for Social Navigation",
-      "titleKO": "IRRL: 소셜 내비게이션의 실세계 학습을 위한 증분 잔차 강화학습",
-      "authorsEN": "Haruto Nagahisa, Kohei Matsumoto, Yuki Tomita, Yuki Hyodo, Ryo Kurazume",
-      "authorsKO": "Haruto Nagahisa, Kohei Matsumoto, Yuki Tomita, Yuki Hyodo, Ryo Kurazume",
-      "abstractEN": "As the demand for mobile robots continues to increase, social navigation has emerged as a critical task, driving active research into deep reinforcement learning (RL) approaches. However, because pedestrian dynamics and social conventions vary widely across different regions, simulations cannot easily encompass all possible real-world scenarios. Real-world RL, in which agents learn while operating directly in physical environments, presents a promising solution to this issue. Nevertheless, this approach faces significant challenges, particularly regarding constrained computational resources on edge devices and learning efficiency. In this study, we propose incremental residual RL (IRRL). This method integrates incremental learning, which is a lightweight process that operates without a replay buffer or batch updates, with residual RL, which enhances learning efficiency by training only on the residuals relative to a base policy. Through the simulation experiments, we demonstrated that, despite lacking a replay buffer, IRRL achieved performance comparable to those of conventional replay buffer-based methods and outperformed existing incremental learning approaches. Furthermore, the real-world experiments confirmed that IRRL can enable robots to effectively adapt to previously unseen environments through the real-world learning.",
-      "abstractKO": "Social Force Model 기반 정책에 GATv2 잔차 정책을 결합해, 리플레이 버퍼 없이 단일 스텝 온라인 업데이트만으로 실세계에서 소셜 내비게이션을 학습하는 증분 잔차 강화학습(IRRL) 프레임워크. 페널티메이트 정규화와 온라인 분산 기반 TD 오차 정규화로 학습을 안정화해 시뮬레이션에서 98.8% 성공률(SFM 80.6% 대비)을 달성했고, Jetson AGX Orin 온보드 실세계 온라인 학습으로 성공률을 40%에서 60%로 끌어올렸다.",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 42,
-      "reason": "Social Force Model 기반 정책에 GATv2 잔차 정책을 결합해, 리플레이 버퍼 없이 단일 스텝 온라인 업데이트만으로 실세계에서 소셜 내비게이션을 학습하는 증분 잔차 강화학습(IRRL) 프레임워크. 페널티메이트 정규화와 온라인 분산 기반 TD 오차 정규화로 학습을 안정화해 시뮬레이션에서 98.8% 성공률(SFM 80.6% 대비)을 달성했고, Jetson AGX Orin 온보드 실세계 온라인 학습으로 성공률을 40%에서 60%로 끌어올렸다.",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/IRRL_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.19536",
-      "venue": "arXiv 2026",
-      "matchScore": 93,
-      "category": "VLN",
-      "feedTitle": "LiveVLN: Breaking the Stop-and-Go Loop in Vision-Language Navigation",
-      "authorsShort": "X. Wang, W. Zhu +6",
-      "feedAbstract": "VLN 런타임 최적화, 비동기 실행, Training-Free, 배포 연속성",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "LiveVLN: Breaking the Stop-and-Go Loop in Vision-Language Navigation",
-      "titleKO": "LiveVLN: Breaking the Stop-and-Go Loop in Vision-Language Navigation",
-      "authorsEN": "Xiangchen Wang, Weiye Zhu, Teng Wang, TianTian Geng, Zekai Zhang, Zhiyuan Qi, Jinyu Yang, Feng Zheng",
-      "authorsKO": "Xiangchen Wang, Weiye Zhu, Teng Wang, TianTian Geng, Zekai Zhang, Zhiyuan Qi, Jinyu Yang, Feng Zheng",
-      "abstractEN": "Recent navigation systems achieve strong benchmark results, yet real-world deployment often remains visibly stop-and-go. This bottleneck arises because the sense-inference-execution loop is still blocking: after each new observation, the controller must wait for sensing, transmission, and inference before motion can continue. Reducing action-generation cost alone therefore does not remove redundant waiting. To address this issue, we present LiveVLN, a training-free framework for more continuous embodied navigation by augmenting pretrained VLM navigators with multi-step action continuation. Instead of pausing for each full sense-and-inference round, LiveVLN overlaps execution with the processing of newly arrived observations, allowing refreshed future actions to be handed off before the current executable prefix is exhausted. This design keeps actions continuously available during motion, reducing idle waiting and enabling smoother online execution. The framework operates at runtime and can be integrated with compatible pretrained VLM navigators. Across R2R and RxR, LiveVLN preserves benchmark performance while reducing waiting time and improving action availability. In real-world deployments, it cuts average episode waiting time by up to $77.7\\%$ and shortens wall-clock episode time by $12.6\\%$ on StreamVLN and $19.6\\%$ on NaVIDA, yielding more coherent execution during deployment. Code is available at https://github.com/NIneeeeeem/LiveVLN.",
-      "abstractKO": "VLN 런타임 최적화, 비동기 실행, Training-Free, 배포 연속성",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 47,
-      "reason": "VLN 런타임 최적화, 비동기 실행, Training-Free, 배포 연속성",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/LiveVLN_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.15076",
-      "venue": "GECCO 2026",
-      "matchScore": 93,
-      "category": "Planner",
-      "feedTitle": "NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning",
-      "authorsShort": "H. Meliani, K. Slimani +1",
-      "feedAbstract": "뇨로진화, NEAT, 생물 영감, 경로 계획, GECCO2026",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning",
-      "titleKO": "NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning",
-      "authorsEN": "Hibatallah Meliani, Khadija Slimani, Samira Khoulji",
-      "authorsKO": "Hibatallah Meliani, Khadija Slimani, Samira Khoulji",
-      "abstractEN": "To navigate a space, the brain makes an internal representation of the environment using different cells such as place cells, grid cells, head direction cells, border cells, and speed cells. All these cells, along with sensory inputs, enable an organism to explore the space around it. Inspired by these biological principles, we developed NEATNC, a Neuro-Evolution of Augmenting Topology guided Navigation Cells. The goal of the paper is to improve NEAT algorithm performance in path planning in dynamic environments using spatial cognitive cells. This approach uses navigation cells as inputs and evolves recurrent neural networks, representing the hippocampus part of the brain. The performance of the proposed algorithm is evaluated in different static and dynamic scenarios. This study highlights NEAT's adaptability to complex and different environments, showcasing the utility of biological theories. This suggests that our approach is well-suited for real-time dynamic path planning for robotics and games.",
-      "abstractKO": "뇨로진화, NEAT, 생물 영감, 경로 계획, GECCO2026",
+      "titleEN": "Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP)",
+      "titleKO": "Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP)",
+      "authorsEN": "Alex Beaudin, Bjørn Andreas Kristiansen, Kristoffer Gryte, Corrado Chiatante, Morten Omholt Alver, Murat Arcak, Tor Arne Johansen (공동 제1저자)",
+      "authorsKO": "Alex Beaudin, Bjørn Andreas Kristiansen, Kristoffer Gryte, Corrado Chiatante, Morten Omholt Alver, Murat Arcak, Tor Arne Johansen (공동 제1저자)",
+      "abstractEN": "Efficient and robust path planning hinges on combining all accessible information sources. In particular, the task of path planning for robotic environmental exploration and monitoring depends highly on the current belief of the world. To capture the uncertainty in the belief, we present a Gaussian process based path planning method that adapts to multi-modal environmental sensing data and incorporates state and input constraints. To solve the path planning problem, we optimize over future waypoints in a receding horizon fashion, and our cost is thus a function of the Gaussian process posterior over all these waypoints. We demonstrate this method, dubbed OLAhGP, on an autonomous surface vessel using oceanic algal bloom data from both a high-fidelity model and in-situ sensing data in a monitoring scenario. Our simulated and experimental results demonstrate significant improvement over existing methods. With the same number of samples, our method generates more informative paths and achieves greater accuracy in identifying algal blooms in chlorophyll a rich waters, measured with respect to total misclassification probability and binary misclassification rate over the domain of interest.",
+      "abstractKO": "GP 정보 경로 계획, BCM 근사, 환경 모니터링, 해양 ASV, 실세계 실험",
       "detailTags": [
         "#Planner"
       ],
       "year": "2026",
       "citations": 0,
       "readMinutes": 40,
-      "reason": "뇨로진화, NEAT, 생물 영감, 경로 계획, GECCO2026",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NEATNC_GECCO2026/index.html"
+      "reason": "GP 정보 경로 계획, BCM 근사, 환경 모니터링, 해양 ASV, 실세계 실험",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/OLAhGP_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.10433",
+      "venue": "arXiv 2026",
+      "matchScore": 84,
+      "category": "Planner",
+      "feedTitle": "PRoID: Predicted Rate of Information Delivery in Multi-Robot Exploration and Relaying",
+      "authorsShort": "S. (교신저자), S. Baek +4",
+      "feedAbstract": "다중 로봇 탐색, 릴레이 결정, 맵 예측, 고장 내성",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "PRoID: Predicted Rate of Information Delivery in Multi-Robot Exploration and Relaying",
+      "titleKO": "PRoID: Predicted Rate of Information Delivery in Multi-Robot Exploration and Relaying",
+      "authorsEN": "Seungchan Kim (교신저자), Seungjae Baek, Micah Corah, Graeme Best, Brady Moon, Sebastian Scherer",
+      "authorsKO": "Seungchan Kim (교신저자), Seungjae Baek, Micah Corah, Graeme Best, Brady Moon, Sebastian Scherer",
+      "abstractEN": "We address Multi-Robot Exploration and Relaying (MRER): a team of robots must explore an unknown environment and deliver acquired information to a fixed base station within a mission time limit. The central challenge is deciding when each robot should stop exploring and relay: this depends on what the robot is likely to find ahead, what information it uniquely holds, and whether immediate or future delivery is more valuable. Prior approaches either ignore the reporting requirement entirely or rely on fixed-schedule relay strategies that cannot adapt to environment structure, team composition, or mission progress. We introduce PRoID (Predicted Rate of Information Delivery), a relay criterion that uses learned map prediction to estimate each robot's future information gain along its planned path, accounting for what teammates are already relaying. PRoID triggers relay when immediate return yields higher information delivery per unit time. We further propose PRoID-Safe, a failure-aware extension that incorporates robot survival probability into the relay criterion, naturally biasing decisions toward earlier relay as failure risk grows. We evaluate on real-world indoor floor plan datasets and show that PRoID and PRoID-Safe outperform fixed-schedule baselines, with stronger relative gains in failure scenarios.",
+      "abstractKO": "다중 로봇 탐색, 릴레이 결정, 맵 예측, 고장 내성",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 43,
+      "reason": "다중 로봇 탐색, 릴레이 결정, 맵 예측, 고장 내성",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/PRoID_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.07599",
+      "venue": "arXiv 2026",
+      "matchScore": 93,
+      "category": "Planner",
+      "feedTitle": "SANDO: Safe Autonomous Trajectory Planning for Dynamic Unknown Environments",
+      "authorsShort": "K. Kondo, J. Tordesillas +1",
+      "feedAbstract": "시공간 안전 비행 코리도(STSFC), 열지도 기반 A* 전역 계획기, 변수 제거로 7.4배 가속한 MIQP 궤적 최적화를 결합해 동적 미지 환경에서 충돌 없음을 공식적으로 보장하는 안전 궤적 계획 프레임워크. 적응형 EKF로 동적 장애물을 추적하며, UAV 하드웨어 실험(정적 6회·동적 10회)에서 완전 온보드로 제약…",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "SANDO: Safe Autonomous Trajectory Planning for Dynamic Unknown Environments",
+      "titleKO": "SANDO: 동적 미지 환경을 위한 안전 자율 궤적 계획",
+      "authorsEN": "Kota Kondo, Jesús Tordesillas, Jonathan P. How",
+      "authorsKO": "Kota Kondo, Jesús Tordesillas, Jonathan P. How",
+      "abstractEN": "SANDO is a safe trajectory planner for 3D dynamic unknown environments, where obstacle locations and motions are unknown a priori and a collision-free plan can become unsafe at any moment, requiring fast replanning. Existing soft-constraint planners are fast but cannot guarantee collision-free paths, while hard-constraint methods ensure safety at the cost of longer computation. SANDO addresses this trade-off through three contributions. First, a heat map-based A* global planner steers paths away from high-risk regions using soft costs, and a spatiotemporal safe flight corridor (STSFC) generator produces time-layered polytopes that inflate obstacles only by their worst-case reachable set at each time layer, rather than by the worst case over the entire horizon. Second, trajectory optimization is formulated as a Mixed-Integer Quadratic Program (MIQP) with hard collision-avoidance constraints, and a variable elimination technique reduces the number of decision variables, enabling fast computation. Third, a formal safety analysis establishes collision-free guarantees under explicit velocity-bound and estimation-error assumptions. Ablation studies show that variable elimination yields up to 7.4x speedup in optimization time, and that STSFCs are critical for feasibility in dense dynamic environments. Benchmark simulations against state-of-the-art methods across standardized static benchmarks, obstacle-rich static forests, and dynamic environments show that SANDO consistently achieves the highest success rate with no constraint violations across all difficulty levels; perception-only experiments without ground truth obstacle information confirm robust performance under realistic sensing. Hardware experiments on a UAV with fully onboard planning, perception, and localization demonstrate six safe flights in static environments and ten safe flights among dynamic obstacles.",
+      "abstractKO": "시공간 안전 비행 코리도(STSFC), 열지도 기반 A* 전역 계획기, 변수 제거로 7.4배 가속한 MIQP 궤적 최적화를 결합해 동적 미지 환경에서 충돌 없음을 공식적으로 보장하는 안전 궤적 계획 프레임워크. 적응형 EKF로 동적 장애물을 추적하며, UAV 하드웨어 실험(정적 6회·동적 10회)에서 완전 온보드로 제약 위반 0회의 안전 비행을 입증했다.",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 42,
+      "reason": "시공간 안전 비행 코리도(STSFC), 열지도 기반 A* 전역 계획기, 변수 제거로 7.4배 가속한 MIQP 궤적 최적화를 결합해 동적 미지 환경에서 충돌 없음을 공식적으로 보장하는 안전 궤적 계획 프레임워크. 적응형 EKF로 동적 장애물을 추적하며, UAV 하드웨어 실험(정적 6회·동적 10회)에서 완전 온보드로 제약 위반 0회의 안전 비행을 입증했다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/SANDO_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.19011",
+      "venue": "arXiv 2026",
+      "matchScore": 84,
+      "category": "Planner",
+      "feedTitle": "Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies",
+      "authorsShort": "T. Hellard, F. Tiofack +2",
+      "feedAbstract": "Sobolev 학습, 확산 정책, 궤적 최적화 워밍스타트, 피드백 게인, 2-20× 가속",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies",
+      "titleKO": "Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies",
+      "authorsEN": "Théotime Le Hellard , Franki Nguimatsia Tiofack , Quentin Le Lidec, Justin Carpentier (공동 제1저자)",
+      "authorsKO": "Théotime Le Hellard , Franki Nguimatsia Tiofack , Quentin Le Lidec, Justin Carpentier (공동 제1저자)",
+      "abstractEN": "Trajectory Optimization (TO) solvers exploit known system dynamics to compute locally optimal trajectories through iterative improvements. A downside is that each new problem instance is solved independently; therefore, convergence speed and quality of the solution found depend on the initial trajectory proposed. To improve efficiency, a natural approach is to warm-start TO with initial guesses produced by a learned policy trained on trajectories previously generated by the solver. Diffusion-based policies have recently emerged as expressive imitation learning models, making them promising candidates for this role. Yet, a counterintuitive challenge comes from the local optimality of TO demonstrations: when a policy is rolled out, small non-optimal deviations may push it into situations not represented in the training data, triggering compounding errors over long horizons. In this work, we focus on learning-based warm-starting for gradient-based TO solvers that also provide feedback gains. Exploiting this specificity, we derive a first-order loss for Sobolev learning of diffusion-based policies using both trajectories and feedback gains. Through comprehensive experiments, we demonstrate that the resulting policy avoids compounding errors, and so can learn from very few trajectories to provide initial guesses reducing solving time by $2\\times$ to $20 \\times$. Incorporating first-order information enables predictions with fewer diffusion steps, reducing inference latency.",
+      "abstractKO": "Sobolev 학습, 확산 정책, 궤적 최적화 워밍스타트, 피드백 게인, 2-20× 가속",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 43,
+      "reason": "Sobolev 학습, 확산 정책, 궤적 최적화 워밍스타트, 피드백 게인, 2-20× 가속",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/SobolevDiffusion_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.21456",
+      "venue": "arXiv 2026",
+      "matchScore": 84,
+      "category": "Planner",
+      "feedTitle": "TSMC: Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics",
+      "authorsShort": "H. 저자, H. SEAS)",
+      "feedAbstract": "담금질 SMC, HMC 재생, 볼츠만 목표 분포, 미분 가능 동역학, 제어-추론",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "TSMC: Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics",
+      "titleKO": "TSMC: Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics",
+      "authorsEN": "Heng Yang (단독 저자, Harvard SEAS)",
+      "authorsKO": "Heng Yang (단독 저자, Harvard SEAS)",
+      "abstractEN": "We propose a sampling-based framework for finite-horizon trajectory and policy optimization under differentiable dynamics by casting controller design as inference. Specifically, we minimize a KL-regularized expected trajectory cost, which yields an optimal \"Boltzmann-tilted\" distribution over controller parameters that concentrates on low-cost solutions as temperature decreases. To sample efficiently from this sharp, potentially multimodal target, we introduce tempered sequential Monte Carlo (TSMC): an annealing scheme that adaptively reweights and resamples particles along a tempering path from a prior to the target distribution, while using Hamiltonian Monte Carlo rejuvenation to maintain diversity and exploit exact gradients obtained by differentiating through trajectory rollouts. For policy optimization, we extend TSMC via (i) a deterministic empirical approximation of the initial-state distribution and (ii) an extended-space construction that treats rollout randomness as auxiliary variables. Experiments across trajectory- and policy-optimization benchmarks show that TSMC is broadly applicable and compares favorably to state-of-the-art baselines.",
+      "abstractKO": "담금질 SMC, HMC 재생, 볼츠만 목표 분포, 미분 가능 동역학, 제어-추론",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 44,
+      "reason": "담금질 SMC, HMC 재생, 볼츠만 목표 분포, 미분 가능 동역학, 제어-추론",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TSMC_arxiv2026/index.html"
     }
   ],
   "archive": [
@@ -2386,134 +2385,135 @@
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/GNPFkCT_arxiv2026/index.html"
     },
     {
-      "id": "2604.19148",
+      "id": "2604.21363",
       "venue": "arXiv 2026",
-      "matchScore": 84,
-      "category": "Planner",
-      "feedTitle": "Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP)",
-      "authorsShort": "A. Beaudin, B. Kristiansen +5",
-      "feedAbstract": "GP 정보 경로 계획, BCM 근사, 환경 모니터링, 해양 ASV, 실세계 실험",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP)",
-      "titleKO": "Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP)",
-      "authorsEN": "Alex Beaudin, Bjørn Andreas Kristiansen, Kristoffer Gryte, Corrado Chiatante, Morten Omholt Alver, Murat Arcak, Tor Arne Johansen (공동 제1저자)",
-      "authorsKO": "Alex Beaudin, Bjørn Andreas Kristiansen, Kristoffer Gryte, Corrado Chiatante, Morten Omholt Alver, Murat Arcak, Tor Arne Johansen (공동 제1저자)",
-      "abstractEN": "Efficient and robust path planning hinges on combining all accessible information sources. In particular, the task of path planning for robotic environmental exploration and monitoring depends highly on the current belief of the world. To capture the uncertainty in the belief, we present a Gaussian process based path planning method that adapts to multi-modal environmental sensing data and incorporates state and input constraints. To solve the path planning problem, we optimize over future waypoints in a receding horizon fashion, and our cost is thus a function of the Gaussian process posterior over all these waypoints. We demonstrate this method, dubbed OLAhGP, on an autonomous surface vessel using oceanic algal bloom data from both a high-fidelity model and in-situ sensing data in a monitoring scenario. Our simulated and experimental results demonstrate significant improvement over existing methods. With the same number of samples, our method generates more informative paths and achieves greater accuracy in identifying algal blooms in chlorophyll a rich waters, measured with respect to total misclassification probability and binary misclassification rate over the domain of interest.",
-      "abstractKO": "GP 정보 경로 계획, BCM 근사, 환경 모니터링, 해양 ASV, 실세계 실험",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 40,
-      "reason": "GP 정보 경로 계획, BCM 근사, 환경 모니터링, 해양 ASV, 실세계 실험",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/OLAhGP_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.10433",
-      "venue": "arXiv 2026",
-      "matchScore": 84,
-      "category": "Planner",
-      "feedTitle": "PRoID: Predicted Rate of Information Delivery in Multi-Robot Exploration and Relaying",
-      "authorsShort": "S. (교신저자), S. Baek +4",
-      "feedAbstract": "다중 로봇 탐색, 릴레이 결정, 맵 예측, 고장 내성",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "PRoID: Predicted Rate of Information Delivery in Multi-Robot Exploration and Relaying",
-      "titleKO": "PRoID: Predicted Rate of Information Delivery in Multi-Robot Exploration and Relaying",
-      "authorsEN": "Seungchan Kim (교신저자), Seungjae Baek, Micah Corah, Graeme Best, Brady Moon, Sebastian Scherer",
-      "authorsKO": "Seungchan Kim (교신저자), Seungjae Baek, Micah Corah, Graeme Best, Brady Moon, Sebastian Scherer",
-      "abstractEN": "We address Multi-Robot Exploration and Relaying (MRER): a team of robots must explore an unknown environment and deliver acquired information to a fixed base station within a mission time limit. The central challenge is deciding when each robot should stop exploring and relay: this depends on what the robot is likely to find ahead, what information it uniquely holds, and whether immediate or future delivery is more valuable. Prior approaches either ignore the reporting requirement entirely or rely on fixed-schedule relay strategies that cannot adapt to environment structure, team composition, or mission progress. We introduce PRoID (Predicted Rate of Information Delivery), a relay criterion that uses learned map prediction to estimate each robot's future information gain along its planned path, accounting for what teammates are already relaying. PRoID triggers relay when immediate return yields higher information delivery per unit time. We further propose PRoID-Safe, a failure-aware extension that incorporates robot survival probability into the relay criterion, naturally biasing decisions toward earlier relay as failure risk grows. We evaluate on real-world indoor floor plan datasets and show that PRoID and PRoID-Safe outperform fixed-schedule baselines, with stronger relative gains in failure scenarios.",
-      "abstractKO": "다중 로봇 탐색, 릴레이 결정, 맵 예측, 고장 내성",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 43,
-      "reason": "다중 로봇 탐색, 릴레이 결정, 맵 예측, 고장 내성",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/PRoID_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.07599",
-      "venue": "arXiv 2026",
+      "venueDetail": "ICRA 2026 (Under Review / arXiv)",
       "matchScore": 93,
+      "category": "VLN",
+      "feedTitle": "HiCo-Nav: A Deployable Embodied Vision-Language Navigation System with Hierarchical Cognition and Context-Aware Exploration",
+      "authorsShort": "X. Xu, H. Wei +3",
+      "feedAbstract": "인지 메모리 그래프(CMG)와 계층적 비동기 3계층 아키텍처로 고수준 추론과 실시간 성능을 동시에 달성한 배포 가능한 VLN 시스템.",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "A Deployable Embodied Vision-Language Navigation System with Hierarchical Cognition and Context-Aware Exploration",
+      "titleKO": "A Deployable Embodied Vision-Language Navigation System with Hierarchical Cognition and Context-Aware Exploration",
+      "authorsEN": "Xukuan Xu, Haoqian Wei, Yaoming Wang, Lei Zhang, Ye Li",
+      "authorsKO": "Xukuan Xu, Haoqian Wei, Yaoming Wang, Lei Zhang, Ye Li",
+      "abstractEN": "Bridging the gap between embodied intelligence and embedded deployment remains a key challenge in intelligent robotic systems, where perception, reasoning, and planning must operate under strict constraints on computation, memory, energy, and real-time execution. In vision-and-language navigation (VLN), existing approaches often face a trade-off between reasoning capability and deployment efficiency on real-world platforms. In this paper, we present a deployable embodied VLN system that achieves both high efficiency and strong high-level reasoning on real-world robots. The system is decomposed into a fast perception-action layer and a deep reasoning layer running asynchronously at different time scales, with a shared memory layer enabling efficient interaction between them. To support long-horizon reasoning, we incrementally construct a compact memory graph and progressively feed decomposed subgraphs into a vision-language model (VLM). Furthermore, we formulate exploration as a Weighted Traveling Repairman Problem (WTRP) by jointly considering reasoning outcomes and the spatial distribution of candidate regions. Extensive experiments in simulation and real-world environments demonstrate improved navigation success and efficiency over existing VLN approaches while maintaining real-time performance on resource-constrained hardware. Code and additional real-world experiments are available at https://github.com/xukuanHIT/HiCo-Nav.",
+      "abstractKO": "인지 메모리 그래프(CMG)와 계층적 비동기 3계층 아키텍처로 고수준 추론과 실시간 성능을 동시에 달성한 배포 가능한 VLN 시스템.",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 46,
+      "reason": "이분 그래프 기반 인지 메모리 그래프(CMG): 시각 앵커 + 객체 노드 + ILP 메모리 압축\nWTRP(가중 여행 수리공 문제) 기반 컨텍스트 인식 탐색 순서 최적화\n비동기 3계층 아키텍처: 인식(10Hz) / 메모리(1-2Hz) / 추론(0.1-0.5Hz)\nUnitree 사족보행 로봇 실세계 배포: 95%(소형 목표) + 65%(소형 목표) 성공률\nSG-Nav 대비 26.5배 빠른 실행 속도 (21.5s vs 569.3s)",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HiCoNav_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.20799",
+      "venue": "arXiv 2026",
+      "matchScore": 84,
       "category": "Planner",
-      "feedTitle": "SANDO: Safe Autonomous Trajectory Planning for Dynamic Unknown Environments",
-      "authorsShort": "K. Kondo, J. Tordesillas +1",
-      "feedAbstract": "시공간 안전 비행 코리도(STSFC), 열지도 기반 A* 전역 계획기, 변수 제거로 7.4배 가속한 MIQP 궤적 최적화를 결합해 동적 미지 환경에서 충돌 없음을 공식적으로 보장하는 안전 궤적 계획 프레임워크. 적응형 EKF로 동적 장애물을 추적하며, UAV 하드웨어 실험(정적 6회·동적 10회)에서 완전 온보드로 제약…",
+      "feedTitle": "HoughGPMap: A Hough Transform Approach to Safety-Aware Scalar Field Mapping Using Gaussian Processes",
+      "authorsShort": "M. Qureshi, T. Satharasi +3",
+      "feedAbstract": "GP 베이지안 매핑, 허프 변환, 최대 분산 샘플링, RRT* 안전 경로, 실세계 검증",
       "tags": [
         "#Planner"
       ],
-      "titleEN": "SANDO: Safe Autonomous Trajectory Planning for Dynamic Unknown Environments",
-      "titleKO": "SANDO: 동적 미지 환경을 위한 안전 자율 궤적 계획",
-      "authorsEN": "Kota Kondo, Jesús Tordesillas, Jonathan P. How",
-      "authorsKO": "Kota Kondo, Jesús Tordesillas, Jonathan P. How",
-      "abstractEN": "SANDO is a safe trajectory planner for 3D dynamic unknown environments, where obstacle locations and motions are unknown a priori and a collision-free plan can become unsafe at any moment, requiring fast replanning. Existing soft-constraint planners are fast but cannot guarantee collision-free paths, while hard-constraint methods ensure safety at the cost of longer computation. SANDO addresses this trade-off through three contributions. First, a heat map-based A* global planner steers paths away from high-risk regions using soft costs, and a spatiotemporal safe flight corridor (STSFC) generator produces time-layered polytopes that inflate obstacles only by their worst-case reachable set at each time layer, rather than by the worst case over the entire horizon. Second, trajectory optimization is formulated as a Mixed-Integer Quadratic Program (MIQP) with hard collision-avoidance constraints, and a variable elimination technique reduces the number of decision variables, enabling fast computation. Third, a formal safety analysis establishes collision-free guarantees under explicit velocity-bound and estimation-error assumptions. Ablation studies show that variable elimination yields up to 7.4x speedup in optimization time, and that STSFCs are critical for feasibility in dense dynamic environments. Benchmark simulations against state-of-the-art methods across standardized static benchmarks, obstacle-rich static forests, and dynamic environments show that SANDO consistently achieves the highest success rate with no constraint violations across all difficulty levels; perception-only experiments without ground truth obstacle information confirm robust performance under realistic sensing. Hardware experiments on a UAV with fully onboard planning, perception, and localization demonstrate six safe flights in static environments and ten safe flights among dynamic obstacles.",
-      "abstractKO": "시공간 안전 비행 코리도(STSFC), 열지도 기반 A* 전역 계획기, 변수 제거로 7.4배 가속한 MIQP 궤적 최적화를 결합해 동적 미지 환경에서 충돌 없음을 공식적으로 보장하는 안전 궤적 계획 프레임워크. 적응형 EKF로 동적 장애물을 추적하며, UAV 하드웨어 실험(정적 6회·동적 10회)에서 완전 온보드로 제약 위반 0회의 안전 비행을 입증했다.",
+      "titleEN": "HoughGPMap: A Hough Transform Approach to Safety-Aware Scalar Field Mapping Using Gaussian Processes",
+      "titleKO": "HoughGPMap: A Hough Transform Approach to Safety-Aware Scalar Field Mapping Using Gaussian Processes",
+      "authorsEN": "Muzaffar Qureshi, Trivikram Satharasi, Tochukwu E. Ogri, Kyle Volle, Rushikesh Kamalapurkar",
+      "authorsKO": "Muzaffar Qureshi, Trivikram Satharasi, Tochukwu E. Ogri, Kyle Volle, Rushikesh Kamalapurkar",
+      "abstractEN": "This paper presents a framework for mapping unknown scalar fields using a sensor-equipped autonomous robot operating in unsafe environments. The unsafe regions are defined as regions of high-intensity, where the field value exceeds a predefined safety threshold. For safe and efficient mapping of the scalar field, the sensor-equipped robot must avoid high-intensity regions during the measurement process. In this paper, the scalar field is modeled as a sample from a Gaussian process (GP), which enables Bayesian inference and provides closed-form expressions for both the predictive mean and the uncertainty. Concurrently, the spatial structure of the high-intensity regions is estimated in real-time using the Hough transform (HT), leveraging the evolving GP posterior. A safe sampling strategy is then employed to guide the robot towards safe measurement locations, using probabilistic safety guarantees on the evolving GP posterior. The estimated high-intensity regions also facilitate the design of safe motion plans for the robot. The effectiveness of the approach is verified through two numerical simulation studies and an indoor experiment for mapping a light-intensity field using a wheeled mobile robot.",
+      "abstractKO": "GP 베이지안 매핑, 허프 변환, 최대 분산 샘플링, RRT* 안전 경로, 실세계 검증",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 45,
+      "reason": "GP 베이지안 매핑, 허프 변환, 최대 분산 샘플링, RRT* 안전 경로, 실세계 검증",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HoughGPMap_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.07945",
+      "venue": "arXiv 2026",
+      "matchScore": 84,
+      "category": "Planner",
+      "feedTitle": "IRRL: Incremental Residual Reinforcement Learning Toward Real-World Learning for Social Navigation",
+      "authorsShort": "H. Nagahisa, K. Matsumoto +3",
+      "feedAbstract": "Social Force Model 기반 정책에 GATv2 잔차 정책을 결합해, 리플레이 버퍼 없이 단일 스텝 온라인 업데이트만으로 실세계에서 소셜 내비게이션을 학습하는 증분 잔차 강화학습(IRRL) 프레임워크. 페널티메이트 정규화와 온라인 분산 기반 TD 오차 정규화로 학습을 안정화해 시뮬레이션에서 98.8%…",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "IRRL: Incremental Residual Reinforcement Learning Toward Real-World Learning for Social Navigation",
+      "titleKO": "IRRL: 소셜 내비게이션의 실세계 학습을 위한 증분 잔차 강화학습",
+      "authorsEN": "Haruto Nagahisa, Kohei Matsumoto, Yuki Tomita, Yuki Hyodo, Ryo Kurazume",
+      "authorsKO": "Haruto Nagahisa, Kohei Matsumoto, Yuki Tomita, Yuki Hyodo, Ryo Kurazume",
+      "abstractEN": "As the demand for mobile robots continues to increase, social navigation has emerged as a critical task, driving active research into deep reinforcement learning (RL) approaches. However, because pedestrian dynamics and social conventions vary widely across different regions, simulations cannot easily encompass all possible real-world scenarios. Real-world RL, in which agents learn while operating directly in physical environments, presents a promising solution to this issue. Nevertheless, this approach faces significant challenges, particularly regarding constrained computational resources on edge devices and learning efficiency. In this study, we propose incremental residual RL (IRRL). This method integrates incremental learning, which is a lightweight process that operates without a replay buffer or batch updates, with residual RL, which enhances learning efficiency by training only on the residuals relative to a base policy. Through the simulation experiments, we demonstrated that, despite lacking a replay buffer, IRRL achieved performance comparable to those of conventional replay buffer-based methods and outperformed existing incremental learning approaches. Furthermore, the real-world experiments confirmed that IRRL can enable robots to effectively adapt to previously unseen environments through the real-world learning.",
+      "abstractKO": "Social Force Model 기반 정책에 GATv2 잔차 정책을 결합해, 리플레이 버퍼 없이 단일 스텝 온라인 업데이트만으로 실세계에서 소셜 내비게이션을 학습하는 증분 잔차 강화학습(IRRL) 프레임워크. 페널티메이트 정규화와 온라인 분산 기반 TD 오차 정규화로 학습을 안정화해 시뮬레이션에서 98.8% 성공률(SFM 80.6% 대비)을 달성했고, Jetson AGX Orin 온보드 실세계 온라인 학습으로 성공률을 40%에서 60%로 끌어올렸다.",
       "detailTags": [
         "#Planner"
       ],
       "year": "2026",
       "citations": 0,
       "readMinutes": 42,
-      "reason": "시공간 안전 비행 코리도(STSFC), 열지도 기반 A* 전역 계획기, 변수 제거로 7.4배 가속한 MIQP 궤적 최적화를 결합해 동적 미지 환경에서 충돌 없음을 공식적으로 보장하는 안전 궤적 계획 프레임워크. 적응형 EKF로 동적 장애물을 추적하며, UAV 하드웨어 실험(정적 6회·동적 10회)에서 완전 온보드로 제약 위반 0회의 안전 비행을 입증했다.",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/SANDO_arxiv2026/index.html"
+      "reason": "Social Force Model 기반 정책에 GATv2 잔차 정책을 결합해, 리플레이 버퍼 없이 단일 스텝 온라인 업데이트만으로 실세계에서 소셜 내비게이션을 학습하는 증분 잔차 강화학습(IRRL) 프레임워크. 페널티메이트 정규화와 온라인 분산 기반 TD 오차 정규화로 학습을 안정화해 시뮬레이션에서 98.8% 성공률(SFM 80.6% 대비)을 달성했고, Jetson AGX Orin 온보드 실세계 온라인 학습으로 성공률을 40%에서 60%로 끌어올렸다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/IRRL_arxiv2026/index.html"
     },
     {
-      "id": "2604.19011",
+      "id": "2604.19536",
       "venue": "arXiv 2026",
-      "matchScore": 84,
+      "matchScore": 93,
+      "category": "VLN",
+      "feedTitle": "LiveVLN: Breaking the Stop-and-Go Loop in Vision-Language Navigation",
+      "authorsShort": "X. Wang, W. Zhu +6",
+      "feedAbstract": "VLN 런타임 최적화, 비동기 실행, Training-Free, 배포 연속성",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "LiveVLN: Breaking the Stop-and-Go Loop in Vision-Language Navigation",
+      "titleKO": "LiveVLN: Breaking the Stop-and-Go Loop in Vision-Language Navigation",
+      "authorsEN": "Xiangchen Wang, Weiye Zhu, Teng Wang, TianTian Geng, Zekai Zhang, Zhiyuan Qi, Jinyu Yang, Feng Zheng",
+      "authorsKO": "Xiangchen Wang, Weiye Zhu, Teng Wang, TianTian Geng, Zekai Zhang, Zhiyuan Qi, Jinyu Yang, Feng Zheng",
+      "abstractEN": "Recent navigation systems achieve strong benchmark results, yet real-world deployment often remains visibly stop-and-go. This bottleneck arises because the sense-inference-execution loop is still blocking: after each new observation, the controller must wait for sensing, transmission, and inference before motion can continue. Reducing action-generation cost alone therefore does not remove redundant waiting. To address this issue, we present LiveVLN, a training-free framework for more continuous embodied navigation by augmenting pretrained VLM navigators with multi-step action continuation. Instead of pausing for each full sense-and-inference round, LiveVLN overlaps execution with the processing of newly arrived observations, allowing refreshed future actions to be handed off before the current executable prefix is exhausted. This design keeps actions continuously available during motion, reducing idle waiting and enabling smoother online execution. The framework operates at runtime and can be integrated with compatible pretrained VLM navigators. Across R2R and RxR, LiveVLN preserves benchmark performance while reducing waiting time and improving action availability. In real-world deployments, it cuts average episode waiting time by up to $77.7\\%$ and shortens wall-clock episode time by $12.6\\%$ on StreamVLN and $19.6\\%$ on NaVIDA, yielding more coherent execution during deployment. Code is available at https://github.com/NIneeeeeem/LiveVLN.",
+      "abstractKO": "VLN 런타임 최적화, 비동기 실행, Training-Free, 배포 연속성",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 47,
+      "reason": "VLN 런타임 최적화, 비동기 실행, Training-Free, 배포 연속성",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/LiveVLN_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.15076",
+      "venue": "GECCO 2026",
+      "matchScore": 93,
       "category": "Planner",
-      "feedTitle": "Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies",
-      "authorsShort": "T. Hellard, F. Tiofack +2",
-      "feedAbstract": "Sobolev 학습, 확산 정책, 궤적 최적화 워밍스타트, 피드백 게인, 2-20× 가속",
+      "feedTitle": "NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning",
+      "authorsShort": "H. Meliani, K. Slimani +1",
+      "feedAbstract": "뇨로진화, NEAT, 생물 영감, 경로 계획, GECCO2026",
       "tags": [
         "#Planner"
       ],
-      "titleEN": "Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies",
-      "titleKO": "Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies",
-      "authorsEN": "Théotime Le Hellard , Franki Nguimatsia Tiofack , Quentin Le Lidec, Justin Carpentier (공동 제1저자)",
-      "authorsKO": "Théotime Le Hellard , Franki Nguimatsia Tiofack , Quentin Le Lidec, Justin Carpentier (공동 제1저자)",
-      "abstractEN": "Trajectory Optimization (TO) solvers exploit known system dynamics to compute locally optimal trajectories through iterative improvements. A downside is that each new problem instance is solved independently; therefore, convergence speed and quality of the solution found depend on the initial trajectory proposed. To improve efficiency, a natural approach is to warm-start TO with initial guesses produced by a learned policy trained on trajectories previously generated by the solver. Diffusion-based policies have recently emerged as expressive imitation learning models, making them promising candidates for this role. Yet, a counterintuitive challenge comes from the local optimality of TO demonstrations: when a policy is rolled out, small non-optimal deviations may push it into situations not represented in the training data, triggering compounding errors over long horizons. In this work, we focus on learning-based warm-starting for gradient-based TO solvers that also provide feedback gains. Exploiting this specificity, we derive a first-order loss for Sobolev learning of diffusion-based policies using both trajectories and feedback gains. Through comprehensive experiments, we demonstrate that the resulting policy avoids compounding errors, and so can learn from very few trajectories to provide initial guesses reducing solving time by $2\\times$ to $20 \\times$. Incorporating first-order information enables predictions with fewer diffusion steps, reducing inference latency.",
-      "abstractKO": "Sobolev 학습, 확산 정책, 궤적 최적화 워밍스타트, 피드백 게인, 2-20× 가속",
+      "titleEN": "NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning",
+      "titleKO": "NEAT-NC: NEAT guided Navigation Cells for Robot Path Planning",
+      "authorsEN": "Hibatallah Meliani, Khadija Slimani, Samira Khoulji",
+      "authorsKO": "Hibatallah Meliani, Khadija Slimani, Samira Khoulji",
+      "abstractEN": "To navigate a space, the brain makes an internal representation of the environment using different cells such as place cells, grid cells, head direction cells, border cells, and speed cells. All these cells, along with sensory inputs, enable an organism to explore the space around it. Inspired by these biological principles, we developed NEATNC, a Neuro-Evolution of Augmenting Topology guided Navigation Cells. The goal of the paper is to improve NEAT algorithm performance in path planning in dynamic environments using spatial cognitive cells. This approach uses navigation cells as inputs and evolves recurrent neural networks, representing the hippocampus part of the brain. The performance of the proposed algorithm is evaluated in different static and dynamic scenarios. This study highlights NEAT's adaptability to complex and different environments, showcasing the utility of biological theories. This suggests that our approach is well-suited for real-time dynamic path planning for robotics and games.",
+      "abstractKO": "뇨로진화, NEAT, 생물 영감, 경로 계획, GECCO2026",
       "detailTags": [
         "#Planner"
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 43,
-      "reason": "Sobolev 학습, 확산 정책, 궤적 최적화 워밍스타트, 피드백 게인, 2-20× 가속",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/SobolevDiffusion_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.21456",
-      "venue": "arXiv 2026",
-      "matchScore": 84,
-      "category": "Planner",
-      "feedTitle": "TSMC: Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics",
-      "authorsShort": "H. 저자, H. SEAS)",
-      "feedAbstract": "담금질 SMC, HMC 재생, 볼츠만 목표 분포, 미분 가능 동역학, 제어-추론",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "TSMC: Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics",
-      "titleKO": "TSMC: Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics",
-      "authorsEN": "Heng Yang (단독 저자, Harvard SEAS)",
-      "authorsKO": "Heng Yang (단독 저자, Harvard SEAS)",
-      "abstractEN": "We propose a sampling-based framework for finite-horizon trajectory and policy optimization under differentiable dynamics by casting controller design as inference. Specifically, we minimize a KL-regularized expected trajectory cost, which yields an optimal \"Boltzmann-tilted\" distribution over controller parameters that concentrates on low-cost solutions as temperature decreases. To sample efficiently from this sharp, potentially multimodal target, we introduce tempered sequential Monte Carlo (TSMC): an annealing scheme that adaptively reweights and resamples particles along a tempering path from a prior to the target distribution, while using Hamiltonian Monte Carlo rejuvenation to maintain diversity and exploit exact gradients obtained by differentiating through trajectory rollouts. For policy optimization, we extend TSMC via (i) a deterministic empirical approximation of the initial-state distribution and (ii) an extended-space construction that treats rollout randomness as auxiliary variables. Experiments across trajectory- and policy-optimization benchmarks show that TSMC is broadly applicable and compares favorably to state-of-the-art baselines.",
-      "abstractKO": "담금질 SMC, HMC 재생, 볼츠만 목표 분포, 미분 가능 동역학, 제어-추론",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 44,
-      "reason": "담금질 SMC, HMC 재생, 볼츠만 목표 분포, 미분 가능 동역학, 제어-추론",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TSMC_arxiv2026/index.html"
+      "readMinutes": 40,
+      "reason": "뇨로진화, NEAT, 생물 영감, 경로 계획, GECCO2026",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NEATNC_GECCO2026/index.html"
     },
     {
       "id": "2604.12149",
