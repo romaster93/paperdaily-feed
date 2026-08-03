@@ -1,142 +1,142 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-02T19:30:05.855Z",
+  "generatedAt": "2026-08-03T19:30:05.691Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 8. 3  월요일",
+    "date": "2026. 8. 4  화요일",
     "title": "오늘의 리뷰",
     "subtitle": "VLN·Planner 새 리뷰 5편 · 전체 96편"
   },
   "papers": [
     {
-      "id": "2604.19148",
-      "venue": "arXiv 2026",
-      "matchScore": 84,
+      "id": "2604.12149",
+      "venue": "ICRA 2026",
+      "matchScore": 87,
       "category": "Planner",
-      "feedTitle": "Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP)",
-      "authorsShort": "A. Beaudin, B. Kristiansen +5",
-      "feedAbstract": "GP 정보 경로 계획, BCM 근사, 환경 모니터링, 해양 ASV, 실세계 실험",
+      "feedTitle": "Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control",
+      "authorsShort": "O. Poyrazoglu, Y. Cao +2",
+      "feedAbstract": "샘플링 MPC, Hellinger 다양성, 궤적 최적화, ICRA2026",
       "tags": [
         "#Planner"
       ],
-      "titleEN": "Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP)",
-      "titleKO": "Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP)",
-      "authorsEN": "Alex Beaudin, Bjørn Andreas Kristiansen, Kristoffer Gryte, Corrado Chiatante, Morten Omholt Alver, Murat Arcak, Tor Arne Johansen (공동 제1저자)",
-      "authorsKO": "Alex Beaudin, Bjørn Andreas Kristiansen, Kristoffer Gryte, Corrado Chiatante, Morten Omholt Alver, Murat Arcak, Tor Arne Johansen (공동 제1저자)",
-      "abstractEN": "Efficient and robust path planning hinges on combining all accessible information sources. In particular, the task of path planning for robotic environmental exploration and monitoring depends highly on the current belief of the world. To capture the uncertainty in the belief, we present a Gaussian process based path planning method that adapts to multi-modal environmental sensing data and incorporates state and input constraints. To solve the path planning problem, we optimize over future waypoints in a receding horizon fashion, and our cost is thus a function of the Gaussian process posterior over all these waypoints. We demonstrate this method, dubbed OLAhGP, on an autonomous surface vessel using oceanic algal bloom data from both a high-fidelity model and in-situ sensing data in a monitoring scenario. Our simulated and experimental results demonstrate significant improvement over existing methods. With the same number of samples, our method generates more informative paths and achieves greater accuracy in identifying algal blooms in chlorophyll a rich waters, measured with respect to total misclassification probability and binary misclassification rate over the domain of interest.",
-      "abstractKO": "GP 정보 경로 계획, BCM 근사, 환경 모니터링, 해양 ASV, 실세계 실험",
+      "titleEN": "Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control",
+      "titleKO": "Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control",
+      "authorsEN": "O. Goktug Poyrazoglu, Yukang Cao, Rahul Moorthy, Volkan Isler",
+      "authorsKO": "O. Goktug Poyrazoglu, Yukang Cao, Rahul Moorthy, Volkan Isler",
+      "abstractEN": "Trajectory optimization depends heavily on initialization. In particular, sampling-based approaches are highly sensitive to initial solutions, and limited exploration frequently leads them to converge to local minima in complex environments. We present Uncertainty Guided Exploratory Trajectory Optimization (UGE-TO), a trajectory optimization algorithm that generates well-separated samples to achieve a better coverage of the configuration space. UGE-TO represents trajectories as probability distributions induced by uncertainty ellipsoids. Unlike sampling-based approaches that explore only in the action space, this representation captures the effects of both system dynamics and action selection. By incorporating the impact of dynamics, in addition to the action space, into our distributions, our method enhances trajectory diversity by enforcing distributional separation via the Hellinger distance between them. It enables a systematic exploration of the configuration space and improves robustness against local minima. Further, we present UGE-MPC, which integrates UGE-TO into sampling-based model predictive controller methods. Experiments demonstrate that UGE-MPC achieves higher exploration and faster convergence in trajectory optimization compared to baselines under the same sampling budget, achieving 72.1% faster convergence in obstacle-free environments and 66% faster convergence with a 6.7% higher success rate in the cluttered environment compared to the best-performing baseline. Additionally, we validate the approach through a range of simulation scenarios and real-world experiments. Our results indicate that UGE-MPC has higher success rates and faster convergence, especially in environments that demand significant deviations from nominal trajectories to avoid failures. The project and code are available at https://ogpoyrazoglu.github.io/cuniform_sampling/.",
+      "abstractKO": "샘플링 MPC, Hellinger 다양성, 궤적 최적화, ICRA2026",
       "detailTags": [
         "#Planner"
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 40,
-      "reason": "GP 정보 경로 계획, BCM 근사, 환경 모니터링, 해양 ASV, 실세계 실험",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/OLAhGP_arxiv2026/index.html"
+      "readMinutes": 54,
+      "reason": "샘플링 MPC, Hellinger 다양성, 궤적 최적화, ICRA2026",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/UGE-MPC_ICRA2026/index.html"
     },
     {
-      "id": "2604.10433",
-      "venue": "arXiv 2026",
-      "matchScore": 84,
-      "category": "Planner",
-      "feedTitle": "PRoID: Predicted Rate of Information Delivery in Multi-Robot Exploration and Relaying",
-      "authorsShort": "S. (교신저자), S. Baek +4",
-      "feedAbstract": "다중 로봇 탐색, 릴레이 결정, 맵 예측, 고장 내성",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "PRoID: Predicted Rate of Information Delivery in Multi-Robot Exploration and Relaying",
-      "titleKO": "PRoID: Predicted Rate of Information Delivery in Multi-Robot Exploration and Relaying",
-      "authorsEN": "Seungchan Kim (교신저자), Seungjae Baek, Micah Corah, Graeme Best, Brady Moon, Sebastian Scherer",
-      "authorsKO": "Seungchan Kim (교신저자), Seungjae Baek, Micah Corah, Graeme Best, Brady Moon, Sebastian Scherer",
-      "abstractEN": "We address Multi-Robot Exploration and Relaying (MRER): a team of robots must explore an unknown environment and deliver acquired information to a fixed base station within a mission time limit. The central challenge is deciding when each robot should stop exploring and relay: this depends on what the robot is likely to find ahead, what information it uniquely holds, and whether immediate or future delivery is more valuable. Prior approaches either ignore the reporting requirement entirely or rely on fixed-schedule relay strategies that cannot adapt to environment structure, team composition, or mission progress. We introduce PRoID (Predicted Rate of Information Delivery), a relay criterion that uses learned map prediction to estimate each robot's future information gain along its planned path, accounting for what teammates are already relaying. PRoID triggers relay when immediate return yields higher information delivery per unit time. We further propose PRoID-Safe, a failure-aware extension that incorporates robot survival probability into the relay criterion, naturally biasing decisions toward earlier relay as failure risk grows. We evaluate on real-world indoor floor plan datasets and show that PRoID and PRoID-Safe outperform fixed-schedule baselines, with stronger relative gains in failure scenarios.",
-      "abstractKO": "다중 로봇 탐색, 릴레이 결정, 맵 예측, 고장 내성",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 43,
-      "reason": "다중 로봇 탐색, 릴레이 결정, 맵 예측, 고장 내성",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/PRoID_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.07599",
+      "id": "2604.19267",
       "venue": "arXiv 2026",
       "matchScore": 93,
       "category": "Planner",
-      "feedTitle": "SANDO: Safe Autonomous Trajectory Planning for Dynamic Unknown Environments",
-      "authorsShort": "K. Kondo, J. Tordesillas +1",
-      "feedAbstract": "시공간 안전 비행 코리도(STSFC), 열지도 기반 A* 전역 계획기, 변수 제거로 7.4배 가속한 MIQP 궤적 최적화를 결합해 동적 미지 환경에서 충돌 없음을 공식적으로 보장하는 안전 궤적 계획 프레임워크. 적응형 EKF로 동적 장애물을 추적하며, UAV 하드웨어 실험(정적 6회·동적 10회)에서 완전 온보드로 제약…",
+      "feedTitle": "ViLiNT: Multimodal Embodiment-Aware Navigation Transformer",
+      "authorsShort": "L. Dezons, Q. Picard +3",
+      "feedAbstract": "멀티모달 로컬 플래닝, RGB+LiDAR 융합, 구현 인식, Diffusion Policy, 충돌 회피",
       "tags": [
         "#Planner"
       ],
-      "titleEN": "SANDO: Safe Autonomous Trajectory Planning for Dynamic Unknown Environments",
-      "titleKO": "SANDO: 동적 미지 환경을 위한 안전 자율 궤적 계획",
-      "authorsEN": "Kota Kondo, Jesús Tordesillas, Jonathan P. How",
-      "authorsKO": "Kota Kondo, Jesús Tordesillas, Jonathan P. How",
-      "abstractEN": "SANDO is a safe trajectory planner for 3D dynamic unknown environments, where obstacle locations and motions are unknown a priori and a collision-free plan can become unsafe at any moment, requiring fast replanning. Existing soft-constraint planners are fast but cannot guarantee collision-free paths, while hard-constraint methods ensure safety at the cost of longer computation. SANDO addresses this trade-off through three contributions. First, a heat map-based A* global planner steers paths away from high-risk regions using soft costs, and a spatiotemporal safe flight corridor (STSFC) generator produces time-layered polytopes that inflate obstacles only by their worst-case reachable set at each time layer, rather than by the worst case over the entire horizon. Second, trajectory optimization is formulated as a Mixed-Integer Quadratic Program (MIQP) with hard collision-avoidance constraints, and a variable elimination technique reduces the number of decision variables, enabling fast computation. Third, a formal safety analysis establishes collision-free guarantees under explicit velocity-bound and estimation-error assumptions. Ablation studies show that variable elimination yields up to 7.4x speedup in optimization time, and that STSFCs are critical for feasibility in dense dynamic environments. Benchmark simulations against state-of-the-art methods across standardized static benchmarks, obstacle-rich static forests, and dynamic environments show that SANDO consistently achieves the highest success rate with no constraint violations across all difficulty levels; perception-only experiments without ground truth obstacle information confirm robust performance under realistic sensing. Hardware experiments on a UAV with fully onboard planning, perception, and localization demonstrate six safe flights in static environments and ten safe flights among dynamic obstacles.",
-      "abstractKO": "시공간 안전 비행 코리도(STSFC), 열지도 기반 A* 전역 계획기, 변수 제거로 7.4배 가속한 MIQP 궤적 최적화를 결합해 동적 미지 환경에서 충돌 없음을 공식적으로 보장하는 안전 궤적 계획 프레임워크. 적응형 EKF로 동적 장애물을 추적하며, UAV 하드웨어 실험(정적 6회·동적 10회)에서 완전 온보드로 제약 위반 0회의 안전 비행을 입증했다.",
+      "titleEN": "ViLiNT: Multimodal Embodiment-Aware Navigation Transformer",
+      "titleKO": "ViLiNT: Multimodal Embodiment-Aware Navigation Transformer",
+      "authorsEN": "Louis Dezons, Quentin Picard, Rémi Marsal, François Goulette, David Filliat",
+      "authorsKO": "Louis Dezons, Quentin Picard, Rémi Marsal, François Goulette, David Filliat",
+      "abstractEN": "Goal-conditioned navigation models for ground robots trained using supervised learning show promising zero-shot transfer, but their collision-avoidance capability nevertheless degrades under distribution shift, i.e. environmental, robot or sensor configuration changes. We propose ViLiNT a multimodal, attention-based policy for goal navigation, trained on heterogeneous data from multiple platforms and environments, which improves robustness with two key features. First, we fuse RGB images, 3D LiDAR point clouds, a goal embedding and a robot's embodiment descriptor with a transformer architecture to capture complementary geometry and appearance cues. The transformer's output is used to condition a diffusion model that generates navigable trajectories. Second, using automatically generated offline labels, we train a path clearance prediction head for scoring and ranking trajectories produced by the diffusion model. The diffusion conditioning as well as the trajectory ranking head depend on a robot's embodiment token that allows our model to generate and select trajectories with respect to the robot's dimensions. Across three simulated environments, ViLiNT improves Success Rate on average by 166\\% over equivalent state-of-the-art vision-only baseline (NoMaD). This increase in performance is confirmed through real-world deployments of a rover navigating in obstacle fields. These results highlight that combining multimodal fusion with our collision prediction mechanism leads to improved off-road navigation robustness.",
+      "abstractKO": "멀티모달 로컬 플래닝, RGB+LiDAR 융합, 구현 인식, Diffusion Policy, 충돌 회피",
       "detailTags": [
         "#Planner"
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 42,
-      "reason": "시공간 안전 비행 코리도(STSFC), 열지도 기반 A* 전역 계획기, 변수 제거로 7.4배 가속한 MIQP 궤적 최적화를 결합해 동적 미지 환경에서 충돌 없음을 공식적으로 보장하는 안전 궤적 계획 프레임워크. 적응형 EKF로 동적 장애물을 추적하며, UAV 하드웨어 실험(정적 6회·동적 10회)에서 완전 온보드로 제약 위반 0회의 안전 비행을 입증했다.",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/SANDO_arxiv2026/index.html"
+      "readMinutes": 45,
+      "reason": "멀티모달 로컬 플래닝, RGB+LiDAR 융합, 구현 인식, Diffusion Policy, 충돌 회피",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ViLiNT_arxiv2026/index.html"
     },
     {
-      "id": "2604.19011",
+      "id": "2604.21138",
       "venue": "arXiv 2026",
-      "matchScore": 84,
+      "matchScore": 93,
       "category": "Planner",
-      "feedTitle": "Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies",
-      "authorsShort": "T. Hellard, F. Tiofack +2",
-      "feedAbstract": "Sobolev 학습, 확산 정책, 궤적 최적화 워밍스타트, 피드백 게인, 2-20× 가속",
+      "feedTitle": "WayPlan: Navigating the Clutter — Waypoint-Based Bi-Level Planning for Multi-Robot Systems",
+      "authorsShort": "J. Ji, Y. Chen +5",
+      "feedAbstract": "다중로봇 TAMP, 2계층 LLM, RLVR, 웨이포인트, BoxNet3D-OBS",
       "tags": [
         "#Planner"
       ],
-      "titleEN": "Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies",
-      "titleKO": "Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies",
-      "authorsEN": "Théotime Le Hellard , Franki Nguimatsia Tiofack , Quentin Le Lidec, Justin Carpentier (공동 제1저자)",
-      "authorsKO": "Théotime Le Hellard , Franki Nguimatsia Tiofack , Quentin Le Lidec, Justin Carpentier (공동 제1저자)",
-      "abstractEN": "Trajectory Optimization (TO) solvers exploit known system dynamics to compute locally optimal trajectories through iterative improvements. A downside is that each new problem instance is solved independently; therefore, convergence speed and quality of the solution found depend on the initial trajectory proposed. To improve efficiency, a natural approach is to warm-start TO with initial guesses produced by a learned policy trained on trajectories previously generated by the solver. Diffusion-based policies have recently emerged as expressive imitation learning models, making them promising candidates for this role. Yet, a counterintuitive challenge comes from the local optimality of TO demonstrations: when a policy is rolled out, small non-optimal deviations may push it into situations not represented in the training data, triggering compounding errors over long horizons. In this work, we focus on learning-based warm-starting for gradient-based TO solvers that also provide feedback gains. Exploiting this specificity, we derive a first-order loss for Sobolev learning of diffusion-based policies using both trajectories and feedback gains. Through comprehensive experiments, we demonstrate that the resulting policy avoids compounding errors, and so can learn from very few trajectories to provide initial guesses reducing solving time by $2\\times$ to $20 \\times$. Incorporating first-order information enables predictions with fewer diffusion steps, reducing inference latency.",
-      "abstractKO": "Sobolev 학습, 확산 정책, 궤적 최적화 워밍스타트, 피드백 게인, 2-20× 가속",
+      "titleEN": "WayPlan: Navigating the Clutter — Waypoint-Based Bi-Level Planning for Multi-Robot Systems",
+      "titleKO": "WayPlan: Navigating the Clutter — Waypoint-Based Bi-Level Planning for Multi-Robot Systems",
+      "authorsEN": "Jiabao Ji, Yongchao Chen, Yang Zhang, Ramana Rao Kompella, Chuchu Fan, Gaowen Liu, Shiyu Chang",
+      "authorsKO": "Jiabao Ji, Yongchao Chen, Yang Zhang, Ramana Rao Kompella, Chuchu Fan, Gaowen Liu, Shiyu Chang",
+      "abstractEN": "Multi-robot control in cluttered environments is a challenging problem that involves complex physical constraints, including robot-robot collisions, robot-obstacle collisions, and unreachable motions. Successful planning in such settings requires joint optimization over high-level task planning and low-level motion planning, as violations of physical constraints may arise from failures at either level. However, jointly optimizing task and motion planning is difficult due to the complex parameterization of low-level motion trajectories and the ambiguity of credit assignment across the two planning levels. In this paper, we propose a hybrid multi-robot control framework that jointly optimizes task and motion planning. To enable effective parameterization of low-level planning, we introduce waypoints, a simple yet expressive representation for motion trajectories. To address the credit assignment challenge, we adopt a curriculum-based training strategy with a modified RLVR algorithm that propagates motion feasibility feedback from the motion planner to the task planner. Experiments on BoxNet3D-OBS, a challenging multi-robot benchmark with dense obstacles and up to nine robots, show that our approach consistently improves task success over motion-agnostic and VLA-based baselines. Our code is available at https://github.com/UCSB-NLP-Chang/navigate-cluster",
+      "abstractKO": "다중로봇 TAMP, 2계층 LLM, RLVR, 웨이포인트, BoxNet3D-OBS",
       "detailTags": [
         "#Planner"
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 43,
-      "reason": "Sobolev 학습, 확산 정책, 궤적 최적화 워밍스타트, 피드백 게인, 2-20× 가속",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/SobolevDiffusion_arxiv2026/index.html"
+      "readMinutes": 41,
+      "reason": "다중로봇 TAMP, 2계층 LLM, RLVR, 웨이포인트, BoxNet3D-OBS",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/WayPlan_arxiv2026/index.html"
     },
     {
-      "id": "2604.21456",
-      "venue": "arXiv 2026",
+      "id": "2604.16298",
+      "venue": "CVPR 2026",
+      "matchScore": 87,
+      "category": "VLN",
+      "feedTitle": "FineCog-Nav: Fine-Grained Cognitive Navigation Framework for Aerial VLN",
+      "authorsShort": "D. Shao, Z. Xu +5",
+      "feedAbstract": "항공 VLN, 인지 모듈, LLM 기반, AerialVLN-Fine, CVPR2026",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "FineCog-Nav: A Fine-Grained Cognitive Navigation Framework for Aerial Vision-Language Navigation",
+      "titleKO": "FineCog-Nav: A Fine-Grained Cognitive Navigation Framework for Aerial Vision-Language Navigation",
+      "authorsEN": "Dian Shao, Zhengzheng Xu, Peiyang Wang, Like Liu, Yule Wang, Jieqi Shi (교신저자), Jing Huo",
+      "authorsKO": "Dian Shao, Zhengzheng Xu, Peiyang Wang, Like Liu, Yule Wang, Jieqi Shi (교신저자), Jing Huo",
+      "abstractEN": "UAV vision-language navigation (VLN) requires an agent to navigate complex 3D environments from an egocentric perspective while following ambiguous multi-step instructions over long horizons. Existing zero-shot methods remain limited, as they often rely on large base models, generic prompts, and loosely coordinated modules. In this work, we propose FineCog-Nav, a top-down framework inspired by human cognition that organizes navigation into fine-grained modules for language processing, perception, attention, memory, imagination, reasoning, and decision-making. Each module is driven by a moderate-sized foundation model with role-specific prompts and structured input-output protocols, enabling effective collaboration and improved interpretability. To support fine-grained evaluation, we construct AerialVLN-Fine, a curated benchmark of 300 trajectories derived from AerialVLN, with sentence-level instruction-trajectory alignment and refined instructions containing explicit visual endpoints and landmark references. Experiments show that FineCog-Nav consistently outperforms zero-shot baselines in instruction adherence, long-horizon planning, and generalization to unseen environments. These results suggest the effectiveness of fine-grained cognitive modularization for zero-shot aerial navigation. Project page: https://smartdianlab.github.io/projects-FineCogNav.",
+      "abstractKO": "항공 VLN, 인지 모듈, LLM 기반, AerialVLN-Fine, CVPR2026",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 46,
+      "reason": "항공 VLN, 인지 모듈, LLM 기반, AerialVLN-Fine, CVPR2026",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/FineCogNav_CVPR2026/index.html"
+    },
+    {
+      "id": "2604.15074",
+      "venue": "TAES 2026",
       "matchScore": 84,
       "category": "Planner",
-      "feedTitle": "TSMC: Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics",
-      "authorsShort": "H. 저자, H. SEAS)",
-      "feedAbstract": "담금질 SMC, HMC 재생, 볼츠만 목표 분포, 미분 가능 동역학, 제어-추론",
+      "feedTitle": "Enhanced Tube-RRT*: Trajectory Planning for 3-UAV Cascaded Rigid-Payload Transport",
+      "authorsShort": "J. (Member, IEEE) +5",
+      "feedAbstract": "UAV, 페이로드 운반, Tube-RRT*, Bayesian 샘플링, IEEE TAES",
       "tags": [
         "#Planner"
       ],
-      "titleEN": "TSMC: Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics",
-      "titleKO": "TSMC: Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics",
-      "authorsEN": "Heng Yang (단독 저자, Harvard SEAS)",
-      "authorsKO": "Heng Yang (단독 저자, Harvard SEAS)",
-      "abstractEN": "We propose a sampling-based framework for finite-horizon trajectory and policy optimization under differentiable dynamics by casting controller design as inference. Specifically, we minimize a KL-regularized expected trajectory cost, which yields an optimal \"Boltzmann-tilted\" distribution over controller parameters that concentrates on low-cost solutions as temperature decreases. To sample efficiently from this sharp, potentially multimodal target, we introduce tempered sequential Monte Carlo (TSMC): an annealing scheme that adaptively reweights and resamples particles along a tempering path from a prior to the target distribution, while using Hamiltonian Monte Carlo rejuvenation to maintain diversity and exploit exact gradients obtained by differentiating through trajectory rollouts. For policy optimization, we extend TSMC via (i) a deterministic empirical approximation of the initial-state distribution and (ii) an extended-space construction that treats rollout randomness as auxiliary variables. Experiments across trajectory- and policy-optimization benchmarks show that TSMC is broadly applicable and compares favorably to state-of-the-art baselines.",
-      "abstractKO": "담금질 SMC, HMC 재생, 볼츠만 목표 분포, 미분 가능 동역학, 제어-추론",
+      "titleEN": "Enhanced Tube-RRT*: Trajectory Planning Algorithm for 3-UAV Cascaded Rigid-Payload Transportation Systems",
+      "titleKO": "Enhanced Tube-RRT*: Trajectory Planning Algorithm for 3-UAV Cascaded Rigid-Payload Transportation Systems",
+      "authorsEN": "Jianqiao Yu (Member, IEEE), Jia Li (Member, IEEE), Tianhua Gao (Member, IEEE, 교신저자)",
+      "authorsKO": "Jianqiao Yu (Member, IEEE), Jia Li (Member, IEEE), Tianhua Gao (Member, IEEE, 교신저자)",
+      "abstractEN": "This paper presents a two-stage trajectory planning framework for a multi-UAV rigid-payload cascaded transportation system, aiming to address planning challenges in densely cluttered environments. In Stage I, an Enhanced Tube-RRT* algorithm is developed by integrating active hybrid sampling and an adaptive expansion strategy, enabling rapid generation of a safe and feasible virtual tube in environments with dense obstacles. Moreover, a trajectory smoothness cost is explicitly incorporated into the edge cost to reduce excessive turns and thereby mitigate cable-induced oscillations. Simulation results demonstrate that the proposed Enhanced Tube-RRT* achieves a higher success rate and effective sampling rate than mixed-sampling Tube-RRT* (STube-RRT*) and adaptive-extension Tube-RRT* (AETube-RRT*), while producing a shorter optimal path with a smaller cumulative turning angle. In Stage II, a convex quadratic program is formulated by considering payload translational and rotational dynamics, cable tension constraints, and collision-safety constraints, yielding a smooth, collision-free desired payload trajectory. Finally, a centralized geometric control scheme is applied to the cascaded system to validate the effectiveness and feasibility of the proposed planning framework, offering a practical solution for payload attitude maneuvering in densely cluttered environments.",
+      "abstractKO": "UAV, 페이로드 운반, Tube-RRT*, Bayesian 샘플링, IEEE TAES",
       "detailTags": [
         "#Planner"
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 44,
-      "reason": "담금질 SMC, HMC 재생, 볼츠만 목표 분포, 미분 가능 동역학, 제어-추론",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TSMC_arxiv2026/index.html"
+      "readMinutes": 49,
+      "reason": "UAV, 페이로드 운반, Tube-RRT*, Bayesian 샘플링, IEEE TAES",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TubeRRT_TAES2026/index.html"
     }
   ],
   "archive": [
@@ -2516,134 +2516,134 @@
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NEATNC_GECCO2026/index.html"
     },
     {
-      "id": "2604.12149",
-      "venue": "ICRA 2026",
-      "matchScore": 87,
-      "category": "Planner",
-      "feedTitle": "Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control",
-      "authorsShort": "O. Poyrazoglu, Y. Cao +2",
-      "feedAbstract": "샘플링 MPC, Hellinger 다양성, 궤적 최적화, ICRA2026",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control",
-      "titleKO": "Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control",
-      "authorsEN": "O. Goktug Poyrazoglu, Yukang Cao, Rahul Moorthy, Volkan Isler",
-      "authorsKO": "O. Goktug Poyrazoglu, Yukang Cao, Rahul Moorthy, Volkan Isler",
-      "abstractEN": "Trajectory optimization depends heavily on initialization. In particular, sampling-based approaches are highly sensitive to initial solutions, and limited exploration frequently leads them to converge to local minima in complex environments. We present Uncertainty Guided Exploratory Trajectory Optimization (UGE-TO), a trajectory optimization algorithm that generates well-separated samples to achieve a better coverage of the configuration space. UGE-TO represents trajectories as probability distributions induced by uncertainty ellipsoids. Unlike sampling-based approaches that explore only in the action space, this representation captures the effects of both system dynamics and action selection. By incorporating the impact of dynamics, in addition to the action space, into our distributions, our method enhances trajectory diversity by enforcing distributional separation via the Hellinger distance between them. It enables a systematic exploration of the configuration space and improves robustness against local minima. Further, we present UGE-MPC, which integrates UGE-TO into sampling-based model predictive controller methods. Experiments demonstrate that UGE-MPC achieves higher exploration and faster convergence in trajectory optimization compared to baselines under the same sampling budget, achieving 72.1% faster convergence in obstacle-free environments and 66% faster convergence with a 6.7% higher success rate in the cluttered environment compared to the best-performing baseline. Additionally, we validate the approach through a range of simulation scenarios and real-world experiments. Our results indicate that UGE-MPC has higher success rates and faster convergence, especially in environments that demand significant deviations from nominal trajectories to avoid failures. The project and code are available at https://ogpoyrazoglu.github.io/cuniform_sampling/.",
-      "abstractKO": "샘플링 MPC, Hellinger 다양성, 궤적 최적화, ICRA2026",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 54,
-      "reason": "샘플링 MPC, Hellinger 다양성, 궤적 최적화, ICRA2026",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/UGE-MPC_ICRA2026/index.html"
-    },
-    {
-      "id": "2604.19267",
+      "id": "2604.19148",
       "venue": "arXiv 2026",
-      "matchScore": 93,
-      "category": "Planner",
-      "feedTitle": "ViLiNT: Multimodal Embodiment-Aware Navigation Transformer",
-      "authorsShort": "L. Dezons, Q. Picard +3",
-      "feedAbstract": "멀티모달 로컬 플래닝, RGB+LiDAR 융합, 구현 인식, Diffusion Policy, 충돌 회피",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "ViLiNT: Multimodal Embodiment-Aware Navigation Transformer",
-      "titleKO": "ViLiNT: Multimodal Embodiment-Aware Navigation Transformer",
-      "authorsEN": "Louis Dezons, Quentin Picard, Rémi Marsal, François Goulette, David Filliat",
-      "authorsKO": "Louis Dezons, Quentin Picard, Rémi Marsal, François Goulette, David Filliat",
-      "abstractEN": "Goal-conditioned navigation models for ground robots trained using supervised learning show promising zero-shot transfer, but their collision-avoidance capability nevertheless degrades under distribution shift, i.e. environmental, robot or sensor configuration changes. We propose ViLiNT a multimodal, attention-based policy for goal navigation, trained on heterogeneous data from multiple platforms and environments, which improves robustness with two key features. First, we fuse RGB images, 3D LiDAR point clouds, a goal embedding and a robot's embodiment descriptor with a transformer architecture to capture complementary geometry and appearance cues. The transformer's output is used to condition a diffusion model that generates navigable trajectories. Second, using automatically generated offline labels, we train a path clearance prediction head for scoring and ranking trajectories produced by the diffusion model. The diffusion conditioning as well as the trajectory ranking head depend on a robot's embodiment token that allows our model to generate and select trajectories with respect to the robot's dimensions. Across three simulated environments, ViLiNT improves Success Rate on average by 166\\% over equivalent state-of-the-art vision-only baseline (NoMaD). This increase in performance is confirmed through real-world deployments of a rover navigating in obstacle fields. These results highlight that combining multimodal fusion with our collision prediction mechanism leads to improved off-road navigation robustness.",
-      "abstractKO": "멀티모달 로컬 플래닝, RGB+LiDAR 융합, 구현 인식, Diffusion Policy, 충돌 회피",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 45,
-      "reason": "멀티모달 로컬 플래닝, RGB+LiDAR 융합, 구현 인식, Diffusion Policy, 충돌 회피",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ViLiNT_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.21138",
-      "venue": "arXiv 2026",
-      "matchScore": 93,
-      "category": "Planner",
-      "feedTitle": "WayPlan: Navigating the Clutter — Waypoint-Based Bi-Level Planning for Multi-Robot Systems",
-      "authorsShort": "J. Ji, Y. Chen +5",
-      "feedAbstract": "다중로봇 TAMP, 2계층 LLM, RLVR, 웨이포인트, BoxNet3D-OBS",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "WayPlan: Navigating the Clutter — Waypoint-Based Bi-Level Planning for Multi-Robot Systems",
-      "titleKO": "WayPlan: Navigating the Clutter — Waypoint-Based Bi-Level Planning for Multi-Robot Systems",
-      "authorsEN": "Jiabao Ji, Yongchao Chen, Yang Zhang, Ramana Rao Kompella, Chuchu Fan, Gaowen Liu, Shiyu Chang",
-      "authorsKO": "Jiabao Ji, Yongchao Chen, Yang Zhang, Ramana Rao Kompella, Chuchu Fan, Gaowen Liu, Shiyu Chang",
-      "abstractEN": "Multi-robot control in cluttered environments is a challenging problem that involves complex physical constraints, including robot-robot collisions, robot-obstacle collisions, and unreachable motions. Successful planning in such settings requires joint optimization over high-level task planning and low-level motion planning, as violations of physical constraints may arise from failures at either level. However, jointly optimizing task and motion planning is difficult due to the complex parameterization of low-level motion trajectories and the ambiguity of credit assignment across the two planning levels. In this paper, we propose a hybrid multi-robot control framework that jointly optimizes task and motion planning. To enable effective parameterization of low-level planning, we introduce waypoints, a simple yet expressive representation for motion trajectories. To address the credit assignment challenge, we adopt a curriculum-based training strategy with a modified RLVR algorithm that propagates motion feasibility feedback from the motion planner to the task planner. Experiments on BoxNet3D-OBS, a challenging multi-robot benchmark with dense obstacles and up to nine robots, show that our approach consistently improves task success over motion-agnostic and VLA-based baselines. Our code is available at https://github.com/UCSB-NLP-Chang/navigate-cluster",
-      "abstractKO": "다중로봇 TAMP, 2계층 LLM, RLVR, 웨이포인트, BoxNet3D-OBS",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 41,
-      "reason": "다중로봇 TAMP, 2계층 LLM, RLVR, 웨이포인트, BoxNet3D-OBS",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/WayPlan_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.16298",
-      "venue": "CVPR 2026",
-      "matchScore": 87,
-      "category": "VLN",
-      "feedTitle": "FineCog-Nav: Fine-Grained Cognitive Navigation Framework for Aerial VLN",
-      "authorsShort": "D. Shao, Z. Xu +5",
-      "feedAbstract": "항공 VLN, 인지 모듈, LLM 기반, AerialVLN-Fine, CVPR2026",
-      "tags": [
-        "#VLN"
-      ],
-      "titleEN": "FineCog-Nav: A Fine-Grained Cognitive Navigation Framework for Aerial Vision-Language Navigation",
-      "titleKO": "FineCog-Nav: A Fine-Grained Cognitive Navigation Framework for Aerial Vision-Language Navigation",
-      "authorsEN": "Dian Shao, Zhengzheng Xu, Peiyang Wang, Like Liu, Yule Wang, Jieqi Shi (교신저자), Jing Huo",
-      "authorsKO": "Dian Shao, Zhengzheng Xu, Peiyang Wang, Like Liu, Yule Wang, Jieqi Shi (교신저자), Jing Huo",
-      "abstractEN": "UAV vision-language navigation (VLN) requires an agent to navigate complex 3D environments from an egocentric perspective while following ambiguous multi-step instructions over long horizons. Existing zero-shot methods remain limited, as they often rely on large base models, generic prompts, and loosely coordinated modules. In this work, we propose FineCog-Nav, a top-down framework inspired by human cognition that organizes navigation into fine-grained modules for language processing, perception, attention, memory, imagination, reasoning, and decision-making. Each module is driven by a moderate-sized foundation model with role-specific prompts and structured input-output protocols, enabling effective collaboration and improved interpretability. To support fine-grained evaluation, we construct AerialVLN-Fine, a curated benchmark of 300 trajectories derived from AerialVLN, with sentence-level instruction-trajectory alignment and refined instructions containing explicit visual endpoints and landmark references. Experiments show that FineCog-Nav consistently outperforms zero-shot baselines in instruction adherence, long-horizon planning, and generalization to unseen environments. These results suggest the effectiveness of fine-grained cognitive modularization for zero-shot aerial navigation. Project page: https://smartdianlab.github.io/projects-FineCogNav.",
-      "abstractKO": "항공 VLN, 인지 모듈, LLM 기반, AerialVLN-Fine, CVPR2026",
-      "detailTags": [
-        "#VLN"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 46,
-      "reason": "항공 VLN, 인지 모듈, LLM 기반, AerialVLN-Fine, CVPR2026",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/FineCogNav_CVPR2026/index.html"
-    },
-    {
-      "id": "2604.15074",
-      "venue": "TAES 2026",
       "matchScore": 84,
       "category": "Planner",
-      "feedTitle": "Enhanced Tube-RRT*: Trajectory Planning for 3-UAV Cascaded Rigid-Payload Transport",
-      "authorsShort": "J. (Member, IEEE) +5",
-      "feedAbstract": "UAV, 페이로드 운반, Tube-RRT*, Bayesian 샘플링, IEEE TAES",
+      "feedTitle": "Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP)",
+      "authorsShort": "A. Beaudin, B. Kristiansen +5",
+      "feedAbstract": "GP 정보 경로 계획, BCM 근사, 환경 모니터링, 해양 ASV, 실세계 실험",
       "tags": [
         "#Planner"
       ],
-      "titleEN": "Enhanced Tube-RRT*: Trajectory Planning Algorithm for 3-UAV Cascaded Rigid-Payload Transportation Systems",
-      "titleKO": "Enhanced Tube-RRT*: Trajectory Planning Algorithm for 3-UAV Cascaded Rigid-Payload Transportation Systems",
-      "authorsEN": "Jianqiao Yu (Member, IEEE), Jia Li (Member, IEEE), Tianhua Gao (Member, IEEE, 교신저자)",
-      "authorsKO": "Jianqiao Yu (Member, IEEE), Jia Li (Member, IEEE), Tianhua Gao (Member, IEEE, 교신저자)",
-      "abstractEN": "This paper presents a two-stage trajectory planning framework for a multi-UAV rigid-payload cascaded transportation system, aiming to address planning challenges in densely cluttered environments. In Stage I, an Enhanced Tube-RRT* algorithm is developed by integrating active hybrid sampling and an adaptive expansion strategy, enabling rapid generation of a safe and feasible virtual tube in environments with dense obstacles. Moreover, a trajectory smoothness cost is explicitly incorporated into the edge cost to reduce excessive turns and thereby mitigate cable-induced oscillations. Simulation results demonstrate that the proposed Enhanced Tube-RRT* achieves a higher success rate and effective sampling rate than mixed-sampling Tube-RRT* (STube-RRT*) and adaptive-extension Tube-RRT* (AETube-RRT*), while producing a shorter optimal path with a smaller cumulative turning angle. In Stage II, a convex quadratic program is formulated by considering payload translational and rotational dynamics, cable tension constraints, and collision-safety constraints, yielding a smooth, collision-free desired payload trajectory. Finally, a centralized geometric control scheme is applied to the cascaded system to validate the effectiveness and feasibility of the proposed planning framework, offering a practical solution for payload attitude maneuvering in densely cluttered environments.",
-      "abstractKO": "UAV, 페이로드 운반, Tube-RRT*, Bayesian 샘플링, IEEE TAES",
+      "titleEN": "Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP)",
+      "titleKO": "Multi-Step Gaussian Process Propagation for Adaptive Path Planning (OLAhGP)",
+      "authorsEN": "Alex Beaudin, Bjørn Andreas Kristiansen, Kristoffer Gryte, Corrado Chiatante, Morten Omholt Alver, Murat Arcak, Tor Arne Johansen (공동 제1저자)",
+      "authorsKO": "Alex Beaudin, Bjørn Andreas Kristiansen, Kristoffer Gryte, Corrado Chiatante, Morten Omholt Alver, Murat Arcak, Tor Arne Johansen (공동 제1저자)",
+      "abstractEN": "Efficient and robust path planning hinges on combining all accessible information sources. In particular, the task of path planning for robotic environmental exploration and monitoring depends highly on the current belief of the world. To capture the uncertainty in the belief, we present a Gaussian process based path planning method that adapts to multi-modal environmental sensing data and incorporates state and input constraints. To solve the path planning problem, we optimize over future waypoints in a receding horizon fashion, and our cost is thus a function of the Gaussian process posterior over all these waypoints. We demonstrate this method, dubbed OLAhGP, on an autonomous surface vessel using oceanic algal bloom data from both a high-fidelity model and in-situ sensing data in a monitoring scenario. Our simulated and experimental results demonstrate significant improvement over existing methods. With the same number of samples, our method generates more informative paths and achieves greater accuracy in identifying algal blooms in chlorophyll a rich waters, measured with respect to total misclassification probability and binary misclassification rate over the domain of interest.",
+      "abstractKO": "GP 정보 경로 계획, BCM 근사, 환경 모니터링, 해양 ASV, 실세계 실험",
       "detailTags": [
         "#Planner"
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 49,
-      "reason": "UAV, 페이로드 운반, Tube-RRT*, Bayesian 샘플링, IEEE TAES",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TubeRRT_TAES2026/index.html"
+      "readMinutes": 40,
+      "reason": "GP 정보 경로 계획, BCM 근사, 환경 모니터링, 해양 ASV, 실세계 실험",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/OLAhGP_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.10433",
+      "venue": "arXiv 2026",
+      "matchScore": 84,
+      "category": "Planner",
+      "feedTitle": "PRoID: Predicted Rate of Information Delivery in Multi-Robot Exploration and Relaying",
+      "authorsShort": "S. (교신저자), S. Baek +4",
+      "feedAbstract": "다중 로봇 탐색, 릴레이 결정, 맵 예측, 고장 내성",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "PRoID: Predicted Rate of Information Delivery in Multi-Robot Exploration and Relaying",
+      "titleKO": "PRoID: Predicted Rate of Information Delivery in Multi-Robot Exploration and Relaying",
+      "authorsEN": "Seungchan Kim (교신저자), Seungjae Baek, Micah Corah, Graeme Best, Brady Moon, Sebastian Scherer",
+      "authorsKO": "Seungchan Kim (교신저자), Seungjae Baek, Micah Corah, Graeme Best, Brady Moon, Sebastian Scherer",
+      "abstractEN": "We address Multi-Robot Exploration and Relaying (MRER): a team of robots must explore an unknown environment and deliver acquired information to a fixed base station within a mission time limit. The central challenge is deciding when each robot should stop exploring and relay: this depends on what the robot is likely to find ahead, what information it uniquely holds, and whether immediate or future delivery is more valuable. Prior approaches either ignore the reporting requirement entirely or rely on fixed-schedule relay strategies that cannot adapt to environment structure, team composition, or mission progress. We introduce PRoID (Predicted Rate of Information Delivery), a relay criterion that uses learned map prediction to estimate each robot's future information gain along its planned path, accounting for what teammates are already relaying. PRoID triggers relay when immediate return yields higher information delivery per unit time. We further propose PRoID-Safe, a failure-aware extension that incorporates robot survival probability into the relay criterion, naturally biasing decisions toward earlier relay as failure risk grows. We evaluate on real-world indoor floor plan datasets and show that PRoID and PRoID-Safe outperform fixed-schedule baselines, with stronger relative gains in failure scenarios.",
+      "abstractKO": "다중 로봇 탐색, 릴레이 결정, 맵 예측, 고장 내성",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 43,
+      "reason": "다중 로봇 탐색, 릴레이 결정, 맵 예측, 고장 내성",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/PRoID_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.07599",
+      "venue": "arXiv 2026",
+      "matchScore": 93,
+      "category": "Planner",
+      "feedTitle": "SANDO: Safe Autonomous Trajectory Planning for Dynamic Unknown Environments",
+      "authorsShort": "K. Kondo, J. Tordesillas +1",
+      "feedAbstract": "시공간 안전 비행 코리도(STSFC), 열지도 기반 A* 전역 계획기, 변수 제거로 7.4배 가속한 MIQP 궤적 최적화를 결합해 동적 미지 환경에서 충돌 없음을 공식적으로 보장하는 안전 궤적 계획 프레임워크. 적응형 EKF로 동적 장애물을 추적하며, UAV 하드웨어 실험(정적 6회·동적 10회)에서 완전 온보드로 제약…",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "SANDO: Safe Autonomous Trajectory Planning for Dynamic Unknown Environments",
+      "titleKO": "SANDO: 동적 미지 환경을 위한 안전 자율 궤적 계획",
+      "authorsEN": "Kota Kondo, Jesús Tordesillas, Jonathan P. How",
+      "authorsKO": "Kota Kondo, Jesús Tordesillas, Jonathan P. How",
+      "abstractEN": "SANDO is a safe trajectory planner for 3D dynamic unknown environments, where obstacle locations and motions are unknown a priori and a collision-free plan can become unsafe at any moment, requiring fast replanning. Existing soft-constraint planners are fast but cannot guarantee collision-free paths, while hard-constraint methods ensure safety at the cost of longer computation. SANDO addresses this trade-off through three contributions. First, a heat map-based A* global planner steers paths away from high-risk regions using soft costs, and a spatiotemporal safe flight corridor (STSFC) generator produces time-layered polytopes that inflate obstacles only by their worst-case reachable set at each time layer, rather than by the worst case over the entire horizon. Second, trajectory optimization is formulated as a Mixed-Integer Quadratic Program (MIQP) with hard collision-avoidance constraints, and a variable elimination technique reduces the number of decision variables, enabling fast computation. Third, a formal safety analysis establishes collision-free guarantees under explicit velocity-bound and estimation-error assumptions. Ablation studies show that variable elimination yields up to 7.4x speedup in optimization time, and that STSFCs are critical for feasibility in dense dynamic environments. Benchmark simulations against state-of-the-art methods across standardized static benchmarks, obstacle-rich static forests, and dynamic environments show that SANDO consistently achieves the highest success rate with no constraint violations across all difficulty levels; perception-only experiments without ground truth obstacle information confirm robust performance under realistic sensing. Hardware experiments on a UAV with fully onboard planning, perception, and localization demonstrate six safe flights in static environments and ten safe flights among dynamic obstacles.",
+      "abstractKO": "시공간 안전 비행 코리도(STSFC), 열지도 기반 A* 전역 계획기, 변수 제거로 7.4배 가속한 MIQP 궤적 최적화를 결합해 동적 미지 환경에서 충돌 없음을 공식적으로 보장하는 안전 궤적 계획 프레임워크. 적응형 EKF로 동적 장애물을 추적하며, UAV 하드웨어 실험(정적 6회·동적 10회)에서 완전 온보드로 제약 위반 0회의 안전 비행을 입증했다.",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 42,
+      "reason": "시공간 안전 비행 코리도(STSFC), 열지도 기반 A* 전역 계획기, 변수 제거로 7.4배 가속한 MIQP 궤적 최적화를 결합해 동적 미지 환경에서 충돌 없음을 공식적으로 보장하는 안전 궤적 계획 프레임워크. 적응형 EKF로 동적 장애물을 추적하며, UAV 하드웨어 실험(정적 6회·동적 10회)에서 완전 온보드로 제약 위반 0회의 안전 비행을 입증했다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/SANDO_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.19011",
+      "venue": "arXiv 2026",
+      "matchScore": 84,
+      "category": "Planner",
+      "feedTitle": "Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies",
+      "authorsShort": "T. Hellard, F. Tiofack +2",
+      "feedAbstract": "Sobolev 학습, 확산 정책, 궤적 최적화 워밍스타트, 피드백 게인, 2-20× 가속",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies",
+      "titleKO": "Accelerating Trajectory Optimization with Sobolev-Trained Diffusion Policies",
+      "authorsEN": "Théotime Le Hellard , Franki Nguimatsia Tiofack , Quentin Le Lidec, Justin Carpentier (공동 제1저자)",
+      "authorsKO": "Théotime Le Hellard , Franki Nguimatsia Tiofack , Quentin Le Lidec, Justin Carpentier (공동 제1저자)",
+      "abstractEN": "Trajectory Optimization (TO) solvers exploit known system dynamics to compute locally optimal trajectories through iterative improvements. A downside is that each new problem instance is solved independently; therefore, convergence speed and quality of the solution found depend on the initial trajectory proposed. To improve efficiency, a natural approach is to warm-start TO with initial guesses produced by a learned policy trained on trajectories previously generated by the solver. Diffusion-based policies have recently emerged as expressive imitation learning models, making them promising candidates for this role. Yet, a counterintuitive challenge comes from the local optimality of TO demonstrations: when a policy is rolled out, small non-optimal deviations may push it into situations not represented in the training data, triggering compounding errors over long horizons. In this work, we focus on learning-based warm-starting for gradient-based TO solvers that also provide feedback gains. Exploiting this specificity, we derive a first-order loss for Sobolev learning of diffusion-based policies using both trajectories and feedback gains. Through comprehensive experiments, we demonstrate that the resulting policy avoids compounding errors, and so can learn from very few trajectories to provide initial guesses reducing solving time by $2\\times$ to $20 \\times$. Incorporating first-order information enables predictions with fewer diffusion steps, reducing inference latency.",
+      "abstractKO": "Sobolev 학습, 확산 정책, 궤적 최적화 워밍스타트, 피드백 게인, 2-20× 가속",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 43,
+      "reason": "Sobolev 학습, 확산 정책, 궤적 최적화 워밍스타트, 피드백 게인, 2-20× 가속",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/SobolevDiffusion_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.21456",
+      "venue": "arXiv 2026",
+      "matchScore": 84,
+      "category": "Planner",
+      "feedTitle": "TSMC: Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics",
+      "authorsShort": "H. 저자, H. SEAS)",
+      "feedAbstract": "담금질 SMC, HMC 재생, 볼츠만 목표 분포, 미분 가능 동역학, 제어-추론",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "TSMC: Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics",
+      "titleKO": "TSMC: Tempered Sequential Monte Carlo for Trajectory and Policy Optimization with Differentiable Dynamics",
+      "authorsEN": "Heng Yang (단독 저자, Harvard SEAS)",
+      "authorsKO": "Heng Yang (단독 저자, Harvard SEAS)",
+      "abstractEN": "We propose a sampling-based framework for finite-horizon trajectory and policy optimization under differentiable dynamics by casting controller design as inference. Specifically, we minimize a KL-regularized expected trajectory cost, which yields an optimal \"Boltzmann-tilted\" distribution over controller parameters that concentrates on low-cost solutions as temperature decreases. To sample efficiently from this sharp, potentially multimodal target, we introduce tempered sequential Monte Carlo (TSMC): an annealing scheme that adaptively reweights and resamples particles along a tempering path from a prior to the target distribution, while using Hamiltonian Monte Carlo rejuvenation to maintain diversity and exploit exact gradients obtained by differentiating through trajectory rollouts. For policy optimization, we extend TSMC via (i) a deterministic empirical approximation of the initial-state distribution and (ii) an extended-space construction that treats rollout randomness as auxiliary variables. Experiments across trajectory- and policy-optimization benchmarks show that TSMC is broadly applicable and compares favorably to state-of-the-art baselines.",
+      "abstractKO": "담금질 SMC, HMC 재생, 볼츠만 목표 분포, 미분 가능 동역학, 제어-추론",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 44,
+      "reason": "담금질 SMC, HMC 재생, 볼츠만 목표 분포, 미분 가능 동역학, 제어-추론",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TSMC_arxiv2026/index.html"
     },
     {
       "id": "2604.08009",
