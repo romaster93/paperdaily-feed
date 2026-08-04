@@ -1,142 +1,162 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-03T19:30:05.691Z",
+  "generatedAt": "2026-08-04T19:30:05.281Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 8. 4  화요일",
+    "date": "2026. 8. 5  수요일",
     "title": "오늘의 리뷰",
     "subtitle": "VLN·Planner 새 리뷰 5편 · 전체 96편"
   },
   "papers": [
     {
-      "id": "2604.12149",
-      "venue": "ICRA 2026",
-      "matchScore": 87,
+      "id": "2604.08009",
+      "venue": "ICUAS 2026",
+      "venueDetail": "ICUAS 2026 (제출 중)",
+      "matchScore": 96,
       "category": "Planner",
-      "feedTitle": "Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control",
-      "authorsShort": "O. Poyrazoglu, Y. Cao +2",
-      "feedAbstract": "샘플링 MPC, Hellinger 다양성, 궤적 최적화, ICRA2026",
+      "feedTitle": "AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection",
+      "authorsShort": "S. Arachchige, J. Garcia +5",
+      "feedAbstract": "완전 오픈소스 실내 UAV 플랫폼(AgiREAL+AgiSIM+AgiSTACK)으로 ENRICH 2025 핵발전소 현장에서 제로샷 시뮬-현실 전이 검증 완료.",
       "tags": [
-        "#Planner"
+        "#실내항공자율화",
+        "#시뮬-현실전이",
+        "#오픈소스플랫폼",
+        "#LiDARSLAM",
+        "#ESDF기반경로계획"
       ],
-      "titleEN": "Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control",
-      "titleKO": "Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control",
-      "authorsEN": "O. Goktug Poyrazoglu, Yukang Cao, Rahul Moorthy, Volkan Isler",
-      "authorsKO": "O. Goktug Poyrazoglu, Yukang Cao, Rahul Moorthy, Volkan Isler",
-      "abstractEN": "Trajectory optimization depends heavily on initialization. In particular, sampling-based approaches are highly sensitive to initial solutions, and limited exploration frequently leads them to converge to local minima in complex environments. We present Uncertainty Guided Exploratory Trajectory Optimization (UGE-TO), a trajectory optimization algorithm that generates well-separated samples to achieve a better coverage of the configuration space. UGE-TO represents trajectories as probability distributions induced by uncertainty ellipsoids. Unlike sampling-based approaches that explore only in the action space, this representation captures the effects of both system dynamics and action selection. By incorporating the impact of dynamics, in addition to the action space, into our distributions, our method enhances trajectory diversity by enforcing distributional separation via the Hellinger distance between them. It enables a systematic exploration of the configuration space and improves robustness against local minima. Further, we present UGE-MPC, which integrates UGE-TO into sampling-based model predictive controller methods. Experiments demonstrate that UGE-MPC achieves higher exploration and faster convergence in trajectory optimization compared to baselines under the same sampling budget, achieving 72.1% faster convergence in obstacle-free environments and 66% faster convergence with a 6.7% higher success rate in the cluttered environment compared to the best-performing baseline. Additionally, we validate the approach through a range of simulation scenarios and real-world experiments. Our results indicate that UGE-MPC has higher success rates and faster convergence, especially in environments that demand significant deviations from nominal trajectories to avoid failures. The project and code are available at https://ogpoyrazoglu.github.io/cuniform_sampling/.",
-      "abstractKO": "샘플링 MPC, Hellinger 다양성, 궤적 최적화, ICRA2026",
+      "titleEN": "AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection",
+      "titleKO": "AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection",
+      "authorsEN": "Sasanka Kuruppu Arachchige, Juan Jose Garcia, Changda Tian, Lauri Suomela, Panos Trahanias, Adriana Tapus, Joni-Kristian Kämäräinen",
+      "authorsKO": "Sasanka Kuruppu Arachchige, Juan Jose Garcia, Changda Tian, Lauri Suomela, Panos Trahanias, Adriana Tapus, Joni-Kristian Kämäräinen",
+      "abstractEN": "Autonomous indoor flight for critical asset inspection presents fundamental challenges in perception, planning, control, and learning. Despite rapid progress, there is still a lack of a compact, active-sensing, open-source platform that is reproducible across simulation and real-world operation. To address this gap, we present Agipix, a co-designed open hardware and software platform for indoor aerial autonomy and critical asset inspection. Agipix features a compact, hardware-synchronized active-sensing platform with onboard GPU-accelerated compute that is capable of agile flight; a containerized ROS~2-based modular autonomy stack; and a photorealistic digital twin of the hardware platform together with a reliable UI. These elements enable rapid iteration via zero-shot transfer of containerized autonomy components between simulation and real flights. We demonstrate trajectory tracking and exploration performance using onboard sensing in industrial indoor environments. All hardware designs, simulation assets, and containerized software are released openly together with documentation.",
+      "abstractKO": "완전 오픈소스 실내 UAV 플랫폼(AgiREAL+AgiSIM+AgiSTACK)으로 ENRICH 2025 핵발전소 현장에서 제로샷 시뮬-현실 전이 검증 완료.",
       "detailTags": [
-        "#Planner"
+        "#실내항공자율화",
+        "#시뮬-현실전이",
+        "#오픈소스플랫폼",
+        "#LiDARSLAM",
+        "#ESDF기반경로계획"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 44,
+      "reason": "**완전 오픈소스 시스템**: 하드웨어 설계(PCB, CAD) + 소프트웨어(Docker ROS 2) + 시뮬레이터 모두 공개\n**포토리얼리스틱 디지털 트윈(AgiSIM)**: UE5 기반, 점유 맵 IoU=0.96 달성\n**제로샷 시뮬-현실 전이**: 동일한 Docker 컨테이너로 시뮬/현실 배포\n**ENRICH 2025 실증**: 오스트리아 폐기 핵발전소에서 자율 점검 비행 (계획 거리 72% 완료)\n**ESDF-aware RRT* 경로 계획**: 실내 장애물 회피 + Frontier 기반 탐색",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/AgiPIX_ICUAS2026/index.html"
+    },
+    {
+      "id": "2604.08883",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 프리프린트",
+      "matchScore": 84,
+      "category": "VLN",
+      "feedTitle": "HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial Vision-and-Language Navigation",
+      "authorsShort": "C. Fan, C. Pan +3",
+      "feedAbstract": "도심 항공 VLN에서 하이브리드 IL-RL 훈련 + MacroPlanner/MicroActor 계층 구조 + SCConv 맵 인코더로 CityNav 벤치마크 SOTA 달성.",
+      "tags": [
+        "#VLN",
+        "#항공UAV내비게이션",
+        "#계층적계획",
+        "#시뮬레이션기반평가"
+      ],
+      "titleEN": "HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial Vision-and-Language Navigation",
+      "titleKO": "HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial Vision-and-Language Navigation",
+      "authorsEN": "Chengjie Fan, Cong Pan, Zijian Liu, Ningzhong Liu, Jie Qin",
+      "authorsKO": "Chengjie Fan, Cong Pan, Zijian Liu, Ningzhong Liu, Jie Qin",
+      "abstractEN": "Inspired by the general Vision-and-Language Navigation (VLN) task, aerial VLN has attracted widespread attention, owing to its significant practical value in applications such as logistics delivery and urban inspection. However, existing methods face several challenges in complex urban environments, including insufficient generalization to unseen scenes, suboptimal performance in long-range path planning, and inadequate understanding of spatial continuity. To address these challenges, we propose HTNav, a new collaborative navigation framework that integrates Imitation Learning (IL) and Reinforcement Learning (RL) within a hybrid IL-RL framework. This framework adopts a staged training mechanism to ensure the stability of the basic navigation strategy while enhancing its environmental exploration capability. By integrating a tiered decision-making mechanism, it achieves collaborative interaction between macro-level path planning and fine-grained action control. Furthermore, a map representation learning module is introduced to deepen its understanding of spatial continuity in open domains. On the CityNav benchmark, our method achieves state-of-the-art performance across all scene levels and task difficulties. Experimental results demonstrate that this framework significantly improves navigation precision and robustness in complex urban environments.",
+      "abstractKO": "도심 항공 VLN에서 하이브리드 IL-RL 훈련 + MacroPlanner/MicroActor 계층 구조 + SCConv 맵 인코더로 CityNav 벤치마크 SOTA 달성.",
+      "detailTags": [
+        "#VLN",
+        "#항공UAV내비게이션",
+        "#계층적계획",
+        "#시뮬레이션기반평가"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 42,
+      "reason": "**하이브리드 IL-RL 스테이지 훈련**: IL로 기본 정책 안정적 학습 후 PPO(λ=0.20)로 탐색 능력 향상\n**계층적 의사결정**: MacroPlanner(고수준 경유점)  + MicroActor(세밀 행동 제어) 협업\n**SCConv 맵 인코더**: 공간-채널 정보 동시 모델링으로 항공 위성 맵 특징 포착\n**CityNav SOTA**: 수정 CityNav*에서 NE 61.4m→40.3m (34.4% 감소), SR 25.49%",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HTNav_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.07957",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 프리프린트",
+      "matchScore": 84,
+      "category": "VLN",
+      "feedTitle": "WorldMAP: Bootstrapping Vision-Language Navigation Trajectory Prediction with Generative World Models",
+      "authorsShort": "H. Chen, S. Jiang +5",
+      "feedAbstract": "생성적 월드 모델의 미래 비디오를 3D 재구성 → 의미론적 그라운딩 → FMM 계획으로 변환하여 VLN 궤적 학습의 지도 신호로 활용하는 Teacher-Student 프레임워크.",
+      "tags": [
+        "#VLN",
+        "#시뮬레이션기반평가"
+      ],
+      "titleEN": "WorldMAP: Bootstrapping Vision-Language Navigation Trajectory Prediction with Generative World Models",
+      "titleKO": "WorldMAP: Bootstrapping Vision-Language Navigation Trajectory Prediction with Generative World Models",
+      "authorsEN": "Hongjin Chen, Shangyun Jiang, Tonghua Su, Chen Gao, Xinlei Chen, Yong Li, Zhibo Chen",
+      "authorsKO": "Hongjin Chen, Shangyun Jiang, Tonghua Su, Chen Gao, Xinlei Chen, Yong Li, Zhibo Chen",
+      "abstractEN": "Vision-language models (VLMs) and generative world models are opening new opportunities for embodied navigation. VLMs are increasingly used as direct planners or trajectory predictors, while world models support look-ahead reasoning by imagining future views. Yet predicting a reliable trajectory from a single egocentric observation remains challenging. Current VLMs often generate unstable trajectories, and world models, though able to synthesize plausible futures, do not directly provide the grounded signals needed for navigation learning. This raises a central question: how can generated futures be turned into supervision for grounded trajectory prediction? We present WorldMAP, a teacher--student framework that converts world-model-generated futures into persistent semantic-spatial structure and planning-derived supervision. Its world-model-driven teacher builds semantic-spatial memory from generated videos, grounds task-relevant targets and obstacles, and produces trajectory pseudo-labels through explicit planning. A lightweight student with a multi-hypothesis trajectory head is then trained to predict navigation trajectories directly from vision-language inputs. On Target-Bench, WorldMAP achieves the best ADE and FDE among compared methods, reducing ADE by 18.0% and FDE by 42.1% relative to the best competing baseline, while lifting a small open-source VLM to DTW performance competitive with proprietary models. More broadly, the results suggest that, in embodied navigation, the value of world models may lie less in supplying action-ready imagined evidence than in synthesizing structured supervision for navigation learning.",
+      "abstractKO": "생성적 월드 모델의 미래 비디오를 3D 재구성 → 의미론적 그라운딩 → FMM 계획으로 변환하여 VLN 궤적 학습의 지도 신호로 활용하는 Teacher-Student 프레임워크.",
+      "detailTags": [
+        "#VLN",
+        "#시뮬레이션기반평가"
       ],
       "year": "2026",
       "citations": 0,
       "readMinutes": 54,
-      "reason": "샘플링 MPC, Hellinger 다양성, 궤적 최적화, ICRA2026",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/UGE-MPC_ICRA2026/index.html"
+      "reason": "**월드 모델의 역할 재정의**: 추론 도구가 아닌 훈련 시 구조화된 의사 레이블 생성기로 활용\n**3단계 교사 파이프라인**: DA3 깊이 추정 + UniPixel 분할 + FMM 경로 계획\n**다중 가설 예측**: K개 궤적 후보를 신뢰도 점수와 함께 예측하는 경량 학생 모델\n**방향 일관성 손실**: 위치 정확도와 경로 부드러움을 동시에 최적화\n**오픈소스 경쟁력**: 8B 모델이 GPT-5.4, Gemini-3-Pro 대비 ADE 18% FDE 42% 향상",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/WorldMAP_arxiv2026/index.html"
     },
     {
-      "id": "2604.19267",
+      "id": "2604.07644",
       "venue": "arXiv 2026",
       "matchScore": 93,
       "category": "Planner",
-      "feedTitle": "ViLiNT: Multimodal Embodiment-Aware Navigation Transformer",
-      "authorsShort": "L. Dezons, Q. Picard +3",
-      "feedAbstract": "멀티모달 로컬 플래닝, RGB+LiDAR 융합, 구현 인식, Diffusion Policy, 충돌 회피",
+      "feedTitle": "GPU-SLS: Safe Large-Scale Robust Nonlinear MPC in Milliseconds via Reachability-Constrained System Level Synthesis on the GPU",
+      "authorsShort": "J. Fang, G. Chou",
+      "feedAbstract": "GPU 병렬 결합 스캔과 ADMM 기반 QP 솔버로 System Level Synthesis 강건 MPC를 밀리초 단위에 푸는 프레임워크. 공식적 도달 가능 집합 제약으로 안전을 보장하면서 CPU OSQP 대비 340배(N=3000), FastSLS 대비 237배 가속을 달성했고, Unitree Go2 61차원 실제…",
       "tags": [
         "#Planner"
       ],
-      "titleEN": "ViLiNT: Multimodal Embodiment-Aware Navigation Transformer",
-      "titleKO": "ViLiNT: Multimodal Embodiment-Aware Navigation Transformer",
-      "authorsEN": "Louis Dezons, Quentin Picard, Rémi Marsal, François Goulette, David Filliat",
-      "authorsKO": "Louis Dezons, Quentin Picard, Rémi Marsal, François Goulette, David Filliat",
-      "abstractEN": "Goal-conditioned navigation models for ground robots trained using supervised learning show promising zero-shot transfer, but their collision-avoidance capability nevertheless degrades under distribution shift, i.e. environmental, robot or sensor configuration changes. We propose ViLiNT a multimodal, attention-based policy for goal navigation, trained on heterogeneous data from multiple platforms and environments, which improves robustness with two key features. First, we fuse RGB images, 3D LiDAR point clouds, a goal embedding and a robot's embodiment descriptor with a transformer architecture to capture complementary geometry and appearance cues. The transformer's output is used to condition a diffusion model that generates navigable trajectories. Second, using automatically generated offline labels, we train a path clearance prediction head for scoring and ranking trajectories produced by the diffusion model. The diffusion conditioning as well as the trajectory ranking head depend on a robot's embodiment token that allows our model to generate and select trajectories with respect to the robot's dimensions. Across three simulated environments, ViLiNT improves Success Rate on average by 166\\% over equivalent state-of-the-art vision-only baseline (NoMaD). This increase in performance is confirmed through real-world deployments of a rover navigating in obstacle fields. These results highlight that combining multimodal fusion with our collision prediction mechanism leads to improved off-road navigation robustness.",
-      "abstractKO": "멀티모달 로컬 플래닝, RGB+LiDAR 융합, 구현 인식, Diffusion Policy, 충돌 회피",
+      "titleEN": "GPU-SLS: Safe Large-Scale Robust Nonlinear MPC in Milliseconds via Reachability-Constrained System Level Synthesis on the GPU",
+      "titleKO": "GPU-SLS: GPU 상의 도달가능성 제약 System Level Synthesis로 구현한 밀리초 단위 대규모 강건 비선형 MPC",
+      "authorsEN": "Jeffrey Fang, Glen Chou",
+      "authorsKO": "Jeffrey Fang, Glen Chou",
+      "abstractEN": "We present GPU-SLS, a GPU-parallelized framework for safe, robust nonlinear model predictive control (MPC) that scales to high-dimensional uncertain robotic systems and long planning horizons. Our method jointly optimizes an inequality-constrained, dynamically-feasible nominal trajectory, a tracking controller, and a closed-loop reachable set under disturbance, all in real-time. To efficiently compute nominal trajectories, we develop a sequential quadratic programming procedure with a novel GPU-accelerated quadratic program (QP) solver that uses parallel associative scans and adaptive caching within an alternating direction method of multipliers (ADMM) framework. The same GPU QP backend is used to optimize robust tracking controllers and closed-loop reachable sets via system level synthesis (SLS), enabling reachability-constrained control in both fixed- and receding-horizon settings. We achieve substantial performance gains, reducing nominal trajectory solve times by 97.7% relative to state-of-the-art CPU solvers and 71.8% compared to GPU solvers, while accelerating SLS-based control and reachability by 237x. Despite large problem scales, our method achieves 100% empirical safety, unlike high-dimensional learning-based reachability baselines. We validate our approach on complex nonlinear systems, including whole-body quadrupeds (61D) and humanoids (75D), synthesizing robust control policies online on the GPU in 20 milliseconds on average and scaling to problems with 2 x 10^5 decision variables and 8 x 10^4 constraints. The implementation of our method is available at https://github.com/Jeff300fang/gpu_sls.",
+      "abstractKO": "GPU 병렬 결합 스캔과 ADMM 기반 QP 솔버로 System Level Synthesis 강건 MPC를 밀리초 단위에 푸는 프레임워크. 공식적 도달 가능 집합 제약으로 안전을 보장하면서 CPU OSQP 대비 340배(N=3000), FastSLS 대비 237배 가속을 달성했고, Unitree Go2 61차원 실제 하드웨어에서 50Hz 실시간 강건 MPC 제어를 최초로 시연했다.",
       "detailTags": [
         "#Planner"
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 45,
-      "reason": "멀티모달 로컬 플래닝, RGB+LiDAR 융합, 구현 인식, Diffusion Policy, 충돌 회피",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ViLiNT_arxiv2026/index.html"
+      "readMinutes": 58,
+      "reason": "GPU 병렬 결합 스캔과 ADMM 기반 QP 솔버로 System Level Synthesis 강건 MPC를 밀리초 단위에 푸는 프레임워크. 공식적 도달 가능 집합 제약으로 안전을 보장하면서 CPU OSQP 대비 340배(N=3000), FastSLS 대비 237배 가속을 달성했고, Unitree Go2 61차원 실제 하드웨어에서 50Hz 실시간 강건 MPC 제어를 최초로 시연했다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/GPU-SLS_arxiv2026/index.html"
     },
     {
-      "id": "2604.21138",
-      "venue": "arXiv 2026",
-      "matchScore": 93,
-      "category": "Planner",
-      "feedTitle": "WayPlan: Navigating the Clutter — Waypoint-Based Bi-Level Planning for Multi-Robot Systems",
-      "authorsShort": "J. Ji, Y. Chen +5",
-      "feedAbstract": "다중로봇 TAMP, 2계층 LLM, RLVR, 웨이포인트, BoxNet3D-OBS",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "WayPlan: Navigating the Clutter — Waypoint-Based Bi-Level Planning for Multi-Robot Systems",
-      "titleKO": "WayPlan: Navigating the Clutter — Waypoint-Based Bi-Level Planning for Multi-Robot Systems",
-      "authorsEN": "Jiabao Ji, Yongchao Chen, Yang Zhang, Ramana Rao Kompella, Chuchu Fan, Gaowen Liu, Shiyu Chang",
-      "authorsKO": "Jiabao Ji, Yongchao Chen, Yang Zhang, Ramana Rao Kompella, Chuchu Fan, Gaowen Liu, Shiyu Chang",
-      "abstractEN": "Multi-robot control in cluttered environments is a challenging problem that involves complex physical constraints, including robot-robot collisions, robot-obstacle collisions, and unreachable motions. Successful planning in such settings requires joint optimization over high-level task planning and low-level motion planning, as violations of physical constraints may arise from failures at either level. However, jointly optimizing task and motion planning is difficult due to the complex parameterization of low-level motion trajectories and the ambiguity of credit assignment across the two planning levels. In this paper, we propose a hybrid multi-robot control framework that jointly optimizes task and motion planning. To enable effective parameterization of low-level planning, we introduce waypoints, a simple yet expressive representation for motion trajectories. To address the credit assignment challenge, we adopt a curriculum-based training strategy with a modified RLVR algorithm that propagates motion feasibility feedback from the motion planner to the task planner. Experiments on BoxNet3D-OBS, a challenging multi-robot benchmark with dense obstacles and up to nine robots, show that our approach consistently improves task success over motion-agnostic and VLA-based baselines. Our code is available at https://github.com/UCSB-NLP-Chang/navigate-cluster",
-      "abstractKO": "다중로봇 TAMP, 2계층 LLM, RLVR, 웨이포인트, BoxNet3D-OBS",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 41,
-      "reason": "다중로봇 TAMP, 2계층 LLM, RLVR, 웨이포인트, BoxNet3D-OBS",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/WayPlan_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.16298",
-      "venue": "CVPR 2026",
-      "matchScore": 87,
+      "id": "2411.17820",
+      "venue": "CVPR 2025",
+      "venueDetail": "CVPR 2025",
+      "matchScore": 96,
       "category": "VLN",
-      "feedTitle": "FineCog-Nav: Fine-Grained Cognitive Navigation Framework for Aerial VLN",
-      "authorsShort": "D. Shao, Z. Xu +5",
-      "feedAbstract": "항공 VLN, 인지 모듈, LLM 기반, AerialVLN-Fine, CVPR2026",
+      "feedTitle": "CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos",
+      "authorsShort": "X. Liu, J. Li +7",
+      "feedAbstract": "2000시간 이상의 웹 규모 도시 보행/운전 비디오로 학습한 구체화된 에이전트로, 비용 많은 주석 없이 대규모 모방학습으로 도시 네비게이션 정책을 학습.",
       "tags": [
         "#VLN"
       ],
-      "titleEN": "FineCog-Nav: A Fine-Grained Cognitive Navigation Framework for Aerial Vision-Language Navigation",
-      "titleKO": "FineCog-Nav: A Fine-Grained Cognitive Navigation Framework for Aerial Vision-Language Navigation",
-      "authorsEN": "Dian Shao, Zhengzheng Xu, Peiyang Wang, Like Liu, Yule Wang, Jieqi Shi (교신저자), Jing Huo",
-      "authorsKO": "Dian Shao, Zhengzheng Xu, Peiyang Wang, Like Liu, Yule Wang, Jieqi Shi (교신저자), Jing Huo",
-      "abstractEN": "UAV vision-language navigation (VLN) requires an agent to navigate complex 3D environments from an egocentric perspective while following ambiguous multi-step instructions over long horizons. Existing zero-shot methods remain limited, as they often rely on large base models, generic prompts, and loosely coordinated modules. In this work, we propose FineCog-Nav, a top-down framework inspired by human cognition that organizes navigation into fine-grained modules for language processing, perception, attention, memory, imagination, reasoning, and decision-making. Each module is driven by a moderate-sized foundation model with role-specific prompts and structured input-output protocols, enabling effective collaboration and improved interpretability. To support fine-grained evaluation, we construct AerialVLN-Fine, a curated benchmark of 300 trajectories derived from AerialVLN, with sentence-level instruction-trajectory alignment and refined instructions containing explicit visual endpoints and landmark references. Experiments show that FineCog-Nav consistently outperforms zero-shot baselines in instruction adherence, long-horizon planning, and generalization to unseen environments. These results suggest the effectiveness of fine-grained cognitive modularization for zero-shot aerial navigation. Project page: https://smartdianlab.github.io/projects-FineCogNav.",
-      "abstractKO": "항공 VLN, 인지 모듈, LLM 기반, AerialVLN-Fine, CVPR2026",
+      "titleEN": "CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos",
+      "titleKO": "CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos",
+      "authorsEN": "Xinhao Liu, Jintong Li, Yicheng Jiang, Niranjan Sujay, Zhicheng Yang, Juexiao Zhang, John Abanes, Jing Zhang, Chen Feng",
+      "authorsKO": "Xinhao Liu, Jintong Li, Yicheng Jiang, Niranjan Sujay, Zhicheng Yang, Juexiao Zhang, John Abanes, Jing Zhang, Chen Feng",
+      "abstractEN": "Navigating dynamic urban environments presents significant challenges for embodied agents, requiring advanced spatial reasoning and adherence to common-sense norms. Despite progress, existing visual navigation methods struggle in map-free or off-street settings, limiting the deployment of autonomous agents like last-mile delivery robots. To overcome these obstacles, we propose a scalable, data-driven approach for human-like urban navigation by training agents on thousands of hours of in-the-wild city walking and driving videos sourced from the web. We introduce a simple and scalable data processing pipeline that extracts action supervision from these videos, enabling large-scale imitation learning without costly annotations. Our model learns sophisticated navigation policies to handle diverse challenges and critical scenarios. Experimental results show that training on large-scale, diverse datasets significantly enhances navigation performance, surpassing current methods. This work shows the potential of using abundant online video data to develop robust navigation policies for embodied agents in dynamic urban settings. Project homepage is at https://ai4ce.github.io/CityWalker/.",
+      "abstractKO": "2000시간 이상의 웹 규모 도시 보행/운전 비디오로 학습한 구체화된 에이전트로, 비용 많은 주석 없이 대규모 모방학습으로 도시 네비게이션 정책을 학습.",
       "detailTags": [
         "#VLN"
       ],
-      "year": "2026",
+      "year": "2024",
       "citations": 0,
-      "readMinutes": 46,
-      "reason": "항공 VLN, 인지 모듈, LLM 기반, AerialVLN-Fine, CVPR2026",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/FineCogNav_CVPR2026/index.html"
-    },
-    {
-      "id": "2604.15074",
-      "venue": "TAES 2026",
-      "matchScore": 84,
-      "category": "Planner",
-      "feedTitle": "Enhanced Tube-RRT*: Trajectory Planning for 3-UAV Cascaded Rigid-Payload Transport",
-      "authorsShort": "J. (Member, IEEE) +5",
-      "feedAbstract": "UAV, 페이로드 운반, Tube-RRT*, Bayesian 샘플링, IEEE TAES",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "Enhanced Tube-RRT*: Trajectory Planning Algorithm for 3-UAV Cascaded Rigid-Payload Transportation Systems",
-      "titleKO": "Enhanced Tube-RRT*: Trajectory Planning Algorithm for 3-UAV Cascaded Rigid-Payload Transportation Systems",
-      "authorsEN": "Jianqiao Yu (Member, IEEE), Jia Li (Member, IEEE), Tianhua Gao (Member, IEEE, 교신저자)",
-      "authorsKO": "Jianqiao Yu (Member, IEEE), Jia Li (Member, IEEE), Tianhua Gao (Member, IEEE, 교신저자)",
-      "abstractEN": "This paper presents a two-stage trajectory planning framework for a multi-UAV rigid-payload cascaded transportation system, aiming to address planning challenges in densely cluttered environments. In Stage I, an Enhanced Tube-RRT* algorithm is developed by integrating active hybrid sampling and an adaptive expansion strategy, enabling rapid generation of a safe and feasible virtual tube in environments with dense obstacles. Moreover, a trajectory smoothness cost is explicitly incorporated into the edge cost to reduce excessive turns and thereby mitigate cable-induced oscillations. Simulation results demonstrate that the proposed Enhanced Tube-RRT* achieves a higher success rate and effective sampling rate than mixed-sampling Tube-RRT* (STube-RRT*) and adaptive-extension Tube-RRT* (AETube-RRT*), while producing a shorter optimal path with a smaller cumulative turning angle. In Stage II, a convex quadratic program is formulated by considering payload translational and rotational dynamics, cable tension constraints, and collision-safety constraints, yielding a smooth, collision-free desired payload trajectory. Finally, a centralized geometric control scheme is applied to the cascaded system to validate the effectiveness and feasibility of the proposed planning framework, offering a practical solution for payload attitude maneuvering in densely cluttered environments.",
-      "abstractKO": "UAV, 페이로드 운반, Tube-RRT*, Bayesian 샘플링, IEEE TAES",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 49,
-      "reason": "UAV, 페이로드 운반, Tube-RRT*, Bayesian 샘플링, IEEE TAES",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TubeRRT_TAES2026/index.html"
+      "readMinutes": 59,
+      "reason": "웹에서 추출한 대규모 도시 비디오 데이터셋 활용 (2000시간 이상)\n확장 가능한 데이터 처리 파이프라인으로 자동 행동 레이블링\n도시 환경의 다양한 도전 시나리오 처리 (off-street, 동적 환경 등)\n기존 방법 대비 우수한 네비게이션 성능\n대규모 다양한 데이터셋으로 학습한 정책의 강력한 성능",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/CityWalker_CVPR2025/index.html"
     }
   ],
   "archive": [
@@ -2646,154 +2666,134 @@
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TSMC_arxiv2026/index.html"
     },
     {
-      "id": "2604.08009",
-      "venue": "ICUAS 2026",
-      "venueDetail": "ICUAS 2026 (제출 중)",
-      "matchScore": 96,
+      "id": "2604.12149",
+      "venue": "ICRA 2026",
+      "matchScore": 87,
       "category": "Planner",
-      "feedTitle": "AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection",
-      "authorsShort": "S. Arachchige, J. Garcia +5",
-      "feedAbstract": "완전 오픈소스 실내 UAV 플랫폼(AgiREAL+AgiSIM+AgiSTACK)으로 ENRICH 2025 핵발전소 현장에서 제로샷 시뮬-현실 전이 검증 완료.",
+      "feedTitle": "Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control",
+      "authorsShort": "O. Poyrazoglu, Y. Cao +2",
+      "feedAbstract": "샘플링 MPC, Hellinger 다양성, 궤적 최적화, ICRA2026",
       "tags": [
-        "#실내항공자율화",
-        "#시뮬-현실전이",
-        "#오픈소스플랫폼",
-        "#LiDARSLAM",
-        "#ESDF기반경로계획"
+        "#Planner"
       ],
-      "titleEN": "AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection",
-      "titleKO": "AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection",
-      "authorsEN": "Sasanka Kuruppu Arachchige, Juan Jose Garcia, Changda Tian, Lauri Suomela, Panos Trahanias, Adriana Tapus, Joni-Kristian Kämäräinen",
-      "authorsKO": "Sasanka Kuruppu Arachchige, Juan Jose Garcia, Changda Tian, Lauri Suomela, Panos Trahanias, Adriana Tapus, Joni-Kristian Kämäräinen",
-      "abstractEN": "Autonomous indoor flight for critical asset inspection presents fundamental challenges in perception, planning, control, and learning. Despite rapid progress, there is still a lack of a compact, active-sensing, open-source platform that is reproducible across simulation and real-world operation. To address this gap, we present Agipix, a co-designed open hardware and software platform for indoor aerial autonomy and critical asset inspection. Agipix features a compact, hardware-synchronized active-sensing platform with onboard GPU-accelerated compute that is capable of agile flight; a containerized ROS~2-based modular autonomy stack; and a photorealistic digital twin of the hardware platform together with a reliable UI. These elements enable rapid iteration via zero-shot transfer of containerized autonomy components between simulation and real flights. We demonstrate trajectory tracking and exploration performance using onboard sensing in industrial indoor environments. All hardware designs, simulation assets, and containerized software are released openly together with documentation.",
-      "abstractKO": "완전 오픈소스 실내 UAV 플랫폼(AgiREAL+AgiSIM+AgiSTACK)으로 ENRICH 2025 핵발전소 현장에서 제로샷 시뮬-현실 전이 검증 완료.",
+      "titleEN": "Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control",
+      "titleKO": "Uncertainty Guided Exploratory Trajectory Optimization for Sampling-Based Model Predictive Control",
+      "authorsEN": "O. Goktug Poyrazoglu, Yukang Cao, Rahul Moorthy, Volkan Isler",
+      "authorsKO": "O. Goktug Poyrazoglu, Yukang Cao, Rahul Moorthy, Volkan Isler",
+      "abstractEN": "Trajectory optimization depends heavily on initialization. In particular, sampling-based approaches are highly sensitive to initial solutions, and limited exploration frequently leads them to converge to local minima in complex environments. We present Uncertainty Guided Exploratory Trajectory Optimization (UGE-TO), a trajectory optimization algorithm that generates well-separated samples to achieve a better coverage of the configuration space. UGE-TO represents trajectories as probability distributions induced by uncertainty ellipsoids. Unlike sampling-based approaches that explore only in the action space, this representation captures the effects of both system dynamics and action selection. By incorporating the impact of dynamics, in addition to the action space, into our distributions, our method enhances trajectory diversity by enforcing distributional separation via the Hellinger distance between them. It enables a systematic exploration of the configuration space and improves robustness against local minima. Further, we present UGE-MPC, which integrates UGE-TO into sampling-based model predictive controller methods. Experiments demonstrate that UGE-MPC achieves higher exploration and faster convergence in trajectory optimization compared to baselines under the same sampling budget, achieving 72.1% faster convergence in obstacle-free environments and 66% faster convergence with a 6.7% higher success rate in the cluttered environment compared to the best-performing baseline. Additionally, we validate the approach through a range of simulation scenarios and real-world experiments. Our results indicate that UGE-MPC has higher success rates and faster convergence, especially in environments that demand significant deviations from nominal trajectories to avoid failures. The project and code are available at https://ogpoyrazoglu.github.io/cuniform_sampling/.",
+      "abstractKO": "샘플링 MPC, Hellinger 다양성, 궤적 최적화, ICRA2026",
       "detailTags": [
-        "#실내항공자율화",
-        "#시뮬-현실전이",
-        "#오픈소스플랫폼",
-        "#LiDARSLAM",
-        "#ESDF기반경로계획"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 44,
-      "reason": "**완전 오픈소스 시스템**: 하드웨어 설계(PCB, CAD) + 소프트웨어(Docker ROS 2) + 시뮬레이터 모두 공개\n**포토리얼리스틱 디지털 트윈(AgiSIM)**: UE5 기반, 점유 맵 IoU=0.96 달성\n**제로샷 시뮬-현실 전이**: 동일한 Docker 컨테이너로 시뮬/현실 배포\n**ENRICH 2025 실증**: 오스트리아 폐기 핵발전소에서 자율 점검 비행 (계획 거리 72% 완료)\n**ESDF-aware RRT* 경로 계획**: 실내 장애물 회피 + Frontier 기반 탐색",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/AgiPIX_ICUAS2026/index.html"
-    },
-    {
-      "id": "2604.08883",
-      "venue": "arXiv 2026",
-      "venueDetail": "arXiv 프리프린트",
-      "matchScore": 84,
-      "category": "VLN",
-      "feedTitle": "HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial Vision-and-Language Navigation",
-      "authorsShort": "C. Fan, C. Pan +3",
-      "feedAbstract": "도심 항공 VLN에서 하이브리드 IL-RL 훈련 + MacroPlanner/MicroActor 계층 구조 + SCConv 맵 인코더로 CityNav 벤치마크 SOTA 달성.",
-      "tags": [
-        "#VLN",
-        "#항공UAV내비게이션",
-        "#계층적계획",
-        "#시뮬레이션기반평가"
-      ],
-      "titleEN": "HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial Vision-and-Language Navigation",
-      "titleKO": "HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial Vision-and-Language Navigation",
-      "authorsEN": "Chengjie Fan, Cong Pan, Zijian Liu, Ningzhong Liu, Jie Qin",
-      "authorsKO": "Chengjie Fan, Cong Pan, Zijian Liu, Ningzhong Liu, Jie Qin",
-      "abstractEN": "Inspired by the general Vision-and-Language Navigation (VLN) task, aerial VLN has attracted widespread attention, owing to its significant practical value in applications such as logistics delivery and urban inspection. However, existing methods face several challenges in complex urban environments, including insufficient generalization to unseen scenes, suboptimal performance in long-range path planning, and inadequate understanding of spatial continuity. To address these challenges, we propose HTNav, a new collaborative navigation framework that integrates Imitation Learning (IL) and Reinforcement Learning (RL) within a hybrid IL-RL framework. This framework adopts a staged training mechanism to ensure the stability of the basic navigation strategy while enhancing its environmental exploration capability. By integrating a tiered decision-making mechanism, it achieves collaborative interaction between macro-level path planning and fine-grained action control. Furthermore, a map representation learning module is introduced to deepen its understanding of spatial continuity in open domains. On the CityNav benchmark, our method achieves state-of-the-art performance across all scene levels and task difficulties. Experimental results demonstrate that this framework significantly improves navigation precision and robustness in complex urban environments.",
-      "abstractKO": "도심 항공 VLN에서 하이브리드 IL-RL 훈련 + MacroPlanner/MicroActor 계층 구조 + SCConv 맵 인코더로 CityNav 벤치마크 SOTA 달성.",
-      "detailTags": [
-        "#VLN",
-        "#항공UAV내비게이션",
-        "#계층적계획",
-        "#시뮬레이션기반평가"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 42,
-      "reason": "**하이브리드 IL-RL 스테이지 훈련**: IL로 기본 정책 안정적 학습 후 PPO(λ=0.20)로 탐색 능력 향상\n**계층적 의사결정**: MacroPlanner(고수준 경유점)  + MicroActor(세밀 행동 제어) 협업\n**SCConv 맵 인코더**: 공간-채널 정보 동시 모델링으로 항공 위성 맵 특징 포착\n**CityNav SOTA**: 수정 CityNav*에서 NE 61.4m→40.3m (34.4% 감소), SR 25.49%",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HTNav_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.07957",
-      "venue": "arXiv 2026",
-      "venueDetail": "arXiv 프리프린트",
-      "matchScore": 84,
-      "category": "VLN",
-      "feedTitle": "WorldMAP: Bootstrapping Vision-Language Navigation Trajectory Prediction with Generative World Models",
-      "authorsShort": "H. Chen, S. Jiang +5",
-      "feedAbstract": "생성적 월드 모델의 미래 비디오를 3D 재구성 → 의미론적 그라운딩 → FMM 계획으로 변환하여 VLN 궤적 학습의 지도 신호로 활용하는 Teacher-Student 프레임워크.",
-      "tags": [
-        "#VLN",
-        "#시뮬레이션기반평가"
-      ],
-      "titleEN": "WorldMAP: Bootstrapping Vision-Language Navigation Trajectory Prediction with Generative World Models",
-      "titleKO": "WorldMAP: Bootstrapping Vision-Language Navigation Trajectory Prediction with Generative World Models",
-      "authorsEN": "Hongjin Chen, Shangyun Jiang, Tonghua Su, Chen Gao, Xinlei Chen, Yong Li, Zhibo Chen",
-      "authorsKO": "Hongjin Chen, Shangyun Jiang, Tonghua Su, Chen Gao, Xinlei Chen, Yong Li, Zhibo Chen",
-      "abstractEN": "Vision-language models (VLMs) and generative world models are opening new opportunities for embodied navigation. VLMs are increasingly used as direct planners or trajectory predictors, while world models support look-ahead reasoning by imagining future views. Yet predicting a reliable trajectory from a single egocentric observation remains challenging. Current VLMs often generate unstable trajectories, and world models, though able to synthesize plausible futures, do not directly provide the grounded signals needed for navigation learning. This raises a central question: how can generated futures be turned into supervision for grounded trajectory prediction? We present WorldMAP, a teacher--student framework that converts world-model-generated futures into persistent semantic-spatial structure and planning-derived supervision. Its world-model-driven teacher builds semantic-spatial memory from generated videos, grounds task-relevant targets and obstacles, and produces trajectory pseudo-labels through explicit planning. A lightweight student with a multi-hypothesis trajectory head is then trained to predict navigation trajectories directly from vision-language inputs. On Target-Bench, WorldMAP achieves the best ADE and FDE among compared methods, reducing ADE by 18.0% and FDE by 42.1% relative to the best competing baseline, while lifting a small open-source VLM to DTW performance competitive with proprietary models. More broadly, the results suggest that, in embodied navigation, the value of world models may lie less in supplying action-ready imagined evidence than in synthesizing structured supervision for navigation learning.",
-      "abstractKO": "생성적 월드 모델의 미래 비디오를 3D 재구성 → 의미론적 그라운딩 → FMM 계획으로 변환하여 VLN 궤적 학습의 지도 신호로 활용하는 Teacher-Student 프레임워크.",
-      "detailTags": [
-        "#VLN",
-        "#시뮬레이션기반평가"
+        "#Planner"
       ],
       "year": "2026",
       "citations": 0,
       "readMinutes": 54,
-      "reason": "**월드 모델의 역할 재정의**: 추론 도구가 아닌 훈련 시 구조화된 의사 레이블 생성기로 활용\n**3단계 교사 파이프라인**: DA3 깊이 추정 + UniPixel 분할 + FMM 경로 계획\n**다중 가설 예측**: K개 궤적 후보를 신뢰도 점수와 함께 예측하는 경량 학생 모델\n**방향 일관성 손실**: 위치 정확도와 경로 부드러움을 동시에 최적화\n**오픈소스 경쟁력**: 8B 모델이 GPT-5.4, Gemini-3-Pro 대비 ADE 18% FDE 42% 향상",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/WorldMAP_arxiv2026/index.html"
+      "reason": "샘플링 MPC, Hellinger 다양성, 궤적 최적화, ICRA2026",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/UGE-MPC_ICRA2026/index.html"
     },
     {
-      "id": "2604.07644",
+      "id": "2604.19267",
       "venue": "arXiv 2026",
       "matchScore": 93,
       "category": "Planner",
-      "feedTitle": "GPU-SLS: Safe Large-Scale Robust Nonlinear MPC in Milliseconds via Reachability-Constrained System Level Synthesis on the GPU",
-      "authorsShort": "J. Fang, G. Chou",
-      "feedAbstract": "GPU 병렬 결합 스캔과 ADMM 기반 QP 솔버로 System Level Synthesis 강건 MPC를 밀리초 단위에 푸는 프레임워크. 공식적 도달 가능 집합 제약으로 안전을 보장하면서 CPU OSQP 대비 340배(N=3000), FastSLS 대비 237배 가속을 달성했고, Unitree Go2 61차원 실제…",
+      "feedTitle": "ViLiNT: Multimodal Embodiment-Aware Navigation Transformer",
+      "authorsShort": "L. Dezons, Q. Picard +3",
+      "feedAbstract": "멀티모달 로컬 플래닝, RGB+LiDAR 융합, 구현 인식, Diffusion Policy, 충돌 회피",
       "tags": [
         "#Planner"
       ],
-      "titleEN": "GPU-SLS: Safe Large-Scale Robust Nonlinear MPC in Milliseconds via Reachability-Constrained System Level Synthesis on the GPU",
-      "titleKO": "GPU-SLS: GPU 상의 도달가능성 제약 System Level Synthesis로 구현한 밀리초 단위 대규모 강건 비선형 MPC",
-      "authorsEN": "Jeffrey Fang, Glen Chou",
-      "authorsKO": "Jeffrey Fang, Glen Chou",
-      "abstractEN": "We present GPU-SLS, a GPU-parallelized framework for safe, robust nonlinear model predictive control (MPC) that scales to high-dimensional uncertain robotic systems and long planning horizons. Our method jointly optimizes an inequality-constrained, dynamically-feasible nominal trajectory, a tracking controller, and a closed-loop reachable set under disturbance, all in real-time. To efficiently compute nominal trajectories, we develop a sequential quadratic programming procedure with a novel GPU-accelerated quadratic program (QP) solver that uses parallel associative scans and adaptive caching within an alternating direction method of multipliers (ADMM) framework. The same GPU QP backend is used to optimize robust tracking controllers and closed-loop reachable sets via system level synthesis (SLS), enabling reachability-constrained control in both fixed- and receding-horizon settings. We achieve substantial performance gains, reducing nominal trajectory solve times by 97.7% relative to state-of-the-art CPU solvers and 71.8% compared to GPU solvers, while accelerating SLS-based control and reachability by 237x. Despite large problem scales, our method achieves 100% empirical safety, unlike high-dimensional learning-based reachability baselines. We validate our approach on complex nonlinear systems, including whole-body quadrupeds (61D) and humanoids (75D), synthesizing robust control policies online on the GPU in 20 milliseconds on average and scaling to problems with 2 x 10^5 decision variables and 8 x 10^4 constraints. The implementation of our method is available at https://github.com/Jeff300fang/gpu_sls.",
-      "abstractKO": "GPU 병렬 결합 스캔과 ADMM 기반 QP 솔버로 System Level Synthesis 강건 MPC를 밀리초 단위에 푸는 프레임워크. 공식적 도달 가능 집합 제약으로 안전을 보장하면서 CPU OSQP 대비 340배(N=3000), FastSLS 대비 237배 가속을 달성했고, Unitree Go2 61차원 실제 하드웨어에서 50Hz 실시간 강건 MPC 제어를 최초로 시연했다.",
+      "titleEN": "ViLiNT: Multimodal Embodiment-Aware Navigation Transformer",
+      "titleKO": "ViLiNT: Multimodal Embodiment-Aware Navigation Transformer",
+      "authorsEN": "Louis Dezons, Quentin Picard, Rémi Marsal, François Goulette, David Filliat",
+      "authorsKO": "Louis Dezons, Quentin Picard, Rémi Marsal, François Goulette, David Filliat",
+      "abstractEN": "Goal-conditioned navigation models for ground robots trained using supervised learning show promising zero-shot transfer, but their collision-avoidance capability nevertheless degrades under distribution shift, i.e. environmental, robot or sensor configuration changes. We propose ViLiNT a multimodal, attention-based policy for goal navigation, trained on heterogeneous data from multiple platforms and environments, which improves robustness with two key features. First, we fuse RGB images, 3D LiDAR point clouds, a goal embedding and a robot's embodiment descriptor with a transformer architecture to capture complementary geometry and appearance cues. The transformer's output is used to condition a diffusion model that generates navigable trajectories. Second, using automatically generated offline labels, we train a path clearance prediction head for scoring and ranking trajectories produced by the diffusion model. The diffusion conditioning as well as the trajectory ranking head depend on a robot's embodiment token that allows our model to generate and select trajectories with respect to the robot's dimensions. Across three simulated environments, ViLiNT improves Success Rate on average by 166\\% over equivalent state-of-the-art vision-only baseline (NoMaD). This increase in performance is confirmed through real-world deployments of a rover navigating in obstacle fields. These results highlight that combining multimodal fusion with our collision prediction mechanism leads to improved off-road navigation robustness.",
+      "abstractKO": "멀티모달 로컬 플래닝, RGB+LiDAR 융합, 구현 인식, Diffusion Policy, 충돌 회피",
       "detailTags": [
         "#Planner"
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 58,
-      "reason": "GPU 병렬 결합 스캔과 ADMM 기반 QP 솔버로 System Level Synthesis 강건 MPC를 밀리초 단위에 푸는 프레임워크. 공식적 도달 가능 집합 제약으로 안전을 보장하면서 CPU OSQP 대비 340배(N=3000), FastSLS 대비 237배 가속을 달성했고, Unitree Go2 61차원 실제 하드웨어에서 50Hz 실시간 강건 MPC 제어를 최초로 시연했다.",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/GPU-SLS_arxiv2026/index.html"
+      "readMinutes": 45,
+      "reason": "멀티모달 로컬 플래닝, RGB+LiDAR 융합, 구현 인식, Diffusion Policy, 충돌 회피",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ViLiNT_arxiv2026/index.html"
     },
     {
-      "id": "2411.17820",
-      "venue": "CVPR 2025",
-      "venueDetail": "CVPR 2025",
-      "matchScore": 96,
+      "id": "2604.21138",
+      "venue": "arXiv 2026",
+      "matchScore": 93,
+      "category": "Planner",
+      "feedTitle": "WayPlan: Navigating the Clutter — Waypoint-Based Bi-Level Planning for Multi-Robot Systems",
+      "authorsShort": "J. Ji, Y. Chen +5",
+      "feedAbstract": "다중로봇 TAMP, 2계층 LLM, RLVR, 웨이포인트, BoxNet3D-OBS",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "WayPlan: Navigating the Clutter — Waypoint-Based Bi-Level Planning for Multi-Robot Systems",
+      "titleKO": "WayPlan: Navigating the Clutter — Waypoint-Based Bi-Level Planning for Multi-Robot Systems",
+      "authorsEN": "Jiabao Ji, Yongchao Chen, Yang Zhang, Ramana Rao Kompella, Chuchu Fan, Gaowen Liu, Shiyu Chang",
+      "authorsKO": "Jiabao Ji, Yongchao Chen, Yang Zhang, Ramana Rao Kompella, Chuchu Fan, Gaowen Liu, Shiyu Chang",
+      "abstractEN": "Multi-robot control in cluttered environments is a challenging problem that involves complex physical constraints, including robot-robot collisions, robot-obstacle collisions, and unreachable motions. Successful planning in such settings requires joint optimization over high-level task planning and low-level motion planning, as violations of physical constraints may arise from failures at either level. However, jointly optimizing task and motion planning is difficult due to the complex parameterization of low-level motion trajectories and the ambiguity of credit assignment across the two planning levels. In this paper, we propose a hybrid multi-robot control framework that jointly optimizes task and motion planning. To enable effective parameterization of low-level planning, we introduce waypoints, a simple yet expressive representation for motion trajectories. To address the credit assignment challenge, we adopt a curriculum-based training strategy with a modified RLVR algorithm that propagates motion feasibility feedback from the motion planner to the task planner. Experiments on BoxNet3D-OBS, a challenging multi-robot benchmark with dense obstacles and up to nine robots, show that our approach consistently improves task success over motion-agnostic and VLA-based baselines. Our code is available at https://github.com/UCSB-NLP-Chang/navigate-cluster",
+      "abstractKO": "다중로봇 TAMP, 2계층 LLM, RLVR, 웨이포인트, BoxNet3D-OBS",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 41,
+      "reason": "다중로봇 TAMP, 2계층 LLM, RLVR, 웨이포인트, BoxNet3D-OBS",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/WayPlan_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.16298",
+      "venue": "CVPR 2026",
+      "matchScore": 87,
       "category": "VLN",
-      "feedTitle": "CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos",
-      "authorsShort": "X. Liu, J. Li +7",
-      "feedAbstract": "2000시간 이상의 웹 규모 도시 보행/운전 비디오로 학습한 구체화된 에이전트로, 비용 많은 주석 없이 대규모 모방학습으로 도시 네비게이션 정책을 학습.",
+      "feedTitle": "FineCog-Nav: Fine-Grained Cognitive Navigation Framework for Aerial VLN",
+      "authorsShort": "D. Shao, Z. Xu +5",
+      "feedAbstract": "항공 VLN, 인지 모듈, LLM 기반, AerialVLN-Fine, CVPR2026",
       "tags": [
         "#VLN"
       ],
-      "titleEN": "CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos",
-      "titleKO": "CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos",
-      "authorsEN": "Xinhao Liu, Jintong Li, Yicheng Jiang, Niranjan Sujay, Zhicheng Yang, Juexiao Zhang, John Abanes, Jing Zhang, Chen Feng",
-      "authorsKO": "Xinhao Liu, Jintong Li, Yicheng Jiang, Niranjan Sujay, Zhicheng Yang, Juexiao Zhang, John Abanes, Jing Zhang, Chen Feng",
-      "abstractEN": "Navigating dynamic urban environments presents significant challenges for embodied agents, requiring advanced spatial reasoning and adherence to common-sense norms. Despite progress, existing visual navigation methods struggle in map-free or off-street settings, limiting the deployment of autonomous agents like last-mile delivery robots. To overcome these obstacles, we propose a scalable, data-driven approach for human-like urban navigation by training agents on thousands of hours of in-the-wild city walking and driving videos sourced from the web. We introduce a simple and scalable data processing pipeline that extracts action supervision from these videos, enabling large-scale imitation learning without costly annotations. Our model learns sophisticated navigation policies to handle diverse challenges and critical scenarios. Experimental results show that training on large-scale, diverse datasets significantly enhances navigation performance, surpassing current methods. This work shows the potential of using abundant online video data to develop robust navigation policies for embodied agents in dynamic urban settings. Project homepage is at https://ai4ce.github.io/CityWalker/.",
-      "abstractKO": "2000시간 이상의 웹 규모 도시 보행/운전 비디오로 학습한 구체화된 에이전트로, 비용 많은 주석 없이 대규모 모방학습으로 도시 네비게이션 정책을 학습.",
+      "titleEN": "FineCog-Nav: A Fine-Grained Cognitive Navigation Framework for Aerial Vision-Language Navigation",
+      "titleKO": "FineCog-Nav: A Fine-Grained Cognitive Navigation Framework for Aerial Vision-Language Navigation",
+      "authorsEN": "Dian Shao, Zhengzheng Xu, Peiyang Wang, Like Liu, Yule Wang, Jieqi Shi (교신저자), Jing Huo",
+      "authorsKO": "Dian Shao, Zhengzheng Xu, Peiyang Wang, Like Liu, Yule Wang, Jieqi Shi (교신저자), Jing Huo",
+      "abstractEN": "UAV vision-language navigation (VLN) requires an agent to navigate complex 3D environments from an egocentric perspective while following ambiguous multi-step instructions over long horizons. Existing zero-shot methods remain limited, as they often rely on large base models, generic prompts, and loosely coordinated modules. In this work, we propose FineCog-Nav, a top-down framework inspired by human cognition that organizes navigation into fine-grained modules for language processing, perception, attention, memory, imagination, reasoning, and decision-making. Each module is driven by a moderate-sized foundation model with role-specific prompts and structured input-output protocols, enabling effective collaboration and improved interpretability. To support fine-grained evaluation, we construct AerialVLN-Fine, a curated benchmark of 300 trajectories derived from AerialVLN, with sentence-level instruction-trajectory alignment and refined instructions containing explicit visual endpoints and landmark references. Experiments show that FineCog-Nav consistently outperforms zero-shot baselines in instruction adherence, long-horizon planning, and generalization to unseen environments. These results suggest the effectiveness of fine-grained cognitive modularization for zero-shot aerial navigation. Project page: https://smartdianlab.github.io/projects-FineCogNav.",
+      "abstractKO": "항공 VLN, 인지 모듈, LLM 기반, AerialVLN-Fine, CVPR2026",
       "detailTags": [
         "#VLN"
       ],
-      "year": "2024",
+      "year": "2026",
       "citations": 0,
-      "readMinutes": 59,
-      "reason": "웹에서 추출한 대규모 도시 비디오 데이터셋 활용 (2000시간 이상)\n확장 가능한 데이터 처리 파이프라인으로 자동 행동 레이블링\n도시 환경의 다양한 도전 시나리오 처리 (off-street, 동적 환경 등)\n기존 방법 대비 우수한 네비게이션 성능\n대규모 다양한 데이터셋으로 학습한 정책의 강력한 성능",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/CityWalker_CVPR2025/index.html"
+      "readMinutes": 46,
+      "reason": "항공 VLN, 인지 모듈, LLM 기반, AerialVLN-Fine, CVPR2026",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/FineCogNav_CVPR2026/index.html"
+    },
+    {
+      "id": "2604.15074",
+      "venue": "TAES 2026",
+      "matchScore": 84,
+      "category": "Planner",
+      "feedTitle": "Enhanced Tube-RRT*: Trajectory Planning for 3-UAV Cascaded Rigid-Payload Transport",
+      "authorsShort": "J. (Member, IEEE) +5",
+      "feedAbstract": "UAV, 페이로드 운반, Tube-RRT*, Bayesian 샘플링, IEEE TAES",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "Enhanced Tube-RRT*: Trajectory Planning Algorithm for 3-UAV Cascaded Rigid-Payload Transportation Systems",
+      "titleKO": "Enhanced Tube-RRT*: Trajectory Planning Algorithm for 3-UAV Cascaded Rigid-Payload Transportation Systems",
+      "authorsEN": "Jianqiao Yu (Member, IEEE), Jia Li (Member, IEEE), Tianhua Gao (Member, IEEE, 교신저자)",
+      "authorsKO": "Jianqiao Yu (Member, IEEE), Jia Li (Member, IEEE), Tianhua Gao (Member, IEEE, 교신저자)",
+      "abstractEN": "This paper presents a two-stage trajectory planning framework for a multi-UAV rigid-payload cascaded transportation system, aiming to address planning challenges in densely cluttered environments. In Stage I, an Enhanced Tube-RRT* algorithm is developed by integrating active hybrid sampling and an adaptive expansion strategy, enabling rapid generation of a safe and feasible virtual tube in environments with dense obstacles. Moreover, a trajectory smoothness cost is explicitly incorporated into the edge cost to reduce excessive turns and thereby mitigate cable-induced oscillations. Simulation results demonstrate that the proposed Enhanced Tube-RRT* achieves a higher success rate and effective sampling rate than mixed-sampling Tube-RRT* (STube-RRT*) and adaptive-extension Tube-RRT* (AETube-RRT*), while producing a shorter optimal path with a smaller cumulative turning angle. In Stage II, a convex quadratic program is formulated by considering payload translational and rotational dynamics, cable tension constraints, and collision-safety constraints, yielding a smooth, collision-free desired payload trajectory. Finally, a centralized geometric control scheme is applied to the cascaded system to validate the effectiveness and feasibility of the proposed planning framework, offering a practical solution for payload attitude maneuvering in densely cluttered environments.",
+      "abstractKO": "UAV, 페이로드 운반, Tube-RRT*, Bayesian 샘플링, IEEE TAES",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 49,
+      "reason": "UAV, 페이로드 운반, Tube-RRT*, Bayesian 샘플링, IEEE TAES",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TubeRRT_TAES2026/index.html"
     },
     {
       "id": "2403.06828",
