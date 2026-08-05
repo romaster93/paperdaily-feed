@@ -1,0 +1,944 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>From Routes to Steps: Separating Semantic Progress from Local Execution in Vision-and-Language Navigation · PaperDaily</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { color: #8f4023; text-decoration: underline; }
+
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
+
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
+}
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
+article code.math-display {
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
+}
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
+article th {
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
+article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: var(--mono); font-size: 12px; text-align: center;
+}
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
+footer {
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
+</head>
+<body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2608.03143">arXiv ↗</a>
+</div>
+<div class="wrap">
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">Route2Step_arxiv2026</span>
+    </div>
+    <h1 class="doc-title">From Routes to Steps: Separating Semantic Progress from Local Execution in Vision-and-Language Navigation: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 2026 (v1, 16 pages / 9 figures) — 탑티어 확정 정보 없음</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2608.03143">2608.03143</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">✅ <a href="https://github.com/Sisyphus-hxy/Route2Step">github.com/Sisyphus-hxy/Route2Step</a> (소스+Qwen2.5-VL-3B 체크포인트 공개, 가공 감독 데이터는 미공개, 라이선스 미명시)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">🌐 <a href="https://sisyphus-hxy.github.io/Route2Step/">sisyphus-hxy.github.io/Route2Step/</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-08-06</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">46KB · 약 47분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
+  </header>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: From Routes to Steps: Separating Semantic Progress from Local Execution in Vision-and-Language Navigation</li>
+<li><strong>저자 (Authors)</strong>: Xiangyun Huang, Xiangchen Wang, Runfeng Lin, Yihao Xu, Kangyu Huang</li>
+<li><strong>소속 (Affiliation)</strong>: (arXiv 프리프린트 기재 기준, 소속 미확정)</li>
+<li><strong>발표처 (Published)</strong>: arXiv 2026 (v1, 2026-08-04, 16 pages / 9 figures) — 탑티어 학회 확정 정보 없음(미확정)</li>
+<li><strong>DOI</strong>: (미확정)</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2608.03143">2608.03143</a></li>
+<li><strong>코드 (Code)</strong>: ✅ <a href="https://github.com/Sisyphus-hxy/Route2Step">Sisyphus-hxy/Route2Step</a> — 실제 소스 공개(Python: <code>agent_dual_qwen2_5_lm.py</code>, <code>eval_qwen2_5_dual_lm.sh</code>, <code>vln_path_metrics.py</code>, <code>DAgger/</code>, <code>habitat_vln/</code>, <code>seg/</code>, <code>configs/</code>), MIA/MAG 체크포인트(Qwen2.5-VL-3B) HuggingFace 공개, <strong>가공 감독 데이터는 미공개</strong>. 라이선스 미명시.</li>
+<li><strong>프로젝트 페이지 (Project)</strong>: ✅ <a href="https://sisyphus-hxy.github.io/Route2Step/">sisyphus-hxy.github.io/Route2Step</a></li>
+</ul>
+<blockquote>
+<p><strong>트랙 판정 노트</strong>: 본 논문은 자연어 route-level 지시를 따라 연속 환경(Continuous Environment, CE)에서 이동하는 전형적 Vision-and-Language Navigation(VLN) 과제를 다룬다. R2R-CE / RxR-CE 벤치마크, egocentric RGB 관측, 저수준 이동 액션 청크 생성이 모두 VLN 정의에 부합하므로 <strong>VLN 트랙 in-scope</strong>로 확정한다. (매니퓰레이션·VLA·자율주행 요소 없음.)</p>
+</blockquote>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>VLN 에이전트는 하나의 긴 route-level 지시(예: <em>&quot;거실을 지나 복도로 나가서, 첫 번째 문에서 오른쪽으로 돌아 계단 앞에서 멈춰라&quot;</em>)를 받아, 이를 구성하는 여러 <strong>하위 단계(sub-instruction/step)</strong>를 egocentric 시각 관측으로부터 순차 실행해야 한다. 이 과제에는 서로 성격이 다른 두 가지 능력이 동시에 얽혀 있다.</p>
+<ol>
+<li><strong>의미적 진행도 추적(semantic progress tracking)</strong> — &quot;지금 나는 지시문의 <em>어느</em> 하위 단계를 수행 중인가?&quot;를 아는 능력. 이는 route 전체와 지금까지의 이동 이력을 대조하여 현재 활성 하위 지시를 식별·갱신하는, 본질적으로 <strong>정렬(alignment)·판단</strong> 문제다.</li>
+<li><strong>국소 실행(local execution)</strong> — &quot;그 하위 단계를 지금 시야에서 <em>어떻게</em> 수행하는가?&quot;를 결정하는 능력. 이는 최근 관측을 보고 저수준 이동 액션을 생성하는 <strong>제어(control)</strong> 문제다.</li>
+</ol>
+<p>기존 VLM 기반 내비게이터(NaVid, Uni-NaVid, NaVILA, StreamVLN 등)의 지배적 관행은 이 둘을 <strong>하나의 next-action 예측 목적함수로 동시에 감독</strong>하는 것이다. 즉 매 스텝 정답 액션 라벨만 주고, 모델이 &quot;어디까지 왔는지&quot;와 &quot;지금 뭘 해야 하는지&quot;를 암묵적으로 함께 학습하도록 맡긴다. 저자들은 이 통합 감독이 <strong>오류 귀속(error attribution)의 붕괴</strong>를 일으킨다고 지적한다:</p>
+<blockquote>
+<p>에이전트가 경로를 이탈했을 때, 교정 액션 라벨은 &quot;다음 한 발&quot;은 복구시키지만, 실패의 <em>원인</em>이 (a) <strong>잘못된 하위 지시를 골랐기 때문(진행도 추적 오류)</strong>인지 (b) <strong>올바른 하위 지시를 실행하지 못했기 때문(실행 오류)</strong>인지 구분하지 못한다. 결과적으로 두 오류가 같은 손실 신호로 뭉개져, 에이전트는 &quot;틀린 단계를 계속 확신에 차서 실행&quot;하는 병리에 빠질 수 있다.</p>
+</blockquote>
+<p><strong>본 논문의 목표</strong>는 이 두 능력을 <strong>명시적 step-level 인터페이스로 분리(decouple)</strong>하여, 각각을 그 성격에 맞는 감독 신호로 학습시키는 것이다. 구체적으로:</p>
+<ul>
+<li><strong>의미적 진행도</strong>는 상태 수준의 교정(state-level correction)으로 감독하고,</li>
+<li><strong>국소 실행</strong>은 반복 실패가 관찰될 때만 선별적 액션 감독(selective action supervision)으로 강화한다.</li>
+</ul>
+<p>이 &quot;수준 분리 교정(level-separated correction)&quot; 전략을 통해, 저자들은 R2R-CE / RxR-CE에서 통합 감독 기반의 강 베이스라인(StreamVLN 등)을 능가하고, 특히 <strong>경로 이탈 후 복구(deviated recovery)</strong> 상황에서 큰 강건성 이득을 얻으며, 실세계 실내·실외 실험에서 이를 검증한다.</p>
+<hr>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) 오류 귀속의 붕괴 (Entangled Error Attribution).</strong>
+next-action 예측 단일 감독 하에서, 손실은 &quot;모델이 낸 액션과 전문가 액션의 불일치&quot;만 측정한다. 그러나 이 불일치는 두 개의 매우 다른 실패 모드가 중첩된 결과다.</p>
+<pre class="diagram"><code>route-level 지시 = [step_1, step_2, ..., step_K]
+
+관측된 실패 (액션 불일치)
+        │
+        ├── 모드 A: 진행도 추적 오류
+        │     &quot;현재 활성 단계를 step_3 로 잘못 판단&quot;
+        │     → 올바른 step_2 를 무시하고 step_3 를 실행
+        │     (에이전트는 자신이 옳다고 &#39;확신&#39;함)
+        │
+        └── 모드 B: 국소 실행 오류
+              &quot;활성 단계 step_2 는 맞게 골랐으나
+               시야에서 문·모서리를 잘못 지나침&quot;
+
+두 모드가 하나의 액션 손실로 뭉개짐 → 무엇을 고쳐야 할지 신호 없음
+</code></pre>
+<p><strong>(C2) 시간적 정렬 라벨의 부재 (No Temporal Alignment Labels).</strong>
+&quot;지금이 지시문의 몇 번째 하위 단계인가&quot;를 학습시키려면, 궤적의 각 시점 <code class="math">t</code> 에 정답 하위 지시 인덱스를 매핑한 라벨이 필요하다. 그러나 R2R/RxR류 데이터셋은 route-level 지시와 전체 궤적만 제공할 뿐, <strong>하위 지시↔궤적 구간의 세밀한 시간 정렬(fine-grained temporal alignment)을 주지 않는다.</strong> 사람이 이를 어노테이션하는 것은 비용이 크고 확장 불가능하다.</p>
+<p><strong>(C3) 이탈 후 복구의 취약성 (Fragility under Deviation).</strong>
+전문가 궤적(expert path)만으로 학습한 정책은 &quot;정상 경로 위(on-path)&quot; 분포에만 강하다. 실제 배포에서는 관측 노이즈·모션 드리프트로 경로를 벗어나는데, 이 <strong>off-distribution(deviated) 상태</strong>에서 진행도 추적이 급격히 무너진다. 표준 DAgger는 전문가 재라벨을 붙여 이를 완화하려 하지만, 재라벨을 <strong>액션 수준에서 무차별적으로</strong> 주면 (C1)의 귀속 붕괴가 그대로 재현된다.</p>
+<p><strong>(C4) 통합 정책의 용량 상충 (Capacity Interference in Unified Policy).</strong>
+하나의 VLM이 &quot;장기 route 이해(느린, 판단적)&quot;와 &quot;즉각 이동 제어(빠른, 반응적)&quot;를 동시에 짊어지면, 서로 다른 시간 스케일·추론 양식이 같은 파라미터를 두고 경쟁한다. 저자들의 관측(Table 4)에서, <strong>더 큰 7B 통합 모델</strong>이 진행도 정확도(on-path)는 높였으나 실제 내비게이션 SR/SPL은 오히려 낮았다 — 즉 &quot;진행도를 잘 아는 것&quot;과 &quot;잘 이동하는 것&quot;이 통합 구조에서 자동으로 함께 오지 않는다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>본 논문의 해결책은 세 개의 축으로 요약된다.</p>
+<ol>
+<li><strong>모듈 분리(module separation)</strong> — 진행도 추적 전용 모듈 <strong>MIA(Instruction Analysis Module)</strong>와 국소 실행 전용 모듈 <strong>MAG(Action Generation Module)</strong>로 정책을 이원화한다. MIA는 &quot;어느 단계 + 실행 상태(정상/복구중)&quot;를 출력하고, MAG는 그 명시적 상태를 조건으로 받아 액션 청크를 생성한다.</li>
+<li><strong>감독 신호 분리(supervision separation)</strong> — 의미적 진행도는 <strong>상태 수준 교정(190K)</strong>, 국소 실행은 <strong>반복 실패에만 선별적 액션 교정(11.5K)</strong>. 이 &quot;수준 분리 교정&quot;이 통합 DAgger(200K)를 능가한다.</li>
+<li><strong>라벨-프리 정렬(label-free alignment)</strong> — <strong>E-SPA</strong>가 수작업 시간 라벨 없이 하위 지시를 궤적 구간에 자기지도로 정렬하여 (C2)를 해소한다.</li>
+</ol>
+<hr>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 명시적 step-level 인터페이스: MIA ↔ MAG 이원화</h3>
+<p>Route2Step의 근간은 정책을 두 개의 협력 모듈로 나누고, 그 사이에 <strong>명시적이고 사람이 읽을 수 있는(step-level) 인터페이스</strong>를 두는 것이다.</p>
+<pre class="diagram"><code>                    route-level 지시 I = [c_1, c_2, ..., c_K]
+                    (c_k = k번째 하위 지시)
+                              │
+        ┌─────────────────────┴──────────────────────┐
+        │                                             │
+        ▼                                             │
+┌──────────────────────┐                              │
+│  MIA                 │   시각 이력                  │
+│  (Instruction        │◀── {o_{t-13}, ..., o_t}      │
+│   Analysis Module)   │    (13 historical + 3 recent)│
+│                      │                              │
+│  출력:               │                              │
+│   • 활성 하위지시 ĉ_t │                              │
+│   • 실행 상태 s_t     │─── s_t ∈ {Normal, Recover}   │
+│     (정상 / 복구중)   │        │                     │
+└──────────────────────┘        │                     │
+        │ ĉ_t (활성 step 텍스트)  │ s_t                 │
+        ▼                        ▼                     ▼
+┌───────────────────────────────────────────────────────┐
+│  MAG (Action Generation Module)                        │
+│   입력: 활성 하위지시 ĉ_t + 실행상태 s_t + 최근 관측   │
+│         {o_{t-7}, ..., o_t} (8 obs)                     │
+│   출력: 저수준 액션 청크 a_{t:t+3} (최대 3 액션)        │
+└───────────────────────────────────────────────────────┘
+        │
+        ▼
+    환경 스텝 → 새 관측 o_{t+1} → (루프)
+</code></pre>
+<ul>
+<li><strong>MIA</strong>는 전체 route 지시와 시각 이력을 받아 <strong>(i) 현재 활성 하위 지시 <code class="math">\hat c_t</code></strong>와 <strong>(ii) 실행 상태 <code class="math">s_t</code>(정상 Normal / 복구중 Recovering)</strong>를 예측한다. 이는 &quot;나는 지금 지시문의 어디에 있고, 정상 진행 중인가 아니면 이탈을 복구하는 중인가&quot;라는 <strong>의미적 자기 위치추정(semantic self-localization)</strong>에 해당한다.</li>
+<li><strong>MAG</strong>는 MIA가 넘겨준 <strong>명시적 진행 상태</strong>(활성 하위 지시 + 실행 상태)를 조건으로, 최근 관측만 보고 <strong>국소 액션 청크</strong>를 생성한다. MAG는 route 전체를 다시 파싱할 필요 없이 &quot;지금 이 한 단계&quot;에만 집중한다.</li>
+</ul>
+<p>이 인터페이스가 핵심인 이유: <strong>오류가 어느 모듈에서 났는지 관측 가능(observable)해진다.</strong> MIA의 <code class="math">\hat c_t</code>가 틀리면 진행도 오류, MIA는 맞았는데 액션이 틀리면 실행 오류로 <strong>분리 귀속</strong>된다. 이 관측 가능성이 §3.3의 수준 분리 교정을 가능하게 하는 전제다.</p>
+<p>두 모듈 모두 백본은 <strong>Qwen2.5-VL-3B</strong>이며, 코드상 <code>agent_dual_qwen2_5_lm.py</code>가 두 LM을 함께 구동하는 dual-LM 에이전트다.</p>
+<h3>3.2 E-SPA: 라벨 없는 하위 지시–궤적 정렬 (Explicit Sub-instruction Progress Alignment)</h3>
+<p>MIA를 학습시키려면 &quot;각 시점의 정답 활성 하위 지시&quot;가 필요하지만 (C2)에서 보았듯 그런 라벨이 없다. <strong>E-SPA</strong>는 이를 <strong>자기지도 정렬</strong>로 만들어낸다. 개념적으로, route 지시를 <code class="math">K</code>개의 하위 지시로 분해하고, 전체 궤적을 <code class="math">K</code>개의 연속 구간으로 나눈 뒤, 각 구간을 각 하위 지시에 <strong>단조(monotonic)·중복 없이</strong> 대응시키는 최적 분할을 찾는다.</p>
+<p>E-SPA의 목적함수는 세 항의 가중합으로 구성된다(공개된 계수):</p>
+<pre class="codeblock"><code>L_ESPA = λ_sem · L_sem  +  λ_act · L_act  +  λ_dur · L_dur
+
+  λ_sem = 0.40   (의미 정렬: 하위지시 텍스트 ↔ 구간 시각특징 유사도)
+  λ_act = 0.60   (액션 일관성: 정렬된 구간이 그 하위지시에 부합하는
+                  액션을 산출하는가)
+  λ_dur = 0.05   (지속시간 정규화: 구간 길이 분포가 비현실적으로
+                  치우치지 않도록)
+</code></pre>
+<ul>
+<li><strong><code class="math">L_{sem}</code> (의미 정렬 항)</strong>: 하위 지시 <code class="math">c_k</code>의 언어 임베딩과, 그에 배정된 궤적 구간의 시각 표현 간 정합도를 높인다. &quot;이 구간의 장면이 이 하위 지시가 서술하는 상황과 맞는가&quot;를 강제한다.</li>
+<li><strong><code class="math">L_{act}</code> (액션 일관성 항, 최대 가중 0.6)</strong>: 정렬이 옳다면, 그 구간에서 MAG가 그 하위 지시를 조건으로 생성하는 액션이 전문가 액션과 일치해야 한다. 즉 <strong>정렬 품질을 실행 신호로 역검증</strong>한다. 가장 큰 가중을 받는다는 점은, 저자들이 &quot;정렬은 최종적으로 행동으로 환원되어야 의미 있다&quot;는 관점을 취함을 보여준다.</li>
+<li><strong><code class="math">L_{dur}</code> (지속시간 정규화, 가중 0.05)</strong>: 한 하위 지시가 궤적의 대부분을 삼키거나 반대로 0에 가깝게 붕괴하는 퇴화 해를 억제하는 약한 정규화.</li>
+</ul>
+<p>이 라벨-프리 정렬로 얻은 (시점 → 활성 하위 지시) 매핑이 MIA의 감독 타깃이 된다. 결정적으로, 저자들은 <strong>사람이 어노테이션한 정렬(FG-R2R, Landmark-RxR)은 학습에서 완전히 배제하고 외부 평가 전용으로만</strong> 사용했다 — 즉 E-SPA는 인간 정렬 라벨 없이 학습되며, 그 정렬 품질이 인간 기준으로 얼마나 좋은지를 별도 홀드아웃으로 정직하게 측정한다.</p>
+<h3>3.3 수준 분리 교정 (Level-Separated Correction) — 논문의 심장</h3>
+<p>Route2Step의 성능 이득 대부분이 여기서 나온다(Table 2). 핵심 통찰: <strong>진행도 오류와 실행 오류는 서로 다른 &quot;수준&quot;의 교정을 요구하며, 이를 같은 액션 손실로 처리하면 안 된다.</strong></p>
+<p>기존 DAgger식 온라인 교정은 롤아웃 중 방문한 상태마다 전문가 액션을 재라벨하여 액션 손실로 넣는다(200K 규모). Route2Step은 이를 두 개의 분리된 교정 채널로 대체한다.</p>
+<pre class="diagram"><code>온라인 롤아웃(온도 0.5로 확률적 탐색) 중 상태 방문
+        │
+        ├──[채널 1] 상태 수준 교정 (State-level Correction) — 190K
+        │     대상: MIA
+        │     신호: &quot;이 상태에서 활성 하위지시가 무엇이고,
+        │            정상인가 복구중인가&quot;의 정답 (E-SPA로 생성)
+        │     의미: 진행도 추적을 &#39;판단&#39; 수준에서 교정.
+        │           경로 이탈 상태에서도 올바른 단계를 되찾도록.
+        │     규모가 큼(190K) — 진행도는 자주, 밀도 높게 교정
+        │
+        └──[채널 2] 선별적 액션 교정 (Selective Action Correction) — 11.5K
+              대상: MAG
+              신호: 전문가 액션 라벨
+              조건: &#39;반복되는 국소 실행 실패&#39;가 관찰된 경우에만
+              의미: 실행이 구조적으로 막히는 소수 지점만 골라
+                    액션 수준에서 교정. 규모가 작음(11.5K, 전체의 ~6%)
+</code></pre>
+<p><strong>왜 이렇게 나누는가.</strong> 진행도 추적은 &quot;어디까지 왔는지&quot;에 대한 판단이라 이탈 상태를 포함해 <strong>광범위하게, 자주</strong> 교정해야 강건해진다(→ 190K, 큰 규모). 반면 국소 실행은 대부분의 지점에서 이미 전문가 궤적으로 충분히 학습되고, <strong>구조적으로 반복 실패하는 소수 병목</strong>(좁은 문, 애매한 분기 등)만 추가 교정하면 된다(→ 11.5K, 선별적). 무차별 액션 재라벨(200K)은 이 구분을 못 해서, 잘 되는 지점까지 액션 손실로 흔들고 (C1)의 귀속 붕괴를 재생산한다.</p>
+<p><strong>정량적 증거 (Table 2, R2R-CE Val-Unseen SR / SPL):</strong></p>
+<pre class="codeblock"><code>Expert-path only .................... 48.1 / 43.3   (교정 없음, 하한)
+State-level correction (190K) ....... 50.6 / 44.7   (진행도만 교정)
+Selective action (11.5K) ............ 49.4 / 44.8   (실행만 교정)
+Conventional DAgger (200K) .......... 49.8 / 44.4   (통합 액션 재라벨)
+Level-separated (190K + 11.5K) ...... 55.3 / 48.2   ★ 본 방법
+</code></pre>
+<p>주목할 점: 두 채널을 <strong>따로</strong> 쓰면 각각 +2점 안팎에 그치지만(50.6, 49.4), <strong>함께</strong> 쓰면 55.3으로 <strong>상승 효과(synergy)</strong>가 크다(+7.2 vs 하한). 그리고 같은 규모(≈200K)의 통합 DAgger(49.8)를 <strong>+5.5점</strong> 앞선다 — 즉 <strong>데이터 양이 아니라 감독의 &quot;수준 배치&quot;가 이득의 원천</strong>임을 통제 실험으로 보인다. 이것이 논문의 가장 강한 주장이다.</p>
+<h3>3.4 실행 상태 인터페이스: 명시적 복구 신호 (Execution-State Interface)</h3>
+<p>MIA가 내보내는 두 번째 출력 <code class="math">s_t \in \{\text{Normal}, \text{Recovering}\}</code>의 가치를 저자들은 Table 3로 격리 검증한다.</p>
+<pre class="codeblock"><code>Implicit recovery (상태 비명시, 암묵 복구) ...... 51.0 / 44.1
+Fixed &#39;Normal&#39; state (항상 정상으로 고정) ....... 53.2 / 47.6
+Predicted state (MIA가 상태 예측) ............... 55.3 / 48.2   ★
+</code></pre>
+<ul>
+<li><strong>암묵 복구(51.0)</strong>: MAG가 상태 정보 없이 알아서 복구해야 하는 기존 방식. 가장 약함.</li>
+<li><strong>정상 고정(53.2)</strong>: 상태를 항상 Normal로 넣어도, &quot;활성 하위 지시를 명시적으로 넘겨주는&quot; 인터페이스 자체만으로 이미 +2.2 이득.</li>
+<li><strong>예측 상태(55.3)</strong>: MIA가 복구중 여부까지 명시하면 추가 +2.1. 에이전트가 &quot;지금 이탈 복구 중&quot;임을 알면 MAG가 더 신중한(복구지향) 액션을 낸다.</li>
+</ul>
+<p>이는 <strong>&quot;복구는 암묵적으로 배우는 능력이 아니라 명시적으로 신호되어야 하는 상태&quot;</strong>라는 설계 철학을 정량화한다.</p>
+<h3>3.5 확률적 롤아웃과 온라인 데이터 수집</h3>
+<p>교정 데이터(190K + 11.5K)는 정책을 온도 <code class="math">\tau=0.5</code>로 <strong>확률적으로 롤아웃</strong>하며 수집한다. 결정론적 그리디 롤아웃은 항상 같은 궤적만 방문해 이탈 상태를 거의 만들지 않지만, <code class="math">\tau=0.5</code> 샘플링은 다양한 이탈·복구 상황을 자연스럽게 유발하여 (C3)에서 요구한 off-distribution 커버리지를 확보한다. E-SPA가 이 롤아웃들에 대해 (시점→하위지시) 정렬과 (정상/복구) 상태 라벨을 자동 부여함으로써, 사람 개입 없이 상태 수준 교정 데이터가 생성된다.</p>
+<hr>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<h3>4.1 전체 파이프라인</h3>
+<pre class="diagram"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                         학습 시간 (Training)                            │
+│                                                                        │
+│  1) 전문가 궤적 학습 (Expert-path)                                     │
+│     R2R-CE / RxR-CE 전문가 경로 → MIA·MAG 초기 학습                    │
+│     (lr = 1e-5, BF16)                                                  │
+│                                                                        │
+│  2) 확률적 온라인 롤아웃 (τ = 0.5)                                     │
+│     현재 정책으로 환경 탐색 → 이탈·복구 상태 자연 발생                 │
+│                     │                                                  │
+│                     ▼                                                  │
+│  3) E-SPA 자기지도 정렬                                                │
+│     (시점 → 활성 하위지시) + (Normal/Recovering) 라벨 자동 생성        │
+│     L = 0.4·L_sem + 0.6·L_act + 0.05·L_dur                             │
+│                     │                                                  │
+│         ┌───────────┴────────────┐                                    │
+│         ▼                        ▼                                    │
+│  4a) 상태수준 교정(190K)   4b) 선별 액션 교정(11.5K)                   │
+│      → MIA (lr = 5e-6)          → MAG (lr = 5e-6)                      │
+└──────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────┐
+│                         추론 시간 (Inference)                           │
+│                                                                        │
+│  route 지시 I + 관측 스트림                                            │
+│        │                                                              │
+│        ▼                                                              │
+│  ┌────────────┐   ĉ_t (활성 하위지시), s_t (상태)   ┌──────────────┐   │
+│  │   MIA      │ ─────────────────────────────────▶ │    MAG       │   │
+│  │ 16 obs 창  │                                     │  8 obs 창    │   │
+│  │(13 hist+3) │                                     │ ≤3 액션 청크 │   │
+│  └────────────┘                                     └──────────────┘   │
+│        ▲                                                   │           │
+│        └────────────── 새 관측 o_{t+1} ◀── 환경 스텝 ──────┘           │
+│                                                                        │
+│   (vLLM 서버로 가속 추론 지원)                                        │
+└──────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 데이터 흐름과 시간 창 (Temporal Windows)</h3>
+<p>두 모듈은 서로 다른 시간 스케일을 본다 — 이는 §2.1 (C4)의 &quot;판단은 느리고 넓게, 제어는 빠르고 좁게&quot;를 구조로 구현한 것이다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>모듈</th>
+<th>시간 창</th>
+<th>구성</th>
+<th>출력</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>MIA</strong></td>
+<td>16 관측</td>
+<td>13 historical + 3 recent</td>
+<td>활성 하위지시 <code class="math">\hat c_t</code> + 상태 <code class="math">s_t</code></td>
+<td>긴 이력 기반 <strong>진행도 판단</strong></td>
+</tr>
+<tr>
+<td><strong>MAG</strong></td>
+<td>8 관측</td>
+<td>최근 8</td>
+<td>액션 청크 <code class="math">a_{t:t+3}</code> (≤3)</td>
+<td>짧은 시야 기반 <strong>국소 제어</strong></td>
+</tr>
+</tbody></table></div>
+<p>MIA가 <strong>더 긴 이력(16)</strong>을 보는 것은 &quot;지금까지 어디를 거쳐 왔는가&quot;를 route와 대조해야 하기 때문이고, MAG가 <strong>짧은 창(8)</strong>과 소수 액션(≤3)만 보는 것은 즉각 반응성과 잦은 재계획(replanning)을 위해서다. 액션을 ≤3으로 짧게 끊는 것은 청크 실행 중 상태가 바뀌어도 곧 MIA로 되돌아와 진행도를 재확인하도록 하는 폐루프 구조다.</p>
+<hr>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<ul>
+<li><strong>R2R-CE</strong> (Room-to-Room in Continuous Environments, <code>R2R_VLNCE_v1-3</code>): 영어 단문형 route 지시. Matterport3D(mp3d) 실내 스캔.</li>
+<li><strong>RxR-CE</strong> (Room-across-Room, CE): 다국어·장문 지시, 경로가 더 길고 복잡. deviation variant 포함.</li>
+<li><strong>시뮬레이터</strong>: Habitat-Sim / Habitat-Lab v0.2.4, Python 3.10.</li>
+<li><strong>인간 정렬 평가 전용 홀드아웃</strong>: <strong>FG-R2R</strong>(fine-grained R2R 하위지시 정렬), <strong>Landmark-RxR</strong>. <strong>학습에서 완전 배제</strong>, MIA의 진행도 정확도 외부 검증에만 사용.</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>NE (Navigation Error)</strong>: 종료 위치–목표 거리(m). 낮을수록 좋음.</li>
+<li><strong>OS / OSR (Oracle Success Rate)</strong>: 궤적 중 목표 3m 이내를 한 번이라도 지났는가.</li>
+<li><strong>SR (Success Rate)</strong>: 목표 3m 이내에서 정지 성공률. 핵심 지표.</li>
+<li><strong>SPL (Success weighted by Path Length)</strong>: 경로 효율 가중 성공률.</li>
+<li><strong>nDTW (RxR)</strong>: 지시 경로와의 정규화 동적시간왜곡 정합도.</li>
+<li><strong>진행도 정확도</strong>: on-path / deviated 두 조건에서 활성 하위지시 예측 정확도(FG-R2R, Landmark-RxR).</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>표 1 — R2R-CE Val-Unseen (핵심 벤치마크)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>NE↓</th>
+<th>OS↑</th>
+<th>SR↑</th>
+<th>SPL↑</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>StreamVLN</td>
+<td>5.43</td>
+<td>62.5</td>
+<td>52.8</td>
+<td>47.2</td>
+</tr>
+<tr>
+<td>DecoVLN</td>
+<td>5.01</td>
+<td>63.5</td>
+<td>56.3</td>
+<td>50.5</td>
+</tr>
+<tr>
+<td>Progress-Think</td>
+<td>4.68</td>
+<td>63.6</td>
+<td>60.1</td>
+<td>53.6</td>
+</tr>
+<tr class="ours">
+<td><strong>Route2Step (본 논문)</strong></td>
+<td><strong>4.78</strong></td>
+<td><strong>61.9</strong></td>
+<td><strong>55.3</strong></td>
+<td><strong>48.2</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>표 2 — RxR-CE Val-Unseen</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>NE↓</th>
+<th>SR↑</th>
+<th>SPL↑</th>
+<th>nDTW↑</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>StreamVLN</td>
+<td>6.72</td>
+<td>48.6</td>
+<td>42.5</td>
+<td>60.2</td>
+</tr>
+<tr>
+<td>DecoVLN</td>
+<td>5.73</td>
+<td>54.2</td>
+<td>46.3</td>
+<td>63.5</td>
+</tr>
+<tr class="ours">
+<td><strong>Route2Step (본 논문)</strong></td>
+<td><strong>5.52</strong></td>
+<td><strong>54.8</strong></td>
+<td><strong>42.6</strong></td>
+<td><strong>58.0</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>해석과 정직한 위치설정.</strong></p>
+<ul>
+<li>Route2Step는 직접적 통합 감독 베이스라인 <strong>StreamVLN을 R2R-CE에서 명확히 능가</strong>한다: SR +2.5(52.8→55.3), NE −0.65(5.43→4.78). RxR-CE에서는 SR +6.2(48.6→54.8), NE −1.20으로 이득이 더 크다 — 장문·이탈 잦은 RxR에서 진행도 분리의 효과가 두드러진다는 저자들의 주장과 일치.</li>
+<li>다만 표에는 <strong>더 강한 동시대 방법(DecoVLN, Progress-Think)</strong>도 함께 실려 있으며, 이들은 일부 지표에서 Route2Step보다 높다(예: Progress-Think R2R SR 60.1, SPL 53.6). 즉 Route2Step는 <strong>모든 지표에서의 SOTA를 주장하지 않는다.</strong> 논문의 기여는 &quot;절대 최고 점수&quot;가 아니라 <strong>&quot;통합 감독을 감독-수준 분리로 바꾸면 같은 백본·같은 데이터로 강건성이 오른다&quot;</strong>는 방법론적 명제이며, 이는 §5.5 실세계·§5.6 이식 실험에서 더 설득력 있게 드러난다. (RxR nDTW가 58.0으로 StreamVLN 60.2보다 낮은 점은 한계 — §8에서 논의.)</li>
+</ul>
+<h3>5.4 진행도 추적 강건성 (Semantic Progress Robustness, Table 4)</h3>
+<p>MIA의 활성 하위지시 예측을, 인간 정렬 홀드아웃에서 <strong>on-path(정상)</strong> vs <strong>deviated(이탈)</strong> 두 조건으로 분리 측정. (3B 모델)</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>데이터</th>
+<th>설정</th>
+<th>on-path Acc</th>
+<th><strong>deviated Acc</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FG-R2R</td>
+<td>Expert (교정 전)</td>
+<td>58.93</td>
+<td>43.54</td>
+</tr>
+<tr>
+<td>FG-R2R</td>
+<td><strong>Corrected (상태수준 교정 후)</strong></td>
+<td>58.61</td>
+<td><strong>54.05</strong></td>
+</tr>
+<tr>
+<td>Landmark-RxR</td>
+<td>Expert</td>
+<td>70.33</td>
+<td>56.13</td>
+</tr>
+<tr>
+<td>Landmark-RxR</td>
+<td><strong>Corrected</strong></td>
+<td>69.99</td>
+<td><strong>64.39</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 발견</strong>: 상태 수준 교정은 on-path 정확도는 거의 유지(58.93→58.61, 70.33→69.99)하면서, <strong>deviated(이탈) 정확도를 크게 끌어올린다</strong>(FG-R2R +10.5, Landmark-RxR +8.3). 즉 교정 이득이 정확히 <strong>경로를 벗어난 어려운 상태에 집중</strong>된다 — 이것이 (C3) &quot;이탈 후 복구 취약성&quot;을 정조준했다는 직접 증거다.</p>
+<p>또한 <strong>7B 통합 모델</strong>은 on-path 진행도 정확도(FG-R2R 60.66, Landmark-RxR 71.62)는 3B보다 높지만 실제 내비게이션은 <strong>SR 50.7 / SPL 44.1로 오히려 낮다</strong>. → &quot;진행도를 아는 것 ≠ 잘 이동하는 것&quot;, 통합 구조에서 용량을 키워도 두 능력이 자동으로 결합되지 않음을 보이며 <strong>모듈 분리의 정당성</strong>을 강화한다.</p>
+<h3>5.5 리얼월드 실험 (Real-world Experiments, Table 11)</h3>
+<p>실세계 실내·실외에서 <strong>9개 과제, 총 33회 자율 시행</strong>.</p>
+<pre class="codeblock"><code>전체:      19 / 33 성공
+ · 실내(2 과제):  5 / 10
+ · 실외(7 과제): 14 / 23
+
+가장 어려운 과제 — 120단어 장문 실내 지시 (각 5회):
+  Route2Step ............ 3 / 5 성공, 평균 5.0 / 7 웨이포인트 완료
+  StreamVLN ............. 0 / 5 성공, 평균 2.2 / 7 웨이포인트
+  StreamVLN + MIA ....... 0 / 5 성공, 평균 4.0 / 7 웨이포인트
+</code></pre>
+<p><strong>해석</strong>: 장문(120단어) 지시는 하위 단계가 많아 진행도 추적 부담이 극대화된다. 통합 감독 StreamVLN은 <strong>0/5로 완전 실패</strong>(평균 2.2 웨이포인트에서 길을 잃음). 흥미롭게도 <strong>StreamVLN에 MIA만 얹으면(외부 진행도 신호 주입)</strong> 웨이포인트가 2.2→4.0으로 크게 늘지만 여전히 0/5 — 즉 진행도 신호는 도움되나, MAG까지 <strong>상태 조건 실행으로 함께 학습</strong>되어야 비로소 완주(3/5)에 도달함을 보인다. 이는 §3.4 &quot;실행 상태 인터페이스&quot;의 실세계 검증이다.</p>
+<h3>5.6 교차 정책 이식 (Cross-Policy Transfer, Table 5)</h3>
+<p>MIA가 예측한 <strong>활성 하위지시를 얼어붙은(frozen) 기존 정책에 조건으로 주입</strong>했을 때의 플러그인 이득.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>기반 정책 (frozen)</th>
+<th>SR (before→after)</th>
+<th>SPL (before→after)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NaVid</td>
+<td>42.5 → <strong>47.4</strong> (+4.9)</td>
+<td>37.5 → 41.4 (+3.9)</td>
+</tr>
+<tr>
+<td>Uni-NaVid</td>
+<td>52.1 → <strong>54.6</strong> (+2.5)</td>
+<td>47.8 → 49.7 (+1.9)</td>
+</tr>
+<tr>
+<td>NaVILA</td>
+<td>54.3 → <strong>55.4</strong> (+1.1)</td>
+<td>49.6 → 51.1 (+1.5)</td>
+</tr>
+<tr>
+<td>StreamVLN</td>
+<td>56.8 → <strong>57.4</strong> (+0.6)</td>
+<td>50.5 → 52.3 (+1.8)</td>
+</tr>
+</tbody></table></div>
+<p><strong>의미</strong>: MIA의 진행도 출력은 Route2Step 전용이 아니라 <strong>모듈식·이식 가능한 신호</strong>다. 약한 정책일수록(NaVid +4.9) 이득이 크고, 이미 강한 정책(StreamVLN +0.6)엔 이득이 작다 — 즉 진행도 추적이 병목인 정책에서 특히 유효. 이는 &quot;진행도 분리&quot;가 특정 아키텍처의 트릭이 아니라 <strong>일반적 결함을 메우는 처방</strong>임을 시사한다.</p>
+<hr>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><strong>진행도–실행 분리라는 문제 정식화</strong>: VLN의 실패를 &quot;진행도 추적 오류 vs 국소 실행 오류&quot;로 명시 분해하고, 통합 next-action 감독이 이 둘을 뭉개 오류 귀속을 붕괴시킨다는 병리를 규명. 이를 관측 가능하게 만드는 <strong>명시적 step-level 인터페이스(MIA↔MAG)</strong> 제안.</li>
+<li><strong>수준 분리 교정(Level-Separated Correction)</strong>: 의미적 진행도는 상태 수준(190K), 국소 실행은 반복 실패에만 선별적 액션(11.5K)으로 교정. <strong>같은 데이터 규모의 통합 DAgger를 +5.5 SR</strong> 능가(Table 2) — 이득의 원천이 데이터 양이 아닌 감독 수준 배치임을 통제 실험으로 입증.</li>
+<li><strong>E-SPA (라벨-프리 정렬)</strong>: 수작업 시간 정렬 라벨 없이 하위지시↔궤적 구간을 자기지도 정렬(<code class="math">\lambda_{sem}{=}0.4,\lambda_{act}{=}0.6,\lambda_{dur}{=}0.05</code>). 인간 정렬(FG-R2R/Landmark-RxR)은 학습에서 배제하고 외부 평가에만 사용해 정직성 확보.</li>
+<li><strong>명시적 복구 상태 신호</strong>: Normal/Recovering 상태를 MIA가 예측·전달하는 것이 암묵 복구 대비 +4.3 SR(51.0→55.3, Table 3). &quot;복구는 명시 신호되어야 할 상태&quot;임을 정량화.</li>
+<li><strong>이탈 강건성의 직접 증명</strong>: 교정 이득이 on-path가 아닌 <strong>deviated 조건에 집중</strong>(FG-R2R deviated +10.5)됨을 인간 정렬 홀드아웃으로 격리 측정.</li>
+<li><strong>완전한 재현 자산 + 이식성</strong>: Qwen2.5-VL-3B 기반 코드·체크포인트 공개, MIA의 진행도 신호가 frozen NaVid/NaVILA/StreamVLN에 이식되어 SR 향상(Table 5). 실세계 9과제 검증.</li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<pre class="codeblock"><code>백본 (MIA, MAG 공통) ............. Qwen2.5-VL-3B (dual-LM)
+정밀도 ........................... BF16
+전문가 궤적 학습 lr .............. 1 × 10⁻⁵
+교정 학습 lr ..................... 5 × 10⁻⁶  (더 낮게 — 미세 교정)
+확률적 롤아웃 온도 τ ............. 0.5
+
+MIA 시간 창 ...................... 16 관측 (13 historical + 3 recent)
+MIA 출력 ......................... 활성 하위지시 + 실행상태{Normal,Recovering}
+MAG 시간 창 ...................... 8 관측
+MAG 액션 청크 .................... 최대 3 액션
+
+교정 데이터 규모:
+  상태 수준 교정(MIA) ............ 190K
+  선별 액션 교정(MAG) ............ 11.5K   (전체의 ~6%)
+  (비교) 통합 DAgger ............. 200K
+
+E-SPA 손실 계수 .................. λ_sem=0.40, λ_act=0.60, λ_dur=0.05
+
+시뮬레이터 ....................... Habitat-Sim/Lab v0.2.4, Python 3.10
+데이터셋 ......................... R2R_VLNCE_v1-3, RxR-CE, Matterport3D
+추론 가속 ........................ vLLM 서버 지원
+평가 전용(학습 배제) ............. FG-R2R, Landmark-RxR
+공개 상태 ........................ 코드 ✅ / MIA·MAG 체크포인트 ✅ /
+                                   가공 감독 데이터 ❌
+</code></pre>
+<p><strong>코드 구조 (공개 저장소)</strong>:</p>
+<ul>
+<li><code>agent_dual_qwen2_5_lm.py</code> — MIA·MAG 두 LM을 함께 구동하는 dual-LM 에이전트(추론 루프)</li>
+<li><code>eval_qwen2_5_dual_lm.sh</code> / <code>eval_qwen2_5_dual_rxr.sh</code> — R2R-CE / RxR-CE 평가 스크립트</li>
+<li><code>eval_m1_static_qa.py</code> — MIA(=M1) 진행도 정확도 정적 QA 평가</li>
+<li><code>vln_path_metrics.py</code> — NE/OSR/SR/SPL/nDTW 계산</li>
+<li><code>DAgger/</code> — 온라인 롤아웃·교정 데이터 수집</li>
+<li><code>habitat_vln/</code> — Habitat 환경 래퍼</li>
+<li><code>seg/</code> — 세그먼트(구간) 정렬 유틸(E-SPA 관련)</li>
+<li><code>configs/</code>, <code>scripts/analyze.py</code> — 설정·결과 분석</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<ul>
+<li><strong>모듈 이식성</strong>: Table 5가 보이듯 MIA는 독립 신호원으로 타 정책에 얹을 수 있어, 새 백본이 나와도 진행도 추적 개선을 재사용 가능. &quot;정책 교체&quot;가 아니라 &quot;진행도 모듈 추가&quot;라는 점증적 확장 경로.</li>
+<li><strong>감독 효율</strong>: 실행 교정이 전체의 ~6%(11.5K)에 불과 — 값비싼 전문가 액션 재라벨을 최소화하면서 이득을 얻어, 대규모 확장 시 어노테이션 비용이 유리.</li>
+<li><strong>백본 크기 역설</strong>: 7B 통합 모델이 3B 분리 모델보다 SR이 낮은 관측(§5.4)은, 단순 스케일업보다 <strong>구조적 분리가 더 나은 투자</strong>일 수 있음을 시사한다.</li>
+</ul>
+<h3>8.2 한계점 (Limitations)</h3>
+<ol>
+<li><strong>절대 SOTA 아님</strong>: R2R-CE SR 55.3은 Progress-Think(60.1)·DecoVLN(56.3)보다 낮다. 방법의 가치는 절대 점수가 아니라 &quot;통합→분리 감독 전환의 강건성 이득&quot;에 있으나, 리더보드 관점에선 최상위가 아니다.</li>
+<li><strong>RxR nDTW 저하</strong>: Route2Step nDTW 58.0 &lt; StreamVLN 60.2. 진행도 분리가 SR은 올리지만 <strong>경로 충실도(지시 경로를 얼마나 그대로 밟는가)</strong>는 다소 희생될 수 있음 — 복구 중 지름길을 택하는 경향으로 추정.</li>
+<li><strong>감독 데이터 미공개</strong>: 코드·체크포인트는 공개되나 <strong>가공 감독 데이터(190K/11.5K)는 미공개</strong> → E-SPA 정렬·교정 데이터의 완전 재현은 제한적.</li>
+<li><strong>하이퍼파라미터 민감성</strong>: E-SPA의 <code class="math">\lambda</code> 삼중 가중, 롤아웃 온도 0.5, 시간 창(16/8) 등은 도메인 튜닝된 값으로, 새 환경 이식 시 재조정 부담.</li>
+<li><strong>실세계 표본 규모</strong>: 33회 시행은 경향 확인에는 충분하나 통계적 결론엔 표본이 작다(특히 실내 2과제·10회).</li>
+<li><strong>라이선스 미명시</strong>: 저장소에 LICENSE 부재 — 재사용·파생 시 법적 불확실성.</li>
+</ol>
+<h3>8.3 향후 방향 (Future Directions)</h3>
+<ul>
+<li><strong>진행도-경로 충실도 동시 최적화</strong>: nDTW 저하를 막도록 E-SPA에 경로 충실도 항 추가.</li>
+<li><strong>복구 상태의 세분화</strong>: Normal/Recovering 2상태를 넘어 &quot;탐색중/재정렬중/막힘&quot; 등 다상태 인터페이스.</li>
+<li><strong>자기평가(self-verification) 결합</strong>: MIA의 진행도 판단에 확신도(confidence)를 부여해, 낮은 확신 구간에서만 재계획하는 적응형 재계획.</li>
+</ul>
+<h3>8.4 재현성 평가 (Reproducibility)</h3>
+<p>공개 자산: ✅ 소스 코드, ✅ MIA/MAG 체크포인트(Qwen2.5-VL-3B, HF), ✅ 평가 스크립트(R2R/RxR), ✅ 진행도 정적 QA 평가, ✅ 표준 지표 계산기. 미공개: ❌ 가공 감독 데이터, ❌ 라이선스. 종합적으로 <strong>추론·평가 재현은 즉시 가능</strong>하나, <strong>학습 파이프라인 완전 재현은 데이터 재생성(E-SPA 재실행) 필요</strong>로 중간 수준.</p>
+<h3>8.5 설계 철학의 일반화 가능성</h3>
+<p>Route2Step의 근본 메시지 — <strong>&quot;이질적 능력을 하나의 손실로 묶지 말고, 능력별로 성격에 맞는 감독 수준을 배치하라&quot;</strong> — 는 VLN을 넘어 장기 시퀀스 의사결정 일반(로봇 조작 서브태스크 추적, 대화형 에이전트의 상태 추적 등)에 이식 가능한 원리다. 특히 &quot;판단(느림·넓음) vs 실행(빠름·좁음)&quot;의 시간 창 분리는 일반적 위계 정책 설계 패턴으로 재사용 여지가 크다.</p>
+<hr>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
+<p>같은 VLN 트랙의 선행 리뷰 논문 중 <strong>주제가 가장 가까운 3편</strong>을 인덱스(카테고리 요약)로 선별해 정독 비교한다:</p>
+<ul>
+<li><strong>AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation</strong> (CVPR 2026) — 진행도 평가·선택적 추론을 다뤄 개념적으로 가장 인접.</li>
+<li><strong>StreamVLN</strong> — 본 논문의 직접 베이스라인(통합 감독 스트리밍 VLM 내비게이터).</li>
+<li><strong>NaVILA</strong> — 다리형 로봇 VLA-내비게이터, 본 논문 Table 5 이식 대상.</li>
+</ul>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>AwareVLN (CVPR2026)</th>
+<th>StreamVLN</th>
+<th>NaVILA</th>
+<th><strong>Route2Step (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 아이디어</td>
+<td>Key Node에서만 선택적 자기인식 추론(씬·진행도·계획)</td>
+<td>스트리밍 VLM으로 관측→액션 통합 감독</td>
+<td>언어지시→다리형 로봇 저수준 이동</td>
+<td>진행도 추적(MIA)과 국소 실행(MAG)을 <strong>구조·감독 수준에서 분리</strong></td>
+</tr>
+<tr>
+<td>진행도 처리</td>
+<td>진행도 &quot;평가&quot;를 추론 텍스트로 명시</td>
+<td>암묵(next-action에 흡수)</td>
+<td>암묵</td>
+<td><strong>명시 모듈 MIA + 상태(Normal/Recover)</strong></td>
+</tr>
+<tr>
+<td>오류 귀속</td>
+<td>부분적(추론이 진행도 노출)</td>
+<td>불가(뭉개짐)</td>
+<td>불가</td>
+<td><strong>분리 귀속 가능</strong></td>
+</tr>
+<tr>
+<td>감독 방식</td>
+<td>자동 데이터 엔진(Qwen-VL-Max+DAgger) 추론 감독</td>
+<td>통합 액션 감독</td>
+<td>IL/VLA 감독</td>
+<td><strong>수준 분리 교정(상태 190K + 선별액션 11.5K)</strong></td>
+</tr>
+<tr>
+<td>라벨-프리 정렬</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td><strong>E-SPA (자기지도)</strong></td>
+</tr>
+<tr>
+<td>백본</td>
+<td>단안 RGB VLM</td>
+<td>VLM(스트리밍)</td>
+<td>VLA(다리형)</td>
+<td>Qwen2.5-VL-3B ×2 (dual)</td>
+</tr>
+<tr>
+<td>R2R-CE SR</td>
+<td>65.4</td>
+<td>52.8</td>
+<td>(Table 5: 54.3)</td>
+<td>55.3</td>
+</tr>
+<tr>
+<td>RxR-CE SR</td>
+<td>67.6</td>
+<td>48.6</td>
+<td>—</td>
+<td>54.8</td>
+</tr>
+<tr>
+<td>이식성(플러그인)</td>
+<td>프레임워크 내부</td>
+<td>—</td>
+<td>—</td>
+<td><strong>MIA를 frozen 정책에 이식(+0.6~+4.9 SR)</strong></td>
+</tr>
+<tr>
+<td>실세계</td>
+<td>복도/가정/사무실</td>
+<td>—</td>
+<td>다리형 실로봇</td>
+<td>실내2+실외7, 19/33</td>
+</tr>
+<tr>
+<td>코드</td>
+<td>✅ Apache-2.0</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (라이선스 미명시)</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>vs AwareVLN (CVPR2026).</strong> 두 논문은 &quot;진행도를 명시적으로 다뤄야 한다&quot;는 직관을 공유한다. 그러나 접근이 대칭적으로 다르다:</p>
+<ul>
+<li>AwareVLN은 진행도를 <strong>추론 텍스트 안에서</strong> 평가하고(Key Node에서만 [REASON] 모드로 씬·진행도·계획을 서술), 이를 <strong>하나의 정책이 선택적으로</strong> 수행한다 — 즉 &quot;언제 깊이 생각할지&quot;를 스파스하게 조절하는 <strong>시간적 분리</strong>.</li>
+<li>Route2Step은 진행도와 실행을 <strong>두 모듈로 공간적(구조적)으로</strong> 분리하고, 결정적으로 <strong>감독 신호까지 수준별로 나눈다</strong>. AwareVLN이 &quot;추론의 빈도&quot;를 최적화한다면, Route2Step은 &quot;감독의 수준&quot;을 최적화한다.</li>
+<li>절대 성능은 AwareVLN이 높다(R2R-CE SR 65.4 vs 55.3). AwareVLN은 단안 RGB로 BEVBert·ETPNav를 능가하는 강력한 프레임워크다. 반면 Route2Step의 차별점은 <strong>오류 귀속 가능성과 이식성</strong>: MIA는 frozen NaVILA/StreamVLN에 얹혀 추가 이득을 주는 반면, AwareVLN의 자기인식 추론은 그 프레임워크에 내재되어 분리 이식이 자명하지 않다. <strong>연구 가치의 축이 다르다</strong> — AwareVLN=최고 성능 자기인식 내비게이터, Route2Step=감독 설계 원리 + 모듈식 진행도 신호.</li>
+</ul>
+<p><strong>vs StreamVLN (직접 베이스라인).</strong> Route2Step는 StreamVLN을 R2R SR +2.5, RxR SR +6.2로 능가하며, 실세계 120단어 과제에서 0/5→3/5의 극적 격차를 낸다. 핵심은 <strong>StreamVLN이 대표하는 &quot;통합 감독&quot; 패러다임 자체를 표적</strong>으로 삼았다는 점 — 같은 스트리밍 VLM 계열이라도 감독을 수준 분리하면 장문·이탈 상황 강건성이 오른다는 것을 통제된 비교로 보인다. 다만 nDTW(경로 충실도)는 StreamVLN이 앞서, 분리가 만능이 아님도 드러난다.</p>
+<p><strong>vs NaVILA.</strong> NaVILA는 다리형 로봇을 위한 언어지시 이동 VLA로, 초점이 <strong>로봇 형태(embodiment)·저수준 보행 실행</strong>에 있다. Route2Step는 embodiment-agnostic한 <strong>감독·인터페이스 층위</strong>의 기여라, 둘은 경쟁이 아니라 <strong>상보적</strong>이다: 실제로 Route2Step의 MIA를 frozen NaVILA에 이식하면 SR 54.3→55.4(+1.1). 즉 Route2Step의 진행도 모듈은 NaVILA류 실행-강한 정책의 <strong>진행도 결함을 메우는 부가 층</strong>으로 쓰일 수 있다.</p>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>강점</strong>: (i) 3B 경량 백본 + vLLM 가속으로 배포 친화적, (ii) MIA 플러그인 이식으로 기존 자산 재활용 가능, (iii) 실세계 실내·실외 검증 존재, (iv) 코드·체크포인트 공개로 즉시 추론/평가 가능.</li>
+<li><strong>약점</strong>: (i) 감독 데이터 미공개로 커스텀 도메인 재학습 시 E-SPA 파이프라인 재구축 필요, (ii) 라이선스 부재로 상용 이식 불확실, (iii) nDTW 저하가 경로 규정이 엄격한 응용(검사·순찰 경로 준수)엔 불리.</li>
+<li><strong>종합</strong>: &quot;기존 VLN 정책의 장문/이탈 강건성을 저비용으로 끌어올리고 싶다&quot;는 실무 요구엔 <strong>MIA 이식</strong>이 매우 실용적. 반면 처음부터 완전 재현·상용화엔 데이터/라이선스 공백이 걸림돌.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>Route2Step의 진짜 기여는 벤치마크 숫자가 아니라 <strong>&quot;VLN을 두 개의 분리 가능한 능력으로 보고, 감독을 능력별 수준에 배치하라&quot;</strong>는 프레임 전환이다. 이는 AwareVLN의 &quot;선택적 추론&quot;, Progress-Think류의 &quot;진행 사고&quot;와 함께 VLN이 <strong>단일 end-to-end 정책에서 위계적·해석가능 구조로 이동</strong>하는 흐름의 한 축을 이룬다. 특히 <strong>오류 귀속 가능성</strong>은 향후 안전·디버깅 가능한 내비게이션의 전제가 되므로, 절대 SOTA가 아님에도 방법론적 파급력이 크다.</p>
+<hr>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
+<ol>
+<li>Huang, X., Wang, X., Lin, R., Xu, Y., Huang, K. <em>From Routes to Steps: Separating Semantic Progress from Local Execution in Vision-and-Language Navigation.</em> arXiv:2608.03143, 2026.</li>
+<li>Guo, W. et al. <em>AwareVLN: Reasoning with Self-awareness for Vision-Language Navigation.</em> CVPR 2026. (본 코퍼스 비교 대상)</li>
+<li><em>StreamVLN.</em> (본 코퍼스 리뷰, 통합 감독 스트리밍 VLM 내비게이터 — 직접 베이스라인)</li>
+<li><em>NaVILA.</em> (본 코퍼스 리뷰, 다리형 로봇 VLA-내비게이터 — Table 5 이식 대상)</li>
+<li>Krantz, J. et al. <em>Beyond the Nav-Graph: Vision-and-Language Navigation in Continuous Environments (R2R-CE).</em> ECCV 2020.</li>
+<li>Ku, A. et al. <em>Room-Across-Room: Multilingual Vision-and-Language Navigation with Dense Spatiotemporal Grounding (RxR).</em> EMNLP 2020.</li>
+<li>Bai, J. et al. <em>Qwen2.5-VL.</em> 2025. (백본 VLM)</li>
+<li>Ross, S., Gordon, G., Bagnell, D. <em>A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning (DAgger).</em> AISTATS 2011.</li>
+<li>Zhang, J. et al. <em>NaVid / Uni-NaVid.</em> (Table 5 이식 대상 정책군)</li>
+<li>Savva, M. et al. <em>Habitat: A Platform for Embodied AI Research.</em> ICCV 2019.</li>
+<li><em>DecoVLN / Progress-Think.</em> (Table 1·2 동시대 비교 방법)</li>
+<li><em>FG-R2R; Landmark-RxR.</em> (진행도 정렬 평가 전용 홀드아웃)</li>
+</ol>
+<p><em>(주: 일부 항목은 arXiv v1 기준 확인 가능한 범위로 기재. 정식 서지·페이지·DOI는 게재 확정 시 갱신 필요.)</em></p>
+<hr>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
+<p><strong>혁신성.</strong> Route2Step는 VLN의 오랜 관행인 &quot;route-level 지시를 하나의 next-action 손실로 통합 감독&quot;하는 방식이 <strong>오류 귀속을 붕괴</strong>시킨다는 병리를 정면으로 규명하고, 이를 <strong>진행도 추적(MIA)과 국소 실행(MAG)의 명시적 step-level 분리</strong>로 해소한다. 가장 독창적인 부분은 단순한 모듈 분할이 아니라 <strong>감독 신호 자체의 수준 분리</strong> — 진행도는 상태 수준(190K), 실행은 반복 실패에만 선별적 액션(11.5K) — 이며, 같은 규모의 통합 DAgger를 +5.5 SR 능가함으로써 <strong>이득의 원천이 데이터 양이 아닌 감독 수준의 배치</strong>임을 통제 실험으로 못박았다. 여기에 수작업 정렬 없이 하위지시-궤적을 정렬하는 <strong>E-SPA</strong>와 <strong>명시적 복구 상태 신호</strong>가 결합해, 특히 <strong>경로 이탈 후 복구</strong>라는 실배포의 핵심 난제에서 강건성을 정조준한다(deviated 정확도 +10.5).</p>
+<p><strong>실용적 의의.</strong> 3B 경량 백본, vLLM 가속, 공개 코드·체크포인트, 그리고 무엇보다 <strong>MIA를 frozen NaVid/NaVILA/StreamVLN에 얹어 SR을 끌어올리는 이식성</strong>(+0.6~+4.9)은, 본 방법이 &quot;새 SOTA 정책 하나&quot;가 아니라 <strong>기존 VLN 자산 전반의 진행도 결함을 메우는 모듈식 처방</strong>임을 보여준다. 실세계 9과제(19/33)·장문 지시(3/5 vs StreamVLN 0/5) 검증은 시뮬을 넘어선 유효성을 뒷받침한다.</p>
+<p><strong>한계와 향후.</strong> 절대 성능은 Progress-Think·DecoVLN 등 동시대 강자에 미치지 못하고, RxR nDTW 저하는 진행도 분리가 경로 충실도를 다소 희생함을 드러낸다. 감독 데이터·라이선스 미공개는 완전 재현·상용화의 공백이다. 향후 (i) 진행도-경로충실도 동시 최적화, (ii) 복구 상태의 다상태화, (iii) 확신도 기반 적응형 재계획이 자연스러운 확장이다. 종합하면 Route2Step는 <strong>리더보드 숫자보다 &quot;VLN 감독을 능력 수준으로 나누라&quot;는 설계 원리로 기여하는 논문</strong>으로, 해석 가능하고 디버깅 가능한 내비게이션으로 가는 흐름에서 인용 가치가 높다.</p>
+<hr>
+<p><em>리뷰 작성일: 2026-08-06 · 트랙: VLN · 코드 ✅ 공개(Qwen2.5-VL-3B) · 발표처: arXiv 2026(미확정)</em></p>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+<div class="rhead" id="rhead" data-title="From Routes to Steps: Separating Semantic Progress from Local Execution in Vision-and-Language Navigation: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
+</body>
+</html>

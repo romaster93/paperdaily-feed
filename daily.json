@@ -1,162 +1,66 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-04T19:30:05.281Z",
+  "generatedAt": "2026-08-05T19:30:06.964Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 8. 5  수요일",
+    "date": "2026. 8. 6  목요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 새 리뷰 5편 · 전체 96편"
+    "subtitle": "VLN·Planner 새 리뷰 2편 · 전체 97편"
   },
   "papers": [
     {
-      "id": "2604.08009",
-      "venue": "ICUAS 2026",
-      "venueDetail": "ICUAS 2026 (제출 중)",
-      "matchScore": 96,
-      "category": "Planner",
-      "feedTitle": "AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection",
-      "authorsShort": "S. Arachchige, J. Garcia +5",
-      "feedAbstract": "완전 오픈소스 실내 UAV 플랫폼(AgiREAL+AgiSIM+AgiSTACK)으로 ENRICH 2025 핵발전소 현장에서 제로샷 시뮬-현실 전이 검증 완료.",
-      "tags": [
-        "#실내항공자율화",
-        "#시뮬-현실전이",
-        "#오픈소스플랫폼",
-        "#LiDARSLAM",
-        "#ESDF기반경로계획"
-      ],
-      "titleEN": "AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection",
-      "titleKO": "AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection",
-      "authorsEN": "Sasanka Kuruppu Arachchige, Juan Jose Garcia, Changda Tian, Lauri Suomela, Panos Trahanias, Adriana Tapus, Joni-Kristian Kämäräinen",
-      "authorsKO": "Sasanka Kuruppu Arachchige, Juan Jose Garcia, Changda Tian, Lauri Suomela, Panos Trahanias, Adriana Tapus, Joni-Kristian Kämäräinen",
-      "abstractEN": "Autonomous indoor flight for critical asset inspection presents fundamental challenges in perception, planning, control, and learning. Despite rapid progress, there is still a lack of a compact, active-sensing, open-source platform that is reproducible across simulation and real-world operation. To address this gap, we present Agipix, a co-designed open hardware and software platform for indoor aerial autonomy and critical asset inspection. Agipix features a compact, hardware-synchronized active-sensing platform with onboard GPU-accelerated compute that is capable of agile flight; a containerized ROS~2-based modular autonomy stack; and a photorealistic digital twin of the hardware platform together with a reliable UI. These elements enable rapid iteration via zero-shot transfer of containerized autonomy components between simulation and real flights. We demonstrate trajectory tracking and exploration performance using onboard sensing in industrial indoor environments. All hardware designs, simulation assets, and containerized software are released openly together with documentation.",
-      "abstractKO": "완전 오픈소스 실내 UAV 플랫폼(AgiREAL+AgiSIM+AgiSTACK)으로 ENRICH 2025 핵발전소 현장에서 제로샷 시뮬-현실 전이 검증 완료.",
-      "detailTags": [
-        "#실내항공자율화",
-        "#시뮬-현실전이",
-        "#오픈소스플랫폼",
-        "#LiDARSLAM",
-        "#ESDF기반경로계획"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 44,
-      "reason": "**완전 오픈소스 시스템**: 하드웨어 설계(PCB, CAD) + 소프트웨어(Docker ROS 2) + 시뮬레이터 모두 공개\n**포토리얼리스틱 디지털 트윈(AgiSIM)**: UE5 기반, 점유 맵 IoU=0.96 달성\n**제로샷 시뮬-현실 전이**: 동일한 Docker 컨테이너로 시뮬/현실 배포\n**ENRICH 2025 실증**: 오스트리아 폐기 핵발전소에서 자율 점검 비행 (계획 거리 72% 완료)\n**ESDF-aware RRT* 경로 계획**: 실내 장애물 회피 + Frontier 기반 탐색",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/AgiPIX_ICUAS2026/index.html"
-    },
-    {
-      "id": "2604.08883",
+      "id": "2608.03143",
       "venue": "arXiv 2026",
-      "venueDetail": "arXiv 프리프린트",
-      "matchScore": 84,
-      "category": "VLN",
-      "feedTitle": "HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial Vision-and-Language Navigation",
-      "authorsShort": "C. Fan, C. Pan +3",
-      "feedAbstract": "도심 항공 VLN에서 하이브리드 IL-RL 훈련 + MacroPlanner/MicroActor 계층 구조 + SCConv 맵 인코더로 CityNav 벤치마크 SOTA 달성.",
-      "tags": [
-        "#VLN",
-        "#항공UAV내비게이션",
-        "#계층적계획",
-        "#시뮬레이션기반평가"
-      ],
-      "titleEN": "HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial Vision-and-Language Navigation",
-      "titleKO": "HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial Vision-and-Language Navigation",
-      "authorsEN": "Chengjie Fan, Cong Pan, Zijian Liu, Ningzhong Liu, Jie Qin",
-      "authorsKO": "Chengjie Fan, Cong Pan, Zijian Liu, Ningzhong Liu, Jie Qin",
-      "abstractEN": "Inspired by the general Vision-and-Language Navigation (VLN) task, aerial VLN has attracted widespread attention, owing to its significant practical value in applications such as logistics delivery and urban inspection. However, existing methods face several challenges in complex urban environments, including insufficient generalization to unseen scenes, suboptimal performance in long-range path planning, and inadequate understanding of spatial continuity. To address these challenges, we propose HTNav, a new collaborative navigation framework that integrates Imitation Learning (IL) and Reinforcement Learning (RL) within a hybrid IL-RL framework. This framework adopts a staged training mechanism to ensure the stability of the basic navigation strategy while enhancing its environmental exploration capability. By integrating a tiered decision-making mechanism, it achieves collaborative interaction between macro-level path planning and fine-grained action control. Furthermore, a map representation learning module is introduced to deepen its understanding of spatial continuity in open domains. On the CityNav benchmark, our method achieves state-of-the-art performance across all scene levels and task difficulties. Experimental results demonstrate that this framework significantly improves navigation precision and robustness in complex urban environments.",
-      "abstractKO": "도심 항공 VLN에서 하이브리드 IL-RL 훈련 + MacroPlanner/MicroActor 계층 구조 + SCConv 맵 인코더로 CityNav 벤치마크 SOTA 달성.",
-      "detailTags": [
-        "#VLN",
-        "#항공UAV내비게이션",
-        "#계층적계획",
-        "#시뮬레이션기반평가"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 42,
-      "reason": "**하이브리드 IL-RL 스테이지 훈련**: IL로 기본 정책 안정적 학습 후 PPO(λ=0.20)로 탐색 능력 향상\n**계층적 의사결정**: MacroPlanner(고수준 경유점)  + MicroActor(세밀 행동 제어) 협업\n**SCConv 맵 인코더**: 공간-채널 정보 동시 모델링으로 항공 위성 맵 특징 포착\n**CityNav SOTA**: 수정 CityNav*에서 NE 61.4m→40.3m (34.4% 감소), SR 25.49%",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HTNav_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.07957",
-      "venue": "arXiv 2026",
-      "venueDetail": "arXiv 프리프린트",
-      "matchScore": 84,
-      "category": "VLN",
-      "feedTitle": "WorldMAP: Bootstrapping Vision-Language Navigation Trajectory Prediction with Generative World Models",
-      "authorsShort": "H. Chen, S. Jiang +5",
-      "feedAbstract": "생성적 월드 모델의 미래 비디오를 3D 재구성 → 의미론적 그라운딩 → FMM 계획으로 변환하여 VLN 궤적 학습의 지도 신호로 활용하는 Teacher-Student 프레임워크.",
-      "tags": [
-        "#VLN",
-        "#시뮬레이션기반평가"
-      ],
-      "titleEN": "WorldMAP: Bootstrapping Vision-Language Navigation Trajectory Prediction with Generative World Models",
-      "titleKO": "WorldMAP: Bootstrapping Vision-Language Navigation Trajectory Prediction with Generative World Models",
-      "authorsEN": "Hongjin Chen, Shangyun Jiang, Tonghua Su, Chen Gao, Xinlei Chen, Yong Li, Zhibo Chen",
-      "authorsKO": "Hongjin Chen, Shangyun Jiang, Tonghua Su, Chen Gao, Xinlei Chen, Yong Li, Zhibo Chen",
-      "abstractEN": "Vision-language models (VLMs) and generative world models are opening new opportunities for embodied navigation. VLMs are increasingly used as direct planners or trajectory predictors, while world models support look-ahead reasoning by imagining future views. Yet predicting a reliable trajectory from a single egocentric observation remains challenging. Current VLMs often generate unstable trajectories, and world models, though able to synthesize plausible futures, do not directly provide the grounded signals needed for navigation learning. This raises a central question: how can generated futures be turned into supervision for grounded trajectory prediction? We present WorldMAP, a teacher--student framework that converts world-model-generated futures into persistent semantic-spatial structure and planning-derived supervision. Its world-model-driven teacher builds semantic-spatial memory from generated videos, grounds task-relevant targets and obstacles, and produces trajectory pseudo-labels through explicit planning. A lightweight student with a multi-hypothesis trajectory head is then trained to predict navigation trajectories directly from vision-language inputs. On Target-Bench, WorldMAP achieves the best ADE and FDE among compared methods, reducing ADE by 18.0% and FDE by 42.1% relative to the best competing baseline, while lifting a small open-source VLM to DTW performance competitive with proprietary models. More broadly, the results suggest that, in embodied navigation, the value of world models may lie less in supplying action-ready imagined evidence than in synthesizing structured supervision for navigation learning.",
-      "abstractKO": "생성적 월드 모델의 미래 비디오를 3D 재구성 → 의미론적 그라운딩 → FMM 계획으로 변환하여 VLN 궤적 학습의 지도 신호로 활용하는 Teacher-Student 프레임워크.",
-      "detailTags": [
-        "#VLN",
-        "#시뮬레이션기반평가"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 54,
-      "reason": "**월드 모델의 역할 재정의**: 추론 도구가 아닌 훈련 시 구조화된 의사 레이블 생성기로 활용\n**3단계 교사 파이프라인**: DA3 깊이 추정 + UniPixel 분할 + FMM 경로 계획\n**다중 가설 예측**: K개 궤적 후보를 신뢰도 점수와 함께 예측하는 경량 학생 모델\n**방향 일관성 손실**: 위치 정확도와 경로 부드러움을 동시에 최적화\n**오픈소스 경쟁력**: 8B 모델이 GPT-5.4, Gemini-3-Pro 대비 ADE 18% FDE 42% 향상",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/WorldMAP_arxiv2026/index.html"
-    },
-    {
-      "id": "2604.07644",
-      "venue": "arXiv 2026",
-      "matchScore": 93,
-      "category": "Planner",
-      "feedTitle": "GPU-SLS: Safe Large-Scale Robust Nonlinear MPC in Milliseconds via Reachability-Constrained System Level Synthesis on the GPU",
-      "authorsShort": "J. Fang, G. Chou",
-      "feedAbstract": "GPU 병렬 결합 스캔과 ADMM 기반 QP 솔버로 System Level Synthesis 강건 MPC를 밀리초 단위에 푸는 프레임워크. 공식적 도달 가능 집합 제약으로 안전을 보장하면서 CPU OSQP 대비 340배(N=3000), FastSLS 대비 237배 가속을 달성했고, Unitree Go2 61차원 실제…",
-      "tags": [
-        "#Planner"
-      ],
-      "titleEN": "GPU-SLS: Safe Large-Scale Robust Nonlinear MPC in Milliseconds via Reachability-Constrained System Level Synthesis on the GPU",
-      "titleKO": "GPU-SLS: GPU 상의 도달가능성 제약 System Level Synthesis로 구현한 밀리초 단위 대규모 강건 비선형 MPC",
-      "authorsEN": "Jeffrey Fang, Glen Chou",
-      "authorsKO": "Jeffrey Fang, Glen Chou",
-      "abstractEN": "We present GPU-SLS, a GPU-parallelized framework for safe, robust nonlinear model predictive control (MPC) that scales to high-dimensional uncertain robotic systems and long planning horizons. Our method jointly optimizes an inequality-constrained, dynamically-feasible nominal trajectory, a tracking controller, and a closed-loop reachable set under disturbance, all in real-time. To efficiently compute nominal trajectories, we develop a sequential quadratic programming procedure with a novel GPU-accelerated quadratic program (QP) solver that uses parallel associative scans and adaptive caching within an alternating direction method of multipliers (ADMM) framework. The same GPU QP backend is used to optimize robust tracking controllers and closed-loop reachable sets via system level synthesis (SLS), enabling reachability-constrained control in both fixed- and receding-horizon settings. We achieve substantial performance gains, reducing nominal trajectory solve times by 97.7% relative to state-of-the-art CPU solvers and 71.8% compared to GPU solvers, while accelerating SLS-based control and reachability by 237x. Despite large problem scales, our method achieves 100% empirical safety, unlike high-dimensional learning-based reachability baselines. We validate our approach on complex nonlinear systems, including whole-body quadrupeds (61D) and humanoids (75D), synthesizing robust control policies online on the GPU in 20 milliseconds on average and scaling to problems with 2 x 10^5 decision variables and 8 x 10^4 constraints. The implementation of our method is available at https://github.com/Jeff300fang/gpu_sls.",
-      "abstractKO": "GPU 병렬 결합 스캔과 ADMM 기반 QP 솔버로 System Level Synthesis 강건 MPC를 밀리초 단위에 푸는 프레임워크. 공식적 도달 가능 집합 제약으로 안전을 보장하면서 CPU OSQP 대비 340배(N=3000), FastSLS 대비 237배 가속을 달성했고, Unitree Go2 61차원 실제 하드웨어에서 50Hz 실시간 강건 MPC 제어를 최초로 시연했다.",
-      "detailTags": [
-        "#Planner"
-      ],
-      "year": "2026",
-      "citations": 0,
-      "readMinutes": 58,
-      "reason": "GPU 병렬 결합 스캔과 ADMM 기반 QP 솔버로 System Level Synthesis 강건 MPC를 밀리초 단위에 푸는 프레임워크. 공식적 도달 가능 집합 제약으로 안전을 보장하면서 CPU OSQP 대비 340배(N=3000), FastSLS 대비 237배 가속을 달성했고, Unitree Go2 61차원 실제 하드웨어에서 50Hz 실시간 강건 MPC 제어를 최초로 시연했다.",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/GPU-SLS_arxiv2026/index.html"
-    },
-    {
-      "id": "2411.17820",
-      "venue": "CVPR 2025",
-      "venueDetail": "CVPR 2025",
+      "venueDetail": "arXiv 2026 (v1, 16 pages / 9 figures) — 탑티어 확정 정보 없음",
       "matchScore": 96,
       "category": "VLN",
-      "feedTitle": "CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos",
-      "authorsShort": "X. Liu, J. Li +7",
-      "feedAbstract": "2000시간 이상의 웹 규모 도시 보행/운전 비디오로 학습한 구체화된 에이전트로, 비용 많은 주석 없이 대규모 모방학습으로 도시 네비게이션 정책을 학습.",
+      "feedTitle": "From Routes to Steps: Separating Semantic Progress from Local Execution in Vision-and-Language Navigation",
+      "authorsShort": "X. Huang, X. Wang +3",
+      "feedAbstract": "VLN을 \"의미적 진행도 추적(어느 하위지시 중인가)\"과 \"국소 실행(그 단계를 어떻게 이동하나)\"의 두 능력으로 나누고, 각각을 별도 모듈(MIA/MAG)과 별도 감독 수준(상태수준 190K + 선별액션 11.5K)으로 학습시켜 통합 next-action 감독의 오류 귀속 붕괴를 해소하고 경로 이탈 복구 강건성을…",
       "tags": [
         "#VLN"
       ],
-      "titleEN": "CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos",
-      "titleKO": "CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos",
-      "authorsEN": "Xinhao Liu, Jintong Li, Yicheng Jiang, Niranjan Sujay, Zhicheng Yang, Juexiao Zhang, John Abanes, Jing Zhang, Chen Feng",
-      "authorsKO": "Xinhao Liu, Jintong Li, Yicheng Jiang, Niranjan Sujay, Zhicheng Yang, Juexiao Zhang, John Abanes, Jing Zhang, Chen Feng",
-      "abstractEN": "Navigating dynamic urban environments presents significant challenges for embodied agents, requiring advanced spatial reasoning and adherence to common-sense norms. Despite progress, existing visual navigation methods struggle in map-free or off-street settings, limiting the deployment of autonomous agents like last-mile delivery robots. To overcome these obstacles, we propose a scalable, data-driven approach for human-like urban navigation by training agents on thousands of hours of in-the-wild city walking and driving videos sourced from the web. We introduce a simple and scalable data processing pipeline that extracts action supervision from these videos, enabling large-scale imitation learning without costly annotations. Our model learns sophisticated navigation policies to handle diverse challenges and critical scenarios. Experimental results show that training on large-scale, diverse datasets significantly enhances navigation performance, surpassing current methods. This work shows the potential of using abundant online video data to develop robust navigation policies for embodied agents in dynamic urban settings. Project homepage is at https://ai4ce.github.io/CityWalker/.",
-      "abstractKO": "2000시간 이상의 웹 규모 도시 보행/운전 비디오로 학습한 구체화된 에이전트로, 비용 많은 주석 없이 대규모 모방학습으로 도시 네비게이션 정책을 학습.",
+      "titleEN": "From Routes to Steps: Separating Semantic Progress from Local Execution in Vision-and-Language Navigation",
+      "titleKO": "From Routes to Steps: Separating Semantic Progress from Local Execution in Vision-and-Language Navigation",
+      "authorsEN": "Xiangyun Huang, Xiangchen Wang, Runfeng Lin, Yihao Xu, Kangyu Huang",
+      "authorsKO": "Xiangyun Huang, Xiangchen Wang, Runfeng Lin, Yihao Xu, Kangyu Huang",
+      "abstractEN": "Vision-and-Language Navigation (VLN) requires an agent to follow a route-level instruction by executing its constituent steps from egocentric visual observations. Existing VLM-based navigators typically supervise both capabilities through next-action prediction alone, making progress-tracking errors difficult to distinguish from execution errors. When an agent deviates from the route, a corrective action label may recover the next movement but does not indicate whether the agent selected the wrong sub-instruction or failed to execute the correct one. Consequently, the agent may continue making decisions from an erroneous progress state. To resolve this ambiguity, we propose \\textbf{Route2Step}, a framework that decouples semantic progress tracking from action generation through an explicit step-level interface. The Instruction Analysis Module ($\\mathcal{M}_{\\mathrm{IA}}$) predicts this state from the global instruction and visual history. Conditioned on the predicted state and recent observations, the Action Generation Module ($\\mathcal{M}_{\\mathrm{AG}}$) generates local action chunks. To supervise the progress state without manual temporal labels, E-SPA, a step-alignment procedure, associates sub-instructions with their corresponding portions of route-level demonstrations. These alignments enable state supervision for incorrect progress estimates, while direct action supervision is reserved for rollout groups that repeatedly fail under the correct active sub-instruction. On R2R-CE, Route2Step improves SR from 48.1\\% to 55.3\\% and SPL from 43.3\\% to 48.2\\%, using 190K state-level corrective samples while requiring only 11.5K directly action-supervised states. Experiments in real-world indoor and outdoor environments further demonstrate the practical applicability of Route2Step. The project page is: https://sisyphus-hxy.github.io/Route2Step/.",
+      "abstractKO": "VLN을 \"의미적 진행도 추적(어느 하위지시 중인가)\"과 \"국소 실행(그 단계를 어떻게 이동하나)\"의 두 능력으로 나누고, 각각을 별도 모듈(MIA/MAG)과 별도 감독 수준(상태수준 190K + 선별액션 11.5K)으로 학습시켜 통합 next-action 감독의 오류 귀속 붕괴를 해소하고 경로 이탈 복구 강건성을 끌어올린 논문.",
       "detailTags": [
         "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 47,
+      "reason": "**진행도–실행 분리 정식화**: 통합 감독이 \"진행도 추적 오류\"와 \"국소 실행 오류\"를 하나의 액션 손실로 뭉개 오류 귀속을 붕괴시킨다는 병리 규명. 명시적 step-level 인터페이스(MIA↔MAG)로 오류를 관측 가능하게 분리.\n**수준 분리 교정(Level-Separated Correction)**: 진행도는 상태수준(190K), 실행은 반복 실패에만 선별 액션(11.5K)으로 교정 → 같은 규모 통합 DAgger(200K) 대비 R2R-CE SR +5.5(49.8→55.3).\n**E-SPA (라벨-프리 정렬)**: 수작업 시간정렬 없이 하위지시↔궤적 구간 자기지도 정렬(λsem=0.4, λact=0.6, λdur=0.05). 인간 정렬(FG-R2R/Landmark-RxR)은 학습 배제·평가 전용.\n**명시적 복구 상태**: MIA가 Normal/Recovering 예측 → 암묵 복구 대비 SR +4.3(51.0→55.3).\n**이식성**: MIA 진행도 신호를 frozen NaVid/Uni-NaVid/NaVILA/StreamVLN에 주입 → SR +0.6~+4.9.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/Route2Step_arxiv2026/index.html"
+    },
+    {
+      "id": "2403.06828",
+      "venue": "RA-L",
+      "venueDetail": "RA-L",
+      "matchScore": 96,
+      "category": "Planner",
+      "feedTitle": "NeuPAN: Direct Point Robot Navigation with E2E Model-based Learning",
+      "authorsShort": "R. Han, S. Wang +9",
+      "feedAbstract": "포인트 클라우드를 직접 거리 특성 공간으로 매핑하는 해석가능 신경망(PAN)을 통해 인지→계획→제어 파이프라인의 오차 전파를 제거한, 지도 없는(map-free) 실시간 엔드-투-엔드 모델 기반 로봇 모션 플래닝 프레임워크.",
+      "tags": [
+        "#E2ELearning"
+      ],
+      "titleEN": "NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning",
+      "titleKO": "NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning",
+      "authorsEN": "Ruihua Han, Shuai Wang, Shuaijun Wang, Zeqing Zhang, Jianjun Chen, Shijie Lin, Chengyang Li, Chengzhong Xu, Yonina C. Eldar, Qi Hao, Jia Pan",
+      "authorsKO": "Ruihua Han, Shuai Wang, Shuaijun Wang, Zeqing Zhang, Jianjun Chen, Shijie Lin, Chengyang Li, Chengzhong Xu, Yonina C. Eldar, Qi Hao, Jia Pan",
+      "abstractEN": "Navigating a nonholonomic robot in a cluttered, unknown environment requires accurate perception and precise motion control for real-time collision avoidance. This paper presents NeuPAN: a real-time, highly accurate, map-free, easy-to-deploy, and environment-invariant robot motion planner. Leveraging a tightly coupled perception-to-control framework, NeuPAN has two key innovations compared to existing approaches: 1) it directly maps raw point cloud data to a latent distance feature space for collision-free motion generation, avoiding error propagation from the perception to control pipeline; 2) it is interpretable from an end-to-end model-based learning perspective. The crux of NeuPAN is solving an end-to-end mathematical model with numerous point-level constraints using a plug-and-play (PnP) proximal alternating-minimization network (PAN), incorporating neurons in the loop. This allows NeuPAN to generate real-time, physically interpretable motions. It seamlessly integrates data and knowledge engines, and its network parameters can be fine-tuned via backpropagation. We evaluate NeuPAN on a ground mobile robot, a wheel-legged robot, and an autonomous vehicle, in extensive simulated and real-world environments. Results demonstrate that NeuPAN outperforms existing baselines in terms of accuracy, efficiency, robustness, and generalization capabilities across various environments, including the cluttered sandbox, office, corridor, and parking lot. We show that NeuPAN works well in unknown and unstructured environments with arbitrarily shaped objects, transforming impassable paths into passable ones.",
+      "abstractKO": "포인트 클라우드를 직접 거리 특성 공간으로 매핑하는 해석가능 신경망(PAN)을 통해 인지→계획→제어 파이프라인의 오차 전파를 제거한, 지도 없는(map-free) 실시간 엔드-투-엔드 모델 기반 로봇 모션 플래닝 프레임워크.",
+      "detailTags": [
+        "#E2ELearning"
       ],
       "year": "2024",
       "citations": 0,
-      "readMinutes": 59,
-      "reason": "웹에서 추출한 대규모 도시 비디오 데이터셋 활용 (2000시간 이상)\n확장 가능한 데이터 처리 파이프라인으로 자동 행동 레이블링\n도시 환경의 다양한 도전 시나리오 처리 (off-street, 동적 환경 등)\n기존 방법 대비 우수한 네비게이션 성능\n대규모 다양한 데이터셋으로 학습한 정책의 강력한 성능",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/CityWalker_CVPR2025/index.html"
+      "readMinutes": 50,
+      "reason": "Perception-to-Control 통합: 원시 포인트 클라우드를 직접 latent distance feature space로 매핑하여 분리된 SLAM→Planning→Control 파이프라인의 오차 누적 제거\n해석 가능한 신경망: Plug-and-Play Proximal Alternating-Minimization Network (PAN)으로 점 수준 제약을 명시적으로 신경 루프에 통합, 물리적 해석가능성 보장\n지상 이동 로봇·휠-다리 로봇·자율 주행 차량 등 다양한 플랫폼에서 모래상자/사무실/복도/주차장 등 비구조·미지 환경 실시간 실험 검증",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NeuPAN_RAL/index.html"
     }
   ],
   "archive": [
@@ -2796,31 +2700,154 @@
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/TubeRRT_TAES2026/index.html"
     },
     {
-      "id": "2403.06828",
-      "venue": "RA-L",
-      "venueDetail": "RA-L",
+      "id": "2604.08009",
+      "venue": "ICUAS 2026",
+      "venueDetail": "ICUAS 2026 (제출 중)",
       "matchScore": 96,
       "category": "Planner",
-      "feedTitle": "NeuPAN: Direct Point Robot Navigation with E2E Model-based Learning",
-      "authorsShort": "R. Han, S. Wang +9",
-      "feedAbstract": "포인트 클라우드를 직접 거리 특성 공간으로 매핑하는 해석가능 신경망(PAN)을 통해 인지→계획→제어 파이프라인의 오차 전파를 제거한, 지도 없는(map-free) 실시간 엔드-투-엔드 모델 기반 로봇 모션 플래닝 프레임워크.",
+      "feedTitle": "AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection",
+      "authorsShort": "S. Arachchige, J. Garcia +5",
+      "feedAbstract": "완전 오픈소스 실내 UAV 플랫폼(AgiREAL+AgiSIM+AgiSTACK)으로 ENRICH 2025 핵발전소 현장에서 제로샷 시뮬-현실 전이 검증 완료.",
       "tags": [
-        "#E2ELearning"
+        "#실내항공자율화",
+        "#시뮬-현실전이",
+        "#오픈소스플랫폼",
+        "#LiDARSLAM",
+        "#ESDF기반경로계획"
       ],
-      "titleEN": "NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning",
-      "titleKO": "NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning",
-      "authorsEN": "Ruihua Han, Shuai Wang, Shuaijun Wang, Zeqing Zhang, Jianjun Chen, Shijie Lin, Chengyang Li, Chengzhong Xu, Yonina C. Eldar, Qi Hao, Jia Pan",
-      "authorsKO": "Ruihua Han, Shuai Wang, Shuaijun Wang, Zeqing Zhang, Jianjun Chen, Shijie Lin, Chengyang Li, Chengzhong Xu, Yonina C. Eldar, Qi Hao, Jia Pan",
-      "abstractEN": "Navigating a nonholonomic robot in a cluttered, unknown environment requires accurate perception and precise motion control for real-time collision avoidance. This paper presents NeuPAN: a real-time, highly accurate, map-free, easy-to-deploy, and environment-invariant robot motion planner. Leveraging a tightly coupled perception-to-control framework, NeuPAN has two key innovations compared to existing approaches: 1) it directly maps raw point cloud data to a latent distance feature space for collision-free motion generation, avoiding error propagation from the perception to control pipeline; 2) it is interpretable from an end-to-end model-based learning perspective. The crux of NeuPAN is solving an end-to-end mathematical model with numerous point-level constraints using a plug-and-play (PnP) proximal alternating-minimization network (PAN), incorporating neurons in the loop. This allows NeuPAN to generate real-time, physically interpretable motions. It seamlessly integrates data and knowledge engines, and its network parameters can be fine-tuned via backpropagation. We evaluate NeuPAN on a ground mobile robot, a wheel-legged robot, and an autonomous vehicle, in extensive simulated and real-world environments. Results demonstrate that NeuPAN outperforms existing baselines in terms of accuracy, efficiency, robustness, and generalization capabilities across various environments, including the cluttered sandbox, office, corridor, and parking lot. We show that NeuPAN works well in unknown and unstructured environments with arbitrarily shaped objects, transforming impassable paths into passable ones.",
-      "abstractKO": "포인트 클라우드를 직접 거리 특성 공간으로 매핑하는 해석가능 신경망(PAN)을 통해 인지→계획→제어 파이프라인의 오차 전파를 제거한, 지도 없는(map-free) 실시간 엔드-투-엔드 모델 기반 로봇 모션 플래닝 프레임워크.",
+      "titleEN": "AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection",
+      "titleKO": "AgiPIX: Bridging Simulation and Reality in Indoor Aerial Inspection",
+      "authorsEN": "Sasanka Kuruppu Arachchige, Juan Jose Garcia, Changda Tian, Lauri Suomela, Panos Trahanias, Adriana Tapus, Joni-Kristian Kämäräinen",
+      "authorsKO": "Sasanka Kuruppu Arachchige, Juan Jose Garcia, Changda Tian, Lauri Suomela, Panos Trahanias, Adriana Tapus, Joni-Kristian Kämäräinen",
+      "abstractEN": "Autonomous indoor flight for critical asset inspection presents fundamental challenges in perception, planning, control, and learning. Despite rapid progress, there is still a lack of a compact, active-sensing, open-source platform that is reproducible across simulation and real-world operation. To address this gap, we present Agipix, a co-designed open hardware and software platform for indoor aerial autonomy and critical asset inspection. Agipix features a compact, hardware-synchronized active-sensing platform with onboard GPU-accelerated compute that is capable of agile flight; a containerized ROS~2-based modular autonomy stack; and a photorealistic digital twin of the hardware platform together with a reliable UI. These elements enable rapid iteration via zero-shot transfer of containerized autonomy components between simulation and real flights. We demonstrate trajectory tracking and exploration performance using onboard sensing in industrial indoor environments. All hardware designs, simulation assets, and containerized software are released openly together with documentation.",
+      "abstractKO": "완전 오픈소스 실내 UAV 플랫폼(AgiREAL+AgiSIM+AgiSTACK)으로 ENRICH 2025 핵발전소 현장에서 제로샷 시뮬-현실 전이 검증 완료.",
       "detailTags": [
-        "#E2ELearning"
+        "#실내항공자율화",
+        "#시뮬-현실전이",
+        "#오픈소스플랫폼",
+        "#LiDARSLAM",
+        "#ESDF기반경로계획"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 44,
+      "reason": "**완전 오픈소스 시스템**: 하드웨어 설계(PCB, CAD) + 소프트웨어(Docker ROS 2) + 시뮬레이터 모두 공개\n**포토리얼리스틱 디지털 트윈(AgiSIM)**: UE5 기반, 점유 맵 IoU=0.96 달성\n**제로샷 시뮬-현실 전이**: 동일한 Docker 컨테이너로 시뮬/현실 배포\n**ENRICH 2025 실증**: 오스트리아 폐기 핵발전소에서 자율 점검 비행 (계획 거리 72% 완료)\n**ESDF-aware RRT* 경로 계획**: 실내 장애물 회피 + Frontier 기반 탐색",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/AgiPIX_ICUAS2026/index.html"
+    },
+    {
+      "id": "2604.08883",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 프리프린트",
+      "matchScore": 84,
+      "category": "VLN",
+      "feedTitle": "HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial Vision-and-Language Navigation",
+      "authorsShort": "C. Fan, C. Pan +3",
+      "feedAbstract": "도심 항공 VLN에서 하이브리드 IL-RL 훈련 + MacroPlanner/MicroActor 계층 구조 + SCConv 맵 인코더로 CityNav 벤치마크 SOTA 달성.",
+      "tags": [
+        "#VLN",
+        "#항공UAV내비게이션",
+        "#계층적계획",
+        "#시뮬레이션기반평가"
+      ],
+      "titleEN": "HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial Vision-and-Language Navigation",
+      "titleKO": "HTNav: A Hybrid Navigation Framework with Tiered Structure for Urban Aerial Vision-and-Language Navigation",
+      "authorsEN": "Chengjie Fan, Cong Pan, Zijian Liu, Ningzhong Liu, Jie Qin",
+      "authorsKO": "Chengjie Fan, Cong Pan, Zijian Liu, Ningzhong Liu, Jie Qin",
+      "abstractEN": "Inspired by the general Vision-and-Language Navigation (VLN) task, aerial VLN has attracted widespread attention, owing to its significant practical value in applications such as logistics delivery and urban inspection. However, existing methods face several challenges in complex urban environments, including insufficient generalization to unseen scenes, suboptimal performance in long-range path planning, and inadequate understanding of spatial continuity. To address these challenges, we propose HTNav, a new collaborative navigation framework that integrates Imitation Learning (IL) and Reinforcement Learning (RL) within a hybrid IL-RL framework. This framework adopts a staged training mechanism to ensure the stability of the basic navigation strategy while enhancing its environmental exploration capability. By integrating a tiered decision-making mechanism, it achieves collaborative interaction between macro-level path planning and fine-grained action control. Furthermore, a map representation learning module is introduced to deepen its understanding of spatial continuity in open domains. On the CityNav benchmark, our method achieves state-of-the-art performance across all scene levels and task difficulties. Experimental results demonstrate that this framework significantly improves navigation precision and robustness in complex urban environments.",
+      "abstractKO": "도심 항공 VLN에서 하이브리드 IL-RL 훈련 + MacroPlanner/MicroActor 계층 구조 + SCConv 맵 인코더로 CityNav 벤치마크 SOTA 달성.",
+      "detailTags": [
+        "#VLN",
+        "#항공UAV내비게이션",
+        "#계층적계획",
+        "#시뮬레이션기반평가"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 42,
+      "reason": "**하이브리드 IL-RL 스테이지 훈련**: IL로 기본 정책 안정적 학습 후 PPO(λ=0.20)로 탐색 능력 향상\n**계층적 의사결정**: MacroPlanner(고수준 경유점)  + MicroActor(세밀 행동 제어) 협업\n**SCConv 맵 인코더**: 공간-채널 정보 동시 모델링으로 항공 위성 맵 특징 포착\n**CityNav SOTA**: 수정 CityNav*에서 NE 61.4m→40.3m (34.4% 감소), SR 25.49%",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/HTNav_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.07957",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 프리프린트",
+      "matchScore": 84,
+      "category": "VLN",
+      "feedTitle": "WorldMAP: Bootstrapping Vision-Language Navigation Trajectory Prediction with Generative World Models",
+      "authorsShort": "H. Chen, S. Jiang +5",
+      "feedAbstract": "생성적 월드 모델의 미래 비디오를 3D 재구성 → 의미론적 그라운딩 → FMM 계획으로 변환하여 VLN 궤적 학습의 지도 신호로 활용하는 Teacher-Student 프레임워크.",
+      "tags": [
+        "#VLN",
+        "#시뮬레이션기반평가"
+      ],
+      "titleEN": "WorldMAP: Bootstrapping Vision-Language Navigation Trajectory Prediction with Generative World Models",
+      "titleKO": "WorldMAP: Bootstrapping Vision-Language Navigation Trajectory Prediction with Generative World Models",
+      "authorsEN": "Hongjin Chen, Shangyun Jiang, Tonghua Su, Chen Gao, Xinlei Chen, Yong Li, Zhibo Chen",
+      "authorsKO": "Hongjin Chen, Shangyun Jiang, Tonghua Su, Chen Gao, Xinlei Chen, Yong Li, Zhibo Chen",
+      "abstractEN": "Vision-language models (VLMs) and generative world models are opening new opportunities for embodied navigation. VLMs are increasingly used as direct planners or trajectory predictors, while world models support look-ahead reasoning by imagining future views. Yet predicting a reliable trajectory from a single egocentric observation remains challenging. Current VLMs often generate unstable trajectories, and world models, though able to synthesize plausible futures, do not directly provide the grounded signals needed for navigation learning. This raises a central question: how can generated futures be turned into supervision for grounded trajectory prediction? We present WorldMAP, a teacher--student framework that converts world-model-generated futures into persistent semantic-spatial structure and planning-derived supervision. Its world-model-driven teacher builds semantic-spatial memory from generated videos, grounds task-relevant targets and obstacles, and produces trajectory pseudo-labels through explicit planning. A lightweight student with a multi-hypothesis trajectory head is then trained to predict navigation trajectories directly from vision-language inputs. On Target-Bench, WorldMAP achieves the best ADE and FDE among compared methods, reducing ADE by 18.0% and FDE by 42.1% relative to the best competing baseline, while lifting a small open-source VLM to DTW performance competitive with proprietary models. More broadly, the results suggest that, in embodied navigation, the value of world models may lie less in supplying action-ready imagined evidence than in synthesizing structured supervision for navigation learning.",
+      "abstractKO": "생성적 월드 모델의 미래 비디오를 3D 재구성 → 의미론적 그라운딩 → FMM 계획으로 변환하여 VLN 궤적 학습의 지도 신호로 활용하는 Teacher-Student 프레임워크.",
+      "detailTags": [
+        "#VLN",
+        "#시뮬레이션기반평가"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 54,
+      "reason": "**월드 모델의 역할 재정의**: 추론 도구가 아닌 훈련 시 구조화된 의사 레이블 생성기로 활용\n**3단계 교사 파이프라인**: DA3 깊이 추정 + UniPixel 분할 + FMM 경로 계획\n**다중 가설 예측**: K개 궤적 후보를 신뢰도 점수와 함께 예측하는 경량 학생 모델\n**방향 일관성 손실**: 위치 정확도와 경로 부드러움을 동시에 최적화\n**오픈소스 경쟁력**: 8B 모델이 GPT-5.4, Gemini-3-Pro 대비 ADE 18% FDE 42% 향상",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/WorldMAP_arxiv2026/index.html"
+    },
+    {
+      "id": "2604.07644",
+      "venue": "arXiv 2026",
+      "matchScore": 93,
+      "category": "Planner",
+      "feedTitle": "GPU-SLS: Safe Large-Scale Robust Nonlinear MPC in Milliseconds via Reachability-Constrained System Level Synthesis on the GPU",
+      "authorsShort": "J. Fang, G. Chou",
+      "feedAbstract": "GPU 병렬 결합 스캔과 ADMM 기반 QP 솔버로 System Level Synthesis 강건 MPC를 밀리초 단위에 푸는 프레임워크. 공식적 도달 가능 집합 제약으로 안전을 보장하면서 CPU OSQP 대비 340배(N=3000), FastSLS 대비 237배 가속을 달성했고, Unitree Go2 61차원 실제…",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "GPU-SLS: Safe Large-Scale Robust Nonlinear MPC in Milliseconds via Reachability-Constrained System Level Synthesis on the GPU",
+      "titleKO": "GPU-SLS: GPU 상의 도달가능성 제약 System Level Synthesis로 구현한 밀리초 단위 대규모 강건 비선형 MPC",
+      "authorsEN": "Jeffrey Fang, Glen Chou",
+      "authorsKO": "Jeffrey Fang, Glen Chou",
+      "abstractEN": "We present GPU-SLS, a GPU-parallelized framework for safe, robust nonlinear model predictive control (MPC) that scales to high-dimensional uncertain robotic systems and long planning horizons. Our method jointly optimizes an inequality-constrained, dynamically-feasible nominal trajectory, a tracking controller, and a closed-loop reachable set under disturbance, all in real-time. To efficiently compute nominal trajectories, we develop a sequential quadratic programming procedure with a novel GPU-accelerated quadratic program (QP) solver that uses parallel associative scans and adaptive caching within an alternating direction method of multipliers (ADMM) framework. The same GPU QP backend is used to optimize robust tracking controllers and closed-loop reachable sets via system level synthesis (SLS), enabling reachability-constrained control in both fixed- and receding-horizon settings. We achieve substantial performance gains, reducing nominal trajectory solve times by 97.7% relative to state-of-the-art CPU solvers and 71.8% compared to GPU solvers, while accelerating SLS-based control and reachability by 237x. Despite large problem scales, our method achieves 100% empirical safety, unlike high-dimensional learning-based reachability baselines. We validate our approach on complex nonlinear systems, including whole-body quadrupeds (61D) and humanoids (75D), synthesizing robust control policies online on the GPU in 20 milliseconds on average and scaling to problems with 2 x 10^5 decision variables and 8 x 10^4 constraints. The implementation of our method is available at https://github.com/Jeff300fang/gpu_sls.",
+      "abstractKO": "GPU 병렬 결합 스캔과 ADMM 기반 QP 솔버로 System Level Synthesis 강건 MPC를 밀리초 단위에 푸는 프레임워크. 공식적 도달 가능 집합 제약으로 안전을 보장하면서 CPU OSQP 대비 340배(N=3000), FastSLS 대비 237배 가속을 달성했고, Unitree Go2 61차원 실제 하드웨어에서 50Hz 실시간 강건 MPC 제어를 최초로 시연했다.",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 58,
+      "reason": "GPU 병렬 결합 스캔과 ADMM 기반 QP 솔버로 System Level Synthesis 강건 MPC를 밀리초 단위에 푸는 프레임워크. 공식적 도달 가능 집합 제약으로 안전을 보장하면서 CPU OSQP 대비 340배(N=3000), FastSLS 대비 237배 가속을 달성했고, Unitree Go2 61차원 실제 하드웨어에서 50Hz 실시간 강건 MPC 제어를 최초로 시연했다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/GPU-SLS_arxiv2026/index.html"
+    },
+    {
+      "id": "2411.17820",
+      "venue": "CVPR 2025",
+      "venueDetail": "CVPR 2025",
+      "matchScore": 96,
+      "category": "VLN",
+      "feedTitle": "CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos",
+      "authorsShort": "X. Liu, J. Li +7",
+      "feedAbstract": "2000시간 이상의 웹 규모 도시 보행/운전 비디오로 학습한 구체화된 에이전트로, 비용 많은 주석 없이 대규모 모방학습으로 도시 네비게이션 정책을 학습.",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos",
+      "titleKO": "CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos",
+      "authorsEN": "Xinhao Liu, Jintong Li, Yicheng Jiang, Niranjan Sujay, Zhicheng Yang, Juexiao Zhang, John Abanes, Jing Zhang, Chen Feng",
+      "authorsKO": "Xinhao Liu, Jintong Li, Yicheng Jiang, Niranjan Sujay, Zhicheng Yang, Juexiao Zhang, John Abanes, Jing Zhang, Chen Feng",
+      "abstractEN": "Navigating dynamic urban environments presents significant challenges for embodied agents, requiring advanced spatial reasoning and adherence to common-sense norms. Despite progress, existing visual navigation methods struggle in map-free or off-street settings, limiting the deployment of autonomous agents like last-mile delivery robots. To overcome these obstacles, we propose a scalable, data-driven approach for human-like urban navigation by training agents on thousands of hours of in-the-wild city walking and driving videos sourced from the web. We introduce a simple and scalable data processing pipeline that extracts action supervision from these videos, enabling large-scale imitation learning without costly annotations. Our model learns sophisticated navigation policies to handle diverse challenges and critical scenarios. Experimental results show that training on large-scale, diverse datasets significantly enhances navigation performance, surpassing current methods. This work shows the potential of using abundant online video data to develop robust navigation policies for embodied agents in dynamic urban settings. Project homepage is at https://ai4ce.github.io/CityWalker/.",
+      "abstractKO": "2000시간 이상의 웹 규모 도시 보행/운전 비디오로 학습한 구체화된 에이전트로, 비용 많은 주석 없이 대규모 모방학습으로 도시 네비게이션 정책을 학습.",
+      "detailTags": [
+        "#VLN"
       ],
       "year": "2024",
       "citations": 0,
-      "readMinutes": 50,
-      "reason": "Perception-to-Control 통합: 원시 포인트 클라우드를 직접 latent distance feature space로 매핑하여 분리된 SLAM→Planning→Control 파이프라인의 오차 누적 제거\n해석 가능한 신경망: Plug-and-Play Proximal Alternating-Minimization Network (PAN)으로 점 수준 제약을 명시적으로 신경 루프에 통합, 물리적 해석가능성 보장\n지상 이동 로봇·휠-다리 로봇·자율 주행 차량 등 다양한 플랫폼에서 모래상자/사무실/복도/주차장 등 비구조·미지 환경 실시간 실험 검증",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NeuPAN_RAL/index.html"
+      "readMinutes": 59,
+      "reason": "웹에서 추출한 대규모 도시 비디오 데이터셋 활용 (2000시간 이상)\n확장 가능한 데이터 처리 파이프라인으로 자동 행동 레이블링\n도시 환경의 다양한 도전 시나리오 처리 (off-street, 동적 환경 등)\n기존 방법 대비 우수한 네비게이션 성능\n대규모 다양한 데이터셋으로 학습한 정책의 강력한 성능",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/CityWalker_CVPR2025/index.html"
     }
   ]
 }
