@@ -1,13 +1,69 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-05T19:30:06.964Z",
+  "generatedAt": "2026-08-06T19:30:00.799Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 8. 6  목요일",
+    "date": "2026. 8. 7  금요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 새 리뷰 2편 · 전체 97편"
+    "subtitle": "VLN·Planner 새 리뷰 2편 · 전체 99편"
   },
   "papers": [
+    {
+      "id": "2608.04825",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 2026 (v1, 2026-08-05, 13 pages / 9 figures) — 탑티어 확정 정보 없음",
+      "matchScore": 96,
+      "category": "VLN",
+      "feedTitle": "Deliberate Before You Fly: Vision-Guided Spatial Deliberation for UAV See-and-Reach Navigation",
+      "authorsShort": "F. Xue, E. Yu +3",
+      "feedAbstract": "UAV See-and-Reach 항해(언어-지정 가시 목표로 접근·정지)에서 시각-언어를 waypoint로 직접 매핑하던 관행이 의미-제어 불일치를 낳는다는 병리를 규명하고, waypoint 이전에 명시적 공간 숙고(목표 방향 앵커→공간 진단→기동 결정→종료 판단)를 구조화 직렬 출력 (𝒟,𝒵,𝒜,𝒮,𝒲)으로…",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "Deliberate Before You Fly: Vision-Guided Spatial Deliberation for UAV See-and-Reach Navigation",
+      "titleKO": "Deliberate Before You Fly: Vision-Guided Spatial Deliberation for UAV See-and-Reach Navigation",
+      "authorsEN": "Fanfu Xue, En Yu, Bohang Liu, Hongjun Wang, Yang Yang",
+      "authorsKO": "Fanfu Xue, En Yu, Bohang Liu, Hongjun Wang, Yang Yang",
+      "abstractEN": "UAV see-and-reach navigation requires an aerial agent to approach a language-specified target visible in its initial view and stop reliably near it. Existing methods typically map vision-language representations directly to action outputs without explicitly modeling intermediate fine-grained spatial decisions. This direct mapping causes semantic-control misalignment, leading to inconsistent maneuvers and unreliable termination. To address this issue, we propose DBFly, a vision-language waypoint prediction framework that introduces explicit vision-guided spatial deliberation before waypoint generation. Specifically, DBFly introduces a spatial maneuver decision chain that progressively performs target-direction anchoring, spatial diagnosis, and maneuver decision, enabling high-level maneuver intent to explicitly guide continuous waypoint generation. DBFly further constructs an implicit flight corridor by transforming the initial target-direction prior into a persistent geometric reference and deriving an online corridor state from the UAV's current position, thereby providing soft geometric guidance for spatial diagnosis and maneuver correction. In addition, DBFly develops a terminal-convergence-aware stopping strategy that characterizes terminal states through both target proximity and short-horizon motion convergence, enabling more reliable stopping near the target. Extensive experiments across seen, unseen-object, and unseen-scene test sets demonstrate that DBFly improves the success rate over the SOTA baseline by an average of 25.07 percentage points. The project homepage is available at https://xuefanfu.github.io/DBFly-Page.",
+      "abstractKO": "UAV See-and-Reach 항해(언어-지정 가시 목표로 접근·정지)에서 시각-언어를 waypoint로 직접 매핑하던 관행이 의미-제어 불일치를 낳는다는 병리를 규명하고, waypoint 이전에 명시적 공간 숙고(목표 방향 앵커→공간 진단→기동 결정→종료 판단)를 구조화 직렬 출력 (𝒟,𝒵,𝒜,𝒮,𝒲)으로 삽입하여 3DG-VLN 대비 평균 SR +25.07pp를 달성한 논문.",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 34,
+      "reason": "**\"숙고 후 비행\" 패러다임**: 시각-언어→waypoint 직접 매핑 대신, waypoint 이전에 명시적 비전 기반 공간 숙고(VGSD)를 삽입해 의미-제어 불일치 해소.\n**구조화 직렬 출력 (𝒟,𝒵,𝒜,𝒮,𝒲)**: 목표방향·공간진단·기동결정·종료결정·waypoint(K=5)를 자기회귀로 순차 생성 → 뒤 필드가 앞 결정을 조건화(의미→제어 인과 명시, 해석 가능).\n**암묵적 비행 회랑**: 초기 목표 방향 사전을 지속적 기하 참조로 변환, 온라인 회랑 상태(ϵ_c=0.5)로 3D 방향 드리프트 억제(맵/SLAM 불요).\n**종말 수렴 인지 정지**: 목표 근접도(δ=10m)+운동 수렴(ϵ_m=0.5)을 결합해 \"접근 지속 vs 안정 수렴\"을 구분 → 조기·지연 정지 감소, NE 대폭 하락.\n**완전 공개 + 실기체**: Qwen3-VL-8B+LoRA(rank8) 코드·평가 스크립트 공개, Livox Mid-360+RealSense D435i×2+Jetson Orin NX/RTX4090 실세계 UAV 데모.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/DBFly_arxiv2026/index.html"
+    },
+    {
+      "id": "2608.04732",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 2026 (v1, 2026-08-05, eess.SY) — 탑티어 확정 정보 없음",
+      "matchScore": 93,
+      "category": "Planner",
+      "feedTitle": "Toward Integrating Adaptive Experience Replay and Online Uncertainty Estimation in Safe Actor-Critic Optimal Control",
+      "authorsShort": "M. Rastegarmoghaddam, D. Nikkhouy +1",
+      "feedAbstract": "안전 로봇 항해(2D 장애물 회피)에서 액터-크리틱·CBF 안전필터·인식 추정을 느슨한 add-on으로 붙이면 서로 오차를 증폭한다는 문제를, 온라인 불확실성 추정을 CBF 여유항으로 흡수하는 강건 CBF + TD·안전·불확실성·신규성 혼합 우선순위 적응 재현(AER) + 실행(필터통과) 액션 크리틱 학습의 통합…",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "Toward Integrating Adaptive Experience Replay and Online Uncertainty Estimation in Safe Actor-Critic Optimal Control",
+      "titleKO": "Toward Integrating Adaptive Experience Replay and Online Uncertainty Estimation in Safe Actor-Critic Optimal Control",
+      "authorsEN": "Mahshad Rastegarmoghaddam, Davoud Nikkhouy, Shima Samadzadeh",
+      "authorsKO": "Mahshad Rastegarmoghaddam, Davoud Nikkhouy, Shima Samadzadeh",
+      "abstractEN": "Safe actor-critic control often treats barrier filtering, uncertainty estimation, and experience replay as separate modules, even though each changes the data used for learning and control. We develop an integrated architecture in which the uncertainty estimate updates the obstacle geometry used by a control barrier function, filter interventions and estimation residuals determine replay priority, and the critic learns from the executed rather than nominal action. We instantiate the architecture on a two-dimensional robot-navigation task with corrupted obstacle measurements and compare six component-matched configurations under common training budgets, random seeds, sensor streams, exploration, and disturbances. Evaluation includes a moderate post-training test, an eleven-level perception-noise sweep, and an exploratory extreme-stress test at multiplier $6.0$. In the extreme test, the integrated configuration recorded no contacts and reached the goal in all five evaluation seeds. Its mean cost was $7.63\\pm0.44$ and its obstacle-belief root-mean-square error was $3.52\\pm0.55$ cm. The uncertainty-estimation ablation also recorded no contacts but reached the goal in four of five seeds, with mean cost $8.96\\pm2.08$ and belief error $11.08\\pm1.23$ cm. A finite-training bound clarifies replay exposure, and a robust barrier condition states the required estimation-error and feasibility assumptions. The results support coupling estimation, safety filtering, and replay on this benchmark; broader safety and convergence claims require further study.",
+      "abstractKO": "안전 로봇 항해(2D 장애물 회피)에서 액터-크리틱·CBF 안전필터·인식 추정을 느슨한 add-on으로 붙이면 서로 오차를 증폭한다는 문제를, 온라인 불확실성 추정을 CBF 여유항으로 흡수하는 강건 CBF + TD·안전·불확실성·신규성 혼합 우선순위 적응 재현(AER) + 실행(필터통과) 액션 크리틱 학습의 통합 아키텍처로 해소한 논문. (트랙: Planner 안전 이동계획 경계사례 — D-SafeMPC 선례로 in-scope, 실로봇 없음·2D 시뮬 개념검증.)",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 27,
+      "reason": "**통합 아키텍처 명제**: 안전 액터-크리틱은 add-on 나열이 아니라 정보 공유 통합 루프여야 함을 6단계 점진 ablation으로 실증.\n**불확실성-결합 강건 CBF**: 추정 잔차·공분산을 CBF 조건 여유항(‖∇ĥ‖ē_d+ē_h)으로 흡수 → 편향·점프·드리프트 오염 인식 하에서도 충돌 0.\n**혼합 적응 재현(AER, Eq.9)**: p_t = 0.18·TD + 0.39·안전 + 0.30·불확실성 + 0.13·신규성 → 안전-임계 전이 우선, TD-only PER의 악화 해소.\n**실행 액션 크리틱 학습**: 증강 전이 ξ_t=(x,u_a,u,r,x',σ,ρ,η)에서 필터 통과 u_t로 크리틱 학습 → 명목-실행 괴리 제거.\n**강한 재현성**: GitHub 재현성 저장소 + Zenodo DOI 아카이브.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/SafeActorCritic_arxiv2026/index.html"
+    }
+  ],
+  "archive": [
     {
       "id": "2608.03143",
       "venue": "arXiv 2026",
@@ -35,35 +91,6 @@
       "reason": "**진행도–실행 분리 정식화**: 통합 감독이 \"진행도 추적 오류\"와 \"국소 실행 오류\"를 하나의 액션 손실로 뭉개 오류 귀속을 붕괴시킨다는 병리 규명. 명시적 step-level 인터페이스(MIA↔MAG)로 오류를 관측 가능하게 분리.\n**수준 분리 교정(Level-Separated Correction)**: 진행도는 상태수준(190K), 실행은 반복 실패에만 선별 액션(11.5K)으로 교정 → 같은 규모 통합 DAgger(200K) 대비 R2R-CE SR +5.5(49.8→55.3).\n**E-SPA (라벨-프리 정렬)**: 수작업 시간정렬 없이 하위지시↔궤적 구간 자기지도 정렬(λsem=0.4, λact=0.6, λdur=0.05). 인간 정렬(FG-R2R/Landmark-RxR)은 학습 배제·평가 전용.\n**명시적 복구 상태**: MIA가 Normal/Recovering 예측 → 암묵 복구 대비 SR +4.3(51.0→55.3).\n**이식성**: MIA 진행도 신호를 frozen NaVid/Uni-NaVid/NaVILA/StreamVLN에 주입 → SR +0.6~+4.9.",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/Route2Step_arxiv2026/index.html"
     },
-    {
-      "id": "2403.06828",
-      "venue": "RA-L",
-      "venueDetail": "RA-L",
-      "matchScore": 96,
-      "category": "Planner",
-      "feedTitle": "NeuPAN: Direct Point Robot Navigation with E2E Model-based Learning",
-      "authorsShort": "R. Han, S. Wang +9",
-      "feedAbstract": "포인트 클라우드를 직접 거리 특성 공간으로 매핑하는 해석가능 신경망(PAN)을 통해 인지→계획→제어 파이프라인의 오차 전파를 제거한, 지도 없는(map-free) 실시간 엔드-투-엔드 모델 기반 로봇 모션 플래닝 프레임워크.",
-      "tags": [
-        "#E2ELearning"
-      ],
-      "titleEN": "NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning",
-      "titleKO": "NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning",
-      "authorsEN": "Ruihua Han, Shuai Wang, Shuaijun Wang, Zeqing Zhang, Jianjun Chen, Shijie Lin, Chengyang Li, Chengzhong Xu, Yonina C. Eldar, Qi Hao, Jia Pan",
-      "authorsKO": "Ruihua Han, Shuai Wang, Shuaijun Wang, Zeqing Zhang, Jianjun Chen, Shijie Lin, Chengyang Li, Chengzhong Xu, Yonina C. Eldar, Qi Hao, Jia Pan",
-      "abstractEN": "Navigating a nonholonomic robot in a cluttered, unknown environment requires accurate perception and precise motion control for real-time collision avoidance. This paper presents NeuPAN: a real-time, highly accurate, map-free, easy-to-deploy, and environment-invariant robot motion planner. Leveraging a tightly coupled perception-to-control framework, NeuPAN has two key innovations compared to existing approaches: 1) it directly maps raw point cloud data to a latent distance feature space for collision-free motion generation, avoiding error propagation from the perception to control pipeline; 2) it is interpretable from an end-to-end model-based learning perspective. The crux of NeuPAN is solving an end-to-end mathematical model with numerous point-level constraints using a plug-and-play (PnP) proximal alternating-minimization network (PAN), incorporating neurons in the loop. This allows NeuPAN to generate real-time, physically interpretable motions. It seamlessly integrates data and knowledge engines, and its network parameters can be fine-tuned via backpropagation. We evaluate NeuPAN on a ground mobile robot, a wheel-legged robot, and an autonomous vehicle, in extensive simulated and real-world environments. Results demonstrate that NeuPAN outperforms existing baselines in terms of accuracy, efficiency, robustness, and generalization capabilities across various environments, including the cluttered sandbox, office, corridor, and parking lot. We show that NeuPAN works well in unknown and unstructured environments with arbitrarily shaped objects, transforming impassable paths into passable ones.",
-      "abstractKO": "포인트 클라우드를 직접 거리 특성 공간으로 매핑하는 해석가능 신경망(PAN)을 통해 인지→계획→제어 파이프라인의 오차 전파를 제거한, 지도 없는(map-free) 실시간 엔드-투-엔드 모델 기반 로봇 모션 플래닝 프레임워크.",
-      "detailTags": [
-        "#E2ELearning"
-      ],
-      "year": "2024",
-      "citations": 0,
-      "readMinutes": 50,
-      "reason": "Perception-to-Control 통합: 원시 포인트 클라우드를 직접 latent distance feature space로 매핑하여 분리된 SLAM→Planning→Control 파이프라인의 오차 누적 제거\n해석 가능한 신경망: Plug-and-Play Proximal Alternating-Minimization Network (PAN)으로 점 수준 제약을 명시적으로 신경 루프에 통합, 물리적 해석가능성 보장\n지상 이동 로봇·휠-다리 로봇·자율 주행 차량 등 다양한 플랫폼에서 모래상자/사무실/복도/주차장 등 비구조·미지 환경 실시간 실험 검증",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NeuPAN_RAL/index.html"
-    }
-  ],
-  "archive": [
     {
       "id": "2607.28560",
       "venue": "arXiv 2026",
@@ -2848,6 +2875,33 @@
       "readMinutes": 59,
       "reason": "웹에서 추출한 대규모 도시 비디오 데이터셋 활용 (2000시간 이상)\n확장 가능한 데이터 처리 파이프라인으로 자동 행동 레이블링\n도시 환경의 다양한 도전 시나리오 처리 (off-street, 동적 환경 등)\n기존 방법 대비 우수한 네비게이션 성능\n대규모 다양한 데이터셋으로 학습한 정책의 강력한 성능",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/CityWalker_CVPR2025/index.html"
+    },
+    {
+      "id": "2403.06828",
+      "venue": "RA-L",
+      "venueDetail": "RA-L",
+      "matchScore": 96,
+      "category": "Planner",
+      "feedTitle": "NeuPAN: Direct Point Robot Navigation with E2E Model-based Learning",
+      "authorsShort": "R. Han, S. Wang +9",
+      "feedAbstract": "포인트 클라우드를 직접 거리 특성 공간으로 매핑하는 해석가능 신경망(PAN)을 통해 인지→계획→제어 파이프라인의 오차 전파를 제거한, 지도 없는(map-free) 실시간 엔드-투-엔드 모델 기반 로봇 모션 플래닝 프레임워크.",
+      "tags": [
+        "#E2ELearning"
+      ],
+      "titleEN": "NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning",
+      "titleKO": "NeuPAN: Direct Point Robot Navigation with End-to-End Model-based Learning",
+      "authorsEN": "Ruihua Han, Shuai Wang, Shuaijun Wang, Zeqing Zhang, Jianjun Chen, Shijie Lin, Chengyang Li, Chengzhong Xu, Yonina C. Eldar, Qi Hao, Jia Pan",
+      "authorsKO": "Ruihua Han, Shuai Wang, Shuaijun Wang, Zeqing Zhang, Jianjun Chen, Shijie Lin, Chengyang Li, Chengzhong Xu, Yonina C. Eldar, Qi Hao, Jia Pan",
+      "abstractEN": "Navigating a nonholonomic robot in a cluttered, unknown environment requires accurate perception and precise motion control for real-time collision avoidance. This paper presents NeuPAN: a real-time, highly accurate, map-free, easy-to-deploy, and environment-invariant robot motion planner. Leveraging a tightly coupled perception-to-control framework, NeuPAN has two key innovations compared to existing approaches: 1) it directly maps raw point cloud data to a latent distance feature space for collision-free motion generation, avoiding error propagation from the perception to control pipeline; 2) it is interpretable from an end-to-end model-based learning perspective. The crux of NeuPAN is solving an end-to-end mathematical model with numerous point-level constraints using a plug-and-play (PnP) proximal alternating-minimization network (PAN), incorporating neurons in the loop. This allows NeuPAN to generate real-time, physically interpretable motions. It seamlessly integrates data and knowledge engines, and its network parameters can be fine-tuned via backpropagation. We evaluate NeuPAN on a ground mobile robot, a wheel-legged robot, and an autonomous vehicle, in extensive simulated and real-world environments. Results demonstrate that NeuPAN outperforms existing baselines in terms of accuracy, efficiency, robustness, and generalization capabilities across various environments, including the cluttered sandbox, office, corridor, and parking lot. We show that NeuPAN works well in unknown and unstructured environments with arbitrarily shaped objects, transforming impassable paths into passable ones.",
+      "abstractKO": "포인트 클라우드를 직접 거리 특성 공간으로 매핑하는 해석가능 신경망(PAN)을 통해 인지→계획→제어 파이프라인의 오차 전파를 제거한, 지도 없는(map-free) 실시간 엔드-투-엔드 모델 기반 로봇 모션 플래닝 프레임워크.",
+      "detailTags": [
+        "#E2ELearning"
+      ],
+      "year": "2024",
+      "citations": 0,
+      "readMinutes": 50,
+      "reason": "Perception-to-Control 통합: 원시 포인트 클라우드를 직접 latent distance feature space로 매핑하여 분리된 SLAM→Planning→Control 파이프라인의 오차 누적 제거\n해석 가능한 신경망: Plug-and-Play Proximal Alternating-Minimization Network (PAN)으로 점 수준 제약을 명시적으로 신경 루프에 통합, 물리적 해석가능성 보장\n지상 이동 로봇·휠-다리 로봇·자율 주행 차량 등 다양한 플랫폼에서 모래상자/사무실/복도/주차장 등 비구조·미지 환경 실시간 실험 검증",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/NeuPAN_RAL/index.html"
     }
   ]
 }

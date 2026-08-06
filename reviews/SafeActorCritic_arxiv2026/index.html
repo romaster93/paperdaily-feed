@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Toward Integrating Adaptive Experience Replay and Online Uncertainty Estimation in Safe Actor-Critic Optimal Control · PaperDaily</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { color: #8f4023; text-decoration: underline; }
+
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
+
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
+}
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
+article code.math-display {
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
+}
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
+article th {
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
+article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: var(--mono); font-size: 12px; text-align: center;
+}
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
+footer {
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
+</head>
+<body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2608.04732">arXiv ↗</a>
+</div>
+<div class="wrap">
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">SafeActorCritic_arxiv2026</span>
+    </div>
+    <h1 class="doc-title">Toward Integrating Adaptive Experience Replay and Online Uncertainty Estimation in Safe Actor-Critic Optimal Control: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 2026 (v1, 2026-08-05, eess.SY) — 탑티어 확정 정보 없음</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2608.04732">2608.04732</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">✅ <a href="https://github.com/SDNT8810/safe-actor-critic-aer-ue-reproducibility">github.com/SDNT8810/safe-actor-critic-aer-ue-reproducibility</a> (재현성 저장소) + Zenodo DOI <a href="https://doi.org/10.5281/zenodo.21515850">doi.org/10.5281/zenodo.21515850</a></span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">❌</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-08-07</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">27KB · 약 27분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
+  </header>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Toward Integrating Adaptive Experience Replay and Online Uncertainty Estimation in Safe Actor-Critic Optimal Control</li>
+<li><strong>저자 (Authors)</strong>: Mahshad Rastegarmoghaddam, Davoud Nikkhouy, Shima Samadzadeh</li>
+<li><strong>소속 (Affiliation)</strong>: Department of Mechanical Engineering, Politecnico di Milano, Milan, Italy</li>
+<li><strong>발표처 (Published)</strong>: arXiv 2026 (v1, 2026-08-05, eess.SY) — 탑티어 학회 확정 정보 없음(미확정)</li>
+<li><strong>DOI</strong>: (미확정)</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2608.04732">2608.04732</a></li>
+<li><strong>코드 (Code)</strong>: ✅ <a href="https://github.com/SDNT8810/safe-actor-critic-aer-ue-reproducibility">SDNT8810/safe-actor-critic-aer-ue-reproducibility</a> — 재현성 저장소(소스 공개) + Zenodo 아카이브 <a href="https://doi.org/10.5281/zenodo.21515850">DOI 10.5281/zenodo.21515850</a></li>
+<li><strong>프로젝트 페이지 (Project)</strong>: ❌ (별도 프로젝트 페이지 없음)</li>
+</ul>
+<blockquote>
+<p><strong>트랙 판정 노트 (중요)</strong>: 본 논문은 제목상 &quot;Optimal Control&quot;이며 안전 강화학습(safe-RL) 제어 아키텍처를 다룬다. 그러나 실험 대상은 <strong>2D 로봇 항해에서 원형 장애물을 회피하며 목표에 도달하는 과제</strong>로, Control Barrier Function(CBF)로 안전한 이동 제어를 생성하는 <strong>장애물 회피 국소 계획(local obstacle avoidance)</strong>이 핵심 기여다. 매니퓰레이션·그래스핑·자율주행 요소가 없고, 확산 안전 플래너에 CBF/CLF를 주입한 <strong>D-SafeMPC(2607.10842, Planner 트랙 기수록)</strong> 선례와 동일하게 &quot;안전 모션 계획&quot; 기여로 판단하여 <strong>Planner 트랙 in-scope</strong>로 편입한다. 단, (i) 실로봇 실험이 없는 순수 2D 시뮬 개념검증, (ii) 기여가 제어-RL 통합 아키텍처에 가까운 경계 사례임을 명시한다(코드·재현성은 강함 — GitHub + Zenodo DOI). 이 플래그를 여기 §1.2에 남긴다.</p>
+</blockquote>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>안전이 요구되는 로봇 제어에서 흔한 설계는 <strong>세 요소를 느슨하게 이어붙이는 것</strong>이다: (i) 학습된 액터-크리틱 정책, (ii) 안전 필터(CBF), (iii) 인식/추정 모듈. 문제는 이들이 <strong>서로 정보를 주고받지 않는 add-on</strong>으로 붙으면 서로의 오류를 증폭한다는 데 있다.</p>
+<p>구체적으로:</p>
+<ul>
+<li>인식(장애물 중심 추정)이 <strong>편향·드리프트·점프</strong>로 오염되면, CBF는 잘못된 장애물 위치에 대해 &quot;안전&quot;을 보장하므로 실제로는 충돌한다.</li>
+<li>크리틱이 <strong>명목 액션(nominal action, 안전 필터 통과 전)</strong>으로 학습하면, 실제 실행되는 것은 필터 보정 후 액션이라 가치 추정과 실행 사이에 괴리가 생긴다.</li>
+<li>경험 재현(experience replay)이 <strong>TD 오차만</strong> 우선순위로 삼으면, 안전 여유가 위태로운(장벽 근처) 전이나 추정이 불확실한 전이를 충분히 학습하지 못한다.</li>
+</ul>
+<p><strong>본 논문의 목표</strong>는 &quot;안전 액터-크리틱 제어는 loosely-connected add-on의 나열이 아니라 <strong>통합 아키텍처(integrated architecture)</strong>로 설계되어야 한다&quot;는 명제를 세우고, 세 결합을 실증하는 것이다: <strong>(A) 온라인 불확실성 추정 → CBF 결합</strong>(추정 장애물 신념과 공분산으로 강건 CBF 조건 구성), <strong>(B) 적응적 경험 재현(AER) → 장벽 근접·추정 잔차에 적응</strong>(안전·불확실성·신규성 점수 혼합 우선순위), <strong>(C) 실행(필터 통과) 액션으로 크리틱 학습</strong>. 이 셋을 결합했을 때 극한 인식 오염(편향 6<del>11.4cm, 점프 30</del>42cm) 하에서도 <strong>충돌 0회 + 최저 비용 + 최소 신념 오차</strong>를 달성함을 보인다.</p>
+<hr>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) 오염된 인식 하의 안전 (Safety under Corrupted Perception).</strong>
+CBF는 장애물의 정확한 기하를 전제로 forward invariance(안전 집합 불변)를 보장한다. 그러나 실제 탐지기는 편향(6.0<del>11.4cm)·완만한 드리프트(5.4cm)·급점프(30</del>42cm)·간헐 홀드로 장애물 중심을 잘못 보고한다. 이 오염을 무시하면 CBF가 <strong>잘못된 안전</strong>을 보장해 충돌한다(본문: AC+CBF 위반 1.64회).</p>
+<p><strong>(C2) 명목–실행 액션 괴리 (Nominal vs Executed Action Mismatch).</strong>
+액터가 낸 명목 액션 <code class="math">u_{a,t}</code>와 안전 필터를 거쳐 실제 실행된 액션 <code class="math">u_t</code>는 다르다. 크리틱을 <code class="math">u_{a,t}</code>로 학습하면 실제 궤적을 만든 <code class="math">u_t</code>의 가치를 배우지 못해, 정책 개선 신호가 왜곡된다.</p>
+<p><strong>(C3) 안전-무관 경험 재현 (Safety-agnostic Replay).</strong>
+표준 PER(Prioritized Experience Replay)은 TD 오차만으로 전이를 우선한다. 하지만 안전 학습에서는 <strong>장벽 여유가 위태로운 전이</strong>(곧 충돌할 뻔한)나 <strong>추정 잔차가 큰 전이</strong>(인식이 특히 불확실했던)가 더 중요하다. TD-only 우선순위는 이런 안전-임계 전이를 과소 표집한다(본문: AC+CBF+PER가 위반 2.21회로 오히려 악화).</p>
+<p><strong>(C4) 통합 없는 add-on의 상호 악화 (Compounding of Loosely-Coupled Modules).</strong>
+위 세 모듈을 독립적으로 붙이면 서로의 오차가 누적된다. 저자들의 핵심 주장은 &quot;이들을 <strong>정보 공유하는 통합 루프</strong>로 설계해야 오차 상쇄가 일어난다&quot;는 것이다.</p>
+<h3>2.2 핵심 해결책</h3>
+<pre class="diagram"><code>[loosely-coupled add-on]            [본 논문: 통합 아키텍처]
+
+ 인식 ──▶ CBF ──▶ 실행                인식(불확실성 σ,ρ)
+   │       ▲                            │  ▲          │
+ (오차 무시)│                           ▼  │          ▼
+ 크리틱←명목액션                   강건 CBF◀──── 적응 재현(AER)
+                                        │       (안전·불확실성·신규성)
+                                        ▼          ▲
+                                     실행 액션 ─────┘
+                                        │
+                                     크리틱←실행 액션
+</code></pre>
+<p>세 결합:</p>
+<ol>
+<li><strong>불확실성-결합 강건 CBF</strong>: 추정 잔차·신념 공분산을 CBF 조건의 여유항으로 넣어, 인식이 나쁠수록 보수적으로 필터링(→C1).</li>
+<li><strong>혼합 우선순위 적응 재현(AER)</strong>: TD 잔차 + 안전 슬랙 + 추정 잔차 + 신규성의 가중 혼합으로 안전-임계 전이를 우선 학습(→C3).</li>
+<li><strong>실행 액션 학습</strong>: 크리틱을 필터 통과 실행 액션 <code class="math">u_t</code>로 학습(→C2).</li>
+</ol>
+<p>이 셋의 통합이 개별 add-on 대비 우월함을 6-단계 점진 ablation으로 증명한다(→C4).</p>
+<hr>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 안전 보정 단계 (Safety-Correction / Robust CBF)</h3>
+<p>실행 제어는 명목 액터 출력 <code class="math">u_a(t)</code>를 안전 집합으로 투영하여 얻는다:</p>
+<pre class="codeblock"><code>u(t) = Π_safe( x(t), u_a(t), d̂(t) )
+
+  · Π_safe : QP(2차계획) — 명목 액션에서의 편차를 최소화하되
+             장벽 부등식 제약을 만족하는 안전 액션으로 투영
+  · d̂(t)  : 온라인 불확실성/외란 추정치 (고정 명목모델이 아님)
+</code></pre>
+<p>핵심은 CBF가 <strong>고정 명목 모델이 아니라 온라인 추정치 <code class="math">\hat d</code>를 받는다</strong>는 점이다. 강건 CBF 조건(전방 불변 충분조건)은 추정 오차 상한 <code class="math">\bar e_d,\ \bar e_h</code>를 여유로 흡수한다:</p>
+<pre class="codeblock"><code>∇ĥ(x)ᵀ ( f(x) + g(x)u + d̂(x) ) + α( ĥ(x) )  ≥  ‖∇ĥ(x)‖ · ē_d  +  ē_h
+
+  좌변: 추정 장애물 신념 ĥ 기반 CBF 감소율
+  우변: 추정 오차 상한(외란 ē_d, 장벽 ē_h)을 여유로 요구
+  → 인식이 불확실할수록 우변↑ → 더 보수적 필터링
+</code></pre>
+<p>이것이 (C1)을 정면으로 해결한다: 탐지기가 점프·드리프트로 오염될수록 추정 잔차가 커지고, 그만큼 CBF가 더 큰 여유를 요구해 실제 충돌을 막는다. QP는 로봇 반경 + 0.022m로 팽창시킨 알려진 직사각형/원형 장애물에 대해 속도를 투영한다.</p>
+<h3>3.2 증강 전이 표현 (Augmented Transition, Eq. 8)</h3>
+<p>표준 전이 <code class="math">(x_t, u_t, r_t, x_{t+1})</code>을 넘어, 안전·추정·신규성 정보를 함께 저장한다:</p>
+<pre class="codeblock"><code>ξ_t = ( x_t, u_{a,t}, u_t, r_t, x_{t+1}, σ_t, ρ_t, η_t )    ... (Eq. 8)
+
+  · u_{a,t} : 명목 액션 (필터 전)
+  · u_t     : 실행 안전 액션 (필터 후)  ← 크리틱은 이걸로 학습
+  · σ_t     : 장벽 슬랙 (barrier slack) — 안전 여유가 얼마나 위태로웠나
+  · ρ_t     : 추정 잔차 (estimation residual) — 인식이 얼마나 불확실했나
+  · η_t     : 최근성 기술자 (recency descriptor) — 신규성
+</code></pre>
+<p><code class="math">u_{a,t}</code>와 <code class="math">u_t</code>를 <strong>둘 다</strong> 저장하는 것이 (C2) 해결의 열쇠다. 크리틱은 실행 전이로 학습하고, 액터는 재현된 TD-잔차 스코어-함수 대리항으로 갱신된다.</p>
+<h3>3.3 혼합 적응 재현 우선순위 (Mixed Adaptive Replay Priority, Eq. 9)</h3>
+<p>전이의 재현 우선순위를 네 신호의 가중 혼합으로 정의:</p>
+<pre class="codeblock"><code>p_t = λ_TD · δ̄_t  +  λ_safe · s_t  +  λ_unc · e_t  +  λ_nov · n_t    ... (Eq. 9)
+
+  · δ̄_t : 정규화 TD 잔차     (λ_TD  = 0.18)
+  · s_t  : 안전 점수(슬랙 기반) (λ_safe = 0.39)  ← 최대 가중
+  · e_t  : 불확실성 점수       (λ_unc = 0.30)
+  · n_t  : 신규성 점수         (λ_nov = 0.13)
+</code></pre>
+<p>가중치가 안전(0.39)·불확실성(0.30)에 집중되어, <strong>TD 오차(0.18)보다 안전-임계·인식-불확실 전이를 우선</strong> 학습한다. 이것이 표준 PER(TD-only)이 안전 학습에서 오히려 악화되는 문제(C3)를 해소한다. (가중치는 손튜닝, 사후 ±20% 민감도 점검만 수행.)</p>
+<h3>3.4 통합 학습 루프 (Algorithm 1)</h3>
+<pre class="codeblock"><code>매 스텝:
+ 1. 상태 x_t 관측
+ 2. 명목 액션 u_{a,t} = 액터(x_t) + 가우시안 탐색
+ 3. 불확실성 추정: 장애물 중심 신념 + 공분산 (Kalman-like 정적중심 필터)
+ 4. 안전 보정: u_t = Π_safe(x_t, u_{a,t}, d̂)  (§3.1 강건 CBF QP)
+ 5. 증강 전이 ξ_t 수집 (§3.2)
+ 6. 혼합 우선순위 미니배치 표집 (§3.3)
+ 7. 크리틱 갱신: 실행 전이(u_t)로 TD 학습   ← (C2)
+ 8. 액터 갱신: 안전-인지 타깃으로 스코어-함수 갱신
+ 9. 추정기 갱신
+</code></pre>
+<p><strong>아키텍처 구성 요소</strong>:</p>
+<ul>
+<li><strong>크리틱</strong>: 7개 선형 상태-가치 특징(목표거리, 제곱항, 정규화 위치). 실행 액션으로 학습.</li>
+<li><strong>액터</strong>: waypoint-추적 명목 정책 + 가우시안 탐색. 재현된 TD-잔차 스코어-함수 대리항으로 갱신.</li>
+<li><strong>추정기</strong>: 인과적 정적-중심 Kalman-유사 필터 → 장애물 중심 신념·공분산.</li>
+<li><strong>재현 관리자</strong>: 증강 전이(명목·실행 액션 + 안전/불확실성/신규성 점수) 저장.</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>┌────────────────────────────────────────────────────────────────┐
+│  통합 안전 액터-크리틱 루프                                      │
+│                                                                │
+│  상태 x_t                                                       │
+│    │                                                           │
+│    ▼                                                           │
+│  ┌─────────┐   u_{a,t}(명목)   ┌───────────────┐               │
+│  │ 액터    │──────────────────▶│ 강건 CBF QP   │               │
+│  │(waypoint│                   │ Π_safe        │◀── d̂,σ,ρ      │
+│  │ 추적)   │                   │(불확실성 결합)│    (추정기)    │
+│  └─────────┘                   └──────┬────────┘               │
+│    ▲                                  │ u_t(실행)              │
+│    │ 스코어-함수 갱신                 ▼                        │
+│  ┌─────────┐   실행 전이로 학습   [환경/실제 기하]             │
+│  │ 크리틱  │◀──────────────────── r_t, x_{t+1}                 │
+│  │(7 선형  │                          │                        │
+│  │ 특징)   │                          ▼                        │
+│  └─────────┘                   ┌──────────────┐                │
+│    ▲                           │ 재현 관리자   │                │
+│    │ 미니배치                  │ ξ_t=(...,σ,ρ,η)│               │
+│    └───────────────────────────┤ 혼합 우선순위 │                │
+│      p_t=0.18δ+0.39s+0.30e+0.13n└──────────────┘               │
+└────────────────────────────────────────────────────────────────┘
+</code></pre>
+<p>데이터 흐름의 핵심: 추정기의 불확실성($d̂,σ,ρ$)이 <strong>CBF와 재현 우선순위 양쪽에</strong> 주입되고, CBF 통과 실행 액션 <code class="math">u_t</code>가 <strong>크리틱 학습과 재현 저장 양쪽에</strong> 흐른다. 이 양방향 정보 공유가 &quot;통합 아키텍처&quot;의 실체다.</p>
+<hr>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 환경 (Environment)</h3>
+<ul>
+<li><strong>2D 로봇 항해</strong> (3.20m × 3.20m 작업공간). 로봇 반경 0.062m, 속도 상한 0.72 m/s, 적분 스텝 0.055s.</li>
+<li>시작 (0.22, 2.82)m → 목표 (1.62, 1.58)m. <strong>은닉 중심 원형 장애물 2개</strong>(반경 0.070m, 0.100m), 탐지기 측정 오염.</li>
+<li><strong>탐지기 오염</strong>: 편향 6.0<del>11.4cm(배수 6.0), 완만 드리프트 5.4cm, 점프 30</del>42cm, 간헐 홀드.</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>Cost</strong>: 러닝 페널티 합</li>
+<li><strong>Violations</strong>: 실제 기하 대비 접촉(충돌) 횟수</li>
+<li><strong>Min h (cm)</strong>: 최소 전역 부호 있는 여유(clearance) — 음수면 침투(충돌)</li>
+<li><strong>Belief RMSE (cm)</strong>: 장애물 신념 오차</li>
+<li><strong>Goal Success</strong>: 목표 도달(5.5cm 허용)</li>
+<li>부가: 필터 개입 횟수, 런타임</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>표 1 — 극한 스트레스(오염 배수 6.0), 6단계 점진 ablation (5 시드)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>Cost↓</th>
+<th>Violations↓</th>
+<th>Min h (cm)↑</th>
+<th>Belief RMSE (cm)↓</th>
+<th>Goal Success↑</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Full (UE+AER+적응CBF)</strong></td>
+<td><strong>7.63±0.44</strong></td>
+<td><strong>0.00±0.00</strong></td>
+<td>2.71±0.23</td>
+<td><strong>3.52±0.55</strong></td>
+<td><strong>100% (5/5)</strong></td>
+</tr>
+<tr>
+<td>AC+CBF+UE</td>
+<td>8.96±2.08</td>
+<td>0.00±0.00</td>
+<td>3.22±2.81</td>
+<td>11.08±1.23</td>
+<td>80% (4/5)</td>
+</tr>
+<tr>
+<td>AC+CBF+AER</td>
+<td>22.62±12.82</td>
+<td>1.07±0.87</td>
+<td>−0.35±1.55</td>
+<td>16.71±1.55</td>
+<td>100% (5/5)</td>
+</tr>
+<tr>
+<td>AC+CBF</td>
+<td>31.00±12.43</td>
+<td>1.64±0.86</td>
+<td>−1.26±0.40</td>
+<td>16.71±1.55</td>
+<td>100% (5/5)</td>
+</tr>
+<tr>
+<td>AC+CBF+PER</td>
+<td>39.08±24.08</td>
+<td>2.21±1.64</td>
+<td>−1.04±1.91</td>
+<td>16.71±1.55</td>
+<td>100% (5/5)</td>
+</tr>
+</tbody></table></div>
+<p>핵심 관찰:</p>
+<ul>
+<li><strong>Full만이 충돌 0 + 최저 Cost(7.63) + 최저 Belief RMSE(3.52cm)를 동시 달성</strong>. 목표 성공 100%.</li>
+<li><strong>AC+CBF+PER(TD-only 재현)는 위반 2.21회로 오히려 최악</strong> — TD-only 우선순위가 안전 학습에 부적합함을 실증(C3 근거).</li>
+<li><strong>UE(온라인 추정) 단독</strong>만으로도 충돌 0을 얻지만 Belief RMSE 11.08cm로 Full(3.52)보다 나쁨 → AER 결합이 신념 정확도를 크게 개선.</li>
+<li>CBF만·CBF+AER은 Min h가 음수(−1.26, −0.35) → 실제 침투(충돌) 발생. 통합해야 Min h가 양수(+2.71)로 안전.</li>
+</ul>
+<p><strong>중간 스트레스(배수 2.2)</strong>: 모든 CBF 변형이 충돌 0; Full이 최저 Belief RMSE·최대 여유.
+<strong>강건성 스윕(배수 0.8~4.5)</strong>: 인식 노이즈 심화에 따라 위반율이 단조 증가 — 안전-성능 트레이드오프의 정량 곡선 제시.</p>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p><strong>없음.</strong> 순수 2D 시뮬레이션 개념검증. 논문도 한계로 &quot;2D 시뮬만, 경량 근사기, 5 시드, 독립 검증셋 없음, 형식적 수렴/하드웨어 증거 없음&quot;을 명시. 다만 <strong>재현성</strong>은 강함: GitHub 재현성 저장소 + Zenodo DOI 아카이브.</p>
+<hr>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><strong>통합 아키텍처 명제</strong>: 안전 액터-크리틱은 add-on의 나열이 아니라 정보 공유 통합 루프여야 한다는 설계 원리를 6-단계 ablation으로 실증.</li>
+<li><strong>불확실성-결합 강건 CBF</strong>: 온라인 추정 잔차·공분산을 CBF 여유항(<code class="math">\bar e_d,\bar e_h</code>)으로 흡수 → 오염된 인식 하에서도 충돌 0(C1).</li>
+<li><strong>혼합 적응 재현(AER)</strong>: TD+안전+불확실성+신규성 가중 혼합(0.18/0.39/0.30/0.13)으로 안전-임계 전이 우선 학습, TD-only PER의 악화를 해소(C3).</li>
+<li><strong>실행 액션 크리틱 학습</strong>: 필터 통과 <code class="math">u_t</code>로 크리틱을 학습해 명목-실행 괴리 제거(C2).</li>
+<li><strong>강한 재현성</strong>: GitHub 재현성 저장소 + Zenodo DOI, 6방법 동일 하이퍼파라미터.</li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<pre class="codeblock"><code>학습 ............................ 10 에피소드 × 115 전이; 평가 280 전이
+재현 버퍼 ....................... 용량 360, 배치 44, 에피소드당 8 갱신
+액터 ............................ waypoint 추적(12 waypoint, 0.006m 지터), lr 0.004
+크리틱 .......................... 선형 근사, lr 0.016, 할인 γ=0.985
+추정기 .......................... Kalman-유사 인과 필터, 기본 게인 0.18(Full)/0.24(UE)
+CBF ............................. 속도 투영 QP; 알려진 사각형을 로봇반경+0.022m 팽창
+재현 우선순위 가중 .............. λ_TD 0.18 / λ_safe 0.39 / λ_unc 0.30 / λ_nov 0.13
+하이퍼파라미터 .................. 6방법 전부 손튜닝 고정(검증탐색 없음, 사후 ±20% 민감도만)
+
+작업공간 ........................ 3.20×3.20 m, 로봇반경 0.062m, v_max 0.72 m/s, dt 0.055s
+장애물 .......................... 원형 2개(r 0.070, 0.100m), 은닉 중심
+오염 ............................ 편향 6.0~11.4cm, 드리프트 5.4cm, 점프 30~42cm
+목표 허용 ....................... 5.5cm
+시드 ............................ 5
+</code></pre>
+<hr>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<ul>
+<li><strong>경량 선형 근사기</strong>: 크리틱 7개 선형 특징·선형 근사로 매우 가벼워, 임베디드 실시간에 유리하나 표현력은 제한적. 고차원 관측(이미지)·복잡 동역학으로 스케일하려면 신경망 근사로 교체 필요.</li>
+<li><strong>모듈성</strong>: 강건 CBF·AER·실행-액션 학습이 서로 독립 구성이라, 다른 RL 백본에 개별 이식 가능(저자도 &quot;compact design template&quot;이라 주장, 로보틱스·자율시스템·역학적 제어에 적용 가능하다고 언급).</li>
+<li><strong>QP 개입 비용</strong>: 매 스텝 QP 투영은 저차원(속도)에서 저렴하나, 다장애물·고DoF로 확장 시 실시간성 검증 필요.</li>
+</ul>
+<h3>8.2 한계점 (Limitations)</h3>
+<ol>
+<li><strong>2D 시뮬만·실로봇 없음</strong>: sim-to-real·고차원 검증 전무. 개념검증 수준.</li>
+<li><strong>작은 실험 규모</strong>: 10 에피소드 학습, 5 시드, 독립 검증셋 없음 → 통계적 일반화 근거 약함.</li>
+<li><strong>손튜닝 하이퍼파라미터</strong>: 재현 가중·CBF 팽창·게인 등을 검증탐색 없이 손튜닝(사후 민감도만).</li>
+<li><strong>형식 보증 부재</strong>: 형식적 수렴 증명 없음. 강건 CBF 조건은 충분조건이나 추정 오차 상한 <code class="math">\bar e_d,\bar e_h</code>의 실제 타당성은 경험적.</li>
+<li><strong>정적-중심 추정 가정</strong>: 장애물이 정적 중심이라는 가정 — 동적 장애물로의 확장 미검증.</li>
+<li><strong>경계적 트랙 정합</strong>: 기여가 안전 이동 계획(Planner)과 RL 제어의 경계에 걸쳐 있음(§1.2 플래그).</li>
+</ol>
+<h3>8.3 향후 방향 (Future Directions)</h3>
+<ul>
+<li><strong>하드웨어 이식</strong>: 실 로봇(차동구동/쿼드로터)에서 오염 인식 하 안전 항해 검증.</li>
+<li><strong>신경망 근사·고차원 관측</strong>: 선형 특징 → CNN/트랜스포머로 확장.</li>
+<li><strong>동적 장애물·형식 보증</strong>: 이동 장애물로 강건 CBF 확장 + 확률적 안전 보증.</li>
+</ul>
+<h3>8.4 재현성 평가 (Reproducibility)</h3>
+<p>공개: ✅ 재현성 저장소 + ✅ Zenodo DOI 아카이브. 6방법 동일 하이퍼파라미터로 ablation 재현 용이. <strong>재현성 측면은 이 논문의 강점</strong> — 다만 규모가 작아(2D·5시드) 결과의 외적 타당성은 제한적.</p>
+<hr>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
+<p>같은 Planner 트랙에서 <strong>안전(CBF/CLF)·장애물 회피</strong> 주제가 가장 가까운 선행 리뷰를 인덱스로 선별:</p>
+<ul>
+<li><strong>D-SafeMPC: Diffusion-based Safe Model Predictive Control</strong> (arXiv 2026) — 확산 궤적 플래너에 이산시간 CBF(안전)/CLF(수렴) 그래디언트를 역확산 매 스텝 주입하고 후반 스텝만 MPC로 투영하는 하이브리드 안전 플래너. <strong>CBF 기반 안전 모션 계획</strong>이라는 점에서 직접 대응.</li>
+</ul>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>D-SafeMPC (arXiv2026)</th>
+<th><strong>Safe Actor-Critic (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>안전 메커니즘</td>
+<td>이산시간 CBF+CLF 그래디언트 주입</td>
+<td>강건 CBF QP 투영(+온라인 불확실성 결합)</td>
+</tr>
+<tr>
+<td>계획 백본</td>
+<td>확산 궤적 플래너 + MPC 투영</td>
+<td>액터-크리틱 RL + waypoint 추적</td>
+</tr>
+<tr>
+<td>인식 불확실성 처리</td>
+<td>(명목 동역학 기반)</td>
+<td><strong>온라인 추정 잔차·공분산을 CBF 여유로 흡수</strong></td>
+</tr>
+<tr>
+<td>학습 요소</td>
+<td>사전학습 확산 + 온라인 투영</td>
+<td>온라인 RL(실행 액션 크리틱 학습)</td>
+</tr>
+<tr>
+<td>경험 재현</td>
+<td>—</td>
+<td><strong>혼합 우선순위 AER(안전 0.39·불확실성 0.30)</strong></td>
+</tr>
+<tr>
+<td>장애물</td>
+<td>3종 동적 장애물</td>
+<td>원형 2개(오염 탐지)</td>
+</tr>
+<tr>
+<td>플랫폼</td>
+<td>Franka 매니퓰레이터 sim-to-real</td>
+<td>2D 포인트 로봇 시뮬</td>
+</tr>
+<tr>
+<td>실로봇</td>
+<td>✅ (Franka)</td>
+<td>❌ (시뮬만)</td>
+</tr>
+<tr>
+<td>코드</td>
+<td>✅</td>
+<td>✅ (+ Zenodo DOI)</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>vs D-SafeMPC(안전 계획 쌍둥이).</strong> 두 논문 모두 <strong>CBF로 안전 집합 불변을 강제</strong>한다는 뼈대를 공유하지만 강조점이 다르다.</p>
+<ul>
+<li><strong>D-SafeMPC의 강점</strong>: 확산 플래너의 장기 궤적 다양성 + MPC 투영으로 동역학 가능성까지 보장, <strong>Franka 실기체 sim-to-real</strong> 검증. 안전=목표 성공을 동적 장애물에서 입증.</li>
+<li><strong>본 논문의 강점</strong>: <strong>인식 오염(편향·점프·드리프트)을 정면으로 다룬다</strong>. D-SafeMPC가 대체로 명목 동역학·정확한 장애물을 가정하는 반면, Safe Actor-Critic은 온라인 추정 잔차를 CBF 여유로 흡수하고, 재현 우선순위까지 안전·불확실성에 적응시킨다. 즉 &quot;<strong>인식이 나쁠 때의 안전</strong>&quot;이라는 직교 축을 파고든다.</li>
+<li><strong>약점 대비</strong>: 본 논문은 2D·시뮬·5시드·손튜닝으로 D-SafeMPC의 실기체·동적장애물 검증에 크게 못 미친다. 방법론적 통찰(불확실성-결합 강건 CBF + AER)은 신선하나 검증 성숙도는 낮다.</li>
+<li><strong>상보성</strong>: D-SafeMPC의 확산 플래너 + 실기체 파이프라인에 본 논문의 <strong>불확실성-결합 재현·강건 CBF 여유</strong>를 이식하면, &quot;오염 인식 하 안전 확산 계획&quot;이라는 유망한 결합이 가능하다.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>강점</strong>: (i) 인식 오염 하 안전이라는 실무적으로 중요한 문제(현실 탐지기는 항상 노이즈), (ii) 경량 선형 근사로 임베디드 친화, (iii) 강한 재현성(GitHub+Zenodo).</li>
+<li><strong>약점</strong>: (i) 2D·시뮬 개념검증으로 실로봇 갭 미검증, (ii) 소규모 실험(10 에피소드·5시드), (iii) 손튜닝 다수 하이퍼파라미터, (iv) 정적 장애물 가정.</li>
+<li><strong>종합</strong>: 현재로선 <strong>연구 프로토타입</strong>. &quot;오염 인식 하 안전&quot;이라는 문제의식과 통합 아키텍처 원리는 가치가 크나, 실배포를 위해선 하드웨어·동적 장애물·신경망 근사 확장이 선결 과제.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>본 논문은 안전 RL 분야에서 흔한 &quot;add-on 나열&quot;을 비판하고 <strong>모듈 간 정보 공유(불확실성→CBF→재현→크리틱)</strong>를 실증한 점에서 방향성이 좋다. 특히 <strong>경험 재현을 안전·불확실성에 적응</strong>시키는 아이디어(Eq. 9)는 안전 RL에서 덜 탐구된 축으로, D-SafeMPC류 안전 플래너·기타 CBF-RL 결합에 재사용될 여지가 있다.</p>
+<hr>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
+<ol>
+<li>Rastegarmoghaddam, M., Nikkhouy, D., Samadzadeh, S. <em>Toward Integrating Adaptive Experience Replay and Online Uncertainty Estimation in Safe Actor-Critic Optimal Control.</em> arXiv:2608.04732, 2026.</li>
+<li><em>D-SafeMPC: Diffusion-based Safe Model Predictive Control with CBF/CLF Guidance.</em> arXiv:2607.10842, 2026. (본 코퍼스 리뷰)</li>
+<li>Ames, A. et al. <em>Control Barrier Functions: Theory and Applications.</em> ECC 2019.</li>
+<li>Schaul, T. et al. <em>Prioritized Experience Replay.</em> ICLR 2016.</li>
+<li>Sutton, R., Barto, A. <em>Reinforcement Learning: An Introduction.</em> MIT Press.</li>
+<li>Zenodo archive: DOI 10.5281/zenodo.21515850 (재현성 코드/데이터).</li>
+</ol>
+<p><em>(주: 일부 항목은 arXiv v1 기준 확인 범위로 기재. 정식 서지·DOI는 게재 확정 시 갱신 필요.)</em></p>
+<hr>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
+<p><strong>혁신성.</strong> 본 논문은 안전 로봇 제어에서 액터-크리틱·CBF·인식 추정을 <strong>느슨한 add-on으로 이어붙이면 서로 오차를 증폭</strong>한다는 문제를 지적하고, 이를 <strong>통합 아키텍처</strong>로 재설계한다: (i) 온라인 불확실성 추정을 CBF 여유항으로 흡수하는 <strong>강건 CBF</strong>, (ii) TD·안전·불확실성·신규성을 혼합한 <strong>적응 경험 재현(AER, 안전 0.39·불확실성 0.30 가중)</strong>, (iii) 필터 통과 <strong>실행 액션으로 크리틱 학습</strong>. 특히 인식 오염(편향·점프·드리프트)을 정면으로 다뤄, D-SafeMPC류가 대체로 가정하는 &quot;정확한 장애물&quot;에서 벗어난 <strong>직교적 문제축</strong>을 판다.</p>
+<p><strong>실용적 의의.</strong> 극한 인식 오염(편향 6<del>11.4cm, 점프 30</del>42cm) 하에서 <strong>Full 구성만이 충돌 0 + 최저 Cost(7.63) + 최저 신념오차(3.52cm) + 목표 100%</strong>를 달성하고, TD-only PER이 오히려 악화(위반 2.21)됨을 보여 통합의 필요성을 실증했다. 경량 선형 근사로 임베디드 친화적이며, GitHub 재현성 저장소 + Zenodo DOI로 재현성이 강하다.</p>
+<p><strong>한계와 향후.</strong> 2D 시뮬·소규모(10 에피소드·5시드)·손튜닝·실로봇 부재·정적 장애물 가정이라는 성숙도 한계가 뚜렷하다. 실 하드웨어 이식, 동적 장애물로의 강건 CBF 확장, 신경망 근사·고차원 관측, 형식적 안전 보증이 자연스러운 다음 단계다. 종합하면 본 논문은 <strong>&quot;오염 인식 하 안전 이동 계획&quot;</strong>이라는 중요한 문제의식과 통합 설계 원리를 제시한 <strong>연구 프로토타입</strong>으로, D-SafeMPC 등 안전 플래너와 결합될 방법론적 씨앗으로서 가치가 있다.</p>
+<hr>
+<p><em>리뷰 작성일: 2026-08-07 · 트랙: Planner(안전 이동 계획·경계 사례, §1.2 플래그) · 코드 ✅ 공개(GitHub+Zenodo DOI) · 발표처: arXiv 2026(미확정)</em></p>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+<div class="rhead" id="rhead" data-title="Toward Integrating Adaptive Experience Replay and Online Uncertainty Estimation in Safe Actor-Critic Optimal Control: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
+</body>
+</html>
