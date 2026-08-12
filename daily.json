@@ -1,13 +1,42 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-11T19:30:05.473Z",
+  "generatedAt": "2026-08-12T19:30:03.490Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 8. 12  수요일",
+    "date": "2026. 8. 13  목요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 최근 리뷰 2편 · 전체 99편"
+    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 100편"
   },
   "papers": [
+    {
+      "id": "2608.10056",
+      "venue": "IROS 2026",
+      "venueDetail": "IROS 2026",
+      "matchScore": 96,
+      "category": "Planner",
+      "feedTitle": "Navigating the Proximity-Safety Balance: Constraint Decomposition for Human Following in Pedestrian Crowds",
+      "authorsShort": "S. Gong, J. Yao +3",
+      "feedAbstract": "밀집 군중 속 타깃 인간 following의 근접(follow)-안전(safety) 상충을, 단일 조밀 보상 대신 희소 과업 보상 + 3개 독립 비용 제약(following/human/obstacle) 으로 분해(constraint decomposition) 하고 PPO-Lagrangian(1보상+3비용 크리틱) 으로…",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "Navigating the Proximity-Safety Balance: Constraint Decomposition for Human Following in Pedestrian Crowds",
+      "titleKO": "Navigating the Proximity-Safety Balance: Constraint Decomposition for Human Following in Pedestrian Crowds",
+      "authorsEN": "Shiting Gong, Jianpeng Yao, Jinfeng Wang, Marco Pavone, Jiachen Li",
+      "authorsKO": "Shiting Gong, Jianpeng Yao, Jinfeng Wang, Marco Pavone, Jiachen Li",
+      "abstractEN": "Following a target human in crowded environments involves an inherent conflict between staying close to the target and navigating safely among surrounding pedestrians and obstacles. This conflict becomes more severe in dense scenarios, where aggressive following risks collisions and conservative margins lead to target loss, especially when pedestrian behaviors are unfamiliar or unpredictable. Existing reinforcement learning (RL) methods typically encode these competing objectives into a single dense reward, but the resulting proximity-safety balance is implicit and difficult to adjust across conditions. To address this, we decompose the human-following task into a sparse task reward and independent cost constraints within a multi-constraint RL formulation, where each constraint is managed through cost thresholds with direct behavioral meaning rather than implicit reward weight ratios, allowing explicit and tunable control over the trade-off. We further quantify the prediction uncertainty of human motions and integrate these estimates into the RL costs to enhance safety under unpredictable conditions. Extensive experiments across both in-distribution and out-of-distribution settings demonstrate that our method achieves an effective proximity-safety balance compared to baselines. Real-robot deployment further validates the feasibility of our method in real-world scenarios. More details are available on our project page: https://nav-ps-balance.github.io/.",
+      "abstractKO": "밀집 군중 속 타깃 인간 following의 근접(follow)-안전(safety) 상충을, 단일 조밀 보상 대신 희소 과업 보상 + 3개 독립 비용 제약(following/human/obstacle) 으로 분해(constraint decomposition) 하고 PPO-Lagrangian(1보상+3비용 크리틱) 으로 각 제약 임계값(δF/δH)에 행동적 의미를 부여해 명시적·조정가능하게 균형 제어. 보행자 예측 불확실성을 DtACI(동적 튜닝 적응 컨포멀 추론) 로 정량화해 안전 버퍼로 관측·비용에 주입 → OOD(rushing/SFM/groups) 견고성. 재학습 없이 임계값만으로 following↔safety 전환, ROSMASTER X3 실로봇 배치.",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 44,
+      "reason": "**제약 분해 정식화**: proximity-safety를 암묵적 보상 가중치 → 명시적 비용 제약 임계값으로 전환(CMDP).\n**다중 크리틱 PPO-Lagrangian**: 1 보상 + 3 비용 크리틱 독립 GAE, 제약별 라그랑주 승수 자동 조정(보행자 안전 승수 lr 최대 8e-5).\n**DtACI 불확실성**: 다중 학습률 ACI 전문가 지수가중 집계로 동적 컨포멀 불확실성 반경 산출 → 안전 버퍼 통합(일반 ACI 대비 우위 ablation).\n**재학습 없는 균형 조정**: δF/δH 임계값만 변경(balanced/safety/following.pt 3종).\n**완전 공개 + sim-to-real**: 코드·모델·baseline 6종·시뮬레이터 공개, ROS 2 실로봇 실증.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ProximitySafetyBalance_IROS2026/index.html"
+    }
+  ],
+  "archive": [
     {
       "id": "2608.04825",
       "venue": "arXiv 2026",
@@ -61,9 +90,7 @@
       "readMinutes": 27,
       "reason": "**통합 아키텍처 명제**: 안전 액터-크리틱은 add-on 나열이 아니라 정보 공유 통합 루프여야 함을 6단계 점진 ablation으로 실증.\n**불확실성-결합 강건 CBF**: 추정 잔차·공분산을 CBF 조건 여유항(‖∇ĥ‖ē_d+ē_h)으로 흡수 → 편향·점프·드리프트 오염 인식 하에서도 충돌 0.\n**혼합 적응 재현(AER, Eq.9)**: p_t = 0.18·TD + 0.39·안전 + 0.30·불확실성 + 0.13·신규성 → 안전-임계 전이 우선, TD-only PER의 악화 해소.\n**실행 액션 크리틱 학습**: 증강 전이 ξ_t=(x,u_a,u,r,x',σ,ρ,η)에서 필터 통과 u_t로 크리틱 학습 → 명목-실행 괴리 제거.\n**강한 재현성**: GitHub 재현성 저장소 + Zenodo DOI 아카이브.",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/SafeActorCritic_arxiv2026/index.html"
-    }
-  ],
-  "archive": [
+    },
     {
       "id": "2608.03143",
       "venue": "arXiv 2026",
