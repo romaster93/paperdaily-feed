@@ -1,13 +1,42 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-12T19:30:03.490Z",
+  "generatedAt": "2026-08-13T19:30:04.221Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 8. 13  목요일",
+    "date": "2026. 8. 14  금요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 100편"
+    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 101편"
   },
   "papers": [
+    {
+      "id": "2608.11901",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 프리프린트 (2026-08-12, v1) — 미확정",
+      "matchScore": 87,
+      "category": "VLN",
+      "feedTitle": "DaViNCi: A Dataset Towards Outdoor Vision-and-Language Navigation with Continuous Actions and Dynamic Elements",
+      "authorsShort": "Z. Xie, P. Lai +2",
+      "feedAbstract": "실외 VLN의 비현실적 평가(고정 이산 위상 그래프·순간이동)를 깨기 위해, CARLA를 VLN 데이터 팩토리로 재목적화하여 연속 행동과 동적 요소를 동시에 도입한 최초의 실외 VLN 데이터셋(6 Towns·6,933 궤적)을 구축. 기하 앵커링 2단계 지시 생성(외적 방향추출→Qwen3-VL 캡션 제약)으로 지시-궤적…",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "DaViNCi: A Dataset Towards Outdoor Vision-and-Language Navigation with Continuous Actions and Dynamic Elements",
+      "titleKO": "DaViNCi: A Dataset Towards Outdoor Vision-and-Language Navigation with Continuous Actions and Dynamic Elements",
+      "authorsEN": "Zihao Xie, Pingrui Lai, Yitong Wu, Hua Yang",
+      "authorsKO": "Zihao Xie, Pingrui Lai, Yitong Wu, Hua Yang",
+      "abstractEN": "Vision-and-Language Navigation (VLN) has progressively expanded from indoor to outdoor environments. However, existing outdoor VLN datasets still rely on fixed discrete topological graphs for construction. It fails to align with the rapidly changing real-world outdoor environments and impedes the sim-to-real transfer of VLN agents. To address this limitation, we propose DaViNCi (\\textbf{D}yn\\textbf{a}mic \\textbf{Vi}sion-and-Language \\textbf{N}avigation in \\textbf{C}ont\\textbf{i}nuous Environment), the first outdoor VLN dataset that simultaneously introduces both continuous and dynamic factors. The agent not only moves in the outdoor environment using continuous actions but is also required to handle unpredictable dynamic elements. The dataset encompasses six distinct maps with a total of 6,933 trajectories. Through comprehensive comparative experiments, we find that the success rate on DaViNCi decreased by more than 10\\% in discrete environments compared to previous datasets. And there is an even greater decline in continuous settings, demonstrating the challenge of DaViNCi. Furthermore, we clarify the impact of action granularity and dynamic elements. These results demonstrate the practical value of DaViNCi in advancing outdoor VLN toward more realistic environments. The website is https://xzh0312.github.io/DaViNCi/.",
+      "abstractKO": "실외 VLN의 비현실적 평가(고정 이산 위상 그래프·순간이동)를 깨기 위해, CARLA를 VLN 데이터 팩토리로 재목적화하여 연속 행동과 동적 요소를 동시에 도입한 최초의 실외 VLN 데이터셋(6 Towns·6,933 궤적)을 구축. 기하 앵커링 2단계 지시 생성(외적 방향추출→Qwen3-VL 캡션 제약)으로 지시-궤적 정합을 자동 보장하고, 이산↔연속 이중 프로토콜로 추상화가 감춘 난이도(이산에서도 SR −10%p+, 연속에서 추가 하락)를 정량 폭로.",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 37,
+      "reason": "**최초 연속+동적 실외 VLN 데이터셋**: 이산·정적 그래프의 sim-to-real 괴리를 정면 겨냥.\n**이산-연속 이중 평가 프로토콜**: 단일 연속 궤적에서 이산 그래프와 연속 환경을 모두 파생 → 추상화 난이도 순수 분리.\n**기하 앵커링 2단계 지시 생성**: 외적 부호 방향 이벤트(Stage1)로 Qwen3-VL-Plus 캡션(Stage2)을 제약 → 6,933 규모 자동·정합 라벨.\n**다축 감도 분석**: 행동 입도(5m/12m)·동적 밀도·`stop` 행동을 독립 변수로 스윕, 난이도 삼분해(데이터/표현/환경).\n**공개 아티팩트**: 데이터셋 즉시 다운로드 + 프로젝트 페이지.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/DaViNCi_arxiv2026/index.html"
+    }
+  ],
+  "archive": [
     {
       "id": "2608.10056",
       "venue": "IROS 2026",
@@ -34,9 +63,7 @@
       "readMinutes": 44,
       "reason": "**제약 분해 정식화**: proximity-safety를 암묵적 보상 가중치 → 명시적 비용 제약 임계값으로 전환(CMDP).\n**다중 크리틱 PPO-Lagrangian**: 1 보상 + 3 비용 크리틱 독립 GAE, 제약별 라그랑주 승수 자동 조정(보행자 안전 승수 lr 최대 8e-5).\n**DtACI 불확실성**: 다중 학습률 ACI 전문가 지수가중 집계로 동적 컨포멀 불확실성 반경 산출 → 안전 버퍼 통합(일반 ACI 대비 우위 ablation).\n**재학습 없는 균형 조정**: δF/δH 임계값만 변경(balanced/safety/following.pt 3종).\n**완전 공개 + sim-to-real**: 코드·모델·baseline 6종·시뮬레이터 공개, ROS 2 실로봇 실증.",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ProximitySafetyBalance_IROS2026/index.html"
-    }
-  ],
-  "archive": [
+    },
     {
       "id": "2608.04825",
       "venue": "arXiv 2026",
