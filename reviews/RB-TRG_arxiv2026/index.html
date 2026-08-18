@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Robot-Body-Aware Traversal Risk Graph Planning · PaperDaily</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { color: #8f4023; text-decoration: underline; }
+
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
+
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
+}
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
+article code.math-display {
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
+}
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
+article th {
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
+article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: var(--mono); font-size: 12px; text-align: center;
+}
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
+footer {
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
+</head>
+<body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2608.16433">arXiv ↗</a>
+</div>
+<div class="wrap">
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">RB-TRG_arxiv2026</span>
+    </div>
+    <h1 class="doc-title">Robot-Body-Aware Traversal Risk Graph Planning (RB-TRG): 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 프리프린트 (2026) — 시스템 배치본이 IEEE ICRA 2026 Legged Robot Challenges에서 Best Autonomy·Best Mobility 수상</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2608.16433">2608.16433</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">✅ <a href="https://github.com/ZhiqiaoGuo/RB-TRG">github.com/ZhiqiaoGuo/RB-TRG</a> (Apache-2.0, Python 3.10+, NumPy 단일 의존성, plan_route API·synthetic_demo·tests)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">❌ 없음 (GitHub 저장소가 창구)</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-08-18</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">40KB · 약 39분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
+  </header>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Robot-Body-Aware Traversal Risk Graph Planning</li>
+<li><strong>저자 (Authors)</strong>: Zhiqiao Guo, Bichi Zhang, Sören Schwertfeger</li>
+<li><strong>소속 (Affiliation)</strong>: Sören Schwertfeger 교수 그룹(ShanghaiTech University, Mobile Autonomous Robotic Systems Lab 계열 — 저자 소속은 본문에 명시적으로 병기되어 있지 않으나 교신저자 라인으로 추정)</li>
+<li><strong>발표처 (Published)</strong>: arXiv 프리프린트 (2026). 시스템 배치본이 <strong>IEEE ICRA 2026 Legged Robot Challenges에서 Best Autonomy·Best Mobility 2개 부문 수상</strong> — 학회 정식 게재가 아닌 <strong>경진대회 실증</strong>으로 검증된 preprint.</li>
+<li><strong>DOI</strong>: 미부여(프리프린트)</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2608.16433">2608.16433</a></li>
+<li><strong>코드 (Code)</strong>: ✅ <strong>공개</strong> — <a href="https://github.com/ZhiqiaoGuo/RB-TRG">https://github.com/ZhiqiaoGuo/RB-TRG</a> (Apache-2.0, Python 3.10+, NumPy 단일 의존성). browser 검증 결과 <strong>실 저장소</strong>: <code>src/rb_trg/</code> 코어 구현, <code>examples/synthetic_demo.py</code> 실행 가능 데모, <code>tests/</code> 단위 테스트, <code>pyproject.toml</code>. <code>plan_route()</code>가 메인 엔트리포인트로 실제 A* 계획을 수행한다. 단, README가 명시하듯 <strong>terrain graph 구성·시뮬레이터·로봇 실행·비교 벤치마킹은 저장소 범위에서 제외</strong>(코어 플래너 API만 공개).</li>
+<li><strong>프로젝트 페이지 (Project Page)</strong>: ❌ 없음 (별도 프로젝트 페이지 없이 GitHub 저장소가 코드·문서 창구)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>RB-TRG는 <strong>비정형 지형에서 바퀴-다리(wheeled-legged) 로봇의 전역 경로 계획</strong>을 다루되, 그 출발점을 <strong>직전 선행 연구인 TRG-planner(RA-L 2025)의 명시적 한계</strong>에 둔다. TRG(Traversal Risk Graph)는 지형 위험도를 노드 유효성과 방향성 엣지 위험으로 인코딩한 희소 그래프 표현으로, 대규모 환경에서 ms 단위 실시간 계획을 가능케 한 강력한 표현이다. 그러나 TRG의 원본 비용(native cost)은 두 가지 기하적 추상화 위에서 계산된다:</p>
+<ol>
+<li><strong>원형 노드 이웃(circular node neighborhood)</strong> — 각 노드의 위험도를 로봇 중심 주변의 <em>원형</em> 영역에 대해 평가.</li>
+<li><strong>엣지 정렬 지형 영역(edge-aligned terrain region)</strong> — 엣지 위험도를 이동 방향을 따라 정렬된 좁은 띠(band)에 대해 평가.</li>
+</ol>
+<p>문제는 이 두 추상화 모두 <strong>로봇의 방향성 있는 몸체 풋프린트(oriented body footprint)</strong> 를 반영하지 못한다는 점이다. 실제 바퀴-다리 로봇(예: Unitree Go2-W)은 직사각형에 가까운 발자국을 갖고, 특히 <strong>회전(turn) 중에는 몸체가 순간적으로 지형과 간섭(body-terrain interference)</strong> 하거나 <strong>부분적 지지 상실(partial support loss)</strong> 을 겪는다. 원형/스칼라 추상화는 &quot;회전 시 앞바퀴가 낭떠러지에 걸리는&quot; 상황이나 &quot;몸체 측면이 바위에 긁히는&quot; 상황을 놓친다.</p>
+<p>RB-TRG의 핵심 질문은 다음과 같다:</p>
+<ul>
+<li>TRG의 <strong>희소 그래프 구성·계획 인터페이스는 그대로 보존</strong>하면서, 엣지 단위의 <em>지형 위험(terrain-risk)</em> 탐색을 <strong>방향·회전 인지 몸체 위험(heading- and turn-aware body-risk) 전이</strong>로 승격(lift)할 수 있는가?</li>
+<li>로봇의 <strong>방향성 직사각형 풋프린트를 엣지를 따라 샘플링하고 yaw sweep(회전각 스윕)</strong> 으로 훑으면, 종방향 지지 변동·횡방향 경사·지형 간섭·미신뢰 지도 노출을 정량화할 수 있는가?</li>
+<li>이 몸체 위험을 <strong>평균+상위꼬리(mean-and-upper-tail) 특징</strong>으로 전이 비용에 실어 <strong>정렬된 노드쌍 상태(ordered node-pair states) 위의 A</strong>*로 최소화하면, 시뮬레이션과 실로봇 양쪽에서 성공률이 오르는가?</li>
+</ul>
+<p>논문은 이 셋 모두에 긍정으로 답하며, MuJoCo 폐루프 실험에서 <strong>성공률을 51.5% → 68.5%로 끌어올리면서 경로 길이는 2.3%만 증가</strong>(안전-효율 트레이드오프가 매우 유리)시키고, 그 정점으로 <strong>Go2-W 실기체가 ICRA 2026 Legged Robot Challenges에서 Best Autonomy·Best Mobility를 동시 수상</strong>한 실증을 든다.</p>
+<hr>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) 원형 노드 추상화의 몸체 무관성 (Body-agnostic circular neighborhood).</strong>
+TRG는 각 노드의 안정성/위험을 로봇 위치 중심의 <em>원형</em> 영역 통계로 계산한다. 원은 방향이 없으므로, 로봇이 어느 방향을 바라보든 같은 위험 값을 준다. 그러나 직사각형 몸체(0.70 m × 0.43 m 급)는 <strong>바라보는 방향에 따라 점유하는 지형이 크게 달라진다</strong> — 좁은 능선 위에서 로봇이 능선을 따라 정렬되면 안전하지만, 능선을 가로질러 서면 앞뒤가 허공에 걸린다. 원형 추상화는 이 방향 의존성을 원리적으로 표현할 수 없다.</p>
+<p><strong>(C2) 엣지 정렬 밴드의 회전 무관성 (Turn-agnostic edge band).</strong>
+TRG의 엣지 위험은 엣지 방향을 따라 정렬된 좁은 띠에 대해 계산된다. 이는 <strong>직진(straight traversal)</strong> 은 잘 모델링하지만, 노드에서 <strong>회전(turn)</strong> 하는 순간을 놓친다. 회전 중에는 몸체의 순간 방향(yaw)이 엣지 방향과 어긋나며, 이때 몸체 모서리가 지형과 간섭하거나 지지가 순간적으로 무너진다. 엣지 정렬 밴드는 &quot;엣지 위&quot;만 보고 &quot;노드에서의 회전 스윕&quot;을 보지 않는다.</p>
+<p><strong>(C3) 부분 지지 상실과 몸체-지형 간섭 (Partial support loss &amp; body-terrain interference).</strong>
+바퀴-다리 로봇의 실패 대부분은 &quot;완전한 낭떠러지&quot;가 아니라 <strong>부분적</strong>이다 — 네 바퀴 중 앞 두 개만 낮은 곳에 걸려 앞쪽 지지가 빠지거나(종방향 지지 변동), 몸체 측면이 경사에 눌려 롤(roll)이 커지거나(횡방향 경사), 몸체 내부(바퀴 사이)가 볼록한 바위에 얹히는(내부 지형 간섭) 식이다. 스칼라 셀 비용은 이 세 가지 기하적 실패 모드를 분리해 측정하지 못한다.</p>
+<p><strong>(C4) 미신뢰 지도 영역에의 노출 (Untrusted map exposure).</strong>
+LiDAR로 구성한 elevation map은 occlusion·희소 관측·동적 요소로 <strong>신뢰할 수 없는 영역(untrusted region)</strong> 을 포함한다. 안전한 계획은 몸체 풋프린트가 이런 미신뢰 셀 위에 얼마나 걸치는지(exposure)를 비용에 반영해, 가급적 신뢰 영역 위로 몸체를 두어야 한다. TRG 원본 비용은 이 노출을 몸체 단위로 정량화하지 않는다.</p>
+<p><strong>(C5) 선행 표현의 이점을 버리지 않는 확장 (Non-destructive extension).</strong>
+TRG의 강점(희소 그래프·wavefront 구성·ms 단위 실시간성·해석 가능한 안전 계수)을 버리고 새 표현을 짜면 실용성이 떨어진다. 도전은 <strong>TRG 구성과 계획 인터페이스를 그대로 두고</strong>, 비용 계산 계층만 몸체 인지로 교체해 기존 파이프라인에 드롭인(drop-in)으로 얹는 것이다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>RB-TRG의 해법은 <strong>&quot;방향성 직사각형 풋프린트 + yaw sweep + 4-신호 몸체 위험(평균+상위꼬리) + 정렬 노드쌍 A*&quot;</strong> 의 결합이며, 핵심은 이 모두가 <strong>TRG 위에 얹히는 비용 승격(cost-lifting) 계층</strong>이라는 점이다:</p>
+<pre class="diagram"><code>                        ┌──────────────────────────────────────────────────────┐
+ (기존 TRG 파이프라인)   │ TRG 구성 — 그대로 보존                                │
+ Elevation Map ────────▶│  • 희소 노드/방향성 엣지, wavefront, traversal_risk   │
+                        │  • 계획 인터페이스 불변                                │
+                        └──────────────────────────────────────────────────────┘
+                                          │  (엣지 위험 → 몸체 위험으로 &quot;승격&quot;)
+                                          ▼
+                        ┌──────────────────────────────────────────────────────┐
+ RB-TRG 비용 승격 계층   │ 방향성 직사각형 풋프린트(0.70×0.43 m)를               │
+                        │   엣지 샘플(0.05 m 간격) × yaw sweep(5°)로 훑어        │
+                        │   4개 몸체 위험 신호 측정:                             │
+                        │    (1) 종방향 지지 변동  (2) 횡방향 경사              │
+                        │    (3) 내부 지형 간섭    (4) 미신뢰 지도 노출         │
+                        │   각 신호 = 평균항 + 상위꼬리항(top 10%, σ=3)         │
+                        │   전이 위험 = 엣지·yaw 스윕에 걸친 최대(worst-case)   │
+                        └──────────────────────────────────────────────────────┘
+                                          ▼
+                        ┌──────────────────────────────────────────────────────┐
+                        │ Risk-Aware A* — 정렬된 노드쌍 상태 위                  │
+                        │  상태 = (이전 노드, 현재 노드) → 진입 heading 인코딩   │
+                        │  누적 전이 비용 최소화, Euclidean heuristic            │
+                        └──────────────────────────────────────────────────────┘
+                                          ▼
+                     방향·회전 안전 전역 경로 → 풀 LiDAR 내비 스택 → Go2-W 실배치
+</code></pre>
+<p>이 설계의 핵심 통찰은 &quot;지형 위험은 스칼라가 아니라 <strong>로봇 몸체가 그 지형 위에서 어떤 자세로 놓이는가</strong>의 함수이며, 특히 <strong>회전 순간</strong>에 최악값을 갖는다&quot;는 것이다. RB-TRG는 그 최악값을 yaw sweep으로 명시적으로 탐색해 비용에 싣는다.</p>
+<hr>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 방향성 직사각형 풋프린트와 yaw sweep — &quot;몸체가 어떻게 놓이는가&quot;</h3>
+<p>RB-TRG의 근본 전환은 TRG의 <strong>원형 노드 이웃 / 엣지 정렬 밴드</strong>를 <strong>방향성 직사각형 풋프린트(oriented rectangular footprint)</strong> 로 교체하는 것이다. 풋프린트는 기본값 <strong>0.70 m(종방향, front-rear) × 0.43 m(횡방향, lateral)</strong> 로, Go2-W급 바퀴-다리 로봇의 실제 몸체 크기에 맞춰져 있다.</p>
+<p>핵심 아이디어를 의사 수식으로 정리하면:</p>
+<pre class="codeblock"><code># 엣지 e = (n_i → n_j)의 몸체 위험 계산
+edge_dir     = normalize(pos(n_j) - pos(n_i))          # 엣지 진행 방향
+for s in sample_points(e, step=0.05m):                 # 엣지 위 0.05m 간격 샘플
+    for yaw in yaw_sweep(around=edge_dir, step=5°):    # 진행방향 주변 회전각 스윕
+        R = place_footprint(center=s, heading=yaw,     # 0.70×0.43m 직사각형을
+                            size=(0.70, 0.43))          #  (s, yaw)에 배치
+        cells = elevation_cells_under(R)               # 풋프린트가 덮는 elevation 셀
+        # 4개 몸체 위험 신호를 cells로부터 계산 (3.2)
+        risk(s, yaw) = combine_four_signals(cells)
+transition_risk(e) = max over (s, yaw) of risk(s, yaw) # 최악(worst-case) 값
+</code></pre>
+<p>여기서 두 가지가 결정적이다:</p>
+<p><strong>(1) yaw sweep = 회전 인지의 원천.</strong> 단순히 엣지 방향으로만 풋프린트를 두면 TRG의 엣지 밴드와 크게 다르지 않다. RB-TRG는 진행 방향 <strong>주변으로 yaw를 5° 간격 스윕</strong>하여, 노드에서 로봇이 실제로 회전할 때 몸체가 취하는 모든 중간 자세를 포함한다. 회전 중 몸체 모서리가 지형과 간섭하는 순간이 이 스윕 안에서 포착된다.</p>
+<p><strong>(2) 최대(worst-case) 집계.</strong> 전이 위험은 엣지 샘플과 yaw 스윕에 걸친 <strong>최댓값</strong>으로 정의된다. 평균이 아니라 최댓값을 쓰는 이유는 안전이 &quot;평균적으로 괜찮음&quot;이 아니라 &quot;가장 위험한 순간에도 견딤&quot;이기 때문이다 — 경로 상 단 한 순간의 지지 상실이 전복으로 이어진다.</p>
+<h3>3.2 4개 몸체 위험 신호 — 종방향/횡방향/내부/노출</h3>
+<p>풋프린트가 덮는 elevation 셀들로부터 RB-TRG는 <strong>네 가지 기하적 몸체 위험 신호</strong>를 계산한다. 각 신호는 서로 다른 실패 모드를 겨냥한다:</p>
+<pre class="codeblock"><code>(1) 종방향 지지 변동 (Longitudinal / front-rear support variation)
+    풋프린트를 앞/뒤로 이분 → 앞쪽 셀 높이 vs 뒤쪽 셀 높이의 편차.
+    큰 값 = 앞뒤 지지 불균형(앞바퀴가 낮은 곳에 걸림 → 피치 급변, 전방 지지 상실).
+
+(2) 횡방향 경사 (Lateral inclination)
+    풋프린트를 좌/우로 이분 → 좌우 셀 높이 편차 → 롤(roll) 각.
+    큰 값 = 측면 경사에 몸체가 기울어짐 → 롤오버 위험.
+
+(3) 내부 지형 간섭 (Internal terrain interference)
+    풋프린트 내부(바퀴/발 지지점 사이) 셀이 지지 평면 위로 얼마나 볼록한가.
+    큰 값 = 몸체 하부가 바위/융기에 얹힘(belly-out) → 구동 상실·전복.
+
+(4) 미신뢰 지도 노출 (Untrusted-map exposure)
+    풋프린트가 trusted_mask=False 셀을 얼마나 덮는가.
+    큰 값 = 관측 신뢰도 낮은 영역 위에 몸체가 놓임 → 예측 불가 위험.
+</code></pre>
+<p><strong>평균+상위꼬리(mean-and-upper-tail) 분해.</strong> 각 신호는 단일 통계가 아니라 <strong>평균항 + 상위꼬리항</strong>의 결합으로 계산된다(기본 가중치 균등, 상위꼬리 = top 10%, σ=3 정규화). 그 논리는:</p>
+<pre class="codeblock"><code>signal_value = w_mean · mean(feature_over_cells)
+             + w_tail · upper_tail(feature_over_cells, top=10%)
+             (기본 w_mean = w_tail = 0.5)
+</code></pre>
+<ul>
+<li><strong>평균항</strong>은 풋프린트 전반의 &quot;일반적&quot; 위험 수준을 잡는다(완만하지만 넓게 나쁜 지형).</li>
+<li><strong>상위꼬리항</strong>은 풋프린트 안의 <strong>소수 극단 셀</strong>을 잡는다(대부분 평탄하지만 한 귀퉁이가 낭떠러지인 경우 — 평균만 보면 놓치지만 실제로는 그 한 셀이 전복을 유발). 이는 로버스트 통계에서 CVaR(조건부 위험가치) 같은 상위꼬리 리스크 측정과 같은 철학이다.</li>
+</ul>
+<p>각 신호는 정규화 스케일(0.30 m, 30°)로 무차원화되어 합산 가능한 형태가 된다.</p>
+<h3>3.3 정렬된 노드쌍 상태 위의 Risk-Aware A* — heading의 상태 인코딩</h3>
+<p>TRG-planner의 A*는 <strong>노드(node) 상태</strong> 위에서 동작한다 — 상태 = &quot;현재 어느 노드에 있는가&quot;. 그러나 몸체 위험은 <strong>진입 방향(heading)</strong> 에 의존하므로, 노드만으로는 상태가 부족하다(같은 노드라도 어느 방향에서 진입했느냐에 따라 다음 회전 위험이 달라진다).</p>
+<p>RB-TRG는 이를 <strong>정렬된 노드쌍(ordered node-pair) 상태</strong>로 해결한다:</p>
+<pre class="codeblock"><code>상태 s = (n_prev, n_curr)     # &quot;n_prev에서 n_curr로 진입&quot; → 현재 heading 암묵 인코딩
+전이  s = (n_prev, n_curr) → s&#39; = (n_curr, n_next)
+전이 비용 = distance(n_curr, n_next) · f(transition_risk(edge, yaw_at_turn))
+</code></pre>
+<p><code>(n_prev, n_curr)</code> 순서쌍은 <strong>현재 노드에서의 로봇 heading을 상태에 담는다</strong>. 따라서 <code>(n_curr, n_next)</code>로의 전이 비용은 &quot;n_curr에서 n_prev→n_curr 방향으로 들어온 상태에서 n_next 방향으로 <strong>회전</strong>할 때&quot;의 몸체 위험(yaw sweep 최악값)을 정확히 반영한다. 이것이 §3.1의 yaw sweep과 맞물려 <strong>회전 인지 계획</strong>을 완성한다.</p>
+<p>A* 자체는 결정론적이며 <strong>Euclidean heuristic</strong>을 쓴다(README 확인). 상태 공간이 노드에서 노드쌍으로 커지지만, TRG가 희소 그래프이므로 실용적 규모를 유지한다. 누적 전이 비용을 최소화하여 <strong>방향·회전 안전 전역 경로</strong>를 얻는다.</p>
+<h3>3.4 TRG 인터페이스 보존 — 드롭인 비용 계층</h3>
+<p>RB-TRG의 설계 미덕은 <strong>비파괴적 확장(non-destructive extension)</strong> 이다:</p>
+<ul>
+<li><strong>TRG 구성은 불변</strong>: 노드/엣지/wavefront/traversal_risk는 그대로.</li>
+<li><strong>계획 인터페이스 보존</strong>: 입력은 여전히 <code>TerrainGraph</code> + <code>ElevationGrid</code>, 출력은 노드 경로.</li>
+<li><strong>교체된 것은 비용 계산 계층 하나</strong>: 엣지의 스칼라 지형 위험 → 노드쌍 전이의 몸체 위험.</li>
+</ul>
+<p>이 덕분에 RB-TRG는 기존 TRG 기반 스택에 <strong>드롭인</strong>으로 얹힌다. Go2-W 배치에서 &quot;풀 LiDAR 내비 스택&quot;과 결합될 수 있었던 것도 이 인터페이스 호환성 덕분이다.</p>
+<h3>3.5 공개 코드 API 분석 (실제 저장소)</h3>
+<p>browser로 검증한 <code>github.com/ZhiqiaoGuo/RB-TRG</code>의 공개 API는 위 방법론과 일관된다:</p>
+<pre class="codeblock"><code class="language-python">from rb_trg import ElevationGrid, GraphEdge, GraphNode, TerrainGraph, plan_route
+import numpy as np
+
+# 2.5D elevation grid (trusted_mask로 미신뢰 영역 지정 — §3.2 신호(4))
+terrain = ElevationGrid.from_array(
+    np.zeros((20, 20), dtype=float),
+    resolution_m=0.1,
+    lower_left_xy=(0.0, 0.0),
+    trusted_mask=None,          # None이면 전부 신뢰
+)
+
+# TRG: 방향성 노드/엣지 (엣지는 traversal_risk 보유 — TRG 원본 위험)
+graph = TerrainGraph(
+    nodes=[
+        GraphNode(0, (0.5, 0.5), [GraphEdge(1, 1.0, 0.0)]),  # (target, distance_m, traversal_risk)
+        GraphNode(1, (1.5, 0.5), []),
+    ],
+    start_node_id=0, goal_node_id=1,
+)
+
+# 시작/목표 heading 지정 → §3.3 노드쌍 상태 A*
+result = plan_route(
+    graph, terrain,
+    start_heading_deg=0.0, goal_heading_deg=0.0,
+    config=PlannerConfig(),   # 0.70×0.43m footprint, 0.05m 샘플, 5° yaw, top10% tail, σ=3
+    timeout_s=None,
+)
+# result: success 여부, node IDs, path 좌표, total cost, 실패 사유
+</code></pre>
+<p><code>PlannerConfig</code> 기본값이 논문 상수와 정확히 일치한다: <strong>풋프린트 0.70×0.43 m, 엣지 샘플 0.05 m, yaw 샘플 5°, 정규화 스케일 0.30 m·30°, 평균/꼬리 균등 가중, 상위꼬리 top 10%, σ=3</strong>. <code>start_heading_deg</code>/<code>goal_heading_deg</code>가 API 표면에 노출된 것이 §3.3의 heading 상태 인코딩을 직접 증거한다. 다만 저장소는 <strong>코어 플래너만</strong> 제공하며 terrain graph 구성·MuJoCo 시뮬·로봇 실행·벤치마크 스크립트는 제외(재현성 §8.5에서 논함).</p>
+<hr>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>┌─────────────────────────────────────────────────────────────────────────┐
+│                         RB-TRG 전체 파이프라인                            │
+└─────────────────────────────────────────────────────────────────────────┘
+
+  [지각/매핑]              [표현 — TRG 보존]           [비용 승격 — RB-TRG]
+ ┌───────────┐          ┌────────────────────┐      ┌──────────────────────┐
+ │ LiDAR      │          │ TRG 구성            │      │ 방향성 풋프린트 배치  │
+ │ point      │─────────▶│ • 희소 노드/엣지    │─────▶│ (0.70×0.43m)         │
+ │ cloud      │  2.5D    │ • wavefront         │ 엣지 │ 엣지샘플×yaw sweep    │
+ │            │ elevation│ • traversal_risk    │ 위험 │ ↓ 4신호(평균+꼬리)    │
+ │ trusted    │  + mask  │ • 계획 인터페이스   │      │ ↓ worst-case 집계     │
+ │ mask       │          │   불변              │      │ = transition_risk     │
+ └───────────┘          └────────────────────┘      └──────────┬───────────┘
+                                                                 │
+                                                                 ▼
+                                              ┌──────────────────────────────┐
+                                              │ Risk-Aware A*                 │
+                                              │ 상태 = (n_prev, n_curr)       │
+                                              │  → heading 인코딩             │
+                                              │ 전이비용 = dist · f(body_risk)│
+                                              │ Euclidean heuristic           │
+                                              └──────────────┬───────────────┘
+                                                             ▼
+                                              ┌──────────────────────────────┐
+                                              │ 전역 경로 (방향·회전 안전)    │
+                                              │  → 풀 LiDAR 내비 스택 추종     │
+                                              │  → Go2-W 실배치               │
+                                              └──────────────────────────────┘
+
+  검증 경로:
+   (a) same-graph 연구: 4개 스캔 지형에서 TRG 원본 비용 vs RB-TRG 비용 (동일 그래프)
+   (b) paired closed-loop MuJoCo: 짝지은 폐루프 시뮬 → 성공률/기하 지표
+   (c) Go2-W 실기체: ICRA 2026 Legged Robot Challenges (Best Autonomy·Best Mobility)
+</code></pre>
+<p>데이터 흐름의 핵심은 <strong>좌측(TRG)은 손대지 않고 우측(비용 승격)만 새로 얹었다</strong>는 점이다. 이 모듈성이 실증(Go2-W 풀 스택 통합)을 가능케 했다.</p>
+<hr>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 / 실험 환경 (Datasets &amp; Environments)</h3>
+<ul>
+<li><strong>4개 스캔 지형 환경(four scanned terrain environments)</strong>: 실제 스캔된 비정형 지형 elevation map. same-graph 연구에 사용 — 동일 TRG 그래프 위에서 TRG 원본 비용과 RB-TRG 비용을 직접 비교(표현 계층만 바꾸는 통제 실험).</li>
+<li><strong>Paired closed-loop MuJoCo</strong>: MuJoCo 물리 시뮬레이터에서 폐루프(closed-loop) 트라이얼. &quot;paired(짝지은)&quot;는 동일 시작-목표·동일 그래프에서 TRG 원본 vs RB-TRG를 짝지어 비교했음을 뜻한다(통제된 A/B).</li>
+<li><strong>Go2-W 실기체</strong>: Unitree Go2-W(바퀴-다리) + 풀 LiDAR 내비게이션 스택, ICRA 2026 Legged Robot Challenges 현장.</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>End-to-end success rate</strong>: 시작→목표 완주 성공률(폐루프, 전복·끼임·실패 없이 도달).</li>
+<li><strong>3개 코어 기하 몸체 배치 지표(three core geometric body-placement metrics)</strong>: 종방향 지지 변동·횡방향 경사·내부 지형 간섭에 대응하는 기하 지표(경로 상 몸체가 얼마나 나쁜 자세로 놓였는지의 누적/최악값). RB-TRG가 이 셋을 모두 감소시키는 것이 직접 목표.</li>
+<li><strong>Mean path length</strong>: 안전을 위해 경로가 얼마나 우회하는지(효율 비용).</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>지표</th>
+<th>TRG 원본(baseline)</th>
+<th>RB-TRG</th>
+<th>변화</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>End-to-end 성공률</strong></td>
+<td>51.5%</td>
+<td><strong>68.5%</strong></td>
+<td><strong>+17.0%p</strong></td>
+</tr>
+<tr>
+<td>3개 코어 기하 몸체 배치 지표</td>
+<td>(기준)</td>
+<td><strong>모두 감소</strong></td>
+<td>개선</td>
+</tr>
+<tr>
+<td>평균 경로 길이</td>
+<td>(기준)</td>
+<td>+2.3%</td>
+<td>소폭 증가</td>
+</tr>
+</tbody></table></div>
+<p>핵심 해석:</p>
+<ul>
+<li><strong>+17.0%p 성공률 개선</strong>은 매우 크다 — 절반 겨우 넘던(51.5%) 완주율을 2/3 이상(68.5%)으로 끌어올렸다. 이는 몸체 인지 비용이 실제 전복/끼임 실패를 대폭 줄였음을 뜻한다.</li>
+<li><strong>경로 길이는 2.3%만 증가</strong>. 안전을 크게 얻으면서 효율은 거의 잃지 않았다 — 안전-효율 트레이드오프 곡선에서 매우 유리한 지점. &quot;회전 위험이 낮은 방향으로 노드쌍을 고르는&quot; 계획이 경로를 크게 우회시키지 않음을 시사.</li>
+<li><strong>3개 기하 지표 동시 감소</strong>는 인과 사슬을 뒷받침한다: 비용에 넣은 몸체 위험(종방향/횡방향/내부)이 실제로 경로 상 그 위험을 낮췄고, 그 결과가 성공률로 이어졌다.</li>
+</ul>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p><strong>Go2-W 실배치 — ICRA 2026 Legged Robot Challenges.</strong> RB-TRG는 Unitree Go2-W(바퀴-다리 사족보행)에 <strong>풀 LiDAR 내비게이션 스택</strong>과 통합되어 배치되었고, <strong>Best Autonomy(최고 자율성)·Best Mobility(최고 기동성) 2개 부문을 수상</strong>했다.</p>
+<p>이 실증의 의미:</p>
+<ul>
+<li><strong>경진대회 검증</strong>은 통제된 논문 실험보다 강한 신호다 — 미지의 지형, 실시간 제약, 타 팀과의 직접 경쟁 하에서 동작했다.</li>
+<li><strong>두 부문 동시 수상</strong>이 방법론의 성격과 일치한다: Best Mobility는 &quot;몸체가 어려운 지형을 물리적으로 잘 통과&quot;(§3.2 몸체 위험 감소의 직접 결과), Best Autonomy는 &quot;자율 계획·실행의 완성도&quot;(풀 스택 통합). RB-TRG가 목표한 &quot;몸체 인지 안전 계획&quot;이 두 축 모두에 기여했음을 방증.</li>
+<li><strong>TRG 인터페이스 보존(§3.4)</strong> 이 실배치 통합을 가능케 한 엔지니어링 이유다 — 기존 LiDAR 내비 스택에 비용 계층만 교체해 얹을 수 있었다.</li>
+</ul>
+<p>다만 논문/초록 수준에서는 실기체의 정량 지표(주행 거리·성공 트라이얼 수 등)가 세밀히 공개되지 않았고, 수상 실적으로 요약된다(§8.5 재현성에서 논함).</p>
+<hr>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>엣지 지형 위험 → 몸체 위험 전이의 승격(cost-lifting).</strong> TRG의 원형 노드/엣지 밴드 추상화가 놓치던 <strong>방향성 직사각형 풋프린트</strong>를 도입하고, 엣지 단위 스칼라 지형 위험을 <strong>방향·회전 인지 몸체 위험 전이</strong>로 승격했다. 이것이 논문의 개념적 핵심.</p>
+</li>
+<li><p><strong>yaw sweep에 의한 회전 인지(turn-awareness).</strong> 노드에서의 회전 순간을 명시적 yaw 스윕으로 탐색해 최악 자세를 포착. 직진만 모델링하던 기존 그래프 위험을 회전까지 확장.</p>
+</li>
+<li><p><strong>4-신호 몸체 위험 + 평균/상위꼬리 분해.</strong> 종방향 지지 변동·횡방향 경사·내부 지형 간섭·미신뢰 지도 노출을 분리 측정하고, 각 신호를 평균항+상위꼬리항(CVaR류)으로 로버스트하게 결합.</p>
+</li>
+<li><p><strong>정렬 노드쌍 상태 A*.</strong> heading을 상태에 인코딩하는 <code>(n_prev, n_curr)</code> 노드쌍 상태로 회전 위험을 계획에 통합 — TRG의 노드 상태 A*를 최소 변경으로 확장.</p>
+</li>
+<li><p><strong>비파괴적 확장 + 실증.</strong> TRG 구성·계획 인터페이스를 보존한 드롭인 계층으로, MuJoCo에서 성공률 51.5→68.5%(경로 +2.3%만), Go2-W 실기체 ICRA 2026 Legged Robot Challenges <strong>Best Autonomy·Best Mobility 수상</strong>. <strong>코드 공개</strong>(Apache-2.0, plan_route API).</p>
+</li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 핵심 파라미터 (PlannerConfig 기본값 — 저장소 검증)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>기본값</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>풋프린트 크기</td>
+<td><strong>0.70 m × 0.43 m</strong></td>
+<td>종방향×횡방향 몸체 직사각형(Go2-W급)</td>
+</tr>
+<tr>
+<td>엣지 샘플 간격</td>
+<td><strong>0.05 m</strong></td>
+<td>엣지 위 풋프린트 배치 밀도</td>
+</tr>
+<tr>
+<td>yaw 샘플 간격</td>
+<td><strong>5°</strong></td>
+<td>회전각 스윕 해상도(§3.1)</td>
+</tr>
+<tr>
+<td>정규화 스케일</td>
+<td><strong>0.30 m, 30°</strong></td>
+<td>높이/각도 신호 무차원화</td>
+</tr>
+<tr>
+<td>평균/꼬리 가중</td>
+<td><strong>균등(0.5/0.5)</strong></td>
+<td>평균항 vs 상위꼬리항</td>
+</tr>
+<tr>
+<td>상위꼬리 비율</td>
+<td><strong>top 10%</strong></td>
+<td>CVaR류 극단 셀 비중</td>
+</tr>
+<tr>
+<td>σ (정규화)</td>
+<td><strong>3</strong></td>
+<td>신호 스케일링</td>
+</tr>
+</tbody></table></div>
+<h3>7.2 구현상의 미묘함</h3>
+<ul>
+<li><strong>worst-case 집계의 이유</strong>: 전이 위험을 엣지 샘플·yaw 스윕의 <strong>최댓값</strong>으로 잡는 것은 보수적이지만 안전 계획의 정석이다. 만약 평균을 쓰면 &quot;대체로 안전하지만 한 순간 전복&quot;하는 경로가 낮은 비용으로 선택될 수 있다.</li>
+<li><strong>top 10% 상위꼬리</strong>: 풋프린트 내 셀 중 상위 10%만 꼬리항에 반영. 너무 작으면 노이즈 셀에 과민, 너무 크면 평균과 구분 안 됨 — 10%는 극단 셀을 잡되 단일 이상치에 휘둘리지 않는 균형.</li>
+<li><strong>결정론적 A* + Euclidean heuristic</strong>: 재현 가능(무작위성 없음). Euclidean heuristic은 admissible(실제 비용 ≥ 직선거리)하여 최적성 보장.</li>
+<li><strong>NumPy 단일 의존성</strong>: 무거운 프레임워크 없이 순수 NumPy로 풋프린트 샘플링·통계를 벡터화. 경량·이식성 높음(실기체 온보드 적합).</li>
+</ul>
+<h3>7.3 실배치 엔지니어링 고려</h3>
+<ul>
+<li><strong>인터페이스 보존이 통합 비용을 최소화</strong>: 기존 TRG 스택의 <code>plan_route</code> 시그니처에 <code>start/goal_heading_deg</code>만 추가된 형태라, 풀 LiDAR 내비 스택에 최소 수정으로 얹힘.</li>
+<li><strong>trusted_mask 주입점</strong>: 매핑 파이프라인이 신뢰도 마스크를 <code>ElevationGrid.from_array</code>에 넘기면, 미신뢰 노출(신호 4)이 자동으로 비용에 반영 — 실환경 occlusion 대응.</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<p>노드쌍 상태 공간은 노드 상태보다 크지만(최대 O(E) 상태, E=엣지 수), TRG가 <strong>희소 그래프</strong>이므로 실용 규모를 유지한다. wavefront 구성으로 &quot;갈 수 있는 영역만&quot; 그래프화하는 TRG의 이점을 그대로 상속하므로, 대규모 환경에서도 실시간성을 크게 해치지 않는다. 풋프린트 샘플링(엣지당 샘플수 × yaw수)이 엣지 비용 계산의 상수 배수를 늘리지만, NumPy 벡터화로 흡수된다.</p>
+<h3>8.2 한계점 (Limitations)</h3>
+<ul>
+<li><strong>2.5D elevation 가정</strong>: 풋프린트 위험이 2.5D 높이 그리드에 의존 → 오버행(overhang)·터널·다층 구조를 표현 못 함(높이 함수는 셀당 단일 값).</li>
+<li><strong>정적 지형 가정</strong>: 동적 장애물(사람·타 로봇)은 표현 밖. trusted_mask로 미신뢰 처리는 되나 예측적 회피는 아님.</li>
+<li><strong>worst-case 보수성</strong>: 최댓값 집계가 때로 과보수적일 수 있어, 실제로 통과 가능한 좁은 통로를 기피할 여지(경로 +2.3%가 그 대가). 안전 계수로 조절하는 명시적 노브는 TRG의 Γ만큼 문서화되지 않음.</li>
+<li><strong>저장소 범위 제한</strong>: 코어 플래너만 공개, 지형 그래프 구성·시뮬·벤치마크 미공개 → 완전 end-to-end 재현은 별도 구현 필요(§8.5).</li>
+<li><strong>풋프린트 강체 가정</strong>: 다리 관절 자유도(스텝 오버·자세 조정)를 몸체 직사각형으로 근사 — 실제 사족보행의 적극적 지형 적응(발 위치 최적화)은 미모델링.</li>
+</ul>
+<h3>8.3 향후 방향</h3>
+<ul>
+<li><strong>3D/멀티레이어 지형</strong>: 오버행·계단을 위한 3D 풋프린트 위험(2.5D → truncated signed distance 계층).</li>
+<li><strong>동적 안전 계수</strong>: TRG의 Γ처럼 몸체 위험 가중을 상황별로 조절하는 해석 가능 노브.</li>
+<li><strong>다리 자유도 결합</strong>: 몸체 위험을 발 위치 최적화(footstep planning)와 결합해 &quot;회피 대신 적응&quot;.</li>
+<li><strong>학습 기반 신뢰 마스크</strong>: trusted_mask를 관측 불확실성 학습으로 자동 생성.</li>
+</ul>
+<h3>8.4 실패 모드 분석</h3>
+<ul>
+<li><strong>좁은 능선 정렬 실패</strong>: 능선 폭 &lt; 풋프린트 종방향(0.70 m)이면 어느 yaw로도 안전 배치가 없어 계획 실패(성공률 68.5%의 잔여 31.5% 일부).</li>
+<li><strong>미매핑 급변 지형</strong>: trusted_mask가 부정확하면 실제 위험을 저평가.</li>
+<li><strong>회전 밀집 구간</strong>: 노드가 촘촘해 연속 급회전이 필요한 구간에서 yaw sweep 최악값이 누적되어 우회 경로 선택(효율 손실).</li>
+</ul>
+<h3>8.5 재현성 평가</h3>
+<ul>
+<li><strong>긍정</strong>: 코드 공개(Apache-2.0), <code>plan_route</code> 실행 가능, <code>synthetic_demo.py</code> 데모, <code>tests/</code> 단위 테스트, <code>PlannerConfig</code> 기본값이 논문 상수와 일치 → <strong>핵심 알고리즘은 재현 가능</strong>.</li>
+<li><strong>제약</strong>: terrain graph 구성·MuJoCo 시뮬·Go2-W 실행·비교 벤치마크는 저장소 밖 → <strong>정량 결과(51.5→68.5%) 완전 재현은 어렵다</strong>. 사용자는 자체 TRG 그래프·시뮬을 붙여야 함.</li>
+<li><strong>종합</strong>: &quot;방법 재현 가능, 결과 재현은 부분적&quot; — 알고리즘 검증에는 충분, 논문 수치 정밀 재현에는 추가 인프라 필요.</li>
+</ul>
+<h3>8.6 이론적 위치짓기</h3>
+<p>RB-TRG는 <strong>로버스트 최적화 관점</strong>에서 읽으면 명료하다: 각 전이의 비용을 (엣지 샘플×yaw)라는 불확실성 집합 위의 <strong>worst-case</strong> 로 잡고, 그 안에서 다시 셀 분포의 <strong>상위꼬리(CVaR류)</strong> 를 취한다 — 이중 로버스트(worst-case-over-poses × tail-over-cells). 이는 안전 계획에서 &quot;평균 성능 최적화&quot;가 아닌 &quot;최악 시나리오 보증&quot;을 택한 원리적 선택이다.</p>
+<hr>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>RB-TRG는 이름·표현 모두 <strong>TRG-planner(RA-L 2025)</strong> 의 직접 확장이므로, 같은 트랙의 이 선행 리뷰가 1차 비교 대상이다. 보조로 대규모 지형 표현을 다룬 리뷰와 대비한다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th><strong>TRG-planner (RA-L 2025)</strong></th>
+<th><strong>HEIGHT (T-ASE 2025)</strong></th>
+<th><strong>RB-TRG (본 논문, arXiv 2026)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 표현</td>
+<td>Traversal Risk Graph(희소, 방향성 엣지)</td>
+<td>계층적 높이맵 기반 탐색</td>
+<td><strong>TRG 위 몸체 위험 승격 계층</strong></td>
+</tr>
+<tr>
+<td>로봇 몸체 모델</td>
+<td><strong>원형/스칼라 이웃</strong>(방향 무관)</td>
+<td>점/원 근사</td>
+<td><strong>방향성 직사각형 풋프린트(0.70×0.43m)</strong></td>
+</tr>
+<tr>
+<td>회전 처리</td>
+<td>엣지 정렬 밴드(직진 중심)</td>
+<td>국소 코스트맵</td>
+<td><strong>yaw sweep으로 명시적 회전 인지</strong></td>
+</tr>
+<tr>
+<td>위험 방향성</td>
+<td>R_lon/R_lat(PCA 타원, 엣지 방향)</td>
+<td>스칼라 traversability</td>
+<td><strong>4신호(종/횡/내부/노출)×평균+상위꼬리</strong></td>
+</tr>
+<tr>
+<td>A* 상태</td>
+<td><strong>노드 상태</strong></td>
+<td>그리드/코스트맵</td>
+<td><strong>정렬 노드쌍 상태(heading 인코딩)</strong></td>
+</tr>
+<tr>
+<td>안전-효율 노브</td>
+<td>안전계수 Γ(명시적)</td>
+<td>파라미터</td>
+<td>worst-case+tail(암묵적, Γ만큼 문서화 안 됨)</td>
+</tr>
+<tr>
+<td>코드 공개</td>
+<td>❌ 미공개(프로젝트페이지만)</td>
+<td>✅(일부)</td>
+<td>✅ <strong>Apache-2.0, plan_route</strong></td>
+</tr>
+<tr>
+<td>실증</td>
+<td>Unitree Go1, ICRA 2023 QRC 우승팀 채택</td>
+<td>시뮬+실로봇</td>
+<td><strong>Go2-W, ICRA 2026 Best Autonomy·Best Mobility</strong></td>
+</tr>
+<tr>
+<td>관계</td>
+<td>RB-TRG의 <strong>기반(base)</strong></td>
+<td>대규모 지형 계열</td>
+<td><strong>TRG의 몸체 인지 후속</strong></td>
+</tr>
+</tbody></table></div>
+<p>핵심 대비:</p>
+<ul>
+<li><strong>vs TRG-planner</strong>: TRG-planner의 결정적 공백은 &quot;로봇을 점/원으로 본다&quot;는 것 — 방향성 엣지 위험(R_lon/R_lat)은 있어도 <strong>몸체 형상·회전 자세</strong>는 없다. RB-TRG는 정확히 이 공백을 메운다: 원형→직사각형, 직진 밴드→yaw sweep, 노드 상태→노드쌍 상태. 즉 RB-TRG는 TRG-planner의 <strong>자연스러운 다음 단계</strong>이며, 관계가 경쟁이 아니라 <strong>누적 확장</strong>이다. 흥미롭게도 TRG-planner는 코드 미공개였으나 RB-TRG는 코드를 공개해, 후속이 재현성 면에서 오히려 앞선다.</li>
+<li><strong>vs HEIGHT류 대규모 지형 계열</strong>: 이들은 &quot;넓은 지형을 어떻게 효율적으로 표현/탐색하는가&quot;에 무게가 있다면, RB-TRG는 &quot;그 위에서 <strong>로봇 몸체가 어떻게 놓이는가</strong>&quot;라는 직교(orthogonal) 축을 판다. 둘은 결합 가능(대규모 표현 + 몸체 인지 비용).</li>
+</ul>
+<h3>9.2 장단점 분석</h3>
+<p><strong>장점</strong></p>
+<ul>
+<li>개념이 명료하고 표적이 정확(원형→방향성 풋프린트라는 단일 축의 결정적 개선).</li>
+<li>성공률 대폭 개선(+17%p) 대비 효율 손실 미미(+2.3%) — 트레이드오프가 탁월.</li>
+<li>TRG 인터페이스 보존 → 드롭인 통합, 실배치 용이(수상이 방증).</li>
+<li>코드 공개(선행 TRG-planner보다 재현성 우위).</li>
+<li>worst-case×상위꼬리 이중 로버스트라는 원리적 안전 설계.</li>
+</ul>
+<p><strong>단점</strong></p>
+<ul>
+<li>2.5D·정적·강체 풋프린트 가정(오버행·동적·다리 적응 미모델링).</li>
+<li>저장소가 코어 플래너만 → 결과 완전 재현 제약.</li>
+<li>안전-효율 노브가 TRG의 Γ만큼 명시적으로 문서화되지 않음.</li>
+<li>실기체 정량 지표가 수상 실적으로 요약(세밀 수치 부족).</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<p><strong>높음.</strong> ICRA 2026 Legged Robot Challenges 실배치·2부문 수상이 실용성의 강한 증거다. TRG 스택을 이미 쓰는 팀에게는 비용 계층 교체만으로 얹히므로 도입 장벽이 낮다. NumPy 단일 의존성·경량 A*로 온보드 적합. 바퀴-다리(Go2-W)·사족보행 재난/탐사 로봇에 즉시 유효. 다만 완전 파이프라인(그래프 구성·매핑)은 자체 구축 필요.</p>
+<h3>9.4 연구 방향성 평가</h3>
+<p>RB-TRG는 &quot;그래프 기반 지형 계획에 <strong>로봇 형상학(robot morphology)</strong> 을 도입&quot;하는 방향의 명확한 이정표다. 후속으로는 (i) 3D/멀티레이어 풋프린트, (ii) 다리 자유도와의 결합(회피→적응), (iii) 동적 안전 계수, (iv) 학습 기반 신뢰 마스크가 자연스럽다. TRG-planner→RB-TRG로 이어진 &quot;표현 보존, 비용 정교화&quot; 계보는 향후에도 유효한 확장 패턴이다.</p>
+<h3>9.5 일반화 가능성</h3>
+<p>방향성 풋프린트 + yaw sweep + 노드쌍 상태라는 아이디어는 TRG에 국한되지 않는다 — 임의의 <strong>그래프/로드맵 기반 플래너</strong>(PRM*, visibility graph 등)에 &quot;몸체 인지 전이 비용&quot; 계층으로 이식 가능. 특히 비홀로노믹·큰 몸체 로봇(트랙터, 대형 UGV)으로 일반화 여지가 크다.</p>
+<hr>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
+<ol>
+<li><strong>본 논문</strong>: Zhiqiao Guo, Bichi Zhang, Sören Schwertfeger, &quot;Robot-Body-Aware Traversal Risk Graph Planning,&quot; arXiv:2608.16433, 2026.</li>
+<li><strong>코드</strong>: <a href="https://github.com/ZhiqiaoGuo/RB-TRG">https://github.com/ZhiqiaoGuo/RB-TRG</a> (Apache-2.0)</li>
+<li><strong>직접 기반</strong>: Dongkyu Lee et al., &quot;TRG-planner: Traversal Risk Graph-Based Path Planning in Unstructured Environments,&quot; IEEE RA-L, 2025 (arXiv:2501.01806). — 본 corpus <code>Planner/review/TRG-Planner_RAL2025/</code></li>
+<li>관련 대규모 지형 계열: HEIGHT (T-ASE 2025) — 본 corpus <code>Planner/review/HEIGHT_TASE2025/</code></li>
+<li>로버스트 리스크 측정(CVaR) 계열 문헌(상위꼬리 위험 측정의 이론적 배경).</li>
+<li>Unitree Go2-W 플랫폼 / IEEE ICRA 2026 Legged Robot Challenges.</li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
+<h3>혁신성</h3>
+<p>RB-TRG의 혁신은 &quot;지형 위험은 스칼라가 아니라 <strong>로봇 몸체가 그 위에 어떤 자세로 놓이는가</strong>의 함수, 특히 <strong>회전 순간</strong>에 최악값을 갖는다&quot;는 통찰을 실용적 계획기로 구현한 데 있다. 원형→방향성 직사각형 풋프린트, 직진 밴드→yaw sweep, 노드→노드쌍 상태라는 세 최소 변경이 TRG의 결정적 공백(몸체·회전 무관성)을 정확히 메운다. worst-case×상위꼬리의 이중 로버스트 설계는 안전 계획의 원리에 충실하다.</p>
+<h3>실용적 의의</h3>
+<p>+17%p 성공률을 +2.3% 경로 길이만으로 얻은 것은 안전-효율 곡선에서 드문 우위이며, Go2-W 실기체의 ICRA 2026 Best Autonomy·Best Mobility 2부문 수상이 이를 현장에서 입증했다. TRG 인터페이스 보존 덕분에 기존 스택에 드롭인으로 얹히고, 코드 공개(Apache-2.0)로 재현성까지 확보 — 선행 TRG-planner의 미공개 상태를 오히려 개선했다.</p>
+<h3>향후 연구 방향</h3>
+<p>3D/멀티레이어 풋프린트, 다리 자유도 결합(회피→적응), 동적 안전 계수, 학습 기반 신뢰 마스크가 자연스러운 확장이다. 더 넓게는 방향성 풋프린트 몸체 위험을 임의의 그래프 기반 플래너로 이식하는 &quot;몸체 인지 전이 비용&quot; 패러다임의 일반화가 유망하다.</p>
+<h3>종합 평가</h3>
+<p>RB-TRG는 <strong>선행 TRG-planner를 최소 변경으로 정확히 보완</strong>하고, 실증(경진대회 수상)과 코드 공개를 겸비한 견고한 후속 연구다. 개념적 참신성은 &quot;혁명적&quot;이라기보다 &quot;정밀한 완성&quot;에 가깝지만, 그 표적이 정확하고 효과가 크며 실배치로 검증되었다는 점에서 Planner 트랙의 모범적 확장 사례로 평가된다. 한계(2.5D·정적·강체 가정)는 명확하나 향후 방향도 명확하다.</p>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+<div class="rhead" id="rhead" data-title="Robot-Body-Aware Traversal Risk Graph Planning (RB-TRG): 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
+</body>
+</html>

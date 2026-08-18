@@ -1,13 +1,42 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-17T19:30:04.476Z",
+  "generatedAt": "2026-08-18T19:30:01.936Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 8. 18  화요일",
+    "date": "2026. 8. 19  수요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 최근 리뷰 1편 · 전체 101편"
+    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 102편"
   },
   "papers": [
+    {
+      "id": "2608.16433",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 프리프린트 (2026) — 시스템 배치본이 IEEE ICRA 2026 Legged Robot Challenges에서 Best Autonomy·Best Mobility 수상",
+      "matchScore": 93,
+      "category": "Planner",
+      "feedTitle": "Robot-Body-Aware Traversal Risk Graph Planning",
+      "authorsShort": "Z. Guo, B. Zhang +1",
+      "feedAbstract": "선행 TRG-planner(RA-L 2025) 의 원형 노드 이웃·엣지 정렬 밴드 추상화가 로봇 몸체·회전을 무시하는 한계를 지적하고, 방향성 직사각형 풋프린트(0.70×0.43m)를 엣지 샘플(0.05m)×yaw sweep(5°)로 훑어 종방향 지지 변동·횡방향 경사·내부 지형 간섭·미신뢰 지도 노출의 4개 몸체 위험…",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "Robot-Body-Aware Traversal Risk Graph Planning",
+      "titleKO": "Robot-Body-Aware Traversal Risk Graph Planning",
+      "authorsEN": "Zhiqiao Guo, Bichi Zhang, Sören Schwertfeger",
+      "authorsKO": "Zhiqiao Guo, Bichi Zhang, Sören Schwertfeger",
+      "abstractEN": "Traversal Risk Graphs (TRGs) provide a compact, terrain-aware representation for global navigation, but native TRG costs are computed over circular node neighborhoods and edge-aligned terrain regions rather than the robot's oriented body footprint. For wheeled-legged robots, this abstraction can miss partial support loss and body-terrain interference, especially during turns. We present Robot-Body-Aware TRG planning (RB-TRG), which builds on the sparse TRG representation and lifts edge-wise terrain-risk search to heading- and turn-aware body-risk transitions. An oriented rectangular footprint is sampled along graph edges and yaw sweeps to measure longitudinal support variation, lateral inclination, terrain interference, and exposure to untrusted map regions. Mean-and-upper-tail features are incorporated into transition costs, whose accumulated value is minimized by A* over ordered node-pair states, preserving TRG construction and its planning interface. We evaluate RB-TRG in a same-graph study on four scanned terrain environments and in paired closed-loop MuJoCo trials. RB-TRG reduces the three core geometric body-placement metrics and increases end-to-end success from 51.5% to 68.5%, while increasing mean path length by 2.3%. A Go2-W deployment further demonstrates RB-TRG with a full LiDAR navigation stack, which received the Best Autonomy and Best Mobility awards at the IEEE ICRA 2026 Legged Robot Challenges. The code for RB-TRG is released at https://github.com/ZhiqiaoGuo/RB-TRG.",
+      "abstractKO": "선행 TRG-planner(RA-L 2025) 의 원형 노드 이웃·엣지 정렬 밴드 추상화가 로봇 몸체·회전을 무시하는 한계를 지적하고, 방향성 직사각형 풋프린트(0.70×0.43m)를 엣지 샘플(0.05m)×yaw sweep(5°)로 훑어 종방향 지지 변동·횡방향 경사·내부 지형 간섭·미신뢰 지도 노출의 4개 몸체 위험 신호(각 평균항+상위꼬리항 top10%·σ3) 를 계산, worst-case 집계된 전이 위험을 정렬 노드쌍 상태(heading 인코딩) A\\*로 최소화. TRG 구성·계획 인터페이스는 보존한 드롭인 비용 승격 계층. MuJoCo 폐루프 성공률 51.5→68.5%(경로 +2.3%만), Go2-W 실기체 ICRA 2026 Legged Robot Challenges 2부문 수상.",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 39,
+      "reason": "**엣지 지형 위험 → 몸체 위험 전이의 승격(cost-lifting)**: 원형/스칼라 추상화를 방향성 직사각형 풋프린트로 교체.\n**yaw sweep 회전 인지**: 노드에서의 회전 순간을 명시적 스윕으로 탐색해 최악 자세 포착.\n**4-신호 몸체 위험 + 평균/상위꼬리(CVaR류) 분해**: 종/횡/내부/노출 분리 측정, 로버스트 결합.\n**정렬 노드쌍 상태 A\\***: `(n_prev, n_curr)` 상태로 heading을 인코딩해 회전 위험을 계획에 통합.\n**비파괴적 확장 + 실증 + 코드 공개**: TRG 인터페이스 보존, Go2-W ICRA 2026 Best Autonomy·Best Mobility, Apache-2.0.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/RB-TRG_arxiv2026/index.html"
+    }
+  ],
+  "archive": [
     {
       "id": "2608.11901",
       "venue": "arXiv 2026",
@@ -34,9 +63,7 @@
       "readMinutes": 37,
       "reason": "**최초 연속+동적 실외 VLN 데이터셋**: 이산·정적 그래프의 sim-to-real 괴리를 정면 겨냥.\n**이산-연속 이중 평가 프로토콜**: 단일 연속 궤적에서 이산 그래프와 연속 환경을 모두 파생 → 추상화 난이도 순수 분리.\n**기하 앵커링 2단계 지시 생성**: 외적 부호 방향 이벤트(Stage1)로 Qwen3-VL-Plus 캡션(Stage2)을 제약 → 6,933 규모 자동·정합 라벨.\n**다축 감도 분석**: 행동 입도(5m/12m)·동적 밀도·`stop` 행동을 독립 변수로 스윕, 난이도 삼분해(데이터/표현/환경).\n**공개 아티팩트**: 데이터셋 즉시 다운로드 + 프로젝트 페이지.",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/DaViNCi_arxiv2026/index.html"
-    }
-  ],
-  "archive": [
+    },
     {
       "id": "2608.10056",
       "venue": "IROS 2026",
