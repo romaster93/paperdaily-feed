@@ -1,13 +1,48 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-24T19:30:05.496Z",
+  "generatedAt": "2026-08-25T19:30:05.927Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 8. 25  화요일",
+    "date": "2026. 8. 26  수요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 최근 리뷰 1편 · 전체 102편"
+    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 103편"
   },
   "papers": [
+    {
+      "id": "2608.23354",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 프리프린트 (2026, 미확정)",
+      "matchScore": 93,
+      "category": "VLN",
+      "feedTitle": "OptiSight: Bridging Semantic Reasoning and Geometric Control for Embodied Navigation",
+      "authorsShort": "A. Avan, J. Sanchez-Riera",
+      "feedAbstract": "VLM 의미 추론과 결정론적 시각 서보잉(카메라 투영 기하)을 5-상태 유한상태 Chain-of-Thought로 분리해, VLM을 갈림길(SEARCHING)에서만 호출하고 정렬·접근·통과는 bbox 기하로 처리하는 8GB VRAM 제로샷 실내 항해 프레임워크.",
+      "tags": [
+        "#VLN",
+        "#Zero-shot항해",
+        "#결정론적시각서보잉",
+        "#코드공개"
+      ],
+      "titleEN": "OptiSight: Bridging Semantic Reasoning and Geometric Control for Embodied Navigation",
+      "titleKO": "OptiSight: Bridging Semantic Reasoning and Geometric Control for Embodied Navigation",
+      "authorsEN": "Alperen Avan, Jordi Sanchez-Riera",
+      "authorsKO": "Alperen Avan, Jordi Sanchez-Riera",
+      "abstractEN": "Autonomous indoor navigation requires both semantic understanding and precise geometric control. We propose OptiSight, a hybrid framework that combines Vision-Language Model reasoning with deterministic visual servoing through a finite-state Chain-of-Thought architecture. Grounded-SAM localizes open-vocabulary targets, while camera projection geometry converts visual observations into navigation commands without requiring dense mapping. The VLM is queried only at key decision points, reducing computational overhead while geometric control handles continuous navigation. Experiments in AI Habitat demonstrate reliable zero-shot navigation across diverse indoor scenarios, including obstacle avoidance and semantic ambiguity, while operating within an 8~GB VRAM budget. The source code is available at https://github.com/avanalperen/OptiSight-Python-Multimodal-CoT-for-Visual-Reasoning.",
+      "abstractKO": "VLM 의미 추론과 결정론적 시각 서보잉(카메라 투영 기하)을 5-상태 유한상태 Chain-of-Thought로 분리해, VLM을 갈림길(SEARCHING)에서만 호출하고 정렬·접근·통과는 bbox 기하로 처리하는 8GB VRAM 제로샷 실내 항해 프레임워크.",
+      "detailTags": [
+        "#VLN",
+        "#Zero-shot항해",
+        "#결정론적시각서보잉",
+        "#코드공개"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 41,
+      "reason": "**의미-기하 분리 FSM**: SEARCHING(VLM)만 의미 결정, FINDING/SCANNING_PATH/NAVIGATING/RECOVERING은 전부 결정론적 기하\n**VLM 호출 decision-point 국한**: 매 스텝 policy 대비 VLM 호출 수천→수십 회로 급감(저지연·저환각)\n**거리-적응 동적 데드밴드**: bbox 폭을 근접도 프록시로 데드밴드(0.08~0.12)·회전게인(0.25~0.5) 스케줄링, 깊이 센서 없이 진동 없는 서보잉\n**조밀 맵 없는 항해**: curiosity/frontier map 없이 현재 프레임 bbox + 국소 3D 투영만으로 결정\n**완전 공개 재현 코드(MIT)**: Qwen VLM + SAM2.1-hiera-tiny + GroundingDINO, start.py 원클릭, 웹 대시보드, 학습 불필요",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/OptiSight_arxiv2026/index.html"
+    }
+  ],
+  "archive": [
     {
       "id": "2608.16433",
       "venue": "arXiv 2026",
@@ -34,9 +69,7 @@
       "readMinutes": 39,
       "reason": "**엣지 지형 위험 → 몸체 위험 전이의 승격(cost-lifting)**: 원형/스칼라 추상화를 방향성 직사각형 풋프린트로 교체.\n**yaw sweep 회전 인지**: 노드에서의 회전 순간을 명시적 스윕으로 탐색해 최악 자세 포착.\n**4-신호 몸체 위험 + 평균/상위꼬리(CVaR류) 분해**: 종/횡/내부/노출 분리 측정, 로버스트 결합.\n**정렬 노드쌍 상태 A\\***: `(n_prev, n_curr)` 상태로 heading을 인코딩해 회전 위험을 계획에 통합.\n**비파괴적 확장 + 실증 + 코드 공개**: TRG 인터페이스 보존, Go2-W ICRA 2026 Best Autonomy·Best Mobility, Apache-2.0.",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/RB-TRG_arxiv2026/index.html"
-    }
-  ],
-  "archive": [
+    },
     {
       "id": "2608.11901",
       "venue": "arXiv 2026",
