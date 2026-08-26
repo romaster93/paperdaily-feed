@@ -1,0 +1,1006 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Trusted Polytopic Action Sets for Fast Planning in Underactuated Systems · PaperDaily</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { color: #8f4023; text-decoration: underline; }
+
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
+
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
+}
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
+article code.math-display {
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
+}
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
+article th {
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
+article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: var(--mono); font-size: 12px; text-align: center;
+}
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
+footer {
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
+</head>
+<body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2608.24019">arXiv ↗</a>
+</div>
+<div class="wrap">
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">PAAMP_LCSS2026</span>
+    </div>
+    <h1 class="doc-title">Trusted Polytopic Action Sets for Fast Planning in Underactuated Systems: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">IEEE Control Systems Letters (L-CSS) 2026, vol. 10, pp. 2173–2178 · CDC 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2608.24019">2608.24019</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval"><a href="https://github.com/akshay5312/paamp_underactuated">✅ akshay5312/paamp_underactuated</a> (C++/CUDA/Python, MIT)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">❌ (별도 프로젝트 페이지 없음)</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-08-26</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">39KB · 약 41분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
+  </header>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Trusted Polytopic Action Sets for Fast Planning in Underactuated Systems</li>
+<li><strong>저자 (Authors)</strong>: Akshay Jaitly, Siavash Farzan</li>
+<li><strong>소속 (Affiliation)</strong>: (저자 소속 — 제어/로보틱스 연구그룹; 논문·공개 저장소 기반)</li>
+<li><strong>발표처 (Published)</strong>: IEEE Control Systems Letters (L-CSS), Vol. 10, pp. 2173–2178, 2026 — <strong>2026 IEEE Conference on Decision and Control (CDC 2026)</strong> 동시 발표(탑티어 제어 학회)</li>
+<li><strong>DOI</strong>: <a href="https://doi.org/10.1109/LCSYS.2026.3718036">10.1109/LCSYS.2026.3718036</a></li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2608.24019">2608.24019</a></li>
+<li><strong>코드</strong>: ✅ <a href="https://github.com/akshay5312/paamp_underactuated">akshay5312/paamp_underactuated</a> (C++/CUDA/Python, MIT License) — 실제 동작 저장소(헤더 <code>include/paamp/</code>의 core·dynamics·pas·planner·solver·cuda 모듈, <code>src/</code> CPU+CUDA 구현, <code>python/</code> pybind11 바인딩, <code>tests/cpp</code>·<code>tests/py</code> 테스트, <code>benchmarks/</code> 예제)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 논문은 <strong>부족구동(underactuated) 비선형 시스템</strong>(제어 입력 차원 <code>nu</code>가 상태 차원 <code>nx</code>보다 작은 시스템 — 카트폴, 애크로봇, 두빈스 차량 등)에 대한 <strong>빠르고 안전한 모션 플래닝</strong>을 목표로 한다. 핵심 착안은 다음 한 문장으로 요약된다:</p>
+<blockquote>
+<p>&quot;부족구동 시스템의 동역학적으로 실현 가능한 운동들은 함수공간(function space) 상의 궤적 다양체(manifold of trajectories) 위에 놓여 있어, 볼록(convex) 모션 플래닝을 직접 적용하기 어렵다.&quot;</p>
+</blockquote>
+<p>전통적 방법론은 두 갈래로 나뉜다. (1) <strong>유한차원 궤적 매개화</strong>(다항식·B-스플라인 계수) — 매개화가 동역학 실현가능성을 보장하지 못해, 실제로 추종 불가능한 궤적을 생성하거나 강한 제약을 걸어야 한다. (2) <strong>예측 지평(prediction horizon)을 늘리는 방식</strong>(kinodynamic RRT, MPPI, NLP) — 지평이 길어질수록 계산비용이 급증하며, 특히 다중로봇/군집 시나리오에서 폭발한다.</p>
+<p>본 논문은 명목 궤적(nominal trajectory) 주변에서 <strong>국소 유한차원 &quot;행동 좌표(action coordinates)&quot;</strong> 를 구성하여, 그 좌표계 안에서 충돌·제어 제약이 <strong>선형(linear)</strong> 이 되도록 만들고, 동역학 위반을 정량화하는 <strong>신뢰영역(trust region)</strong> 안에서 IRIS-류 팽창으로 <strong>볼록 내부근사(convex inner approximation)</strong> 를 뽑아낸다. 이 볼록 집합이 곧 <strong>신뢰 다면체 행동집합(trusted Polytopic Action Set, PAS)</strong> 이며, 여러 PAS를 <strong>선형계획(LP)</strong> 으로 합성(compose)하여 다중 세그먼트 계획을 수행한다. 저자들은 이 방식이 kinodynamic RRT 대비 <strong>14–78배 빠르고</strong>, 샘플링/NLP 베이스라인 대비 <strong>종단 오차를 26–86% 낮춘다</strong>고 보고한다.</p>
+<p>한 마디로: <strong>&quot;단일 상태(state)를 노드로 하는 트리&quot;가 아니라 &quot;합성된 도달가능 집합(reachable set)을 노드로 하는 트리&quot;</strong> 를 성장시키는 것이 이 논문의 정체성이다.</p>
+<hr>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p>부족구동 비선형 시스템의 모션 플래닝은 다음의 근본적 난점을 안고 있다.</p>
+<ol>
+<li><p><strong>동역학 실현가능성과 볼록성의 충돌</strong>: <code>ẋ = f(x,u)</code> 가 비선형이면, 실현가능한 궤적들의 집합은 일반적으로 비볼록(nonconvex)이다. 볼록 최적화(LP/QP)의 속도 이점을 얻으려면 이 비볼록 집합을 어떻게든 볼록화해야 하는데, 순진한 선형화는 원래 동역학에서 멀어질수록 오차가 커진다.</p>
+</li>
+<li><p><strong>유한차원 매개화의 한계</strong>: 다항식/스플라인 계수로 궤적을 매개화하면 최적화 변수는 유한하지만, 그 계수 조합이 실제 동역학을 만족한다는 보장이 없다. 부족구동에서는 &quot;원하는 상태 궤적&quot;을 임의로 그릴 수 없다(예: 카트폴은 진자를 직접 밀 수 없고 카트를 통해 간접 구동).</p>
+</li>
+<li><p><strong>지평 확장의 계산 폭발</strong>: kinodynamic RRT는 상태공간을 단일 점 단위로 탐색하며, 매 확장마다 짧은 시뮬레이션 롤아웃과 충돌검사를 반복한다. 좁은 통로·버그트랩(U자 장애물)에서 확장 횟수가 급증하고, 다중로봇에서는 조합 폭발이 일어난다.</p>
+</li>
+<li><p><strong>질의(query) 능력의 부재</strong>: NLP 기반 궤적최적화는 <strong>단 하나의 궤적점</strong>만 반환한다. &quot;이 계획 세그먼트가 목표를 포함하는가?&quot;, &quot;목표에 가장 가까운 도달점은?&quot; 같은 질의를 값싸게 반복할 수 없다. 반면 도달가능 집합을 명시적으로 들고 있으면 이런 질의가 LP 한 번으로 끝난다.</p>
+</li>
+</ol>
+<h3>2.2 핵심 해결책</h3>
+<p>본 논문의 해결책은 <strong>3단 파이프라인</strong>으로 구성된다.</p>
+<pre class="codeblock"><code>[1] 명목 궤적 주변 국소 선형화 → 아핀 궤적 사상(affine trajectory map)
+       x(t;γ) = x*(t) + R(t)γ,  u(t;γ) = u*(t) + U(t)γ
+       → 충돌·제어 제약이 γ에 대해 선형
+[2] 동역학 위반 척도 ζ(γ)로 신뢰영역 정의 + IRIS-류 팽창으로 볼록 내부근사
+       Ω_trust = A_lin ∩ R_trust(ζ_max)   ← 이것이 PAS
+[3] 여러 PAS를 연속성 제약(선형)으로 합성 → PAS-RRT 트리
+       노드 = 합성된 도달가능 집합, 확장 = LP 투영 + 새 PAS 부착
+</code></pre>
+<p>핵심은 <strong>&quot;동역학을 선형화하되, 선형화가 믿을 만한 영역만 볼록집합으로 인증&quot;</strong> 한다는 점이다. 신뢰영역 밖으로 나가면 선형 모델이 실제 동역학과 벌어지므로, 위반 척도 <code>ζ(γ)</code>가 그 경계를 정의하고 IRIS-ZO(zeroth-order) 팽창이 <code>ζ ≤ ζ_max</code>를 만족하는 볼록 내부근사를 잘라낸다.</p>
+<hr>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 아핀 궤적 사상 (Affine Trajectory Map)</h3>
+<p>출발점은 부족구동 연속시간 비선형 시스템이다.</p>
+<pre class="codeblock"><code>ẋ(t) = f(x(t), u(t)),   nx &gt; nu   (부족구동)
+</code></pre>
+<p>명목 궤적 <code>(x*(t), u*(t))</code> 주변에서 1차 선형화하여 선형 시변(LTV) 시스템을 얻는다.</p>
+<pre class="codeblock"><code>δẋ(t) = A(t) δx(t) + B(t) δu(t)
+   A(t) = ∂f/∂x |(x*,u*),   B(t) = ∂f/∂u |(x*,u*)
+</code></pre>
+<p>상태편차를 상태천이행렬 <code>Φ(t,s)</code>로 적분하면:</p>
+<pre class="codeblock"><code>δx(t) = Φ(t,0) δx₀ + ∫₀ᵗ Φ(t,s) B(s) δu(s) ds
+</code></pre>
+<p>여기서 결정적 단계 — <strong>제어 편차를 정적 계수벡터로 매개화</strong>한다. <code>L(t)</code>를 기저행렬(예: M개 노트를 가진 조각별 선형 PWL), <code>η ∈ ℝ^{nη}</code>를 정적 계수로 두면:</p>
+<pre class="codeblock"><code>δu(t) = L(t) η
+</code></pre>
+<p>이를 대입하면 상태편차가 <strong>입력-상태 사상</strong> <code>K(t)</code>를 통해 정적 매개변수의 선형 함수가 된다.</p>
+<pre class="codeblock"><code>δx(t) = Φ(t,0) δx₀ + K(t) η
+   K(t) := ∫₀ᵗ Φ(t,s) B(s) L(s) ds     (input-to-state map)
+</code></pre>
+<p>복합 매개변수 <code>γ</code>와 기저행렬을 정의한다.</p>
+<pre class="codeblock"><code>γ := [δx₀ ; η] ∈ ℝ^{nγ},   nγ = nx + nη
+R(t) := [ Φ(t,0) | K(t) ]     (상태 기저)
+U(t) := [   0    | L(t) ]     (제어 기저)
+</code></pre>
+<p>그러면 <strong>아핀 궤적 사상 (식 1)</strong> 이 완성된다.</p>
+<pre class="diagram"><code>─────────────────────────────────────────
+  x(t; γ) = x*(t) + R(t) γ      ← 상태 궤적
+  u(t; γ) = u*(t) + U(t) γ      ← 제어 궤적
+─────────────────────────────────────────
+</code></pre>
+<p><strong>핵심 성질</strong>: <code>γ = 0</code>이면 명목 궤적을 정확히 복원한다. 그리고 상태·제어가 <code>γ</code>에 <strong>아핀(affine)</strong> 이므로, 종단 제약·충돌회피·제어한계가 전부 <code>γ</code>에 대한 <strong>선형 부등식</strong>으로 표현된다. 이것이 이후 모든 볼록성의 원천이다.</p>
+<p>한 PAS <code>𝒜</code>(= <code>γ</code>의 다면체)가 주어지면, 시각 <code>t</code>의 도달가능 상태집합은 다면체의 선형상(linear image)으로, <strong>그 자체가 다면체 (식 2)</strong> 이다.</p>
+<pre class="codeblock"><code>𝒳(t) := { x*(t) + R(t) γ | γ ∈ 𝒜 }     ← 다면체
+</code></pre>
+<p>따라서 &quot;목표 포함(goal containment)&quot; 또는 &quot;최근접점(closest-point)&quot; 질의가 <code>γ</code>에 대한 <strong>선형 실현가능성/최적화 문제</strong>로 환원된다. 이것이 NLP가 못 하는 값싼 반복 질의를 가능케 한다.</p>
+<h3>3.2 충돌회피의 선형화 (Linear Collision Constraints)</h3>
+<p>인덱스 <code>k</code>의 샘플된 금지점(forbidden point) <code>p ∈ P_k</code>에 대해, 여유(margin) <code>0 &lt; ε_{p,k} &lt; ‖p - x*_k‖²</code> 를 두고 다음 <strong>분리 초평면(separating hyperplane, 식 9)</strong> 을 세운다.</p>
+<pre class="codeblock"><code>( R_kᵀ (p - x*_k) )ᵀ γ  ≤  ‖p - x*_k‖² - ε_{p,k}
+</code></pre>
+<p>이 부등식은 &quot;상태를 점 <code>p</code>에 놓으려는 임의의 <code>γ</code>&quot;를 위반하게 만든다. 모든 샘플 장애물에 대해 쌓으면:</p>
+<pre class="codeblock"><code>A_col γ ≤ b_col     (충돌회피, 선형)
+A_u   γ ≤ b_u       (제어한계,   선형)
+</code></pre>
+<p>이 둘의 교집합이 <strong>선형 행동집합 (식 12)</strong> 이다.</p>
+<pre class="codeblock"><code>𝒜_lin := { γ | A_col γ ≤ b_col,  A_u γ ≤ b_u }
+</code></pre>
+<p>주의할 점: 충돌검사는 <strong>이산 시각</strong> <code>k ∈ 𝒦_obs</code>에서만 이뤄지며(샘플 기반, 보수적), 연속시간 안전 인증은 아니다. 저자들도 §한계에서 &quot;더 조밀한 연속시간 안전 인증&quot;을 향후 과제로 명시한다.</p>
+<h3>3.3 동역학 신뢰영역 (Dynamics Trust Region)</h3>
+<p>선형화는 명목에서 멀어질수록 실제 동역학과 벌어진다. 이를 정량화하기 위해 <strong>1스텝 이산화 결함(defect, 식 13)</strong> 을 정의한다.</p>
+<pre class="codeblock"><code>ζ(γ) := Σ_{k=0}^{N-1} ‖ x_{k+1}(γ) - x_k(γ) - Δt·f(x_k(γ), u_k(γ)) ‖₂²
+</code></pre>
+<p>구성상 <code>ζ(0) = 0</code>(명목 궤적은 결함 0)이고, <code>γ</code>가 커져 선형근사가 벌어질수록 <code>ζ</code>가 증가한다. 사용자 지정 허용치 <code>ζ_max</code>로 <strong>신뢰영역 (식 14)</strong> 을 정한다.</p>
+<pre class="codeblock"><code>ℛ_trust(ζ_max) := { γ ∈ ℝ^{nγ} | ζ(γ) ≤ ζ_max }
+</code></pre>
+<p><code>ζ_max</code>가 작으면 모델 충실도가 높지만 도달범위가 좁고, 크면 도달범위가 넓지만 근사오차가 커진다 — <strong>탐색-충실도 트레이드오프의 명시적 손잡이</strong>다.</p>
+<p>문제는 <code>ℛ_trust</code>가 일반적으로 <strong>비볼록</strong>이라는 것. 여기서 <strong>IRIS(Iterative Regional Inflation by Semidefinite programming)에서 영감받은 팽창</strong> 의 zeroth-order 변형(IRIS-ZO)을 써서, 선형 제약집합 <code>𝒜_lin</code>과 교차시키며 볼록 내부근사를 잘라낸다 <strong>(식 15)</strong>.</p>
+<pre class="diagram"><code>─────────────────────────────────────────────
+  Ω_trust := 𝒜_lin ∩ ℛ_trust(ζ_max)      ← 이것이 PAS
+─────────────────────────────────────────────
+</code></pre>
+<p>IRIS-ZO는 매 라운드 <strong>256개 배치 샘플</strong>을 행동공간에서 뽑고, 신뢰영역을 위반하는 샘플에 대해 <strong>12회 이분탐색(bisection)</strong> 으로 경계를 국소화한 뒤 절단 초평면을 추가한다(<code>M_iter</code> 라운드 반복). LTI(이중적분기)처럼 선형화가 정확한 경우 <code>M_iter = 0</code>(팽창 불필요), 카트폴 같은 비선형은 <code>M_iter = 1~5</code>.</p>
+<h3>3.4 PAS의 합성 (Composition of Polytopic Action Sets)</h3>
+<p>두 연속 세그먼트의 PAS를 이으려면, 앞 세그먼트의 종단 상태와 뒤 세그먼트의 시작 상태가 일치해야 한다. 궤적 사상이 아핀이므로 이 <strong>연속성 제약도 선형</strong> 이며, 합성집합 <strong>(식 3)</strong> 은 볼록 다면체다.</p>
+<pre class="codeblock"><code>𝒞 := { (γ₁, γ₂) | γⱼ ∈ 𝒜ⱼ,  x_{1,N}(γ₁) = x_{2,0}(γ₂) }
+</code></pre>
+<p><code>ℓ</code>개의 PAS를 합성하면 <strong>연속 다중 세그먼트 궤적</strong>을 인코딩하는 다면체가 되고, 그 위에서의 사후 궤적최적화(예: 제어노력 최소화)는 <strong>단일 볼록 프로그램(QP)</strong> 으로 풀린다. 즉 계획(feasibility)과 최적화(effort)가 분리되어, 먼저 도달가능성을 LP로 확보한 뒤 매끄러운 궤적을 QP로 추출한다.</p>
+<h3>3.5 PAS-RRT: 집합을 노드로 하는 트리 (Set-Valued Tree Growth)</h3>
+<p>전체 플래너는 RRT의 뼈대를 따르되, <strong>노드가 단일 상태가 아니라 &quot;합성된 도달가능 집합&quot;</strong> 이다.</p>
+<p><strong>절차 (Section IV-B):</strong></p>
+<p><strong>① 노드 선택</strong> — 무작위 목표 <code>x_rand</code>에 대해, 가중 마스크 <code>W</code>(대각행렬)로 특성상태 <code>x̂_v</code>가 가장 가까운 노드를 고른다.</p>
+<pre class="codeblock"><code>v* = argmin_v ‖ W ( x̂_v - x_rand ) ‖₂
+</code></pre>
+<p><strong>② 도달집합으로 투영 (식 22)</strong> — 선택된 노드의 합성집합 <code>𝒞_{v*}</code> 안에서 <code>x_rand</code>에 가장 가까운 도달점을 LP로 찾는다.</p>
+<pre class="codeblock"><code>min_{Γ_{v*}, r}  r
+   s.t.  Γ_{v*} ∈ 𝒞_{v*},
+         ‖ W ( x_{v*}^T(Γ_{v*}) - x_rand ) ‖_∞ ≤ r
+</code></pre>
+<p>해로 얻은 <code>x_seed</code>가 새 PAS의 씨앗이 된다. (가중 L∞ 투영 → LP)</p>
+<p><strong>③ 조향 및 새 PAS 구성</strong> — 샘플 기반 조향으로 <code>x_seed</code>에서 <code>x_rand</code>를 향한 명목 궤적을 만들고, §3의 구성으로 신뢰 PAS <code>𝒜_new</code>를 생성한다. 그리고 이전 세그먼트 집합과 <strong>합성 (식 23)</strong> 하여 자식 노드를 만든다.</p>
+<pre class="codeblock"><code>𝒞_{v+} := { (Γ_{v*}, γ_new) |
+            Γ_{v*} ∈ 𝒞_{v*},  A_new γ_new ≤ b_new,
+            x_{v*}^T(Γ_{v*}) = x_{new,0}(γ_new) }
+</code></pre>
+<p><strong>④ 목표 검사</strong> — LP 실현가능성으로 <code>x_goal ∈ 𝒳_{v+}^T</code> 인지 검사. 성공하면 계획을 추출·반환, 실패하면 최근접 도달점을 캐시하고 ①로 돌아간다.</p>
+<p><strong>ASCII: PAS-RRT 확장 한 스텝</strong></p>
+<pre class="diagram"><code>        x_rand (무작위 목표)
+           ○
+           │  ② W-L∞ 투영 (LP)
+           ▼
+   ┌───────────────┐        ③ 조향+PAS 구성
+   │  노드 v*       │  x_seed   ┌──────────────┐
+   │  집합 𝒞_{v*}   │ ────────► │  새 PAS 𝒜_new │
+   │ (도달가능 다면체)│          └──────┬───────┘
+   └───────────────┘                 │ 합성(연속성 선형제약)
+           │                         ▼
+           │                 ┌────────────────┐
+           └────── 부모 ──────│ 자식 v+  𝒞_{v+} │
+                             │ (합성 도달집합)  │
+                             └────────────────┘
+                                     │ ④ 목표 포함? (LP feasibility)
+                                     ▼   yes → 계획 추출
+</code></pre>
+<p>기존 kinodynamic RRT가 매 노드에서 <strong>하나의 궤적</strong>을 붙이는 반면, PAS-RRT는 매 노드에서 <strong>연속체(polytope of trajectories)</strong> 를 붙인다. 따라서 목표가 어떤 노드의 도달집합에 &quot;들어오기만 하면&quot; 즉시 성공 판정되고, 정밀한 종단맞춤은 QP가 담당한다 — 이것이 확장 횟수를 크게 줄이는 원천이다.</p>
+<h3>3.6 IRIS-ZO 팽창의 상세 (Zeroth-Order Regional Inflation)</h3>
+<p>원래 IRIS는 반정정계획(SDP)으로 자유공간에 최대 볼록영역을 팽창시키지만, 신뢰영역 <code>ℛ_trust</code>의 경계는 <code>ζ(γ)=ζ_max</code>라는 <strong>비선형 등위면</strong>이라 SDP로 직접 다루기 어렵다. PAAMP는 이를 <strong>영차(zeroth-order, 그래디언트 불요) 샘플링</strong>으로 우회한다.</p>
+<pre class="codeblock"><code>알고리즘: IRIS-ZO(𝒜_lin, ζ_max, 라운드 M_iter)
+  Ω ← 𝒜_lin                       # 선형제약(충돌+제어)으로 초기화
+  repeat M_iter 회:
+    S ← Ω 안에서 256개 γ 배치 샘플      # GPU 병렬
+    V ← { γ ∈ S | ζ(γ) &gt; ζ_max }      # 신뢰영역 위반 샘플
+    for each γ_v in V:
+       # 명목점(중심)과 γ_v 사이를 12회 이분탐색으로
+       # ζ(γ)=ζ_max 경계 γ_b 국소화
+       γ_b ← Bisect(center, γ_v, ζ_max, 12)
+       # γ_b에서 접평면(절단 초평면)을 Ω에 추가
+       Ω ← Ω ∩ { γ | aᵀ(γ - γ_b) ≤ 0 }
+  return Ω                          # 볼록 다면체 (PAS)
+</code></pre>
+<p><strong>핵심 성질</strong>:</p>
+<ul>
+<li><strong>그래디언트 불요</strong>: <code>ζ(γ)</code> 값만 평가하면 되므로, 미분 불가능하거나 접촉이 있는 동역학에도 적용 가능. 256 배치 평가는 GPU 롤아웃으로 병렬화.</li>
+<li><strong>내부근사 보장</strong>: 각 절단이 위반영역을 배제하는 방향이므로, 결과 <code>Ω</code>는 <code>ℛ_trust ∩ 𝒜_lin</code>의 <strong>내부근사</strong>(안전측). 즉 PAS 안의 모든 <code>γ</code>는 <code>ζ ≤ ζ_max</code>를 (샘플 해상도 한도 내에서) 만족.</li>
+<li><strong>LTI 특례</strong>: 이중적분기처럼 <code>f</code>가 선형이면 선형화가 정확하여 <code>ζ(γ)=0 ∀γ</code>, 팽창이 불필요(<code>M_iter=0</code>)하고 <code>Ω = 𝒜_lin</code> 그대로. 이때 PAAMP는 <strong>정확한</strong> 도달집합을 다루므로 Table I의 100% 성공이 자연스럽다.</li>
+<li><strong>비선형(카트폴)</strong>: <code>M_iter=1~5</code>, <code>ζ_max=0.05</code>. 팽창 라운드가 늘수록 PAS는 조금씩 축소되며 모델 충실도↑.</li>
+</ul>
+<h3>3.7 계획의 볼록 구조 요약 (Why Everything Stays Convex)</h3>
+<p>전체 파이프라인이 볼록성을 유지하는 이유를 한 표로 정리한다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>구성요소</th>
+<th>수학적 형태</th>
+<th>볼록 프로그램</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>아핀 궤적 사상</td>
+<td><code>x=x*+Rγ</code> (아핀)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>충돌회피 (식 9)</td>
+<td><code>A_col γ ≤ b_col</code> (선형)</td>
+<td>LP/QP 제약</td>
+</tr>
+<tr>
+<td>제어한계</td>
+<td><code>A_u γ ≤ b_u</code> (선형)</td>
+<td>LP/QP 제약</td>
+</tr>
+<tr>
+<td>신뢰영역 볼록화</td>
+<td>IRIS-ZO 절단 (선형)</td>
+<td>LP/QP 제약</td>
+</tr>
+<tr>
+<td>세그먼트 합성 (식 3)</td>
+<td>종단=시작 등식 (선형)</td>
+<td>LP/QP 제약</td>
+</tr>
+<tr>
+<td>트리 투영 (식 22)</td>
+<td>W-L∞ 최소화</td>
+<td><strong>LP</strong></td>
+</tr>
+<tr>
+<td>목표 포함 검사</td>
+<td>실현가능성</td>
+<td><strong>LP</strong></td>
+</tr>
+<tr>
+<td>사후 궤적 평활</td>
+<td>제어노력 최소화</td>
+<td><strong>QP</strong></td>
+</tr>
+</tbody></table></div>
+<p>즉 원래의 <strong>비볼록·부족구동 궤적생성</strong>이, 국소 아핀화 한 겹과 신뢰영역 볼록화 덕분에 <strong>LP+QP의 연쇄</strong>로 환원된다. 이 환원이 14–78배 가속의 근본 원인이다.</p>
+<hr>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>┌──────────────────────────────────────────────────────────────────┐
+│                 PAAMP: Trusted PAS Planning Pipeline               │
+└──────────────────────────────────────────────────────────────────┘
+
+  입력: ẋ=f(x,u) (부족구동),  x_start, x_goal,  장애물 P_k,  제어한계
+      │
+      ▼
+┌─────────────────────┐   명목 궤적 (x*, u*)  샘플 기반 조향으로 생성
+│  Steering / Rollout  │ ────────────────────────────────────────┐
+│  (GPU 배치 롤아웃)    │                                          │
+└─────────────────────┘                                          ▼
+      │                                        ┌──────────────────────────┐
+      │  선형화 A(t),B(t)                       │  PAS 구성 (pas 모듈)       │
+      ▼                                        │  · 아핀사상 R(t),U(t) (식1) │
+┌─────────────────────┐                        │  · 충돌선형화 A_col (식9)   │
+│  Dynamics 모듈        │  Φ(t,s), K(t)          │  · 제어한계 A_u             │
+│  (선형화·천이행렬)     │ ─────────────────────► │  · ζ(γ) 신뢰영역 (식13-14)  │
+└─────────────────────┘                        │  · IRIS-ZO 볼록내부근사(식15)│
+                                               └────────────┬─────────────┘
+                                                            │  PAS 𝒜 (다면체)
+                                                            ▼
+                                               ┌──────────────────────────┐
+                                               │  Planner: PAS-RRT          │
+                                               │  · 노드=합성 도달집합 𝒞     │
+                                               │  · W-L∞ 투영 (식22, LP)     │
+                                               │  · 합성 (식23, 연속성 선형)  │
+                                               │  · 목표포함 LP feasibility   │
+                                               └────────────┬─────────────┘
+                                                            │  합성 다면체 경로
+                                                            ▼
+                                               ┌──────────────────────────┐
+                                               │  Solver: 사후 최적화        │
+                                               │  · LP: HiGHS (질의·투영)     │
+                                               │  · QP: OSQP (제어노력 최소화) │
+                                               └────────────┬─────────────┘
+                                                            ▼
+                                          출력: 동역학 정합 매끄러운 다중세그먼트 궤적
+</code></pre>
+<p><strong>데이터 흐름 요약</strong>: (1) 조향이 명목 궤적을 만들고 → (2) 동역학 모듈이 선형화·천이행렬을 계산 → (3) PAS 모듈이 아핀사상·충돌선형화·신뢰영역·IRIS-ZO로 볼록 PAS를 뽑고 → (4) 플래너가 도달집합을 노드로 트리를 성장(LP 투영·합성·목표검사) → (5) 솔버가 LP(HiGHS)로 질의를, QP(OSQP)로 최종 매끄러운 궤적을 추출. GPU(CUDA)는 롤아웃/실현가능성 배치 평가를 가속하며, CUDA 장치가 없으면 자동 CPU 폴백한다.</p>
+<hr>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 테스트 시스템 (Test Systems)</h3>
+<p>저장소에 4종 동역학이 기본 탑재되어 있고, 논문은 그중 이중적분기(LTI)와 카트폴(비선형 부족구동)을 중점 평가한다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>시스템</th>
+<th align="center">상태차원 nx</th>
+<th align="center">제어차원 nu</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>DoubleIntegrator</strong></td>
+<td align="center">4</td>
+<td align="center">2</td>
+<td>힘 제어 2D 입자 (LTI, 선형화 정확)</td>
+</tr>
+<tr>
+<td><strong>Cartpole</strong></td>
+<td align="center">4</td>
+<td align="center">1</td>
+<td>카트에 힘, 진자 스윙업 (부족구동 비선형)</td>
+</tr>
+<tr>
+<td><strong>Acrobot</strong></td>
+<td align="center">4</td>
+<td align="center">1</td>
+<td>2링크 진자, 엘보 토크 (부족구동)</td>
+</tr>
+<tr>
+<td><strong>Dubins</strong></td>
+<td align="center">3</td>
+<td align="center">1</td>
+<td>정속 차량, 회전율 제어 (비홀로노믹)</td>
+</tr>
+</tbody></table></div>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>성공률(Success rate)</strong>: 목표 허용치(이중적분기 0.5 m) 내 도달 비율</li>
+<li><strong>런타임(Runtime, ms)</strong>: 계획 소요 시간</li>
+<li><strong>확장 횟수(Expansions)</strong>: 트리 성장 반복 수</li>
+<li><strong>세그먼트 수(Segments)</strong>: 합성된 PAS 개수</li>
+<li><strong>종단 오차(Terminal error)</strong>: 목표 대비 종단 상태 오차 (단일 PAS 도달성 평가)</li>
+<li><strong>스텝당 동역학 잔차(Per-step dynamics residual)</strong>: 계획 궤적의 실제 동역학 정합도</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>LTI(이중적분기) 장애물 회피 (Table I, M=10, N=20)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>장애물 수 (점유율)</th>
+<th align="center">성공률</th>
+<th align="center">런타임</th>
+<th align="center">확장</th>
+<th align="center">세그먼트</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>4–25개 (4.5–28%)</td>
+<td align="center"><strong>100%</strong></td>
+<td align="center">9.6–127 ms</td>
+<td align="center">5.8–59.8</td>
+<td align="center">2.5–4.9</td>
+</tr>
+<tr>
+<td>고밀도 (40–63%)</td>
+<td align="center">92–82%</td>
+<td align="center">305–552 ms</td>
+<td align="center">—</td>
+<td align="center">—</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li><strong>kinodynamic RRT(OMPL) 대비 속도</strong>: <strong>14–78배</strong> (동일 제어한계·충돌여유 매칭)</li>
+<li>예시: 장애물 20개에서 <strong>67 ms vs RRT 2.0 s</strong> (경로비용 유사)</li>
+</ul>
+<p><strong>카트폴 단일-PAS 목표 도달성 (Fig. 6, M=40)</strong></p>
+<ul>
+<li><strong>종단 오차 감소</strong>: 직접 샘플링 대비 지평 <code>T ∈ [1.5, 3.0] s</code>에서 <strong>26–86%</strong> 감소</li>
+<li>NLP 베이스라인(소프트 페널티)은 샘플링을 못 넘어서며, 질의 가능한 집합이 아니라 <strong>단일 점</strong>만 반환</li>
+</ul>
+<p><strong>카트폴 트리 계획 (Table II, 20 trial 중앙값)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>지평 T</th>
+<th align="center">확장</th>
+<th align="center">런타임</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>짧은 지평 (0.75–1.50 s)</td>
+<td align="center">5.5–41.5</td>
+<td align="center">184–1297 ms</td>
+</tr>
+<tr>
+<td>긴 지평 (3.0–4.0 s)</td>
+<td align="center">1.0–2.0</td>
+<td align="center">26–154 ms</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>긴 지평(<code>T ≥ 3.0 s</code>)에서 스텝당 동역학 잔차 ≤ 0.006 (높은 정합)</li>
+<li>흥미로운 역설: <strong>지평이 길수록 확장이 줄고 빨라진다</strong> — 한 PAS의 도달범위가 넓어 목표를 더 빨리 포함하기 때문</li>
+</ul>
+<p><strong>특수 시나리오 (각 50 trial)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>시나리오</th>
+<th align="center">성공률</th>
+<th align="center">확장</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>좁은 통로 (단일 간극)</td>
+<td align="center"><strong>100%</strong></td>
+<td align="center">~10</td>
+</tr>
+<tr>
+<td>버그트랩 (U자 장애물)</td>
+<td align="center"><strong>100%</strong></td>
+<td align="center">~105</td>
+</tr>
+</tbody></table></div>
+<p><strong>베이스라인</strong></p>
+<ol>
+<li><strong>kinodynamic RRT (OMPL)</strong>: 제어한계·충돌여유를 동일하게 맞춤</li>
+<li><strong>라인서치 NLP</strong>: 유한차분 Gauss–Newton, 8회 재시작, <code>ζ ≤ ζ_max</code>를 소프트 페널티로</li>
+</ol>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p><strong>없음.</strong> 본 논문의 검증은 전부 시뮬레이션 벤치마크(cluttered planar 이중적분기, 카트폴 스윙업, 애크로봇/두빈스 동역학)로 이뤄진다. 실기체(하드웨어) 실험은 포함되지 않는다. 저자들은 향후 과제로 &quot;실제 로봇 배치&quot;와 &quot;더 조밀한 연속시간 안전 인증&quot;을 명시한다. 이는 IEEE L-CSS(짧은 레터 형식) 논문의 통상적 범위와 부합한다 — 이론·알고리즘 기여와 시뮬레이션 검증에 집중.</p>
+<hr>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>신뢰 다면체 행동집합(Trusted PAS) 개념</strong>: 명목 궤적 주변 국소 아핀 좌표에서 충돌·제어 제약을 선형화하고, 동역학 위반 척도 <code>ζ(γ)</code>로 신뢰영역을 정의하여 IRIS-ZO 팽창으로 볼록 내부근사를 인증. <strong>비선형 부족구동 동역학을 값싼 볼록 질의로 다루는 다리</strong>를 놓았다.</p>
+</li>
+<li><p><strong>집합-값 트리(set-valued tree)로의 RRT 재정의</strong>: 노드가 단일 상태가 아니라 &quot;합성된 도달가능 집합&quot;인 PAS-RRT. 목표가 도달집합에 포함되기만 하면 즉시 성공 판정되어, kinodynamic RRT 대비 확장 횟수·런타임을 크게 줄인다(14–78배 가속).</p>
+</li>
+<li><p><strong>계획과 최적화의 볼록 분리</strong>: 도달가능성(LP feasibility)을 먼저 확보하고, 매끄러운 궤적(제어노력 최소화)을 사후 QP로 추출. 다중 세그먼트 합성이 선형 연속성 제약으로 유지되어 전체가 볼록.</p>
+</li>
+<li><p><strong>질의 가능한 계획 표현</strong>: NLP가 단일 점만 반환하는 것과 달리, 도달가능 집합을 명시적으로 들고 있어 &quot;목표 포함?&quot;, &quot;최근접 도달점?&quot; 같은 질의를 LP 한 번으로 반복 수행.</p>
+</li>
+<li><p><strong>완전 공개 재현 구현(MIT)</strong>: C++/CUDA/Python 실저장소. 4종 동역학(DoubleIntegrator/Cartpole/Acrobot/Dubins), pybind11 바인딩, GoogleTest/pytest 테스트, 벤치마크 스크립트, LP=HiGHS·QP=OSQP 통합, GPU 롤아웃+CPU 폴백. 순수 Python으로 <code>paamp.System</code> 서브클래싱하여 새 동역학 확장 가능.</p>
+</li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 저장소 구조 (Repository Layout)</h3>
+<pre class="diagram"><code>paamp_underactuated/
+├── include/paamp/     공개 헤더: core, dynamics, pas, planner, solver, cuda
+├── src/               CPU + CUDA 구현
+├── python/            pybind11 바인딩 + paamp 패키지
+├── tests/cpp/         GoogleTest 단위 테스트
+├── tests/py/          pytest 테스트
+├── benchmarks/        단일-모션 예제 + 시각화 (figures/)
+├── docs/              방법 문서·그림
+├── EXTENDING.md       확장 가이드
+└── LICENSE            MIT
+</code></pre>
+<p><strong>핵심 모듈</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>모듈</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>core</td>
+<td>기저 추상화·유틸리티</td>
+</tr>
+<tr>
+<td>dynamics</td>
+<td>시스템 정의·선형화</td>
+</tr>
+<tr>
+<td>pas</td>
+<td>신뢰 다면체 행동집합 구성</td>
+</tr>
+<tr>
+<td>planner</td>
+<td>PAS-RRT 샘플 기반 플래너</td>
+</tr>
+<tr>
+<td>solver</td>
+<td>LP(HiGHS)·QP(OSQP) 통합</td>
+</tr>
+<tr>
+<td>cuda</td>
+<td>롤아웃·실현가능성 GPU 가속</td>
+</tr>
+</tbody></table></div>
+<h3>7.2 빌드 요구사항</h3>
+<ul>
+<li>CMake ≥ 3.24 (또는 4.x + <code>-DCMAKE_POLICY_VERSION_MINIMUM=3.5</code>)</li>
+<li>CUDA 13 (기본 <code>sm_120</code>; <code>-DCMAKE_CUDA_ARCHITECTURES=&lt;arch&gt;</code>로 재정의)</li>
+<li>Eigen 3.4, Python 3.10+ + pybind11</li>
+<li>HiGHS·OSQP·GoogleTest (자동 fetch)</li>
+</ul>
+<pre class="codeblock"><code class="language-bash"># C++
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+ctest --test-dir build --output-on-failure
+# Python
+pip install -e . --config-settings=cmake.build-type=Release
+pytest tests/py
+# 예제
+PYTHONPATH=../python python3 lti_obstacle_example.py       # 이중적분기 경로계획
+PYTHONPATH=../python python3 cartpole_swingup_example.py   # 카트폴 스윙업
+</code></pre>
+<h3>7.3 주요 상수·하이퍼파라미터 (논문 실측)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>의미</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>M</strong></td>
+<td>PWL 제어 노트 수</td>
+<td>5, 10, 15, 20, 30, 40</td>
+</tr>
+<tr>
+<td><strong>N</strong></td>
+<td>이산화 지평 스텝</td>
+<td>10, 20, 30</td>
+</tr>
+<tr>
+<td><strong>T</strong></td>
+<td>PAS당 계획 지평</td>
+<td>0.75–4.0 s (카트폴)</td>
+</tr>
+<tr>
+<td><strong>Δt</strong></td>
+<td>시간 스텝</td>
+<td>0.1 s (이중적분기) / 0.015 s (카트폴)</td>
+</tr>
+<tr>
+<td><strong>ζ_max</strong></td>
+<td>동역학 결함 신뢰 허용치</td>
+<td>0.05 (카트폴), LTI는 N/A(정확)</td>
+</tr>
+<tr>
+<td><strong>M_iter</strong></td>
+<td>IRIS-ZO 절단 라운드</td>
+<td>0 (LTI), 1–5 (카트폴)</td>
+</tr>
+<tr>
+<td><strong>Batch size</strong></td>
+<td>라운드당 행동공간 샘플</td>
+<td>256</td>
+</tr>
+<tr>
+<td><strong>Bisection</strong></td>
+<td>위반 샘플당 경계 국소화</td>
+<td>12회</td>
+</tr>
+<tr>
+<td><strong>Goal tol.</strong></td>
+<td>계획 성공 임계</td>
+<td>0.5 m (이중적분기)</td>
+</tr>
+<tr>
+<td><strong>u 한계</strong></td>
+<td>제어 상자</td>
+<td>[-5,5]² N (DI) / [-10,10] N (카트폴)</td>
+</tr>
+<tr>
+<td><strong>장애물</strong></td>
+<td>반경 / 점유율 스윕</td>
+<td>r=0.6 m / 4.5–63%</td>
+</tr>
+</tbody></table></div>
+<p><strong>솔버·하드웨어</strong>: 롤아웃·GPU 평가 NVIDIA RTX 5060(배치), LP=HiGHS(CPU), QP(최소노력 평활화)=OSQP(CPU). 소배치는 융합 CUDA 커널, 대배치는 cuBLAS GEMM. Python 정의 시스템은 GPU 오라클이 CPU로 폴백.</p>
+<h3>7.4 실제 코드 확인 (Code Verification)</h3>
+<p>GitHub 저장소 <code>akshay5312/paamp_underactuated</code>는 <strong>placeholder가 아닌 실동작 저장소</strong>로 확인되었다:</p>
+<ul>
+<li>C++/CUDA 코어(<code>include/paamp/</code>, <code>src/</code>)에 core·dynamics·pas·planner·solver·cuda 모듈 실재</li>
+<li>pybind11 바인딩(<code>python/</code>)으로 Python에서 4종 동역학 사용·확장 가능</li>
+<li><code>tests/cpp</code>(GoogleTest)·<code>tests/py</code>(pytest) 테스트, <code>benchmarks/</code>에 <code>lti_obstacle_example.py</code>·<code>cartpole_swingup_example.py</code> 시각화 예제</li>
+<li>MIT 라이선스, L-CSS 2026 인용 명시</li>
+<li><strong>단, 저장소는 코어 플래너 + 예제 중심</strong>이며, 논문 Table I/II의 전체 벤치마크 스윕 스크립트가 그대로 재현되는지는 저장소 밖일 수 있음(코어 알고리즘은 공개).</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<ul>
+<li><strong>지평-확장의 역설</strong>: 긴 지평이 오히려 확장 횟수를 줄인다(카트폴 T=3–4 s에서 1–2회 확장). 한 PAS의 도달집합이 넓어져 목표 포함이 빨라지기 때문. 이는 &quot;지평↑ → 비용↑&quot;의 통념을 뒤집는 PAS 고유의 특성.</li>
+<li><strong>다중로봇/군집</strong>: 논문 서두에서 다중로봇 시 계산폭발을 문제로 지목. PAS의 볼록 합성이 조합 복잡도를 완화할 잠재력이 있으나, 본 논문은 단일 시스템 검증에 그침(향후 과제).</li>
+<li><strong>GPU 가속</strong>: 롤아웃·실현가능성 배치 평가를 GPU로 처리, 256 배치 샘플을 병렬 평가. CPU 폴백으로 이식성 확보.</li>
+</ul>
+<h3>8.2 한계점 (Limitations)</h3>
+<ol>
+<li><strong>보수적 이산 안전</strong>: 충돌검사가 이산 시각에서만 이뤄져 연속시간 안전 인증이 아님. &quot;여유(margin)보다 좁은 통로&quot;에서 성능 저하.</li>
+<li><strong>명목 롤아웃 품질 의존</strong>: 나쁜 명목 궤적이 나오면 성능이 급락. PAS 생성과 조향의 결합이 느슨함(향후 &quot;더 긴밀한 결합&quot; 명시).</li>
+<li><strong>실기체 검증 부재</strong>: 전부 시뮬레이션. sim-to-real 갭·센서잡음·모델오차에서의 신뢰영역 유효성 미검증.</li>
+<li><strong>인증의 근사성</strong>: PAS는 신뢰영역의 볼록 <strong>내부근사</strong>이므로, <code>ζ_max</code> 선택이 도달성-안전성을 좌우하는 튜닝 손잡이로 남음.</li>
+</ol>
+<h3>8.3 향후 방향 (Future Directions)</h3>
+<ul>
+<li>연속시간 안전 인증(예: 배리어/튜브 결합)으로 이산 보수성 해소</li>
+<li>PAS 생성 ↔ 조향의 긴밀 결합(공동 최적화)</li>
+<li>실기체 배치 및 sim-to-real</li>
+<li>다중로봇 합성으로 군집 계획 확장</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
+<p>같은 Planner 트랙의 <strong>샘플 기반 트리(RRT 계열) + 기하구조 인증</strong>을 공유하는 선행 리뷰 논문들과 비교한다. 선정: <strong>Manifold-Guided Motion Planning for Tight Assemblies (CMG-RRT, WAFR 2026)</strong>, <strong>Enhanced Tube-RRT*: Trajectory Planning for 3-UAV Cascaded Rigid-Payload Transportation Systems (TubeRRT, IEEE T-AES 2026)</strong>, <strong>Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering (VisualRRT, CVPR 2026)</strong>.</p>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>CMG-RRT (WAFR 2026)</th>
+<th>Enhanced Tube-RRT* (T-AES 2026)</th>
+<th>Visual-RRT (CVPR 2026)</th>
+<th><strong>본 논문 PAAMP (L-CSS 2026)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 아이디어</td>
+<td>접촉 임계 다양체(SDF 영집합) 근방 집중 샘플링</td>
+<td>튜브(trajectory tube) + Bayesian Thompson 샘플링 + 볼록 QP</td>
+<td>미분가능 3DGS 렌더 그래디언트 + RRT 융합</td>
+<td>신뢰 <strong>다면체</strong> 행동집합(PAS) + 집합-값 트리</td>
+</tr>
+<tr>
+<td>트리 노드</td>
+<td>단일 배치(configuration)</td>
+<td>단일 경로점(+튜브 반경)</td>
+<td>단일 상태(그래디언트 확장)</td>
+<td><strong>합성된 도달가능 집합(polytope)</strong></td>
+</tr>
+<tr>
+<td>동역학 처리</td>
+<td>준정적(기하 조립) — 동역학 없음</td>
+<td>강체 페이로드 동역학, QP로 후처리</td>
+<td>기구학(kinematic), 동역학 무시</td>
+<td><strong>부족구동 비선형</strong> 국소선형화+신뢰영역</td>
+</tr>
+<tr>
+<td>볼록성/인증</td>
+<td>Lipschitz 보수 커버(SDF 세분)</td>
+<td>SOC 제약 QP(케이블 장력)</td>
+<td>없음(그래디언트 하강)</td>
+<td>IRIS-ZO 볼록 내부근사 + LP/QP</td>
+</tr>
+<tr>
+<td>질의 능력</td>
+<td>경로 존재 여부</td>
+<td>튜브 내 궤적</td>
+<td>렌더링 손실 최소화</td>
+<td><strong>LP로 목표포함·최근접 반복 질의</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>✅ MIT (TAU-CGL/cmg-rrt)</td>
+<td>❌ 미공개</td>
+<td>⏳ 예정(placeholder)</td>
+<td>✅ <strong>MIT (실저장소)</strong></td>
+</tr>
+<tr>
+<td>실로봇</td>
+<td>✅ UR5e 이중팔</td>
+<td>❌ 시뮬</td>
+<td>✅ Fetch 80%</td>
+<td>❌ 시뮬만</td>
+</tr>
+<tr>
+<td>대표 성능</td>
+<td>16 벤치 100%·평균 3.0분 (TR-RRT 대비 ~20배)</td>
+<td>94% 성공 (STube-RRT* 36% 대비)</td>
+<td>먼 목표 SR 2%→41%</td>
+<td>RRT 대비 14–78배·종단오차 26–86%↓</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>PAAMP의 강점</strong></p>
+<ul>
+<li><strong>부족구동 비선형을 볼록으로</strong>: CMG-RRT(준정적 조립)·VisualRRT(기구학)는 동역학을 다루지 않고, TubeRRT는 특정 강체 페이로드 동역학에 특화된다. PAAMP는 <strong>일반 부족구동 <code>ẋ=f(x,u)</code></strong> 를 국소선형화+신뢰영역으로 볼록화하는 원리적 다리를 놓는다.</li>
+<li><strong>집합-값 노드의 확장 효율</strong>: 세 비교군은 모두 단일 상태/경로점을 노드로 하지만, PAAMP는 도달가능 <strong>집합</strong>을 노드로 두어 목표 포함을 LP로 즉시 판정 — 긴 지평에서 확장 1–2회라는 극적 효율.</li>
+<li><strong>질의 가능성</strong>: NLP·순수 그래디언트(VisualRRT)가 단일 해만 주는 데 반해, 명시적 다면체로 반복 질의가 값싸다.</li>
+<li><strong>재현성 우위</strong>: TubeRRT(미공개)·VisualRRT(placeholder)와 달리 <strong>실동작 MIT 저장소</strong> — CMG-RRT와 함께 코드 공개 그룹.</li>
+</ul>
+<p><strong>PAAMP의 약점</strong></p>
+<ul>
+<li><strong>실기체 부재</strong>: CMG-RRT(UR5e)·VisualRRT(Fetch 80%)는 sim-to-real을 보였으나 PAAMP는 시뮬만.</li>
+<li><strong>이산 안전의 보수성</strong>: TubeRRT의 튜브는 연속 안전여유를 명시적으로 다루는 반면, PAAMP의 이산 충돌검사는 좁은 통로에서 보수적.</li>
+<li><strong>명목 롤아웃 의존</strong>: 나쁜 명목 궤적에서 성능 급락 — CMG-RRT의 다양체 안내처럼 구조적 가이드가 아직 약함.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>강한 후보 도메인</strong>: 카트폴·애크로봇류 부족구동 로봇, 곡예형 드론·다관절 시스템의 <strong>온보드 실시간 계획</strong>(볼록 LP/QP는 임베디드 친화적). 14–78배 가속과 GPU 배치는 자원제약 플랫폼에 유리.</li>
+<li><strong>선결 과제</strong>: 실기체 검증과 연속시간 안전이 없어, 현 단계에서는 시뮬/HIL 파이프라인이나 상위계획-하위추종 스택의 <strong>상위 궤적생성기</strong>로 통합하는 것이 현실적. TubeRRT식 튜브를 PAS에 결합하면 안전여유를 명시화할 수 있다.</li>
+<li><strong>통합 시너지</strong>: PAAMP(부족구동 볼록 궤적생성) + iCrowdNav/ProximitySafetyBalance류(사회적 로컬계획)처럼 <strong>동역학 계층</strong>과 <strong>의사결정 계층</strong>의 조합이 유망.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>PAAMP는 &quot;부족구동 동역학을 볼록 최적화의 언어로 번역&quot;하는 <strong>원리적 기여</strong>로, CMG-RRT(기하 구조)·VisualRRT(지각-계획 융합)와는 <strong>직교(orthogonal)</strong> 하다. 세 방향은 경쟁이 아니라 <strong>결합 가능</strong>하다: PAS의 볼록 도달집합을 CMG-RRT의 다양체 안내와 결합하면 부족구동 좁은통로 문제를, VisualRRT의 미분가능 렌더와 결합하면 시각목표 부족구동 계획을 열 수 있다. 특히 <strong>집합-값 트리</strong> 라는 자료구조 자체가 다중로봇 합성·재계획 캐싱 등으로 확장될 여지가 크다.</p>
+<hr>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
+<ul>
+<li><strong>본 논문</strong>: A. Jaitly, S. Farzan, &quot;Trusted Polytopic Action Sets for Fast Planning in Underactuated Systems,&quot; <em>IEEE Control Systems Letters (L-CSS)</em>, vol. 10, pp. 2173–2178, 2026. DOI: 10.1109/LCSYS.2026.3718036. arXiv:2608.24019. Code: <a href="https://github.com/akshay5312/paamp%5C_underactuated">https://github.com/akshay5312/paamp\_underactuated</a> (MIT)</li>
+<li><strong>비교(코퍼스 내)</strong>:<ul>
+<li>D. Livnat, M. M. Bilevich, M. Kleinbort, D. Halperin, &quot;Manifold-Guided Motion Planning for Tight Assemblies (CMG-RRT),&quot; <em>WAFR 2026</em>. (Planner/review/CMG-RRT_WAFR2026)</li>
+<li>&quot;Enhanced Tube-RRT*: Trajectory Planning Algorithm for 3-UAV Cascaded Rigid-Payload Transportation Systems,&quot; <em>IEEE T-AES 2026 (under review)</em>. (Planner/review/TubeRRT_TAES2026)</li>
+<li>S. Lee et al., &quot;Visual-RRT: Finding Paths toward Visual-Goals via Differentiable Rendering,&quot; <em>CVPR 2026</em>. (Planner/review/VisualRRT_CVPR2026)</li>
+</ul>
+</li>
+<li><strong>방법 배경</strong>: IRIS(Iterative Regional Inflation by Semidefinite programming) 계열 볼록 자유영역 팽창; OMPL kinodynamic RRT(베이스라인); HiGHS(LP)·OSQP(QP) 솔버; Eigen·pybind11.</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
+<p><strong>Trusted Polytopic Action Sets (PAAMP)</strong> 는 부족구동 비선형 시스템의 모션 플래닝에서 오래된 딜레마 — &quot;동역학 실현가능성 vs 볼록 최적화의 속도&quot; — 를 <strong>명목 궤적 주변의 국소 아핀 좌표계 + 동역학 위반 신뢰영역 + IRIS-ZO 볼록 내부근사</strong> 로 정면 돌파한다. 핵심 혁신은 두 가지다. 첫째, 충돌·제어 제약을 <code>γ</code>에 대한 선형 부등식으로 만들어 <strong>PAS(신뢰 다면체 행동집합)</strong> 라는 볼록 인증 궤적족을 얻고, 이를 선형 연속성으로 합성한다. 둘째, RRT의 노드를 단일 상태에서 <strong>&quot;합성된 도달가능 집합&quot;</strong> 으로 재정의하여, 목표 포함을 LP로 즉시 판정하는 <strong>집합-값 트리(PAS-RRT)</strong> 를 구성한다.</p>
+<p>성과는 명확하다: kinodynamic RRT 대비 <strong>14–78배 가속</strong>, 샘플링/NLP 대비 <strong>종단오차 26–86% 감소</strong>, 좁은통로·버그트랩 100% 성공, 그리고 <strong>긴 지평이 오히려 확장을 줄이는</strong> 반직관적 효율. 무엇보다 <strong>실동작 MIT 저장소</strong>(C++/CUDA/Python, 4종 동역학, LP=HiGHS·QP=OSQP)로 재현성을 확보해, 코드 미공개(TubeRRT)·placeholder(VisualRRT) 대비 실용적 우위를 갖는다.</p>
+<p>한계는 <strong>실기체 검증 부재</strong>와 <strong>이산 충돌검사의 보수성</strong>, <strong>명목 롤아웃 품질 의존</strong>이다. 그러나 이는 L-CSS 레터의 범위 안에서 자연스러운 후속 과제이며, 저자들도 연속시간 안전 인증·PAS↔조향 긴밀결합·실기체 배치·다중로봇 합성을 향후 방향으로 제시한다. 종합하면 PAAMP는 부족구동 로봇의 <strong>실시간 볼록 궤적생성</strong>을 위한 원리적이고 재현가능한 토대로, CMG-RRT(기하 다양체)·VisualRRT(지각-계획 융합)와 직교하며 결합 가능한 유망한 연구 축을 연다.</p>
+<hr>
+<p><em>작성: 2026-08-27 · 트랙: Planner · arXiv 2608.24019 · IEEE L-CSS 2026 / CDC 2026 · 코드 ✅ MIT</em></p>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+<div class="rhead" id="rhead" data-title="Trusted Polytopic Action Sets for Fast Planning in Underactuated Systems: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
+</body>
+</html>

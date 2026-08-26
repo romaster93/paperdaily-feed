@@ -1,13 +1,48 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-25T19:30:05.927Z",
+  "generatedAt": "2026-08-26T19:30:05.711Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 8. 26  수요일",
+    "date": "2026. 8. 27  목요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 103편"
+    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 104편"
   },
   "papers": [
+    {
+      "id": "2608.24019",
+      "venue": "LCSS 2026",
+      "venueDetail": "IEEE Control Systems Letters (L-CSS) 2026, vol. 10, pp. 2173–2178 · CDC 2026",
+      "matchScore": 93,
+      "category": "Planner",
+      "feedTitle": "Trusted Polytopic Action Sets for Fast Planning in Underactuated Systems",
+      "authorsShort": "A. Jaitly, S. Farzan",
+      "feedAbstract": "부족구동 비선형 시스템의 실현가능 궤적을 명목궤적 주변 국소 아핀좌표로 매개화하여 충돌·제어 제약을 선형화하고, 동역학 위반척도 ζ(γ)의 신뢰영역을 IRIS-ZO로 볼록 내부근사한 신뢰 다면체 행동집합(PAS) 을 만들어, 이 집합을 노드로 하는 집합-값 트리(PAS-RRT)로 kinodynamic RRT 대비…",
+      "tags": [
+        "#Planner",
+        "#샘플기반모션플래닝",
+        "#볼록최적화",
+        "#코드공개"
+      ],
+      "titleEN": "Trusted Polytopic Action Sets for Fast Planning in Underactuated Systems",
+      "titleKO": "Trusted Polytopic Action Sets for Fast Planning in Underactuated Systems",
+      "authorsEN": "Akshay Jaitly, Siavash Farzan",
+      "authorsKO": "Akshay Jaitly, Siavash Farzan",
+      "abstractEN": "Underactuated systems pose a challenge for convex motion planning because their dynamically feasible motions lie on a manifold of trajectories in function space. Building on our earlier formulation of polytopic action sets (PAS), this paper presents a method for rapidly generating, online, trusted convex sets of short-horizon actions for underactuated and potentially nonlinear systems. Around a nominal trajectory, we construct local finite-dimensional action coordinates in which each parameter vector encodes a complete nearby motion through an affine trajectory map, rendering collision-avoidance and control bounds linear. To remain consistent with the nonlinear dynamics, we introduce a dynamics-violation metric and extract a trusted convex inner approximation using an IRIS-inspired inflation procedure directly in action space. The resulting PAS are reusable convex families of actions that can be queried and composed with linear programs, and a PAS-guided tree expansion treats nodes as composed reachable families rather than single trajectories, coupling local nonlinear fidelity with convex reuse for longer-horizon planning. The planner solves cluttered planar scenes in tens of milliseconds (14-78x faster than a kinodynamic RRT baseline) and reduces terminal error on a nonlinear underactuated benchmark by 26-86% over sampling and NLP baselines.",
+      "abstractKO": "부족구동 비선형 시스템의 실현가능 궤적을 명목궤적 주변 국소 아핀좌표로 매개화하여 충돌·제어 제약을 선형화하고, 동역학 위반척도 ζ(γ)의 신뢰영역을 IRIS-ZO로 볼록 내부근사한 신뢰 다면체 행동집합(PAS) 을 만들어, 이 집합을 노드로 하는 집합-값 트리(PAS-RRT)로 kinodynamic RRT 대비 14–78배 빠른 볼록 모션 플래닝을 달성한다.",
+      "detailTags": [
+        "#Planner",
+        "#샘플기반모션플래닝",
+        "#볼록최적화",
+        "#코드공개"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 41,
+      "reason": "**신뢰 다면체 행동집합(Trusted PAS)**: 아핀 궤적사상 `x(t;γ)=x*(t)+R(t)γ`로 충돌/제어 제약을 γ에 대한 선형 부등식으로 만들고, 1스텝 이산화 결함 `ζ(γ)`의 신뢰영역을 IRIS-ZO(배치 256·이분탐색 12회) 팽창으로 볼록 내부근사.\n**집합-값 트리 PAS-RRT**: RRT 노드를 단일 상태가 아닌 \"합성된 도달가능 집합(polytope)\"으로 재정의. W-L∞ 투영(LP)·연속성 합성(선형)·목표포함 검사(LP feasibility)로 트리 성장. 목표가 도달집합에 포함되기만 하면 즉시 성공.\n**계획·최적화의 볼록 분리**: 도달가능성을 LP로 확보하고 매끄러운 궤적을 사후 QP(제어노력 최소화)로 추출.\n**완전 공개 재현 구현(MIT)**: 4종 동역학(DoubleIntegrator/Cartpole/Acrobot/Dubins), pybind11 바인딩, GoogleTest/pytest, LP=HiGHS·QP=OSQP, GPU 롤아웃+CPU 폴백.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/PAAMP_LCSS2026/index.html"
+    }
+  ],
+  "archive": [
     {
       "id": "2608.23354",
       "venue": "arXiv 2026",
@@ -40,9 +75,7 @@
       "readMinutes": 41,
       "reason": "**의미-기하 분리 FSM**: SEARCHING(VLM)만 의미 결정, FINDING/SCANNING_PATH/NAVIGATING/RECOVERING은 전부 결정론적 기하\n**VLM 호출 decision-point 국한**: 매 스텝 policy 대비 VLM 호출 수천→수십 회로 급감(저지연·저환각)\n**거리-적응 동적 데드밴드**: bbox 폭을 근접도 프록시로 데드밴드(0.08~0.12)·회전게인(0.25~0.5) 스케줄링, 깊이 센서 없이 진동 없는 서보잉\n**조밀 맵 없는 항해**: curiosity/frontier map 없이 현재 프레임 bbox + 국소 3D 투영만으로 결정\n**완전 공개 재현 코드(MIT)**: Qwen VLM + SAM2.1-hiera-tiny + GroundingDINO, start.py 원클릭, 웹 대시보드, 학습 불필요",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/OptiSight_arxiv2026/index.html"
-    }
-  ],
-  "archive": [
+    },
     {
       "id": "2608.16433",
       "venue": "arXiv 2026",
