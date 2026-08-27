@@ -1,45 +1,47 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-26T19:30:05.711Z",
+  "generatedAt": "2026-08-27T19:30:00.975Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 8. 27  목요일",
+    "date": "2026. 8. 28  금요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 104편"
+    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 105편"
   },
   "papers": [
     {
-      "id": "2608.24019",
-      "venue": "LCSS 2026",
-      "venueDetail": "IEEE Control Systems Letters (L-CSS) 2026, vol. 10, pp. 2173–2178 · CDC 2026",
+      "id": "2608.25830",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 프리프린트 (2026, cs.RO) — 발표처 미확정",
       "matchScore": 93,
       "category": "Planner",
-      "feedTitle": "Trusted Polytopic Action Sets for Fast Planning in Underactuated Systems",
-      "authorsShort": "A. Jaitly, S. Farzan",
-      "feedAbstract": "부족구동 비선형 시스템의 실현가능 궤적을 명목궤적 주변 국소 아핀좌표로 매개화하여 충돌·제어 제약을 선형화하고, 동역학 위반척도 ζ(γ)의 신뢰영역을 IRIS-ZO로 볼록 내부근사한 신뢰 다면체 행동집합(PAS) 을 만들어, 이 집합을 노드로 하는 집합-값 트리(PAS-RRT)로 kinodynamic RRT 대비…",
+      "feedTitle": "Anytime Global Tensor Motion Planning",
+      "authorsShort": "S. Coumar, A. Le +1",
+      "feedAbstract": "배치 텐서 계획 GTMP의 인접 레이어 간선을 임의 블랙박스 로컬 플래너(LP)로 실현하도록 일반화하고, 그 위에 고정예산 무작위재시작(Anytime-GTMP)으로 모든 δ-clear 호모토피 클래스를 거의확실히 커버하고 정보집합 성장(AO-GTMP)으로 비용 최적값 c*로 거의확실 수렴하는 두 anytime 정책을…",
       "tags": [
         "#Planner",
         "#샘플기반모션플래닝",
-        "#볼록최적화",
+        "#Anytime/점근최적계획",
+        "#위상적다양성",
         "#코드공개"
       ],
-      "titleEN": "Trusted Polytopic Action Sets for Fast Planning in Underactuated Systems",
-      "titleKO": "Trusted Polytopic Action Sets for Fast Planning in Underactuated Systems",
-      "authorsEN": "Akshay Jaitly, Siavash Farzan",
-      "authorsKO": "Akshay Jaitly, Siavash Farzan",
-      "abstractEN": "Underactuated systems pose a challenge for convex motion planning because their dynamically feasible motions lie on a manifold of trajectories in function space. Building on our earlier formulation of polytopic action sets (PAS), this paper presents a method for rapidly generating, online, trusted convex sets of short-horizon actions for underactuated and potentially nonlinear systems. Around a nominal trajectory, we construct local finite-dimensional action coordinates in which each parameter vector encodes a complete nearby motion through an affine trajectory map, rendering collision-avoidance and control bounds linear. To remain consistent with the nonlinear dynamics, we introduce a dynamics-violation metric and extract a trusted convex inner approximation using an IRIS-inspired inflation procedure directly in action space. The resulting PAS are reusable convex families of actions that can be queried and composed with linear programs, and a PAS-guided tree expansion treats nodes as composed reachable families rather than single trajectories, coupling local nonlinear fidelity with convex reuse for longer-horizon planning. The planner solves cluttered planar scenes in tens of milliseconds (14-78x faster than a kinodynamic RRT baseline) and reduces terminal error on a nonlinear underactuated benchmark by 26-86% over sampling and NLP baselines.",
-      "abstractKO": "부족구동 비선형 시스템의 실현가능 궤적을 명목궤적 주변 국소 아핀좌표로 매개화하여 충돌·제어 제약을 선형화하고, 동역학 위반척도 ζ(γ)의 신뢰영역을 IRIS-ZO로 볼록 내부근사한 신뢰 다면체 행동집합(PAS) 을 만들어, 이 집합을 노드로 하는 집합-값 트리(PAS-RRT)로 kinodynamic RRT 대비 14–78배 빠른 볼록 모션 플래닝을 달성한다.",
+      "titleEN": "Anytime Global Tensor Motion Planning",
+      "titleKO": "Anytime Global Tensor Motion Planning",
+      "authorsEN": "Sai Coumar, An T. Le, Zachary Kingston",
+      "authorsKO": "Sai Coumar, An T. Le, Zachary Kingston",
+      "abstractEN": "Global Tensor Motion Planning (GTMP) solves motion planning with batched tensor operations over a layered multipartite graph. We generalize GTMP so that adjacent-layer edges are realized by any black-box local planner (e.g., linear interpolation, splines, sampling-based planning, trajectory optimization, or generative sampling). We provide two anytime policies on top of this generalization: Anytime GTMP with random restarts at a fixed budget, which covers every homotopy class almost surely, and AO-GTMP with informed expansion with growing budgets, which converges to the optimal cost. We prove that a single sampled graph covers every endpoint-fixed homotopy class admitting a \\(δ\\)-clear representative of bounded length. We also prove that additional samples per layer reduce the per-layer miss probability exponentially, whereas stronger local planners reduce the required layer count only sublinearly. On manipulation benchmarks the method matches state-of-the-art performance, and on 2D navigation it returns batches of topologically diverse solutions, while the informed baselines concentrate on one or two classes.",
+      "abstractKO": "배치 텐서 계획 GTMP의 인접 레이어 간선을 임의 블랙박스 로컬 플래너(LP)로 실현하도록 일반화하고, 그 위에 고정예산 무작위재시작(Anytime-GTMP)으로 모든 δ-clear 호모토피 클래스를 거의확실히 커버하고 정보집합 성장(AO-GTMP)으로 비용 최적값 c*로 거의확실 수렴하는 두 anytime 정책을 세워, 하나의 프레임워크에서 위상적 다양성과 점근 최적성을 예산 스케줄 선택으로 분리한다.",
       "detailTags": [
         "#Planner",
         "#샘플기반모션플래닝",
-        "#볼록최적화",
+        "#Anytime/점근최적계획",
+        "#위상적다양성",
         "#코드공개"
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 41,
-      "reason": "**신뢰 다면체 행동집합(Trusted PAS)**: 아핀 궤적사상 `x(t;γ)=x*(t)+R(t)γ`로 충돌/제어 제약을 γ에 대한 선형 부등식으로 만들고, 1스텝 이산화 결함 `ζ(γ)`의 신뢰영역을 IRIS-ZO(배치 256·이분탐색 12회) 팽창으로 볼록 내부근사.\n**집합-값 트리 PAS-RRT**: RRT 노드를 단일 상태가 아닌 \"합성된 도달가능 집합(polytope)\"으로 재정의. W-L∞ 투영(LP)·연속성 합성(선형)·목표포함 검사(LP feasibility)로 트리 성장. 목표가 도달집합에 포함되기만 하면 즉시 성공.\n**계획·최적화의 볼록 분리**: 도달가능성을 LP로 확보하고 매끄러운 궤적을 사후 QP(제어노력 최소화)로 추출.\n**완전 공개 재현 구현(MIT)**: 4종 동역학(DoubleIntegrator/Cartpole/Acrobot/Dubins), pybind11 바인딩, GoogleTest/pytest, LP=HiGHS·QP=OSQP, GPU 롤아웃+CPU 폴백.",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/PAAMP_LCSS2026/index.html"
+      "readMinutes": 46,
+      "reason": "**블랙박스 LP로의 일반화**: 계층형 다분 그래프의 인접 레이어 간선을 직선·스플라인·RRT-Connect·궤적최적화·생성샘플러 등 임의 점대점 LP로 실현. LP를 질의 타원체 E(x,y;ℓ) 안에서 x→y 무충돌 경로를 반환/실패하는 확률적 절차로 추상화.\n**전 클래스 커버리지 보장(Thm.1)**: 하나의 샘플 그래프가 유계 길이의 δ-clear 대표를 갖는 **모든** 호모토피 클래스를 동시에 커버. δ-tube 호모토피 보조정리(반경 δ 튜브 안 체인은 기준경로와 호모토픽)로 환원.\n**정량적 스케일링 법칙**: 레이어당 추가 샘플은 per-layer miss 확률을 지수적으로 감소, 강한 로컬 플래너는 필요 레이어 수 M을 오직 sublinear 감소 → \"적당한 로컬 + 많은 전역 샘플\"의 우세.\n**클래스 증강 값 반복(Prop.1)**: 상태 (v,χ) 위 단일 배치 텐서 수축으로 모든 실현 클래스의 최소비용 체인을 Θ(MN²|K|)에 동시 반환.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/AnytimeGTMP_arxiv2026/index.html"
     }
   ],
   "archive": [
@@ -75,6 +77,39 @@
       "readMinutes": 41,
       "reason": "**의미-기하 분리 FSM**: SEARCHING(VLM)만 의미 결정, FINDING/SCANNING_PATH/NAVIGATING/RECOVERING은 전부 결정론적 기하\n**VLM 호출 decision-point 국한**: 매 스텝 policy 대비 VLM 호출 수천→수십 회로 급감(저지연·저환각)\n**거리-적응 동적 데드밴드**: bbox 폭을 근접도 프록시로 데드밴드(0.08~0.12)·회전게인(0.25~0.5) 스케줄링, 깊이 센서 없이 진동 없는 서보잉\n**조밀 맵 없는 항해**: curiosity/frontier map 없이 현재 프레임 bbox + 국소 3D 투영만으로 결정\n**완전 공개 재현 코드(MIT)**: Qwen VLM + SAM2.1-hiera-tiny + GroundingDINO, start.py 원클릭, 웹 대시보드, 학습 불필요",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/OptiSight_arxiv2026/index.html"
+    },
+    {
+      "id": "2608.24019",
+      "venue": "LCSS 2026",
+      "venueDetail": "IEEE Control Systems Letters (L-CSS) 2026, vol. 10, pp. 2173–2178 · CDC 2026",
+      "matchScore": 93,
+      "category": "Planner",
+      "feedTitle": "Trusted Polytopic Action Sets for Fast Planning in Underactuated Systems",
+      "authorsShort": "A. Jaitly, S. Farzan",
+      "feedAbstract": "부족구동 비선형 시스템의 실현가능 궤적을 명목궤적 주변 국소 아핀좌표로 매개화하여 충돌·제어 제약을 선형화하고, 동역학 위반척도 ζ(γ)의 신뢰영역을 IRIS-ZO로 볼록 내부근사한 신뢰 다면체 행동집합(PAS) 을 만들어, 이 집합을 노드로 하는 집합-값 트리(PAS-RRT)로 kinodynamic RRT 대비…",
+      "tags": [
+        "#Planner",
+        "#샘플기반모션플래닝",
+        "#볼록최적화",
+        "#코드공개"
+      ],
+      "titleEN": "Trusted Polytopic Action Sets for Fast Planning in Underactuated Systems",
+      "titleKO": "Trusted Polytopic Action Sets for Fast Planning in Underactuated Systems",
+      "authorsEN": "Akshay Jaitly, Siavash Farzan",
+      "authorsKO": "Akshay Jaitly, Siavash Farzan",
+      "abstractEN": "Underactuated systems pose a challenge for convex motion planning because their dynamically feasible motions lie on a manifold of trajectories in function space. Building on our earlier formulation of polytopic action sets (PAS), this paper presents a method for rapidly generating, online, trusted convex sets of short-horizon actions for underactuated and potentially nonlinear systems. Around a nominal trajectory, we construct local finite-dimensional action coordinates in which each parameter vector encodes a complete nearby motion through an affine trajectory map, rendering collision-avoidance and control bounds linear. To remain consistent with the nonlinear dynamics, we introduce a dynamics-violation metric and extract a trusted convex inner approximation using an IRIS-inspired inflation procedure directly in action space. The resulting PAS are reusable convex families of actions that can be queried and composed with linear programs, and a PAS-guided tree expansion treats nodes as composed reachable families rather than single trajectories, coupling local nonlinear fidelity with convex reuse for longer-horizon planning. The planner solves cluttered planar scenes in tens of milliseconds (14-78x faster than a kinodynamic RRT baseline) and reduces terminal error on a nonlinear underactuated benchmark by 26-86% over sampling and NLP baselines.",
+      "abstractKO": "부족구동 비선형 시스템의 실현가능 궤적을 명목궤적 주변 국소 아핀좌표로 매개화하여 충돌·제어 제약을 선형화하고, 동역학 위반척도 ζ(γ)의 신뢰영역을 IRIS-ZO로 볼록 내부근사한 신뢰 다면체 행동집합(PAS) 을 만들어, 이 집합을 노드로 하는 집합-값 트리(PAS-RRT)로 kinodynamic RRT 대비 14–78배 빠른 볼록 모션 플래닝을 달성한다.",
+      "detailTags": [
+        "#Planner",
+        "#샘플기반모션플래닝",
+        "#볼록최적화",
+        "#코드공개"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 41,
+      "reason": "**신뢰 다면체 행동집합(Trusted PAS)**: 아핀 궤적사상 `x(t;γ)=x*(t)+R(t)γ`로 충돌/제어 제약을 γ에 대한 선형 부등식으로 만들고, 1스텝 이산화 결함 `ζ(γ)`의 신뢰영역을 IRIS-ZO(배치 256·이분탐색 12회) 팽창으로 볼록 내부근사.\n**집합-값 트리 PAS-RRT**: RRT 노드를 단일 상태가 아닌 \"합성된 도달가능 집합(polytope)\"으로 재정의. W-L∞ 투영(LP)·연속성 합성(선형)·목표포함 검사(LP feasibility)로 트리 성장. 목표가 도달집합에 포함되기만 하면 즉시 성공.\n**계획·최적화의 볼록 분리**: 도달가능성을 LP로 확보하고 매끄러운 궤적을 사후 QP(제어노력 최소화)로 추출.\n**완전 공개 재현 구현(MIT)**: 4종 동역학(DoubleIntegrator/Cartpole/Acrobot/Dubins), pybind11 바인딩, GoogleTest/pytest, LP=HiGHS·QP=OSQP, GPU 롤아웃+CPU 폴백.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/PAAMP_LCSS2026/index.html"
     },
     {
       "id": "2608.16433",
