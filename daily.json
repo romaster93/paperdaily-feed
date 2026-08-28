@@ -1,13 +1,42 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-27T19:30:00.975Z",
+  "generatedAt": "2026-08-28T19:30:06.662Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 8. 28  금요일",
+    "date": "2026. 8. 29  토요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 105편"
+    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 106편"
   },
   "papers": [
+    {
+      "id": "2608.26314",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 프리프린트 (2026, cs.RO · math.OC) — 정식 발표처 미확정",
+      "matchScore": 93,
+      "category": "Planner",
+      "feedTitle": "Dispersive Forward Tree Search for Optimal Control: Coverage, Complexity, and Computation",
+      "authorsShort": "S. Deshpande, J. How",
+      "feedAbstract": "미분평탄 비선형 시스템의 kinodynamic 모션 계획에서 steering(두 점 연결 BVP)을 분산(dispersion) 으로 치환한 전방 전파 트리 플래너 — 국소 δ-분산 명령의 전방 트리가 인증 가능한 크기에서 근사 최적 궤적을 포함함을 결정론적으로 보장(Thm 5.10), 비용 무시 커버리지의 지수…",
+      "tags": [
+        "#코드공개"
+      ],
+      "titleEN": "Dispersive Forward Tree Search for Optimal Control: Coverage, Complexity, and Computation",
+      "titleKO": "Dispersive Forward Tree Search for Optimal Control: Coverage, Complexity, and Computation",
+      "authorsEN": "Shashank A. Deshpande, Jonathan P. How",
+      "authorsKO": "Shashank A. Deshpande, Jonathan P. How",
+      "abstractEN": "Steering-based planners require solutions to state-to-state boundary value problems, which can be inaccessible for nonlinear platforms. Forward propagation evades the steering requirement, but the finite-sample behavior of the associated planners remains uncharacterized and their implementations underperform in practice. This paper develops a propagation-based kinodynamic planner with deterministic finite-sample near-optimality guarantees. We work within the large class of differentially flat nonlinear systems and show that a forward tree of locally dispersive control commands contains a near-optimal trajectory at a certified tree size. We provide a general mechanism to construct dispersive command sets for control-affine systems, which are necessary to implement the search algorithm prescribed by the theory. We show that covering the certified trajectory class irrespective of cost provably demands a tree exponentially sized in the problem horizon, and present a cost-conditioned dominance pruning procedure that retains near-optimality at a tree size polynomial in the horizon. We implement the resulting search algorithm, Dispersive Forward Tree search (DFT*), as breadth-first expansion of the forward tree, which maps naturally onto parallel hardware. We design efficient dispersive samplers for the unicycle, the trailer car, and the quadrotor and evaluate challenging planning tasks for these platforms. DFT* delivers consistently competitive and often substantially better solution quality than state-of-the-art kinodynamic planners at comparable solution times on embedded-tier processors, accelerating further as parallel compute is scaled. We also implement DFT* in a receding-horizon loop to demonstrate real-time planning in dynamic environments at embedded-tier compute budgets.",
+      "abstractKO": "미분평탄 비선형 시스템의 kinodynamic 모션 계획에서 steering(두 점 연결 BVP)을 분산(dispersion) 으로 치환한 전방 전파 트리 플래너 — 국소 δ-분산 명령의 전방 트리가 인증 가능한 크기에서 근사 최적 궤적을 포함함을 결정론적으로 보장(Thm 5.10), 비용 무시 커버리지의 지수 하한(Prop 5.12)을 비용 조건부 우세 가지치기로 다항 크기 ε-최적(Thm 5.17)으로 억제, 너비 우선 GPU 배치(DFT\\)·후퇴지평 온라인(WWDFT\\)으로 실현.",
+      "detailTags": [
+        "#코드공개"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 40,
+      "reason": "미분평탄 비선형 시스템의 kinodynamic 모션 계획에서 steering(두 점 연결 BVP)을 분산(dispersion) 으로 치환한 전방 전파 트리 플래너 — 국소 δ-분산 명령의 전방 트리가 인증 가능한 크기에서 근사 최적 궤적을 포함함을 결정론적으로 보장(Thm 5.10), 비용 무시 커버리지의 지수 하한(Prop 5.12)을 비용 조건부 우세 가지치기로 다항 크기 ε-최적(Thm 5.17)으로 억제, 너비 우선 GPU 배치(DFT\\)·후퇴지평 온라인(WWDFT\\)으로 실현.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/DFTStar_arxiv2026/index.html"
+    }
+  ],
+  "archive": [
     {
       "id": "2608.25830",
       "venue": "arXiv 2026",
@@ -42,9 +71,7 @@
       "readMinutes": 46,
       "reason": "**블랙박스 LP로의 일반화**: 계층형 다분 그래프의 인접 레이어 간선을 직선·스플라인·RRT-Connect·궤적최적화·생성샘플러 등 임의 점대점 LP로 실현. LP를 질의 타원체 E(x,y;ℓ) 안에서 x→y 무충돌 경로를 반환/실패하는 확률적 절차로 추상화.\n**전 클래스 커버리지 보장(Thm.1)**: 하나의 샘플 그래프가 유계 길이의 δ-clear 대표를 갖는 **모든** 호모토피 클래스를 동시에 커버. δ-tube 호모토피 보조정리(반경 δ 튜브 안 체인은 기준경로와 호모토픽)로 환원.\n**정량적 스케일링 법칙**: 레이어당 추가 샘플은 per-layer miss 확률을 지수적으로 감소, 강한 로컬 플래너는 필요 레이어 수 M을 오직 sublinear 감소 → \"적당한 로컬 + 많은 전역 샘플\"의 우세.\n**클래스 증강 값 반복(Prop.1)**: 상태 (v,χ) 위 단일 배치 텐서 수축으로 모든 실현 클래스의 최소비용 체인을 Θ(MN²|K|)에 동시 반환.",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/AnytimeGTMP_arxiv2026/index.html"
-    }
-  ],
-  "archive": [
+    },
     {
       "id": "2608.23354",
       "venue": "arXiv 2026",
