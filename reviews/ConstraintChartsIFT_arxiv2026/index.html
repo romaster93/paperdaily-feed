@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Planning along Differentiable Charts of Constraint Manifolds with General-Purpose IK Solvers · PaperDaily</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { color: #8f4023; text-decoration: underline; }
+
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
+
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
+}
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
+article code.math-display {
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
+}
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
+article th {
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
+article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: var(--mono); font-size: 12px; text-align: center;
+}
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
+footer {
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
+</head>
+<body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2609.10905">arXiv ↗</a>
+</div>
+<div class="wrap">
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">ConstraintChartsIFT_arxiv2026</span>
+    </div>
+    <h1 class="doc-title">Planning along Differentiable Charts of Constraint Manifolds with General-Purpose IK Solvers: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 프리프린트 (Under review, 8 pages / 4 figures / 3 tables)</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2609.10905">2609.10905</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">✅ <a href="https://github.com/cohnt/constraint-manifold-charts-ift">cohnt/constraint-manifold-charts-ift</a> (C++/Python, MIT, Drake 1.56.0)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">🌐 <a href="https://tommycohn.com/inverse-function-theorem-parameterization/">tommycohn.com/inverse-function-theorem-parameterization</a> (데모 <a href="https://youtu.be/ADF4g3iQsuY">youtu.be/ADF4g3iQsuY</a>)</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-09-12</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">40KB · 약 39분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
+  </header>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Planning along Differentiable Charts of Constraint Manifolds with General-Purpose IK Solvers</li>
+<li><strong>저자 (Authors)</strong>: Thomas Cohn, Seiji Shaw, Harel Biggie, Travis Manderson, Nicholas Roy, Russ Tedrake</li>
+<li><strong>소속 (Affiliation)</strong>: MIT CSAIL (Robust Robotics Group / Robot Locomotion Group 계열)</li>
+<li><strong>발표처 (Published)</strong>: arXiv 프리프린트, Under review (8 pages, 4 figures, 3 tables)</li>
+<li><strong>DOI</strong>: 미확정 (프리프린트)</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2609.10905">2609.10905</a></li>
+<li><strong>코드</strong>: <a href="https://github.com/cohnt/constraint-manifold-charts-ift">✅ cohnt/constraint-manifold-charts-ift</a> (C++/Python, MIT 라이선스, Drake 1.56.0 기반, 3개 자립 실험 폴더)</li>
+<li><strong>프로젝트</strong>: <a href="https://tommycohn.com/inverse-function-theorem-parameterization/">🌐 tommycohn.com/inverse-function-theorem-parameterization</a> (논문·코드·YouTube 데모 영상 <a href="https://youtu.be/ADF4g3iQsuY">https://youtu.be/ADF4g3iQsuY</a>)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 논문은 <strong>운동학적 등식 제약(kinematic equality constraints) 하에서 로봇 매니퓰레이터의 궤적을 계획</strong>하는 문제를 다룬다. 양팔로 하나의 상자를 함께 드는 이중팔(bimanual) 조작, 문 열기, 크랭크 돌리기처럼 두 손(또는 손과 환경) 사이의 상대 자세가 고정되어야 하는 과업에서, 실현 가능한 로봇 구성(configuration)들은 전체 관절공간(joint space) 안에서 <strong>측도(measure)가 0인 저차원 부분다양체(submanifold)</strong> 위에만 존재한다. 이런 제약다양체 위에서 계획하는 것은 다음과 같은 근본적 어려움을 낳는다:</p>
+<ul>
+<li>샘플링 기반 플래너(RRT/PRM)는 무작위 샘플이 다양체에 &quot;정확히&quot; 놓일 확률이 0이므로 거부 샘플링(rejection sampling)이 작동하지 않는다.</li>
+<li>궤적 최적화(trajectory optimization)는 강한 비선형 등식 제약을 다뤄야 하고 초기화(initialization)에 극도로 민감하다.</li>
+<li>결과 궤적을 사후 처리(post-processing)하거나 컴플라이언스 제어(compliant control)로 보정해야 한다.</li>
+</ul>
+<p><strong>본 논문의 핵심 통찰</strong>은, 다양체 위에서 직접 계획하는 대신 <strong>해석적 역기구학(analytic inverse kinematics, IK)을 이용해 제약다양체를 최소 좌표(minimal coordinates)로 매개화(parameterize)한 &quot;미분 가능한 차트(differentiable chart)&quot;</strong> 를 구성하고, 그 차트 위에서 표준적인 무제약(unconstrained)에 가까운 최적화를 수행한다는 것이다. 즉, 제약을 <strong>명시적 등식 제약으로 풀지 않고, 매개화 자체가 제약을 by construction 만족</strong>하도록 한다.</p>
+<p>여기서 가장 큰 실용적 장벽은 &quot;기존의 해석적 IK 솔버(IKFast, EAIK 등)는 자동미분(autodiff)과 호환되지 않는 블랙박스 코드&quot;라는 점이다. 최적화가 작동하려면 IK 매개화의 그래디언트(Jacobian)가 필요한데, 이 솔버들을 매번 손으로 미분 가능하게 다시 짜는 것은 비현실적이다. <strong>본 논문의 기여는 역함수 정리(Inverse Function Theorem, IFT)를 이용해, IK 솔버를 전혀 수정하지 않고도(=블랙박스로 호출하면서) 순방향 기구학(forward kinematics)의 Jacobian만으로 IK Jacobian을 계산</strong>하는 방법이다. 여기에 (a) 도달 불가능 목표를 위한 최소제곱 정의역 확장(least-squares domain extension), (b) 워크스페이스 경계에서만 특이성을 막는 도달성 제약(reachability constraint description)을 더해, 범용 IK 솔버로도 견고한 그래디언트 기반 제약 계획을 가능하게 한다.</p>
+<blockquote>
+<p><strong>트랙 판정 (범위 내 경계 사례 명시)</strong>: 본 논문의 실험 플랫폼은 KUKA iiwa·UR5e·RB-Y1 등 <strong>매니퓰레이터</strong>이며, 상자 픽앤플레이스 같은 조작 과업을 다룬다. 그러나 논문의 <strong>핵심 기여는 grasping/조작 정책이 아니라 &quot;제약다양체 위의 궤적 계획(motion planning)&quot; 자체</strong>이다. 이는 corpus의 선행 판례 — PAAMP(부족구동 시스템의 신뢰 다면체 행동집합 모션계획), CMG-RRT(접촉 다양체 근방 집중 샘플링 RRT), GCS-Certified(볼록집합그래프 인증 계획, #249 큐), CPP-Manipulators(과잉자유도 매니퓰레이터 커버리지 경로계획, #274 큐) — 와 동일하게, <strong>플랫폼이 매니퓰레이터일지라도 기여가 모션계획이면 Planner 트랙 in-scope</strong>로 분류한다. VLA·grasping 정책 학습·매니퓰레이션 스킬 학습이 아니므로 제외 게이트에 걸리지 않는다.</p>
+</blockquote>
+<hr>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) 제약다양체의 측도-0 성질.</strong> 이중팔이 강체 상자를 잡고 있으면, 두 엔드이펙터의 상대 자세 <code>T_rel = T_left⁻¹ T_right</code>가 고정 상수여야 한다. 이 등식 제약은 SE(3) 상의 6개 스칼라 방정식이며, <code>n</code>-자유도 이중팔(예: 14-DoF)에서 실현 가능한 구성 집합은 <code>n-6</code> 차원 부분다양체로 축소된다. 관절공간을 무작위로 샘플링하면 이 다양체에 놓일 확률이 정확히 0이라, 표준 샘플링 기반 플래너가 무력화된다.</p>
+<p><strong>(C2) 등식 제약 궤적 최적화의 초기화 민감성.</strong> 궤적 최적화기에 제약을 직접 넣으면(<code>γ(s) ∈ ℳ</code> for all s), 문제는 강한 비선형 등식 제약을 갖는 비볼록 최적화가 된다. 수렴이 초기 추정에 극도로 민감하고, 국소 최적점·수치 불안정·제약 위반 잔차 문제가 상존한다.</p>
+<p><strong>(C3) 블랙박스 IK 솔버의 비(非)미분성.</strong> 해석적 IK를 쓰면 제약을 최소 좌표로 매개화할 수 있다. 그러나 실용적 해석 IK 솔버들:</p>
+<ul>
+<li><strong>IKFast</strong> (OpenRAVE): 기구학 방정식을 파싱해 최적화된 C++ 코드를 생성하는 메타 솔버. 자동미분 비호환.</li>
+<li><strong>EAIK</strong>: 6R 팔에 대해 subproblem decomposition으로 해석해를 자동 생성. 역시 autodiff 비호환.</li>
+</ul>
+<p>이들을 그래디언트 기반 최적화에 쓰려면 IK Jacobian이 필요한데, 코드 생성 방식이라 손으로 다시 미분 가능하게 작성하는 것이 사실상 불가능하다.</p>
+<p><strong>(C4) 도달 불가능 목표에서의 그래디언트 정의.</strong> 최적화 도중 후보 엔드이펙터 목표 <code>Xᴳ_w</code>가 워크스페이스 밖(도달 불가)으로 벗어나면 IK는 해가 없다. 이때 그래디언트가 정의되지 않으면 최적화가 죽는다. <strong>불가능 영역에서도 &quot;의미 있는 방향&quot;의 그래디언트</strong>를 제공해 최적화기가 실현 가능 영역으로 되돌아오게 해야 한다.</p>
+<p><strong>(C5) 특이점(singularity)에서의 과도한 제약.</strong> 도달성을 직접 제약(reachability를 모든 점에서 강제)하면 실현 가능 내부(interior)까지 과도하게 제약해 탐색을 방해한다. 특이성은 사실상 워크스페이스 <strong>경계</strong>에서만 문제인데, 이를 구분하지 못하면 보수적으로 계획 공간이 줄어든다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>논문은 위 도전과제에 대해 4개의 맞물린 도구를 제안한다:</p>
+<ol>
+<li><p><strong>IFT 기반 IK Jacobian 계산 (C3 해결)</strong>: 역함수 정리로, IK 솔버를 블랙박스로 호출하되 IK의 Jacobian은 순방향 기구학 Jacobian의 (선형 시스템 풀이를 통한) 역으로 얻는다. 솔버 내부를 미분할 필요가 없다.</p>
+</li>
+<li><p><strong>최소제곱 정의역 확장 + 6단계 그래디언트 근사 (C4 해결)</strong>: 도달 불가능 목표를 &quot;가장 가까운 도달 가능점을 찾는 최소제곱 문제&quot;로 재해석하고, 그 민감도(sensitivity)를 6가지 복잡도 수준으로 근사(Zero → Pseudoinverse → Levenberg-Marquardt → Residual Damping → Anisotropic → Full Newton).</p>
+</li>
+<li><p><strong>경계 도달성 제약 (C5 해결)</strong>: <code>-log det(JJᵀ + εI) ≤ τ</code> 형태의 로그-행렬식 장벽으로, 워크스페이스 경계 근방에서만 특이성을 억제하고 내부는 자유롭게 둔다.</p>
+</li>
+<li><p><strong>미분 가능 차트 위의 무제약형 최적화 (C1·C2 해결)</strong>: 위 세 도구로 IK 매개화 <code>φ</code>를 미분 가능하게 만들면, 제약다양체 위의 계획을 <strong>최소 좌표 <code>γ̃</code>에 대한 (거의) 무제약 최적화</strong> <code>argmin L(φ∘γ̃)</code>로 바꾼다. IrisNp2(GCS)·Trajopt(직접 콜로케이션)·TOPPRA(시간 최적 재파라미터화) 등 기존 플래너에 드롭인으로 결합된다.</p>
+</li>
+</ol>
+<hr>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 역함수 정리(IFT)를 통한 IK Jacobian 계산</h3>
+<p><strong>기본 아이디어</strong>: IK 솔버를 자동미분 호환으로 고치는 대신, &quot;순방향 기구학(FK)은 미분하기 쉽다&quot;는 사실을 이용한다. FK와 IK는 서로 역함수 관계이므로, 역함수 정리를 쓰면 IK의 Jacobian을 FK Jacobian으로부터 얻을 수 있다.</p>
+<p><strong>정리 1 (Inverse Function Theorem)</strong>. 연속 미분 가능 <code>f: ℝⁿ → ℝⁿ</code>가 점 <code>p</code>에서 full-rank Jacobian을 가지면:</p>
+<pre class="codeblock"><code>[Df(p)]⁻¹ = D(f⁻¹)(f(p))
+</code></pre>
+<p>즉 역함수의 Jacobian은 원함수 Jacobian의 역행렬이다.</p>
+<p><strong>여유(redundant) 매니퓰레이터를 위한 증강 순방향 기구학.</strong> 6R처럼 정확히 6자유도가 아니라 <code>n &gt; 6</code> 여유 자유도가 있는 팔에서는, FK가 정방(square)이 아니므로 IFT를 바로 못 쓴다. 이를 해결하기 위해 <strong>증강 FK(augmented forward kinematics)</strong> 를 정의한다:</p>
+<pre class="codeblock"><code>FKₐ : ℝⁿ → SE(3) × Ψ × 𝒦
+</code></pre>
+<p>여기서 <code>SE(3)</code>는 엔드이펙터 자세, <code>Ψ</code>는 여유 자유도를 고정하는 추가 좌표(nullspace parameterization), <code>𝒦</code>는 (선택적) 추가 좌표다. 이렇게 하면 <code>FKₐ</code>가 정방 사상이 되어 IFT를 적용할 수 있다. Jacobian은 블록 구조를 갖는다:</p>
+<pre class="diagram"><code>              ┌ DFK(q)  ┐   ← 엔드이펙터 자세에 대한 FK Jacobian
+DFKₐ(q) =    │         │
+              └ DFKψ(q) ┘   ← 여유좌표 ψ에 대한 Jacobian
+</code></pre>
+<p><strong>그래디언트 계산 = 선형 시스템 풀이.</strong> 어떤 상위 변수 <code>y</code>(예: 목표 자세, 여유좌표)에 대한 관절각 <code>q</code>의 민감도는, 명시적 행렬 역산 없이 <strong>선형 시스템을 풀어서</strong> 얻는다:</p>
+<pre class="codeblock"><code>DFKₐ(q) · (∂q/∂y) = (∂X/∂y , ∂ψ/∂y)ᵀ
+</code></pre>
+<p>좌변의 <code>DFKₐ(q)</code>는 FK로부터 값이 알려져 있고, 우변은 상위 변수의 변화 방향이다. 이 시스템을 <code>∂q/∂y</code>에 대해 풀면 곧 IK Jacobian이 된다. 명시적 <code>[DFKₐ]⁻¹</code> 계산을 피하므로 <strong>수치적으로 안정</strong>하다.</p>
+<pre class="diagram"><code>        블랙박스 IK 솔버(IKFast/EAIK)                 미분 가능 순방향 기구학
+        q* = IK(Xᴳ, ψ)   ← 값만 얻음         ⇄        X = FK(q*),  J = DFK(q*)
+                │                                              │
+                └────────── IFT ──────────┐                    │
+                                          ▼                    ▼
+                        DFKₐ(q*) · (∂q/∂y) = (∂X/∂y, ∂ψ/∂y)ᵀ  풀이 → ∂q/∂y (IK Jacobian)
+</code></pre>
+<p>이 절차의 아름다움은 <strong>IK 솔버의 내부를 전혀 건드리지 않는다</strong>는 데 있다. 어떤 해석 IK 솔버든(손으로 짠 것이든, IKFast가 생성한 것이든) 값 <code>q*</code>만 반환하면, 그 지점의 FK Jacobian으로부터 IK Jacobian을 사후적으로 조립할 수 있다.</p>
+<h3>3.2 최소제곱 정의역 확장 (Least-Squares Domain Extension)</h3>
+<p><strong>문제</strong>: 최적화 중 후보 목표 <code>Xᴳ_w</code>가 도달 불가능하면 <code>IK(Xᴳ_w, ψ)</code>는 해가 없다. 최적화가 이 영역을 지나갈 때 그래디언트가 정의되어야 계속 진행한다.</p>
+<p><strong>해결</strong>: IK를 &quot;정확한 해&quot;가 아니라 <strong>가장 가까운 도달 가능 구성을 찾는 최소제곱 문제</strong>로 확장 정의한다:</p>
+<pre class="codeblock"><code>ÎK(Xᴳ_w, ψ) = argmin_q ‖ FKₐ(q) - (Xᴳ_w, ψ) ‖²₂
+</code></pre>
+<p>도달 가능 영역에서는 잔차가 0이 되어 기존 IK와 일치하고, 도달 불가 영역에서는 &quot;가장 가까운 접근점&quot;을 반환한다.</p>
+<p><strong>민감도 분석 (식 8)</strong>. 이 최소제곱 해의 그래디언트는 다음과 같다:</p>
+<pre class="codeblock"><code>DÎK(Xᴳ_w, ψ) = ( Jₐᵀ Jₐ + Σᵢ₌₁ⁿ rᵢ Hᵢ )⁻¹ Jₐᵀ
+</code></pre>
+<p>여기서:</p>
+<ul>
+<li><code>Jₐ = DFKₐ(q*)</code> : 증강 FK Jacobian</li>
+<li><code>rᵢ = [FKₐ(q*) - (Xᴳ_w, ψ)]ᵢ</code> : <code>i</code>번째 잔차 성분</li>
+<li><code>Hᵢ</code> : <code>i</code>번째 출력에 대한 기구학 Hessian slice</li>
+</ul>
+<p>이 식은 완전한 Gauss-Newton/Newton 민감도지만, <code>Hᵢ</code>(기구학 Hessian) 계산이 비싸다. 그래서 논문은 <strong>복잡도가 증가하는 6단계 근사 계층</strong>을 제시한다:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>이름</th>
+<th>근사식</th>
+<th>특징</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Zero Gradients (식 9)</td>
+<td><code>D̂IK ≈ 0</code></td>
+<td>도달 불가 영역에서 그래디언트 무시. 가장 값싸지만 정보 없음</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Pseudoinverse (식 10)</td>
+<td><code>D̂IK ≈ Jₐ†</code></td>
+<td>잔차 무시, 무어-펜로즈 유사역행렬</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Levenberg-Marquardt (식 11)</td>
+<td><code>(Jₐᵀ Jₐ + λI)⁻¹ Jₐᵀ</code></td>
+<td>상수/특이값 기반 감쇠 λ</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Residual Damping</strong> (식 12)</td>
+<td><code>(Jₐᵀ Jₐ + λ‖r‖² I)⁻¹ Jₐᵀ</code></td>
+<td><strong>잔차 크기에 비례한 감쇠</strong> — 논문의 권장 기본값</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Anisotropic Damping (식 13)</td>
+<td>SVD 기반 방향별 감쇠</td>
+<td>방향에 따라 다른 감쇠</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Full Newton (식 14)</td>
+<td>기구학 Hessian 항 포함</td>
+<td>가장 정확, 가장 비쌈</td>
+</tr>
+</tbody></table></div>
+<p><strong>Residual Damping(4번)이 실험적으로 최선의 절충점</strong>이다. 잔차 <code>‖r‖²</code>가 클수록(=목표가 더 멀수록) 감쇠를 키워, 도달 불가 영역에서 그래디언트를 부드럽게 정규화하면서도 도달 가능 영역에서는 정확한 그래디언트로 수렴한다. Hessian을 계산하지 않으므로 값싸다.</p>
+<h3>3.3 경계 도달성 제약 (Boundary Reachability Constraint)</h3>
+<p><strong>문제</strong>: 도달성(reachability)을 최적화 제약으로 직접 넣으면(직접 도달성, 식 2), 이 제약이 워크스페이스 <strong>모든 점에서 활성(active)</strong> 이 되어 실현 가능 내부까지 과도하게 좁힌다.</p>
+<p><strong>해결 (식 15)</strong>: 특이성은 사실상 워크스페이스 <strong>경계</strong>에서만 문제이므로, 로그-행렬식(log-det) 장벽으로 경계 근방에서만 비특이성을 강제한다:</p>
+<pre class="codeblock"><code>b := -log det( J Jᵀ + εI ) ≤ τ
+</code></pre>
+<ul>
+<li><code>J Jᵀ</code>가 특이(rank 결손)에 가까워지면 행렬식이 0으로, <code>-log det → +∞</code>로 발산 → 제약 <code>b ≤ τ</code>가 활성화되어 밀어냄.</li>
+<li>내부(비특이 영역)에서는 <code>-log det</code>가 작아 제약이 느슨(inactive) → 계획 공간을 좁히지 않음.</li>
+<li><code>εI</code>는 수치 정규화(작은 양의 정칙화).</li>
+</ul>
+<p><strong>그래디언트</strong>:</p>
+<pre class="codeblock"><code>∂b/∂qᵢ* = -2 · tr( Jᵀ (J Jᵀ + εI)⁻¹ ∂J/∂qᵢ* )
+</code></pre>
+<p><code>∂J/∂qᵢ*</code>는 기구학 Hessian 성분이지만, 이 제약은 경계 근방에서만 활성이므로 계산 부담이 국소적이다. 이 &quot;경계 도달성(Boundary reachability)&quot;은 실험에서 &quot;직접 도달성(Direct reachability)&quot;보다 계획 공간을 덜 침해하면서도 특이점 회피 효과를 유지한다.</p>
+<h3>3.4 미분 가능 차트 위의 무제약형 궤적 계획</h3>
+<p>세 도구(3.1~3.3)를 결합하면, 제약다양체 <code>ℳ</code>를 최소 좌표 <code>y ∈ 𝒴</code>로 매개화하는 미분 가능 차트 <code>φ: 𝒴 → ℳ</code>, <code>φ(y) = IK(Xᴳ(y), ψ(y))</code> 를 얻는다. 이제 원래 제약 계획 문제 (식 3):</p>
+<pre class="codeblock"><code>argmin_γ  L(γ)
+   s.t.   γ(s) ∈ ℳ              (제약다양체 위)
+          γ(s) 충돌 없음
+</code></pre>
+<p>를 최소 좌표에 대한 (거의) 무제약 문제 (식 4)로 재작성한다:</p>
+<pre class="codeblock"><code>argmin_γ̃  L( φ ∘ γ̃ )
+   s.t.   (φ ∘ γ̃)(s) 충돌 없음     ← 등식 제약 소거!
+          γ̃ ∈ 𝒞¹                    ← 매끄러움만 요구
+</code></pre>
+<p><strong>핵심</strong>: <code>γ(s) ∈ ℳ</code> 등식 제약이 매개화에 의해 자동으로 사라진다. 최적화기는 이제 충돌 회피(부등식)와 매끄러움만 다루면 된다. <code>φ</code>가 미분 가능하므로 <code>L(φ∘γ̃)</code>의 그래디언트를 연쇄율(chain rule)로 전파할 수 있고, 이 지점에서 3.1의 IK Jacobian이 정확히 필요한 항을 공급한다.</p>
+<p><strong>왜 최소 좌표인가 — 차원 관점</strong>. 제약다양체 <code>ℳ</code>가 <code>n</code>차원 관절공간(configuration space) 안에서 <code>m</code>개 등식 제약으로 절단된 <code>d = n - m</code>차원 부분다양체라고 하자. 기존의 두 접근은 각각 비용을 치른다:</p>
+<ul>
+<li><strong>프로젝션 방식(project-and-plan)</strong>: 전체 <code>ℝⁿ</code>에서 자유롭게 계획한 뒤 매 스텝 <code>ℳ</code>로 사영(Newton 반복)한다. 사영이 수렴하지 않거나(제약 야코비안 특이) 사영 전후로 인접 샘플이 다른 지점으로 튀어 궤적이 불연속해질 수 있다.</li>
+<li><strong>접평면 방식(tangent-space, 예: AtlasRRT/Constrained-RRT)</strong>: <code>ℳ</code>를 접평면 차트들의 아틀라스로 국소 선형화하지만, 차트 경계에서 전환·재선형화 로직이 복잡하고 곡률이 큰 영역에서 차트가 촘촘해진다.</li>
+</ul>
+<p>본 논문의 차트 <code>φ: 𝒴 → ℳ</code>는 <strong><code>d</code>차원(정확히 다양체 차원과 일치)의 전역 최소 좌표</strong>를 해석 IK가 이미 제공한다는 점을 활용한다. 예컨대 이중팔이 강체 상대자세 <code>T_rel</code>을 유지하며 물체를 함께 드는 과업에서, 6-DoF+6-DoF=12-DoF 관절공간은 제약(상대자세 6등식)으로 6차원 다양체가 되며, 이 6차원은 &quot;잡은 물체의 SE(3) 자세&quot;라는 자연스러운 최소 좌표 <code>y ∈ SE(3)</code>로 그대로 매개화된다. 최적화기는 12차원 관절이 아니라 6차원 물체 자세만 탐색하면 되고, 관절 실현은 IK가 담당한다. 차원 축소(12→6)가 곧 탐색 공간 축소이자 제약 소거다.</p>
+<p><strong>연쇄율 전개 (워크드 예시)</strong>. 비용 <code>L(γ)=∫‖q̇(s)‖² ds</code>(관절 속도 제곱 적분, 매끄러움 비용)를 최소 좌표에서 미분해 보자. <code>q(s)=φ(y(s))</code>이므로 <code>q̇ = Dφ(y)·ẏ</code>이고,</p>
+<pre class="codeblock"><code>L(φ∘γ̃) = ∫ ‖ Dφ(y(s)) ẏ(s) ‖² ds
+</code></pre>
+<p><code>y</code>에 대한 그래디언트는 연쇄율로</p>
+<pre class="codeblock"><code>∂L/∂y = 2 ∫ [ Dφ(y)ᵀ Dφ(y) ẏ ]ᵀ (·) + (Dφ의 y-미분 항) ds
+</code></pre>
+<p>가 되며, 여기서 <code>Dφ(y) = ∂q/∂y</code>가 바로 §3.1의 IFT Jacobian이다. 즉 <strong>플래너가 요구하는 유일한 미분 정보가 IK Jacobian 하나로 환원</strong>된다. 충돌 비용 <code>c(q)=c(φ(y))</code>도 마찬가지로 <code>∂c/∂y = (∂c/∂q)·Dφ(y)</code>로, 워크스페이스에서 계산된 충돌 그래디언트 <code>∂c/∂q</code>(부호거리장 등)를 <code>Dφ</code>로 pull-back 하기만 하면 된다. 이 균일한 pull-back 구조 덕분에 IrisNp2·Trajopt·TOPPRA가 코드 수정 없이 그대로 붙는다(드롭인).</p>
+<p><strong>수치적 조건화</strong>. <code>Dφ = Jₐ⁻¹</code>(또는 정의역 확장 시 <code>(JₐᵀJₐ+…)⁻¹Jₐᵀ</code>)이므로, <code>Jₐ</code>가 특이에 가까우면 <code>Dφ</code>가 폭발한다 — 이것이 §3.3 경계 도달성 제약이 필요한 이유다. 최소 좌표 계획은 다양체 곡률/특이성을 <code>Dφ</code>의 조건수(condition number)로 흡수하며, 경계 장벽 <code>-log det(JJᵀ+εI)≤τ</code>는 이 조건수가 워크스페이스 경계에서만 발산하도록 국한시켜 내부에서는 잘-조건화된(well-conditioned) 최적화를 유지한다.</p>
+<hr>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<p>전체 파이프라인은 &quot;블랙박스 IK 솔버 → IFT 미분 래퍼 → 미분 가능 차트 → 기존 플래너&quot;의 4층 구조다:</p>
+<pre class="diagram"><code>┌─────────────────────────────────────────────────────────────────────┐
+│  Layer 0. 로봇/과업 정의                                              │
+│  - URDF, 제약(예: 이중팔 상대자세 T_rel 고정), 목표 자세 Xᴳ           │
+└──────────────────────────────┬────────────────────────────────────────┘
+                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  Layer 1. 블랙박스 해석 IK 솔버                                       │
+│  - Bespoke(손짜기) / EAIK(6R 자동) / IKFast(코드생성)                  │
+│  - 입력: (Xᴳ_w, ψ)   출력: q*  (값만)                                  │
+└──────────────────────────────┬────────────────────────────────────────┘
+                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  Layer 2. IFT 미분 래퍼 (본 논문의 핵심)                              │
+│  ┌───────────────────────────────────────────────────────────┐       │
+│  │ (a) IFT Jacobian:  DFKₐ(q*)·(∂q/∂y)=(∂X/∂y,∂ψ/∂y)ᵀ 풀이   │       │
+│  │ (b) 최소제곱 정의역 확장 + Residual Damping (도달 불가 대응)│       │
+│  │ (c) 경계 도달성 제약  -log det(JJᵀ+εI)≤τ (특이점 회피)      │       │
+│  └───────────────────────────────────────────────────────────┘       │
+│  → 미분 가능 차트 φ:𝒴→ℳ 와 그 Jacobian Dφ 제공                        │
+└──────────────────────────────┬────────────────────────────────────────┘
+                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  Layer 3. 기존 플래너/최적화기 (드롭인 결합)                          │
+│  - IrisNp2 (Graph-of-Convex-Sets, GCS 계획)                            │
+│  - Trajopt (직접 콜로케이션, RRT/BiRRT 초기화)                         │
+│  - TOPPRA (시간 최적 재파라미터화, retiming)                          │
+│  → 최소 좌표 γ̃ 위에서 (거의)무제약 최적화 → 관절 궤적 q(t)             │
+└──────────────────────────────┬────────────────────────────────────────┘
+                               ▼
+                    실행 (단순 관절-위치 추적으로 충분)
+</code></pre>
+<p><strong>데이터 흐름 요약</strong>: 플래너(Layer 3)가 최소 좌표 <code>γ̃</code>를 후보로 제안 → 차트 <code>φ</code>(Layer 2)가 이를 실현 가능 관절 구성 <code>q</code>로 사상하고 그 Jacobian을 반환 → 비용/충돌 그래디언트가 IK Jacobian을 통해 <code>γ̃</code>로 역전파 → 플래너가 갱신. 제약다양체 준수는 매개화가 보장하므로 사후 프로젝션이 불필요하며, 실기체에서는 단순 관절-위치 추적만으로 제약 위반을 mm/mrad 수준으로 유지한다(§5.4).</p>
+<hr>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<p>로봇 학습용 데이터셋이 아니라, <strong>3개 로봇 플랫폼 × 절차적으로 생성된 계획 인스턴스</strong>로 평가한다:</p>
+<ul>
+<li><strong>KUKA iiwa 이중팔</strong>: 10,000개 무작위 도달 가능 구성(Jacobian 정확도 검증) + 다운스트림 계획 과업.</li>
+<li><strong>UR5e 그래스 선택</strong>: 테이블 위 머그컵 + 장애물 환경 100 인스턴스 × 10 초기화.</li>
+<li><strong>RB-Y1 전신 이중팔</strong>: 바닥 4×5 그리드 위치에서 상자를 집어 테이블에 놓는 20 트라이얼(실기체).</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>Jacobian 정확도</strong>: IFT 그래디언트 vs. 손짜기 IK의 forward-mode autodiff 그래디언트 오차(median / 95th percentile).</li>
+<li><strong>그래디언트 계산 속도</strong>: partial 벡터 크기별 IFT vs. autodiff 시간.</li>
+<li><strong>다운스트림 계획 시간(s)</strong>: IrisNp2 / Trajopt / TOPPRA 각 단계 소요.</li>
+<li><strong>성공률(Success Rate)</strong>: 그래스 선택 최적화가 유효 해에 수렴한 비율.</li>
+<li><strong>평균 비용(Mean Cost)</strong> 및 <strong>런타임(Runtime)</strong>.</li>
+<li><strong>제약 위반(Constraint violation)</strong>: 실기체 실행 시 상대자세 위반량(mm / mrad).</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>(A) IFT Jacobian 정확도 (KUKA iiwa 이중팔, Fig. 3)</strong>. 손으로 미분 가능하게 짠 IK의 autodiff 그래디언트를 ground truth로 삼아 비교:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>지표</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Median 오차 (10,000 무작위 도달가능 구성)</td>
+<td><code>&lt; 10⁻¹³</code></td>
+</tr>
+<tr>
+<td>95th percentile 오차</td>
+<td><code>&lt; 10⁻¹²</code></td>
+</tr>
+</tbody></table></div>
+<p>즉 IFT 그래디언트는 <strong>수치적으로 사실상 정확</strong>(machine precision 근방)하다. 속도(Fig. 2)는 partial 벡터가 작으면(<code>&lt; 2⁶</code>) autodiff가 빠르고, 크면 IFT가 빠르다 — 즉 여러 상위 변수에 대해 동시에 그래디언트가 필요한 계획 상황에서 IFT가 유리하다.</p>
+<p><strong>(B) 다운스트림 계획 시간 (KUKA iiwa, Table I)</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>IrisNp2 (s)</th>
+<th>Trajopt (s)</th>
+<th>TOPPRA (s)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Autodiff Direct (손짜기 기준선)</td>
+<td>1.14</td>
+<td>1.54</td>
+<td>0.59</td>
+</tr>
+<tr>
+<td>IFT Residual Damping (Direct)</td>
+<td>1.58</td>
+<td>1.76</td>
+<td>0.81</td>
+</tr>
+<tr>
+<td><strong>IFT Residual Damping (Boundary)</strong></td>
+<td><strong>1.15</strong></td>
+<td><strong>1.24</strong></td>
+<td>0.81</td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 관찰</strong>: 경계 도달성(Boundary) 제약을 쓰면, IFT가 <strong>손짜기 autodiff와 IrisNp2 계획 시간에서 동등(1.15 vs 1.14)</strong> 하며 Trajopt에서는 오히려 더 빠르다(1.24 vs 1.54). 즉 자동 IK 솔버를 쓰면서도 성능 손실이 없다.</p>
+<p><strong>(C) UR5e 그래스 선택 (Table II, 100 인스턴스 × 10 초기화)</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>정식화</th>
+<th>성공률 (3 init)</th>
+<th>평균 비용</th>
+<th>median 런타임 (s)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>C-Space 기준선 (식 17)</td>
+<td>86%</td>
+<td>12.81</td>
+<td>0.105</td>
+</tr>
+<tr>
+<td>IFT + Direct reachability</td>
+<td><strong>93%</strong></td>
+<td>12.57</td>
+<td>0.100</td>
+</tr>
+<tr>
+<td>IFT + Boundary reachability</td>
+<td>90%</td>
+<td>13.03</td>
+<td>0.095</td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 관찰</strong>: IFT 정식화가 <strong>더 높은 성공률</strong>(93% / 90% vs 86%)을 달성한다. 특히 이 실험은 손짜기 IK가 아니라 <strong>EAIK가 자동 생성한 해석 IK</strong>를 사용했음에도 성능이 향상됐다 — 즉 방법이 &quot;손짜기 솔버가 없어도&quot; 작동함을 보인다.</p>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p><strong>RB-Y1 전신 이중팔 픽앤플레이스 (Fig. 1, Table III)</strong> — 본 논문의 하드웨어 검증.</p>
+<ul>
+<li><strong>로봇</strong>: Rainbow Robotics RB-Y1 (이동 베이스 + 이중팔 상체 휴머노이드형). 팔 IK는 <strong>IKFast 생성 솔버</strong> 사용.</li>
+<li><strong>과업</strong>: 바닥의 4×5 그리드 위치에서 상자를 집어 테이블 위에 놓기(20 트라이얼).</li>
+<li><strong>계획 구성</strong>: 6-파트 궤적 시퀀스 — 무제약 프리그래스프 → <strong>제약(상자 잡은 상태) 리프트</strong> → <strong>제약 배치</strong> → 무제약 포스트그래스프. 정적 안정성(static stability) 제약도 포함. BiRRT + shortcutting으로 초기 경로, Trajopt로 정련, TOPPRA로 재타이밍.</li>
+</ul>
+<p><strong>결과 (Table III)</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>지표</th>
+<th>평균 (Mean)</th>
+<th>최대 (Max)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>총 계획 시간 (s)</td>
+<td>56.1</td>
+<td>135.0</td>
+</tr>
+<tr>
+<td>궤적 지속 시간 (s)</td>
+<td>54.1</td>
+<td>63.6</td>
+</tr>
+<tr>
+<td>제약 위반 (mm)</td>
+<td>0.555</td>
+<td>2.235</td>
+</tr>
+<tr>
+<td>제약 위반 (mrad)</td>
+<td>1.597</td>
+<td>6.809</td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 관찰</strong>: <strong>20회 하드웨어 롤아웃 전부 성공</strong>적으로 상자를 테이블에 전달했다. 특히 제약 위반이 <strong>평균 0.555 mm / 1.597 mrad</strong> 수준으로 극히 작아, 컴플라이언스 제어나 사후 프로젝션 없이 <strong>단순 관절-위치 추적(joint-position tracking)</strong> 만으로 제약을 충실히 유지했다. 이는 &quot;매개화가 제약을 by construction 만족한다&quot;는 접근의 실기체 유효성을 직접 증명한다.</p>
+<hr>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>범용 IK 솔버의 사후 미분화 (IFT 래퍼)</strong>: 해석 IK 솔버(IKFast·EAIK 등)를 전혀 수정하지 않고, 순방향 기구학 Jacobian만으로 IK Jacobian을 역함수 정리로 조립한다. &quot;블랙박스 IK를 그래디언트 기반 최적화에 넣는&quot; 오랜 실용적 장벽을 제거한다. 여유 자유도는 증강 FK로 정방화하여 처리한다.</p>
+</li>
+<li><p><strong>도달 불가 영역을 위한 최소제곱 정의역 확장 + 6단계 그래디언트 근사</strong>: IK를 최소제곱으로 확장하고, Zero → Pseudoinverse → LM → Residual Damping → Anisotropic → Full Newton의 계층적 근사를 제시. <strong>Residual Damping</strong>이 정확도-비용 절충의 실용 기본값임을 실험으로 확인.</p>
+</li>
+<li><p><strong>경계 도달성 제약 (<code>-log det(JJᵀ+εI)≤τ</code>)</strong>: 특이성을 워크스페이스 경계 근방에서만 억제하여, 직접 도달성 제약이 실현 가능 내부까지 과도하게 좁히는 문제를 해소. 실험에서 손짜기 autodiff 수준의 계획 시간 회복.</p>
+</li>
+<li><p><strong>기존 플래너와의 드롭인 결합</strong>: IrisNp2(GCS), Trajopt(직접 콜로케이션), TOPPRA(재타이밍)에 미분 가능 차트를 그대로 끼워, 제약다양체 계획을 최소 좌표 위의 (거의)무제약 최적화로 전환.</p>
+</li>
+<li><p><strong>다중 로봇·실기체 검증 + 완전 공개 구현(MIT)</strong>: KUKA iiwa(정확도/속도), UR5e(자동 IK로 성공률↑), RB-Y1(20/20 실기체 성공, 제약 위반 sub-mm). 코드(C++/Python, Drake 1.56.0)가 3개 자립 실험 폴더로 공개되어 재현 가능.</p>
+</li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<ul>
+<li><strong>프레임워크</strong>: Drake 1.56.0 (핀 고정). 최적화·기구학·충돌 검사·GCS(IrisNp2) 인프라 제공.</li>
+<li><strong>언어</strong>: C++ 코어(해석 IK + 궤적 최적화) + Python(실험/분석 스크립트).</li>
+<li><strong>IK 솔버 3종</strong>:<ul>
+<li><em>Bespoke</em> 손짜기 autodiff-호환 IK — KUKA iiwa 이중팔 정확도 기준선.</li>
+<li><em>EAIK</em> — 6R 팔 해석해 자동 생성(subproblem decomposition), UR5e에 사용.</li>
+<li><em>IKFast</em> — 기구학 방정식 파싱 후 최적화 C++ 코드 생성, RB-Y1 팔에 사용.</li>
+</ul>
+</li>
+<li><strong>정의역 확장 기본값</strong>: Residual Damping <code>(Jₐᵀ Jₐ + λ‖r‖² I)⁻¹ Jₐᵀ</code> (식 12).</li>
+<li><strong>도달성 제약</strong>: 경계형 <code>-log det(JJᵀ+εI) ≤ τ</code>, <code>ε</code>는 소량 정칙화.</li>
+<li><strong>다운스트림 파이프라인</strong>: BiRRT + shortcutting(초기 경로) → Trajopt 직접 콜로케이션(정련) → TOPPRA(시간 최적 재타이밍). GCS 계열은 IrisNp2.</li>
+<li><strong>RB-Y1 궤적 구조</strong>: 6-파트(무제약↔제약 구간 교대), 정적 안정성 제약 포함, 20 트라이얼.</li>
+<li><strong>저장소 구조</strong>: <code>iiwa-bimanual/</code>(C++ 해석 IK + trajopt), <code>ur5e-grasp-selection/</code>(그래스 선택 실험), <code>rby1-whole-body/</code>(전신 IK + 하드웨어 데모), <code>docker/</code>, <code>docs/</code>, <code>third_party/</code>. 라이선스 MIT(로봇 기술서·메시는 별도 조건, THIRD_PARTY.md).</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<ul>
+<li><strong>IK 솔버 독립성</strong>: 방법이 특정 솔버에 묶이지 않으므로, 새 로봇에 대해 IKFast/EAIK로 해석해만 생성하면 즉시 미분 가능 차트를 얻는다. 손짜기 미분 코드 작성 비용이 사라진다.</li>
+<li><strong>여러 상위 변수 동시 그래디언트</strong>: partial 벡터가 클수록 IFT가 autodiff보다 빠르므로(Fig. 2), 목표 자세·여유좌표·과업 파라미터를 동시에 최적화하는 고차원 계획에서 유리.</li>
+</ul>
+<h3>8.2 한계점 (Limitations)</h3>
+<ul>
+<li><strong>해석 IK 존재 가정</strong>: 방법은 해석적(또는 준해석적) IK가 있어야 한다. 완전 일반 기구학(비6R·특수 구조 없는 팔)에서 해석해가 없으면 수치 IK로 대체해야 하고, 그 경우 IFT의 이점(솔버 무수정)이 약화될 수 있다.</li>
+<li><strong>특이점 근방 수치 민감성</strong>: 경계 도달성 제약이 특이성을 완화하지만, 극단적 특이 구성 근방에서는 <code>JJᵀ</code>의 조건수가 나빠져 그래디언트 정확도가 떨어질 수 있다.</li>
+<li><strong>다중 IK 분기(branch) 처리</strong>: 해석 IK는 다중해를 가지며, 최적화 중 분기 전환(branch switching)이 궤적 불연속을 유발할 수 있다. 6-파트 시퀀스 구성이 부분적으로 이를 완화하나, 일반적 분기 연속성 보장은 향후 과제.</li>
+<li><strong>평가 규모</strong>: 실기체는 RB-Y1 단일 플랫폼·20 트라이얼로, 통계적 폭이 제한적이다.</li>
+</ul>
+<h3>8.3 향후 방향 (Future Directions)</h3>
+<ul>
+<li><strong>동적(dynamically-aware) 제약 계획으로 확장</strong>: 현재는 기구학 제약 중심. 동역학·힘 제약을 차트 위에 얹으면 접촉 풍부(contact-rich) 과업으로 확장 가능.</li>
+<li><strong>폐루프(closed-loop) 결합</strong>: 미분 가능 차트를 MPC 루프에 넣어 실시간 재계획.</li>
+<li><strong>다양체 위 GCS의 인증(certification)</strong>: IrisNp2와의 결합을 넘어, 차트 위에서 무충돌 볼록 영역의 형식적 인증으로 확장.</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>가장 가까운 선행(같은 Planner 트랙, 제약/다양체 위 모션계획)은 <strong>PAAMP</strong> (<em>Trusted Polytopic Action Sets for Fast Planning in Underactuated Systems</em>, IEEE L-CSS 2026), <strong>CMG-RRT</strong> (<em>Contact Manifold Guided RRT</em>, WAFR 2026), 그리고 GCS 계열(본 논문이 IrisNp2로 직접 결합)이다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>PAAMP (L-CSS 2026)</th>
+<th>CMG-RRT (WAFR 2026)</th>
+<th><strong>본 논문 (arXiv 2026)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>다루는 제약</td>
+<td>부족구동 동역학(kinodynamic)</td>
+<td>접촉 다양체(조립, SDF 영집합)</td>
+<td>운동학적 등식 제약(이중팔·문 등)</td>
+</tr>
+<tr>
+<td>다양체 처리 방식</td>
+<td>명목궤적 주변 <strong>국소 아핀좌표</strong>로 매개화 + 볼록 신뢰영역</td>
+<td>SDF 계층 세분으로 <strong>다양체 근방 집중 샘플링</strong></td>
+<td><strong>해석 IK로 최소좌표 차트</strong> 매개화(미분 가능)</td>
+</tr>
+<tr>
+<td>핵심 수학 도구</td>
+<td>IRIS-ZO 볼록 내부근사, 신뢰 다면체 행동집합</td>
+<td>임계 다양체 <code>F=0</code>, SDF Lipschitz 커버</td>
+<td><strong>역함수 정리(IFT)</strong> + 최소제곱 정의역 확장 + log-det 도달성</td>
+</tr>
+<tr>
+<td>그래디언트 원천</td>
+<td>아핀 사상(선형)</td>
+<td>리만 최적화 확장</td>
+<td><strong>블랙박스 IK의 사후 IFT 미분</strong></td>
+</tr>
+<tr>
+<td>결합 대상 플래너</td>
+<td>자체 PAS-RRT(집합-값 트리)</td>
+<td>RRT 변형</td>
+<td><strong>기존 플래너 드롭인</strong> (IrisNp2/Trajopt/TOPPRA)</td>
+</tr>
+<tr>
+<td>실기체</td>
+<td>❌ (시뮬만)</td>
+<td>✅ UR5e 이중팔 &quot;az puzzle&quot;</td>
+<td>✅ <strong>RB-Y1 20/20, 위반 sub-mm</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>✅ MIT (paamp_underactuated)</td>
+<td>✅ MIT (cmg-rrt)</td>
+<td>✅ <strong>MIT (constraint-manifold-charts-ift)</strong></td>
+</tr>
+<tr>
+<td>대표 성능</td>
+<td>kinodynamic RRT 대비 14–78×</td>
+<td>TR-RRT 대비 ~20× (3.0분)</td>
+<td>손짜기 autodiff와 동등(1.15 vs 1.14s), 성공률 86→93%</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>본 논문의 강점</strong>:</p>
+<ul>
+<li><strong>실용성/모듈성이 압도적</strong>: 새 플래너를 발명하는 대신, &quot;블랙박스 IK를 미분 가능하게&quot; 만들어 기존 플래너(IrisNp2/Trajopt/TOPPRA)에 그대로 결합. PAAMP·CMG-RRT는 각각 새로운 트리/샘플링 알고리즘을 요구하는 반면, 본 논문은 <strong>기존 파이프라인 재사용</strong>을 극대화한다.</li>
+<li><strong>엔지니어링 비용 절감</strong>: 손으로 미분 가능한 IK를 짜는 것은 로봇마다 반복되는 큰 부담인데, IFT 래퍼가 이를 제거한다. UR5e 실험에서 자동 IK(EAIK)로도 성공률이 오른 것이 이 이점을 직접 보인다.</li>
+<li><strong>실기체 제약 충실도</strong>: sub-mm/mrad 위반은 매개화 접근의 by-construction 만족이 실기체에서 얼마나 강한지 보여준다. CMG-RRT도 실기체가 있으나, 본 논문은 &quot;단순 위치 추적으로 충분&quot;함을 정량화했다.</li>
+</ul>
+<p><strong>본 논문의 약점</strong>:</p>
+<ul>
+<li><strong>해석 IK 의존</strong>: PAAMP(동역학 기반)·CMG-RRT(SDF 기반)는 IK 해석해가 없어도 작동하지만, 본 논문은 해석 IK가 전제. 완전 일반 기구학에서는 이점이 줄어든다.</li>
+<li><strong>다양체 종류의 폭</strong>: 접촉·동역학 제약(CMG-RRT/PAAMP의 영역)까지는 아직 확장 전. 현재는 운동학적 등식 제약에 특화.</li>
+<li><strong>최적성 보장 부재</strong>: PAAMP는 볼록 도달성/집합-값 트리로 구조적 보장을, CMG-RRT는 확률적 완전성 논의를 갖는 반면, 본 논문은 주로 실용 성능(속도·성공률·실기체) 중심으로, 대역적 최적성/완전성에 대한 형식 보장은 약하다.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<p>실적용 관점에서 본 논문은 corpus 내에서도 <strong>매우 배치 친화적(deployment-friendly)</strong> 이다:</p>
+<ul>
+<li>코드가 MIT로 완전 공개되어 있고, Drake 위에서 3개 자립 실험 폴더로 재현 가능.</li>
+<li>기존 Drake 파이프라인(IrisNp2/Trajopt/TOPPRA)을 쓰는 팀은 IK 래퍼만 교체하면 되므로 도입 장벽이 낮다.</li>
+<li>실기체(RB-Y1)에서 특수 제어 없이 단순 위치 추적으로 sub-mm 제약을 달성 → 산업 이중팔·전신 조작에 직접 적용 가능.</li>
+<li>다만 로봇에 해석 IK(IKFast/EAIK 생성 가능한 기구학)가 있어야 하므로, 특수·모듈러·연속체 로봇에는 추가 작업이 필요하다.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>기술적 참신성은 &quot;새 플래너&quot;가 아니라 <strong>&quot;기존 도구를 잇는 다리(bridge)&quot;</strong> 에 있다. PAAMP·CMG-RRT가 제약다양체 계획의 <strong>알고리즘 자체</strong>를 혁신했다면, 본 논문은 <strong>범용 IK 솔버 생태계(IKFast/EAIK)와 그래디언트 기반 최적화 생태계(Drake/GCS)를 IFT로 접합</strong>한다. 이는 CMG-RRT의 &quot;접촉 다양체 근방 집중&quot;이나 PAAMP의 &quot;볼록 도달 집합&quot;과 <strong>직교·상보적</strong>이다 — 실제로 PAAMP가 향후과제로 언급한 &quot;동역학 인지 로컬 플래너&quot;나 CMG-RRT의 리만 확장에, 본 논문의 미분 가능 차트를 로컬 플래너 슬롯으로 결합하는 하이브리드가 자연스러운 다음 단계다.</p>
+<hr>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
+<ul>
+<li>T. Cohn, S. Shaw, H. Biggie, T. Manderson, N. Roy, R. Tedrake, &quot;Planning along Differentiable Charts of Constraint Manifolds with General-Purpose IK Solvers,&quot; arXiv:2609.10905, 2026.</li>
+<li>A. Jaitly, S. Farzan, &quot;Trusted Polytopic Action Sets for Fast Planning in Underactuated Systems (PAAMP),&quot; IEEE L-CSS 2026 / CDC 2026 (corpus 리뷰).</li>
+<li>&quot;Contact Manifold Guided RRT (CMG-RRT),&quot; WAFR 2026 (corpus 리뷰).</li>
+<li>IKFast (OpenRAVE) — 해석 IK 코드 생성 메타 솔버.</li>
+<li>EAIK — 6R 팔 해석 IK 자동 생성(subproblem decomposition).</li>
+<li>IrisNp2 / Graph-of-Convex-Sets (GCS) 계획 (Drake).</li>
+<li>TOPPRA — 시간 최적 경로 매개화.</li>
+<li>프로젝트/코드: <a href="https://github.com/cohnt/constraint-manifold-charts-ift">https://github.com/cohnt/constraint-manifold-charts-ift</a> , <a href="https://tommycohn.com/inverse-function-theorem-parameterization/">https://tommycohn.com/inverse-function-theorem-parameterization/</a></li>
+</ul>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
+<p>본 논문은 운동학적 등식 제약 하의 매니퓰레이터 궤적 계획에서, <strong>제약다양체를 해석 IK로 최소 좌표 매개화한 &quot;미분 가능한 차트&quot;</strong> 를 구성하고 그 위에서 (거의)무제약 최적화를 수행하는 접근을 제안한다. 핵심 혁신은 <strong>역함수 정리를 이용해 블랙박스 IK 솔버(IKFast·EAIK)를 전혀 수정하지 않고도 그래디언트 기반 최적화에 편입</strong>한 점이며, 여기에 도달 불가 영역을 위한 최소제곱 정의역 확장(Residual Damping)과 특이점을 경계에서만 억제하는 log-det 도달성 제약을 더해 견고성을 확보했다.</p>
+<p>실용적 의의는 크다. 손으로 미분 가능한 IK를 로봇마다 다시 짜야 하던 부담을 제거하고, 기존 Drake 플래너(IrisNp2/Trajopt/TOPPRA)에 드롭인으로 결합된다. KUKA iiwa에서 손짜기 autodiff와 동등한 계획 시간, UR5e에서 자동 IK로도 성공률 향상(86→93%), 그리고 RB-Y1 실기체 20/20 성공(제약 위반 sub-mm)이 이를 뒷받침한다. 코드가 MIT로 완전 공개되어 재현성도 높다.</p>
+<p>한계는 해석 IK 존재 가정과, 접촉·동역학 제약까지는 아직 확장되지 않은 점이다. 그러나 이 접근은 PAAMP·CMG-RRT 같은 알고리즘 혁신과 <strong>상보적</strong>이며, 미분 가능 차트를 로컬 플래너 슬롯으로 결합하는 하이브리드가 유망한 향후 방향이다. 요컨대 본 논문은 &quot;제약다양체 계획&quot;이라는 오래된 문제에 대해, <strong>새 알고리즘이 아니라 생태계를 잇는 다리</strong>로 실질적 진전을 이룬 실용적 연구다.</p>
+<hr>
+<p><em>리뷰 작성: 2026-09-12 · Paper Review (NanoClaw)</em></p>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+<div class="rhead" id="rhead" data-title="Planning along Differentiable Charts of Constraint Manifolds with General-Purpose IK Solvers: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
+</body>
+</html>

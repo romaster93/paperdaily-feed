@@ -1,13 +1,50 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-10T19:30:05.907Z",
+  "generatedAt": "2026-09-11T19:30:01.333Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 9. 11  금요일",
+    "date": "2026. 9. 12  토요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 최근 리뷰 1편 · 전체 107편"
+    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 108편"
   },
   "papers": [
+    {
+      "id": "2609.10905",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 프리프린트 (Under review, 8 pages / 4 figures / 3 tables)",
+      "matchScore": 96,
+      "category": "Planner",
+      "feedTitle": "Planning along Differentiable Charts of Constraint Manifolds with General-Purpose IK Solvers",
+      "authorsShort": "T. Cohn, S. Shaw +4",
+      "feedAbstract": "운동학적 등식 제약 하 매니퓰레이터 궤적 계획에서, 해석 IK로 제약다양체를 최소좌표 \"미분 가능 차트\"로 매개화하되 역함수 정리(IFT)로 블랙박스 IK 솔버(IKFast·EAIK)를 전혀 수정 않고 그래디언트를 조립해, 기존 플래너(IrisNp2/Trajopt/TOPPRA)에 드롭인 결합하고 RB-Y1 실기체…",
+      "tags": [
+        "#Planner",
+        "#제약다양체계획",
+        "#역함수정리/미분가능차트",
+        "#범용IK솔버결합",
+        "#코드공개"
+      ],
+      "titleEN": "Planning along Differentiable Charts of Constraint Manifolds with General-Purpose IK Solvers",
+      "titleKO": "Planning along Differentiable Charts of Constraint Manifolds with General-Purpose IK Solvers",
+      "authorsEN": "Thomas Cohn, Seiji Shaw, Harel Biggie, Travis Manderson, Nicholas Roy, Russ Tedrake",
+      "authorsKO": "Thomas Cohn, Seiji Shaw, Harel Biggie, Travis Manderson, Nicholas Roy, Russ Tedrake",
+      "abstractEN": "Planning trajectories for robot manipulators under kinematic equality constraints restricts feasible motions to a measure-zero submanifold of the configuration space, requiring special algorithmic treatment. A promising strategy is parametrizing the set of feasible configurations using analytic inverse kinematics (IK). Bespoke analytic IK functions can be written to be differentiable, a necessary property for gradient-based trajectory optimization. But the vast majority of IK functions are computed by automated meta-solvers like IKFast, and are difficult to modify for differentiability. We present a new approach for computing gradients of analytic IK parameterizations: we leverage the inverse function theorem to recover the desired gradients from the ordinary forward kinematic Jacobian. Furthermore, we present a least-squares domain extension and an optimization-amenable description of the reachability constraint, which preserves gradient signal outside the reachable workspace. We demonstrate the efficacy of our approach through numerical experiments and downstream tasks, including a hardware demonstration of an RB-Y1 picking up a box and placing it on a table. Project website: https://cohnt.github.io/inverse-function-theorem-parameterization/",
+      "abstractKO": "운동학적 등식 제약 하 매니퓰레이터 궤적 계획에서, 해석 IK로 제약다양체를 최소좌표 \"미분 가능 차트\"로 매개화하되 역함수 정리(IFT)로 블랙박스 IK 솔버(IKFast·EAIK)를 전혀 수정 않고 그래디언트를 조립해, 기존 플래너(IrisNp2/Trajopt/TOPPRA)에 드롭인 결합하고 RB-Y1 실기체 20/20 성공(제약 위반 sub-mm) 달성.",
+      "detailTags": [
+        "#Planner",
+        "#제약다양체계획",
+        "#역함수정리/미분가능차트",
+        "#범용IK솔버결합",
+        "#코드공개"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 39,
+      "reason": "**IFT 기반 IK Jacobian**: `[Df(p)]⁻¹=D(f⁻¹)f(p)` — 순방향 기구학 Jacobian만으로 블랙박스 IK 미분, 여유자유도는 증강 FK로 정방화\n**최소제곱 정의역 확장**: 도달 불가 목표를 `argmin_q‖FKₐ(q)-(Xᴳ,ψ)‖²`로 확장 + 6단계 그래디언트 근사(Zero→Pseudoinverse→LM→Residual Damping→Anisotropic→Full Newton), Residual Damping이 실용 기본값\n**경계 도달성 제약**: `-log det(JJᵀ+εI)≤τ`로 특이성을 워크스페이스 경계에서만 억제(내부 과제약 회피)\n**드롭인 결합**: 제약다양체 계획을 최소좌표 위 (거의)무제약 최적화로 전환, IrisNp2·Trajopt·TOPPRA 재사용",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ConstraintChartsIFT_arxiv2026/index.html"
+    }
+  ],
+  "archive": [
     {
       "id": "2609.03483",
       "venue": "arXiv 2026",
@@ -40,9 +77,7 @@
       "readMinutes": 39,
       "reason": "**최초 training-free 공중-지상 협력 VLN 베이스라인 + CARLA-Air 평가 프로토콜 정립**\n**공유 조감 맵(shared bird's-eye map)**: UGV pose + VLM 앵커링 목표를 CAR(파랑)/GOAL(빨강) 마커 + yellow line + 거리 라벨로 UAV 하향 시야에 렌더링 — 단방향·해석가능·기하 접지된 협력 채널 (소박한 양방향 결합의 오류 증폭 회피)\n**3D-SPF**: SPF를 이산 고도 명령(descend/hold/ascend)의 3D 공간 탐색으로 확장, frozen VLM이 JSON(u,v,hc)만 출력하고 실행은 결정론적\n**UGV frozen VLM 도로추종 계획**: 공유 맵에서 10 픽셀 waypoint 경로 계획 + 폐루프 실행\n**training-free 분해가 협력 인터페이스를 노출한다는 통찰** (VLM 의미 추론 + 결정론적 기하 실행)\n**시뮬-분리 실 하드웨어 배포** (쿼드로터 Mid360 LiDAR+D435i + 전방향 로봇)",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/AGC-VLN_arxiv2026/index.html"
-    }
-  ],
-  "archive": [
+    },
     {
       "id": "2608.26314",
       "venue": "arXiv 2026",
