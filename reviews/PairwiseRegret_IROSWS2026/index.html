@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Pairwise Approximation Can Select the Wrong Multi-Robot Plan · PaperDaily</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { color: #8f4023; text-decoration: underline; }
+
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
+
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
+}
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
+article code.math-display {
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
+}
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
+article th {
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
+article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: var(--mono); font-size: 12px; text-align: center;
+}
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
+footer {
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
+</head>
+<body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2609.29929">arXiv ↗</a>
+</div>
+<div class="wrap">
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">PairwiseRegret_IROSWS2026</span>
+    </div>
+    <h1 class="doc-title">Pairwise Approximation Can Select the Wrong Multi-Robot Plan: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">IROS 2026 WS</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2609.29929">2609.29929</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">✅ <a href="https://github.com/williamteo/pairwise-regret">github.com/williamteo/pairwise-regret</a> (MIT + CC BY 4.0, Python 3.10+ stdlib, analyze.py/test_analysis.py/scores.json/provenance.json)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">🌐 <a href="https://william-teo.com/pairwise-regret">william-teo.com/pairwise-regret</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-09-26</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">39KB · 약 39분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
+  </header>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Pairwise Approximation Can Select the Wrong Multi-Robot Plan</li>
+<li><strong>저자 (Authors)</strong>: William Teo (단독 저자)</li>
+<li><strong>소속 (Affiliation)</strong>: 독립 연구 (프로젝트 페이지 및 저자 사이트 기준)</li>
+<li><strong>발표처 (Published)</strong>: IROS 2026 Workshop on Intelligent Information Gathering (지능형 정보 수집 워크숍) / arXiv 2026</li>
+<li><strong>DOI</strong>: (워크숍 논문 — DOI 미부여)</li>
+<li><strong>arXiv</strong>: 2609.29929</li>
+<li><strong>코드</strong>: <a href="https://github.com/williamteo/pairwise-regret">https://github.com/williamteo/pairwise-regret</a> (공개 확인 — 코드 MIT, 데이터 CC BY 4.0, Python 3.10+ 표준 라이브러리만 사용)</li>
+<li><strong>프로젝트 페이지</strong>: <a href="https://www.william-teo.com/pairwise-regret/">https://www.william-teo.com/pairwise-regret/</a></li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 논문은 <strong>경로 계획 알고리즘을 제안하는 논문이 아니라, 다중 로봇 탐색 계획(multi-robot exploration plan)을 &quot;선택&quot;할 때 널리 쓰이는 근사 목적함수(pairwise approximation)가 언제·왜 잘못된 계획을 고르는지를 분석·정량화하는 분석(analysis) 논문</strong>이다. 트랙 판정상 이 논문은 <strong>다중 로봇 탐색 전략(exploration strategy)의 계획 선택 목적함수를 분석</strong>하므로 Planner 트랙(탐색 전략 연구)에 속한다. 다만 경로 생성기 자체를 제안하지 않고 <strong>얼어붙은(frozen) 궤적을 재생(replay)하여 목적함수 근사의 선택 후회(selection regret)를 측정</strong>한다는 점에서 <strong>경계적(borderline)</strong> 이다. 이는 본 코퍼스의 δ-Similarity(#268, 샘플기반 kinodynamic 계획의 근사최적성 증명 가정 반박)나 &quot;What Symmetry Buys a Learned Motion Planner&quot;(#278, 학습 모션 플래너의 등변성 표현 분석)와 같은 <strong>계획 이론·분석 논문</strong>의 in-scope 선례를 따른다.</p>
+<p>핵심 문제의식은 다음과 같다. 다수의 다중 로봇 조율(coordination) 기법 — 조율 그래프(coordination graph)의 엣지 기반 페이로프, 심층 다중에이전트 학습의 쌍별(pairwise) 페이로프 함수, 프론티어 탐색의 쌍별 가시성 페널티(Burgard 2005) — 은 팀 전체의 목적함수를 <strong>로봇 쌍(pair) 수준의 상호작용까지만</strong> 근사한다. 이러한 쌍별 근사가 실제로 <strong>후보 계획들 중 최선을 고르는(plan selection)</strong> 작업에서 얼마나 신뢰할 수 있는가? 저자는 4대 로봇 팀의 실내 탐색에서 <strong>전달 커버리지(delivered coverage)</strong> 집합함수 <code>F(S)</code>를 모든 부분집합 <code>S⊆{1,2,3,4}</code>에 대해 정확히 측정한 뒤, 두 가지 대표적 쌍별 근사(정확한 2차 뫼비우스 절단 <code>F₂</code>, 최소제곱 적합 2-additive 점수 <code>G</code>)가 정확한 목적함수 <code>F</code>가 고르는 계획과 <strong>다른(더 낮은 커버리지) 계획을 선택</strong>하는 빈도와 크기를 7개 맵에서 실증한다.</p>
+<p>결론을 한 줄로 요약하면: <strong>&quot;쌍별 근사는 3대 이상 로봇의 협동 시너지(higher-order interaction)를 버리기 때문에, 재구성 오차(reconstruction error)가 작더라도 계획 선택에서 체계적으로 최적이 아닌 계획을 고를 수 있다&quot;</strong>는 부정적(negative) 결과다.</p>
+<hr>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) 다중 로봇 목적함수의 조합 폭발.</strong> n대 로봇 팀의 팀 목적함수 <code>F</code>는 원리상 <code>2ⁿ</code>개 부분집합 각각에 대한 값을 요구한다. 4대면 16개, 10대면 1024개다. 실제 계획·조율 알고리즘은 이 전체 집합함수를 다룰 수 없으므로, <strong>저차(low-order) 상호작용만 유지하는 근사</strong>로 대체한다. 가장 흔한 것이 <strong>쌍별(order-2) 근사</strong>다:</p>
+<ul>
+<li>조율 그래프: 목적함수를 노드(개별 로봇)와 엣지(로봇 쌍) 항의 합으로 분해.</li>
+<li>다중에이전트 RL: 쌍별 페이로프 함수 <code>Q_{ij}</code>.</li>
+<li>프론티어 탐색(Burgard et al. 2005): 이미 다른 로봇에 배정된 타겟에 대한 <strong>쌍별 가시성 페널티</strong>.</li>
+</ul>
+<p><strong>(C2) 재구성 정확도 ≠ 선택 정확도.</strong> 근사 목적함수의 품질을 평가할 때 관행적으로 <strong>값 재구성 오차</strong>(approximated value가 실제 값에 얼마나 가까운가)를 본다. 그러나 계획을 &quot;선택&quot;하는 데 중요한 것은 절대값이 아니라 <strong>후보들 간 순위(ranking)</strong> 다. 근사가 모든 후보의 값을 균일하게 편향시키면 재구성 오차는 커도 순위는 보존되어 선택이 정확할 수 있고, 반대로 재구성 오차가 작아도 후보별 편향이 불균일하면 순위가 뒤집혀(flip) 잘못된 계획을 고를 수 있다.</p>
+<p><strong>(C3) 시너지가 큰 협동 탐색.</strong> 커버리지 탐색에서 3대·4대 로봇이 함께 만들어내는 협동 효과(겹치지 않는 영역 분담, 릴레이 통신을 통한 데이터 전달)는 <strong>본질적으로 고차 상호작용</strong>이다. 쌍별 근사는 이를 구조적으로 표현할 수 없다.</p>
+<p><strong>(C4) 통신 제약의 비단조성.</strong> 통신 범위(communication range)가 유한하면 어떤 로봇이 수집한 정보가 기지국에 전달되는지가 팀 구성에 의존한다. 이 때문에 커버리지 함수가 통신 범위에 따라 시너지 구조를 바꾸고, 근사의 실패가 범위에 따라 나타났다 사라졌다 한다.</p>
+<h3>2.2 핵심 해결책 (제안하는 분석 프레임)</h3>
+<p>논문은 알고리즘 대신 <strong>엄밀한 측정 프로토콜</strong>을 제안한다:</p>
+<ol>
+<li><strong>정확한 집합함수 측정.</strong> 각 후보 조인트 계획에 대해 16개 로봇 부분집합을 <strong>각각 신선한 월드(fresh world)에서 재생</strong>하여 정확한 <code>F(S)</code>를 얻는다. 이는 근사의 품질을 판정할 <strong>정답(ground truth)</strong> 을 제공한다.</li>
+<li><strong>두 종류의 쌍별 근사 정의.</strong> (a) 정확한 2차 뫼비우스 절단 <code>F₂</code> (해석적), (b) 15개 비어있지 않은 부분집합 값에 대한 최소제곱 2-additive 적합 <code>G</code> (데이터 적합).</li>
+<li><strong>선택 후회(selection regret) 측정.</strong> 근사가 고른 계획과 정확 목적함수가 고른 계획의 실제 커버리지 차이를 맵 커버리지 비율(%)로 보고.</li>
+<li><strong>재구성 오차와 선택 후회를 분리 측정.</strong> 두 지표가 어긋나는 사례(env5)를 명시적으로 드러내 (C2)를 실증.</li>
+</ol>
+<hr>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 전달 커버리지 집합함수 <code>F(S)</code></h3>
+<p>4대 로봇 팀 <code>N={1,2,3,4}</code>가 실내 점유격자(occupancy grid) 맵을 탐색한다. 각 로봇은 미리 로그된(logged) 결정론적 궤적을 따른다. <strong>전달 커버리지</strong> 집합함수는:</p>
+<pre class="codeblock"><code>F(S) = (부분집합 S⊆N의 로봇들이 각자 로그된 궤적을 완료했을 때
+        기지국(base station)이 알게 된 점유격자 맵의 비율)
+</code></pre>
+<p>여기서 핵심은 &quot;전달(delivered)&quot;이다. 로봇이 센싱한 영역이라도 통신 제약 때문에 기지국에 전달되지 못하면 커버리지에 포함되지 않는다. 따라서 <code>F(S)</code>는 단순한 센싱 영역 합집합(순수 커버리지)이 아니라 <strong>통신 위상에 의존하는 값</strong>이며, 팀 구성 <code>S</code>에 따라 릴레이 경로가 달라져 비자명한 시너지가 발생한다.</p>
+<p>측정 절차:</p>
+<pre class="codeblock"><code>for each 후보 조인트 계획 b:
+    for each 부분집합 S ⊆ {1,2,3,4}:   # 2^4 = 16개
+        신선한 월드에서 S의 로봇들만 로그된 궤적 재생
+        F_b(S) = 전달된 맵 비율 기록
+    # 선택 기준: 팀 전체 점수 F_b(N)  (N = 전체 4대)
+</code></pre>
+<p>즉 후보 계획을 고르는 <strong>1차 기준은 <code>F(N)</code></strong>(전체 팀이 실제로 전달하는 커버리지)이다. 근사의 임무는 이 <code>F(N)</code>을 정확히 계산하지 않고도 후보들의 <code>F(N)</code> 순위를 맞히는 것이다.</p>
+<p><strong>ASCII 다이어그램 — 부분집합 격자 (4대 로봇, 16개 부분집합):</strong></p>
+<pre class="codeblock"><code>                      F({1,2,3,4})            &lt;- level 4 (전체 팀)
+                    /     |    |     \
+          F({1,2,3}) F({1,2,4}) F({1,3,4}) F({2,3,4})   &lt;- level 3 (삼중)
+         /    |    |    |    |    |    |    ...  \
+   F({1,2}) F({1,3}) F({1,4}) F({2,3}) F({2,4}) F({3,4})  &lt;- level 2 (쌍)
+        \     |     |     |     |     /
+        F({1}) F({2}) F({3}) F({4})               &lt;- level 1 (개별)
+                     F(∅)=0                        &lt;- level 0
+</code></pre>
+<p>쌍별 근사는 <strong>level 0·1·2까지만</strong> 정보를 쓰고 level 3·4(삼중·사중 시너지)를 버린다.</p>
+<h3>3.2 뫼비우스 분해와 2차 절단 <code>F₂</code></h3>
+<p>임의의 집합함수 <code>F</code>는 <strong>뫼비우스 변환(Möbius transform)</strong> 으로 상호작용 항 <code>m(T)</code>로 유일하게 분해된다:</p>
+<pre class="codeblock"><code>m(T) = Σ_{U⊆T} (−1)^{|T∖U|} F(U)        (뫼비우스 계수: 순수 상호작용)
+F(S) = Σ_{T⊆S} m(T)                       (역변환: 재합성)
+</code></pre>
+<p><code>m(T)</code>의 의미: <strong>&quot;집합 T가 공동으로(jointly), 그리고 T 내부의 더 작은 어떤 부분집합에도 귀속되지 않는(belongs to no smaller group inside it) 값의 몫&quot;</strong>. 즉 <code>m({1,2})</code>는 로봇 1과 2가 함께 있을 때만 생기는 순수 쌍별 시너지(개별 기여를 뺀 나머지)이고, <code>m({1,2,3})</code>은 세 로봇이 모두 있을 때만 생기는 순수 삼중 시너지다.</p>
+<p><strong>2차 뫼비우스 절단</strong> <code>F₂</code>는 크기 ≤2 항만 유지:</p>
+<pre class="codeblock"><code>F₂(S) = Σ_{T⊆S, |T|≤2} m(T)
+</code></pre>
+<p>4대 전체 팀에 대해 전개하면 (논문 식):</p>
+<pre class="codeblock"><code>F₂(N) = Σ_{i&lt;j} F({i,j})  −  2 Σ_i F({i})
+</code></pre>
+<p><strong>유도(왜 −2 계수인가):</strong> 각 쌍 <code>{i,j}</code>의 뫼비우스 계수는</p>
+<pre class="codeblock"><code>m({i,j}) = F({i,j}) − F({i}) − F({j}) + F(∅) = F({i,j}) − F({i}) − F({j})   (F(∅)=0)
+</code></pre>
+<p><code>F₂(N) = Σ_i m({i}) + Σ_{i&lt;j} m({i,j})</code> 이고 <code>m({i}) = F({i})</code> 이므로:</p>
+<pre class="codeblock"><code>F₂(N) = Σ_i F({i}) + Σ_{i&lt;j} [F({i,j}) − F({i}) − F({j})]
+      = Σ_i F({i}) + Σ_{i&lt;j} F({i,j}) − Σ_{i&lt;j}[F({i}) + F({j})]
+</code></pre>
+<p>4대에서 각 개별항 <code>F({i})</code>는 쌍 <code>{i,j}</code>에 총 3번(j≠i) 등장하므로 <code>Σ_{i&lt;j}[F({i})+F({j})] = 3 Σ_i F({i})</code>. 따라서:</p>
+<pre class="codeblock"><code>F₂(N) = Σ_i F({i}) + Σ_{i&lt;j} F({i,j}) − 3 Σ_i F({i})
+      = Σ_{i&lt;j} F({i,j}) − 2 Σ_i F({i})       ✓ (논문 식과 일치)
+</code></pre>
+<p>이 유도는 왜 쌍별 근사가 위험한지 대수적으로 보여준다: <code>F₂(N)</code>은 <strong>삼중항 <code>m({i,j,k})</code> 4개와 사중항 <code>m({1,2,3,4})</code> 1개, 총 5개 상호작용 항을 완전히 누락</strong>한다. 이 5개 항이 바로 3·4대 로봇의 협동 커버리지 시너지다.</p>
+<h3>3.3 최소제곱 2-additive 적합 <code>G</code></h3>
+<p><code>F₂</code>는 뫼비우스 항을 <strong>해석적으로 절단</strong>한 것이라 3차 이상 시너지가 큰 경우 값이 크게 어긋나거나 [0,1] 범위를 벗어날 수 있다. 대안으로 <strong>데이터 적합형 2-additive 점수</strong> <code>G</code>를 정의한다 (Grabisch 1997의 k-additive 퍼지 측도 형식):</p>
+<pre class="codeblock"><code>G(S) = Σ_{i∈S} a_i  +  Σ_{{i,j}⊆S} b_{ij}
+</code></pre>
+<p>계수 <code>{a_i, b_{ij}}</code>는 <strong>15개 비어있지 않은 부분집합 값 전체에 대해 등가중(equal weight) 최소제곱</strong>으로 적합하며, 절편(intercept)은 없어 <code>G(∅)=0</code>이 보장된다:</p>
+<pre class="codeblock"><code>{a_i, b_{ij}} = argmin  Σ_{S≠∅} ( G(S) − F(S) )²
+</code></pre>
+<p><code>F₂</code>와 <code>G</code>의 차이:</p>
+<ul>
+<li><code>F₂</code>: <strong>오직 크기 ≤2 부분집합 값만</strong> 사용(해석적 절단). 삼중·사중 값 정보를 아예 안 봄.</li>
+<li><code>G</code>: <strong>15개 모든 부분집합 값을 보고</strong> 쌍별 형식에 최소제곱으로 밀어넣음. 즉 삼중·사중 시너지를 쌍별 항 <code>b_{ij}</code>에 &quot;흡수&quot;시켜 분산 최소화.</li>
+</ul>
+<p>직관적으로 <code>G</code>는 고차 정보를 활용하므로 더 나을 것 같지만, 논문은 <strong>&quot;상호작용 항을 더 유지해도 선택이 일관되게 개선되지 않는다(retaining more interaction terms did not consistently improve selection)&quot;</strong> 는 반직관적 결과를 보인다(§5).</p>
+<h3>3.4 가법 기준선 <code>F₁</code>과 Bonferroni 경계</h3>
+<p>비교를 위한 <strong>순수 가법(additive) 기준선</strong>:</p>
+<pre class="codeblock"><code>F₁(S) = Σ_{i∈S} F({i})       (개별 커버리지 단순 합, 상호작용 완전 무시)
+</code></pre>
+<p>커버리지 함수(열등수확, submodular)에서는 <strong>Bonferroni 부등식</strong>이 성립:</p>
+<pre class="codeblock"><code>F₁ ≥ F ≥ F₂           (가법은 과대추정, 2차 절단은 과소추정)
+F₃ ≥ F                (3차 절단은 과대추정)
+</code></pre>
+<p>즉 홀수차 절단은 위에서, 짝수차 절단은 아래에서 실제 값을 조인다. <code>F₂ ≤ F</code> 이므로 <code>F₂</code>는 <strong>체계적으로 과소추정</strong>하는데, 이 과소추정의 크기가 후보마다 달라 순위를 뒤집는다.</p>
+<p><strong>핵심 항등식 (누락되는 것의 정확한 정체):</strong> 이상적(무제약) 통신 하에서 전달 커버리지가 순수 커버리지 함수일 때,</p>
+<pre class="codeblock"><code>F − F₂ = (정확히 3대 로봇에게만 보인 면적) + 3 × (4대 모두에게 보인 면적)
+</code></pre>
+<p>이 식은 <code>F₂</code>가 버리는 것이 <strong>막연한 오차가 아니라 명확한 기하학적 의미(3중·4중 중복 관측 영역)</strong> 임을 보여준다. <code>F₂</code>가 [0,1]을 벗어나는 이유도 여기 있다: 중복 관측이 많으면 <code>Σ_{i&lt;j}F({i,j})</code>가 과대해져 <code>−2Σ_i F({i})</code>로 빼도 실제 커버리지를 넘거나 음수가 된다.</p>
+<h3>3.5 선택 후회(Selection Regret)의 역학</h3>
+<p>근사 <code>F̂</code>(=<code>F₂</code> 또는 <code>G</code>)가 고른 계획 <code>b&#39;</code>와 정확 목적함수 <code>F</code>가 고른 계획 <code>b_F</code>의 <strong>후회</strong>:</p>
+<pre class="codeblock"><code>regret = F_{b_F}(N) − F_{b&#39;}(N)  ≥ 0     (맵 커버리지 비율 %로 보고)
+</code></pre>
+<p><code>b_F</code>가 정의상 <code>F(N)</code> 최대 계획이므로 후회는 항상 비음수다. 선택 변화(selection change)는 <strong>최상위 계획이 서로 다르거나(disjoint top sets) 후회가 10⁻¹²를 초과</strong>할 때로 판정.</p>
+<p><strong>순위 뒤집힘 조건 (핵심 통찰):</strong> 두 후보 <code>c</code>(정확 승자), <code>w</code>(근사가 잘못 고른 후보)에 대해 근사 오차를 <code>e_b = F̂_b(N) − F_b(N)</code> 라 하면, 근사가 <code>w</code>를 <code>c</code>보다 높게 매기는 조건은:</p>
+<pre class="codeblock"><code>F̂_w(N) &gt; F̂_c(N)
+⟺ F_w(N) + e_w &gt; F_c(N) + e_c
+⟺ e_w − e_c  &gt;  F_w(N) − F_c(N)      (논문 식)
+</code></pre>
+<p>우변 <code>F_w(N) − F_c(N)</code>은 음수(진짜 승자 <code>c</code>가 더 높으므로)다. 따라서 <strong>오차 차이 <code>e_w − e_c</code>가 진짜 커버리지 격차를 넘어설 때<strong> 순위가 뒤집힌다. 이것이 (C2)의 정확한 대수적 표현이다: </strong>중요한 것은 오차의 절대 크기(재구성 정확도)가 아니라 후보 간 오차의 차이(differential error)</strong> 다. 근사가 모든 후보에 같은 오차를 주면(<code>e_w=e_c</code>) 순위는 절대 안 뒤집히지만, 오차가 후보의 시너지 구조에 따라 불균일하면 작은 오차로도 뒤집힌다.</p>
+<h3>3.6 워크드 예제 (Worked Example) — <code>F₂</code>가 순위를 뒤집는 최소 사례</h3>
+<p>쌍별 근사가 어떻게 잘못된 계획을 고르는지 구체적 숫자로 보이자. 4대 로봇, 두 후보 계획 <code>c</code>(진짜 승자)와 <code>w</code>(근사가 잘못 고를 후보)를 가정한다. 값은 맵 커버리지 비율(0~1).</p>
+<p><strong>후보 c — &quot;분담형(disjoint)&quot; 계획</strong> (로봇들이 서로 다른 영역을 맡아 겹침 최소):</p>
+<pre class="codeblock"><code>F_c({i})      = 0.30   (각 개별, i=1..4)
+F_c({i,j})    = 0.58   (각 쌍; 0.30+0.30=0.60에서 약간의 겹침 −0.02)
+F_c({i,j,k})  = 0.84   (각 삼중)
+F_c(N)        = 1.00   (전체 팀 — 맵 완전 커버)
+</code></pre>
+<p><strong>후보 w — &quot;중복형(redundant)&quot; 계획</strong> (로봇들이 겹치는 영역을 많이 봄, 협동 시너지 낮음):</p>
+<pre class="codeblock"><code>F_w({i})      = 0.34   (각 개별 — 개별 성능은 c보다 높음)
+F_w({i,j})    = 0.60   (각 쌍 — 겹침이 커서 합보다 많이 낮음)
+F_w({i,j,k})  = 0.74   (각 삼중 — 중복 심화)
+F_w(N)        = 0.80   (전체 팀 — 맵의 20%를 못 봄)
+</code></pre>
+<p><strong>정확 목적함수 선택:</strong> <code>F_c(N)=1.00 &gt; F_w(N)=0.80</code> → 진짜 승자는 <code>c</code>. 이게 정답.</p>
+<p><strong>쌍별 절단 <code>F₂(N) = Σ_{i&lt;j}F({i,j}) − 2Σ_i F({i})</code></strong> 계산 (쌍 6개, 개별 4개):</p>
+<pre class="codeblock"><code>F₂_c(N) = 6 × 0.58 − 2 × (4 × 0.30) = 3.48 − 2.40 = 1.08
+F₂_w(N) = 6 × 0.60 − 2 × (4 × 0.34) = 3.60 − 2.72 = 0.88
+</code></pre>
+<p>근사 선택: <code>F₂_c=1.08 &gt; F₂_w=0.88</code> → 이 경우엔 <code>c</code>를 맞게 골랐다. 그러나 두 값 모두 [0,1]을 벗어남(<code>F₂_c=1.08 &gt; 1</code>, §3.4의 과대 중복 관측 항 반영). 이제 후보 <code>w</code>의 쌍 겹침만 조금 낮춰(로봇 쌍이 더 상보적으로 보이게) <code>F_w({i,j})=0.66</code>으로 바꾸되 전체 팀은 여전히 <code>F_w(N)=0.80</code>으로 두자(삼중·사중 시너지가 나쁘면 쌍이 좋아도 전체는 낮을 수 있음 — 바로 고차 항의 존재 이유):</p>
+<pre class="codeblock"><code>F₂_w&#39;(N) = 6 × 0.66 − 2 × (4 × 0.34) = 3.96 − 2.72 = 1.24
+</code></pre>
+<p>이제 <code>F₂_w&#39;=1.24 &gt; F₂_c=1.08</code> → <strong>근사는 <code>w</code>를 승자로 고른다</strong>. 그러나 실제로는 <code>F_w(N)=0.80 &lt; F_c(N)=1.00</code>이므로 <strong>후회 = 1.00 − 0.80 = 0.20</strong> 발생.</p>
+<p><strong>무엇이 벌어졌나:</strong> <code>w&#39;</code>는 쌍 수준에선 좋아 보이지만(높은 <code>F({i,j})</code>), 삼중·사중에서 협동이 무너진다(<code>F_w({i,j,k})=0.74</code>, <code>F_w(N)=0.80</code>). <code>F₂</code>는 이 고차 붕괴를 <strong>볼 수 없으므로</strong> 쌍 성능에 속아 <code>w&#39;</code>를 고른다. §3.5의 조건 <code>e_w − e_c &gt; F_w(N) − F_c(N)</code>을 확인하면:</p>
+<pre class="codeblock"><code>e_c = F₂_c(N) − F_c(N) = 1.08 − 1.00 = +0.08
+e_w = F₂_w&#39;(N) − F_w(N) = 1.24 − 0.80 = +0.44
+e_w − e_c = 0.44 − 0.08 = 0.36  &gt;  F_w(N) − F_c(N) = 0.80 − 1.00 = −0.20   ✓ 뒤집힘
+</code></pre>
+<p>차등 오차 0.36이 진짜 격차 0.20을 넘어 순위가 뒤집혔다. 주목할 점: <code>w&#39;</code>의 재구성 오차 절대값(0.44)이 크긴 하지만, <strong>뒤집힘을 결정한 건 절대 오차가 아니라 <code>c</code>와의 차이(0.36)</strong> 다. 두 후보가 같은 편향을 받았다면(<code>e_w=e_c</code>) 아무리 오차가 커도 순위는 보존됐을 것이다. 이것이 env5(평균 재구성 오차 최소인데 선택 실패)가 역설이 아닌 이유다.</p>
+<hr>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<p>이 논문의 &quot;시스템&quot;은 로봇 스택이 아니라 <strong>측정·분석 파이프라인</strong>이다. 공개 코드(github.com/williamteo/pairwise-regret)의 구조와 정합한다.</p>
+<pre class="diagram"><code>┌──────────────────────────────────────────────────────────────────────┐
+│ [1] 계획 생성 (Plan Generation)                                        │
+│   IROS 2026 Intelligent Information Gathering 워크숍 시뮬레이터          │
+│   (commit 2a2c751, 7개 맵 env1~env7)                                    │
+│                                                                        │
+│   Primary family (맵당 8 후보):                                         │
+│     nearest-frontier 정책 × 파라미터 격자                              │
+│       relay period {100, 300}                                          │
+│       relay handoff {on, off}                                          │
+│       frontier-crowding penalty {default, off}                        │
+│   Secondary family (맵당 8 후보):                                       │
+│     uniform-random frontier 선택 × 2 생성 시드                         │
+│                                                                        │
+│   공통: 통신 범위 15 m, 1000-step 지평, 결정론적 궤적(frozen)          │
+└──────────────────────────────────────────────────────────────────────┘
+                             │  로그된 궤적 (frozen)
+                             ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ [2] 정확한 집합함수 측정 (Exact Set-Function Evaluation)               │
+│   각 후보 × 16개 부분집합 S ⊆ {1,2,3,4}                                 │
+│     신선한 월드에서 S만 재생 → F_b(S) (전달 커버리지)                   │
+│   Primary family: 맵당 768 replays                                      │
+│   → scores.json (정답 집합함수 값 저장)                                 │
+└──────────────────────────────────────────────────────────────────────┘
+                             │  scores.json
+                             ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ [3] 근사 계산 (Approximation)  — analyze.py                             │
+│   F₁(S) = Σ F({i})               (가법 기준선)                          │
+│   F₂(S) = Σ_{|T|≤2} m(T)          (2차 뫼비우스 절단, 해석적)           │
+│   G(S)  = Σ a_i + Σ b_{ij}        (2-additive 최소제곱 적합)            │
+│   (선택적) F₃(S)                  (3차 절단, 비교용)                    │
+└──────────────────────────────────────────────────────────────────────┘
+                             │
+                             ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ [4] 선택·후회 분석 (Selection &amp; Regret)                                │
+│   각 근사가 argmax_b F̂_b(N)로 계획 선택                                 │
+│   regret = F_{b_F}(N) − F_{b&#39;}(N)  (맵 커버리지 %)                      │
+│   재구성 오차 E₂ 와 선택 후회를 분리 보고                              │
+│   [0,1] 범위 이탈 카운트 / 통신 범위 스윕(3,6,15 m)                    │
+│   → 재현: test_analysis.py, provenance.json (출처 고정)               │
+└──────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<p><strong>재현성 설계:</strong> 코드는 Python 3.10+ 표준 라이브러리만 쓰고(외부 의존성 없음), <code>scores.json</code>(입력 집합함수 값)·<code>provenance.json</code>(생성 출처·시뮬레이터 커밋 해시)·<code>test_analysis.py</code>(단위 테스트)·<code>METHODS.md</code>(방법 문서)를 포함한다. 즉 <strong>얼어붙은 점수 테이블에서 모든 표를 결정론적으로 재계산</strong>할 수 있어, 시뮬레이터 없이도 분석 결론을 검증할 수 있다. 라이선스는 코드 MIT, 데이터 CC BY 4.0.</p>
+<hr>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<p>IROS 2026 Intelligent Information Gathering 워크숍의 실내 탐색 경진 시뮬레이터(commit <code>2a2c751</code>)에서 배포된 <strong>7개 맵(env1~env7)</strong>. 각 맵에서 두 계획 패밀리:</p>
+<ul>
+<li><strong>Primary family</strong>: nearest-frontier 정책 + 파라미터 격자(relay period 2 × relay handoff 2 × frontier-crowding penalty 2 = 8 후보).</li>
+<li><strong>Secondary family</strong>: uniform-random frontier + 2 시드 = 8 후보.</li>
+<li>공통 설정: 통신 범위 15 m, 1000-step 지평, 결정론적 궤적.</li>
+<li>Primary family 기준 맵당 <strong>768 replays</strong>(후보 × 부분집합 × 신선한 월드).</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>선택 후회(selection regret)</strong>: <code>F_{b_F}(N) − F_{b&#39;}(N)</code>, 맵 커버리지 비율(%).</li>
+<li><strong>오선택 맵 수(misrank count)</strong>: 7개 맵 중 근사가 최적이 아닌 계획을 고른 맵 수.</li>
+<li><strong>재구성 오차 <code>E₂</code></strong>: 근사값과 실제값의 평균 오차(선택 후회와 분리).</li>
+<li><strong>[0,1] 범위 이탈 빈도</strong>: <code>F₂</code>가 유효 커버리지 범위를 벗어난 평가 횟수.</li>
+<li><strong>통신 범위 민감도</strong>: 3 m / 6 m / 15 m 스윕에서 후회 변화.</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>표 1 — Primary family (생성 범위 15 m), 7개 맵 요약:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>근사</th>
+<th align="center">오선택 맵 수</th>
+<th align="left">후회 범위</th>
+<th align="left">비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>F₁</code> (가법)</td>
+<td align="center">1 / 7</td>
+<td align="left">(6개 맵 정확)</td>
+<td align="left"><strong>가법 기준선이 6/7에서 정확 승자 선택</strong></td>
+</tr>
+<tr>
+<td><code>F₂</code> (2차 절단)</td>
+<td align="center"><strong>6 / 7</strong></td>
+<td align="left">0.0034 (env2) ~ <strong>0.337 (env1)</strong></td>
+<td align="left">env1·env3에서 <strong>정확 승자를 꼴찌로</strong> 랭크</td>
+</tr>
+<tr>
+<td><code>G</code> (2-additive 적합)</td>
+<td align="center">3 / 7</td>
+<td align="left">env1: 0.337 → <strong>0.071</strong> 로 감소</td>
+<td align="left">적합이 F₂보다 낫지만 여전히 3맵 오선택</td>
+</tr>
+</tbody></table></div>
+<p><strong>표 2 — Secondary family (uniform-random frontier, 15 m):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>근사</th>
+<th align="center">오선택 맵 수</th>
+<th align="left">후회 범위</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>F₁</code> (가법)</td>
+<td align="center">3 / 7 (=4개 정확)</td>
+<td align="left">—</td>
+</tr>
+<tr>
+<td><code>F₂</code> (2차 절단)</td>
+<td align="center"><strong>6 / 7</strong></td>
+<td align="left">0.025 (env5) ~ 0.181 (env2)</td>
+</tr>
+<tr>
+<td><code>G</code> (2-additive 적합)</td>
+<td align="center">3 / 7</td>
+<td align="left">—</td>
+</tr>
+</tbody></table></div>
+<p><strong>표 3 — 통신 범위 스윕(핵심: 비단조성):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>관측</th>
+<th align="left">값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>유한 범위 최대 후회</td>
+<td align="left"><strong>0.427 (env1 @ 3 m)</strong></td>
+</tr>
+<tr>
+<td>env5 @ 3 m</td>
+<td align="left">후회 0 (근사가 정확 선택)</td>
+</tr>
+<tr>
+<td>env5 @ 6 m</td>
+<td align="left">후회 <strong>0.240</strong> (근사가 실패)</td>
+</tr>
+</tbody></table></div>
+<p>→ <strong>후회가 통신 범위에 따라 나타났다 사라진다.</strong> 시너지 구조가 통신 위상에 의존하기 때문(§2.1 C4). 어떤 범위에서 근사가 통하더라도 다른 범위에서 실패할 수 있어, 범위 무관 신뢰 보장이 불가능하다.</p>
+<p><strong>표 4 — 재구성 오차 ≠ 선택 후회 (env5, 핵심 반례):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>지표</th>
+<th align="left">env5 값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>평균 재구성 오차 <code>E₂</code></td>
+<td align="left"><strong>0.14 (전 맵 중 최소)</strong></td>
+</tr>
+<tr>
+<td>그럼에도 <code>F₂</code> 선택 후회</td>
+<td align="left"><strong>0.240</strong></td>
+</tr>
+</tbody></table></div>
+<p>→ <strong>재구성 오차가 가장 작은 맵에서 오히려 선택이 실패</strong>. §3.5의 대수 <code>e_w − e_c &gt; F_w−F_c</code>가 실증됨: 평균 오차가 작아도 후보 간 <strong>차등 오차</strong>가 진짜 커버리지 격차를 넘으면 순위가 뒤집힌다.</p>
+<p><strong>표 5 — <code>F₂</code>의 유효 범위 이탈:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>패밀리</th>
+<th align="left">[0,1] 이탈 빈도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Primary</td>
+<td align="left"><strong>185 / 336</strong> 평가</td>
+</tr>
+<tr>
+<td>Secondary</td>
+<td align="left"><strong>79 / 96</strong> 평가</td>
+</tr>
+<tr>
+<td><code>G</code> (모든 <code>G(N)</code>)</td>
+<td align="left">항상 [0,1] 내</td>
+</tr>
+</tbody></table></div>
+<p>→ <code>F₂</code>는 절반 이상에서 물리적으로 무의미한 커버리지 값(음수·1 초과)을 낸다. 이는 §3.4의 <code>F−F₂ = (3중 관측) + 3×(4중 관측)</code> 항등식의 직접 귀결.</p>
+<p><strong>고차 절단 실험 (<code>F₃</code>):</strong></p>
+<pre class="codeblock"><code>F₃는 F₂의 primary 선택 변화 31개 중 30개를 제거 → 그러나 env3에서 새로 4개 도입
+</code></pre>
+<p>→ <strong>&quot;상호작용 항을 더 유지해도 선택이 일관되게 개선되지 않는다&quot;</strong>(핵심 반직관 결론). 고차가 대부분 오선택을 없애지만, 특정 맵에서 새 오선택을 만들어낸다.</p>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p><strong>실물 로봇 실험은 없다.</strong> 이 논문은 워크숍 시뮬레이터의 로그된 궤적을 재생·분석하는 순수 시뮬레이션/분석 연구다. 다만 분석 대상 궤적이 <strong>실제 탐색 경진 시뮬레이터에서 생성된 정책 출력</strong>(nearest-frontier, uniform-random frontier)이라는 점에서, 실무 다중 로봇 조율 파이프라인이 채택하는 쌍별 근사의 위험을 직접 겨냥한다. 얼어붙은 궤적 + 표준 라이브러리 재현 코드로 <strong>결과가 완전히 결정론적·검증 가능</strong>하다는 것이 이 논문의 실증적 강점이다.</p>
+<hr>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>다중 로봇 계획 선택에서 쌍별 근사의 부정적 결과를 최초로 정량화.</strong> 정확한 2차 뫼비우스 절단 <code>F₂</code>와 데이터 적합형 2-additive 점수 <code>G</code> 모두 고정된 후보 풀에서 <strong>더 낮은 커버리지 계획을 선택</strong>할 수 있음을 7개 맵·두 계획 패밀리·통신 범위 스윕으로 실증(F₂ primary 6/7 맵 오선택, 최대 후회 0.427).</p>
+</li>
+<li><p><strong>재구성 정확도와 선택 정확도의 분리를 대수적·실증적으로 규명.</strong> 순위 뒤집힘 조건 <code>e_w − e_c &gt; F_w(N) − F_c(N)</code>을 유도하고, env5(재구성 오차 최소 0.14인데 선택 후회 0.240)로 <strong>&quot;근사 목적함수는 재구성 정확도가 아니라 그것이 고르는 계획으로 평가해야 한다&quot;</strong>는 방법론적 지침을 제시.</p>
+</li>
+<li><p><strong>누락되는 시너지의 정확한 기하학적 정체 규명.</strong> <code>F − F₂ = (3중 관측 면적) + 3×(4중 관측 면적)</code> 항등식으로 쌍별 근사가 버리는 것이 <strong>3·4대 로봇 협동 커버리지</strong>임을 명시하고, 이것이 <code>F₂</code>의 [0,1] 이탈(185/336)의 원인임을 연결.</p>
+</li>
+<li><p><strong>고차 유지가 만능이 아님을 보임.</strong> <code>F₃</code>가 F₂의 오선택 31개 중 30개를 제거하지만 env3에서 새 오선택 4개를 도입 → <strong>차수를 올리는 것이 일관된 해법이 아니라는</strong> 반직관적 관찰.</p>
+</li>
+<li><p><strong>완전 재현 가능한 오픈 분석 아티팩트.</strong> 표준 라이브러리 기반 코드(MIT)와 얼어붙은 점수·출처 데이터(CC BY 4.0), 단위 테스트, 방법 문서를 공개하여 시뮬레이터 없이도 모든 표를 재계산 가능하게 함.</p>
+</li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<p><strong>계획 생성 파라미터:</strong></p>
+<ul>
+<li>통신 범위(생성 시): 15 m (스윕 시 3 m / 6 m / 15 m)</li>
+<li>지평: 1000 steps</li>
+<li>Primary 격자: relay period ∈ {100, 300}, relay handoff ∈ {on, off}, frontier-crowding penalty ∈ {default, off} → 8 후보/맵</li>
+<li>Secondary: uniform-random frontier × 2 시드 → 8 후보/맵</li>
+<li>로봇 수 n = 4, 부분집합 수 2⁴ = 16</li>
+<li>Primary family replays: 768/맵</li>
+</ul>
+<p><strong>근사 계산:</strong></p>
+<ul>
+<li>뫼비우스 계수: <code>m(T) = Σ_{U⊆T}(−1)^{|T∖U|}F(U)</code></li>
+<li><code>F₂(N) = Σ_{i&lt;j}F({i,j}) − 2Σ_i F({i})</code></li>
+<li><code>G</code>: 15개 비어있지 않은 부분집합에 대한 등가중 최소제곱, 절편 없음(G(∅)=0)</li>
+<li>선택 변화 임계값: 최상위 계획 disjoint 또는 후회 &gt; 10⁻¹²</li>
+</ul>
+<p><strong>소프트웨어:</strong></p>
+<ul>
+<li>Python 3.10+, 표준 라이브러리만(외부 의존성 없음)</li>
+<li>파일: <code>analyze.py</code>(분석 재계산), <code>test_analysis.py</code>(단위 테스트), <code>scores.json</code>(정답 집합함수 값), <code>provenance.json</code>(시뮬레이터 커밋 2a2c751 등 출처), <code>METHODS.md</code>, <code>docs/</code>, <code>LICENSE</code></li>
+<li>라이선스: 코드 MIT / 데이터 CC BY 4.0</li>
+<li>프로젝트: <a href="https://www.william-teo.com/pairwise-regret/">https://www.william-teo.com/pairwise-regret/</a></li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 조율 그래프·다중에이전트 RL에 대한 함의</h3>
+<p>논문의 함의는 <strong>엣지 기반 조율 그래프, 쌍별 페이로프 다중에이전트 학습, 쌍별 가시성 페널티 프론티어 탐색이 체계적으로 최적이 아닌 다중 로봇 계획을 고를 수 있다</strong>는 것이다. 이들은 모두 팀 목적함수를 쌍별로 분해하는데, 커버리지처럼 고차 시너지가 큰 목적함수에서는 §5의 후회가 그대로 재현될 위험이 있다. 특히 <strong>차등 오차 <code>e_w − e_c</code>가 문제</strong>이므로, 근사가 학습으로 재구성 오차를 줄이더라도(예: <code>G</code>의 최소제곱 적합) 선택 신뢰는 보장되지 않는다.</p>
+<h3>8.2 한계점</h3>
+<ul>
+<li><strong>관측 규모.</strong> n=4, 7개 맵, 16·8 후보로 조합 규모가 작다. n이 커지면 <code>2ⁿ</code> 정답 측정이 불가능해져 분석 자체가 어려워진다(정답 측정의 확장성 문제).</li>
+<li><strong>얼어붙은 궤적.</strong> 계획 생성기와 분리해 사후 분석하므로, 근사 목적함수를 <strong>최적화 루프 안에서</strong> 사용할 때(근사로 계획을 생성·개선)의 후회는 직접 다루지 않는다(선택 vs 최적화의 간극).</li>
+<li><strong>커버리지 단일 목적.</strong> 전달 커버리지 한 종류의 목적함수만 분석. 다른 정보 수집 목적(엔트로피 감소, 상호정보량)에서 쌍별 근사의 후회는 별도 검증 필요.</li>
+<li><strong>실물 로봇 부재.</strong> 시뮬레이터 로그 기반.</li>
+</ul>
+<h3>8.3 향후 방향</h3>
+<ul>
+<li><strong>선택 안전 근사.</strong> 재구성 오차가 아니라 <strong>순위 보존(rank-preserving)</strong> 을 직접 목표로 하는 근사 설계(예: 후보 쌍 간 차등 오차를 제약하는 학습).</li>
+<li><strong>적응적 차수.</strong> <code>F₃</code>가 맵마다 다르게 작동하므로, 맵/팀별로 필요한 상호작용 차수를 온라인 추정하는 적응 절단.</li>
+<li><strong>범위 인지 근사.</strong> 통신 범위 비단조성(env5)을 반영해 범위별로 근사 구조를 전환.</li>
+<li><strong>대규모 확장.</strong> <code>2ⁿ</code> 정답 없이도 후회를 상한(bound)하는 이론(Downie et al. 2023의 유계 부분집합 평가 최악 사례와 연결).</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>이 논문은 <strong>계획을 생성하지 않고 계획 선택 목적함수의 근사를 분석</strong>하는 드문 유형이다. 본 코퍼스에서 (a) 커버리지·근사·이론 보장을 다루는 계획 이론 논문, (b) 정보 수집 목적함수를 최대화하는 탐색 계획 논문과 비교한다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>Anytime GTMP (배치 텐서 계획, arxiv2026)</th>
+<th>DFT* (분산 전방 트리, arxiv2026)</th>
+<th>PDE-TargetSearch (UAV 표적 탐색, ISR2026)</th>
+<th><strong>본 논문 (Pairwise Regret)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>산출물</td>
+<td>모션 계획 알고리즘</td>
+<td>kinodynamic 계획 알고리즘</td>
+<td>경로 계획 알고리즘</td>
+<td><strong>계획 선택 목적함수 근사 분석(negative result)</strong></td>
+</tr>
+<tr>
+<td>핵심 대상</td>
+<td>호모토피 클래스 <strong>커버리지</strong> 보장</td>
+<td>도달집합 δ-균일 <strong>커버링(분산)</strong></td>
+<td>누적 발견확률(정보 목적) 최대화</td>
+<td><strong>전달 커버리지 집합함수의 쌍별 근사 후회</strong></td>
+</tr>
+<tr>
+<td>이론 성격</td>
+<td>근사(예산)로 <strong>최적성 보장</strong>(a.s. 수렴)</td>
+<td>근사(커버리지)로 <strong>ε-최적 보장</strong>(Thm 5.17)</td>
+<td>메타휴리스틱 최적화(보장 없음)</td>
+<td><strong>근사가 보장을 잃는 조건</strong>(반례·후회)</td>
+</tr>
+<tr>
+<td>로봇 수</td>
+<td>단일 매니퓰레이터/이동체</td>
+<td>단일 이동체</td>
+<td>단일 UAV</td>
+<td><strong>다중 로봇(4대) 팀</strong></td>
+</tr>
+<tr>
+<td>상호작용 차수</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td><strong>뫼비우스 차수(2/3차) 절단이 핵심 변수</strong></td>
+</tr>
+<tr>
+<td>검증</td>
+<td>MotionBenchMaker + 2D 시뮬</td>
+<td>Dynobench 시뮬</td>
+<td>6 시나리오 시뮬 + 실물 3DR Solo</td>
+<td>7 맵 시뮬(얼어붙은 궤적)</td>
+</tr>
+<tr>
+<td>코드</td>
+<td>✅ MIT</td>
+<td>✅ BSD-3</td>
+<td>(search 단계)</td>
+<td>✅ MIT+CC-BY</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>Anytime GTMP / DFT* 대비 (거울상 관계).</strong> 두 논문은 <strong>근사(예산·커버리지·분산)가 언제 최적/근사최적을 보장하는지</strong> 를 적극적으로 증명한다. 본 논문은 정반대로 <strong>널리 쓰이는 근사(쌍별)가 언제 보장을 잃는지</strong> 를 실증한다. 즉 세 논문은 &quot;근사와 최적성&quot;이라는 같은 축의 양극단이다. Anytime GTMP·DFT*가 <strong>&quot;이 근사는 안전하다&quot;</strong> 를 증명하는 건설적(constructive) 결과라면, 본 논문은 <strong>&quot;이 근사는 위험하다&quot;</strong> 를 보이는 반증적(refutational) 결과다. 이 상보성은 δ-Similarity(#268, 샘플기반 계획 근사최적성 증명의 숨은 가정 반박)·&quot;What Symmetry Buys a Learned Motion Planner&quot;(#278, 학습 플래너 표현 분석)와 같은 <strong>분석/이론 계열 in-scope 선례</strong> 를 잇는다.</p>
+<p><strong>PDE-TargetSearch 대비.</strong> PDE-TargetSearch는 누적 발견확률이라는 <strong>정보 수집 목적함수를 최대화하는 경로 계획</strong>을 제안하고 실물 드론으로 검증한다. 본 논문은 이런 정보 목적함수를 <strong>다중 로봇으로 확장할 때, 팀 목적함수를 쌍별로 근사하면 계획 선택이 실패</strong>할 수 있음을 경고한다. 즉 PDE-TargetSearch류의 단일 로봇 정보 계획을 다중 로봇 조율로 옮기는 실무자에게 본 논문은 직접적 주의 사항을 준다.</p>
+<p><strong>본 논문의 강점.</strong> (1) 조합 정답(16개 부분집합)을 측정해 근사 품질을 <strong>절대적으로 판정</strong>. (2) 재구성 vs 선택 분리라는 방법론적 통찰이 다른 근사 목적함수에도 이식 가능. (3) 표준 라이브러리 재현 코드로 검증 장벽이 낮음.</p>
+<p><strong>본 논문의 약점.</strong> (1) 알고리즘 기여가 없어 &quot;그래서 어떤 근사를 써야 하는가&quot;에 대한 건설적 답이 부족(향후 과제로 남김). (2) n=4·7맵으로 규모가 작아 일반화 주장이 제한적. (3) 실물 로봇 부재.</p>
+<h3>9.3 실적용 가능성 평가</h3>
+<p>직접 배포되는 플래너는 아니지만 <strong>실무 가치가 높은 진단 도구</strong>다. 다중 로봇 탐색·감시·정보 수집 시스템을 조율 그래프나 쌍별 페이로프로 설계하는 팀은, 본 논문의 프로토콜(정답 부분집합 측정 → 근사 후회 측정 → 재구성/선택 분리)을 자신의 목적함수에 적용해 <strong>쌍별 근사가 안전한지 사전 감사</strong>할 수 있다. 공개 코드가 표준 라이브러리만 쓰므로 자체 <code>scores.json</code>을 넣어 즉시 재사용 가능하다.</p>
+<h3>9.4 연구 방향성 평가</h3>
+<p><strong>기술적 참신성: 중상.</strong> 뫼비우스/k-additive/Choquet 측도(Grabisch 1997)와 submodular 최적화(Krause·Guestrin)는 기존 이론이지만, 이를 <strong>다중 로봇 계획 &quot;선택&quot;의 후회로 연결하고 커버리지 탐색에서 실증</strong>한 것은 새롭다. 특히 &quot;재구성 오차 ≠ 선택 후회&quot;의 대수적 규명과 <code>F₃</code>의 비일관적 개선은 실무 통념(차수를 올리면 낫다)을 반박하는 가치 있는 관찰이다. 아이디어의 중복도는 낮으나(코퍼스에 유사 분석 없음), 알고리즘 부재로 후속 건설적 연구(선택 안전 근사)가 필요한 <strong>문제 제기형(agenda-setting) 논문</strong>이다.</p>
+<hr>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
+<ul>
+<li>Grabisch, M. (1997). <em>k-order additive discrete fuzzy measures and their representation.</em> Fuzzy Sets and Systems. (k-additive 측도 형식)</li>
+<li>Burgard, W., Moors, M., Stachniss, C., Schneider, F. (2005). <em>Coordinated multi-robot exploration.</em> IEEE T-RO. (쌍별 가시성 페널티 프론티어 탐색)</li>
+<li>Krause, A., Singh, A., Guestrin, C. <em>Near-optimal sensor placements / multi-robot information gathering.</em> (submodular 최적화)</li>
+<li>Guestrin, C., Koller, D., Parr, R. <em>Multiagent planning with factored MDPs.</em> (조율 그래프·factored MDP)</li>
+<li>Downie et al. (2023). <em>Submodular maximization from bounded-size subset evaluations can be far from optimal.</em> (유계 부분집합 평가 최악 사례)</li>
+<li>Rooker &amp; Birk; Banfi et al.; Hull et al. <em>Communication-constrained multi-robot exploration / connectivity / relaying.</em></li>
+<li>본 코퍼스 비교 대상: Anytime GTMP(arXiv 2608.25830), DFT*(arXiv 2608.26314), PDE-TargetSearch(arXiv 2607.17771).</li>
+<li>벤치마크: IROS 2026 Workshop on Intelligent Information Gathering 시뮬레이터(commit 2a2c751).</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
+<p>이 논문은 다중 로봇 계획 선택에서 <strong>쌍별(order-2) 근사가 잘못된 계획을 고를 수 있다</strong>는 명확한 부정적 결과를 제시한다. 정확한 2차 뫼비우스 절단 <code>F₂</code>와 데이터 적합형 2-additive 점수 <code>G</code> 모두 7개 맵에서 더 낮은 커버리지 계획을 선택했고(F₂ primary 6/7, 최대 후회 0.427), 재구성 오차가 가장 작은 맵(env5, E₂=0.14)에서 오히려 선택 후회 0.240이 발생했다. 순위 뒤집힘 조건 <code>e_w − e_c &gt; F_w(N)−F_c(N)</code>은 <strong>중요한 것이 근사의 절대 정확도가 아니라 후보 간 차등 오차</strong>임을 대수적으로 규명하며, <code>F − F₂ = (3중 관측) + 3×(4중 관측)</code> 항등식은 버려지는 것이 3·4대 로봇 협동 시너지임을 못박는다. 나아가 <code>F₃</code>가 오선택 대부분을 없애면서도 새 오선택을 만든다는 점에서 <strong>차수를 올리는 것이 일관된 해법이 아님</strong>을 보인다.</p>
+<p><strong>혁신성</strong>: 계획 생성이 아니라 계획 선택 목적함수의 근사를 정면으로 분석한 드문 연구로, &quot;근사 목적함수는 그것이 고르는 계획으로 평가해야 한다&quot;는 방법론적 지침을 남긴다. <strong>실용적 의의</strong>: 조율 그래프·쌍별 페이로프·프론티어 페널티로 다중 로봇을 설계하는 실무자에게 사전 감사 프로토콜과 재현 코드를 제공한다. <strong>향후 연구</strong>: 재구성이 아니라 순위 보존을 목표로 하는 선택-안전 근사, 맵/팀별 적응 차수, 통신 범위 인지 근사, 그리고 <code>2ⁿ</code> 정답 없이 후회를 상한하는 이론이 필요하다. 본 논문은 건설적 해법보다 <strong>문제를 정확히 정의하고 통념을 반박하는 데</strong> 가치가 있는 agenda-setting 분석이며, Anytime GTMP·DFT*의 &quot;근사는 안전하다&quot; 증명과 거울상을 이루는 &quot;근사는 위험하다&quot; 실증으로 코퍼스의 이론 축을 보완한다.</p>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+<div class="rhead" id="rhead" data-title="Pairwise Approximation Can Select the Wrong Multi-Robot Plan: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
+</body>
+</html>

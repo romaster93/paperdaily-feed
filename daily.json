@@ -1,13 +1,45 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-24T19:30:01.114Z",
+  "generatedAt": "2026-09-25T19:30:00.922Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 9. 25  금요일",
+    "date": "2026. 9. 26  토요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 최근 리뷰 1편 · 전체 108편"
+    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 109편"
   },
   "papers": [
+    {
+      "id": "2609.29929",
+      "venue": "IROS 2026 WS",
+      "matchScore": 96,
+      "category": "Planner",
+      "feedTitle": "Pairwise Approximation Can Select the Wrong Multi-Robot Plan",
+      "authorsShort": "W. Teo",
+      "feedAbstract": "다중 로봇 커버리지 계획 선택에서 널리 쓰이는 쌍별(2-additive) 근사 목적함수 `F₂`가 고차(삼중 이상) 협동 항을 무시하기 때문에 실제로 더 나쁜 계획을 승자로 고를 수 있음을 뫼비우스 분해·본페로니 부등식으로 이론화하고 7개 맵 실측으로 정량화한 분석 논문.",
+      "tags": [
+        "#Planner",
+        "#이론/분석",
+        "#코드공개"
+      ],
+      "titleEN": "Pairwise Approximation Can Select the Wrong Multi-Robot Plan",
+      "titleKO": "Pairwise Approximation Can Select the Wrong Multi-Robot Plan",
+      "authorsEN": "William Teo",
+      "authorsKO": "William Teo",
+      "abstractEN": "Multi-robot coordination methods often score a joint plan from singleton and pairwise terms, leaving out the terms that involve three or more robots. We measure the plan-selection regret of two pairwise approximations to delivered coverage using frozen multi-robot trajectories. For each four-robot plan on an indoor exploration benchmark, replaying all 16 robot subsets gives the exact delivered-coverage set function $F$. From the same subset values we compute two pairwise scores: the exact order-2 Möbius truncation $F_2$, which depends only on the singleton and pair values, and an equal-weight least-squares two-additive fit $G$. Ranking by $F_2$ instead of $F$ changes the selected plan on six of seven maps at the 15 m candidate-generation range in each of two candidate families, with regret up to 0.337 of map coverage. Switching to $G$ reduces the regret but still changes the selection on three of seven maps in each family. The additive score $F_1$, which keeps only the singleton terms, selects the exact winner on six of seven maps in one family and four of seven in the other, against one of seven for $F_2$. We also find that lower average reconstruction error does not guarantee lower selection regret.",
+      "abstractKO": "다중 로봇 커버리지 계획 선택에서 널리 쓰이는 쌍별(2-additive) 근사 목적함수 `F₂`가 고차(삼중 이상) 협동 항을 무시하기 때문에 실제로 더 나쁜 계획을 승자로 고를 수 있음을 뫼비우스 분해·본페로니 부등식으로 이론화하고 7개 맵 실측으로 정량화한 분석 논문.",
+      "detailTags": [
+        "#Planner",
+        "#이론/분석",
+        "#코드공개"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 39,
+      "reason": "**뫼비우스 분해 기반 근사 오차 정식화**: 집합함수 `F(S)=Σ_{T⊆S}m(T)`를 뫼비우스 계수 `m(T)`로 분해하고, 2-additive 절단 `F₂(N)=Σ_{i<j}F({i,j})−2Σ_i F({i})`가 남기는 잔차 `F−F₂=(3중 관측)+3×(4중 관측)`을 명시.\n**순위 뒤집힘 조건 유도**: 계획 선택은 재구성 오차 절대값이 아니라 후보 간 **차등 오차** `e_w−e_c > F_w(N)−F_c(N)`로 결정됨을 증명 — 평균 오차 최소인 맵에서도 선택 실패가 발생하는 역설 설명.\n**본페로니 부등식 경계**: `F₁≥F≥F₂`(F₁=개별합 상계, F₂=쌍별 하계) 및 `F₃≥F`로 근사의 방향성 편향 규명.\n**7개 맵 실측**: 1차 목적함수에서 F₂가 6/7 맵 오선택(후회 0.0034~0.427), 최소제곱 2-additive 적합 G는 3/7로 개선, F₁은 6/7 정답. F₂ 값이 [0,1]을 336건 중 185건 벗어남.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/PairwiseRegret_IROSWS2026/index.html"
+    }
+  ],
+  "archive": [
     {
       "id": "2609.10905",
       "venue": "arXiv 2026",
@@ -42,9 +74,7 @@
       "readMinutes": 39,
       "reason": "**IFT 기반 IK Jacobian**: `[Df(p)]⁻¹=D(f⁻¹)f(p)` — 순방향 기구학 Jacobian만으로 블랙박스 IK 미분, 여유자유도는 증강 FK로 정방화\n**최소제곱 정의역 확장**: 도달 불가 목표를 `argmin_q‖FKₐ(q)-(Xᴳ,ψ)‖²`로 확장 + 6단계 그래디언트 근사(Zero→Pseudoinverse→LM→Residual Damping→Anisotropic→Full Newton), Residual Damping이 실용 기본값\n**경계 도달성 제약**: `-log det(JJᵀ+εI)≤τ`로 특이성을 워크스페이스 경계에서만 억제(내부 과제약 회피)\n**드롭인 결합**: 제약다양체 계획을 최소좌표 위 (거의)무제약 최적화로 전환, IrisNp2·Trajopt·TOPPRA 재사용",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/ConstraintChartsIFT_arxiv2026/index.html"
-    }
-  ],
-  "archive": [
+    },
     {
       "id": "2609.03483",
       "venue": "arXiv 2026",
