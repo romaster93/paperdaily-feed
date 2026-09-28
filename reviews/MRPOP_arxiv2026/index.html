@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>MR. POP: Multi-Robot Parallel Optimizing Planner for Almost-Surely Asymptotically Optimal Planning · PaperDaily</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { color: #8f4023; text-decoration: underline; }
+
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
+
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
+}
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
+article code.math-display {
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
+}
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
+article th {
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
+article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: var(--mono); font-size: 12px; text-align: center;
+}
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
+footer {
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
+</head>
+<body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2609.30644">arXiv ↗</a>
+</div>
+<div class="wrap">
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">MRPOP_arxiv2026</span>
+    </div>
+    <h1 class="doc-title">MR. POP: Multi-Robot Parallel Optimizing Planner for Almost-Surely Asymptotically Optimal Planning: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2609.30644">2609.30644</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">✅ <a href="https://github.com/CoMMALab/MR.POP">github.com/CoMMALab/MR.POP</a> (C++/CMake, 13 커밋, 빌드 가능, README 공사 중, 라이선스 미명시)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">❌</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-09-28</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">40KB · 약 40분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
+  </header>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: MR. POP: Multi-Robot Parallel Optimizing Planner for Almost-Surely Asymptotically Optimal Planning</li>
+<li><strong>저자 (Authors)</strong>: Chih H. Huang, Roy Xing, Brian Plancher, Zachary Kingston</li>
+<li><strong>소속 (Affiliation)</strong>: Columbia University (Huang·Xing·Plancher), Purdue University (Kingston) — CoMMALab 계보 (VAMP·pRRTC·ReVAMP·univamp 개발 그룹)</li>
+<li><strong>발표처 (Published)</strong>: arXiv 프리프린트 (2026년 9월 25일 제출), 발표처 미확정</li>
+<li><strong>DOI</strong>: 미부여 (arXiv 프리프린트)</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2609.30644">https://arxiv.org/abs/2609.30644</a></li>
+<li><strong>코드 (Code)</strong>: ✅ 공개 — <a href="https://github.com/CoMMALab/MR.POP">https://github.com/CoMMALab/MR.POP</a> (C++/CMake, 13 커밋, <code>src/</code>·<code>extern/</code>·<code>scripts/</code>·<code>CMakeLists.txt</code> 구성, 빌드 가능. README &quot;still under construction&quot; 상태이며 LICENSE 파일 미확인 → 라이선스는 명시하지 않음)</li>
+<li><strong>연구비 (Funding)</strong>: Simons Foundation·Simons Foundation International·Schmidt Sciences 지원 언급</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>다중 로봇(multi-robot) 모션계획에서 <strong>전역 최적(globally optimal) 경로</strong>를 구하는 것은 근본적으로 어려운 문제다. 단일 로봇에서 <strong>거의 확실하게 점근적 최적(almost-surely asymptotically optimal, a.s.a.o.)</strong> 을 보장하는 샘플기반 계획기(RRT*·BIT*·FMT*·AORRTC 등)는 잘 정립되어 있고, 최근 CPU 병렬화로 상당히 가속되었다. 그러나 이들은 로봇 수가 늘어 <strong>결합 구성공간(joint configuration space)의 차원이 폭발</strong>하면(예: Franka 팔 4대 = 28-DOF, 5대 = 35-DOF) 실용적 시간 안에 수렴하지 못한다.</p>
+<p>본 논문은 이 병목을 <strong>GPU의 대규모 SIMT(Single-Instruction Multiple-Thread) 병렬성</strong>으로 정면 돌파하는 계획기 <strong>MR. POP</strong>를 제안한다. 핵심 아이디어는 두 가지 확립된 도구를 GPU 위에서 결합하는 것이다:</p>
+<ol>
+<li><strong>dRRT (discrete RRT)</strong> — 각 로봇의 개별 로드맵을 텐서곱(tensor-product)으로 암묵적 결합한 복합 로드맵 위에서 오라클 유도(oracle-guided) 탐색을 수행하는 다중 로봇 샘플기반 탐색.</li>
+<li><strong>AO-x 메타알고리즘</strong> — 임의의 실현가능(feasible) 계획 서브루틴을 감싸, <strong>상태-비용 공간(state-cost space)</strong> 에서 정보기반 샘플링(informed sampling)을 반복 실행함으로써 점근적 최적성을 부여하는 anytime 프레임워크.</li>
+</ol>
+<p>MR. POP는 <strong>수백 개의 로드맵 구성·트리 탐색 반복을 동시에</strong> 실행하고, 그 밑에서 최근접 이웃 탐색(nearest neighbor)과 충돌검사(collision checking)를 다시 스레드 병렬화한다. 그 결과 35-DOF까지의 다중 로봇 문제에서 <strong>유일하게 100% 성공률</strong>을 달성하면서 SOTA a.s.a.o. 계획기보다 빠르다. 나아가 MR. POP가 생성하는 <strong>고품질·다양한 시드(seed)</strong> 는 하류(downstream) 궤적최적화기(cuRobo 등)의 국소최소(local minima) 회피를 도와, 그 성공률을 <strong>4%에서 72%로</strong> 끌어올린다.</p>
+<blockquote>
+<p><strong>트랙 판정 및 경계 플래그</strong>: MR. POP의 평가 플랫폼은 Franka·Flexiv·Kinova 등 <strong>매니퓰레이터</strong>다. 그러나 본 논문의 기여는 grasping·조작(manipulation)이 아니라 <strong>다중 로봇 결합공간에서의 최적 모션계획 알고리즘</strong>이며, 무충돌 경로 생성·장애물 회피·탐색 전략이 핵심이다. 이는 매니퓰레이터 플랫폼을 쓰되 기여가 모션계획인 선행 in-scope 사례(<strong>PAAMP</strong>_LCSS2026·<strong>Planning along Differentiable Charts of Constraint Manifolds</strong>_arxiv2026·<strong>ReVAMP</strong>#300)와 동일한 판정 기준을 따라 <strong>Planner 트랙 in-scope</strong>로 분류한다.</p>
+</blockquote>
+<hr>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C-1) 결합 구성공간의 차원 폭발.</strong> 로봇 <code>k</code>대가 각각 <code>d</code>-DOF이면 결합공간은 <code>k·d</code> 차원이다. 4-Franka는 28차원, 5-Franka는 35차원이다. RRT*류 단일 트리는 차원에 지수적으로 민감해, 이 규모에서는 수렴 전에 시간·메모리 예산이 고갈된다.</p>
+<p><strong>(C-2) a.s.a.o. 보장과 계산 성능의 상충.</strong> 실현가능성만 빠르게 얻는 계획기(RRT-Connect·pRRTC)는 최적성 보장이 없고, 최적성을 보장하는 계획기(RRT*·BIT*·FMT*)는 다중 로봇 규모에서 느리다. <strong>두 성질을 동시에</strong> 얻는 것이 목표다.</p>
+<p><strong>(C-3) CPU 병렬화의 한계.</strong> a.s.a.o. 계획기의 CPU 병렬화(예: 수십 스레드)는 코어 수에 묶여 있어, 결합공간의 요구 샘플 수를 감당하기에 부족하다.</p>
+<p><strong>(C-4) 하류 궤적최적화기의 국소최소.</strong> cuRobo 같은 GPU 궤적최적화기는 빠르지만 비볼록 지형에서 나쁜 초기값(seed)이면 국소최소에 갇혀 실패한다. 다중 로봇 28-DOF에서 무작위/단순 시드로는 성공률이 4% 수준으로 붕괴한다.</p>
+<p><strong>(C-5) GPU 워크로드 불균형.</strong> 충돌검사는 로봇/모션마다 필요한 세밀 구(sphere) 검사량이 다르다. 순진하게 모션당 고정 스레드를 할당하면, 복잡한 모션의 스레드가 병목이 되고 단순 모션의 스레드는 놀아 SIMT 효율이 떨어진다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>MR. POP는 위 도전과제에 대해 다음을 결합한다:</p>
+<ul>
+<li><strong>(C-1·C-2 대응)</strong> dRRT의 복합 로드맵 표현 + AO-x의 상태-비용 공간 정보기반 샘플링 → 결합공간을 명시적으로 열거하지 않고 암묵적 텐서곱 위에서 탐색하며, 매 반복 비용 상계 <code>c_best</code>로 탐색 영역을 좁혀 점근적 최적성을 보장.</li>
+<li><strong>(C-3 대응)</strong> 3계층 GPU SIMT 병렬성 → 수백 블록이 독립적 로드맵 구성·트리 탐색 반복을 동시 수행, 그 밑에서 스레드가 샘플링·NN·충돌검사를 병렬화.</li>
+<li><strong>(C-4 대응)</strong> MR. POP를 궤적최적화기의 <strong>시드 생성기</strong>로 사용 → 다양하고 저비용인 초기 경로가 국소최소 회피를 도와 cuRobo 성공률 4%→72%.</li>
+<li><strong>(C-5 대응)</strong> 2단계 조밀→세밀(coarse-to-fine) 충돌검사 + <code>c_i : total</code> 비율 기반 스레드 재할당 → 워크로드 균형.</li>
+</ul>
+<hr>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 dRRT: 텐서곱 복합 로드맵과 오라클 유도 탐색</h3>
+<p>다중 로봇 계획에서 각 로봇 <code>i</code>는 자신의 구성공간 <code>C_i</code>에 개별 로드맵 <code>G_i = (V_i, E_i)</code>를 갖는다. dRRT는 이들의 <strong>텐서곱(tensor product)</strong> 으로 정의되는 <strong>복합 로드맵(composite roadmap)</strong> <code>𝔾</code> 위에서 탐색한다:</p>
+<pre class="codeblock"><code>𝔾 = G_1 ⊗ G_2 ⊗ ... ⊗ G_k
+
+복합 정점:  q = (q^1, q^2, ..., q^k),   q^i ∈ V_i
+복합 간선:  두 복합 정점 q, q&#39; 사이 간선은
+            모든 i에 대해 (q^i, q&#39;^i) ∈ E_i  (또는 q^i = q&#39;^i)
+            이며, 결합 이동이 로봇 간 충돌 없이 실현 가능할 때
+</code></pre>
+<p>이 복합 로드맵은 <strong>명시적으로 저장하면 정점 수가 <code>Π|V_i|</code> 로 폭발<strong>하므로, dRRT는 로드맵을 </strong>암묵적(implicit)</strong> 으로만 다루고 필요할 때 오라클로 다음 이동을 질의한다.</p>
+<p><strong>오라클(oracle)의 이웃 선택.</strong> 트리의 현재 노드 <code>q_near</code>에서 무작위 표본 <code>q_rand</code> 방향으로 확장할 때, 오라클은 복합 로드맵의 이웃 중 <code>q_rand</code>와 <strong>가장 잘 정렬된(best aligned)</strong> 이웃을 고른다. 각 로봇에 대해 개별 로드맵에서 <code>q^i_rand</code> 방향과 각도가 가장 작은 인접 정점을 고르고, 이를 복합 이동으로 조립한다. AO-x와 결합될 때는 여기에 <strong>비용 필터</strong>가 추가된다(3.2 참조):</p>
+<pre class="codeblock"><code>확장 후보:  v ∈ admissible_neighbors(q_near)
+비용 조건:  ext_cost(v) = g_near + ‖v − q_near‖ ≤ c_rand   ......(비용 좌표 안에 드는가)
+선택:       argmin_v  angle(v − q_near,  q_rand − q_near)  s.t. 위 비용 조건
+</code></pre>
+<p>즉 &quot;<code>c_rand</code>보다 싼 cost-to-come을 가질 수 없는 확장&quot;만 폐기하고, 그보다 싼 경로에 도달 가능한 확장은 양의 확률로 유지한다.</p>
+<h3>3.2 AO-x 메타알고리즘: 상태-비용 공간의 정보기반 샘플링</h3>
+<p>AO-x는 임의의 <strong>실현가능 계획 서브루틴</strong>(여기서는 dRRT)을 감싸 점근적 최적성을 부여하는 anytime 메타알고리즘이다. 핵심은 계획을 <strong>상태-비용 공간(state-cost space)</strong> 에서 수행하는 것이다: 각 정점을 <code>(구성 q, cost-to-come g)</code> 쌍으로 다루고, 현재까지 찾은 최선 비용 <code>c_best</code>보다 싼 경로만 탐색하도록 표본을 제한한다.</p>
+<p><strong>정보기반 샘플링(informed sampling).</strong> 구성 표본 <code>q_rand</code>는 <code>c_best</code>보다 싼 경로에 놓일 수 있는 모든 구성을 담는 <strong>프로레이트 초타원체(prolate hyperspheroid)</strong> 에서 추출한다(RRT*의 informed set과 동형):</p>
+<pre class="codeblock"><code>Informed set:  X_inf(c_best) = { q :  ‖q − q_start‖ + ‖q − q_goal‖ ≤ c_best }
+q_rand  ~  INFORMED_SAMPLE(c_best)            # 초점 q_start, q_goal, 장축 c_best
+</code></pre>
+<p><strong>비용 좌표 샘플링.</strong> 상태-비용 공간이므로 비용 좌표 <code>c_rand</code>도 표본해야 한다. cost-to-come 하한 <code>ḡ(q) = ‖q − q_start‖</code>를 하계로 삼아 균일 추출한다:</p>
+<pre class="codeblock"><code>c_rand  ~  U[ ḡ(q_rand),  c_best ]           # ḡ(q) = ‖q − q_start‖ (cost-to-come 하한)
+</code></pre>
+<p>이 <code>c_rand</code>가 3.1의 오라클 비용 필터에 들어가, 확장이 <code>c_rand</code> 이하의 cost-to-come을 유지하도록 강제한다.</p>
+<p><strong>수렴 조건 (C1)/(C2)와 정리.</strong> AO-x의 점근적 최적성은 감싸인 서브루틴이 두 조건을 만족할 때 성립한다.</p>
+<ul>
+<li><strong>(C1) 유한시간 실현가능성</strong>: <code>c_best</code>보다 싼 해가 존재하면, 실현가능 서브루틴이 유한 시간 안에 이를 반환한다. Lemma 1은 한 스테이지의 <strong>전진(advancement) 확률</strong>을 다음으로 하계한다:</li>
+</ul>
+<pre class="codeblock"><code>Pr[advancement]  ≥  (p_n · ξ_n)^M
+      p_n = (c_best − C(σ)) / c_best        # 현재 해 대비 개선 여지
+      M   = 경로를 이루는 이동(segment) 수
+      ξ_n = 로드맵에 의존하는 상수
+</code></pre>
+<ul>
+<li><strong>(C2) 기대 수축(expected contraction)</strong>: 한 스테이지가 기대적으로 최적 비용 <code>C*_n</code>에 가까워진다.</li>
+</ul>
+<pre class="codeblock"><code>E[ C(y) | c_best ]  −  C*_n   ≤   (1 − w_n)( c_best − C*_n ),     w_n &gt; 0     ......(Eq. 1)
+      w_n = 로드맵에만 의존하는 양의 수축률
+</code></pre>
+<p><strong>Theorem 1 (a.s.a.o.)</strong>: dRRT가 (C1)·(C2)를 만족하므로, MR. POP가 반환하는 해의 비용은 반복이 증가함에 따라 <strong>거의 확실하게 최적 비용으로 수렴</strong>한다. (C2)의 기하급수적 수축 형태는 매 스테이지 성공 시 최적성 간극이 일정 비율 <code>w_n</code>씩 줄어듦을 뜻하며, Borel–Cantelli 논법으로 a.s. 수렴이 따른다.</p>
+<pre class="diagram"><code>   상태-비용 공간에서의 AO-x + dRRT 한 반복
+   ┌───────────────────────────────────────────────────────────┐
+   │ 1. q_rand ~ INFORMED_SAMPLE(c_best)   (프로레이트 초타원체) │
+   │ 2. c_rand ~ U[ ‖q_rand − q_start‖ , c_best ]               │
+   │ 3. q_near ← NN(트리, q_rand)                                │
+   │ 4. v ← ORACLE(q_near, q_rand)                               │
+   │        s.t. g_near + ‖v − q_near‖ ≤ c_rand                  │
+   │ 5. if COLLISION_FREE(q_near → v):  트리에 (v, g) 추가        │
+   │ 6. if v 가 goal 연결:  c_best ← min(c_best, 새 경로 비용)    │
+   └───────────────────────────────────────────────────────────┘
+      c_best 가 줄어들수록 1의 초타원체가 수축 → 탐색 집중 (informed)
+</code></pre>
+<h3>3.3 3계층 GPU SIMT 병렬성</h3>
+<p>MR. POP의 성능은 <strong>세 계층</strong>의 병렬성을 GPU 하드웨어 계층(그리드/블록/스레드)에 대응시키는 데서 나온다.</p>
+<pre class="diagram"><code>  ┌──────────────────────────────────────────────────────────────┐
+  │ 고수준 (High-level)  — 다수 계획 인스턴스 / 양방향(bidirectional)│
+  │   여러 개의 dRRT/AO-x 계획 시도를 동시 실행                     │
+  │   양방향 탐색(start-tree ↔ goal-tree)                          │
+  ├──────────────────────────────────────────────────────────────┤
+  │ 중수준 (Mid-level)   — 블록 병렬 반복                          │
+  │   각 GPU 블록이 독립적으로 로드맵 구성/트리 탐색 한 반복 수행   │
+  │   &quot;modern GPUs are capable of running hundreds of blocks       │
+  │    simultaneously&quot;  → 수백 반복 동시 진행                       │
+  ├──────────────────────────────────────────────────────────────┤
+  │ 저수준 (Low-level)   — 스레드 병렬 기본연산                    │
+  │   샘플링 · 최근접 이웃(NN) 탐색 · 충돌검사(collision)를         │
+  │   블록 내 스레드들이 병렬 수행                                  │
+  └──────────────────────────────────────────────────────────────┘
+       그리드(grid) = 여러 계획 인스턴스
+       블록(block)  = 한 계획 반복(로드맵 구성 or 트리 확장)
+       스레드(thread)= 샘플/NN/충돌 등 기본연산 병렬단위
+</code></pre>
+<p>이 계층 매핑의 이점은, GPU가 <strong>수백 개 블록을 동시에 굴릴 수 있으므로</strong> 결합공간이 요구하는 방대한 샘플 수를 CPU 코어 수 제약 없이 소화한다는 점이다. dRRT의 암묵적 복합 로드맵과 AO-x의 상태-비용 반복이 모두 <strong>독립적 병렬 단위</strong>로 쪼개지기 때문에 SIMT 모델에 자연스럽게 얹힌다.</p>
+<h3>3.4 2단계 조밀→세밀 충돌검사와 스레드 재할당</h3>
+<p>충돌검사는 샘플기반 계획의 최대 비용 항목이다. MR. POP는 CoMMALab 계보(VAMP)의 <strong>구(sphere) 근사</strong> — URDF 지오메트리를 폼(foam)형 구 집합으로 보수적으로 근사 — 를 이어받아, 2단계로 검사한다.</p>
+<pre class="codeblock"><code>[Stage 1] 조밀(coarse) — 보수적 큰 구
+   • 각 이산화된 이동(discretized motion) d_i 에 4개 스레드 할당
+   • 순전파 기구학(forward kinematics) 추적 + 조밀 구 충돌검사
+   • 조밀 구에서 무충돌이면 → 그 이동은 확정 무충돌 (조기 종료)
+   • 조밀 구에서 충돌 가능성이 있으면 → 세밀 검사 필요
+   • 각 이동 d_i 가 요구하는 세밀 구 개수 c_i 를 집계
+
+[Stage 2] 세밀(fine) — 작은 구, 워크로드 균형 재할당
+   • 스레드를  c_i : total  비율에 따라 재할당
+        (total = Σ_i c_i,  세밀 검사가 필요한 이동들의 총 구 개수)
+   • 세밀 구가 많은 복잡한 이동에 더 많은 스레드가 배정됨
+   • → SIMT 발산(divergence) 최소화, 워크로드 균형
+</code></pre>
+<p><strong>왜 재할당인가.</strong> 순진하게 &quot;모션당 고정 스레드&quot;를 쓰면, 세밀 구 100개짜리 복잡한 이동과 5개짜리 단순한 이동에 같은 스레드가 배정돼, 복잡한 이동의 스레드가 20배 오래 걸려 워프(warp) 전체가 대기한다. <code>c_i : total</code> 비례 재할당은 이 불균형을 흡수한다(도전과제 C-5 해소).</p>
+<h3>3.5 로드맵 구성 (Algorithm 2)과 PRM* 연결 반경</h3>
+<p>개별 로드맵 <code>G_i</code>는 PRM* 스타일로 GPU 위에서 구성된다. 연결 반경은 점근적 최적성을 보장하는 표준 PRM* 공식을 따른다:</p>
+<pre class="codeblock"><code>r*(n) = (1 + η) · 2 · (1 + 1/d)^(1/d) · ( max_i μ(C^f_i) / ζ_d )^(1/d) · ( log n / n )^(1/d)   ...(Eq. 2)
+
+   n         : 로드맵 표본 수
+   d         : 구성공간 차원
+   μ(C^f_i)  : 로봇 i 의 자유공간(free space) 부피 측도
+   ζ_d       : 단위 d-차원 공(ball) 부피
+   η         : 여유(inflation) 상수
+</code></pre>
+<p><strong>Algorithm 2의 흐름</strong> (블록 병렬):</p>
+<pre class="codeblock"><code>1. 리더(leader) 블록이 start/goal 로 로드맵 초기화                    (Lines 3–6)
+2. 각 블록이 자유 구성 표본 추출                                        (Line 11)
+3. 반경 δ 안의 이웃 탐색                                                (Lines 12–14)
+4. 간선 충돌검사 (3.4의 2단계 검사 사용)                               (Lines 15–16)
+5. 그리드 전역 동기화 — 블록별 쓰기 병합                                (Line 17)
+6. 리더 블록이 BFS 로 연결성(connectivity) 확인                        (Lines 18–19)
+</code></pre>
+<p>리더-블록 패턴(초기화·병합·연결성 확인은 한 블록, 표본·이웃·검사는 전 블록)은 GPU 상에서 동기화 비용을 최소화하면서 로드맵을 병렬 성장시킨다.</p>
+<hr>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                            MR. POP 파이프라인                          │
+│                                                                        │
+│  입력: 로봇 k대 URDF, start/goal 결합구성, 장애물(환경 구 근사)         │
+│                                                                        │
+│  ┌───────────────────────────────────────────────────────────────┐   │
+│  │ [A] 개별 로드맵 구성 (GPU, Algorithm 2)                          │   │
+│  │     G_1 ... G_k  — PRM* 반경 r*(n) (Eq.2), 블록 병렬             │   │
+│  │     리더 블록: 초기화·병합·BFS 연결성                            │   │
+│  └───────────────────────────────────────────────────────────────┘   │
+│                              │                                         │
+│                              ▼                                         │
+│  ┌───────────────────────────────────────────────────────────────┐   │
+│  │ [B] 복합 로드맵 𝔾 = G_1 ⊗ ... ⊗ G_k  (암묵적, 텐서곱)           │   │
+│  │     명시 저장 안 함 — 오라클이 필요 시 이웃 질의                  │   │
+│  └───────────────────────────────────────────────────────────────┘   │
+│                              │                                         │
+│                              ▼                                         │
+│  ┌───────────────────────────────────────────────────────────────┐   │
+│  │ [C] AO-x + 양방향 dRRT 탐색 (GPU, 3계층 병렬)                    │   │
+│  │   ┌─────────────────────────────────────────────────────────┐ │   │
+│  │   │ 고: 다수 인스턴스 / 양방향  (그리드)                      │ │   │
+│  │   │ 중: 블록당 dRRT 반복      (수백 블록 동시)               │ │   │
+│  │   │ 저: 샘플·NN·충돌 스레드   (2단계 coarse→fine, 재할당)     │ │   │
+│  │   └─────────────────────────────────────────────────────────┘ │   │
+│  │   informed sample (프로레이트 초타원체, c_best 수축)            │   │
+│  │   비용 좌표 c_rand ~ U[ḡ(q_rand), c_best]                       │   │
+│  └───────────────────────────────────────────────────────────────┘   │
+│                              │                                         │
+│                              ▼                                         │
+│   출력: a.s.a.o. 결합 경로 (+ 하류 최적화기 시드로 재사용 가능)         │
+│         └────────► cuRoboV2 등 궤적최적화기에 다양한 저비용 시드 제공   │
+└──────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<p><strong>데이터 흐름 요약.</strong> (A) 각 로봇의 개별 로드맵을 GPU 블록 병렬로 만들고, (B) 이를 텐서곱으로 암묵 결합해 복합 로드맵 <code>𝔾</code>를 정의한다. (C) AO-x가 상태-비용 공간에서 informed 표본을 뽑고 양방향 dRRT가 오라클 유도로 <code>𝔾</code>를 탐색하되, 3계층 병렬성으로 수백 반복을 동시 수행한다. <code>c_best</code>가 갱신될 때마다 초타원체가 수축해 탐색이 집중되고, 비용이 점근적으로 최적에 수렴한다. 산출된 경로는 그 자체로 해이면서, 동시에 cuRobo 같은 궤적최적화기의 <strong>다양한 시드</strong>로 재사용된다.</p>
+<hr>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets / Benchmarks)</h3>
+<ul>
+<li><strong>Four Franka Bin Packing (28-DOF)</strong>: Franka 팔 4대, 50개 bin-packing 문제. xECBS 계획 연구 기반 벤치.</li>
+<li><strong>Five Franka Shelf Reaching (35-DOF)</strong>: Franka 팔 5대, 50개 shelf-reaching 문제.</li>
+<li><strong>Single-Robot Fetch (8-DOF)</strong>: MotionBenchMaker 단일 로봇 벤치(대조군).</li>
+<li><strong>저장소 재현</strong>: <code>build/evaluate_mr panda_four &lt;name&gt;</code> / <code>build/evaluate_mr panda_five &lt;name&gt;</code> 로 28/35-DOF 벤치 실행 가능(README/scripts 확인).</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>성공률 (solve rate)</strong>: 예산 안에 실현가능 해를 찾은 비율.</li>
+<li><strong>계획 시간 (planning time)</strong>: 해 도달까지 벽시계 시간(가속 배수로 비교).</li>
+<li><strong>해 비용 (solution cost)</strong> 및 <strong>수렴 속도</strong>: 시간에 따른 비용 하강 곡선, interquartile range(IQR).</li>
+<li><strong>하류 최적화기 성공률</strong>: MR. POP 시드로 cuRoboV2를 초기화했을 때 성공률.</li>
+<li><strong>경로 품질</strong>: 경로 길이·모션 시간·무차원 저크(dimensionless jerk, 시간·변위로 정규화).</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>벤치 (DOF)</th>
+<th>계획기</th>
+<th>성공률</th>
+<th>속도(대비 배수)</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>4-Franka Bin Packing (28)</td>
+<td><strong>MR. POP</strong></td>
+<td><strong>100%</strong></td>
+<td>기준</td>
+<td>최저비용 수렴 최속·IQR 최소</td>
+</tr>
+<tr>
+<td>4-Franka (28)</td>
+<td>pRRTC</td>
+<td>100%</td>
+<td>MR.POP가 <strong>2.5×</strong> 빠름</td>
+<td>실현가능만 (최적성 X)</td>
+</tr>
+<tr>
+<td>4-Franka (28)</td>
+<td>VAMP-MR (CBS)</td>
+<td>—</td>
+<td>MR.POP가 <strong>1.9×</strong> 빠름</td>
+<td></td>
+</tr>
+<tr>
+<td>4-Franka (28)</td>
+<td>VAMP-MR (RRT)</td>
+<td>—</td>
+<td>MR.POP가 <strong>4.3×</strong> 빠름</td>
+<td></td>
+</tr>
+<tr>
+<td>4-Franka (28)</td>
+<td>AO-dRRT</td>
+<td>—</td>
+<td>비용 수렴 느림·IQR 큼</td>
+<td>CPU a.s.a.o.</td>
+</tr>
+<tr>
+<td>5-Franka Shelf Reaching (35)</td>
+<td><strong>MR. POP</strong></td>
+<td><strong>100%</strong> (유일)</td>
+<td>기준</td>
+<td>유일하게 완전 성공</td>
+</tr>
+<tr>
+<td>5-Franka (35)</td>
+<td>pRRTC</td>
+<td>&lt;100%</td>
+<td>MR.POP가 <strong>3.1×</strong> 빠름</td>
+<td>≥60% 성공 계획기 중</td>
+</tr>
+<tr>
+<td>5-Franka (35)</td>
+<td>VAMP-MR</td>
+<td>&lt;100%</td>
+<td>MR.POP가 <strong>5.1×</strong> 빠름</td>
+<td>≥60% 성공 계획기 중</td>
+</tr>
+<tr>
+<td>1-Fetch (8, MotionBenchMaker)</td>
+<td>MR. POP / pRRTC / AORRTC</td>
+<td>100%</td>
+<td>MR.POP가 저비용 수렴 <strong>수 자릿수</strong> 빠름</td>
+<td>다른 a.s.a.o. 대비</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li><strong>28-DOF</strong>: MR. POP와 pRRTC만 100% 성공. MR. POP는 pRRTC 대비 <strong>2.5×</strong>, VAMP-MR CBS 대비 <strong>1.9×</strong>, VAMP-MR RRT 대비 <strong>4.3×</strong> 빠르며, AO-dRRT보다 <strong>더 낮은 비용으로 더 빨리</strong> 수렴(IQR도 더 작음 = 안정적).</li>
+<li><strong>35-DOF</strong>: <strong>MR. POP만 100% 성공</strong>. 60% 이상 성공한 계획기들 중에서 pRRTC 대비 <strong>3.1×</strong>, VAMP-MR류 대비 <strong>5.1×</strong> 빠름.</li>
+<li><strong>8-DOF 단일 로봇</strong>: MR. POP·pRRTC·AORRTC 모두 100%. MR. POP는 다른 a.s.a.o. 계획기보다 저비용 해에 <strong>수 자릿수(orders of magnitude)</strong> 빠르게 수렴 → 다중 로봇 특화 설계가 단일 로봇에서도 손해가 아님.</li>
+</ul>
+<p><strong>cuRoboV2 시딩 (28-DOF)</strong>: MR. POP 시드로 초기화 시 cuRoboV2 성공률이 <strong>4% → 72%</strong> 로 급등. 반복 수를 늘릴수록 <strong>경로 길이·모션 시간이 짧아지고 무차원 저크가 감소</strong> → MR. POP의 다양·저비용 시드가 비볼록 지형의 국소최소를 회피하도록 돕는다.</p>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<ul>
+<li><strong>하드웨어 구성</strong>: 14-DOF 이중팔 시스템 — 7-DOF <strong>Flexiv Rizon 4s</strong> + 7-DOF <strong>Kinova Gen 3</strong>.</li>
+<li><strong>실증 내용</strong>: MR. POP의 <strong>경로 최적성</strong>과 <strong>궤적최적화기 시드 생성기로서의 유효성</strong>이 실기체로 전이됨을 확인. 특히 <strong>이동 장애물(moving obstacles) 주변 실시간 재계획(real-time replanning)</strong> (Figure 7)을 14-DOF 이중팔에서 시연.</li>
+<li><strong>의의</strong>: 시뮬레이션의 GPU 성능이 실물 이중팔의 동적 환경 재계획으로 이어짐을 보여, 알고리즘의 실용성을 뒷받침.</li>
+</ul>
+<p><strong>실험 환경</strong>: NVIDIA RTX 5090 GPU + Intel Core Ultra 9 285K CPU.</p>
+<hr>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>GPU 기반 a.s.a.o. 다중 로봇 계획기 최초 제안</strong>: dRRT(복합 로드맵)와 AO-x(상태-비용 informed 샘플링)를 GPU SIMT 병렬성 위에서 결합해, 점근적 최적성 보장과 계산 성능을 동시에 달성. 35-DOF까지 <strong>유일하게 100% 성공률</strong>.</p>
+</li>
+<li><p><strong>3계층 병렬성의 하드웨어 대응</strong>: 고(다수 인스턴스/양방향)–중(블록당 계획 반복 수백 개 동시)–저(스레드 병렬 샘플·NN·충돌) 계층을 그리드/블록/스레드에 매핑. CPU 코어 수 제약을 벗어나 결합공간 샘플 수요를 소화.</p>
+</li>
+<li><p><strong>2단계 조밀→세밀 충돌검사 + 워크로드 균형 재할당</strong>: 조밀 구 조기종료로 대부분의 이동을 값싸게 걸러내고, 세밀 검사가 필요한 이동에는 <code>c_i:total</code> 비율로 스레드를 재할당해 SIMT 발산을 최소화.</p>
+</li>
+<li><p><strong>하류 궤적최적화기의 시드 생성기로서의 가치 입증</strong>: 다양·저비용 시드로 cuRoboV2 성공률 <strong>4%→72%</strong>, 경로 길이·모션 시간·저크 개선. &quot;빠른 실현가능 계획기&quot;를 넘어 &quot;<strong>최적화기의 국소최소 회피를 돕는 시드 팩토리</strong>&quot;라는 새 활용 축 제시.</p>
+</li>
+<li><p><strong>실기체 전이</strong>: 14-DOF Flexiv+Kinova 이중팔에서 경로 최적성·시드 유효성·이동 장애물 실시간 재계획 실증.</p>
+</li>
+<li><p><strong>공개 코드</strong>: github.com/CoMMALab/MR.POP (C++/CMake, 28/35-DOF 벤치 스크립트 포함) — 재현성 확보.</p>
+</li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<ul>
+<li><strong>베이스 알고리즘</strong>: dRRT (복합 로드맵 텐서곱 오라클 탐색) + AO-x 메타알고리즘 (상태-비용 informed 샘플링, C1/C2 조건).</li>
+<li><strong>로드맵</strong>: PRM* 연결 반경 <code>r*(n)</code> (Eq. 2), 블록 병렬 구성, 리더 블록 BFS 연결성 확인.</li>
+<li><strong>탐색</strong>: 양방향 dRRT, informed sample from 프로레이트 초타원체, 비용 좌표 <code>c_rand ~ U[‖q_rand−q_start‖, c_best]</code>.</li>
+<li><strong>충돌검사</strong>: URDF→구(sphere) 폼 근사(VAMP 계보). Stage 1 이동당 4스레드 조밀검사 + 세밀 구 개수 <code>c_i</code> 집계, Stage 2 <code>c_i:total</code> 비율 스레드 재할당.</li>
+<li><strong>GPU 하드웨어</strong>: NVIDIA RTX 5090 (수백 블록 동시 실행 활용), CPU Intel Core Ultra 9 285K.</li>
+<li><strong>하류 최적화기 연동</strong>: cuRoboV2 시드로 MR. POP 해를 주입 (여러 반복 → 다양한 시드 세트).</li>
+<li><strong>빌드/재현</strong>: CMake (<code>cmake -B build</code> → <code>cmake --build build</code>), 벤치 실행 <code>build/evaluate_mr panda_four/panda_five &lt;name&gt;</code>, 벤치는 xECBS 계획 연구 기반. <code>extern/</code>에 외부 의존성(서브모듈) 포함.</li>
+<li><strong>저장소 상태</strong>: 13 커밋, README &quot;still under construction&quot;, LICENSE 미확인(라이선스 미명시), stars/forks 0 (초기 단계).</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<p>MR. POP의 확장성은 <strong>차원(로봇 수)</strong> 과 <strong>GPU 자원</strong>의 두 축에서 나타난다. 28→35-DOF로 갈 때 다른 계획기의 성공률이 붕괴(&lt;100%)하는 반면 MR. POP만 100%를 유지하는 것은, 결합공간 샘플 수요를 블록 병렬성으로 흡수하기 때문이다. GPU 블록 수가 커질수록 중수준 병렬성이 그대로 이득으로 전환되어, 하드웨어 세대(RTX 5090 등)의 발전이 자동으로 성능 향상으로 이어질 여지가 크다.</p>
+<h3>8.2 &quot;계획기 vs 시드 생성기&quot; 이중 역할</h3>
+<p>본 논문의 흥미로운 관점은 MR. POP를 <strong>단독 해결기</strong>로도, <strong>하류 최적화기의 시드 팩토리</strong>로도 쓸 수 있다는 것이다. cuRobo류 GPU 궤적최적화기는 볼록성이 없으면 나쁜 초기값에서 국소최소에 빠지는데(28-DOF 성공률 4%), MR. POP의 a.s.a.o. 성질이 <strong>저비용이면서도 위상적으로 다양한</strong> 시드를 제공해 성공률을 72%까지 끌어올린다. 이는 &quot;샘플기반 계획기 ↔ 최적화기&quot;를 경쟁이 아닌 <strong>상보(complementary) 관계</strong>로 재정립한다.</p>
+<h3>8.3 한계점 (Limitations)</h3>
+<ul>
+<li>논문은 명시적 한계 절을 두지 않았다(제공된 본문 기준). 다만 다음이 관찰된다:<ul>
+<li><strong>로드맵 품질 의존</strong>: (C1)/(C2)의 상수 <code>ξ_n</code>·<code>w_n</code>이 로드맵에 의존하므로, 개별 로드맵이 빈약하면 수축률이 나빠질 수 있다.</li>
+<li><strong>GPU 메모리</strong>: 로봇 수·로드맵 크기가 커지면 블록별 상태·복합 이웃 질의의 메모리 압박이 커질 수 있다(정량 분석 미제시).</li>
+<li><strong>환경 표현</strong>: 충돌검사가 구 근사에 의존하므로, 얇은/오목한 장애물에 대한 보수성(과충돌 판정)이 있을 수 있다(VAMP 계보 공통 특성).</li>
+<li><strong>평가 도메인</strong>: Franka·Flexiv·Kinova 등 고정기저 매니퓰레이터 위주로, 이동 로봇 팀(모바일 베이스)으로의 일반화는 향후 과제.</li>
+</ul>
+</li>
+<li><strong>향후 방향(본문)</strong>: 35-DOF까지 100% 성공이라는 성취를 강조하되, 구체적 후속 연구 방향은 명시하지 않음.</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>같은 Planner 트랙에서 토픽이 가장 가까운 선행 리뷰 — <strong>Dispersive Forward Tree Search for Optimal Control (DFT*)</strong>_arxiv2026 (GPU 배치 kinodynamic 최적 계획), <strong>Anytime GTMP</strong>_arxiv2026 (anytime·AO 배치 텐서 모션계획), <strong>PAAMP</strong>_LCSS2026 (부족구동 샘플기반 모션계획, 집합-값 노드) — 와 비교한다. 또한 <strong>동일 연구실(CoMMALab) 계보</strong>인 <strong>ReVAMP</strong>#300(VAMP 기반 반응형 시각 모션계획)과의 관계도 짚는다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>DFT* (arXiv2026)</th>
+<th>Anytime GTMP (arXiv2026)</th>
+<th>PAAMP (L-CSS2026)</th>
+<th><strong>MR. POP (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>문제</td>
+<td>미분평탄 kinodynamic 최적제어</td>
+<td>기하 모션계획, 호모토피 커버리지</td>
+<td>부족구동 비선형 kinodynamic MP</td>
+<td><strong>다중 로봇 결합공간 최적 MP</strong></td>
+</tr>
+<tr>
+<td>최적성</td>
+<td>근사 최적(결정론적 커버리지 보장)</td>
+<td>AO (비용 c*로 a.s. 수렴)</td>
+<td>실현가능+볼록 국소최적</td>
+<td><strong>a.s.a.o. (Theorem 1)</strong></td>
+</tr>
+<tr>
+<td>핵심 표현</td>
+<td>분산(dispersion) δ-균일 덮기 트리</td>
+<td>배치 텐서 다분 그래프 레이어</td>
+<td>집합-값(polytope) RRT 노드</td>
+<td><strong>텐서곱 복합 로드맵 + 상태-비용 informed 샘플</strong></td>
+</tr>
+<tr>
+<td>병렬화</td>
+<td>GPU 배치(너비우선 전방 트리)</td>
+<td>배치 텐서 연산</td>
+<td>(CPU 볼록계획 LP/QP)</td>
+<td><strong>3계층 GPU SIMT (그리드/블록/스레드)</strong></td>
+</tr>
+<tr>
+<td>다중 로봇</td>
+<td>단일 시스템 중심</td>
+<td>단일 로봇</td>
+<td>단일 부족구동 시스템</td>
+<td><strong>핵심 대상 (28/35-DOF)</strong></td>
+</tr>
+<tr>
+<td>충돌검사</td>
+<td>(플랫폼 의존)</td>
+<td>(플랫폼 의존)</td>
+<td>분리초평면(볼록)</td>
+<td><strong>2단계 구 근사 + 스레드 재할당</strong></td>
+</tr>
+<tr>
+<td>실기체</td>
+<td>시뮬만(v1 표 추출 실패)</td>
+<td>시뮬만(MBM+2D)</td>
+<td>시뮬만</td>
+<td><strong>14-DOF Flexiv+Kinova 이중팔</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>✅ BSD-3</td>
+<td>✅ MIT</td>
+<td>✅ MIT</td>
+<td>✅ (라이선스 미명시)</td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>DFT* 대비.</strong> DFT*는 조향(steering, 두 상태 연결 BVP)을 도달집합의 δ-균일 덮기로 치환해 GPU 배치 전방 트리를 굴리는 <strong>단일 시스템 kinodynamic</strong> 계획기다. MR. POP는 초점이 <strong>다중 로봇 결합공간</strong>이며, dRRT의 복합 로드맵으로 차원 폭발을 다루고 AO-x로 점근적 최적성을 얻는다. 두 논문 모두 &quot;GPU 병렬성으로 최적/근사최적 계획을 가속&quot;한다는 큰 방향은 공유하나, DFT*는 커버리지(도달성) 관점, MR. POP는 결합공간 탐색+비용 수축 관점으로 <strong>직교</strong>한다. DFT*의 도달집합 커버리지 아이디어는 MR. POP의 개별 로드맵 구성 품질(로드맵 의존 상수 <code>w_n</code>·<code>ξ_n</code> 개선)에 접목될 여지가 있다.</p>
+<p><strong>Anytime GTMP 대비.</strong> Anytime GTMP는 배치 텐서 레이어 그래프 위에서 anytime·AO로 호모토피 클래스를 커버하며 비용을 <code>c*</code>로 a.s. 수렴시킨다. <strong>AO 메타 관점을 공유</strong>한다는 점에서 MR. POP와 가장 가깝다(둘 다 anytime·점근적 최적). 차이는 (1) GTMP는 <strong>단일 로봇 기하</strong> 호모토피 커버리지, MR. POP는 <strong>다중 로봇</strong> 결합공간; (2) GTMP는 배치 텐서 그래프, MR. POP는 텐서곱 복합 로드맵 + 상태-비용 informed 샘플; (3) GTMP는 로컬플래너를 블랙박스로 일반화, MR. POP는 dRRT 오라클을 GPU 스레드까지 내려 병렬화. GTMP의 &quot;레이어당 샘플↑ = miss확률 지수감소&quot; 스케일링 통찰과 MR. POP의 &quot;블록 병렬로 샘플 수요 흡수&quot;는 상호 보완적이다.</p>
+<p><strong>PAAMP 대비.</strong> PAAMP는 부족구동 시스템의 실현가능 궤적이 함수공간 다양체에 놓여 볼록계획을 직접 못 쓰는 문제를, 명목궤적 주변 국소 아핀좌표로 선형화한 <strong>집합-값 RRT 노드(polytope)</strong> 로 해소한다. MR. POP와의 공통점은 <strong>RRT 노드를 단일 상태 이상으로 재정의</strong>한다는 발상(PAAMP=볼록 도달집합, MR. POP=텐서곱 복합 정점)이나, PAAMP는 단일 부족구동 동역학·CPU 볼록계획, MR. POP는 다중 로봇 기구학·GPU SIMT로 목적과 수단이 다르다. 두 방법은 결합 가능성이 있다(부족구동 다중 로봇의 GPU 병렬 최적계획).</p>
+<p><strong>ReVAMP(#300) — 동일 연구실 계보.</strong> ReVAMP와 MR. POP는 모두 CoMMALab의 <strong>VAMP(구 근사 초고속 충돌검사)</strong> 계보다. ReVAMP는 시각 관측 기반 <strong>반응형 단일/이중팔 적응 모션계획</strong>(코드 미공개, 실기체 Franka+RB-Y1)이고, MR. POP는 <strong>다중 로봇 최적 모션계획</strong>(코드 공개, 14-DOF 이중팔)이다. 같은 충돌검사 백본을 공유하되, ReVAMP는 &quot;반응성·적응성&quot;, MR. POP는 &quot;다중 로봇·점근 최적성·GPU 확장성&quot; 축으로 갈라진다. 흥미롭게도 MR. POP가 <strong>코드 공개로 재현성 우위</strong>를 가지며, ReVAMP의 반응형 재계획과 MR. POP의 실시간 이동 장애물 재계획(Figure 7)은 향후 통합될 자연스러운 후속 방향이다.</p>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>강점</strong>: (1) 공개 코드 + CMake 빌드 + 28/35-DOF 벤치 스크립트 → 즉시 재현·확장 가능. (2) 14-DOF 실기체 이중팔에서 이동 장애물 실시간 재계획 실증 → 산업용 이중팔 셀·다중팔 셀에 직접적. (3) cuRobo 시드 생성기 활용은 기존 GPU 최적화 파이프라인에 <strong>드롭인</strong>으로 붙일 수 있어 채택 장벽이 낮다.</li>
+<li><strong>제약</strong>: (1) RTX 5090급 GPU를 전제 → 임베디드/저사양에서는 이득이 줄 수 있다. (2) 구 근사의 보수성으로 얇은 장애물 환경에서 과충돌 판정 가능. (3) 라이선스 미명시 상태(README 공사 중) → 상업적 채택 전 라이선스 확인 필요.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>MR. POP는 &quot;샘플기반 계획기를 GPU로 가속&quot;하는 최근 흐름(pRRTC·VAMP·DFT*)을 <strong>다중 로봇 a.s.a.o.</strong> 로 밀어 올린 자연스럽고 강한 진전이다. 특히 <strong>계획기를 최적화기의 시드 팩토리로 재정의</strong>한 관점은, &quot;계획 vs 최적화&quot; 이분법을 넘어 하이브리드 파이프라인의 표준 구성요소로 자리 잡을 잠재력이 있다. 향후: (1) 모바일 베이스 다중 로봇으로 일반화, (2) 부족구동/동역학 제약(PAAMP·DFT* 결합), (3) 로드맵 품질을 학습으로 개선해 <code>w_n</code> 수축률 향상, (4) 멀티 GPU 스케일아웃이 유망하다.</p>
+<hr>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
+<ol>
+<li>Huang, C. H., Xing, R., Plancher, B., Kingston, Z. <strong>MR. POP: Multi-Robot Parallel Optimizing Planner for Almost-Surely Asymptotically Optimal Planning.</strong> arXiv:2609.30644, 2026.</li>
+<li>dRRT — Solovey, K., Salzman, O., Halperin, D. <em>Finding a needle in an exponential haystack: Discrete RRT for exploration of implicit roadmaps in multi-robot motion planning.</em> IJRR, 2016.</li>
+<li>AO-x 메타알고리즘 — Hauser, K., Zhou, Y. <em>Asymptotically Optimal Planning by Feasible Kinodynamic Planning in a State-Cost Space.</em> IEEE T-RO, 2016.</li>
+<li>Informed sampling — Gammell, J. D., Srinivasa, S. S., Barfoot, T. D. <em>Informed RRT*: Optimal sampling-based path planning focused via direct sampling of an admissible ellipsoidal heuristic.</em> IROS, 2014.</li>
+<li>PRM* / RRT* — Karaman, S., Frazzoli, E. <em>Sampling-based algorithms for optimal motion planning.</em> IJRR, 2011.</li>
+<li>VAMP (구 근사 초고속 충돌검사) — Thomason, W., Kingston, Z., Kavraki, L. E. <em>Motions in Microseconds via Vectorized Sampling-Based Planning.</em> ICRA, 2024.</li>
+<li>pRRTC — CoMMALab, GPU 병렬 RRT-Connect. 2025.</li>
+<li>cuRobo — Sundaralingam, B. et al. <em>cuRobo: Parallelized Collision-Free Robot Motion Generation.</em> ICRA, 2023.</li>
+<li><strong>Dispersive Forward Tree Search for Optimal Control (DFT*)</strong>, arXiv 2026 — 본 코퍼스 리뷰 <code>Planner/review/DFTStar_arxiv2026/</code>.</li>
+<li><strong>Anytime GTMP</strong>, arXiv 2026 — 본 코퍼스 리뷰 <code>Planner/review/AnytimeGTMP_arxiv2026/</code>.</li>
+<li><strong>PAAMP</strong>, IEEE L-CSS 2026 — 본 코퍼스 리뷰 <code>Planner/review/PAAMP_LCSS2026/</code>.</li>
+<li><strong>ReVAMP</strong> (#300), arXiv 2026 — 본 코퍼스 큐 <code>queue_new.md</code>.</li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
+<p>MR. POP는 다중 로봇 최적 모션계획이라는 오래된 난제를 <strong>GPU SIMT 병렬성</strong>으로 정면 돌파한다. dRRT의 텐서곱 복합 로드맵과 AO-x의 상태-비용 informed 샘플링을 결합하고, 이를 고–중–저 3계층 병렬성으로 GPU 하드웨어에 매핑하며, 2단계 조밀→세밀 충돌검사에 스레드 재할당을 더해 SIMT 효율을 끌어올린다. 그 결과 <strong>35-DOF까지 유일하게 100% 성공률</strong>을 유지하면서 pRRTC·VAMP-MR 등 SOTA a.s.a.o. 계획기보다 1.9×~5.1× 빠르고, Theorem 1로 <strong>거의 확실한 점근적 최적성</strong>을 보장한다.</p>
+<p><strong>혁신성</strong>은 (1) 최초의 GPU 기반 a.s.a.o. 다중 로봇 계획기, (2) AO 메타알고리즘·dRRT·구 근사 충돌검사를 GPU 스레드 수준까지 내려 통합한 시스템 설계, (3) 계획기를 궤적최적화기의 <strong>시드 팩토리</strong>로 재정의(cuRobo 4%→72%)한 관점에 있다.</p>
+<p><strong>실용적 의의</strong>는 공개 코드(CMake 빌드·28/35-DOF 벤치)와 14-DOF Flexiv+Kinova 이중팔 실기체 실증(이동 장애물 실시간 재계획)에서 뚜렷하다. 산업용 다중팔 셀, 그리고 기존 GPU 최적화 파이프라인의 시드 단계에 드롭인으로 붙일 수 있다.</p>
+<p><strong>향후 연구 방향</strong>으로는 모바일 베이스 다중 로봇 일반화, 부족구동·동역학 제약 통합(PAAMP·DFT* 결합), 학습 기반 로드맵 품질 개선을 통한 수축률 향상, 멀티 GPU 스케일아웃이 제시된다. MR. POP는 &quot;샘플기반 계획 ↔ GPU 최적화&quot;를 경쟁이 아닌 상보 관계로 재정립하며, 다중 로봇 계획의 실용 지평을 35-DOF급으로 끌어올린 의미 있는 진전이다.</p>
+<hr>
+<p><em>리뷰 작성: 2026-09-28 | Paper Review Agent | 트랙: Planner (다중 로봇 GPU 최적 모션계획, 경계 플래그: 매니퓰레이터 플랫폼이나 기여가 모션계획 — PAAMP·DFT*·ReVAMP 선례)</em></p>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+<div class="rhead" id="rhead" data-title="MR. POP: Multi-Robot Parallel Optimizing Planner for Almost-Surely Asymptotically Optimal Planning: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
+</body>
+</html>

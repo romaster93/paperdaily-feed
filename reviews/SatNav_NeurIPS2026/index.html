@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>SatNav: A Large-Scale Benchmark for Aerial Vision-Language Navigation with Satellite Imagery · PaperDaily</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { color: #8f4023; text-decoration: underline; }
+
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
+
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
+}
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
+article code.math-display {
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
+}
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
+article th {
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
+article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: var(--mono); font-size: 12px; text-align: center;
+}
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
+footer {
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
+</head>
+<body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2609.31507">arXiv ↗</a>
+</div>
+<div class="wrap">
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">SatNav_NeurIPS2026</span>
+    </div>
+    <h1 class="doc-title">SatNav: A Scalable Benchmark for Long-Horizon UAV Vision-Language Navigation from Satellite Imagery — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">NeurIPS 2026 (Datasets &amp; Benchmarks Track)</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2609.31507">2609.31507</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">✅ <a href="https://github.com/Eku127/SatNav">Eku127/SatNav</a> · <a href="https://github.com/Eku127/SwiftVLN">Eku127/SwiftVLN</a></span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">✅ <a href="https://eku127.github.io/SatNav/">eku127.github.io/SatNav</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-09-29</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">41KB · 약 39분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
+  </header>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: SatNav: A Scalable Benchmark for Long-Horizon UAV Vision-Language Navigation from Satellite Imagery</li>
+<li><strong>저자 (Authors)</strong>: Jiajun Jiang, Chunliang Hua, Zichun Chen, Yanxing Wu, Zeyuan Yang, Jie Song, Xiao Hu</li>
+<li><strong>소속 (Affiliation)</strong>: arXiv 원문에 기관명이 명시적으로 노출되지 않음(프로젝트 페이지·코드 org <code>Eku127</code>). 저자 목록·프로젝트/코드 배포 방식으로 보아 학계 연구그룹 주도. — <em>추정 금지 원칙에 따라 소속은 &quot;미상&quot;으로 표기하고 확인되면 갱신</em></li>
+<li><strong>발표처 (Published)</strong>: <strong>NeurIPS 2026, Track on Evaluations and Datasets (Datasets &amp; Benchmarks)</strong> — 게재 확정. 32 pages, 16 figures.</li>
+<li><strong>DOI</strong>: (arXiv 프리프린트, DOI 미부여 상태)</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2609.31507">https://arxiv.org/abs/2609.31507</a> (제출 2026-09-25)</li>
+<li><strong>라이선스</strong>: CC BY 4.0 (데이터셋)</li>
+<li><strong>코드</strong>: ✅ <a href="https://github.com/Eku127/SatNav">https://github.com/Eku127/SatNav</a> (벤치마크) · <a href="https://github.com/Eku127/SwiftVLN">https://github.com/Eku127/SwiftVLN</a> (프레임워크)</li>
+<li><strong>데이터셋</strong>: ✅ <a href="https://huggingface.co/datasets/Eku127/SatNav-Episodes-v0.1">https://huggingface.co/datasets/Eku127/SatNav-Episodes-v0.1</a></li>
+<li><strong>모델 주(zoo)</strong>: ✅ <a href="https://huggingface.co/collections/Eku127/satnav-baseline-model-zoo">https://huggingface.co/collections/Eku127/satnav-baseline-model-zoo</a></li>
+<li><strong>프로젝트 페이지</strong>: ✅ <a href="https://eku127.github.io/SatNav/">https://eku127.github.io/SatNav/</a></li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 논문은 <strong>도시 규모(urban-scale)·장기지평(long-horizon) UAV(무인 항공기) Vision-Language Navigation(VLN)</strong> 을 위한 <strong>확장 가능한 벤치마크와 데이터셋, 그리고 참조 프레임워크(SwiftVLN)</strong> 를 제안한다.</p>
+<p>핵심 문제의식은 다음과 같다. 기존 VLN 벤치마크(실내 R2R/RxR, 실외 항공 AerialVLN 등)는 <strong>고비용 3D 재구성(photogrammetry·NeRF·3DGS)</strong> 에 의존한다. 3D 재구성은 (a) 데이터 수집·처리 비용이 극도로 크고, (b) 커버 가능한 <strong>지리적 범위가 좁으며</strong>, (c) 시나리오 수가 제한된다. 그 결과 항공 VLN 연구는 소수의 재구성된 도시/장면에 갇혀, <strong>도시 규모에서의 지속 메모리(sustained memory)·지리적 이해(geographic understanding)</strong> 를 요구하는 장기지평 항해를 제대로 평가하지 못했다.</p>
+<p>SatNav의 통찰은 <strong>&quot;UAV의 하향(top-down) 카메라 시점을 고해상도 위성영상 크롭(satellite imagery crop)으로 대리(proxy)한다&quot;</strong> 는 것이다. 위성영상은 (1) 전 지구를 이미 커버하며, (2) 3D 재구성 없이 자동 파이프라인으로 대량의 에피소드를 합성할 수 있어, <strong>지리적 다양성과 규모를 동시에</strong> 확보한다. 이 대리 전략으로 <strong>59개 장면 · 18개 도시 · 118,000개 에피소드 · 평균 궤적 379m</strong> 라는 유례없는 규모의 항공 VLN 데이터셋을 자동 구축했다.</p>
+<p>또한 저자들은 <strong>위성영상으로 학습한 정책이 실제 드론 영상(operational UAV footage)에서도 동작함</strong>(satellite-to-reality transfer)을 경량 시각 어댑터로 실증하여, 대리 전략이 단순한 &quot;값싼 시뮬레이터&quot;가 아니라 <strong>실기체로 전이되는 학습 신호</strong>임을 보인다.</p>
+<p>이 리뷰는 (i) 위성영상 대리라는 데이터 팩토리 설계, (ii) 세 과제군(Boundary/Landmark/Route)의 인지적 구조, (iii) SwiftVLN의 교체형(switchable) 메모리 설계 공간, (iv) 도시 규모에서 드러나는 기존 모델의 한계, (v) sim/proxy-to-real 전이의 의의를 PhD 수준으로 분석한다.</p>
+<hr>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) 3D 재구성 의존성 → 규모·지리 다양성의 병목.</strong>
+항공 VLN의 대표 벤치마크(AerialVLN 계열)는 사실적 3D 도시를 렌더링하여 UAV 시점을 생성한다. 사진측량/NeRF/3DGS 기반 재구성은 장면당 수백~수천 장의 항공 촬영, 정합, 후처리를 요구한다. 이는:</p>
+<ul>
+<li>장면 수를 수십 개 규모로 제한하고,</li>
+<li>특정 도시(주로 촬영이 이뤄진 곳)에 편향시키며,</li>
+<li>&quot;새로운 도시 일반화(unseen city generalization)&quot;를 구조적으로 평가하기 어렵게 만든다.</li>
+</ul>
+<p><strong>(C2) 장기지평(long-horizon)에서의 지속 메모리 부재.</strong>
+도시 규모 항해는 수백 미터에 걸쳐 진행된다(SatNav 평균 379m). 이때 에이전트는:</p>
+<ul>
+<li>이미 방문한 영역·경계(loop)를 기억하고,</li>
+<li>멀리 있는 랜드마크를 공간적으로 접지(ground)하며,</li>
+<li>다단계 경로 지시(방향+수치 힌트)를 순서대로 추적해야 한다.</li>
+</ul>
+<p>기존 VLN 모델은 짧은 실내 궤적(R2R 평균 수 미터~수십 미터)에 최적화되어, 장기지평에서 <strong>메모리 표현(어떤 과거를 어떻게 압축·보존할지)</strong> 이 성능을 지배함에도 이를 체계적으로 비교할 실험대(testbed)가 없었다.</p>
+<p><strong>(C3) 항공 시점 특유의 지시 유형 부재.</strong>
+지상/실내 VLN 지시(&quot;문을 지나 왼쪽&quot;)는 항공 도시 항해에 부적합하다. 도시 규모에서는:</p>
+<ul>
+<li><strong>경계 순찰/루프 진행 추적</strong>(Boundary),</li>
+<li><strong>원거리 랜드마크 접지</strong>(Landmark),</li>
+<li><strong>수치 단서를 포함한 경로 추종</strong>(&quot;세 번째 교차로에서 좌회전&quot;)(Route)</li>
+</ul>
+<p>같은, <strong>지리적·수치적·위상적</strong> 추론을 요구하는 지시 유형이 필요하다.</p>
+<p><strong>(C4) 시뮬/대리 → 실기체 전이(sim/proxy-to-real gap).</strong>
+위성영상은 실제 드론 카메라와 해상도·시점·조명·왜곡이 다르다. 위성으로 학습한 정책이 실제 UAV 영상에서 무너지면 벤치마크의 실용적 가치가 훼손된다. 따라서 <strong>전이 가능성 실증</strong>이 필수 검증 항목이다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>SatNav는 위 네 도전과제를 다음으로 해소한다:</p>
+<ol>
+<li><strong>위성영상 대리 + 자동 에피소드 합성 파이프라인</strong> (C1 해소): 3D 재구성을 위성 크롭으로 대체, 자동 프로세스로 118K 에피소드/18개 도시 생성 → 규모·지리 다양성 동시 확보 + seen/unseen 도시 일반화 평가 가능.</li>
+<li><strong>SwiftVLN — 교체형 메모리 설계 공간</strong> (C2 해소): History Sampling × Input Augmentation × Memory Compression의 조합을 모듈식으로 스위칭하여, 장기지평 메모리 설계를 <strong>통제된 절제(ablation)</strong> 로 비교.</li>
+<li><strong>세 과제군(Boundary/Landmark/Route)</strong> (C3 해소): 항공 도시 항해에 특화된 인지 축을 분리한 과제 설계.</li>
+<li><strong>위성-실기체 전이 실증</strong> (C4 해소): 경량 시각 어댑터로 위성 학습 정책을 실제 드론 영상에 배치, 세 과제 전부에서 전이 동작 확인.</li>
+</ol>
+<hr>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 위성영상 대리(Satellite-as-UAV-view)와 데이터 팩토리</h3>
+<p>SatNav의 1차 기여는 <strong>데이터 생성 방식 자체</strong>다. UAV의 하향 카메라가 보는 장면을 <strong>고해상도 위성 크롭</strong>으로 근사한다.</p>
+<pre class="diagram"><code>[위성영상 대리 파이프라인 — 개념도]
+
+전 지구 위성 타일(고해상도)
+        │
+        ▼
+ 도시/장면 선택 (18 cities, 59 scenes)
+        │  ← 지리 다양성을 &quot;촬영&quot;이 아닌 &quot;선택&quot;으로 확보
+        ▼
+ 궤적 샘플링 (평균 379m long-horizon)
+        │
+        ├── 하향 크롭 시퀀스 생성 (UAV 시점 대리)
+        │        각 스텝 = 현재 위치 중심 위성 크롭
+        │
+        ▼
+ 과제군별 지시 자동 생성
+   ├── Boundary: 루프/경계 진행 지시
+   ├── Landmark: 원거리 지형지물 접지 지시
+   └── Route: 방향 + 수치 단서 경로 지시
+        │
+        ▼
+ 118,000 에피소드 (train / val / test[seen·unseen])
+</code></pre>
+<p>이 설계의 이론적 함의:</p>
+<ul>
+<li><strong>비용 곡선의 기울기 변화</strong>: 3D 재구성은 장면 수 N에 대해 수집·처리 비용이 대략 선형(장면마다 촬영 필요)으로 증가한다. 위성 대리는 위성 타일이 이미 존재하므로 <strong>한계 장면 추가 비용이 0에 수렴</strong>한다(크롭·라벨 자동화만 필요). 이것이 &quot;Scalable&quot;의 실체다.</li>
+<li><strong>지리 다양성의 무상 확보</strong>: 18개 도시는 서로 다른 도시 형태(격자형 vs 방사형 vs 불규칙), 블록 크기, 도로망 위상을 갖는다. 이는 <strong>seen/unseen 도시 일반화</strong>라는, 기존 항공 VLN이 구조적으로 평가 못하던 축을 자연스럽게 연다.</li>
+</ul>
+<p><strong>대리의 한계도 명확히 짚어야 한다(정직한 평가):</strong></p>
+<ul>
+<li>위성영상은 (a) <strong>고정 시점(정사에 가까운 하향)</strong> 으로, 실제 UAV의 자유로운 pitch/roll·저고도 사각(oblique) 시점을 완전히 대리하지 못한다.</li>
+<li>(b) <strong>시간 정지 스냅샷</strong>이라 동적 요소(차량·보행자·그림자 이동)를 담지 않는다.</li>
+<li>(c) 해상도·색보정이 위성 센서 특성에 종속된다.
+저자들이 <strong>전이 실험(§3.4)</strong> 을 굳이 포함한 이유가 바로 이 gap을 정량적으로 봉합하기 위해서다.</li>
+</ul>
+<h3>3.2 세 과제군(Task Families)의 인지적 구조</h3>
+<p>SatNav는 도시 규모 항공 항해를 세 개의 직교하는 인지 축으로 분해한다.</p>
+<p><strong>(1) Boundary — 경계/루프 진행 추적.</strong>
+지정된 둘레(perimeter)나 루프를 따라 항해하며, &quot;루프를 얼마나 완주했는가&quot;를 추적한다.</p>
+<ul>
+<li>요구 능력: <strong>누적 진행 상태의 지속 기억</strong>. 에이전트는 자신이 이미 지난 경계 구간을 재방문하지 않도록, 과거 궤적을 장기 메모리에 유지해야 한다.</li>
+<li>인지 병목: <strong>장기지평 메모리</strong>. 궤적이 길수록 &quot;어디까지 돌았는지&quot;를 잊기 쉽다.</li>
+</ul>
+<p><strong>(2) Landmark — 원거리 랜드마크 공간 접지.</strong>
+&quot;OO(두드러진 지형지물) 쪽으로/근처로 가라&quot;는 지시를 받아, 시야 내(또는 기억 속) 랜드마크를 공간적으로 접지한다.</p>
+<ul>
+<li>요구 능력: <strong>시각-언어 접지 + 지리적 방위 추론</strong>. 하향 위성 시점에서 랜드마크(공원·경기장·강·대형 건물 등)를 식별하고 상대 방위를 계산.</li>
+<li>인지 병목: <strong>개방 어휘 시각 접지</strong>와 <strong>전역 공간 이해</strong>.</li>
+</ul>
+<p><strong>(3) Route — 수치 단서 경로 추종.</strong>
+&quot;세 번째 블록에서 우회전&quot; 같은 <strong>방향 + 수치(counting) 단서</strong>를 포함한 다단계 경로를 순서대로 추종.</p>
+<ul>
+<li>요구 능력: <strong>순차적 지시 파싱 + 카운팅(교차로/블록 세기) + 자기위치 추정</strong>.</li>
+<li>인지 병목: <strong>장기 순차 정렬(instruction-trajectory alignment)</strong> 과 <strong>수치 추론</strong>. LLM/VLM 계열이 특히 카운팅에 취약함이 알려져 있어, 이 과제가 현대 모델의 약점을 정조준한다.</li>
+</ul>
+<pre class="codeblock"><code>[세 과제군의 인지 축 분리]
+
+               지속 메모리        시각-언어 접지     순차/수치 추론
+ Boundary        ★★★               ★                 ★★
+ Landmark        ★★                ★★★               ★
+ Route           ★★                ★★                ★★★
+
+ → 세 과제가 서로 다른 능력을 스트레스 테스트하도록 설계
+   (단일 SR로 뭉뚱그리지 않고 능력별 병목을 분리 진단 가능)
+</code></pre>
+<p>이 삼분(三分)은 DaViNCi(실외 연속 VLN 데이터셋)가 난이도를 데이터/표현/환경 층으로 분해한 것과 유사한 정신 — <strong>단일 성공률이 감추는 실패 원인을 축별로 노출</strong>하려는 벤치마크 설계 철학이다.</p>
+<h3>3.3 SwiftVLN — 교체형(Switchable) 메모리 프레임워크</h3>
+<p>SatNav의 2차 기여는 <strong>참조 프레임워크 SwiftVLN</strong>이다. SwiftVLN은 장기지평 VLN에서 &quot;메모리를 어떻게 다룰지&quot;를 <strong>세 개의 독립 교체 가능한 스테이지</strong>로 모듈화하여, 조합적 절제(combinatorial ablation)를 가능케 한다.</p>
+<pre class="diagram"><code>[SwiftVLN 메모리 파이프라인 — 3 스테이지]
+
+과거 관측 이력 O = {o_1, o_2, ..., o_t}
+        │
+        ▼
+┌─────────────────────────────┐
+│ Stage 1. History Sampling   │  어떤 과거 프레임을 볼까?
+│  • Uniform                  │   전체 이력 균등 샘플
+│  • Random                   │   무작위 선택 후 시간순 정렬
+│  • Temporal-biased          │   최근 관측을 조밀하게 샘플
+└─────────────────────────────┘
+        │  샘플된 프레임 부분집합
+        ▼
+┌─────────────────────────────┐
+│ Stage 2. Input Augmentation │  각 프레임에 무엇을 더할까?
+│  • Initial Observation      │   최초 시점(첫 뷰)을 시각 앵커로
+│  • Relative Pose            │   시작점 대비 변위·헤딩 주입
+└─────────────────────────────┘
+        │  증강된 토큰열
+        ▼
+┌─────────────────────────────┐
+│ Stage 3. Memory Compression │  긴 이력을 어떻게 압축할까?
+│  • Per-frame Pooling        │   프레임별 풀링 후 시간축 연결
+│  • Map Memory               │   전역·지역 탐색 공간 맵 인코딩
+│  • Global Token Clustering   │   전체 이력 걸쳐 토큰 클러스터링(GTC)
+│  • Segment Token Clustering  │   시간 세그먼트 내 클러스터링(STC)
+│                             │      → 시간 구조 보존
+└─────────────────────────────┘
+        │  압축된 메모리 표현
+        ▼
+   정책(VLM 백본) → 액션
+</code></pre>
+<p>각 스테이지의 설계 논리:</p>
+<p><strong>Stage 1 — History Sampling(무엇을 볼지).</strong>
+장기지평에서 모든 프레임을 백본에 넣는 것은 계산·컨텍스트 한계상 불가능하다. 세 전략은 서로 다른 가정을 반영한다:</p>
+<ul>
+<li><em>Uniform</em>: &quot;전 구간이 동등하게 중요&quot; — 경계 루프처럼 전역 진행이 중요한 Boundary에 유리할 가설.</li>
+<li><em>Temporal-biased</em>: &quot;최근이 더 중요&quot; — 근시안적 액션 결정(다음 한 걸음)에 유리하나 장기 진행 추적엔 불리할 가설.</li>
+<li><em>Random</em>: 편향 없는 기준선(control).</li>
+</ul>
+<p><strong>Stage 2 — Input Augmentation(무엇을 더할지).</strong></p>
+<ul>
+<li><em>Initial Observation</em>: 첫 뷰를 <strong>고정 시각 앵커</strong>로 유지 → &quot;출발점 대비 어디까지 왔나&quot;의 기준틀 제공(Boundary/Route에 유용 가설).</li>
+<li><em>Relative Pose</em>: 시작점 대비 <strong>변위·헤딩(SE(2) 상대 포즈)</strong> 을 명시적으로 주입 → 시각만으로 자기위치 추정이 어려운 하향 시점의 약점을 기하 정보로 보강. 이는 OccPlanner/NavCMPO류가 &quot;언어 없는 시각 목표&quot;에 기하 포즈를 접지한 것과 같은 계열의 아이디어.</li>
+</ul>
+<p><strong>Stage 3 — Memory Compression(어떻게 압축할지).</strong> 이 스테이지가 SwiftVLN의 심장부다.</p>
+<ul>
+<li><em>Per-frame Pooling</em>: 프레임 단위 풀링 후 시간축 concat — 단순·저비용, 그러나 토큰 수가 길이에 선형으로 증가.</li>
+<li><em>Map Memory</em>: 관측을 <strong>명시적 전역/지역 맵</strong>으로 인코딩 — 공간적 재방문·경계 추적(Boundary)에 구조적으로 유리. 실내 VLN의 semantic-map 계열(IESM 등)과 통하는 발상.</li>
+<li><em>Global Token Clustering (GTC)</em>: 전체 이력 토큰을 클러스터링하여 고정 예산으로 압축 — 시간 구조는 일부 소실.</li>
+<li><em>Segment Token Clustering (STC)</em>: <strong>시간 세그먼트 내부에서 클러스터링하여 시간 순서를 보존</strong> — 순차 추론(Route)에 유리할 가설. GTC의 &quot;시간 무시&quot; 약점을 보완.</li>
+</ul>
+<p><strong>핵심 설계 미덕</strong>: 세 스테이지가 <strong>직교(orthogonal)</strong> 하도록 정의되어, <code>3 × 2 × 4 = 24</code>가지 메모리 구성을 동일 백본/데이터에서 교체·비교할 수 있다. 이는 &quot;어떤 메모리가 어떤 과제에 좋은가&quot;를 <strong>통제된 절제</strong>로 답하게 하는, 벤치마크 부속 프레임워크로서 매우 이상적인 형태다.</p>
+<h3>3.5 메모리 예산 관점의 워크드 분석(Memory Budget Walk-through)</h3>
+<p>SwiftVLN 세 스테이지가 왜 &quot;직교하면서도 상호작용하는지&quot;를 토큰 예산(token budget) 관점에서 구체적으로 따라가 보자. 장기지평 VLN에서 진짜 병목은 <strong>VLM 백본의 컨텍스트 길이</strong>다. 궤적이 평균 379m·수백 스텝에 이르면, 프레임당 토큰 수 × 스텝 수가 컨텍스트를 즉시 초과한다.</p>
+<pre class="codeblock"><code>[토큰 예산 흐름 — 개념적 계산]
+
+가정: 프레임당 원시 시각 토큰 v = 256, 궤적 길이 T = 300 스텝, 백본 컨텍스트 예산 B ≈ 4096 (시각 슬롯)
+
+(A) 압축·샘플링 없이 전량 투입:
+      필요 토큰 = v · T = 256 · 300 = 76,800  ≫ B = 4096   → 불가능
+
+(B) Stage 1(History Sampling)만: K개 프레임만 선택 (예 K=16)
+      필요 토큰 = v · K = 256 · 16 = 4,096  ≈ B          → 겨우 맞음
+      단, 300스텝 중 16개만 보므로 &quot;무엇을 버릴지&quot;가 성능을 좌우
+        · Temporal-biased: 최근 조밀 → 다음 한 걸음엔 유리, 루프 완주 추적엔 취약
+        · Uniform: 전 구간 균등 → 경계 진행(Boundary) 추적에 유리
+
+(C) Stage 3(Memory Compression) 추가: 프레임당 토큰을 v→v&#39; 로 압축
+      Per-frame Pooling: v&#39; = 32  → v&#39;·T = 32·300 = 9,600  (여전히 초과, 샘플링 병행 필요)
+      GTC/STC: 전체를 고정 예산 C_tok 토큰으로 클러스터링 (예 C_tok = 512, T 무관)
+             → 토큰 수가 궤적 길이와 무관해짐 = 진정한 장기지평 확장성
+</code></pre>
+<p>이 계산이 드러내는 세 가지 통찰:</p>
+<ol>
+<li><p><strong>Stage 3(특히 GTC/STC)가 확장성의 핵심.</strong> Per-frame Pooling은 토큰 수가 여전히 T에 선형이라 초장기지평에서 붕괴한다. 반면 GTC/STC는 <strong>고정 토큰 예산 C_tok</strong> 으로 압축하므로 궤적 길이와 무관 — 379m든 1km든 동일 예산으로 처리한다. 이것이 &quot;Long-Horizon&quot;을 실제로 감당하는 메커니즘이다.</p>
+</li>
+<li><p><strong>GTC vs STC의 트레이드오프가 과제 의존적.</strong> GTC는 전 이력을 한 번에 클러스터링해 <strong>공간적 요약</strong>엔 강하나 <strong>시간 순서를 소실</strong>한다 — Route(수치 카운팅·순차 지시)엔 불리. STC는 시간 세그먼트별로 클러스터링해 <strong>순서를 보존</strong>하나 세그먼트 경계 정보가 파편화될 수 있다. 즉 최적 압축은 과제군에 따라 갈리며, 이것이 24구성 절제의 실효 가치다.</p>
+</li>
+<li><p><strong>Stage 2(Relative Pose)가 압축 손실을 보정.</strong> 압축은 필연적으로 정보를 버린다. 특히 하향 위성 시점은 텍스처가 반복적(도로·블록)이라 시각만으로 자기위치 추정이 어렵다. Relative Pose 주입은 <strong>압축된 시각 메모리가 잃은 기하 정보를 저비용 토큰으로 복원</strong>하는 역할 — 시각 압축과 기하 증강이 상보적으로 맞물린다.</p>
+</li>
+</ol>
+<p>이 워크드 분석은 SwiftVLN이 단순한 &quot;여러 옵션 나열&quot;이 아니라, <strong>컨텍스트 예산이라는 물리적 제약 아래에서 각 스테이지가 서로 다른 병목(선택·기하·길이무관 압축)을 담당하도록 설계된 정합적 구조</strong>임을 보여준다.</p>
+<h3>3.6 왜 &quot;위성 대리&quot;가 학습 신호로 유효한가 — 표현 관점</h3>
+<p>위성-실기체 전이(§3.4)가 경량 어댑터만으로 성립하는 이유를 표현학습 관점에서 해석하면:</p>
+<pre class="diagram"><code>[도메인 간 공유 표현 vs 고유 표현]
+
+           공유 신호 (전이 가능)              고유 신호 (도메인 특이)
+위성 도메인 ┌──────────────────────┐        ┌──────────────────┐
+           │ 도로망 위상            │        │ 위성 센서 색보정   │
+           │ 블록 구조·경계         │        │ 정사 시점 왜곡     │
+           │ 랜드마크 상대 배치     │        │ 정지 스냅샷        │
+실드론     │ 방위·거리 관계         │        │ 저고도 사각·모션블러│
+           └──────────────────────┘        └──────────────────┘
+                    ▲                                ▲
+          정책 백본이 학습(재사용)          경량 어댑터가 정렬(교체)
+</code></pre>
+<p>VLN에 실제로 필요한 결정 신호(어느 방향으로·얼마나·어떤 랜드마크로)는 대부분 <strong>공유 신호</strong>에 담긴다. 도메인을 가르는 것은 주로 <strong>저수준 외관</strong>이다. 따라서 백본이 공유 표현을 학습하고 어댑터가 외관 차이만 정렬하면 전이가 성립한다. 이 구조적 사실이 &quot;위성 대리가 값싼 가짜가 아니라 진짜 학습 신호&quot;라는 주장의 표현학습적 근거다. (동시에, 공유 신호에 담기지 <strong>않는</strong> 저고도 근접 항해·동적 회피는 대리의 사각지대라는 §8.2 한계와 정확히 대응한다.)</p>
+<h3>3.4 위성-실기체 전이(Satellite-to-Reality Transfer)</h3>
+<p>SwiftVLN은 위성 크롭으로 학습한 뒤, <strong>경량 시각 어댑터(lightweight visual adapter)</strong> 를 통해 실제 UAV 비행 영상에 배치된다. 저자들은 세 과제(Boundary/Landmark/Route) 전부에서 전이가 동작함을 실기체 비행으로 실증했다.</p>
+<p>전이 설계의 논리:</p>
+<pre class="diagram"><code>[위성 → 실기체 전이]
+
+위성 도메인 (학습)              실드론 도메인 (배치)
+┌────────────────┐            ┌────────────────┐
+│ 하향 위성 크롭  │  domain     │ 실제 UAV 영상   │
+│ 정사 시점       │  gap        │ 저고도/사각 시점 │
+│ 정지 스냅샷     │ ─────────▶  │ 동적·조명 변화  │
+└────────────────┘            └────────────────┘
+        │                              ▲
+        │   경량 시각 어댑터로 gap 봉합  │
+        └──────────────────────────────┘
+   (백본·정책은 재사용, 어댑터만 실도메인에 정렬)
+</code></pre>
+<p>경량 어댑터만으로 gap을 봉합한다는 것은, <strong>위성 대리가 담은 의미·기하 신호가 실제 항해에 유효</strong>하며 도메인 차이는 주로 <strong>저수준 외관(appearance)</strong> 에 있음을 시사한다. 이는 대리 전략의 정당성을 뒷받침하는 가장 중요한 실증이다.</p>
+<hr>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>[SatNav 전체 파이프라인]
+
+┌──────────────────────────────────────────────────────────┐
+│                    데이터 생성 (오프라인)                    │
+│                                                            │
+│  위성 타일 → 도시/장면 선택(18 cities·59 scenes)            │
+│      → 궤적 샘플링(평균 379m) → 하향 크롭 시퀀스            │
+│      → 과제군별 지시 자동 생성(Boundary/Landmark/Route)     │
+│      → 118K 에피소드 · train/val/test[seen·unseen]         │
+└──────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌──────────────────────────────────────────────────────────┐
+│                   에이전트 학습/평가 (SwiftVLN)             │
+│                                                            │
+│  관측 이력 O_{1:t}                                          │
+│    → History Sampling(Uniform/Random/Temporal)             │
+│    → Input Augmentation(Init Obs / Relative Pose)          │
+│    → Memory Compression(Pooling/Map/GTC/STC)               │
+│    → VLM 백본 → 액션(이동 명령)                             │
+│                                                            │
+│  평가지표: SR(30m 내 정지) · OS · SPL · NE                  │
+│  분할: Test Seen / Test Unseen                             │
+└──────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌──────────────────────────────────────────────────────────┐
+│                  실기체 전이 (온라인)                        │
+│  위성 학습 정책 + 경량 시각 어댑터 → 실제 UAV 비행          │
+│  3 과제 전부 전이 동작 확인                                  │
+└──────────────────────────────────────────────────────────┘
+</code></pre>
+<p>데이터 흐름의 핵심은 <strong>오프라인 데이터 팩토리 → 통제된 메모리 절제 → 실기체 전이</strong> 의 3단 구조다. 각 단이 독립 모듈이라, 후속 연구자는 (a) 자신의 정책을 SwiftVLN 슬롯에 끼워 평가하거나, (b) SatNav 데이터만 가져다 다른 프레임워크로 학습하거나, (c) 전이 어댑터만 교체할 수 있다. <strong>재사용성(reusability)이 벤치마크의 수명을 좌우</strong>하는데, 이 분해가 그것을 보장한다.</p>
+<hr>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<ul>
+<li><strong>SatNav-Episodes-v0.1</strong> (HuggingFace 공개, CC BY 4.0)</li>
+<li>규모: <strong>118,000 에피소드 / 59 장면 / 18 도시</strong></li>
+<li>평균 궤적 길이: <strong>379 m</strong> (장기지평)</li>
+<li>과제군: <strong>Boundary / Landmark / Route</strong> 3종</li>
+<li>분할: train / validation / test, <strong>seen vs unseen 장면 구분</strong> (도시 일반화 평가 지원)</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>SR (Success Rate)</strong>: 에이전트가 목표 30m 이내에서 정지하면 성공</li>
+<li><strong>OS (Observed/Observed Success)</strong>: 궤적 중 어느 스텝에서든 목표 반경 도달</li>
+<li><strong>SPL (Success weighted by Path Length)</strong>: 경로 효율 가중 성공률</li>
+<li><strong>NE (Navigation Error)</strong>: 최종 목표까지의 거리(m)</li>
+</ul>
+<p>SR 임계값이 <strong>30m</strong>로 설정된 점은 도시 규모(평균 379m 궤적)에 비례한 합리적 관용(tolerance)이다 — 실내 R2R의 3m 임계값을 도시 스케일로 재조정한 셈.</p>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p>논문이 명시적으로 보고한 대표 수치:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>모델</th>
+<th align="center">Test Seen SR</th>
+<th align="center">Test Unseen SR</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>StreamVLN</strong> (대표 베이스라인)</td>
+<td align="center"><strong>67.3%</strong></td>
+<td align="center"><strong>58.4%</strong></td>
+</tr>
+</tbody></table></div>
+<ul>
+<li><strong>Seen→Unseen 낙폭 약 −8.9%p</strong>(67.3→58.4)는, 도시 규모 항공 항해에서 <strong>미관측 도시 일반화가 실질적 난제</strong>임을 보여준다. 기존 실내 VLN보다 낙폭 구조가 다르며(도시 형태·도로망 위상이 통째로 바뀜), 이는 SatNav가 겨냥한 &quot;지리적 이해&quot; 축이 유효하게 작동함을 의미.</li>
+<li>논문은 <strong>고전 VLN 에이전트</strong>와 <strong>현대 대형 VLM 기반 모델</strong>을 함께 벤치마크했고, &quot;<strong>도시 규모 항해가 여전히 도전적(city-scale navigation remains challenging)</strong>&quot;이라고 총평. 즉 현재 최고 모델도 도시 규모 장기지평에서 완전히 풀지 못한다.</li>
+<li><strong>Navigation pretraining(항해 사전학습)</strong> 이 모델 쌍 전반에서 성능을 향상시킨다고 보고 — 대규모 SatNav 데이터가 사전학습 신호로 유용함을 뒷받침.</li>
+</ul>
+<blockquote>
+<p><em>참고(정직성)</em>: arXiv/프로젝트 페이지 발췌 기준으로 명시 확인된 정량 수치는 StreamVLN의 Seen/Unseen SR이 대표적이다. 24가지 메모리 구성별 세부 SR/SPL/NE 표는 본문(32페이지)에 상세히 있을 것으로 보이나, 본 리뷰는 <strong>발췌로 확인된 수치만 표기</strong>하고 미확인 수치는 날조하지 않는다. 메모리 구성별 결과는 코드/논문 본문으로 재현 확인 시 갱신 권장.</p>
+</blockquote>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<ul>
+<li><strong>위성-실기체 전이</strong>: SwiftVLN을 위성 크롭으로 학습 후 <strong>경량 시각 어댑터</strong>로 실제 UAV 비행에 배치, <strong>세 과제(Boundary/Landmark/Route) 전부에서 전이 동작 확인</strong>.</li>
+<li>의의: 위성 대리가 &quot;값싼 합성 데이터&quot;에 그치지 않고 <strong>실기체로 전이되는 실효 신호</strong>임을 입증. 데이터 규모·지리 다양성(위성)과 실전 유효성(전이)을 동시에 달성한 드문 사례.</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>위성영상 대리 데이터 팩토리 — 3D 재구성 병목 제거.</strong>
+UAV 하향 시점을 고해상도 위성 크롭으로 대리하여, 재구성 없이 <strong>118K 에피소드·18개 도시·평균 379m</strong>의 도시 규모 장기지평 데이터셋을 자동 합성. 한계 장면 추가 비용을 사실상 0으로 낮춰 &quot;Scalable&quot;을 실현하고, seen/unseen <strong>도시 일반화</strong>를 구조적으로 평가 가능케 함.</p>
+</li>
+<li><p><strong>항공 도시 항해에 특화된 3 과제군(Boundary/Landmark/Route).</strong>
+지속 메모리·시각-언어 접지·순차/수치 추론이라는 직교 인지 축을 분리, 단일 SR이 감추는 능력별 병목을 진단.</p>
+</li>
+<li><p><strong>SwiftVLN — 교체형 메모리 설계 공간.</strong>
+History Sampling × Input Augmentation × Memory Compression(3×2×4=24 구성)을 모듈식으로 스위칭, 장기지평 VLN 메모리 설계를 <strong>통제된 조합 절제</strong>로 비교하는 참조 프레임워크 제공.</p>
+</li>
+<li><p><strong>도시 규모 난이도 실증.</strong>
+고전 VLN·현대 VLM 모두 도시 규모 장기지평에서 미해결(StreamVLN 67.3%/58.4% SR). 미관측 도시 일반화 낙폭을 정량화.</p>
+</li>
+<li><p><strong>위성-실기체 전이 실증.</strong>
+경량 어댑터만으로 위성 학습 정책을 실드론에 전이(3 과제 전부), 대리 전략의 실전 유효성 입증.</p>
+</li>
+<li><p><strong>완전 공개 아티팩트(코드+데이터+모델, CC BY 4.0, NeurIPS 2026).</strong>
+벤치마크·프레임워크 코드, HF 데이터셋, 베이스라인 모델 주(zoo)를 전면 공개 → 재현성·확장성 확보.</p>
+</li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<ul>
+<li><strong>입력</strong>: 각 스텝 위성 하향 크롭(현재 위치 중심), 관측 이력 O_{1:t}.</li>
+<li><strong>액션/성공 판정</strong>: 목표 30m 이내 정지 시 SR 성공.</li>
+<li><strong>메모리 구성(24가지)</strong>:<ul>
+<li>History Sampling ∈ {Uniform, Random, Temporal-biased}</li>
+<li>Input Augmentation ∈ {Initial Observation, Relative Pose}</li>
+<li>Memory Compression ∈ {Per-frame Pooling, Map Memory, GTC, STC}</li>
+</ul>
+</li>
+<li><strong>백본</strong>: 대형 VLM 계열(고전 VLN 에이전트와 대비 평가). 대표 베이스라인 <strong>StreamVLN</strong>(실내 스트리밍 VLN 계보).</li>
+<li><strong>사전학습</strong>: navigation pretraining이 모델 쌍 전반 성능 향상.</li>
+<li><strong>전이</strong>: 경량 시각 어댑터로 위성→실드론 도메인 gap 봉합, 백본/정책 재사용.</li>
+<li><strong>분할</strong>: train/val/test(seen·unseen 장면).</li>
+<li><strong>공개물</strong>: <ul>
+<li>벤치마크 코드 <a href="https://github.com/Eku127/SatNav">https://github.com/Eku127/SatNav</a></li>
+<li>프레임워크 코드 <a href="https://github.com/Eku127/SwiftVLN">https://github.com/Eku127/SwiftVLN</a></li>
+<li>데이터셋 <a href="https://huggingface.co/datasets/Eku127/SatNav-Episodes-v0.1">https://huggingface.co/datasets/Eku127/SatNav-Episodes-v0.1</a></li>
+<li>모델 주 <a href="https://huggingface.co/collections/Eku127/satnav-baseline-model-zoo">https://huggingface.co/collections/Eku127/satnav-baseline-model-zoo</a></li>
+<li>프로젝트 <a href="https://eku127.github.io/SatNav/">https://eku127.github.io/SatNav/</a></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>하이퍼파라미터(학습률·에폭·토큰 예산·클러스터 수 K 등)의 정확한 값은 코드/논문 본문에서 확인 권장 — 발췌 근거로는 미노출이므로 본 리뷰에서 임의 수치를 기입하지 않는다(날조 금지).</p>
+</blockquote>
+<hr>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성(Scalability)의 본질</h3>
+<p>SatNav의 확장성은 &quot;위성 타일이 이미 전 지구를 커버한다&quot;는 사실에서 나온다. 이는 데이터 생성 비용 곡선을 <strong>재구성 선형 → 라벨 자동화 준상수</strong>로 바꾼다. 실질적으로:</p>
+<ul>
+<li>새 도시/대륙 추가 = 크롭·지시 자동 생성만 필요.</li>
+<li>시간축 확장(계절·연도별 위성) 가능성 → 향후 도메인 다양성 확대 여지.</li>
+<li>해상도/센서 업그레이드 시 데이터 품질 자동 향상.</li>
+</ul>
+<h3>8.2 한계점</h3>
+<ul>
+<li><strong>시점 대리의 근본 한계</strong>: 정사에 가까운 하향·정지 스냅샷이라, 저고도 사각 시점·동적 요소·조명 변화를 담지 못함. 전이 어댑터가 이를 부분 봉합하나, <strong>저고도 근접 항해(건물 사이 통과 등)</strong> 는 대리 범위를 벗어남.</li>
+<li><strong>액션 공간의 추상화</strong>: 위성 크롭 이동은 실제 UAV의 6-DoF 동역학·풍외란·배터리 제약을 추상화. 고수준 waypoint 항해엔 적합하나 저수준 제어 검증엔 부적합.</li>
+<li><strong>지시 자동 생성의 다양성</strong>: 자동 파이프라인 지시는 템플릿 편향 가능성. 인간 자연어의 모호성·구어체를 얼마나 담는지는 별도 검증 필요.</li>
+<li><strong>정량 세부 공개 범위</strong>: 발췌 기준 24구성별 세부 결과 수치는 본문 의존 — 재현으로 확인 권장.</li>
+</ul>
+<h3>8.3 향후 방향</h3>
+<ul>
+<li><strong>동적·저고도 확장</strong>: 위성 대리에 시계열/사각 뷰(항공 비디오)를 하이브리드로 결합.</li>
+<li><strong>메모리 설계 자동탐색</strong>: 24구성 수동 스위칭을 넘어 과제 조건부 메모리 라우팅(learned memory routing).</li>
+<li><strong>크로스-도시 커리큘럼</strong>: 도시 형태 위상별 난이도 커리큘럼으로 unseen 일반화 강화.</li>
+<li><strong>언어 다양성</strong>: 다국어·구어체 지시 확장(도시가 18개국에 걸치므로 자연스러운 확장축).</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>비교 대상 선정(같은 VLN 트랙, 항공/도시/데이터셋 축 근접): <strong>AirForesight</strong>(UAV-VLN, 현재-미래 공간맵 상상, ACM MM 2026, 코퍼스 큐 #198), <strong>AirAnchor</strong>(제로샷 항공 VLN, 공간 앵커, 코퍼스 큐 #270), <strong>DaViNCi</strong>(실외 연속 VLN 데이터셋, CARLA 데이터 팩토리, 코퍼스 리뷰 #193), <strong>CityWalker</strong>(웹영상 도시 항해 데이터셋, 코퍼스 리뷰).</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th align="center">DaViNCi (arXiv2026)</th>
+<th align="center">CityWalker (CVPR2025)</th>
+<th align="center">AirForesight (ACM MM2026)</th>
+<th align="center"><strong>SatNav (NeurIPS2026)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>도메인</td>
+<td align="center">실외 지상(연속)</td>
+<td align="center">실외 지상(도시 보행)</td>
+<td align="center">UAV 항공</td>
+<td align="center"><strong>UAV 항공(도시 규모)</strong></td>
+</tr>
+<tr>
+<td>데이터 소스</td>
+<td align="center">CARLA 시뮬</td>
+<td align="center">웹 영상(실사)</td>
+<td align="center">시뮬</td>
+<td align="center"><strong>위성영상 대리</strong></td>
+</tr>
+<tr>
+<td>3D 재구성 의존</td>
+<td align="center">❌(시뮬 렌더)</td>
+<td align="center">❌(실영상)</td>
+<td align="center">렌더/재구성</td>
+<td align="center"><strong>❌(위성 크롭)</strong></td>
+</tr>
+<tr>
+<td>규모(에피소드)</td>
+<td align="center">6,933</td>
+<td align="center">웹영상 대량</td>
+<td align="center">중간</td>
+<td align="center"><strong>118,000</strong></td>
+</tr>
+<tr>
+<td>지리 다양성</td>
+<td align="center">6 Towns(시뮬)</td>
+<td align="center">도시들</td>
+<td align="center">제한</td>
+<td align="center"><strong>18 도시·59 장면</strong></td>
+</tr>
+<tr>
+<td>장기지평</td>
+<td align="center">중간</td>
+<td align="center">중간</td>
+<td align="center">중간</td>
+<td align="center"><strong>평균 379m(장기)</strong></td>
+</tr>
+<tr>
+<td>과제 인지 분해</td>
+<td align="center">데이터/표현/환경 3층</td>
+<td align="center">단일</td>
+<td align="center">상상 기반</td>
+<td align="center"><strong>Boundary/Landmark/Route 3축</strong></td>
+</tr>
+<tr>
+<td>seen/unseen 도시</td>
+<td align="center">제한</td>
+<td align="center">제한</td>
+<td align="center">제한</td>
+<td align="center"><strong>✅ 구조적 지원</strong></td>
+</tr>
+<tr>
+<td>실기체 전이</td>
+<td align="center">❌(시뮬)</td>
+<td align="center">실영상 학습</td>
+<td align="center">실기체無</td>
+<td align="center"><strong>✅ 위성→실드론 전이</strong></td>
+</tr>
+<tr>
+<td>메모리 절제 프레임워크</td>
+<td align="center">❌</td>
+<td align="center">❌</td>
+<td align="center">❌</td>
+<td align="center"><strong>✅ SwiftVLN 24구성</strong></td>
+</tr>
+<tr>
+<td>아티팩트 공개</td>
+<td align="center">데이터(Drive)</td>
+<td align="center">데이터</td>
+<td align="center">코드無</td>
+<td align="center"><strong>✅ 코드+데이터+모델(CC BY 4.0)</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 차별점 분석:</strong></p>
+<ul>
+<li><p><strong>vs DaViNCi</strong>: 두 논문 모두 &quot;재구성 병목을 우회한 VLN 데이터 팩토리&quot;라는 정신을 공유하나, DaViNCi는 <strong>CARLA 시뮬</strong>(지상·연속·동적 요소 통제)로, SatNav는 <strong>위성 대리</strong>(항공·도시 규모·지리 다양성)로 다른 축을 공략한다. DaViNCi가 &quot;연속 행동+동적 요소&quot;의 난이도 분해에 강하다면, SatNav는 &quot;지리 규모+장기지평 메모리&quot;에 강하다. <strong>상보적</strong>이며, 이상적으로는 SatNav의 도시 규모 위성 + DaViNCi류 동적 시뮬을 결합한 하이브리드가 다음 지향점.</p>
+</li>
+<li><p><strong>vs CityWalker</strong>: CityWalker는 <strong>실사 웹영상</strong>으로 실감을 확보하나 지시가 point-goal/궤적 위주이고 지리 규모 통제가 약하다. SatNav는 <strong>위성 대리로 규모·seen/unseen을 통제</strong>하고 항공 특화 언어 지시(Boundary/Landmark/Route)를 부여한다. 실감(CityWalker) vs 통제·규모(SatNav)의 트레이드오프.</p>
+</li>
+<li><p><strong>vs AirForesight / AirAnchor</strong>: 두 선행은 UAV-VLN <strong>방법론</strong>(미래 상상·공간 앵커)에 집중하나 평가 환경이 소수 시뮬 장면에 갇힌다. SatNav는 이들이 서지 못한 <strong>도시 규모·지리 다양성·장기지평 평가대</strong>를 제공 — AirForesight/AirAnchor 같은 방법을 <strong>SatNav 위에서 재평가</strong>하면 진짜 일반화 능력이 드러날 것. 즉 SatNav는 이들의 <strong>경쟁자가 아니라 상위 평가 인프라</strong>다.</p>
+</li>
+<li><p><strong>vs StreamVLN(베이스라인)</strong>: StreamVLN은 실내 스트리밍 VLN에서 강하나 SatNav 도시 규모에서 67.3/58.4% SR에 머문다 — 실내 최적화 메모리가 도시 장기지평에 부족함을 노출. SwiftVLN의 Map Memory/STC 같은 구조적 메모리가 이 gap을 메우려는 시도.</p>
+</li>
+</ul>
+<h3>9.2 장단점 분석</h3>
+<p><strong>장점:</strong></p>
+<ul>
+<li>데이터 생성 비용 곡선을 근본적으로 바꾼 확장성(위성 대리).</li>
+<li>지리 다양성·seen/unseen 도시 일반화를 구조적으로 여는 유일한 항공 VLN 벤치마크급 규모(118K/18도시).</li>
+<li>능력별 3 과제군 + 24구성 메모리 절제로 진단력이 높음.</li>
+<li>위성→실드론 전이 실증으로 실전 유효성 확보.</li>
+<li>완전 공개 아티팩트(NeurIPS Datasets track, CC BY 4.0).</li>
+</ul>
+<p><strong>단점:</strong></p>
+<ul>
+<li>시점 대리의 근본 한계(정사·정지·고정 고도) → 저고도/동적/사각 항해 미포함.</li>
+<li>액션·동역학 추상화로 저수준 제어 검증 부적합.</li>
+<li>자동 생성 지시의 언어 다양성 검증 여지.</li>
+<li>발췌 기준 세부 정량표(24구성) 미확인 — 본문/코드 재현 권장.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>도시 규모 UAV 임무(순찰·감시·배송 경로)</strong> 의 고수준 언어 지시 항해 사전학습·평가에 즉시 유용.</li>
+<li>위성 대리 학습 + 경량 어댑터 전이는 <strong>실배치 파이프라인의 현실적 청사진</strong> 제공.</li>
+<li>저수준 비행 제어·충돌 회피는 별도 스택(예: 코퍼스의 UAV Planner들과 결합) 필요 — SatNav는 &quot;무엇을·어디로&quot;를, Planner는 &quot;어떻게 안전하게&quot;를 담당하는 <strong>역할 분담</strong>이 자연스럽다.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>데이터 중심 항공 VLN을 <strong>소수 재구성 장면 → 지구 규모 위성 대리</strong>로 이동시킨 패러다임 전환. 향후 (a) 동적·사각 뷰 하이브리드, (b) 학습형 메모리 라우팅, (c) 다국어 지시, (d) SatNav 위에서의 선행 방법 재평가가 유력한 후속 축. 참신성은 &quot;방법&quot;보다 <strong>&quot;데이터 생성 패러다임 + 평가 인프라&quot;</strong> 에 있으며, 이것이 NeurIPS Datasets track에 정확히 부합.</p>
+<hr>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
+<ul>
+<li>Jiang et al., &quot;SatNav: A Scalable Benchmark for Long-Horizon UAV Vision-Language Navigation from Satellite Imagery,&quot; NeurIPS 2026 (Datasets &amp; Benchmarks). arXiv:2609.31507.</li>
+<li>(코퍼스 비교) DaViNCi: 실외 연속 VLN 데이터셋(CARLA 데이터 팩토리), arXiv 2026 — VLN/review/DaViNCi_arxiv2026.</li>
+<li>(코퍼스 비교) CityWalker: 실사 웹영상 도시 항해, CVPR 2025.</li>
+<li>(코퍼스 비교) AirForesight: UAV-VLN 현재-미래 공간맵 상상, ACM MM 2026 — queue #198.</li>
+<li>(코퍼스 비교) AirAnchor: 제로샷 항공 VLN 공간 앵커, arXiv 2026 — queue #270.</li>
+<li>(베이스라인) StreamVLN: 스트리밍 VLN 계보.</li>
+<li>데이터/코드: github.com/Eku127/SatNav, github.com/Eku127/SwiftVLN, huggingface.co/datasets/Eku127/SatNav-Episodes-v0.1.</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
+<p>SatNav는 항공 VLN의 오랜 병목이던 <strong>3D 재구성 의존성</strong>을 <strong>위성영상 대리</strong>로 우회하여, 지리 다양성(18 도시)·규모(118K 에피소드)·장기지평(평균 379m)을 동시에 확보한 <strong>확장 가능한 도시 규모 UAV VLN 벤치마크</strong>다. Boundary/Landmark/Route 세 과제군으로 지속 메모리·시각-언어 접지·순차/수치 추론이라는 직교 능력을 분리 진단하고, SwiftVLN(History Sampling × Input Augmentation × Memory Compression, 24구성)이라는 교체형 메모리 프레임워크로 장기지평 메모리 설계를 통제 절제로 비교한다.</p>
+<p>실험은 고전 VLN·현대 VLM 모두 도시 규모 장기지평에서 미해결임을(StreamVLN 67.3%/58.4% SR, 미관측 도시 낙폭) 보이며, <strong>위성→실드론 전이</strong>를 경량 어댑터로 실증하여 대리 전략의 실전 유효성을 입증했다.</p>
+<p><strong>혁신성</strong>은 개별 방법이 아니라 <strong>데이터 생성 패러다임의 전환 + 재사용 가능한 평가/절제 인프라</strong>에 있다. 이는 NeurIPS Datasets &amp; Benchmarks track의 취지에 정확히 부합하며, 향후 항공 VLN 방법론들이 <strong>공정하고 대규모인 공통 평가대</strong> 위에서 경쟁하도록 만든다. 완전 공개 아티팩트(코드+데이터+모델, CC BY 4.0)는 이 벤치마크의 수명과 커뮤니티 채택 가능성을 크게 높인다.</p>
+<p>한계(정사·정지 시점 대리, 저수준 동역학 추상화, 자동 지시 다양성)는 명확하나, 이는 &quot;규모·통제·전이&quot;를 얻기 위한 의식적 트레이드오프이며, 동적·사각 뷰 하이브리드와 학습형 메모리 라우팅이라는 구체적 후속 경로가 이미 열려 있다. SatNav는 항공 VLN 연구를 <strong>소수 장면의 방법 경쟁</strong>에서 <strong>지구 규모의 일반화 경쟁</strong>으로 끌어올린 이정표적 데이터셋이다.</p>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+<div class="rhead" id="rhead" data-title="SatNav: A Scalable Benchmark for Long-Horizon UAV Vision-Language Navigation from Satellite Imagery — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
+</body>
+</html>
