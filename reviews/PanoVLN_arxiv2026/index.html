@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Towards Effective Panoramic Vision-and-Language Navigation (PanoVLN) · PaperDaily</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { color: #8f4023; text-decoration: underline; }
+
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
+
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
+}
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
+article code.math-display {
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
+}
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
+article th {
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
+article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: var(--mono); font-size: 12px; text-align: center;
+}
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
+footer {
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
+</head>
+<body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2609.34759">arXiv ↗</a>
+</div>
+<div class="wrap">
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">PanoVLN_arxiv2026</span>
+    </div>
+    <h1 class="doc-title">Towards Effective Panoramic Vision-and-Language Navigation (PanoVLN): 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 2026 (cs.CV, cs.RO) — 발표처 미확정</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2609.34759">2609.34759</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval"><a href="https://github.com/wangzhen-w/PanoVLN">✅</a> (실제 저장소, 라이선스 **미정**)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://wangzhen-w.github.io/PanoVLN/">🌐</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-09-30</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">40KB · 약 38분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
+  </header>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Towards Effective Panoramic Vision-and-Language Navigation (PanoVLN)</li>
+<li><strong>저자 (Authors)</strong>: Zhen Wang, Changpeng Wang, Zhe Liu, Zhangyang Qi, Yuxiang Lu, Zimo Zeng, Donglian Qi, Xi Chen</li>
+<li><strong>소속 (Affiliation)</strong>: 논문 본문에 명시적으로 나열되지 않음 (미상)</li>
+<li><strong>발표처 (Published)</strong>: arXiv 2026 (cs.CV, cs.RO), 2026-09-28 제출, 22 pages / 14 figures — 정식 학회/저널 발표처 미확정</li>
+<li><strong>DOI</strong>: 미정</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2609.34759">2609.34759</a></li>
+<li><strong>코드</strong>: <a href="https://github.com/wangzhen-w/PanoVLN">github.com/wangzhen-w/PanoVLN</a> (실제 저장소, 라이선스 <strong>미정</strong>)</li>
+<li><strong>프로젝트</strong>: <a href="https://wangzhen-w.github.io/PanoVLN/">wangzhen-w.github.io/PanoVLN</a></li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 논문은 연속 환경 Vision-and-Language Navigation(VLN-CE)에서 <strong>파노라마(전방위 360°) 시각 입력을 효과적으로 활용</strong>하는 정책을 설계하는 것을 목표로 한다. 핵심 문제의식은 다음의 직관에서 출발한다:</p>
+<blockquote>
+<p>&quot;더 완전한 시각적 문맥(panorama)은 더 잘 정보에 근거한 항해 결정을 가능하게 해야 한다.&quot;</p>
+</blockquote>
+<p>그러나 저자들은 <strong>단순히 원근(perspective) 이미지를 파노라마로 교체하는 것만으로는 성능이 오르지 않는다</strong>는 점을 진단한다. 파노라마가 제공하는 넓은 시야는 (a) 여러 방향에 걸친 분기 선택지를 한 프레임에 담을 수 있는 잠재력을 지니지만, (b) 기존 원근 기반 정책의 <strong>짧은 행동 지평(action horizon)</strong>, (c) 분기 결정을 학습시키지 못하는 <strong>훈련 데이터 편향</strong>, (d) 방향 간 공간 관계를 포착하지 못하는 <strong>평면적 표현</strong>이라는 세 가지 병목 때문에 그 잠재력이 발현되지 못한다.</p>
+<p>따라서 본 연구의 구체적 목표는, 이 세 병목을 각각 겨냥한 세 가지 설계 변경 — <strong>① 신뢰도 유도 실행(Confidence-Guided Execution, CGE)</strong>, <strong>② 분기 중심 훈련 데이터 구축</strong>, <strong>③ 공간 관계 시각 표현(Spatial-Relationship Representation)</strong> — 을 통해, 파노라마의 넓은 문맥을 실제 항해 성능으로 전환하는 것이다. 결과적으로 R2R-CE Val-Unseen에서 성공률(SR) 77.3%, RxR-CE Val-Unseen에서 SR 78.0%로 이전 SOTA 대비 각각 +11.9%p, +8.7%p를 달성하며, <strong>Unitree Go2 사족 로봇 실기체</strong>에서 더 적은 정지(pause)와 더 빠른 항해를 실증한다.</p>
+<hr>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) 짧은 행동 지평 — 파노라마의 넓은 시야를 소진하지 못함.</strong>
+기존 원근 기반 VLN 정책은 전형적으로 다음 1~수 스텝의 짧은 행동만 예측한다. 이는 좁은 원근 시야로는 먼 미래의 분기점을 관측할 수 없기 때문에 합리적인 설계였다. 그러나 파노라마는 로봇 뒤·옆까지 포함한 전방위를 한 번에 보므로, 이론적으로는 &quot;저 앞 교차로에서 왼쪽으로 꺾어라&quot; 같은 <strong>장기 지평 계획</strong>을 단일 관측에서 수립할 수 있다. 그럼에도 정책이 짧은 지평만 예측하도록 훈련되면 이 정보는 버려진다. 실제로 저자들의 절제 실험은 <strong>원근 정책이 지평 H=4에서 성능이 포화</strong>되는 반면 <strong>파노라마 정책은 H=18까지 이득이 지속</strong>됨을 보인다 — 즉 지평을 늘리지 않으면 파노라마의 가치가 사라진다.</p>
+<p><strong>(C2) 분기 결정을 학습시키지 않는 훈련 데이터.</strong>
+표준 VLN 데이터셋(R2R, RxR 등)의 궤적은 대부분 &quot;직진 위주&quot;의 경로로 구성되어, 여러 갈래 길 중 하나를 <strong>명시적 언어 단서에 근거해 선택</strong>하는 순간(decision point)이 희소하다. 파노라마 정책이 &quot;여러 방향 선택지를 동시에 보고 지시에 맞는 방향을 고르는&quot; 능력을 발휘하려면, 훈련 데이터 자체에 <strong>분기점(branching point)이 밀집</strong>하고 각 분기에서의 올바른 선택이 지시문에 분명히 접지(ground)되어 있어야 한다. 기존 데이터는 이를 제공하지 못한다.</p>
+<p><strong>(C3) 방향 간 공간 관계를 포착하지 못하는 평면 표현.</strong>
+파노라마를 단순히 픽셀로 펼쳐(equirectangular) VLM에 넣으면, 모델은 &quot;정면의 문&quot;과 &quot;왼쪽 90°의 복도&quot;가 3D 공간에서 어떤 상대 배치인지를 추론하기 어렵다. 등장방형 투영은 극점 왜곡·경계 불연속을 지니며, RGB 의미 특징만으로는 기하 레이아웃(깊이·상대 방위)이 암묵적이다. 또한 기하 정보를 추가하겠다고 시각 토큰 수를 늘리면 VLM의 연산 비용이 폭증한다.</p>
+<p><strong>(C4) 실기체 배치의 지연·정지 문제.</strong>
+VLM 기반 정책은 한 번의 추론이 무겁다(수백 ms). 매 스텝 재추론하는 동기식 실행은 로봇을 자주 멈춰 세워(pause) 항해를 느리고 끊기게 만든다. 파노라마의 장기 지평 예측 능력을 실기체 효율로 전환하려면, <strong>한 번의 추론으로 여러 스텝을 안전하게 실행</strong>하되 불확실할 때만 재계획하는 메커니즘이 필요하다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>PanoVLN은 위 네 도전을 각각 정조준한 세 축 + 실행 전략으로 대응한다.</p>
+<pre class="diagram"><code>┌──────────────────────────────────────────────────────────────────┐
+│  병목                        해결책                                  │
+├──────────────────────────────────────────────────────────────────┤
+│ C1 짧은 지평           →  ③+CGE: H=18 장기 예측 + 신뢰도 유도 실행    │
+│ C2 분기 없는 데이터    →  ②: 800 HM3D 씬 분기 중심 궤적 ~98K 구축     │
+│ C3 평면 표현           →  ③: PanoVGGT 기하 + 의미 잔차 융합(토큰 불변) │
+│ C4 실기체 정지         →  CGE: 불확실성 예산 기반 다스텝 실행·적응 재계획 │
+└──────────────────────────────────────────────────────────────────┘
+</code></pre>
+<ul>
+<li><strong>① Confidence-Guided Execution (CGE)</strong>: 단일 파노라마에서 H=18 행동을 예측하되, 예측된 접두(prefix)를 누적 불확실성이 예산 B를 넘기 전까지 실행하고, 넘으면 새 관측으로 재계획. 장기 지평 예측을 &quot;안전하게 소비&quot;하는 실행층.</li>
+<li><strong>② 분기 중심 훈련 데이터</strong>: HM3D 800 씬에서 navigation mesh로 보행 가능 공간을 분할, 분기점을 명시적으로 식별해 그 점들을 통과하는 궤적을 표집, LLM으로 지시문을 생성하고 3중 검증(운동 일관성·선택 접지·정지 접지)으로 라벨 품질 보장 (~98K 궤적).</li>
+<li><strong>③ 공간 관계 표현</strong>: 동결된 Qwen 3.5-4B 비전 인코더의 의미 특징 + 동결된 PanoVGGT 기하 인코더의 3D 재구성 단서를 잔차 연결(<code>V̄ = V + α·f(G)</code>, α=0.2)로 융합하되, <strong>시각 토큰 수를 늘리지 않음</strong>.</li>
+</ul>
+<hr>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 Confidence-Guided Execution (CGE) — 신뢰도 유도 실행</h3>
+<p><strong>동기.</strong> 파노라마 정책이 H=18의 긴 행동 시퀀스를 예측하더라도, 그 전부를 맹목적으로 실행하면 예측 후반부의 오차가 누적되어 위험하다. 반대로 항상 1스텝만 실행하면 매 스텝 재추론으로 실기체가 자주 멈춘다(C4). CGE는 <strong>예측 시퀀스의 신뢰할 수 있는 앞부분만 실행</strong>하고, 신뢰가 떨어지는 지점에서 새 관측으로 재계획하는 적응적 실행층이다.</p>
+<p><strong>행동 공간과 불확실성.</strong> 행동 공간은 4원(forward, left, right, stop)이다. 시각 t의 정책 호출에서, 예측 시퀀스의 위치 i에 대한 행동 확률은 로짓의 softmax로 정의된다:</p>
+<pre class="codeblock"><code>q_{t,i}(a) = softmax(logits_{t,i})[a],   a ∈ {forward, left, right, stop}
+</code></pre>
+<p>위치 i의 행동 불확실성은 선택된 행동 â_{t,i}의 음의 로그 확률로 정의한다:</p>
+<pre class="codeblock"><code>u_{t,i} = − log q_{t,i}( â_{t,i} )
+</code></pre>
+<p>즉 정책이 그 행동을 확신할수록(q→1) u→0, 애매할수록 u가 커진다.</p>
+<p><strong>누적 불확실성 예산.</strong> 예측 접두 길이 k에 대한 누적 불확실성:</p>
+<pre class="codeblock"><code>U_t(k) = Σ_{i=1}^{k} u_{t,i}
+</code></pre>
+<p>실행 길이 E_t는, <strong>최소 실행 E_min을 보장</strong>하면서 <strong>누적 불확실성이 예산 B를 넘지 않는 최대 접두</strong>로 결정한다:</p>
+<pre class="codeblock"><code>E_t = max { k :  k ≤ E_min   또는   U_t(k) ≤ B }
+</code></pre>
+<p>기본값은 <strong>B = 1.2, E_min = 4, 예측 지평 H = 18</strong>. 실제로는 신뢰도에 따라 한 번의 추론으로 4~12 행동이 실행된 뒤 재계획이 일어난다.</p>
+<p><strong>직관적 동작.</strong></p>
+<pre class="diagram"><code>예측 시퀀스 (H=18):  F  F  L  F  F  F  (R?)  ...
+위치별 u_{t,i}:      .05 .07 .3 .1 .08 .12  0.9 ...
+누적 U_t(k):        .05 .12 .42 .52 .60 .72  1.62 ...
+                                              └── B=1.2 초과 → 여기서 절단
+E_min=4 보장 → 최소 4 실행,  U_t(k)≤1.2 인 최대 k=6 → E_t=6 실행 후 재계획
+</code></pre>
+<ul>
+<li>직선 복도처럼 확신이 높은 구간에서는 U가 천천히 자라 <strong>긴 접두(예: 12)</strong>를 한 번에 실행 → 정지 최소화.</li>
+<li>교차로·모호한 지점에서는 특정 위치의 u가 급증 → U가 예산을 빠르게 소진 → <strong>짧게 실행하고 새 관측으로 재계획</strong> → 안전.</li>
+</ul>
+<p><strong>설계적 의의.</strong> CGE는 &quot;고정 길이 실행&quot;의 딜레마(짧으면 느리고 길면 위험)를 <strong>데이터 의존적 적응 길이</strong>로 해소한다. 절제 실험에서 CGE는 고정 길이 실행(1, 6, 12, 18)과 무작위 길이 접두를 모두 능가한다. 핵심은 E_t가 정책 자신의 확신도(calibrated logits)를 신호로 삼는다는 점 — 별도 불확실성 헤드나 앙상블 없이 기존 로짓만으로 구현된다.</p>
+<p><strong>워크드 예제 — 두 시나리오 대비.</strong>
+CGE의 E_t 결정이 상황에 따라 어떻게 달라지는지 두 극단 사례로 구체화한다(B=1.2, E_min=4, H=18 기준).</p>
+<pre class="diagram"><code>[시나리오 A — 긴 직선 복도]
+â:        F   F   F   F   F   F   F   F   F   F   F   F   F
+q(â):    .98 .97 .98 .96 .97 .95 .96 .94 .93 .92 .90 .85 .55
+u=-log q:.02 .03 .02 .04 .03 .05 .04 .06 .07 .08 .11 .16 .60
+U(k):    .02 .05 .07 .11 .14 .19 .23 .29 .36 .44 .55 .71 1.31
+                                                          └ k=13에서 B=1.2 초과
+ → E_min=4 만족 &amp; U(k)≤1.2 인 최대 k = 12  → E_t = 12 (한 호출로 12스텝)
+
+[시나리오 B — 즉각 등장하는 교차로]
+â:        F   L?  F?  R?  ...
+q(â):    .95 .48 .60 .52 ...
+u=-log q:.05 .73 .51 .65 ...
+U(k):    .05 .78 1.29 ...  (k=3에서 이미 B 초과)
+ → E_min=4 가 U≤B 보다 우선 적용되어 최소 4 실행하나, 누적이 이미 커서
+   재계획이 사실상 4스텝마다 발생 → E_t≈4 (곧바로 재관측·재계획)
+</code></pre>
+<p>시나리오 A에서는 단일 추론 비용을 12스텝에 분산해 실기체 정지를 최소화하고, 시나리오 B에서는 불확실한 분기에서 조기 재계획으로 오선택을 방지한다. 이 <strong>비대칭적 반응</strong>이 평균 정책 호출 7.4회(§5.4)의 근원이다.</p>
+<p><strong>E_min과 B의 역할 분해.</strong> 두 상수는 서로 다른 실패를 막는다.</p>
+<ul>
+<li><code>E_min</code>(=4)은 <strong>하한 보장</strong>: 신뢰도가 낮아도 최소 4스텝은 진행해 &quot;매 스텝 멈춤&quot;(호출 폭증)을 방지. 지나치게 크면 위험한 접두까지 강제 실행하므로 안전-효율 트레이드오프의 하한 손잡이다.</li>
+<li><code>B</code>(=1.2)는 <strong>상한 절단</strong>: 누적 불확실성이 예산을 넘으면 아무리 길어도 절단해 오차 누적을 차단. 크면 공격적(긴 실행·빠르나 위험), 작으면 보수적(짧은 실행·안전하나 잦은 정지). 4원 행동에서 단일 위치 u의 이론적 최대는 −log(1/4)=1.386이므로, B=1.2는 &quot;거의 최대로 애매한 행동 하나&quot;에 해당하는 예산이다 — 즉 한 번의 강한 애매함이 나타나면 그 직후 절단되도록 조율된 값이다.</li>
+</ul>
+<p><strong>왜 &quot;최댓값 k&quot;이지 &quot;최솟값&quot;이 아닌가.</strong> E_t 정의의 <code>max{k : ...}</code>는 조건을 만족하는 <strong>가장 긴</strong> 접두를 취한다. 조건이 <code>k ≤ E_min</code> 또는 <code>U_t(k) ≤ B</code>의 논리합이므로, (a) U가 B를 넘기 전까지의 모든 k와 (b) E_min 이하의 모든 k가 후보가 되고, 그중 최댓값이 실행 길이가 된다. 이는 &quot;신뢰가 유지되는 한 최대한 길게 한 번에 실행&quot;이라는 효율 지향을 수식으로 못박은 것이다. 만약 U가 첫 스텝부터 매우 커도(예: 시나리오 B) E_min 항이 최소 실행을 보장하므로 로봇이 완전히 정지 루프에 빠지지 않는다.</p>
+<h3>3.2 장기 지평 예측과 파노라마의 상보성</h3>
+<p>CGE가 유효하려면 애초에 정책이 <strong>믿을 만한 장기 예측</strong>을 내놓아야 한다. 여기서 파노라마의 넓은 시야가 결정적이다. 절제 실험의 핵심 발견:</p>
+<pre class="codeblock"><code>지평 H  |  원근(perspective) 정책 SR  |  파노라마 정책 SR
+--------|----------------------------|--------------------
+  1     |    (기준)                   |   (기준)
+  4     |    포화(plateau)            |   상승 지속
+  12    |    이득 없음/하락           |   상승 지속
+  18    |    ─                        |   최고점(peak)
+</code></pre>
+<p>원근 정책은 좁은 시야로 먼 분기를 볼 수 없어 H를 늘려도 감독 신호가 무의미해진다(포화). 반면 파노라마는 여러 방향의 분기를 한 프레임에 담으므로, <strong>H=18까지 &quot;이 방향들 중 지시에 맞는 길을 골라 계속 가라&quot;는 장기 감독</strong>이 실제로 의미를 지닌다. 즉 파노라마(공간)와 장기 지평(시간)은 상보적이며, 둘 다 있을 때만 CGE의 다스텝 실행이 성립한다.</p>
+<h3>3.3 분기 중심 훈련 데이터 구축 (Decision-Centric Trajectories)</h3>
+<p><strong>문제 재확인.</strong> 표준 데이터는 분기 선택 순간이 희소해, 정책이 &quot;여러 갈래 중 언어로 지정된 하나를 고르는&quot; 능력을 학습하지 못한다.</p>
+<p><strong>구축 파이프라인 (800 HM3D 씬).</strong></p>
+<pre class="codeblock"><code>(1) 공간 분할:  navigation mesh로 보행 가능 영역을 셀로 분할
+(2) 분기점 식별: 들어온 방향을 제외하고 관측 가능한 통행 가능 경로가
+                 ≥2개인 위치를 &quot;branching point&quot;로 표시
+(3) 궤적 표집:   서로 다른 영역에 종점을 표집, 이 분기점들을 통과하는
+                 경로만 유지 (분기 밀집 궤적)
+(4) 정제:        렌더링 품질 검사 + 근접 중복 제거
+</code></pre>
+<p><strong>지시문 생성·검증 (LLM 기반).</strong>
+각 궤적을 <strong>주행(travel)·분기(branching)·도착(arrival)</strong> 세그먼트로 분해한다. 대형 언어모델(<strong>Qwen 3.8-27B</strong>)이 (a) 지상 진실 경로가 오버레이된 1인칭 비디오와 (b) 8-뷰 나침반 이미지를 입력받아 지시문을 생성한다. 그리고 <strong>3중 검증</strong>으로 라벨 품질을 보장한다:</p>
+<pre class="codeblock"><code>① 운동 일관성 (motion consistency):
+     지시문의 이동 순서·방향이 비디오의 실제 움직임과 일치하는가
+② 선택 접지 (choice grounding):
+     지시문이 여러 가시적 대안 중 시연된 경로를 명확히 식별하는가
+③ 정지 접지 (stop grounding):
+     도착 위치 묘사가 실제 관측과 일치하는가
+</code></pre>
+<p>불일치 세그먼트는 <strong>국소 수정(local revision) 후 재검증</strong>을 거친다. 최종 데이터셋은 <strong>~98K 궤적</strong>으로, <strong>회전·종료 지점 부근에 밀집 표집</strong>되어 분기 결정과 정지 판단을 집중 감독한다. 이 데이터는 DAgger(전문가 상호작용 교정)와 결합될 때 최종 성능에 누적적으로 기여한다.</p>
+<p><strong>왜 분기점이 핵심 구성 단위인가.</strong> VLN에서 &quot;실패&quot;의 대부분은 직선 구간이 아니라 <strong>갈림길에서의 잘못된 선택</strong>에서 발생한다. 그런데 임의 궤적을 표집하면 통계적으로 직진 스텝이 압도적으로 많아, 손실 함수가 &quot;앞으로 가기&quot;에 지배되고 분기 순간의 그래디언트 기여가 희석된다. 본 파이프라인은 이 불균형을 <strong>표집 분포 자체를 분기점 통과 경로로 제한</strong>해 교정한다 — 즉 어려운 결정(분기·정지)의 밀도를 인위적으로 높인 커리큘럼에 가깝다. 이는 CGE(§3.1)와도 맞물린다: CGE가 분기에서 짧게 재계획하려면, 정책이 분기 순간에 대한 <strong>잘 보정된(calibrated) 불확실성</strong>을 내야 하고, 그러려면 분기 사례를 충분히 학습해야 한다. 분기 밀집 데이터가 없으면 CGE의 신뢰도 신호 자체가 신뢰할 수 없게 된다.</p>
+<p><strong>3중 검증의 실패 모드 대응.</strong> 세 검증 단계는 각기 다른 라벨 오류를 겨냥한다.</p>
+<ul>
+<li>① 운동 일관성은 <strong>환각(hallucination)</strong> 방지 — LLM이 비디오에 없는 이동(&quot;계단을 올라&quot;)을 지어내는 오류.</li>
+<li>② 선택 접지는 <strong>모호성(ambiguity)</strong> 방지 — &quot;앞으로 가라&quot;처럼 여러 갈래에 똑같이 적용되어 분기 감독으로 무용한 지시.</li>
+<li>③ 정지 접지는 <strong>종료 오정합(termination mismatch)</strong> 방지 — 도착 묘사가 실제 종점 관측과 어긋나 정지 시점을 잘못 가르치는 오류.</li>
+</ul>
+<p>분기(②)와 정지(③)를 별도 검증으로 분리한 것은, 이 둘이 §2의 C1(짧은 지평)·C2(분기 빈곤)와 직접 대응하는 핵심 결정이기 때문이다. 국소 수정 후 재검증 루프는 전체 궤적을 폐기하지 않고 문제 세그먼트만 고쳐 <strong>데이터 수율(yield)을 보존</strong>한다 — 800 씬에서 ~98K 궤적을 얻는 규모 효율의 근거다.</p>
+<p><strong>8-뷰 나침반 입력의 역할.</strong> LLM에 1인칭 비디오뿐 아니라 <strong>8방위 나침반 이미지</strong>를 함께 주는 것은, 지시문이 &quot;왼쪽/오른쪽/뒤&quot; 같은 <strong>전방위 방향어</strong>를 정확히 쓰도록 접지하기 위함이다. 원근 비디오만으로는 시야 밖 방향을 언어화할 수 없으므로, 파노라마 정책이 학습할 지시문이 애초에 전방위 어휘를 담도록 데이터 생성 단계에서 보장하는 것이다. 이는 파노라마 입력(§3.5)과 데이터 구축이 <strong>일관된 전방위 표현</strong>을 공유하도록 설계되었음을 보여준다.</p>
+<p><strong>의의.</strong> 이는 SatNav(#306)나 AwareVLN(자동 데이터 엔진)에서 본 &quot;합성 감독 데이터&quot; 계보에 속하되, <strong>분기점을 명시적 구성 원리로 삼는다</strong>는 점이 차별적이다 — 데이터의 통계적 편향(직진 위주)을 데이터 구축 단계에서 직접 교정한다.</p>
+<h3>3.4 공간 관계 시각 표현 (Spatial-Relationship Representation)</h3>
+<p><strong>목표.</strong> 파노라마 RGB에서 <strong>의미(semantic)</strong> 와 <strong>기하(geometric)</strong> 특징을 함께 추출·정렬·융합하되, <strong>시각 토큰 수를 늘리지 않아</strong> VLM 연산 비용을 보존한다.</p>
+<p><strong>두 인코더.</strong></p>
+<ul>
+<li><strong>의미 특징 V_t</strong>: 동결된 <strong>Qwen 3.5-4B</strong> 비전 인코더에서 추출 (장면 내용·객체 의미).</li>
+<li><strong>기하 특징 G_t</strong>: <strong>PanoVGGT</strong> — 파노라마 기하 인코더로, &quot;feed-forward 3D 재구성&quot; 단서를 추출 (추론 시점 기하 추출, 그래디언트 업데이트 없음, 동결).</li>
+</ul>
+<p><strong>정렬·융합.</strong> 기하 특징을 <strong>등장방형(equirectangular) 좌표로 리샘플링</strong>하고, VLM 토큰 영역에 맞게 <strong>2×2 그룹화</strong>한 뒤, MLP(<strong>8192 → 4096 → 2560</strong>, GELU)로 투영한다. 최종 융합은 잔차 연결:</p>
+<pre class="codeblock"><code>V̄_t = V_t + α · f_ψ(G_t),     α = 0.2 (잔차 스케일)
+</code></pre>
+<p>여기서 f_ψ는 위의 정렬·그룹화·MLP 투영 함수. α=0.2의 작은 잔차 스케일은 기하 신호를 <strong>의미 특징을 교란하지 않는 보정항</strong>으로 주입한다.</p>
+<pre class="diagram"><code>파노라마 RGB (960×480)
+   ├── Qwen3.5-4B(frozen) ──► V_t (의미 토큰)
+   └── PanoVGGT(frozen)   ──► G_t (기하)
+                                 │  등장방형 리샘플 → 2×2 그룹 → MLP(8192→4096→2560, GELU)
+                                 ▼
+                             α·f_ψ(G_t)   (α=0.2)
+                                 │
+        V̄_t = V_t + α·f_ψ(G_t)  ◄──┘   ← 토큰 수 불변(N_c 유지)
+</code></pre>
+<p><strong>토큰 예산.</strong> 현재 파노라마는 N_c 토큰, 히스토리 프레임은 각 N_h 토큰(더 거친 해상도)을 받는다. 총 시각 예산은 다음으로 <strong>일정하게 유지</strong>된다:</p>
+<pre class="codeblock"><code>Budget = N_c + M · N_h      (M = 히스토리 프레임 수)
+</code></pre>
+<p>기하 정보를 추가해도 이 예산이 변하지 않는 것이 핵심 — 기하는 <strong>새 토큰이 아니라 기존 의미 토큰의 값에 융합</strong>된다.</p>
+<p><strong>절제 근거.</strong> PanoVGGT는 대안 기하 인코더(UniK3D, DA2, DAP)보다 SR을 +1.2~2.0%p 높인다 — 파노라마 전용 기하 재구성이 원근용 깊이 추정기보다 전방위 레이아웃 포착에 유리함을 시사.</p>
+<p><strong>왜 &quot;토큰 불변&quot;이 결정적인가 — 비용·정합 관점 분해.</strong>
+융합 방식은 크게 두 갈래다. (a) 기하 토큰을 <strong>새로 추가</strong>해 시퀀스에 이어붙이는 방식, (b) 본 논문처럼 <strong>기존 의미 토큰 값에 잔차로 더하는</strong> 방식. VLM의 self-attention은 토큰 수 L에 대해 O(L²) 비용을 가지므로, (a)는 시각 토큰이 N_c → N_c + N_g로 늘면 어텐션 비용이 대략 ((N_c+N_g)/N_c)² 배로 증가한다. 파노라마는 이미 원근 대비 시야각이 커 N_c 자체가 크므로, 여기에 기하 토큰까지 더하면 실기체 지연(272ms/call)이 그대로 악화된다. (b)는 다음을 동시에 달성한다.</p>
+<pre class="codeblock"><code>관점            (a) 토큰 추가            (b) 잔차 융합(본 논문)
+----------------------------------------------------------------
+어텐션 비용     O((N_c+N_g)²) ↑↑         O(N_c²) 불변
+공간 정합       기하·의미 토큰이          동일 (u,v) 위치의 의미
+                별도 위치 → 교차정렬       토큰에 그 위치 기하를
+                어텐션이 학습해야 함        직접 가산 → 정합 자명
+학습 부담       정렬을 데이터로 학습        α만 조정(0.2), 정렬 불필요
+백본 개조       입력 길이 변경 필요        길이·아키텍처 무변경
+</code></pre>
+<p>핵심은 등장방형 리샘플 + 2×2 그룹화가 기하 특징 G_t를 <strong>의미 토큰과 동일한 (u,v) 격자에 정렬</strong>시킨다는 점이다. 그 결과 같은 픽셀 영역의 &quot;무엇(의미)&quot;과 &quot;어디·얼마나 멀리(기하)&quot;가 <strong>같은 토큰 벡터 안에서 합쳐진다</strong>. 이는 교차 어텐션으로 두 모달을 사후 정렬하는 부담을 원천 제거한다.</p>
+<p><strong>α=0.2의 스케일 해석.</strong> 잔차 계수 α는 기하 신호가 의미 표현을 지배하지 않도록 하는 <strong>주입 강도 손잡이</strong>다. α가 크면 기하가 의미를 교란해 사전학습된 Qwen3.5-4B 표현이 붕괴할 위험이 있고, α=0(제거)이면 평면 표현으로 회귀해 공간 관계(&quot;탁자 왼쪽&quot;, &quot;복도 끝&quot;)를 잃는다. 0.2라는 값은 <strong>의미를 보존하면서 기하를 보정항으로만</strong> 얹는 균형점으로, MLP 출력 f_ψ(G_t)가 V_t와 같은 차원(2560)으로 투영되어 요소별 가산이 성립한다. MLP 병목(8192→4096→2560)은 PanoVGGT의 고차원 기하 특징을 VLM 임베딩 차원으로 압축하며, GELU 비선형이 단순 선형 투영으로는 얻기 어려운 기하-의미 좌표계 변환을 학습한다.</p>
+<p><strong>동결(frozen)의 함의.</strong> 두 인코더가 모두 동결이므로 PanoVLN이 실제로 학습하는 것은 (i) 투영 MLP f_ψ와 (ii) VLM 정책 헤드뿐이다. 이는 대규모 사전학습된 표현(Qwen3.5-4B 의미, PanoVGGT 기하)을 <strong>재학습 없이 재사용</strong>해 데이터·연산 효율을 얻는 설계로, 실기체 배치까지 고려하면 훈련 비용과 과적합 위험을 동시에 낮춘다.</p>
+<h3>3.5 정책 백본과 파노라마 처리</h3>
+<ul>
+<li><strong>백본</strong>: <strong>Qwen 3.5-4B</strong> 비전-언어 모델.</li>
+<li><strong>입력 해상도</strong>: 현재 관측 파노라마 <strong>960×480</strong>, 히스토리 프레임은 극점에서 20°를 크롭한 뒤 <strong>448×224</strong>.</li>
+<li><strong>행동 디코딩</strong>: greedy, 정책 호출당 정확히 <strong>18 토큰</strong> 출력(=H=18 행동).</li>
+<li><strong>PanoVGGT</strong>: 추론 시점에만 기하 추출(동결, 학습 없음).</li>
+</ul>
+<h3>3.6 세 축의 결합 — 왜 함께여야 하는가</h3>
+<p>세 기여는 독립적 트릭이 아니라 <strong>하나의 인과 사슬</strong>로 맞물린다:</p>
+<pre class="codeblock"><code>③ 공간 관계 표현
+   → 파노라마의 방향 간 레이아웃을 정책이 이해 가능
+      ↓
+② 분기 중심 데이터
+   → 그 이해를 &quot;지시에 맞는 분기 선택&quot; 능력으로 훈련
+      ↓
+장기 지평(H=18) 예측
+   → 여러 분기를 내다보는 신뢰할 만한 긴 시퀀스 산출
+      ↓
+① CGE
+   → 그 긴 예측을 실기체에서 안전·효율적으로 소비(다스텝 실행)
+      ↓
+결과: 정확도(SR) ↑  +  실기체 효율(정지↓·속도↑)
+</code></pre>
+<p>표현이 없으면 데이터가 소용없고(방향을 이해 못 함), 데이터가 없으면 장기 예측이 무의미하며(분기 감독 부재), 장기 예측이 없으면 CGE가 소비할 것이 없다. 이 상보성이 논문의 설계 논리다.</p>
+<hr>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>                    ┌─────────────────────────────────────────────┐
+   자연어 지시  ────►│                                             │
+                    │            Qwen 3.5-4B (VLM backbone)        │
+   파노라마 RGB      │                                             │
+   (960×480) ──┬───►│  [의미 토큰 V_t]  ⊕  [기하 융합 α·f(G_t)]    │
+               │    │            = V̄_t (토큰 수 불변)              │
+               │    │                                             │
+   PanoVGGT ───┘    │         자기회귀 디코딩 → 18 행동 토큰         │
+   (frozen 기하)    └─────────────────────────────────────────────┘
+                                        │
+                          예측 시퀀스 â_{t,1..18} + 로짓
+                                        │
+                    ┌───────────────────▼───────────────────┐
+                    │      Confidence-Guided Execution        │
+                    │  u_{t,i}=−log q(â);  U_t(k)=Σu          │
+                    │  E_t = max{k: k≤E_min or U_t(k)≤B}      │
+                    │  (B=1.2, E_min=4)                       │
+                    └───────────────────┬───────────────────┘
+                                        │  E_t 개 행동 실행
+                                        ▼
+                          로봇 이동 (Go2) → 새 파노라마 관측 → 재계획
+</code></pre>
+<p><strong>히스토리 관리.</strong> 현재 프레임 N_c 토큰 + M개 히스토리 프레임(각 N_h, 저해상)로 총 예산 N_c + M·N_h 고정. 파노라마 히스토리는 극점 크롭(20°) 후 448×224로 압축.</p>
+<p><strong>데이터 흐름 요약.</strong> (1) 파노라마·지시 입력 → (2) 의미+기하 융합 표현 → (3) VLM이 18 행동 예측 → (4) CGE가 신뢰 접두 E_t 실행 → (5) 이동 후 새 관측으로 순환. 훈련은 §3.3의 분기 중심 ~98K 궤적 + DAgger로 수행.</p>
+<hr>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<ul>
+<li><strong>R2R-CE</strong> (Room-to-Room, Continuous Environments) — Val-Unseen.</li>
+<li><strong>RxR-CE</strong> (Room-across-Room, Continuous Environments) — Val-Unseen, 다국어·장문 지시.</li>
+<li><strong>훈련 데이터</strong>: 자체 구축 분기 중심 ~98K 궤적 (800 HM3D 씬) + DAgger.</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>SR</strong> (Success Rate): 목표 반경 내 정지 성공률 (↑).</li>
+<li><strong>SPL</strong> (Success weighted by Path Length): 경로 효율 가중 성공률 (↑).</li>
+<li><strong>NE</strong> (Navigation Error): 종료 위치-목표 거리, m (↓).</li>
+<li><strong>OS</strong> (Oracle Success): 경로 중 목표 반경 진입 여부 (↑).</li>
+<li><strong>nDTW</strong> (normalized Dynamic Time Warping): 경로 형태 정합도, RxR 주로 (↑).</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>Val-Unseen 주요 결과:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>벤치마크</th>
+<th>SR (%)</th>
+<th>SPL (%)</th>
+<th>NE (m)</th>
+<th>OS (%)</th>
+<th>nDTW</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>R2R-CE</strong></td>
+<td><strong>77.3</strong></td>
+<td>70.6</td>
+<td>2.83</td>
+<td>83.1</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>RxR-CE</strong></td>
+<td><strong>78.0</strong></td>
+<td>65.9</td>
+<td>2.85</td>
+<td>78.0</td>
+<td>73.3</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>이전 SOTA 대비 <strong>R2R-CE +11.9%p, RxR-CE +8.7%p (절대 SR 향상)</strong>.</li>
+<li>참고로 같은 코퍼스의 단안 RGB SOTA인 AwareVLN(CVPR 2026)이 R2R-CE Val-Unseen SR 65.4%, RxR-CE SR 67.6%였음을 감안하면, PanoVLN의 77.3%/78.0%는 파노라마+장기지평 설계가 가져온 큰 폭의 도약이다.</li>
+</ul>
+<blockquote>
+<p><strong>정직성 주석</strong>: 위 표는 논문 본문(arxiv HTML)에서 추출한 Val-Unseen 수치다. 베이스라인별(개별 방법명 대응) 전체 비교표의 각 행 수치는 본 리뷰 작성 시점에 완전히 확보하지 못했으므로 <strong>개별 베이스라인 대응 수치는 임의로 기재하지 않는다</strong>(날조 금지). &quot;+11.9%p/+8.7%p&quot;는 논문이 명시한 이전 SOTA 대비 향상폭이다.</p>
+</blockquote>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p><strong>셋업.</strong></p>
+<ul>
+<li>로봇: <strong>Unitree Go2</strong> 사족 로봇.</li>
+<li>카메라: <strong>Insta360 X5</strong> 파노라마 카메라, 지상 1.5m 높이 장착.</li>
+<li>연산: 원격 <strong>RTX 3090</strong> GPU (네트워크 오버헤드 호출당 272 ms).</li>
+<li>실행: 동기식 — 로봇이 예측 요청 → 대기 → 실행 → 다음 관측 요청.</li>
+</ul>
+<p><strong>성능 (환경당 20 trials).</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>환경</th>
+<th>항해 시간</th>
+<th>속도</th>
+<th>정지 횟수</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Hallway(복도)</td>
+<td>86.4 s</td>
+<td>25.7 cm/s</td>
+<td>5.4회</td>
+</tr>
+<tr>
+<td>Office/Campus 전이</td>
+<td>실내 잡동사니·실외 지형 성공</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p><strong>효율 이득 (vs 베이스라인 NaVid / NaVILA / StreamVLN / JanusVLN).</strong></p>
+<pre class="codeblock"><code>정책 호출 수:   PanoVLN 7.4  vs  베이스라인 29 ~ 101
+대기 시간 비율: PanoVLN 13.6% vs 베이스라인 23 ~ 39%
+</code></pre>
+<p>즉 CGE의 다스텝 실행이 <strong>정책 호출을 1/4~1/13로 줄여</strong>, 더 적은 정지와 더 빠르고 부드러운 항해를 실현한다. Office/Campus 전이 실험에서 실내 클러터와 실외 지형 모두를 항해하며 성공률·실행 효율에서 위 베이스라인들을 능가.</p>
+<h3>5.5 절제 실험 요약 (Ablation)</h3>
+<ul>
+<li><strong>예측 지평</strong>: 파노라마 정책은 H=18에서 최고, 원근 정책은 H=4에서 포화 (§3.2).</li>
+<li><strong>CGE vs 고정 실행</strong>: 적응 실행이 고정 길이(1/6/12/18)·무작위 접두를 모두 능가.</li>
+<li><strong>기하 인코더</strong>: PanoVGGT가 UniK3D/DA2/DAP 대비 +1.2~2.0%p SR.</li>
+<li><strong>훈련 데이터</strong>: 분기 중심 궤적이 누적 이득을 제공하며, DAgger와 결합 시 최종 성능 달성.</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><strong>파노라마 VLN을 &quot;실제로 작동하게&quot; 만든 3축 진단·처방.</strong> 파노라마 입력의 잠재력이 발현되지 못하는 이유를 짧은 지평·분기 없는 데이터·평면 표현으로 분해하고, 각각에 대응하는 설계를 제시.</li>
+<li><strong>Confidence-Guided Execution (CGE).</strong> 정책 로짓의 음의 로그 확률을 불확실성으로 삼아 누적 예산(B=1.2, E_min=4)으로 다스텝 실행 길이를 적응 결정 — 별도 불확실성 모듈 없이 장기 예측을 안전·효율적으로 소비. 실기체 정책 호출을 대폭 절감.</li>
+<li><strong>분기 중심 훈련 데이터 구축 파이프라인.</strong> navigation mesh 분기점 식별 + LLM 지시 생성 + 3중 접지 검증으로 ~98K 결정 밀집 궤적을 자동 구축, 직진 편향을 데이터 단계에서 교정.</li>
+<li><strong>토큰 불변 공간 관계 표현.</strong> 동결 PanoVGGT 기하를 동결 Qwen3.5-4B 의미에 잔차(α=0.2) 융합하되 시각 토큰 예산을 늘리지 않아 연산 비용 보존.</li>
+<li><strong>강력한 벤치마크·실기체 실증.</strong> R2R-CE 77.3%/RxR-CE 78.0% Val-Unseen SOTA, Unitree Go2+Insta360 X5 실기체에서 호출 7.4회·대기 13.6%로 베이스라인 대비 빠르고 매끄러운 항해.</li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>VLM 백본</td>
+<td>Qwen 3.5-4B</td>
+</tr>
+<tr>
+<td>의미 인코더</td>
+<td>Qwen 3.5-4B vision (frozen)</td>
+</tr>
+<tr>
+<td>기하 인코더</td>
+<td>PanoVGGT (frozen, feed-forward 3D)</td>
+</tr>
+<tr>
+<td>잔차 스케일 α</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>기하 투영 MLP</td>
+<td>8192 → 4096 → 2560, GELU</td>
+</tr>
+<tr>
+<td>기하 그룹화</td>
+<td>2×2 (VLM 토큰 영역 정합)</td>
+</tr>
+<tr>
+<td>예측 지평 H</td>
+<td>18 (호출당 18 토큰 greedy)</td>
+</tr>
+<tr>
+<td>CGE 예산 B</td>
+<td>1.2</td>
+</tr>
+<tr>
+<td>CGE 최소 실행 E_min</td>
+<td>4</td>
+</tr>
+<tr>
+<td>전형 실행 길이</td>
+<td>4~12 (신뢰도 의존)</td>
+</tr>
+<tr>
+<td>현재 파노라마 해상도</td>
+<td>960×480</td>
+</tr>
+<tr>
+<td>히스토리 프레임 해상도</td>
+<td>448×224 (극점 20° 크롭 후)</td>
+</tr>
+<tr>
+<td>시각 토큰 예산</td>
+<td>N_c + M·N_h (기하 융합해도 불변)</td>
+</tr>
+<tr>
+<td>행동 공간</td>
+<td>{forward, left, right, stop}</td>
+</tr>
+<tr>
+<td>훈련 데이터</td>
+<td>~98K 분기 중심 궤적 (800 HM3D) + DAgger</td>
+</tr>
+<tr>
+<td>지시 생성 LLM</td>
+<td>Qwen 3.8-27B</td>
+</tr>
+<tr>
+<td>실기체</td>
+<td>Unitree Go2 + Insta360 X5 (1.5m) + RTX 3090 원격(272 ms/call)</td>
+</tr>
+</tbody></table></div>
+<hr>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 CGE의 보정(calibration) 의존성</h3>
+<p>CGE는 정책 로짓이 잘 보정되어 있다고 암묵 가정한다. u_{t,i} = −log q가 실제 오류 확률과 단조 관계여야 예산 B가 의미를 가진다. VLM의 softmax 로짓은 종종 과신(overconfident)하는 경향이 있어, 분포 이동(sim→real, 새 환경)에서 u가 실제 위험을 과소평가할 수 있다. E_min의 하한과 B의 보수적 설정이 안전 마진을 제공하지만, <strong>명시적 보정(temperature scaling 등)이나 앙상블 불확실성</strong>은 향후 강건성 개선 여지다.</p>
+<h3>8.2 지연·동기 실행의 한계</h3>
+<p>실기체는 원격 RTX 3090에 호출당 272 ms의 네트워크 오버헤드를 지불하며 동기식으로 대기한다. CGE가 호출 수를 7.4로 줄여 이 비용을 상당히 흡수하지만, 진정한 <strong>비동기·온보드 추론</strong>(예측 실행 중 다음 관측 선반영)은 여전히 열린 과제다. 4B 백본의 온디바이스 경량화도 배치 실용성의 관건.</p>
+<h3>8.3 파노라마 특유의 왜곡·경계</h3>
+<p>등장방형 투영의 극점 왜곡을 20° 크롭으로 완화하지만, 경계 불연속(좌우 끝이 물리적으로 연속)은 표현 학습에 남는 난제다. PanoVGGT가 전방위 기하를 재구성하여 부분적으로 보완하나, 파노라마 전용 위치 인코딩·순환 어텐션 등은 추가 개선 방향.</p>
+<h3>8.4 데이터 구축의 LLM 의존과 검증 비용</h3>
+<p>지시 생성이 Qwen 3.8-27B에 의존하며 3중 검증+국소 재수정 루프를 거친다. 이는 라벨 품질을 보장하지만 <strong>LLM의 공간 서술 편향</strong>을 데이터에 주입할 위험이 있고, 검증 통과 기준의 임계값이 데이터 분포를 좌우한다. 검증 자동화의 정밀도-재현율 트레이드오프는 데이터 규모 확장 시 재조정이 필요.</p>
+<h3>8.5 확장성 — 더 큰 백본·다중 카메라</h3>
+<p>현재 4B 백본에서 이미 강한 성능을 보이므로, 더 큰 VLM으로의 스케일업이 지평·분기 추론을 더 개선할지가 흥미로운 질문이다. 또한 Insta360 단일 파노라마 외에 <strong>다중 카메라·깊이 센서 융합</strong>으로 기하 신호를 강화하면 §3.4의 잔차 융합 프레임이 자연스럽게 확장될 수 있다.</p>
+<hr>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>StreamVLN (ICRA 2026)</th>
+<th>NaVILA (RSS 2025)</th>
+<th>AwareVLN (CVPR 2026)</th>
+<th>SatNav (NeurIPS 2026)</th>
+<th><strong>PanoVLN (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>시각 입력</td>
+<td>단안 연속 비디오(원근)</td>
+<td>단안 원근(계층 VLA)</td>
+<td>단안 RGB</td>
+<td>위성/UAV 하향뷰</td>
+<td><strong>파노라마 360°</strong></td>
+</tr>
+<tr>
+<td>핵심 아이디어</td>
+<td>스트리밍 온라인 VLM·KV 관리</td>
+<td>고수준 VLM+저수준 로코모션 계층</td>
+<td>Key Node 선택적 자기인식 추론</td>
+<td>위성영상 프록시 대규모 항공 벤치</td>
+<td>지평×분기×표현 3축+CGE</td>
+</tr>
+<tr>
+<td>실행 전략</td>
+<td>매 프레임 스트리밍</td>
+<td>계층 분리(언어→보행)</td>
+<td>Key Node에서만 추론</td>
+<td>(벤치마크)</td>
+<td><strong>신뢰도 유도 다스텝 실행</strong></td>
+</tr>
+<tr>
+<td>행동 지평</td>
+<td>단기(스트리밍)</td>
+<td>단기 고수준 명령</td>
+<td>단기+선택 추론</td>
+<td>—</td>
+<td><strong>장기 H=18</strong></td>
+</tr>
+<tr>
+<td>R2R-CE Val-Unseen SR</td>
+<td>(스트리밍 SOTA급)</td>
+<td>—</td>
+<td>65.4%</td>
+<td>—</td>
+<td><strong>77.3%</strong></td>
+</tr>
+<tr>
+<td>실기체</td>
+<td>실로봇</td>
+<td>사족(Go2 등)</td>
+<td>복도/가정/사무실</td>
+<td>—</td>
+<td><strong>Go2+파노라마 카메라</strong></td>
+</tr>
+<tr>
+<td>데이터 기여</td>
+<td>—</td>
+<td>—</td>
+<td>자동 추론 데이터 엔진</td>
+<td>118K 항공 에피소드</td>
+<td><strong>분기 중심 ~98K 구축</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>장점.</strong></p>
+<ul>
+<li><strong>파노라마의 잠재력을 실제 SR로 전환한 최초의 체계적 처방</strong>: &quot;입력만 바꾸면 안 된다&quot;는 진단과 3축 해법이 명확하고 절제로 뒷받침됨.</li>
+<li><strong>CGE의 우아함</strong>: 기존 로짓만으로 적응 실행을 구현, 실기체 호출을 극적으로 절감(7.4 vs 29~101).</li>
+<li><strong>토큰 불변 기하 융합</strong>: 연산 비용을 늘리지 않고 공간 관계 표현을 주입 — 실용적.</li>
+<li><strong>강한 실증</strong>: R2R/RxR 큰 폭 SOTA + 실기체 효율.</li>
+</ul>
+<p><strong>단점·한계.</strong></p>
+<ul>
+<li><strong>라이선스 미정</strong>: 코드 저장소는 실재하나 라이선스가 명시되지 않아(미정) 재사용 조건이 불투명.</li>
+<li><strong>동기·원격 추론 의존</strong>: 온보드·비동기 실행은 미해결(§8.2).</li>
+<li><strong>로짓 보정 가정</strong>: CGE의 안전성이 VLM 과신에 취약할 수 있음(§8.1).</li>
+<li><strong>LLM 데이터 편향</strong>: 지시 생성이 대형 LLM에 의존(§8.4).</li>
+<li><strong>발표처 미확정</strong>: arXiv 프리프린트로 정식 리뷰 통과 전.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<p>파노라마 카메라(Insta360류)는 저렴·경량이라 실 배치 문턱이 낮고, CGE의 호출 절감은 클라우드 추론 비용·지연을 직접 낮춘다. 실내 복도~실외 캠퍼스 전이가 실증되어 <strong>서비스 로봇·순찰·안내</strong> 응용에 근접해 있다. 다만 온보드 경량화와 라이선스 명확화가 상용화 전제.</p>
+<h3>9.4 연구 방향성 평가</h3>
+<p>&quot;넓은 시야(공간) × 긴 지평(시간) × 적응 실행&quot;의 삼각 결합은 VLN을 넘어 <strong>일반 embodied 정책</strong>에 이식 가능한 원리다. CGE는 D4orm 계열의 anytime·불확실성 인지 실행 사고와 맞닿아 있고(계획-실행 분리), 분기 중심 데이터 구축은 SatNav의 대규모 벤치 계보를 &quot;결정 밀도&quot; 축으로 보완한다. 향후 (a) 보정된 불확실성, (b) 비동기 온보드, (c) 파노라마 전용 위치 인코딩이 자연스러운 후속.</p>
+<hr>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
+<ul>
+<li>본 논문: Wang et al., &quot;Towards Effective Panoramic Vision-and-Language Navigation (PanoVLN),&quot; arXiv:2609.34759, 2026.</li>
+<li>비교 대상(본 코퍼스 리뷰): StreamVLN (ICRA 2026), NaVILA (RSS 2025), AwareVLN (CVPR 2026), SatNav (NeurIPS 2026 Datasets &amp; Benchmarks).</li>
+<li>관련 베이스라인(논문 인용): NaVid, JanusVLN.</li>
+<li>구성 요소: Qwen 3.5-4B / Qwen 3.8-27B (VLM/LLM), PanoVGGT (파노라마 기하 인코더), R2R-CE·RxR-CE·HM3D (벤치·씬).</li>
+<li>코드: github.com/wangzhen-w/PanoVLN (라이선스 미정).</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
+<p>PanoVLN은 &quot;파노라마를 넣으면 항해가 나아질 것&quot;이라는 단순 직관이 <strong>그대로는 성립하지 않는다</strong>는 반례에서 출발해, 그 실패를 짧은 지평·분기 없는 데이터·평면 표현으로 정밀 분해하고 각각을 정조준한 세 처방으로 파노라마의 잠재력을 실제 성능으로 전환한다. <strong>Confidence-Guided Execution</strong>은 정책 자신의 로짓을 신뢰 신호로 삼아 장기 예측(H=18)을 실기체에서 안전·효율적으로 소비하며, <strong>분기 중심 ~98K 데이터</strong>는 직진 편향을 데이터 단계에서 교정하고, <strong>토큰 불변 기하 융합</strong>은 연산 비용 없이 공간 관계를 주입한다. 결과는 R2R-CE 77.3%·RxR-CE 78.0% Val-Unseen SOTA(각 +11.9%p/+8.7%p)와, Unitree Go2 실기체에서 정책 호출 7.4회·대기 13.6%의 매끄러운 항해다.</p>
+<p><strong>혁신성</strong>은 개별 트릭이 아니라 &quot;공간(파노라마)×시간(장기 지평)×실행(CGE)&quot;을 하나의 인과 사슬로 엮은 <strong>시스템 설계</strong>에 있다. <strong>실용적 의의</strong>는 저렴한 파노라마 카메라와 호출 절감이라는, 실 배치에 직결되는 요소를 정면으로 다룬 점이다. <strong>향후 연구</strong>는 보정된 불확실성, 비동기·온보드 추론, 파노라마 전용 표현으로 이어질 것이며, 코드 라이선스 명확화가 커뮤니티 확산의 관건이다. PanoVLN은 파노라마 VLN을 &quot;가능성&quot;에서 &quot;작동하는 시스템&quot;으로 끌어올린, 방향성이 뚜렷한 기여다.</p>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+<div class="rhead" id="rhead" data-title="Towards Effective Panoramic Vision-and-Language Navigation (PanoVLN): 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
+</body>
+</html>

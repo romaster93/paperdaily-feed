@@ -1,13 +1,85 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-28T19:30:02.097Z",
+  "generatedAt": "2026-09-29T19:30:02.369Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 9. 29  화요일",
+    "date": "2026. 9. 30  수요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 새 리뷰 2편 · 전체 111편"
+    "subtitle": "VLN·Planner 새 리뷰 2편 · 전체 113편"
   },
   "papers": [
+    {
+      "id": "2609.35651",
+      "venue": "T-RO 2026",
+      "venueDetail": "IEEE Transactions on Robotics (T-RO) 2026 (accepted)",
+      "matchScore": 93,
+      "category": "Planner",
+      "feedTitle": "D4orm: Denoising Multi-Robot Trajectories",
+      "authorsShort": "Y. Zhang, K. Okumura +2",
+      "feedAbstract": "학습 없이 모델 기반 확산(MBD)의 역디노이징으로 다중 로봇 궤적을 최적화하는 프레임워크로, 동역학 롤아웃 + 적합도 함수 + 몬테카를로 스코어 근사로 무충돌·동역학 실현가능 궤적을 생성하며, 분리형·온라인·분산 3변형으로 100대 시뮬 디컨플릭션과 10대 실제 쿼드로터 zero-shot 배치를 실증.",
+      "tags": [
+        "#Planner",
+        "#다중로봇궤적최적화",
+        "#모델기반확산",
+        "#분산온보드계획",
+        "#코드공개"
+      ],
+      "titleEN": "D4orm: Denoising Multi-Robot Trajectories (Dynamics-aware Diffusion Denoised Deformations)",
+      "titleKO": "D4orm: Denoising Multi-Robot Trajectories (Dynamics-aware Diffusion Denoised Deformations)",
+      "authorsEN": "Yuhao Zhang, Keisuke Okumura, Ajay Shankar, Amanda Prorok",
+      "authorsKO": "Yuhao Zhang, Keisuke Okumura, Ajay Shankar, Amanda Prorok",
+      "abstractEN": "Multi-robot trajectory planning is a fundamental problem in multi-robot coordination but remains computationally challenging due to its nonconvex, multimodal, and high-dimensional nature. This work builds upon D4orm, a dynamics-aware diffusion-denoising framework, and develops a family of planning architectures for diverse operational requirements. Unlike conventional numerical optimization methods, D4orm employs sampling-based optimization to generate solution trajectories through massively parallel sampling, leveraging modern computing architectures such as GPUs. Its diffusion-denoising structure iteratively optimizes \\textit{deformations} to candidate control trajectories, providing an efficient and versatile paradigm for generating kinodynamically feasible and conflict-free trajectories. Using D4orm as the building block for advanced planners, we present a decoupled planner for improved scalability, an online receding-horizon planner with feedback control, and a distributed planner for resource-constrained settings. Evaluations with differential-drive and holonomic robots in 2D and 3D environments demonstrate that D4orm-based approaches find high-quality solutions faster and more reliably than other sampling-based optimization methods, such as MPPI, as well as a learned diffusion-model-based method. We further demonstrate zero-shot deployment on ten real quadrotors with obstacles, large-scale deconfliction with 100 simulated robots, and fully onboard distributed `lifelong' operation with six ground robots. Overall, these results establish diffusion denoising as a scalable and reliable framework for multi-robot coordination. Code and video: https://github.com/proroklab/d4orm",
+      "abstractKO": "학습 없이 모델 기반 확산(MBD)의 역디노이징으로 다중 로봇 궤적을 최적화하는 프레임워크로, 동역학 롤아웃 + 적합도 함수 + 몬테카를로 스코어 근사로 무충돌·동역학 실현가능 궤적을 생성하며, 분리형·온라인·분산 3변형으로 100대 시뮬 디컨플릭션과 10대 실제 쿼드로터 zero-shot 배치를 실증.",
+      "detailTags": [
+        "#Planner",
+        "#다중로봇궤적최적화",
+        "#모델기반확산",
+        "#분산온보드계획",
+        "#코드공개"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 38,
+      "reason": "**모델 기반 확산 다중로봇 계획**: 학습된 스코어 네트워크 없이 롤아웃+적합도+몬테카를로 그래디언트로 역확산 스코어 해석적 추정\n**변형 기반 anytime 정제**: 이전 궤적에 대한 변형(deformation)을 반복 최적화 → 언제 멈춰도 최선 해 반환, 웜스타트로 온라인 재계획 지원\n**3배치 아키텍처**: 분리형(확장성·100대)·온라인 후퇴지평+피드백(실시간·실기체)·분산(온보드·lifelong)\n**임의 동역학 수용**: 롤아웃이 동역학을 파라미터화로 흡수 → 홀로노믹·차동구동·쿼드로터를 동일 코드로\n**광범위 실기체**: 10대 실제 쿼드로터+장애물 zero-shot, 6대 지상로봇 완전 온보드 분산 lifelong\n**Apache-2.0 공개 코드**: JAX/Python, 대량 병렬 GPU 샘플링",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/D4orm_TRO2026/index.html"
+    },
+    {
+      "id": "2609.34759",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 2026 (cs.CV, cs.RO) — 발표처 미확정",
+      "matchScore": 96,
+      "category": "VLN",
+      "feedTitle": "Towards Effective Panoramic Vision-and-Language Navigation (PanoVLN)",
+      "authorsShort": "Z. Wang, C. Wang +6",
+      "feedAbstract": "파노라마(360°) 입력을 VLN에 효과적으로 쓰기 위해 짧은 지평·분기 없는 데이터·평면 표현이라는 세 병목을 진단하고, 신뢰도 유도 다스텝 실행(CGE)·분기 중심 ~98K 훈련 데이터·토큰 불변 기하 융합(PanoVGGT+Qwen3.5-4B)으로 대응해 R2R-CE 77.3%·RxR-CE 78.0%…",
+      "tags": [
+        "#VLN",
+        "#파노라마360°입력",
+        "#장기지평예측+신뢰도유도실행",
+        "#분기중심훈련데이터구축",
+        "#기하-의미융합표현"
+      ],
+      "titleEN": "Towards Effective Panoramic Vision-and-Language Navigation (PanoVLN)",
+      "titleKO": "Towards Effective Panoramic Vision-and-Language Navigation (PanoVLN)",
+      "authorsEN": "Zhen Wang, Changpeng Wang, Zhe Liu, Zhangyang Qi, Yuxiang Lu, Zimo Zeng, Donglian Qi, Xi Chen",
+      "authorsKO": "Zhen Wang, Changpeng Wang, Zhe Liu, Zhangyang Qi, Yuxiang Lu, Zimo Zeng, Donglian Qi, Xi Chen",
+      "abstractEN": "Recent vision-language models (VLMs) have advanced vision-and-language navigation (VLN), enabling models to predict navigation actions from visual observations and language instructions. In this work, we explore VLN with panoramic observations and introduce PanoVLN. The motivation is straightforward: more complete visual context should enable better-informed navigation decisions. For example, a panorama can reveal a passage outside a perspective camera's field of view, allowing the model to identify the intended route without additional exploration. However, we find that simply replacing perspective images with panoramas yields only limited gains. Our diagnosis suggests that fully exploiting wider visibility requires modifications to action prediction, training supervision, and visual representation. First, wider visibility supports longer-horizon action planning. We make the model predict longer action sequences, enabling larger turns and subsequent movement from a single panorama. Specifically, we introduce a confidence-guided execution (CGE) strategy that dynamically determines how many predicted actions to execute before replanning. Second, wider visibility also brings more complex route choices. We therefore construct training routes with frequent branching points and clear instructions to provide targeted supervision for route selection. Third, panoramic navigation requires understanding spatial relationships across viewing directions, beyond recognizing individual landmarks. We combine semantic and geometric features from RGB panoramas to capture both scene content and spatial layout without adding visual tokens. With a 4B backbone and RGB-only input, PanoVLN surpasses the previous SOTA by 11.9% and 8.7% in success rate on R2R-CE and RxR-CE Val-Unseen. Real-world experiments on a quadruped further demonstrate faster navigation with fewer pauses than prior VLN methods.",
+      "abstractKO": "파노라마(360°) 입력을 VLN에 효과적으로 쓰기 위해 짧은 지평·분기 없는 데이터·평면 표현이라는 세 병목을 진단하고, 신뢰도 유도 다스텝 실행(CGE)·분기 중심 ~98K 훈련 데이터·토큰 불변 기하 융합(PanoVGGT+Qwen3.5-4B)으로 대응해 R2R-CE 77.3%·RxR-CE 78.0% Val-Unseen SOTA와 Unitree Go2 실기체 효율을 달성.",
+      "detailTags": [
+        "#VLN",
+        "#파노라마360°입력",
+        "#장기지평예측+신뢰도유도실행",
+        "#분기중심훈련데이터구축",
+        "#기하-의미융합표현"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 38,
+      "reason": "**Confidence-Guided Execution (CGE)**: 정책 로짓의 음의 로그 확률을 불확실성으로 삼아 누적 예산(B=1.2, E_min=4)으로 장기 예측(H=18)의 실행 접두 길이를 적응 결정 → 실기체 정책 호출 대폭 절감\n**분기 중심 훈련 데이터**: navigation mesh 분기점 식별 + LLM(Qwen3.8-27B) 지시 생성 + 3중 접지 검증으로 ~98K 결정 밀집 궤적 자동 구축(800 HM3D) + DAgger\n**토큰 불변 공간 관계 표현**: 동결 PanoVGGT 기하를 동결 Qwen3.5-4B 의미에 잔차(α=0.2) 융합, 시각 토큰 예산(N_c+M·N_h) 불변\n**파노라마×장기지평 상보성**: 파노라마 정책은 H=18 최고, 원근 정책은 H=4 포화",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/PanoVLN_arxiv2026/index.html"
+    }
+  ],
+  "archive": [
     {
       "id": "2609.31507",
       "venue": "NeurIPS 2026",
@@ -70,9 +142,7 @@
       "readMinutes": 40,
       "reason": "**GPU 기반 a.s.a.o. 다중 로봇 계획기 최초 제안**: dRRT 복합 로드맵 + AO-x 상태-비용 informed 샘플링(프로레이트 초타원체, c_rand ~ U[‖q−q_start‖, c_best]), Theorem 1로 점근적 최적성 보장(조건 C1 유한시간 실현가능성·Lemma 1 전진확률 (p_n·ξ_n)^M, 조건 C2 기대수축 Eq.1).\n**3계층 GPU SIMT 병렬성**: 고(다수 인스턴스/양방향 dRRT)–중(블록당 계획 반복 수백 개 동시)–저(스레드 병렬 샘플·NN·충돌) → 그리드/블록/스레드 매핑.\n**2단계 조밀→세밀 충돌검사 + 워크로드 균형**: URDF→구 근사(VAMP 계보), Stage 1 이동당 4스레드 조밀검사+세밀구 개수 c_i 집계, Stage 2 c_i:total 비율 스레드 재할당.\n**PRM\\* 병렬 로드맵 구성** (Eq.2 연결반경, 리더블록 BFS 연결성 확인).\n**궤적최적화기 시드 생성기로서의 가치 입증**: 다양·저비용 시드로 cuRoboV2 성공률 4%→72%, 경로 길이·모션 시간·무차원 저크 개선.",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/MRPOP_arxiv2026/index.html"
-    }
-  ],
-  "archive": [
+    },
     {
       "id": "2609.29929",
       "venue": "IROS 2026 WS",
