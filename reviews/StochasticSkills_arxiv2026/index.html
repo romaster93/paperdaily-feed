@@ -1,0 +1,902 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Multi-Robot Multi-Goal Motion Planning with Stochastic Skills · PaperDaily</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { color: #8f4023; text-decoration: underline; }
+
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
+
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
+}
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
+article code.math-display {
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
+}
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
+article th {
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
+article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: var(--mono); font-size: 12px; text-align: center;
+}
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
+footer {
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
+</head>
+<body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2610.07784">arXiv ↗</a>
+</div>
+<div class="wrap">
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">StochasticSkills_arxiv2026</span>
+    </div>
+    <h1 class="doc-title">Multi-Robot Multi-Goal Motion Planning with Stochastic Skills: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 2026 (발표처 미정)</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2610.07784">2610.07784</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">❌ (미공개)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">❌</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-10-08</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">41KB · 약 40분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
+  </header>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Multi-Robot Multi-Goal Motion Planning with Stochastic Skills</li>
+<li><strong>저자 (Authors)</strong>: William Schnyder, Valentin N. Hartmann, Stelian Coros</li>
+<li><strong>소속 (Affiliation)</strong>: ETH Zürich, Computational Robotics Lab (CRL)</li>
+<li><strong>발표처 (Published)</strong>: arXiv 2026 (프리프린트, 발표처 미확정; Comments: 8 pages, 5 figures, 2 tables)</li>
+<li><strong>DOI</strong>: 미부여 (프리프린트)</li>
+<li><strong>arXiv</strong>: 2610.07784</li>
+<li><strong>코드 (Code)</strong>: <a href="https://github.com/vhartman/multirobot-pathplanning-benchmark">https://github.com/vhartman/multirobot-pathplanning-benchmark</a> (공개 ✅ — Python+C++ 혼합, <code>dev/william</code> 브랜치, 887+ 커밋, 실행 가능. <strong>LICENSE 파일 없음 → 라이선스 미명시</strong>)</li>
+<li><strong>상태</strong>: 순수 시뮬레이션(실기체 실험 없음 — 저자가 향후 과제로 명시)</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>로봇이 <strong>집단(group)으로 작업 공간을 공유</strong>하며 실제 과제를 수행하는 상황이 늘고 있다. 이때 각 로봇은 단순한 점-대-점 이동만 하는 것이 아니라 <strong>매니퓰레이션 스킬(manipulation skill)</strong> — 예컨대 집기(pick), 놓기(place), 삽입(insertion), 전달(handover) — 을 수반한다. 이러한 스킬에는 두 가지 본질적 난점이 있다.</p>
+<ol>
+<li><strong>연속 물리 실행(continuous physical execution)</strong>: 스킬은 이산적 &quot;성공/실패&quot; 이벤트가 아니라 시간에 걸친 연속 궤적으로 전개된다.</li>
+<li><strong>확률적 거동(stochastic behavior)</strong>: 같은 스킬을 명령해도 <strong>실행 시간(execution time)이 가변적</strong>이고, <strong>연속 궤적의 결과(outcome)가 불확실</strong>하다. (예: 물체를 집는 데 걸리는 시간, 집은 뒤 물체가 놓이는 최종 자세의 편차.)</li>
+</ol>
+<p>기존 다중 로봇 계획기들은 이 간극을 다음 세 가지 방식으로 회피해 왔고, 각각 한계가 있다.</p>
+<ul>
+<li><strong>단일 로봇 한정(single-robot scenarios)</strong>: 스킬의 확률성을 모델링하되 로봇 간 상호작용(공유 작업공간·충돌)을 다루지 못한다.</li>
+<li><strong>개루프 경로(open-loop paths)</strong>: 미리 하나의 경로를 고정해 실행 — 다른 로봇의 스킬이 예상보다 느리거나 결과가 다르면 <strong>동적으로 재조율할 수 없다</strong>.</li>
+<li><strong>사후 스케줄링(post-hoc scheduling)</strong>: 먼저 경로를 뽑고 나중에 시간표를 끼워 맞춘다 — <strong>계획 시점의 동적 조율(dynamic coordination)이 구조적으로 불가능</strong>하다.</li>
+</ul>
+<p><strong>본 논문의 목표</strong>는 이 세 한계를 동시에 해소하는 것이다. 즉, <strong>확률적 스킬을 샘플링 기반 다중 로봇 계획 안으로 직접 통합</strong>하여, 한 로봇이 스킬을 실행하는 동안 <strong>다른 (제어 가능한) 로봇들이 그 실행 진행 상황에 반응해 자신의 움직임을 실시간으로 적응</strong>시키는 <strong>반응형 정책(reactive policy)</strong> 을 계획 시점에 얻는 것이다. 핵심 프레이밍은 문제를 <strong>다중 모드 복합 로드맵(multi-modal composite roadmap) 위의 마르코프 결정 과정(MDP)</strong> 으로 정식화하고, 이 MDP를 풀어 반응형 정책을 산출하는 것이다. 스킬 불확실성을 <strong>계획 시점에 직접 해소(resolve at planning time)</strong> 함으로써, 보수적(conservative) 베이스라인의 <strong>비관주의(pessimism)</strong> 를 피하고 강건하면서도 동적인 다중 로봇 조율을 달성한다.</p>
+<hr>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p>다중 로봇이 매니퓰레이션 스킬을 공유 작업공간에서 동시 수행할 때 발생하는 핵심 난점은 다음과 같다.</p>
+<p><strong>(C1) 스킬의 가변 실행 시간 (variable execution time).</strong>
+한 로봇이 스킬 A를 수행하는 데 걸리는 시간이 결정적(deterministic)이지 않다. 사후 스케줄링은 &quot;최악의 경우(worst-case)&quot; 실행 시간을 가정해 다른 로봇을 대기시키거나 우회시키는데, 이는 대부분의 실제 실행에서 <strong>불필요한 보수성(conservatism)</strong> 을 유발한다 — 거의 일어나지 않는 지연에 맞춰 계획이 과도하게 느려진다.</p>
+<p><strong>(C2) 연속 궤적 결과의 불확실성 (uncertain continuous trajectory outcome).</strong>
+스킬은 이산적 상태 전이가 아니라 <strong>연속 궤적</strong>이며, 그 궤적이 통과하는 공간 자체가 확률적이다. 즉, 다른 로봇이 피해야 할 &quot;장애물 영역&quot;이 <strong>확률분포</strong>로 주어진다. 개루프 계획은 이 분포의 한 실현(realization)만 가정하므로, 실제 실행이 그와 어긋나면 충돌하거나 비효율적이 된다.</p>
+<p><strong>(C3) 계획-실행 분리의 구조적 한계 (planning–execution decoupling).</strong>
+&quot;먼저 경로, 나중에 시간&quot; 식의 사후 스케줄링은 경로를 고정한 뒤에야 조율하므로, <strong>경로 자체가 조율 가능성을 반영하지 못한다</strong>. 진정한 동적 조율은 &quot;다른 로봇이 지금 스킬의 어느 단계에 있는가&quot;를 <strong>상태(state)로 삼아</strong> 그에 따라 분기(branching)하는 정책이 필요하다.</p>
+<p><strong>(C4) 복합 구성 공간의 차원 폭발 (curse of dimensionality in composite space).</strong>
+R대의 로봇을 합친 복합 구성 공간 <code>Q_R = ∏_r Q_r</code>은 로봇 수에 따라 지수적으로 커진다. 여기에 스킬 결과의 확률 분포까지 상태에 넣으면 차원이 더 커진다. 샘플링 기반 로드맵 위에서 MDP를 풀려면 <strong>상태·행동·전이의 이산화</strong>가 계산 가능하면서도 해의 품질을 보존하도록 설계되어야 한다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>본 논문은 위 난점을 <strong>&quot;다중 모드 복합 로드맵 위의 MDP&quot;</strong> 라는 단일 프레임으로 묶는다. 핵심 아이디어는 네 겹이다.</p>
+<ol>
+<li><strong>복합 구성의 분해 (factorization)</strong>: 각 로봇의 구성을 <strong>스킬 부분(skill part)</strong> 과 <strong>제어 가능 부분(controllable part)</strong> 으로 쪼갠다 — <code>q = (q^skill, q^ctrl)</code>. 스킬 부분은 확률적 스킬이 지배하는(제어 불가능한) 자유도이고, 제어 부분은 계획기가 자유롭게 움직일 수 있는 자유도이다.</li>
+<li><strong>스킬 결과의 비닝 (binning)</strong>: 확률적 스킬의 연속 결과를 이산 격자로 양자화(<code>⌊q^skill(t_k)/δ⌋</code>)하여 <strong>유한한 &quot;자연(nature) 상태&quot; 집합 Z</strong> 로 만들고, 전이 확률을 <strong>샘플 빈도수(frequency)로 추정</strong>한다 (<code>P(z&#39;|z) = n(z→z&#39;)/∑n(z→z&#39;&#39;)</code>).</li>
+<li><strong>MDP 정식화</strong>: 상태 <code>x = (m, u, z)</code> — 모드 <code>m</code>, 로드맵 꼭짓점 <code>u</code>(제어 로봇의 현재 위치), 자연 상태 <code>z</code>(스킬 진행 상황) — 위에서, 제어 로봇의 행동 <code>a ∈ A(u) = N(u) ∪ {u}</code>(이웃으로 이동 또는 제자리 유지)에 대한 <strong>가치 반복(value iteration)</strong> 으로 반응형 정책을 계산한다.</li>
+<li><strong>스킬 구간/비스킬 구간 분리 처리</strong>: 스킬이 진행 중인 모드에서는 <strong>단위 시간 Δt</strong> 기준으로, 스킬이 없는 모드에서는 <strong>Dijkstra 최단경로(makespan 기준)</strong> 로 값을 계산해, 복합 로드맵 전체에 대해 <strong>anytime 배치 정제(batched refinement)</strong> 를 수행한다.</li>
+</ol>
+<p>결과적으로, 보수적 베이스라인이 &quot;최악 실행 시간을 가정하고 안전 여유를 크게 잡는&quot; 방식이라면, 본 방법은 &quot;스킬이 실제로 어느 단계에 있는지를 관측해 그때그때 최적 행동을 선택하는&quot; <strong>상태 반응형(state-reactive)</strong> 방식이다.</p>
+<hr>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 복합 구성 공간의 스킬/제어 분해 (Skill–Control Factorization)</h3>
+<p>다중 로봇 시스템의 <strong>복합 구성(composite configuration)</strong> 은 모든 로봇의 구성을 이어붙인 것이다. 본 논문은 이를 두 부분으로 분리한다.</p>
+<pre class="codeblock"><code>q = (q^skill, q^ctrl) ∈ Q_R^skill × Q_R^ctrl
+</code></pre>
+<ul>
+<li><code>q^skill</code>: <strong>확률적 스킬이 지배하는 자유도.</strong> 계획기가 직접 제어하지 못하고, 스킬 전이 모델 <code>f</code>에 의해 확률적으로 전개된다. (예: 집기 스킬을 수행 중인 팔의 엔드이펙터 궤적.)</li>
+<li><code>q^ctrl</code>: <strong>제어 가능한 자유도.</strong> 계획기가 로드맵 위에서 자유롭게 선택할 수 있다. (예: 스킬을 수행하지 않고 대기·우회하는 다른 로봇의 관절.)</li>
+</ul>
+<p>이 분해가 중요한 이유는 <strong>불확실성의 국소화(localization of uncertainty)</strong> 때문이다. 복합 공간 전체를 확률적으로 다루면 차원이 폭발하지만, &quot;지금 스킬을 수행 중인 로봇&quot;의 자유도만 확률 변수로 두고 나머지는 결정적 로드맵 탐색으로 처리하면 <strong>계산 가능한 크기</strong>로 줄어든다.</p>
+<pre class="diagram"><code>  복합 구성 q = (q^skill, q^ctrl)
+  ┌──────────────────────┬───────────────────────┐
+  │   q^skill            │   q^ctrl              │
+  │   (확률적·비제어)      │   (결정적·제어 가능)    │
+  │   스킬 전이 f가 지배    │   로드맵 N(u) 탐색     │
+  │   → nature 상태 z로   │   → 행동 a로 선택       │
+  │     비닝·확률추정       │                       │
+  └──────────────────────┴───────────────────────┘
+</code></pre>
+<h3>3.2 복합 비용 함수 (Composite Cost Function)</h3>
+<p>두 복합 구성 <code>q₁, q₂</code> 사이의 비용은 다음과 같이 정의된다.</p>
+<pre class="codeblock"><code>c(q₁, q₂) = (1-w) · max_r ||q₁^r - q₂^r||₂  +  w · ∑_r ||q₁^r - q₂^r||₂
+</code></pre>
+<p>여기서 <code>r</code>은 로봇 인덱스, <code>w ∈ [0,1]</code>은 가중치(논문에 구체적 값 미명시 — &quot;not stated&quot;)이다. 이 비용은 두 극단을 <strong>볼록 결합(convex combination)</strong> 한 것이다.</p>
+<ul>
+<li><strong><code>max_r</code> 항 (makespan-지향)<strong>: 모든 로봇 중 </strong>가장 많이 움직인 로봇<strong>의 이동량. 로봇들이 병렬로 동시에 움직인다고 보면, 한 전이의 소요 시간은 &quot;가장 느린(가장 멀리 가는) 로봇&quot;이 결정한다 → </strong>makespan(최장 완료 시간) 최소화</strong>에 대응.</li>
+<li><strong><code>∑_r</code> 항 (sum-of-costs-지향)<strong>: 모든 로봇의 이동량 총합 → </strong>총 에너지/이동거리 최소화</strong>에 대응.</li>
+</ul>
+<p><code>w=0</code>이면 순수 makespan, <code>w=1</code>이면 순수 sum-of-costs가 된다. 다중 로봇 계획에서 makespan과 sum-of-costs는 종종 상충하는데, 이 가중치로 사용자가 <strong>트레이드오프를 조율</strong>할 수 있다. 본 논문의 주 평가지표가 <strong>실현 makespan 중앙값(C_med)</strong> 이라는 점에서, <code>max_r</code> 항이 핵심 역할을 한다.</p>
+<h3>3.3 확률적 스킬 전이 모델과 비닝 (Stochastic Skill Transition &amp; Binning)</h3>
+<h4>3.3.1 스킬 전이 모델</h4>
+<p>스킬이 수행되는 동안 스킬 자유도는 다음 <strong>확률적 이산 전이</strong>로 전개된다.</p>
+<pre class="codeblock"><code>q^skill_{k+1} = f(q^skill_k, env_static, ω_k)
+</code></pre>
+<ul>
+<li><code>f</code>: 스킬 전이 함수. 현재 스킬 구성 <code>q^skill_k</code>, 정적 환경 <code>env_static</code>, 그리고 <strong>확률 변수 <code>ω_k</code></strong>(스킬의 불확실성 원천)를 받아 다음 스킬 구성을 낸다.</li>
+<li><code>ω_k</code>: 매 스텝의 랜덤 실현. 이것이 실행 시간과 궤적 결과의 가변성을 만든다.</li>
+</ul>
+<p>이 모델은 <strong>블랙박스(black-box)</strong> 로 취급된다 — 계획기는 <code>f</code>를 샘플링할 수 있을 뿐, 그 내부 동역학의 해석적 형태를 요구하지 않는다. 즉, 물리 시뮬레이터나 학습된 스킬 정책을 그대로 <code>f</code>로 꽂을 수 있다.</p>
+<h4>3.3.2 결과 비닝과 전이 확률 추정</h4>
+<p>연속 스킬 궤적을 그대로 다루면 상태가 무한하므로, <strong>시간 인덱스 <code>k</code>와 양자화된 스킬 구성</strong>으로 이산화한다.</p>
+<pre class="codeblock"><code>z = (k, ⌊q^skill(t_k)/δ⌋)
+</code></pre>
+<ul>
+<li><code>k</code>: 스킬 진행의 시간 스텝 인덱스.</li>
+<li><code>⌊q^skill(t_k)/δ⌋</code>: 시각 <code>t_k</code>에서의 스킬 구성을 해상도 <code>δ</code>로 양자화(floor)한 격자 셀. (<code>δ</code>는 논문에 구체 값 미명시 — &quot;not stated&quot;.)</li>
+</ul>
+<p>이렇게 정의된 <code>z</code>를 <strong>자연 상태(nature state)</strong> 라 부른다. 자연 상태 간 전이 확률은 <strong>몬테카를로 샘플의 빈도수</strong>로 추정한다.</p>
+<pre class="codeblock"><code>P(z&#39;|z) = n(z→z&#39;) / ∑_{z&#39;&#39;} n(z→z&#39;&#39;)
+</code></pre>
+<ul>
+<li><code>n(z→z&#39;)</code>: 스킬 전이 모델 <code>f</code>를 반복 샘플링했을 때, 자연 상태 <code>z</code>에서 <code>z&#39;</code>로 간 횟수.</li>
+<li>분모는 <code>z</code>에서 나간 모든 전이의 총 횟수 → 정규화하여 확률로 만든다.</li>
+</ul>
+<pre class="diagram"><code>  스킬 궤적 샘플링 (Monte Carlo로 f 반복 실행)
+      │
+      ▼
+  각 시각 t_k의 연속 구성을 δ-격자로 양자화 → z = (k, bin)
+      │
+      ▼
+  전이 빈도수 n(z→z&#39;) 집계
+      │
+      ▼
+  정규화 P(z&#39;|z) = n(z→z&#39;) / Σ n(z→z&#39;&#39;)
+      │
+      ▼
+  유한 자연-상태 전이 분포 → MDP의 확률 커널
+</code></pre>
+<p>이 &quot;샘플 → 비닝 → 빈도 정규화&quot; 파이프라인은 스킬의 <strong>임의의 확률적 거동을 데이터 기반으로 유한 MDP 커널로 흡수</strong>한다는 점에서 핵심적이다. 스킬이 복잡하고 해석 불가능해도, 샘플만 뽑을 수 있으면 계획에 통합된다.</p>
+<h3>3.4 MDP 정식화 (MDP Formulation over the Composite Roadmap)</h3>
+<h4>3.4.1 상태·행동·비용</h4>
+<p>복합 로드맵 위에 다음 MDP를 세운다.</p>
+<ul>
+<li><strong>상태 (State)</strong>: <code>x = (m, u, z)</code><ul>
+<li><code>m</code>: <strong>모드(mode)</strong> — 현재 어떤 스킬 단계/과제 구간에 있는지. (다중 모드 로드맵의 &quot;모드&quot;에 대응.)</li>
+<li><code>u ∈ V_ctrl</code>: <strong>제어 로봇의 로드맵 꼭짓점(vertex)</strong> — 제어 가능 로봇들이 현재 어느 로드맵 노드에 있는지.</li>
+<li><code>z ∈ Z</code>: <strong>자연 상태</strong> — 스킬이 어느 진행 단계(어느 bin)에 있는지. 다른 로봇이 실행 중인 스킬의 &quot;관측된 진행 상황&quot;이다.</li>
+</ul>
+</li>
+<li><strong>행동 (Action)</strong>: <code>a ∈ A(u) = N(u) ∪ {u}</code><ul>
+<li><code>N(u)</code>: 로드맵에서 <code>u</code>의 이웃 꼭짓점들로 <strong>이동</strong>.</li>
+<li><code>{u}</code>: <strong>제자리 유지(hold)</strong> — 스킬이 진행되기를 기다리며 현재 위치에 머무름.</li>
+<li>즉 제어 로봇은 매 결정마다 &quot;한 칸 움직일지, 그대로 기다릴지&quot;를 선택한다. 이 &quot;기다림&quot; 행동이 <strong>동적 조율</strong>을 가능케 한다 — 다른 로봇의 스킬 완료를 기다렸다가 움직이는 전략.</li>
+</ul>
+</li>
+<li><strong>단계 비용 (Stage cost)</strong>:<pre class="codeblock"><code>c_time(q_k, q_{k+1}) = { Δt                        (스킬 모드에서)
+                       { c(q_k, q_{k+1}) / v_max    (비스킬 모드에서)
+</code></pre>
+<ul>
+<li><strong>스킬 모드</strong>: 시간이 스킬의 고정 타임스텝 <code>Δt</code>로 흐른다 (스킬이 시간을 지배).</li>
+<li><strong>비스킬 모드</strong>: 제어 로봇의 이동 비용 <code>c(·,·)</code>를 최대 속도 <code>v_max</code>로 나눠 <strong>이동 소요 시간</strong>으로 환산. (<code>v_max</code>는 논문에 구체 값 미명시 — &quot;not stated&quot;.)</li>
+</ul>
+</li>
+</ul>
+<p>이 이원적 비용 구조가 핵심이다. 스킬이 진행 중일 때는 &quot;시간이 흐르는 비용&quot;, 제어 로봇이 자유 이동할 때는 &quot;거리/속도 = 시간&quot; 비용으로 <strong>모든 것을 makespan(시간) 단위로 통일</strong>한다.</p>
+<h4>3.4.2 벨만 가치 반복 (Bellman Value Iteration)</h4>
+<p>반응형 정책은 다음 벨만 방정식의 <strong>가치 반복</strong>으로 얻는다.</p>
+<pre class="codeblock"><code>V(u, z) = min_{a∈A(u)} ∑_{z&#39;} P(z&#39;|z) · [ g(u,z,a,z&#39;) + W(a,z,z&#39;) ]
+</code></pre>
+<ul>
+<li><code>V(u,z)</code>: 상태 <code>(u,z)</code>의 <strong>최적 가치</strong>(기대 잔여 makespan).</li>
+<li><code>min_{a∈A(u)}</code>: 가능한 행동(이동/유지) 중 최선을 선택.</li>
+<li><code>∑_{z&#39;} P(z&#39;|z)</code>: 스킬의 확률적 다음 단계 <code>z&#39;</code>에 대한 <strong>기댓값</strong>.</li>
+<li><code>g(u,z,a,z&#39;)</code>: 해당 전이의 즉시 비용(단계 비용).</li>
+<li><code>W(a,z,z&#39;)</code>: <strong>미래 가치 항</strong>, 스킬이 계속되는지 끝나는지에 따라 분기:</li>
+</ul>
+<pre class="codeblock"><code>W(a,z,z&#39;) = { V(a, z&#39;)        (스킬이 계속되면 — 같은 모드에서 다음 자연 상태로)
+            { V^exit(a, z)    (스킬이 종료되면 — 모드 전환)
+</code></pre>
+<ul>
+<li>스킬이 <strong>계속</strong>되면, 제어 로봇은 새 위치 <code>a</code>(선택한 행동 결과)에서 다음 자연 상태 <code>z&#39;</code>에 대한 가치를 본다.</li>
+<li>스킬이 <strong>종료</strong>되면, <code>V^exit</code>로 넘어가 <strong>모드 전환 후의 가치</strong>를 평가한다.</li>
+</ul>
+<h4>3.4.3 종료 가치 (Exit Value)</h4>
+<p>스킬이 끝나는 순간의 가치는 다음과 같다.</p>
+<pre class="codeblock"><code>V^exit(a, z) = min_n [ c((e_z, q_a), q_n) + V(n) ]
+</code></pre>
+<ul>
+<li><code>e_z</code>: 스킬 종료 시점의 스킬 구성(자연 상태 <code>z</code>가 지정하는 종료 구성).</li>
+<li><code>q_a</code>: 제어 로봇이 행동 <code>a</code>로 도달한 구성.</li>
+<li><code>(e_z, q_a)</code>: 스킬 종료 직후의 <strong>복합 구성</strong>(스킬 자유도는 <code>e_z</code>로 고정, 제어 자유도는 <code>q_a</code>).</li>
+<li><code>min_n</code>: 모든 다음 로드맵 꼭짓점 <code>n</code> 중 <strong>최선의 후속 노드</strong>로 전이.</li>
+<li><code>c((e_z, q_a), q_n)</code>: 종료 복합 구성에서 후속 노드 <code>q_n</code>까지의 이동 비용.</li>
+<li><code>V(n)</code>: 후속 노드의 가치(재귀).</li>
+</ul>
+<p>즉 <code>V^exit</code>은 &quot;스킬이 끝난 바로 그 구성에서, 다음 모드/과제 구간으로 넘어가는 최적 연결 비용&quot;을 계산한다. 스킬 종료 지점이 확률적(<code>z</code>에 의존)이므로, 이 종료 가치도 자연 상태마다 달라진다.</p>
+<h4>3.4.4 비스킬 구간 처리 (Non-skill Modes via Dijkstra)</h4>
+<p>스킬이 없는 모드(순수 이동 구간)에서는 확률성이 없으므로 MDP가 아니라 <strong>결정적 최단경로 문제</strong>로 환원된다. 이 구간은 <strong>Dijkstra 알고리즘</strong>으로 복합 로드맵 위 최소 makespan 경로를 직접 계산한다. (전이 비용은 §3.4.1의 <code>c(·,·)/v_max</code>.)</p>
+<pre class="diagram"><code>  전체 계획 = [비스킬 모드: Dijkstra] → [스킬 모드: MDP value iteration(V, V^exit)] → [비스킬 모드: Dijkstra] → ...
+                                          │
+                                          └─ 스킬 진행 z를 관측하며 반응형으로 행동 a 선택
+</code></pre>
+<h3>3.5 Anytime 배치 정제 (Anytime Batched Refinement)</h3>
+<p>복합 로드맵은 샘플링으로 점진 구축되며, 계획기는 <strong>anytime</strong> 방식으로 동작한다 — 시간이 허락하는 한 로드맵에 샘플을 추가하고, 그 위에서 가치 반복을 <strong>배치(batched)</strong> 로 재계산하여 해를 <strong>점진적으로 개선</strong>한다. 이는 샘플링 기반 계획의 표준적 anytime 성질(더 많은 샘플 → 더 나은 해)을 MDP 가치 반복과 결합한 것이다. 첫 해(first solution)를 빠르게 내고, 이후 추가 계산으로 makespan을 줄여간다.</p>
+<p>(배치 크기, 샘플 수, 정제 반복 횟수 등 구체 하이퍼파라미터는 논문에 명시되지 않음 — &quot;not stated&quot;.)</p>
+<hr>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<p>전체 파이프라인은 <strong>오프라인 스킬 특성화 → 복합 로드맵 구축 → MDP 해결 → 온라인 반응형 실행</strong>의 흐름을 가진다.</p>
+<pre class="diagram"><code>┌─────────────────────────────────────────────────────────────────────┐
+│ [오프라인] 스킬 특성화 (Skill Characterization)                        │
+│   스킬 전이 모델 f를 Monte Carlo로 반복 샘플링                          │
+│   → 자연 상태 z = (k, ⌊q^skill/δ⌋) 비닝                                │
+│   → 전이 확률 P(z&#39;|z) = n(z→z&#39;)/Σn(z→z&#39;&#39;) 추정                         │
+└───────────────────────────────┬─────────────────────────────────────┘
+                                 │  (유한 확률 커널)
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│ [계획] 다중 모드 복합 로드맵 구축 + MDP 해결                             │
+│   복합 구성 q=(q^skill, q^ctrl) 샘플링 → 로드맵 V_ctrl, N(u)            │
+│                                                                       │
+│   비스킬 모드 ──────────────▶ Dijkstra (결정적 최단 makespan)          │
+│                                                                       │
+│   스킬 모드 ────────────────▶ Value Iteration                         │
+│     V(u,z)=min_a Σ_z&#39; P(z&#39;|z)[g + W]                                  │
+│     W = V(a,z&#39;)  (스킬 계속)  |  V^exit(a,z)  (스킬 종료)              │
+│     V^exit(a,z)=min_n[c((e_z,q_a),q_n)+V(n)]                          │
+│                                                                       │
+│   ↻ Anytime 배치 정제: 샘플 추가 → 재-value-iteration → makespan↓      │
+└───────────────────────────────┬─────────────────────────────────────┘
+                                 │  (반응형 정책 π: (u,z) → a)
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│ [온라인 실행] 반응형 조율 (Reactive Coordination)                       │
+│   스킬 실행 로봇: f에 따라 확률적으로 전개, 자연 상태 z 관측             │
+│   제어 로봇: 현재 (u, z)에서 정책 π가 지정하는 행동 a 수행              │
+│              (이웃 이동 N(u) 또는 제자리 유지 {u})                      │
+│   → 다른 로봇의 스킬 진행에 실시간 적응                                  │
+└─────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<p><strong>데이터 흐름 요약</strong>: 스킬의 확률적 거동이 오프라인 샘플링으로 유한 MDP 커널이 되고, 이 커널이 복합 로드맵 위 가치 반복에 투입되어 반응형 정책을 만든다. 온라인에서는 스킬 진행 <code>z</code>가 관측될 때마다 정책이 제어 로봇의 행동을 지정하므로, <strong>계획이 곧 실시간 조율 규칙</strong>이 된다. 보수적 베이스라인처럼 &quot;최악 경우를 가정한 고정 경로&quot;가 아니라 &quot;관측된 상태에 따라 분기하는 정책&quot;이라는 점이 구조적 차이다.</p>
+<hr>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 / 환경 (Datasets / Environments)</h3>
+<p>실 로봇 실험은 없고, 시뮬레이션 환경 세 그룹에서 평가한다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>그룹</th>
+<th>환경</th>
+<th>자유도</th>
+<th>특징</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>결정적 계획 (deterministic)</td>
+<td>bin picking, bin packing, dual-arm transport, handover</td>
+<td>각 12-DoF</td>
+<td>4개 매니퓰레이션 환경</td>
+</tr>
+<tr>
+<td>확률적 평면 (stochastic planar)</td>
+<td>square, rectangle, shared-point</td>
+<td>각 4-DoF</td>
+<td>스킬 불확실성 검증용 평면 로봇</td>
+</tr>
+<tr>
+<td>고차원 (high-dimensional)</td>
+<td>eight-object stacking</td>
+<td>12–24 DoF (로봇 2–4대)</td>
+<td>확장성·반응성 핵심 실험</td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p><strong>스코프 주석(트랙 판정)</strong>: bin picking/packing, dual-arm transport, handover, 8-object stacking 등 플랫폼이 매니퓰레이터이고 과제가 매니퓰레이션 스킬을 포함하지만, <strong>본 논문의 기여는 집기/파지(grasping) 자체가 아니라 다중 로봇의 동시 모션을 조율하는 샘플링 기반 모션 계획(로드맵+MDP+가치 반복)</strong> 이다. 따라서 PAAMP(매니퓰레이터 플랫폼이나 기여가 모션계획), D4orm(다중 로봇 궤적 최적화), GAMBIT(다중 로봇 연속 궤적계획) 선례에 따라 <strong>Planner 트랙 in-scope</strong>로 판정한다.</p>
+</blockquote>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>첫 해까지의 계획 시간 (t̄_first, s)</strong>: 계획기가 첫 유효 해를 내는 데 걸린 평균 시간.</li>
+<li><strong>계획 성공률 (Planning success rate, %)</strong>: 제한 시간 내 유효 계획을 찾은 비율.</li>
+<li><strong>실행 성공률 (Execution success rate, %)</strong>: 산출된 계획/정책을 실제 (시뮬) 실행했을 때 충돌 없이 완료한 비율.</li>
+<li><strong>실현 makespan 중앙값 (C_med, s)</strong>: 실제 실행에서 측정된 최장 완료 시간의 중앙값.</li>
+<li><strong>경험적 확률밀도함수 (ePDFs)</strong>: 실현 makespan의 분포(단일 수치가 아니라 분포 전체를 비교).</li>
+<li><strong>평균 makespan 감소율 (%)</strong>: 베이스라인 대비 평균 makespan이 줄어든 비율.</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<h4>5.3.1 8-객체 스태킹 (Table II)</h4>
+<p>로봇 수 R ∈ {2,3,4}, 두 과제 설정(Sequence: 순서 고정 / Dependency: 의존성 제약)에 대해 <strong>Conservative(보수적 개루프)</strong> vs <strong>Reactive(본 방법)</strong> 를 비교.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>설정</th>
+<th>계획기</th>
+<th>R</th>
+<th>t̄_first (s)</th>
+<th>계획 성공 (%)</th>
+<th>실행 성공 (%)</th>
+<th>C_med (s)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Sequence</td>
+<td>Conservative</td>
+<td>2</td>
+<td>17.4</td>
+<td>100</td>
+<td>100</td>
+<td>61.4</td>
+</tr>
+<tr>
+<td>Sequence</td>
+<td><strong>Reactive</strong></td>
+<td>2</td>
+<td>80.6</td>
+<td>100</td>
+<td>100</td>
+<td><strong>46.6</strong></td>
+</tr>
+<tr>
+<td>Sequence</td>
+<td>Conservative</td>
+<td>3</td>
+<td>21.4</td>
+<td>100</td>
+<td>100</td>
+<td>61.5</td>
+</tr>
+<tr>
+<td>Sequence</td>
+<td><strong>Reactive</strong></td>
+<td>3</td>
+<td>99.8</td>
+<td>100</td>
+<td>100</td>
+<td><strong>48.8</strong></td>
+</tr>
+<tr>
+<td>Sequence</td>
+<td>Conservative</td>
+<td>4</td>
+<td>23.1</td>
+<td>100</td>
+<td>100</td>
+<td>62.6</td>
+</tr>
+<tr>
+<td>Sequence</td>
+<td><strong>Reactive</strong></td>
+<td>4</td>
+<td>133.6</td>
+<td>100</td>
+<td>100</td>
+<td><strong>50.7</strong></td>
+</tr>
+<tr>
+<td>Dependency</td>
+<td>Conservative</td>
+<td>2</td>
+<td>23.9</td>
+<td>100</td>
+<td>80</td>
+<td>47.4</td>
+</tr>
+<tr>
+<td>Dependency</td>
+<td><strong>Reactive</strong></td>
+<td>2</td>
+<td>375.6</td>
+<td>100</td>
+<td>69</td>
+<td>47.7</td>
+</tr>
+<tr>
+<td>Dependency</td>
+<td>Conservative</td>
+<td>3</td>
+<td>19.9</td>
+<td>100</td>
+<td>100</td>
+<td>46.8</td>
+</tr>
+<tr>
+<td>Dependency</td>
+<td><strong>Reactive</strong></td>
+<td>3</td>
+<td>257.8</td>
+<td>100</td>
+<td>59</td>
+<td>56.0</td>
+</tr>
+<tr>
+<td>Dependency</td>
+<td>Conservative</td>
+<td>4</td>
+<td>19.6</td>
+<td>60</td>
+<td>89</td>
+<td>52.9</td>
+</tr>
+<tr>
+<td>Dependency</td>
+<td><strong>Reactive</strong></td>
+<td>4</td>
+<td>226.1</td>
+<td>100</td>
+<td>100</td>
+<td>57.7</td>
+</tr>
+</tbody></table></div>
+<p><strong>해석 (정직한 양면 평가)</strong>:</p>
+<ul>
+<li><strong>Sequence 설정에서는 Reactive가 명확히 우세</strong>하다. makespan 중앙값이 R=2에서 61.4→46.6s(약 24% 감소), R=3에서 61.5→48.8s, R=4에서 62.6→50.7s로 <strong>일관되게 줄고, 실행 성공률은 100%를 유지</strong>한다. 반응형 조율이 보수적 대기의 비관주의를 제거한 효과다.</li>
+<li><strong>그 대가로 계획 시간(t̄_first)이 크게 증가</strong>한다 — Sequence R=2에서 17.4→80.6s, R=4에서 23.1→133.6s. MDP 가치 반복이 개루프 계획보다 비싸다. 즉 <strong>&quot;계획 시간을 더 쓰고 실행 makespan을 줄이는&quot;</strong> 트레이드오프다.</li>
+<li><strong>Dependency 설정에서는 결과가 혼재(mixed)</strong> 한다. R=4에서는 Reactive가 계획 성공 60→100%, 실행 성공 89→100%로 개선되지만, <strong>R=2·R=3에서는 Reactive의 실행 성공률이 오히려 낮다(69%, 59%)</strong> — 이 구간에서는 반응형 정책이 보수적 개루프보다 불리하다. 저자가 이 한계를 숨기지 않고 표에 드러낸 점은 신뢰할 만하며, 의존성 제약 하에서의 반응형 조율은 추가 연구 여지가 있음을 시사한다.</li>
+</ul>
+<h4>5.3.2 확률적 평면 환경 — 평균 makespan 감소율</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>환경</th>
+<th>makespan 감소율</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>square</td>
+<td>13.3%</td>
+</tr>
+<tr>
+<td>rectangle</td>
+<td>8.1%</td>
+</tr>
+<tr>
+<td>shared-point</td>
+<td><strong>43.4%</strong></td>
+</tr>
+<tr>
+<td>prescribed sequence (4R–8-object)</td>
+<td>19.0–24.1%</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li><strong>shared-point 환경에서 43.4%</strong> 라는 큰 감소를 보인다 — 로봇들이 <strong>단일 공유 지점</strong>을 두고 경합할 때, 반응형 조율(한 로봇의 스킬 진행을 보고 다른 로봇이 양보/대기)이 가장 큰 이득을 낸다. 공유 자원 경합이 심할수록 보수적 고정 스케줄의 비관주의가 크고, 반응형이 그 간극을 많이 회수한다.</li>
+<li>square(13.3%)·rectangle(8.1%)처럼 경합이 약한 구조에서는 이득이 작다 — 이득의 크기가 <strong>작업공간 경합 강도에 비례</strong>함을 보여준다.</li>
+</ul>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p><strong>없음.</strong> 모든 평가는 시뮬레이션(12–24 DoF 매니퓰레이터/4-DoF 평면 로봇)에서 수행되었다. 실 로봇 배치는 저자가 <strong>향후 과제(future work)</strong> 로 명시했다. 이는 코드가 공개된 다중 로봇 계획 선례(예: D4orm — 실제 쿼드로터/지상로봇 zero-shot)와 대비되는 본 논문의 명확한 한계다.</p>
+<hr>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>확률적 스킬의 샘플링 기반 다중 로봇 계획 통합 (최초)</strong>: 기존에 분절되어 있던 세 접근(단일 로봇 확률 모델 / 다중 로봇 개루프 / 사후 스케줄링)을 <strong>&quot;다중 모드 복합 로드맵 위 MDP&quot;</strong> 라는 단일 정식화로 통합했다. 스킬 불확실성을 <strong>계획 시점에 직접 해소</strong>하는 것이 핵심 차별점이다.</p>
+</li>
+<li><p><strong>스킬/제어 분해에 의한 차원 관리</strong>: 복합 구성을 <code>q = (q^skill, q^ctrl)</code>로 쪼개, 확률성을 스킬 자유도에만 국소화하고 제어 자유도는 결정적 로드맵 탐색으로 처리함으로써 <strong>차원 폭발을 완화</strong>했다. 스킬 모드는 MDP 가치 반복, 비스킬 모드는 Dijkstra로 분리 처리하는 하이브리드 구조가 이를 구현한다.</p>
+</li>
+<li><p><strong>데이터 기반 유한 MDP 커널 구성</strong>: 블랙박스 스킬 전이 <code>f</code>를 Monte Carlo 샘플링 → 비닝(<code>z=(k,⌊q^skill/δ⌋)</code>) → 빈도 정규화(<code>P(z&#39;|z)</code>)로 <strong>유한 확률 커널</strong>로 흡수했다. 스킬의 해석적 모델을 요구하지 않으므로, 물리 시뮬레이터·학습 스킬 정책을 그대로 꽂을 수 있는 <strong>모듈성</strong>을 가진다.</p>
+</li>
+<li><p><strong>반응형 정책에 의한 비관주의 제거</strong>: 보수적 베이스라인이 최악 실행 시간을 가정해 과도하게 느려지는 문제를, 스킬 진행 상황 <code>z</code>를 상태로 삼아 분기하는 <strong>반응형 정책</strong>으로 해소했다. Sequence 설정에서 makespan을 일관되게 줄이고(최대 ~24%), 공유 자원 경합이 심한 평면 환경에서 <strong>43.4%</strong> 감소를 달성했다.</p>
+</li>
+<li><p><strong>공개 벤치마크/코드</strong>: 다중 로봇 경로계획 벤치마크 저장소(github.com/vhartman/multirobot-pathplanning-benchmark)에 구현을 공개하여 재현성을 제공한다. (단, LICENSE 미명시.)</p>
+</li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<h3>7.1 코드 공개 상태 (browser 검증)</h3>
+<ul>
+<li><strong>저장소</strong>: <a href="https://github.com/vhartman/multirobot-pathplanning-benchmark">https://github.com/vhartman/multirobot-pathplanning-benchmark</a></li>
+<li><strong>브랜치</strong>: 본 논문 구현은 <code>dev/william</code> 브랜치에 위치.</li>
+<li><strong>구성</strong>: Python + C++ 혼합(핵심 수치/충돌 검사 C++, 상위 로직 Python 추정).</li>
+<li><strong>활성도</strong>: 887+ 커밋의 실제 동작 벤치마크 저장소 — placeholder가 아니라 실행 가능한 코드.</li>
+<li><strong>라이선스</strong>: <strong>LICENSE 파일 없음 → 라이선스 미명시.</strong> (코드가 공개되어 있으나 명시적 사용 허가가 없으므로, 재사용 시 저자 확인 필요.)</li>
+<li><strong>정직성 주석</strong>: 아래 하이퍼파라미터들은 <strong>논문 본문에 명시되지 않았다</strong>(코드에는 존재할 수 있으나 본 리뷰는 논문 기준으로만 기술하며 추정하지 않는다).</li>
+</ul>
+<h3>7.2 논문에 명시되지 않은 주요 파라미터 (&quot;not stated&quot;)</h3>
+<ul>
+<li>비닝 해상도 <code>δ</code></li>
+<li>제어 로봇 최대 속도 <code>v_max</code></li>
+<li>Monte Carlo 샘플 수 <code>N_MC</code></li>
+<li>비용 가중치 <code>w</code> (makespan↔sum-of-costs 트레이드오프)</li>
+<li>로드맵 엣지 길이 한계 <code>ρ</code> 세부</li>
+<li>anytime 배치 크기·정제 반복 횟수</li>
+</ul>
+<h3>7.3 명시된 설정</h3>
+<ul>
+<li><strong>계획 비용 통일 단위</strong>: 시간(초). 스킬 모드는 <code>Δt</code>, 비스킬 모드는 <code>c(·,·)/v_max</code>.</li>
+<li><strong>행동 공간</strong>: <code>A(u) = N(u) ∪ {u}</code> (로드맵 이웃 이동 또는 제자리 유지).</li>
+<li><strong>평가 반복</strong>: Table II의 실행 성공률은 다수 실행(stochastic rollout)의 비율로, 확률적 거동을 반영.</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<p>8-객체 스태킹에서 로봇 2→4대(12→24 DoF)로 확장했을 때, Reactive의 <strong>계획 시간이 급증</strong>한다(Sequence: 80.6→133.6s; Dependency: 375.6→226.1s로 비단조). MDP 상태 공간 <code>(m,u,z)</code>가 로봇 수와 스킬 복잡도에 따라 커지므로, 가치 반복 비용이 확장성의 병목이다. 반면 <strong>실현 makespan은 로봇 수가 늘어도 비교적 안정적</strong>(Sequence 46.6→50.7s)이어서, 계획을 한 번 풀어두면 실행 품질은 유지된다. 즉 본 방법은 <strong>오프라인 계획 비용은 비싸지만 온라인 실행은 효율적</strong>인 프로파일을 가진다.</p>
+<h3>8.2 한계점 (Limitations)</h3>
+<ol>
+<li><strong>시뮬레이션 전용</strong>: 실 로봇 검증 부재. 스킬 전이 모델 <code>f</code>의 Monte Carlo 특성화가 실세계 센서 노이즈·물리 편차를 얼마나 잘 흡수하는지 미검증.</li>
+<li><strong>Dependency 설정의 역전</strong>: R=2·3에서 Reactive 실행 성공률이 보수적보다 낮음(69%·59%). 의존성 제약 하에서 반응형 정책이 <strong>충돌/교착으로 실패하는 모드</strong>가 존재한다.</li>
+<li><strong>계획 시간 비용</strong>: 가치 반복이 개루프 대비 수 배~10배 느림(17.4→80.6s 등). 실시간 재계획에는 부담.</li>
+<li><strong>비닝의 근사 오차</strong>: <code>δ</code>-격자 양자화가 거칠면 스킬 결과 분포를 왜곡, 세밀하면 상태 폭발. <code>δ</code> 선택의 민감도 분석이 논문에 없음.</li>
+<li><strong>파라미터 미명시</strong>: §7.2의 핵심 상수들이 본문에 없어 재현/비교가 제한적(코드 의존).</li>
+</ol>
+<h3>8.3 향후 방향 (Future Directions)</h3>
+<ul>
+<li><strong>실 로봇 배치</strong>(저자 명시): 스킬 특성화를 실 하드웨어 데이터로 보정.</li>
+<li><strong>Dependency 설정 실패 모드 해소</strong>: 의존성 제약을 MDP 상태/제약에 더 명시적으로 반영.</li>
+<li><strong>계획 시간 가속</strong>: 가치 반복의 배치/GPU 병렬화, 혹은 학습 기반 가치 함수 근사(D4orm/GAMBIT류 학습 결합).</li>
+<li><strong>스킬 전이 모델의 온라인 적응</strong>: 실행 중 관측으로 <code>P(z&#39;|z)</code>를 갱신하는 적응형 커널.</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
+<p>본 절은 <strong>바운드된 읽기 프로토콜</strong>에 따라 토픽이 가장 가까운 선행 리뷰 — <strong>D4orm</strong>(다중 로봇 궤적 최적화, 본 corpus 리뷰), <strong>PAAMP</strong>(샘플링 기반 집합-값 모션 계획, 리뷰), <strong>Anytime GTMP</strong>(배치 텐서 로드맵 계획, 리뷰) — 와 비교한다. 모두 Planner 트랙이며, 본 논문과 &quot;다중 로봇/샘플링 기반 모션 계획&quot;이라는 공통 축을 가진다.</p>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>D4orm (T-RO 2026)</th>
+<th>PAAMP (L-CSS 2026)</th>
+<th>Anytime GTMP (arXiv 2026)</th>
+<th><strong>본 논문 (Stochastic Skills, arXiv 2026)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>핵심 문제</td>
+<td>다중 로봇 궤적 최적화</td>
+<td>부족구동 비선형 모션계획</td>
+<td>호모토피 클래스 포괄 경로계획</td>
+<td><strong>확률적 스킬 하 다중 로봇 조율</strong></td>
+</tr>
+<tr>
+<td>불확실성 모델링</td>
+<td>없음(결정적 동역학 롤아웃)</td>
+<td>없음(결정적 신뢰영역)</td>
+<td>없음(결정적 커버리지)</td>
+<td><strong>스킬 결과·시간을 MDP 확률 커널로 명시</strong></td>
+</tr>
+<tr>
+<td>수학적 도구</td>
+<td>모델 기반 확산(역디노이징 스코어)</td>
+<td>국소 아핀좌표+IRIS-ZO 볼록 내부근사</td>
+<td>배치 텐서 가치반복(결정적)</td>
+<td><strong>MDP 가치 반복(확률적)+Dijkstra 하이브리드</strong></td>
+</tr>
+<tr>
+<td>조율 방식</td>
+<td>결합 궤적 동시 최적화</td>
+<td>단일/부족구동(로봇 1)</td>
+<td>단일 쿼리 다중 레이어</td>
+<td><strong>반응형 정책(스킬 진행 z에 분기)</strong></td>
+</tr>
+<tr>
+<td>anytime</td>
+<td>변형 기반 정제</td>
+<td>—</td>
+<td>무작위 재시작/증분</td>
+<td><strong>배치 정제(샘플↑→value iter 재계산)</strong></td>
+</tr>
+<tr>
+<td>실 로봇</td>
+<td><strong>있음</strong>(쿼드로터·지상로봇 zero-shot)</td>
+<td>없음(시뮬)</td>
+<td>없음(MBM+2D)</td>
+<td><strong>없음(시뮬만)</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>✅ Apache-2.0</td>
+<td>✅ MIT</td>
+<td>✅ MIT</td>
+<td>✅ <strong>라이선스 미명시</strong></td>
+</tr>
+<tr>
+<td>로봇 수</td>
+<td>최대 100(분리형)·실기체 6–10</td>
+<td>단일</td>
+<td>단일</td>
+<td><strong>2–4(스태킹)·평면 다수</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>vs D4orm (Denoising Multi-Robot Trajectories)</strong>: D4orm은 <strong>결정적 동역학</strong> 하에서 다중 로봇 궤적을 모델 기반 확산으로 최적화하며, <strong>최대 100대 확장·실기체 zero-shot</strong>이라는 강력한 확장성/실증을 가진다. 그러나 D4orm은 <strong>스킬의 확률적 실행 시간·결과를 다루지 않는다</strong> — 궤적이 결정적이라고 가정한다. 본 논문은 정반대로 <strong>스킬 불확실성을 1급 시민으로 모델링</strong>하되, 그 대가로 확장성(2–4대)과 실증(시뮬만)이 D4orm에 크게 못 미친다. <strong>상보적</strong>이다: D4orm의 확산 궤적 생성기를 본 논문의 MDP 반응 계층과 결합하면(&quot;확률 스킬 구간은 MDP 반응, 자유 이동 구간은 확산 최적화&quot;) 양쪽 강점을 취할 여지가 있다.</p>
+<p><strong>vs PAAMP (Planning as Affine Action Manifold Projection)</strong>: PAAMP는 부족구동 비선형 동역학을 국소 아핀좌표+볼록 내부근사로 다루는 <strong>단일 로봇</strong> 모션계획이다. &quot;RRT 노드를 단일 상태가 아니라 집합(polytope)으로 재정의&quot;하는 추상화가 특징이다. 본 논문은 로봇 수(다중)·불확실성(확률)·조율(반응형)이라는 <strong>직교 축</strong>을 공략하므로 직접 경쟁 관계가 아니다. 다만 PAAMP가 &quot;상태를 집합으로 승격&quot;했듯, 본 논문은 &quot;상태를 (제어 위치 u, 스킬 진행 z)의 곱으로 승격&quot;했다는 <strong>구조적 유사성</strong>(상태 공간 재설계로 난제를 흡수)이 있다.</p>
+<p><strong>vs Anytime GTMP (Graph-Tensor Motion Planning)</strong>: Anytime GTMP는 계층형 다분 그래프 위 <strong>배치 텐서 가치 반복</strong>으로 호모토피 클래스를 포괄하는 <strong>결정적</strong> 단일 쿼리 계획이다. 본 논문도 로드맵 위 <strong>가치 반복</strong>을 쓰지만, GTMP가 결정적 커버리지를 목표로 하는 반면 본 논문은 <strong>확률 전이 <code>P(z&#39;|z)</code>에 대한 기댓값 벨만 방정식<strong>을 푼다는 점이 결정적 차이다. GTMP의 배치 텐서 연산은 본 논문의 </strong>anytime 배치 정제</strong>를 가속하는 엔진으로 결합 가능해 보인다(결정적 GTMP 커버리지 + 확률적 MDP 반응).</p>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>강점</strong>: 블랙박스 스킬(<code>f</code>)을 샘플링만으로 통합하는 <strong>모듈성</strong>은 실용적으로 매력적이다 — 학습된 스킬 정책이나 물리 시뮬레이터를 그대로 꽂을 수 있다. 공유 작업공간 경합이 심한 조립/물류 셀(shared-point에서 43.4% makespan 감소)에서 즉각적 가치가 있다.</li>
+<li><strong>약점</strong>: (1) <strong>실 로봇 미검증</strong> — 스킬 특성화의 sim-to-real 간극이 미지수. (2) <strong>계획 시간 수십~수백 초</strong> — 온라인 재계획엔 부적합, 오프라인 사전 계획 시나리오에 한정. (3) <strong>Dependency 설정 실패 모드</strong> — 의존성 많은 실제 조립 과제에서 신뢰성 우려. (4) <strong>라이선스 미명시</strong> — 상용/재배포엔 저자 확인 필요.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>본 논문의 가장 큰 기여는 <strong>&quot;스킬 불확실성을 계획 시점에 해소한다&quot;는 프레이밍 자체</strong>다. 다중 로봇 계획 문헌이 (a) 확장성(D4orm·GAMBIT), (b) 동역학 일반성(PAAMP), (c) 커버리지(GTMP)를 각각 밀어붙이는 동안, 본 논문은 <strong>(d) 실행 불확실성 하 반응형 조율</strong>이라는 비교적 미개척 축을 연다. 다만 현 단계는 <strong>개념 증명(proof-of-concept)</strong> 성격이 강하다 — 시뮬만, 소규모(2–4대), 일부 설정(Dependency)에서 역전. 이 축이 실용화되려면 <strong>확장성(학습 가치 함수)·실증(실 로봇)·신뢰성(의존성 제약)</strong> 세 방향의 후속이 필요하며, 공개 벤치마크 저장소가 그 토대를 제공한다는 점은 긍정적이다.</p>
+<hr>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
+<ul>
+<li>Schnyder, W., Hartmann, V. N., Coros, S. &quot;Multi-Robot Multi-Goal Motion Planning with Stochastic Skills.&quot; arXiv:2610.07784, 2026.</li>
+<li>코드: <a href="https://github.com/vhartman/multirobot-pathplanning-benchmark">https://github.com/vhartman/multirobot-pathplanning-benchmark</a> (branch <code>dev/william</code>)</li>
+<li>(비교) D4orm: &quot;Denoising Multi-Robot Trajectories&quot; — 본 corpus <code>Planner/review/D4orm_TRO2026/</code>.</li>
+<li>(비교) PAAMP — 본 corpus <code>Planner/review/PAAMP_LCSS2026/</code>.</li>
+<li>(비교) Anytime GTMP — 본 corpus <code>Planner/review/AnytimeGTMP_arxiv2026/</code>.</li>
+<li>(관련 선례) GAMBIT (큐 #317, 다중 로봇 연속 궤적계획 학습), Cascaded Consensus Splitting (큐 #314, 다분기 우발성 게임), Multi-Arm LQ Games (큐 #245, 협조 모션계획).</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
+<p><strong>Multi-Robot Multi-Goal Motion Planning with Stochastic Skills</strong>는 확률적 매니퓰레이션 스킬을 수반하는 다중 로봇의 동시 모션 계획을, <strong>다중 모드 복합 로드맵 위의 MDP</strong>로 정식화하고 가치 반복으로 <strong>반응형 정책</strong>을 얻는 접근을 제시한다. 핵심 통찰은 세 가지다: (1) 복합 구성을 <strong>스킬/제어로 분해</strong>해 불확실성을 국소화하고, (2) 블랙박스 스킬을 <strong>Monte Carlo 비닝+빈도 정규화</strong>로 유한 MDP 커널로 흡수하며, (3) 스킬 진행을 <strong>상태 <code>z</code>로 삼아 분기하는 벨만 방정식<strong>(스킬 모드)과 </strong>Dijkstra</strong>(비스킬 모드)를 하이브리드로 결합한다.</p>
+<p><strong>혁신성</strong>: 기존 다중 로봇 계획이 결정적 궤적을 가정하거나 사후 스케줄링으로 조율을 미루던 것을, <strong>계획 시점에 불확실성을 직접 해소</strong>하는 반응형 정책으로 전환했다. Sequence 설정에서 makespan을 일관되게(~24%) 줄이고, 공유 자원 경합 환경에서 <strong>43.4%</strong> 감소를 달성해 보수적 베이스라인의 비관주의 제거 효과를 실증했다.</p>
+<p><strong>실용적 의의</strong>: 블랙박스 스킬을 샘플링만으로 통합하는 모듈성은 조립·물류 등 공유 작업공간 셀에서 가치가 있다. 다만 <strong>시뮬 전용·소규모·수십~수백 초 계획 시간·Dependency 설정 역전·라이선스 미명시</strong>라는 한계로 현 단계는 개념 증명에 가깝다.</p>
+<p><strong>향후 연구 방향</strong>: 실 로봇 sim-to-real 보정, 학습 기반 가치 함수로의 계획 시간 가속, 의존성 제약 하 실패 모드 해소, 그리고 D4orm·GTMP류와의 결합(확산 궤적 생성 + MDP 반응 조율, 배치 텐서 가속)이 자연스러운 다음 단계다. 공개 벤치마크 저장소가 이 축의 재현 가능한 발전을 뒷받침한다.</p>
+<hr>
+<p><em>리뷰 작성: 2026-10-08 · Paper Review 에이전트 · 본 리뷰는 arXiv HTML(arxiv.org/html/2610.07784) 본문과 공개 저장소 검증에 근거하며, 본문에 명시되지 않은 수치는 &quot;not stated&quot;로 표기하고 추정하지 않았다.</em></p>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+<div class="rhead" id="rhead" data-title="Multi-Robot Multi-Goal Motion Planning with Stochastic Skills: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
+</body>
+</html>

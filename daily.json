@@ -1,13 +1,48 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-06T19:30:05.669Z",
+  "generatedAt": "2026-10-07T19:30:02.937Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 10. 7  수요일",
+    "date": "2026. 10. 8  목요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 최근 리뷰 2편 · 전체 113편"
+    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 114편"
   },
   "papers": [
+    {
+      "id": "2610.07784",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 2026 (발표처 미정)",
+      "matchScore": 84,
+      "category": "Planner",
+      "feedTitle": "Multi-Robot Multi-Goal Motion Planning with Stochastic Skills",
+      "authorsShort": "W. Schnyder, V. Hartmann +1",
+      "feedAbstract": "다중 로봇이 여러 목표를 순회하는 모션 계획에서, 결과가 확률적인 \"스킬(stochastic skill)\"을 환경 전이 확률로 추상화해 복합 구성공간(skill+control)을 비닝(binning)하고, 모드 전환을 상태로 갖는 MDP의 값 반복으로 보수적(Conservative)·반응적(Reactive) 두 실행…",
+      "tags": [
+        "#Planner",
+        "#다중목표계획",
+        "#확률적스킬/불확실성하계획",
+        "#MDP/값반복"
+      ],
+      "titleEN": "Multi-Robot Multi-Goal Motion Planning with Stochastic Skills",
+      "titleKO": "Multi-Robot Multi-Goal Motion Planning with Stochastic Skills",
+      "authorsEN": "William Schnyder, Valentin N. Hartmann, Stelian Coros",
+      "authorsKO": "William Schnyder, Valentin N. Hartmann, Stelian Coros",
+      "abstractEN": "As robots are increasingly deployed in groups and share workspaces to execute real-world tasks, planning their concurrent motions around complex manipulation skills becomes essential. These skills involve continuous physical execution and may exhibit stochastic behavior, resulting in variable execution times and uncertain continuous trajectories. Existing planners either limit execution to single-robot scenarios, rely on open-loop paths, or use post-hoc scheduling that prevents dynamic coordination. In this paper, we address this gap by integrating stochastic skills into sampling-based multi-robot planning by formulating the problem as a Markov Decision Process (MDP) over a multi-modal composite roadmap. For stochastic skills, solving the MDP yields a reactive policy that allows controllable robots to dynamically adapt their motions in response to other robots' execution of manipulation skills. By resolving skill uncertainty directly at planning time, this approach avoids the pessimism of conservative baselines and unlocks robust, dynamic multi-robot coordination. Code for the planners is available at https://www.vhartmann.com/stochastic-skills.",
+      "abstractKO": "다중 로봇이 여러 목표를 순회하는 모션 계획에서, 결과가 확률적인 \"스킬(stochastic skill)\"을 환경 전이 확률로 추상화해 복합 구성공간(skill+control)을 비닝(binning)하고, 모드 전환을 상태로 갖는 MDP의 값 반복으로 보수적(Conservative)·반응적(Reactive) 두 실행 전략을 유도하는 다중 목표 모션 계획 프레임워크.",
+      "detailTags": [
+        "#Planner",
+        "#다중목표계획",
+        "#확률적스킬/불확실성하계획",
+        "#MDP/값반복"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 40,
+      "reason": "**확률적 스킬의 전이확률 추상화**: 실행 결과가 비결정적인 스킬을 `q^skill_{k+1}=f(q^skill_k, env, ω_k)` 롤아웃 후 `z=(k, ⌊q^skill/δ⌋)` 비닝으로 이산 전이확률 `P(z'|z)` 추정\n**skill+control 복합 구성공간 인수분해**: `q=(q^skill, q^ctrl)`로 스킬 모드와 일반 이동 모드를 하나의 비용 `c=(1-w)max_r‖·‖+w∑_r‖·‖`로 통합\n**모드 전환 MDP + 값 반복**: 상태 `x=(m,u,z)`·행동 `a∈A(u)=N(u)∪{u}`에 Bellman `V(u,z)=min_a∑P(z'|z)[g+W]`, exit value `V^exit`로 스킬 이탈 시 비스킬 모드 Dijkstra 비용 연결\n**Conservative vs Reactive 두 실행 전략**: 동일 MDP에서 보수적(불확실성 흡수 빠른 계획)·반응적(관측 기반 재계획 저비용 경로) 유도\n**Anytime 배치 정제**: 순차·의존(Sequence/Dependency) 두 목표 구조에서 메이크스팬 점진 개선",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/StochasticSkills_arxiv2026/index.html"
+    }
+  ],
+  "archive": [
     {
       "id": "2609.35651",
       "venue": "T-RO 2026",
@@ -77,9 +112,7 @@
       "readMinutes": 38,
       "reason": "**Confidence-Guided Execution (CGE)**: 정책 로짓의 음의 로그 확률을 불확실성으로 삼아 누적 예산(B=1.2, E_min=4)으로 장기 예측(H=18)의 실행 접두 길이를 적응 결정 → 실기체 정책 호출 대폭 절감\n**분기 중심 훈련 데이터**: navigation mesh 분기점 식별 + LLM(Qwen3.8-27B) 지시 생성 + 3중 접지 검증으로 ~98K 결정 밀집 궤적 자동 구축(800 HM3D) + DAgger\n**토큰 불변 공간 관계 표현**: 동결 PanoVGGT 기하를 동결 Qwen3.5-4B 의미에 잔차(α=0.2) 융합, 시각 토큰 예산(N_c+M·N_h) 불변\n**파노라마×장기지평 상보성**: 파노라마 정책은 H=18 최고, 원근 정책은 H=4 포화",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/PanoVLN_arxiv2026/index.html"
-    }
-  ],
-  "archive": [
+    },
     {
       "id": "2609.31507",
       "venue": "NeurIPS 2026",
