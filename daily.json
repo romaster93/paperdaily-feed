@@ -1,13 +1,42 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-08T19:30:00.406Z",
+  "generatedAt": "2026-10-09T19:30:05.487Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 10. 9  금요일",
+    "date": "2026. 10. 10  토요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 최근 리뷰 1편 · 전체 114편"
+    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 115편"
   },
   "papers": [
+    {
+      "id": "2610.12126",
+      "venue": "arXiv 2026",
+      "venueDetail": "arXiv 2026 (발표처 미확정)",
+      "matchScore": 93,
+      "category": "VLN",
+      "feedTitle": "SuperNav: 통합 시각-점 인터페이스 기반 제로샷 범용 항해",
+      "authorsShort": "J. Zhang, J. Xu +6",
+      "feedAbstract": "MLLM이 로봇 동역학·좌표계를 전혀 모른 채 `(4-뷰 중 하나, [u,v] 픽셀)`이라는 통합 시각-점 인터페이스로만 목표를 지시하고, 결정론적/학습형 두 운동 백엔드가 깊이 역투영·내비메시 스냅·측지 경로추종을 처리하여 학습 없는 제로샷으로 instance/multi-object/demand-driven/OVON…",
+      "tags": [
+        "#VLN"
+      ],
+      "titleEN": "SuperNav: Zero-shot Generalist Navigation via a Unified Visual-Point Interface",
+      "titleKO": "SuperNav: Zero-shot Generalist Navigation via a Unified Visual-Point Interface",
+      "authorsEN": "Jinkai Zhang, Jingyi Xu, Yuanhong Yu, Jiarui Guo, Ruizhen Hu, Hujun Bao, Xiaowei Zhou, Sida Peng",
+      "authorsKO": "Jinkai Zhang, Jingyi Xu, Yuanhong Yu, Jiarui Guo, Ruizhen Hu, Hujun Bao, Xiaowei Zhou, Sida Peng",
+      "abstractEN": "General-purpose service robots need navigation systems that can handle diverse human requests in unfamiliar environments, combining task generality with scene generality. Some existing methods fine-tune multimodal large language models (MLLMs) to predict navigation actions, making their behavior dependent on the coverage of navigation training data and potentially limiting generalization to new requests and environments. Our key insight is to let the MLLM focus on interpreting requests, understanding scenes, and making decisions while preserving its general-purpose capabilities and delegating motion execution to navigation tools. To realize this idea, we introduce SuperNav, which equips a pretrained MLLM with a specialized agent harness without navigation-specific fine-tuning of the MLLM. Our harness supports these decisions with Navigation Skills, agent-oriented Tools for physical interaction, and task-progress and context management. A unified visual-point interface connects decision-making to motion by allowing the model to specify destinations directly in images and revise its decisions from execution feedback. Together, these components support sustained navigation across different task requirements and environments. SuperNav outperforms four evaluated baselines on instance-level, multi-object, and demand-driven tasks. Category-level evaluation on HM3D and deployment on a real quadruped robot further demonstrate its applicability across environments. Project Page: https://zju3dv.github.io/SuperNav/",
+      "abstractKO": "MLLM이 로봇 동역학·좌표계를 전혀 모른 채 `(4-뷰 중 하나, [u,v] 픽셀)`이라는 통합 시각-점 인터페이스로만 목표를 지시하고, 결정론적/학습형 두 운동 백엔드가 깊이 역투영·내비메시 스냅·측지 경로추종을 처리하여 학습 없는 제로샷으로 instance/multi-object/demand-driven/OVON 네 과제 유형을 한 하네스로 수행하는 범용 항해 에이전트.",
+      "detailTags": [
+        "#VLN"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 43,
+      "reason": "**통합 시각-점 인터페이스**: MLLM 출력을 전 과제·전 플랫폼에서 `PointNav(d, [u,v]), u,v∈[0,1]`로 통일 — 저수준 모터 명령을 산출하지 않으므로 MLLM의 사전학습 \"가리키기\" 능력만으로 제로샷 일반화.\n**상호교체 가능한 두 운동 백엔드**: (a) Geo-based Executor(Recast/Detour PathFinder + GreedyGeodesicFollower, standoff 0.7m), (b) Learned Executor(DINOv2 + flow head, 45000 업데이트). 인터페이스 불변, 백엔드만 교체.\n**에이전트 지향 도구 + 항해 스킬(Markdown 패키지)**: search/recovery/completion 스킬이 FSM 상태 전이를 자연어로 인코딩 — 전이 로직을 MLLM 추론에 위임해 과제 유형 전반 재사용.\n**media-only 컨텍스트 정리**: 텍스트 이력·goal records·이미지 경로는 보존하고 \"대체된\" 이미지 픽셀만 제거 → 장기지평 토큰 예산을 상수 창으로 통제(multi-object에서 StreamVLN 0.00 SR 붕괴와 대비).",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/SuperNav_arxiv2026/index.html"
+    }
+  ],
+  "archive": [
     {
       "id": "2610.07784",
       "venue": "arXiv 2026",
@@ -40,9 +69,7 @@
       "readMinutes": 40,
       "reason": "**확률적 스킬의 전이확률 추상화**: 실행 결과가 비결정적인 스킬을 `q^skill_{k+1}=f(q^skill_k, env, ω_k)` 롤아웃 후 `z=(k, ⌊q^skill/δ⌋)` 비닝으로 이산 전이확률 `P(z'|z)` 추정\n**skill+control 복합 구성공간 인수분해**: `q=(q^skill, q^ctrl)`로 스킬 모드와 일반 이동 모드를 하나의 비용 `c=(1-w)max_r‖·‖+w∑_r‖·‖`로 통합\n**모드 전환 MDP + 값 반복**: 상태 `x=(m,u,z)`·행동 `a∈A(u)=N(u)∪{u}`에 Bellman `V(u,z)=min_a∑P(z'|z)[g+W]`, exit value `V^exit`로 스킬 이탈 시 비스킬 모드 Dijkstra 비용 연결\n**Conservative vs Reactive 두 실행 전략**: 동일 MDP에서 보수적(불확실성 흡수 빠른 계획)·반응적(관측 기반 재계획 저비용 경로) 유도\n**Anytime 배치 정제**: 순차·의존(Sequence/Dependency) 두 목표 구조에서 메이크스팬 점진 개선",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/StochasticSkills_arxiv2026/index.html"
-    }
-  ],
-  "archive": [
+    },
     {
       "id": "2609.35651",
       "venue": "T-RO 2026",
