@@ -1,13 +1,50 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-11T19:30:00.554Z",
+  "generatedAt": "2026-10-12T19:30:02.281Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 10. 12  월요일",
+    "date": "2026. 10. 13  화요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 최근 리뷰 1편 · 전체 115편"
+    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 116편"
   },
   "papers": [
+    {
+      "id": "2610.13195",
+      "venue": "arXiv 2026",
+      "venueDetail": "Submitted to IEEE ICRA 2027 (under review)",
+      "matchScore": 93,
+      "category": "Planner",
+      "feedTitle": "PATACON: GPU-Parallel Tangent-Bundle RRT-Connect for Constrained Motion Planning",
+      "authorsShort": "G. Oh, J. An +2",
+      "feedAbstract": "운동학 등식제약 하 고차원 매니퓰레이터 모션계획에서 \"steer-then-project\"의 세 병목(불필요 투영·역추적·경계 품질저하)을, 제약다양체 접선공간(tangent bundle) 위에서 직접 전개하는 Tangent-Guided Steering(TGS)+Tangent-Guided Manifold…",
+      "tags": [
+        "#Planner",
+        "#제약모션계획",
+        "#샘플링기반계획",
+        "#GPU병렬",
+        "#코드공개"
+      ],
+      "titleEN": "PATACON: Parallel Tangent-Bundle Constrained Motion Planning on GPU",
+      "titleKO": "PATACON: Parallel Tangent-Bundle Constrained Motion Planning on GPU",
+      "authorsEN": "Gahyun Oh, Junho An, Suhyun Jeon, Suhan Park",
+      "authorsKO": "Gahyun Oh, Junho An, Suhyun Jeon, Suhan Park",
+      "abstractEN": "Fast whole-body motion planning enables continuous replanning for humanoid robots in dynamic environments while satisfying collision avoidance and kinematic constraints. However, constrained motion planning incurs substantial computational cost due to repeated constraint projection in addition to collision checking and nearest-neighbor search. Recently, GPU-based massively parallel planners have been proposed to reduce computational cost. Nevertheless, these planners still steer in the ambient configuration space, so projecting candidates that deviate from the manifold remains a significant source of overhead, particularly in highly constrained, high-dimensional problems. In this work, we introduce PATACON, a GPU-parallel bidirectional planner that explores tangent space to exploit the local manifold geometry induced by known constraint functions. Experiments on dual-arm closed-chain and humanoid whole-body constrained planning tasks show that PATACON outperforms the prior work as configuration-space dimension and constraint codimension grow, achieving up to an 11.25 times speedup. These results suggest that GPU-parallel tangent-space exploration brings constrained whole-body motion planning closer to real-time performance.",
+      "abstractKO": "운동학 등식제약 하 고차원 매니퓰레이터 모션계획에서 \"steer-then-project\"의 세 병목(불필요 투영·역추적·경계 품질저하)을, 제약다양체 접선공간(tangent bundle) 위에서 직접 전개하는 Tangent-Guided Steering(TGS)+Tangent-Guided Manifold Projection(TGMP)으로 해소하고, GPU SIMT 3계층 병렬 RRT-Connect 위에 올려 cpRRTC 대비 최대 11.25배 가속(전 플랫폼 100% 성공)을 달성한 병렬 제약 모션계획기.",
+      "detailTags": [
+        "#Planner",
+        "#제약모션계획",
+        "#샘플링기반계획",
+        "#GPU병렬",
+        "#코드공개"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 49,
+      "reason": "**접선다발 조향(TGS)**: 제약다양체 ℳ={q|h(q)=0}의 접선공간 T_qℳ={v|Jh(q)v=0}로 샘플/확장을 투영(P_𝒯r=N(q)N(q)ᵀ)해 애초에 다양체 접선 방향으로만 전진 — 역추적을 부호검사로 사전 차단\n**접선유도 다양체 투영(TGMP)**: 접선 전진점 q̄_k=q̄_near+kξu를 잔차 E_ℳ=‖h(q̄_k)‖₂≤ε_ℳ로만 저비용 보정 — 전면 뉴턴 투영 대비 반복 급감\n**GPU SIMT 3계층 병렬**: 다수 트리/블록당 수백 반복/스레드별 샘플·NN·충돌을 N_blk=512로 배치 병렬\n**드롭인 anytime**: RRT-Connect EXTEND/CONNECT 보존 + anytime 비용개선 R_cost=(C_init−C*)/C_init×100\n**코드 공개 + 재현성**: Apache-2.0 실저장소(cpRRTC_TB-RRT), cpRRTC 베이스라인 포함",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/PATACON_arxiv2026/index.html"
+    }
+  ],
+  "archive": [
     {
       "id": "2610.12126",
       "venue": "arXiv 2026",
@@ -34,9 +71,7 @@
       "readMinutes": 43,
       "reason": "**통합 시각-점 인터페이스**: MLLM 출력을 전 과제·전 플랫폼에서 `PointNav(d, [u,v]), u,v∈[0,1]`로 통일 — 저수준 모터 명령을 산출하지 않으므로 MLLM의 사전학습 \"가리키기\" 능력만으로 제로샷 일반화.\n**상호교체 가능한 두 운동 백엔드**: (a) Geo-based Executor(Recast/Detour PathFinder + GreedyGeodesicFollower, standoff 0.7m), (b) Learned Executor(DINOv2 + flow head, 45000 업데이트). 인터페이스 불변, 백엔드만 교체.\n**에이전트 지향 도구 + 항해 스킬(Markdown 패키지)**: search/recovery/completion 스킬이 FSM 상태 전이를 자연어로 인코딩 — 전이 로직을 MLLM 추론에 위임해 과제 유형 전반 재사용.\n**media-only 컨텍스트 정리**: 텍스트 이력·goal records·이미지 경로는 보존하고 \"대체된\" 이미지 픽셀만 제거 → 장기지평 토큰 예산을 상수 창으로 통제(multi-object에서 StreamVLN 0.00 SR 붕괴와 대비).",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/SuperNav_arxiv2026/index.html"
-    }
-  ],
-  "archive": [
+    },
     {
       "id": "2610.07784",
       "venue": "arXiv 2026",
