@@ -1,13 +1,41 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-13T19:30:01.047Z",
+  "generatedAt": "2026-10-14T19:30:03.134Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 10. 14  수요일",
+    "date": "2026. 10. 15  목요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 최근 리뷰 1편 · 전체 116편"
+    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 117편"
   },
   "papers": [
+    {
+      "id": "2610.18321",
+      "venue": "CoRL 2026",
+      "matchScore": 96,
+      "category": "Planner",
+      "feedTitle": "CoSMO: Conformal Semantic Mapping for Open-World Safe Robot Navigation",
+      "authorsShort": "S. Wang, Y. Zheng +3",
+      "feedAbstract": "이 논문은 개방세계(open-world)에서 로봇이 안전하게 항해(safe navigation) 하기 위한 의미지도(semantic map) 구축의 근본 문제를 다룬다. 로봇이 환경을 주행할 때, 단순히 \"물체가 있다/없다\"는 기하학적 점유(occupancy)만으로는 불충분하다. 어떤 물체인지(semantic…",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "CoSMO: Conformal Semantic Mapping for Open-World Safe Robot Navigation",
+      "titleKO": "CoSMO: Conformal Semantic Mapping for Open-World Safe Robot Navigation",
+      "authorsEN": "Shuqi Wang, Yiwei Zheng, Pingrui Zhang, Yue Gao, Xiang Yin",
+      "authorsKO": "Shuqi Wang, Yiwei Zheng, Pingrui Zhang, Yue Gao, Xiang Yin",
+      "abstractEN": "Safe autonomous navigation requires not only geometric obstacle avoidance but also semantic awareness. Different object categories demand different safety clearances, and the set of relevant categories may expand as the robot explores novel environments. Vision-language models (VLMs) offer rich semantic representations for building maps of unknown scenes, yet their confidence scores are poorly calibrated, making raw predictions unreliable for safety-critical planning. Conformal prediction (CP) can provide coverage guarantees, but existing methods assume a fixed label set and stationary data, limiting their use in open-world settings. We propose Conformal Semantic Mapping for Open-World Safe Robot Navigation (CoSMO), a semantic safety mapping framework that transforms VLM embeddings into calibrated coverage sets and safety-aware obstacle dilations over a dynamically expanding hazard vocabulary, even under distribution shift. Experiments on the Matterport3D (MP3D) dataset show that CoSMO reduces semantic collisions by 61.6% relative to a geometry-only baseline, while maintaining formal coverage guarantees even under delayed expert feedback. Real-world experiments on a quadruped robot further demonstrate generalization by achieving long-run empirical coverage of 90.73% against the 90% target. Project website: https://yangming911.github.io/cosmo-page/.",
+      "abstractKO": "이 논문은 개방세계(open-world)에서 로봇이 안전하게 항해(safe navigation) 하기 위한 의미지도(semantic map) 구축의 근본 문제를 다룬다. 로봇이 환경을 주행할 때, 단순히 \"물체가 있다/없다\"는 기하학적 점유(occupancy)만으로는 불충분하다. 어떤 물체인지(semantic label) 와 그 물체가 얼마나 위험한지(safety radius) 를 알아야만, 예컨대 \"유리 샤워부스 근처는 넓게 돌아가라\", \"탁자 모서리는 더 멀리 피하라\" 같은 의미 기반 안전 여유(semantic clearance)를 경로계획기에 줄 수 있다.",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 35,
+      "reason": "이 논문은 개방세계(open-world)에서 로봇이 안전하게 항해(safe navigation) 하기 위한 의미지도(semantic map) 구축의 근본 문제를 다룬다. 로봇이 환경을 주행할 때, 단순히 \"물체가 있다/없다\"는 기하학적 점유(occupancy)만으로는 불충분하다. 어떤 물체인지(semantic label) 와 그 물체가 얼마나 위험한지(safety radius) 를 알아야만, 예컨대 \"유리 샤워부스 근처는 넓게 돌아가라\", \"탁자 모서리는 더 멀리 피하라\" 같은 의미 기반 안전 여유(semantic clearance)를 경로계획기에 줄 수 있다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/CoSMO_CoRL2026/index.html"
+    }
+  ],
+  "archive": [
     {
       "id": "2610.13195",
       "venue": "arXiv 2026",
@@ -42,9 +70,7 @@
       "readMinutes": 49,
       "reason": "**접선다발 조향(TGS)**: 제약다양체 ℳ={q|h(q)=0}의 접선공간 T_qℳ={v|Jh(q)v=0}로 샘플/확장을 투영(P_𝒯r=N(q)N(q)ᵀ)해 애초에 다양체 접선 방향으로만 전진 — 역추적을 부호검사로 사전 차단\n**접선유도 다양체 투영(TGMP)**: 접선 전진점 q̄_k=q̄_near+kξu를 잔차 E_ℳ=‖h(q̄_k)‖₂≤ε_ℳ로만 저비용 보정 — 전면 뉴턴 투영 대비 반복 급감\n**GPU SIMT 3계층 병렬**: 다수 트리/블록당 수백 반복/스레드별 샘플·NN·충돌을 N_blk=512로 배치 병렬\n**드롭인 anytime**: RRT-Connect EXTEND/CONNECT 보존 + anytime 비용개선 R_cost=(C_init−C*)/C_init×100\n**코드 공개 + 재현성**: Apache-2.0 실저장소(cpRRTC_TB-RRT), cpRRTC 베이스라인 포함",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/PATACON_arxiv2026/index.html"
-    }
-  ],
-  "archive": [
+    },
     {
       "id": "2610.12126",
       "venue": "arXiv 2026",
