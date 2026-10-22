@@ -197,10 +197,10 @@ footer {
     <div class="pubcard">
       <div class="prow"><span class="pkey">발표처</span><span class="pval">CoRL 2026</span></div>
       <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2610.18321">2610.18321</a></span></div>
-      <div class="prow"><span class="pkey">코드</span><span class="pval">✅ 공개 — <a href="https://github.com/Yangming911/CoSMO">github.com/Yangming911/CoSMO</a> (2026-10-15 browser 확인 — 실제 소스 존재: `config/`·`eval/`·`mapping/`·`planning/`·`planning_cpp/`·`vision_models/`·`onemap_utils/`, 진입점 `eval_habitat.py`, `requirements.txt`, LICENSE. 네비게이션 백본은 SemanticOneMap 파생. 라이선스=상류 고지 보존 조건의 MIT 계열)</span></div>
-      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://yangming911.github.io/cosmo-page/">yangming911.github.io/cosmo-page/</a> (🌐 활성)</span></div>
-      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-10-14</span></div>
-      <div class="prow"><span class="pkey">분량</span><span class="pval">35KB · 약 35분 읽기</span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">✅ <a href="https://github.com/Yangming911/CoSMO">Yangming911/CoSMO</a> (MIT)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval">✅ <a href="https://yangming911.github.io/cosmo-page/">yangming911.github.io/cosmo-page</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-10-22</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">43KB · 약 44분 읽기</span></div>
     </div>
     <nav class="toccard">
       <div class="toc-label">목차 · 11개 섹션</div>
@@ -319,6 +319,26 @@ footer {
        Q̂(q): 과거 점수 이력의 경험적 q-분위수
 </code></pre>
 <p>직관: 최근에 miss(커버 실패)가 목표보다 많으면 <code>err_t</code>가 커지고 → <code>α_{t+1}</code>이 작아지고 → <code>Q_{t+1}</code>(임계값)이 커져 → 커버리지 집합이 넓어진다(더 보수적). 반대로 miss가 적으면 임계값이 줄어 집합이 좁아진다(덜 보수적). <strong>ACI는 장기적으로 경험적 커버리지를 목표치 1−α로 수렴</strong>시킨다 — 분포가 이동해도. 실험에서 실기체 경험적 커버리지 <strong>90.73%</strong> 가 목표 90%에 거의 정확히 맞는 것이 이 보장의 실증이다.</p>
+<p><strong>워크드 예제 — ACI 업데이트 10스텝 추적 (α=0.1, γ=0.05).</strong>
+분포이동(로봇이 새 방으로 진입해 미지의 위험 물체가 몰린 상황)으로 miss가 연달아 터지는 버스트를 가정하자. 각 스텝 갱신식은 <code>α_{t+1} = α_t + 0.05·(0.1 − err_t)</code> 이다(<code>err_t</code>∈{0,1}). 초기 <code>α_1 = 0.1</code>.</p>
+<pre class="codeblock"><code> t | S_{t−τ}&gt;Q_t? | err_t | 0.1−err_t | Δα=0.05·(·) | α_{t+1}  | 비고
+---+--------------+-------+-----------+-------------+----------+----------------------
+ 1 |   miss       |   1   |  −0.9     |  −0.045     |  0.055   | 위험 버스트 시작
+ 2 |   miss       |   1   |  −0.9     |  −0.045     |  0.010   | α 급락 → Q 급상승(보수화)
+ 3 |   cover      |   0   |  +0.1     |  +0.005     |  0.015   | 넓어진 집합이 커버 회복
+ 4 |   cover      |   0   |  +0.1     |  +0.005     |  0.020   |
+ 5 |   cover      |   0   |  +0.1     |  +0.005     |  0.025   | 천천히 완화 복귀
+ 6 |   cover      |   0   |  +0.1     |  +0.005     |  0.030   |
+ 7 |   miss       |   1   |  −0.9     |  −0.045     | −0.015→0 | clip(0): 과보수 포화 방지
+ 8 |   cover      |   0   |  +0.1     |  +0.005     |  0.005   |
+ 9 |   cover      |   0   |  +0.1     |  +0.005     |  0.010   |
+10 |   cover      |   0   |  +0.1     |  +0.005     |  0.015   | 평형 근방 복귀
+</code></pre>
+<ul>
+<li><strong>(성질 1) 비대칭 응답</strong>: miss는 α를 −0.045 움직이고 cover는 +0.005만 움직인다 — <strong>9배 비대칭</strong>. &quot;위험 신호(miss)에는 빠르게 보수화, 안전 신호(cover)에는 천천히 완화.&quot; 이는 갱신식에서 err=1일 때 계수가 <code>α−1=−0.9</code>, err=0일 때 <code>α=+0.1</code>이기 때문이다. 안전-결정적(safety-critical) 매핑에 바람직한 비대칭이다 — 충돌 위험에는 민감하게, 통로 개방에는 신중하게 반응한다.</li>
+<li><strong>(성질 2) 자기교정과 평형</strong>: 기댓값으로 <code>E[α_{t+1}−α_t] = γ·(α − E[err_t]) = 0 ⟺ E[err_t] = α</code>. 즉 ACI는 <strong>장기 miss율을 정확히 α=0.1에 고정</strong>하는 고정점을 가진다. 실기체 경험적 커버리지 90.73%(=1−0.0927)가 90%에 붙은 근원이 바로 이 평형이다. t7의 <code>clip(0)</code>은 α&lt;0이 되면 <code>Q=Q̂(1−α)&gt;Q̂(1)</code>로 분위수 범위를 벗어나 전 통로를 봉쇄하는 <strong>과보수 포화</strong>를 차단한다.</li>
+<li><strong>(성질 3) 지연 피드백 τ의 역할</strong>: <code>err_t</code>는 <code>S_{t−τ}</code>로 평가된다 — 실기체에서 GDINO 지연(~350ms)과 피드백 lag τ(128–448ms) 때문에 현재 관측이 아니라 <strong>수 스텝 전 관측의 커버 여부</strong>로 갱신한다. 이 지연이 과도하면 ACI가 분포이동을 뒤늦게 따라가 버스트 구간 커버리지가 일시적으로 떨어질 수 있으나, γ가 작아(0.05) 진동 없이 평형으로 수렴한다.</li>
+</ul>
 <h3>3.3 셀별 커버리지 집합 (Coverage Set)</h3>
 <p>임계값 <code>Q_t</code>가 정해지면, 각 셀 <code>j</code>의 <strong>라벨 커버리지 집합</strong>은:</p>
 <pre class="codeblock"><code>  C_j^(t) = { l ∈ V_t | s(v_j^(t), ψ(l)) ≤ Q_t }
@@ -348,6 +368,19 @@ footer {
   최대 안전반경 상한 D̄ = 5 cells (0.5 m)
 </code></pre>
 <p><strong>왜 max(최악)인가</strong>: 참 라벨이 집합 안에 있을 확률이 ≥90%이므로, 집합 내 가장 위험한 라벨의 반경으로 팽창하면 <strong>참 물체의 위험을 높은 확률로 포괄</strong>한다. 불확실한 셀은 집합이 크고(여러 위험 라벨 포함) → 넓게 팽창(보수적), 확신하는 셀은 집합이 작아 → 좁게 팽창. 이것이 과신(C2 충돌)과 과잉보수(C2 봉쇄) 사이 <strong>적응적 균형</strong>이다.</p>
+<p><strong>워크드 예제 — 세 셀의 팽창량 비교.</strong> 동일한 시각 <code>t</code>, 임계값 <code>Q_t=0.28</code>(코사인 거리)이라 하자. 세 셀의 비적합도 점수와 그에 따른 커버리지 집합·팽창량:</p>
+<pre class="diagram"><code>셀 j │ 점수 s(v_j, ψ(l))                          │ C_j (≤0.28)              │ d_wc = max D_safe
+─────┼────────────────────────────────────────────┼──────────────────────────┼──────────────────
+ A   │ table:0.12 chest:0.22 cabinet:0.26 tv:0.41 │ {table, chest, cabinet}  │ max(5,4,4) = 5 cells
+ B   │ table:0.09 chest:0.44 cabinet:0.47         │ {table}                  │ max(5)     = 5 cells
+ C   │ chair:0.15 sofa:0.19 floor:0.24            │ {chair, sofa, floor}     │ max(0,0,0) = 0 cells
+</code></pre>
+<ul>
+<li><strong>셀 A(불확실)</strong>: 세 위험 라벨이 모두 임계값 안 → 집합이 크다. 팽창량은 최악 라벨 table(5 cells). 참 물체가 chest(4)든 cabinet(4)든, table 기준 5 cells로 팽창하면 <strong>어느 경우도 포괄</strong>된다. &quot;무엇인지 모를 때는 가장 위험한 것으로 가정.&quot;</li>
+<li><strong>셀 B(확신)</strong>: table만 집합에 남고 나머지는 멀다 → 팽창량 5 cells이되 <strong>집합이 작아 다른 라벨로 인한 과잉팽창이 없다</strong>. 셀 A와 팽창 수치는 같지만 의미가 다르다 — B는 &quot;table임을 확신&quot;해서 5, A는 &quot;셋 중 하나라 보수적으로&quot; 5.</li>
+<li><strong>셀 C(자유공간/비위험)</strong>: chair·sofa·floor 모두 <code>D_safe=0</code> → 팽창 0. 집합이 커도(3개) 위험 라벨이 없으므로 <strong>순수 기하 점유만</strong> 남는다. <code>C_j=∅</code>이 아니어도 위험반경이 0이면 결과적으로 기하 전용이 된다.</li>
+</ul>
+<p>이 예제가 보여주는 설계 요점: <strong>팽창량은 &quot;집합의 크기&quot;가 아니라 &quot;집합 내 최대 위험반경&quot;으로 결정</strong>된다. 따라서 비위험 라벨이 아무리 많이 집합에 들어와도 통로를 막지 않고(셀 C), 위험 라벨이 하나라도 불확실하게 남으면 보수적으로 팽창한다(셀 A). 상한 <code>D̄=5</code>는 단일 물체가 전 통로를 봉쇄하는 degenerate 팽창을 차단한다.</p>
 <p>팽창된 장애물맵은 표준 <strong>그래프 기반 경로계획기</strong>(SemanticOneMap 백본의 planner)에 그대로 넘겨 안전 경로를 뽑는다.</p>
 <h3>3.5 개방어휘 점진 확장 (Open-World Hazard Vocabulary Expansion)</h3>
 <p>개방세계 핵심(C4). 사전에 없는 위험 물체를 <strong>전문가 오라클(expert oracle)</strong> 이 발견하면:</p>
@@ -368,6 +401,36 @@ footer {
   전문가 오라클(GDINO, 간헐) ── 새 위험 라벨 발견 시만 어휘 확장
 </code></pre>
 <p>엣지 VLM은 매 프레임 빠르게 돌고(저지연), 무거운 전문가 오라클은 <strong>새 위험 발견 시에만</strong> 호출되는 2계층 구조로 실시간성과 개방성을 모두 확보한다.</p>
+<hr>
+<h3>3.6 비용-커버리지 트레이드오프 정량 분석 (Cost–Coverage Trade-off)</h3>
+<p>CoSMO의 설계 전체를 하나의 트레이드오프 축으로 읽을 수 있다: <strong>경로 안전성(의미 충돌 회피) ↔ 경로 효율성(탐색 거리·성공률)</strong>. ACI의 목표 오류율 <code>α</code>가 이 축을 지배하는 단일 손잡이다.</p>
+<pre class="diagram"><code>   α ↓ (예: 0.05)                     α ↑ (예: 0.20)
+   ───────────────                    ───────────────
+   Q_t = Q̂(0.95) 큼                   Q_t = Q̂(0.80) 작음
+   커버리지 집합 C_j 큼                커버리지 집합 C_j 작음
+   더 많은 위험 라벨 포함              적은 위험 라벨만 포함
+   팽창량 ↑ → 넓은 안전여유            팽창량 ↓ → 좁은 안전여유
+   의미 충돌 ↓↓ (안전)                의미 충돌 ↑ (위험)
+   탐색 거리 ↑, 성공률 ↓ (봉쇄)       탐색 거리 ↓, 성공률 ↑
+</code></pre>
+<p><strong>Table 1의 설정 A–F가 이 축의 샘플링</strong>이라는 점이 분석의 핵심이다. 세 가지 극단과 CoSMO의 위치를 비용 관점에서 재해석하면:</p>
+<pre class="diagram"><code>설정            │ 어휘·임계값 전략          │ 축 위치        │ 의미충돌 / 성공률
+───────────────┼──────────────────────────┼───────────────┼──────────────────
+B (argmax)      │ 최빈 라벨 1개 확정         │ α→1 극단(공격) │ 0.103 / 18.4  (최고 성공·최악 안전)
+F (GDINO)       │ 전문가 검출 그대로         │ 공격적         │ 0.097 / 16.5
+D (CoSMO)       │ ACI 적응 집합 α=0.1        │ 균형점         │ 0.081 / 13.8  (61.6% 충돌↓)
+E (known-vocab) │ 사전 고정 어휘             │ 보수적         │ 0.059 / 10.4  (오라클 상한 근사)
+C (uniform)     │ 모든 라벨 균등 팽창        │ α→0 극단(봉쇄) │ 0.053 / 8.7   (최고 안전·최악 성공)
+A (OneMap)      │ 의미 팽창 없음             │ 기하 전용       │ 0.071 / 11.3  (semantic-blind 기준선)
+</code></pre>
+<p>읽는 법:</p>
+<ul>
+<li><strong>C(uniform)</strong> 는 &quot;모든 라벨을 위험으로 간주, 균등 팽창&quot; = α→0 극단. 의미 충돌은 최저(0.053)지만 통로가 과잉봉쇄되어 성공률이 8.7로 붕괴. <strong>안전을 사면 효율이 죽는다</strong>는 것을 보여주는 하한.</li>
+<li><strong>B(argmax)</strong> 는 &quot;최빈 라벨 하나만 믿는다&quot; = α→1 극단. 성공률은 최고(18.4)지만 오분류 시 팽창을 놓쳐 충돌 0.103으로 최악. <strong>효율을 사면 안전이 죽는다</strong>는 상한.</li>
+<li><strong>D(CoSMO)</strong> 는 이 둘 사이에서 <strong>충돌을 B 대비 61.6% 줄이면서 성공률 13.8을 유지</strong> — C처럼 봉쇄하지도, B처럼 방치하지도 않는다. E(known-vocab, 오라클 어휘)에 근접하되 <strong>사전 어휘 없이</strong> 도달한 것이 기여의 요체다.</li>
+<li><strong>A(OneMap)</strong> 는 의미를 아예 안 쓰는 기하 전용 기준선. 흥미롭게도 충돌 0.071로 C보다 높은데, 이는 &quot;의미 팽창 없음 ≠ 안전&quot;임을 뜻한다 — 위험 물체 근처를 그냥 기하적으로 지나가면 의미 충돌이 발생한다.</li>
+</ul>
+<p><strong>커버리지 보장이 트레이드오프를 &quot;조정 가능&quot;하게 만든다</strong>: 일반적 안전 마진은 경험적으로 튜닝한 상수(magic number)라 환경이 바뀌면 재튜닝이 필요하다. CoSMO는 <code>α</code>가 <strong>통계적 의미</strong>(장기 오류율)를 갖기 때문에, &quot;충돌을 10% 이하로&quot;라는 요구를 <code>α=0.1</code>로 직접 번역할 수 있다. 실기체 실험의 경험적 커버리지 90.73%가 목표 90%에 맞은 것(§3.2 워크드 예제)이 이 번역이 실제로 작동함을 입증한다. 이것이 상수 튜닝 기반 비용설계와의 결정적 차별점이다.</p>
 <hr>
 <div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <pre class="diagram"><code>┌──────────────────────────────────────────────────────────────┐
