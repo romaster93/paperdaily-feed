@@ -198,8 +198,8 @@ footer {
       <div class="prow"><span class="pkey">발표처</span><span class="pval">CoRL 2026</span></div>
       <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2610.26852">2610.26852</a></span></div>
       <div class="prow"><span class="pkey">코드</span><span class="pval">✅ <a href="https://github.com/tasl-lab/CoopUQ">tasl-lab/CoopUQ</a> (라이선스 미명시 — predictor/·onpolicy/·simulator/ 실동작 저장소, 체크포인트 포함)</span></div>
-      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-10-22</span></div>
-      <div class="prow"><span class="pkey">분량</span><span class="pval">29KB · 약 30분 읽기</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-11-16</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">34KB · 약 36분 읽기</span></div>
     </div>
     <nav class="toccard">
       <div class="toc-label">목차 · 11개 섹션</div>
@@ -332,6 +332,53 @@ w_d(x,y) = max(0, r_safe − d(x,y))      # 로봇에 가까운 위험일수록 
 <li>라그랑주 승수 <code>η</code> 초기값 0.1, 학습률 0.003, <code>[0,5]</code> 로 클리핑 — 비용이 한도 ϵ을 넘으면 η가 커져 정책을 보수화, 여유가 생기면 η가 작아져 효율 추구.</li>
 <li>비용 한도 <code>ϵ=0.10</code> 이 <strong>위험 허용치의 해석 가능한 단일 손잡이</strong>. OOD에서 예측이 흐려져 불확실성 비용이 늘면, 같은 ϵ 아래에서 정책이 자동으로 더 조심하게 된다 — <strong>재학습 없이</strong> 위험 민감도가 적응한다.</li>
 </ul>
+<hr>
+<h3>3.6 비용 함수 워크드 예제 (Worked Example of the Cost Term)</h3>
+<p>비용 함수 <code>C^i</code> 가 <strong>점유(occupancy)와 불확실성(uncertainty)을 분리된 두 항의 worst-case 로 집계</strong>한다는 점은 추상적으로는 와닿지 않는다. 격자 파라미터를 고정하고 두 셀을 손으로 계산해 그 동작을 드러낸다.</p>
+<p><strong>설정</strong>: 격자 해상도 0.1 m/셀, 재계획 주기 <code>Δt=0.2 s</code>, 안전 반경 <code>r_safe=5 셀</code>, 점유 임계 <code>φ_occ=0.5</code>, 불확실성 임계 <code>φ_unc=0.3</code>, 가중 <code>λ_occ=λ_unc=0.5</code>. 거리 가중 커널은</p>
+<pre class="codeblock"><code>w_d(x,y) = max(0,  r_safe − d(x,y))      # 가까울수록 선형으로 커짐, r_safe 밖은 0
+</code></pre>
+<p>로봇 중심에서 두 후보 셀을 본다:</p>
+<pre class="diagram"><code>          │ 거리 d │ 점유 m │ 불확실 u │ w_d = max(0, 5−d)
+  셀 A    │   3     │  0.82  │   0.15   │   2
+  셀 B    │   2     │  0.20  │   0.61   │   3
+</code></pre>
+<p><strong>점유 항</strong> (임계 초과 셀만, worst-case 집계):</p>
+<pre class="codeblock"><code>  셀 A:  𝕀(0.82 &gt; 0.5)·λ_occ·w_d(A) = 1·0.5·2 = 1.0
+  셀 B:  𝕀(0.20 &gt; 0.5)·λ_occ·w_d(B) = 0·(…)   = 0
+  → max_occ = 1.0        (점유 위험은 셀 A가 지배)
+</code></pre>
+<p><strong>불확실성 항</strong> (동일 방식):</p>
+<pre class="codeblock"><code>  셀 A:  𝕀(0.15 &gt; 0.3)·λ_unc·w_d(A) = 0·(…)   = 0
+  셀 B:  𝕀(0.61 &gt; 0.3)·λ_unc·w_d(B) = 1·0.5·3 = 1.5
+  → max_unc = 1.5        (불확실성 위험은 셀 B가 지배)
+</code></pre>
+<p><strong>총 비용</strong>:</p>
+<pre class="codeblock"><code>  C^i = Δt·( max_occ + max_unc ) = 0.2·(1.0 + 1.5) = 0.5
+</code></pre>
+<p>핵심은 <strong>두 항의 worst-case 셀이 서로 다르다</strong>는 점이다. 셀 A는 &quot;확실히 점유된 중거리 장애물&quot;(고전적 OGM 비용이 이미 잡는 것), 셀 B는 <strong>&quot;점유 신뢰도는 낮지만(0.20) 모델이 자신 없어 하고(0.61) 로봇에 더 가까운(d=2)&quot;</strong> 셀이다. 표준 점유 전용 비용이라면 셀 B는 <code>m=0.20&lt;0.5</code> 라 <strong>완전히 무시</strong>되어 블라인드 스폿이 된다. CoopUQ는 이 셀을 불확실성 항으로 <strong>비용에 승격</strong>시켜 로봇이 선제적으로 우회하게 만든다. 이것이 §3.5에서 말한 &quot;재학습 없는 분포 이동 적응&quot;의 수치적 실체다 — OOD에서 예측기가 흐려지면 <code>u</code> 가 올라가 <code>max_unc</code> 가 커지고, 동일 <code>ϵ</code> 하에서 라그랑주 승수 η가 정책을 자동으로 보수화한다.</p>
+<hr>
+<h3>3.7 픽셀 엔트로피의 정량 분석 (Quantifying Pixel-wise Entropy)</h3>
+<p>불확실성 맵은 <code>M=8</code> 개 VAE 샘플에 대한 <strong>픽셀별 정규화 섀넌 엔트로피</strong>다. 베르누이(점유/비점유) 가정 하에서</p>
+<pre class="codeblock"><code>  H(p̄) = −[ p̄·log₂ p̄ + (1−p̄)·log₂(1−p̄) ]     # p̄ = 8 샘플의 점유 평균
+</code></pre>
+<p>세 가지 샘플 합의(consensus) 상황을 계산해 보면 왜 이 신호가 &quot;협력 융합의 효용&quot;을 포착하는지 드러난다:</p>
+<pre class="codeblock"><code>  (1) 강한 합의   7/8 점유  → p̄≈0.89 → H≈0.50 bit   (낮은 불확실성)
+  (2) 완전 분열   4/4       → p̄=0.50 → H=1.00 bit   (최대 불확실성)
+  (3) 강한 비점유 1/8       → p̄≈0.13 → H≈0.54 bit   (낮은 불확실성)
+</code></pre>
+<p>협력 융합(Middle Fusion)의 <strong>비대칭 효과</strong>가 여기서 보인다. 이웃 로봇 k의 시야가 로봇 i의 가림 영역 P를 커버하면, 게이트 <code>G^i_t</code> 가 그 영역의 교차-어텐션을 열어 융합 후 <code>p̄</code> 가 한쪽으로 쏠린다(위 (1)/(3)) → <strong>H≈0.5 bit 로 떨어져</strong> 로봇이 그 영역을 효율적으로 통과한다. 반대로 <strong>어느 로봇도 보지 못하는 사각 Q</strong>는 융합해도 합의가 안 생겨 <code>p̄≈0.5</code>, <strong>H≈0.9~1.0 bit 를 유지</strong> → 비용 항이 살아 안전이 보존된다. 즉 엔트로피 맵은 &quot;협력으로 해소된 가림&quot;과 &quot;협력으로도 못 푸는 진짜 사각&quot;을 <strong>자동으로 구분</strong>한다.</p>
+<p>이 메커니즘이 Table 2의 <code>ITR=11.98</code> 이 HEIGHT(13.80)보다 <strong>낮은</strong>(=더 빠른 도착) 이유를 설명한다. 단일 로봇 불확실성 추정(SCOPE 등)은 가림 영역 P도 사각 Q도 똑같이 높은 불확실성으로 처리해 과도하게 멈칫거리지만, CoopUQ는 P를 융합으로 해소해 불필요한 감속을 줄인다.</p>
+<hr>
+<h3>3.8 임계값·위험 허용치 트레이드오프 (φ_unc / ϵ Trade-off)</h3>
+<p>두 하이퍼파라미터가 &quot;안전 vs 효율&quot; 곡선 위의 작동점을 정한다:</p>
+<pre class="codeblock"><code>  φ_unc ↓ (0.3→0.2)  : 더 많은 셀을 불확실성 위험으로 승격 → 적극 회피, 안전↑ 효율↓
+  φ_unc ↑ (0.3→0.4)  : 소수 셀만 승격 → 효율↑ 안전↓ (사각 블라인드 스폿 재발 위험)
+  ϵ ↓ (0.10→0.05)    : 비용 한도 조임 → η 상시 큼 → 보수적 주행
+  ϵ ↑ (0.10→0.20)    : 비용 한도 느슨 → 공격적 주행, 혼잡서 충돌률 상승
+</code></pre>
+<p>논문이 <code>φ_unc=0.3, ϵ=0.10</code> 을 기본값으로 쓰는 근거는 Table 2에서 이 구간이 <strong>SR 저하 없이 충돌률을 떨어뜨리는 &quot;free-lunch&quot; 구간</strong>이라는 실측이다(OOD dense에서 SR −11.1% 로 SCOPE −22.4% 의 절반).</p>
+<p><strong>중대한 한계 — 보정의 부재.</strong> CoopUQ의 불확실성은 VAE 샘플 엔트로피라는 <strong>경험적 proxy</strong>이며, <strong>통계적 커버리지 보장이 없다</strong>. 즉 &quot;엔트로피 0.6 = 실제 오예측 확률 X%&quot;라는 보정된 대응이 성립하지 않는다. 이 지점이 같은 TASL Lab 계보의 <strong>ProximitySafetyBalance(#187, DtACI 동적 컨포멀)</strong> 및 <strong>CoSMO(#336, ACI 적응 컨포멀 예측)</strong> 와의 <strong>근본적 차이</strong>다. 두 선행은 컨포멀 예측으로 커버리지를 통계적으로 보장하는 반면, CoopUQ는 협력 융합으로 <strong>불확실성의 공간 분포를 더 정확히 만드는</strong> 쪽에 투자했다. 따라서 <strong>CoopUQ의 공간적 협력 융합 + 컨포멀 보정의 결합</strong>이 자연스러운 후속 방향이며, 논문도 이를 향후 과제로 언급한다.</p>
 <hr>
 <div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <pre class="diagram"><code>┌──────────────────────────────────────────────────────────────────────────┐
