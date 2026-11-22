@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-21T19:30:03.755Z",
+  "generatedAt": "2026-11-22T19:30:03.948Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 11. 22  일요일",
+    "date": "2026. 11. 23  월요일",
     "title": "오늘의 리뷰",
     "subtitle": "VLN·Planner 최근 리뷰 1편 · 전체 118편"
   },
@@ -30,7 +30,7 @@
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 36,
+      "readMinutes": 43,
       "reason": "단일 로봇 사회적 항해(social navigation)에서 강화학습(RL)은 인간과 공유하는 제약 환경에서 빠르고 확장 가능한 결정을 내리는 유력한 패러다임이 되었다. 그러나 이 성공을 다중 로봇(multi-robot) 환경으로 그대로 확장하면 안전성과 효율이 동시에 무너진다. 핵심 원인은 두 가지다.",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/CoopUQ_CoRL2026/index.html"
     }

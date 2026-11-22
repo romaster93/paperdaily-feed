@@ -198,8 +198,8 @@ footer {
       <div class="prow"><span class="pkey">발표처</span><span class="pval">CoRL 2026</span></div>
       <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2610.26852">2610.26852</a></span></div>
       <div class="prow"><span class="pkey">코드</span><span class="pval">✅ <a href="https://github.com/tasl-lab/CoopUQ">tasl-lab/CoopUQ</a> (라이선스 미명시 — predictor/·onpolicy/·simulator/ 실동작 저장소, 체크포인트 포함)</span></div>
-      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-11-16</span></div>
-      <div class="prow"><span class="pkey">분량</span><span class="pval">34KB · 약 36분 읽기</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-11-22</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">41KB · 약 43분 읽기</span></div>
     </div>
     <nav class="toccard">
       <div class="toc-label">목차 · 11개 섹션</div>
@@ -379,6 +379,75 @@ w_d(x,y) = max(0, r_safe − d(x,y))      # 로봇에 가까운 위험일수록 
 </code></pre>
 <p>논문이 <code>φ_unc=0.3, ϵ=0.10</code> 을 기본값으로 쓰는 근거는 Table 2에서 이 구간이 <strong>SR 저하 없이 충돌률을 떨어뜨리는 &quot;free-lunch&quot; 구간</strong>이라는 실측이다(OOD dense에서 SR −11.1% 로 SCOPE −22.4% 의 절반).</p>
 <p><strong>중대한 한계 — 보정의 부재.</strong> CoopUQ의 불확실성은 VAE 샘플 엔트로피라는 <strong>경험적 proxy</strong>이며, <strong>통계적 커버리지 보장이 없다</strong>. 즉 &quot;엔트로피 0.6 = 실제 오예측 확률 X%&quot;라는 보정된 대응이 성립하지 않는다. 이 지점이 같은 TASL Lab 계보의 <strong>ProximitySafetyBalance(#187, DtACI 동적 컨포멀)</strong> 및 <strong>CoSMO(#336, ACI 적응 컨포멀 예측)</strong> 와의 <strong>근본적 차이</strong>다. 두 선행은 컨포멀 예측으로 커버리지를 통계적으로 보장하는 반면, CoopUQ는 협력 융합으로 <strong>불확실성의 공간 분포를 더 정확히 만드는</strong> 쪽에 투자했다. 따라서 <strong>CoopUQ의 공간적 협력 융합 + 컨포멀 보정의 결합</strong>이 자연스러운 후속 방향이며, 논문도 이를 향후 과제로 언급한다.</p>
+<hr>
+<h3>3.9 편차 유도 게이트의 수학적 전개 (Deviation-Guided Gate, 심화)</h3>
+<p>협력 융합의 핵심은 &quot;언제·어디서 이웃 로봇의 예측을 반영할 것인가&quot;를 <strong>공간적으로 선택</strong>하는 게이트다. 단순히 모든 셀에서 이웃 특징을 섞으면(always-mix) 자기 관측이 신뢰할 만한 영역까지 오염되고, 반대로 균일 평균(uniform-avg)만 쓰면 사각지대 보정 효과가 희석된다. CoopUQ는 <strong>픽셀 단위 편차(deviation)</strong> 를 먼저 측정하고, 그 편차가 큰 곳 — 즉 자기 예측과 이웃 예측이 불일치하는 곳 — 에서만 융합을 열도록 한다.</p>
+<p><strong>(1) 픽셀 단위 L2 편차.</strong> 로봇 <code>i</code> 의 BEV 특징맵 <code>F^i_t ∈ ℝ^{C×H×W}</code> 와, 이웃 <code>k</code> 의 특징을 <code>i</code> 좌표계로 정합(ego-transform)한 <code>F̂^{k→i}_t</code> 사이의 채널 L2 거리를 이웃 집합 <code>N_i</code> 에 대해 평균한다:</p>
+<pre class="diagram"><code>          1
+D^i_t(x,y) = ───── · Σ    ‖ F^i_t(:,x,y) − F̂^{k→i}_t(:,x,y) ‖_2
+         |N_i|   k∈N_i
+</code></pre>
+<p><code>D^i_t(x,y)</code> 가 크다는 것은 그 셀에서 로봇 <code>i</code> 의 지각과 이웃의 지각이 크게 어긋난다는 뜻이며, 이는 전형적으로 <strong><code>i</code> 의 사각지대(occlusion)</strong> 이거나 동적 객체의 가림이 발생한 영역이다.</p>
+<p><strong>(2) 시그모이드 게이트.</strong> 편차를 0~1 가중으로 변환한다:</p>
+<pre class="codeblock"><code>G^i_t(x,y) = σ( a · D^i_t(x,y) − b ),   a &gt; 0
+</code></pre>
+<p><code>a</code> 는 민감도, <code>b/a</code> 는 임계 편차다. <code>D &gt; b/a</code> 인 셀에서만 게이트가 열린다(<code>G → 1</code>). <code>a&gt;0</code> 이므로 편차가 큰 곳일수록 융합을 강하게 반영한다.</p>
+<p><strong>(3) 게이트 적용 융합.</strong> 열린 게이트에서만 이웃 특징의 어텐션 가중 합을 자기 특징에 더한다:</p>
+<pre class="diagram"><code>F^cross_i(:,x,y) = F^i_t(:,x,y) + G^i_t(x,y) · Σ   α^k_{(x,y)} · F̂^{k→i}_t(:,x,y)
+                                             k∈N_i
+
+              exp( ⟨ W_q F^i_t(:,x,y),  W_k F̂^{k→i}_t(:,x,y) ⟩ / √d )
+α^k_{(x,y)} = ────────────────────────────────────────────────────────────
+              Σ_{k&#39;∈N_i} exp( ⟨ W_q F^i_t(:,x,y), W_k F̂^{k&#39;→i}_t(:,x,y) ⟩ / √d )
+</code></pre>
+<p>여기서 <strong>역할 분리</strong>가 핵심이다:</p>
+<ul>
+<li><code>α^k_{(x,y)}</code> (softmax 어텐션) = <strong>어느 이웃을 신뢰할지</strong> 선택 (이웃 간 상대 가중).</li>
+<li><code>G^i_t(x,y)</code> (시그모이드 게이트) = <strong>융합 결과를 얼마나 반영할지</strong> 공간적으로 제어 (자기 vs 융합).</li>
+</ul>
+<p>이 두 메커니즘이 직교하기 때문에, &quot;신뢰할 이웃은 골랐지만 이 셀에서는 자기 관측이 충분하다&quot; 는 상황(α 큼·G 작음)과 &quot;사각지대라 융합을 열어야 한다&quot; 는 상황(G 큼)이 독립적으로 표현된다.</p>
+<p><strong>(4) Early/Late/Middle 융합 비교.</strong> 논문은 융합 시점을 세 가지로 절제한다:</p>
+<pre class="codeblock"><code>Early fusion  (입력단 always-mix)  : 자기 신뢰영역 오염 → IoU 0.68
+Late fusion   (출력단 uniform-avg) : 사각지대 보정 희석 → IoU 0.60
+Middle fusion (D → G → α 선택적)   : SSIM 0.86 / IoU 0.72  ← 채택
+</code></pre>
+<p>Middle(편차 유도 게이트) 이 두 극단을 모두 앞선다. 게이트가 열린 융합 영역의 예측 엔트로피는 <code>H ≈ 0.5</code> 로 낮아지는 반면, 구조적 사각지대(게이트가 없다면 보정되지 않았을 영역)의 엔트로피는 <code>H ≈ 0.9~1.0</code> 에 머문다 — 이는 §3.7 의 엔트로피 기반 불확실성과 직접 연결되며, <strong>게이트가 불확실성을 &quot;줄일 수 있는 곳에서만&quot; 작동</strong>함을 보여준다.</p>
+<hr>
+<h3>3.10 VAE 디코더의 ELBO와 비자기회귀 다중모달 생성 (심화)</h3>
+<p>융합된 특징 <code>F^fuse_i</code> 로부터 미래 점유맵 <code>m_{t+1:t+h}</code> 을 <strong>다중모달·비자기회귀</strong> 로 생성하는 것이 CoopUQ 예측기의 마지막 단계다. 보행자의 미래는 본질적으로 다봉(multi-modal: 좌회전·우회전·정지)이므로, 단일 결정론적 디코딩은 평균으로 뭉개진다(mode collapse → 중앙 흐릿한 점유).</p>
+<p><strong>(1) 조건부 VAE의 ELBO.</strong> 미래 점유 시퀀스의 로그우도를 잠재변수 <code>z</code> 로 하한한다:</p>
+<pre class="diagram"><code>log p(m_{t+1:t+h} | F^fuse_i)  ≥  E_{z∼q}[ log p(m | z, F^fuse_i) ]  −  D_KL( q(z|·) ‖ p(z) )
+                                  └────────── 재구성 ──────────┘     └──── 정규화 ────┘
+</code></pre>
+<ul>
+<li>사전분포 <code>p(z) = N(0, I)</code></li>
+<li>근사사후 <code>q(z|·) = N(μ, diag(σ²))</code>, 인코더가 <code>(μ, σ)</code> 를 출력</li>
+<li>재매개화 <code>z = μ + σ ⊙ ε</code>, <code>ε ∼ N(0,I)</code> (그래디언트 역전파 가능)</li>
+</ul>
+<p><strong>(2) 손실과 닫힌형 KL.</strong></p>
+<pre class="diagram"><code>L = L_recon + β · D_KL,     β = 0.01
+
+           1
+D_KL  =  ─── · Σ ( μ_j² + σ_j² − log σ_j² − 1 )
+           2    j
+</code></pre>
+<p><code>β = 0.01</code> 로 <strong>작게</strong> 둔 것이 설계의 요점이다. KL 항을 강하게 누르면(β 큼) 사후가 사전으로 붕괴(posterior collapse)해 <code>z</code> 가 정보를 잃고 — 결국 디코더가 조건 <code>F^fuse_i</code> 만 보고 단일 모드를 내뱉는다. 작은 β 는 <code>z</code> 공간에 다양성을 보존해 <strong>M=8 샘플이 서로 다른 미래(좌/우/정지)</strong> 를 그리게 한다.</p>
+<p><strong>(3) 비자기회귀(NAR) vs 자기회귀(AR).</strong> 자기회귀 생성은 <code>m_{t+1} → m_{t+2} → …</code> 를 순차 조건화하므로 한 스텝의 오차가 다음 스텝으로 <strong>누적</strong>된다(WMSE 상승). CoopUQ는 <code>h=5</code> 미래 프레임을 <strong>병렬 단일 패스</strong> 로 디코딩한다:</p>
+<pre class="codeblock"><code>AR : m̂_{t+1} = D(z, F)         NAR: [m̂_{t+1} … m̂_{t+h}] = D(z, F)   (한 번에)
+     m̂_{t+2} = D(z, F, m̂_{t+1})      → 오차 누적 없음, 지연 상수
+     m̂_{t+3} = D(z, F, m̂_{t+1:t+2})
+         ⋯ (오차 전파)
+</code></pre>
+<p>Table 1 의 WMSE(가중 MSE)에서 NAR 디코딩의 이점이 드러난다: <strong>CoopUQ 0.09 vs SOGMP++ 0.19</strong> — 자기회귀 누적 오차가 없는 쪽이 절반 이하다.</p>
+<p><strong>(4) 전체 연결 고리.</strong> VAE 다중모달 생성(작은 β) → 샘플 간 엔트로피로 불확실성 정량화(§3.7) → 불확실성 비용 <code>C^i</code>(§3.5) → 보수적 정책(MAPPO-Lagrangian)으로 이어진다:</p>
+<pre class="diagram"><code>┌─────────────┐   M=8 샘플    ┌──────────────┐   엔트로피 u   ┌────────────┐
+│ F^fuse_i    │─────────────▶│ VAE NAR 디코더 │──────────────▶│ 비용 C^i    │
+│ (게이트 융합) │  (작은 β=0.01) │ m̂^{(1..8)}    │  (샘플 분산)   │ λ_unc·𝕀(u&gt;φ)│
+└─────────────┘               └──────────────┘               └─────┬──────┘
+                                                                    ▼
+                                                         MAPPO-Lagrangian 보수 정책
+</code></pre>
+<p>작은 β 가 다양성을 지키지 않으면 이 고리 전체가 무너진다 — 샘플이 한 점으로 붕괴하면 엔트로피가 0 이 되어 사각지대에서도 불확실성 비용이 걸리지 않고, 정책은 위험한 영역으로 진입한다. <strong>β=0.01 은 단순 하이퍼파라미터가 아니라 불확실성 신호의 생존 조건</strong>이다.</p>
 <hr>
 <div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
 <pre class="diagram"><code>┌──────────────────────────────────────────────────────────────────────────┐
