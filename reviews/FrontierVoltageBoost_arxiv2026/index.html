@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Frontier Voltage Boost Laplacian Path Planning · PaperDaily</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { color: #8f4023; text-decoration: underline; }
+
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
+
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
+}
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
+article code.math-display {
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
+}
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
+article th {
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
+article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: var(--mono); font-size: 12px; text-align: center;
+}
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
+footer {
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
+</head>
+<body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2611.27308">arXiv ↗</a>
+</div>
+<div class="wrap">
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">Planner</span>
+      <span class="chip2 plain">FrontierVoltageBoost_arxiv2026</span>
+    </div>
+    <h1 class="doc-title">Frontier Voltage Boost Laplacian Path Planning: 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2611.27308">2611.27308</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval">✅ 공개 — <a href="https://github.com/vpritamani/FrontierVoltageBoostLaplacianPathPlanning">github.com/vpritamani/FrontierVoltageBoostLaplacianPathPlanning</a> (Python 3.10+, numpy/scipy/pillow/flask/rtree + 선택적 PyTorch GPU 경로). **라이선스 파일 없음 → 라이선스 미명시** (논문 자체는 CC BY 4.0).</span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-11-23</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">39KB · 약 37분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
+  </header>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: Frontier Voltage Boost Laplacian Path Planning</li>
+<li><strong>저자 (Authors)</strong>: Vinay Pritamani, Rishabh Jain, Jack Lowry, Joshua Smith</li>
+<li><strong>소속 (Affiliation)</strong>: 논문에 명시되지 않음 (저자 소속 미기재)</li>
+<li><strong>발표처 (Published)</strong>: arXiv preprint (cs.RO), 2026-11-20 submitted. 확정 학회/저널 없음.</li>
+<li><strong>DOI</strong>: 10.48550/arXiv.2611.27308</li>
+<li><strong>arXiv</strong>: <a href="https://arxiv.org/abs/2611.27308">https://arxiv.org/abs/2611.27308</a></li>
+<li><strong>코드 (Code)</strong>: ✅ 공개 — <a href="https://github.com/vpritamani/FrontierVoltageBoostLaplacianPathPlanning">https://github.com/vpritamani/FrontierVoltageBoostLaplacianPathPlanning</a> (Python 3.10+, numpy/scipy/pillow/flask/rtree + 선택적 PyTorch GPU 경로). <strong>라이선스 파일 없음 → 라이선스 미명시</strong> (논문 자체는 CC BY 4.0).</li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>이 논문은 <strong>조화 함수(harmonic function) 기반 전위장(potential field) 경로 계획</strong>의 고전적 난제인 <strong>&quot;평탄 영역(flat region) 문제&quot;</strong> 를 정면으로 해결한다.</p>
+<p>조화 함수 경로 계획은 1990년대 Connolly 등이 제안한 접근으로, 라플라스 방정식(Laplace&#39;s equation)의 해가 <strong>국소 최소점(local minima)이 없는</strong> 유일한 특성을 가진다는 점을 이용한다. 장애물을 고전위(high voltage), 목표를 저전위(zero voltage)로 놓고 라플라스 방정식을 풀면, 그 전위장의 음의 그래디언트(negative gradient)를 따라 내려가는 것만으로 장애물을 피해 목표에 도달하는 경로가 <strong>보장</strong>된다. 인공 전위장(Artificial Potential Field, APF)이 국소 최소점에 갇히는 고질적 문제를 원리적으로 회피하는 것이다.</p>
+<p>그러나 이 우아한 보장에는 치명적인 실무적 약점이 있다. 라플라스 방정식의 수치해(numerical solution)는 반복적 완화(iterative relaxation, 예: Jacobi/Gauss-Seidel)로 구하는데, <strong>정보가 반복당 약 1픽셀씩만 전파</strong>된다. 넓은 자유 공간이나 목표에서 멀리 떨어진 영역에서는 전위값이 거의 균일(flat)해지고, 그 영역의 그래디언트가 <strong>부동소수점 정밀도 한계 이하로 작아져</strong> 그래디언트 하강이 방향을 잃는다. 즉, 이론적으로는 국소 최소점이 없지만, 실제 컴퓨터에서는 &quot;수치적 평탄 영역&quot;이 사실상 국소 최소점처럼 작동해 경로 추출이 실패한다.</p>
+<p>본 연구의 목표는 이 수치적 평탄 영역 문제를 <strong>&quot;프론티어 전압 부스트(Frontier Voltage Boost)&quot;</strong> 라는 조각별(piecewise) 전위 할당 전략으로 극복하여, (1) <strong>대규모 지도(1000×1000, 나아가 10000×10000 픽셀)에서도</strong> 조화 함수 계획을 성공률 100%로 확장하고, (2) <strong>별도의 후처리 없이 매끄러운(C²-연속에 가까운) 경로</strong>를 생성하며, (3) GPU 병렬화로 <strong>실시간에 준하는 계산 시간</strong>(1000² 지도 0.18초)을 달성하는 것이다.</p>
+<hr>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p>경로 계획(path planning)의 주요 패러다임은 각각 뚜렷한 한계를 가진다.</p>
+<p><strong>(C1) 탐색 기반(A*, Dijkstra)의 비매끄러움과 차원 저주</strong>
+A*는 최적성과 완전성을 보장하지만, 생성 경로가 격자축에 묶여 각진(jagged) 형태이며 매끄러운 경로를 얻으려면 별도 평활화(smoothing) 후처리가 필요하다. 또한 상태 공간이 커지면 탐색 노드 수가 폭증한다.</p>
+<p><strong>(C2) 샘플링 기반(RRT, PRM)의 무방향성과 비결정성</strong>
+RRT 계열은 고차원에서 강력하지만 무작위 샘플링이라 경로가 들쭉날쭉하고, 실행마다 결과가 달라지며(비결정적), 좁은 통로(narrow passage)에서 샘플 채택률이 급락한다. 매끄러운 경로를 위해 추가 최적화가 필수다.</p>
+<p><strong>(C3) 인공 전위장(APF)의 국소 최소점</strong>
+APF는 장애물 반발력과 목표 인력의 합으로 즉각적이고 매끄러운 방향을 주지만, 두 힘이 상쇄되는 지점에서 <strong>국소 최소점에 갇혀</strong> 목표 도달에 실패하는 근본적 결함이 있다. 오목(concave) 장애물이나 좁은 통로 입구에서 특히 치명적이다.</p>
+<p><strong>(C4) 고전 조화 함수(Connolly)의 수치적 평탄 영역</strong>
+조화 함수는 (C3)의 국소 최소점 문제를 이론적으로 제거하지만, 앞서 설명한 대로 <strong>정보 전파가 반복당 1픽셀</strong>에 그친다. 지도 크기 <code>n</code>에 대해 전위장이 지도 전체에 &quot;스며들려면&quot; <code>O(n)</code> 반복이 필요하고, 멀리 떨어진 자유 공간에서는 전위값이 <code>v_max</code>(장애물 전위)에 포화되어 그래디언트가 소실된다. 그 결과 고전 조화 함수 계획은 <strong>작은 지도에만</strong> 실용적이었고, 대규모 지도에서는 &quot;평탄 영역&quot; 때문에 경로 추출이 붕괴했다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>본 논문의 통찰은 <strong>&quot;전위 정밀도(voltage precision)를 아직 풀리지 않은 영역에 집중 재할당하라&quot;</strong> 는 것이다.</p>
+<p>라플라스 방정식을 한 번에 전역적으로 푸는 대신, <strong>조각별(piecewise)로</strong> 푼다:</p>
+<ol>
+<li>낮은 최대 전위값(<code>v_max=1</code>)으로 일부 영역만 완화를 진행한다.</li>
+<li>전위값이 <code>v_max</code> 미만으로 유의미하게 떨어진 셀 — 즉 <strong>&quot;풀린 셀(solved cells)&quot;</strong> — 을 식별한다.</li>
+<li>이 풀린 셀들을 <strong>새로운 경계 조건(Dirichlet BC)으로 동결</strong>한다. 이들은 이제 목표로부터 전위가 전파된, 신뢰할 수 있는 &quot;앵커&quot;다.</li>
+<li><strong>최대 전위값을 1 증가</strong>(<code>v_max → v_max+1</code>)시키고, 아직 안 풀린 셀(frontier)의 전위를 새 <code>v_max</code>로 리셋한다.</li>
+<li>시작점이 &quot;풀린 집합&quot;에 포함될 때까지 반복한다.</li>
+</ol>
+<p>핵심은, 전위값의 동적 범위를 넓히면서(<code>v_max</code>를 키우면서) <strong>아직 풀리지 않은 프론티어 영역에 추가 &quot;전압&quot;(수치적 해상도)을 부여</strong>한다는 점이다. 동결된 풀린 셀들이 경계 조건으로 작동해 정보 전파의 &quot;출발선&quot;을 전진시키므로, 프론티어는 매 라운드 목표 쪽으로 넓어지고, 평탄 영역이 생기기 전에 그 부분이 이미 경계로 고정된다. 이는 마치 <strong>파면(wavefront)이 목표에서 바깥으로 번져 나가되, 지나간 자리는 정밀한 경계로 굳히고 아직 번지는 최전선(frontier)에만 전압 자원을 몰아주는</strong> 전략이다.</p>
+<hr>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 라플라스 방정식과 조화 전위장 (Laplace&#39;s Equation &amp; Harmonic Potential)</h3>
+<p>경로 계획을 전위장 <code>ϕ: X → ℝ</code> 위의 문제로 정식화한다. <code>X ⊆ ℝ^d</code>는 작업 공간(격자)이다. 전위장은 <strong>라플라스 방정식</strong>을 만족해야 한다:</p>
+<pre class="codeblock"><code>∇²ϕ = Σᵢ (∂²ϕ / ∂xᵢ²) = 0
+</code></pre>
+<p>여기에 <strong>디리클레 경계 조건(Dirichlet boundary conditions)</strong> 을 부과한다:</p>
+<pre class="codeblock"><code>ϕ(X_obs)  = v_max      (장애물: 최고 전위)
+ϕ(x_goal) = 0          (목표: 최저 전위)
+</code></pre>
+<p>라플라스 방정식의 해(조화 함수)는 <strong>최대 원리(maximum principle)</strong> 에 의해 내부에 극값(극대·극소)을 가질 수 없다. 즉 <strong>국소 최소점이 경계(장애물·목표)에만 존재</strong>한다. 따라서 자유 공간의 어떤 점에서 출발해 <code>−∇ϕ</code>를 따라가면 반드시 유일한 최소점인 목표(<code>ϕ=0</code>)에 도달한다. 이것이 APF와 결정적으로 다른 지점이다.</p>
+<h3>3.2 Jacobi 완화와 라플라스 합성곱 커널 (Jacobi Relaxation &amp; Laplace Convolution)</h3>
+<p>이산 격자에서 라플라스 방정식의 수치해는 반복적 완화로 구한다. 각 셀의 전위를 이웃 셀 전위의 평균으로 갱신한다(2D의 경우 4-이웃):</p>
+<pre class="codeblock"><code>ϕᵏ⁺¹(xᵢ) = (1 / 2n) Σⱼ∈N(i) ϕᵏ(xⱼ)
+</code></pre>
+<p>여기서 <code>n</code>은 차원 수(2D면 <code>2n=4</code>), <code>N(i)</code>는 셀 <code>xᵢ</code>의 축방향 이웃 집합이다. 이 갱신은 <strong>합성곱(convolution)</strong> 으로 표현되어 GPU에서 대규모 병렬화가 가능하다. 2D 커널은:</p>
+<pre class="codeblock"><code>        ⎡ 0  1  0 ⎤
+ω = 1/4 ⎢ 1  0  1 ⎥
+        ⎣ 0  1  0 ⎦
+</code></pre>
+<p>즉 <code>ϕᵏ⁺¹ = ω * ϕᵏ</code> (장애물·목표·동결된 풀린 셀은 경계 조건으로 고정하고 갱신에서 제외). 중심 가중치가 0이고 상하좌우만 1/4인 전형적인 5점 라플라시안 완화 커널이다. 이 합성곱 구조 덕분에 전체 격자 갱신이 단일 텐서 연산으로 처리되며, 논문 구현은 PyTorch <code>conv2d</code>/<code>conv3d</code>(및 N차원 일반화)를 <code>use_gpu=True</code> 경로로 호출한다.</p>
+<p><strong>왜 평탄 영역이 생기는가</strong>: 한 번의 합성곱은 각 셀에 이웃 정보만 섞으므로, 목표의 &quot;0 전위&quot; 신호가 거리 <code>r</code>만큼 떨어진 셀에 도달하려면 최소 <code>r</code>번의 반복이 필요하다. 반복 예산 <code>n_L</code>이 유한하면, 목표에서 <code>n_L</code>보다 먼 셀은 아직 <code>v_max</code>에 포화되어 있고, 그 주변은 <code>v_max</code>에 거의 수렴한 평탄 지대가 되어 그래디언트가 부동소수점 정밀도 이하로 소실된다.</p>
+<h3>3.3 프론티어 전압 부스트 (Frontier Voltage Boost) — 핵심 기여</h3>
+<p>평탄 영역 문제를 해결하는 본 논문의 핵심 알고리즘이다. 전체 격자를 세 집합으로 분할한다:</p>
+<pre class="codeblock"><code>S : 풀린 집합(solved)     — 목표로부터 유효 전위가 전파된, 경계로 동결할 셀
+O : 장애물 집합(obstacle)  — 항상 v_max
+F : 프론티어(frontier)    — 아직 안 풀린 자유 셀 (= X \ (S ∪ O))
+</code></pre>
+<p><strong>Algorithm 1 — Frontier Voltage Boost Laplacian Path Planning</strong> (논문 의사코드 재구성):</p>
+<pre class="codeblock"><code>입력: 지도 X, 장애물 X_obs, 시작 x_start, 목표 x_goal,
+      라운드당 완화 반복수 n_L, 풀림 임계 ε
+ 1:  v_max ← 1
+ 2:  ϕ(x) ← v_max          for all x          ▷ 전 격자를 최고 전위로 초기화
+ 3:  ϕ(x_goal) ← 0                            ▷ 목표만 0 전위
+ 4:  S ← { x_goal }                           ▷ 풀린 집합: 목표에서 시작
+ 5:  O ← X_obs
+ 6:  F ← X \ (S ∪ O)                          ▷ 나머지는 프론티어
+ 7:  while x_start ∉ S do                      ▷ 시작점이 풀릴 때까지
+ 8:      for i = 1 to n_L do                   ▷ 프론티어에 Jacobi 완화
+ 9:          M ← { x ∈ F }
+10:          ϕ(M) ← LaplaceConvolution(ϕ)(M)  ▷ S·O는 경계로 고정, F만 갱신
+11:      end for
+12:      S_new ← { x ∈ F | ϕ(x) &lt; v_max − ε }  ▷ 유의미하게 떨어진 셀 = 풀림
+13:      S ← S ∪ S_new
+14:      F ← F \ S_new
+15:      v_max ← v_max + 1                      ▷ 전압 부스트: 동적 범위 확장
+16:      ϕ(F ∪ O) ← v_max                       ▷ 안 풀린 셀·장애물을 새 v_max로 리셋
+17:  end while
+18:  σ ← GradientDescent(ϕ, x_start, x_goal)    ▷ 경로 추출
+출력: 경로 σ
+</code></pre>
+<p><strong>단계별 직관</strong>:</p>
+<ul>
+<li><strong>Line 2–6 (초기화)</strong>: 전 격자를 <code>v_max=1</code>로 채우고 목표만 0으로 두면, 1라운드 완화 후 목표 주변 셀부터 전위가 떨어지기 시작한다.</li>
+<li><strong>Line 8–11 (라운드 완화)</strong>: 프론티어 <code>F</code>에만 <code>n_L</code>번 Jacobi 완화를 돌린다. <code>S</code>(풀린 셀)와 <code>O</code>(장애물)는 <strong>경계 조건으로 고정</strong>되므로, 목표뿐 아니라 &quot;이미 풀린 셀들&quot;에서도 전위가 전파된다. 즉 정보 전파의 출발선이 목표 한 점에서 → 풀린 영역 전체의 테두리로 전진한다.</li>
+<li><strong>Line 12 (풀림 판정)</strong>: <code>ϕ(x) &lt; v_max − ε</code>인 셀 = &quot;최고 전위에서 ε 이상 떨어진 셀&quot; = 목표 방향 정보가 도달한 셀. 이들을 <code>S_new</code>로 수확한다. <code>ε</code>는 <strong>수치적 유의미성 문턱</strong>으로, 부동소수점 노이즈를 걸러낸다.</li>
+<li><strong>Line 15–16 (전압 부스트)</strong>: <code>v_max</code>를 1 키우고 <strong>안 풀린 셀을 새 <code>v_max</code>로 리셋</strong>한다. 이것이 알고리즘의 심장이다. 동적 범위(<code>[0, v_max]</code>)가 매 라운드 넓어지므로, 아직 안 풀린 프론티어에는 더 큰 전위 낙차(= 더 높은 수치 해상도)가 배정된다. 풀린 영역은 낮은 전위에 고정되어 그래디언트가 보존되고, 프론티어는 새 <code>v_max</code>에서 다시 낙차를 만들며 &quot;전압 정밀도&quot;를 공급받는다.</li>
+<li><strong>Line 7 (종료)</strong>: 시작점이 풀린 집합에 들어오면 즉시 종료. 전 지도를 풀 필요 없이, <strong>시작–목표를 잇는 전위 통로만 완성</strong>되면 끝난다. 이것이 대규모 지도에서의 계산 절감 포인트다.</li>
+</ul>
+<p><strong>원리적 효과</strong>: 고전 조화 함수는 단일 <code>v_max</code>로 전역을 풀기에 먼 영역이 평탄해진다. 프론티어 전압 부스트는 <code>v_max</code>를 <strong>조각별로 증가</strong>시켜 &quot;아직 안 풀린 부분&quot;에만 전압 해상도를 몰아주므로, 평탄 영역이 애초에 형성되기 전에 그 셀이 경계로 동결된다. 저자들은 이를 <strong>&quot;piecewise approach that allocates extra voltage precision to the unsolved parts&quot;</strong> 라 명명한다.</p>
+<h3>3.4 경로 추출 — 경계된 그래디언트 하강 (Bounded Gradient Descent)</h3>
+<p>완성된 전위장 <code>ϕ</code>에서 경로 <code>σ</code>를 추출한다. 시작점에서 음의 그래디언트를 따라 내려간다:</p>
+<pre class="codeblock"><code>σᵢ₊₁ = σᵢ − η ∇ϕ(σᵢ)
+</code></pre>
+<p>여기서 스텝 크기는 <strong>1로 상한</strong>된다(<code>‖η∇ϕ(σᵢ)‖ ≤ 1</code>). 이 경계가 중요하다: 전위장이 급격히 변하는(그래디언트가 큰) 지점에서 과도한 스텝으로 장애물을 건너뛰는 것을 막고, 그래디언트가 작은(평탄에 가까운) 지점에서는 정규화를 통해 <strong>최소 전진량을 보장</strong>해 멈춤을 방지한다.</p>
+<p>라플라스 해의 매끄러움(조화 함수는 무한히 미분 가능) 덕분에, 이렇게 추출된 경로는 <strong>C²-연속에 가까운 매끄러운 곡선</strong>이 되며 <strong>별도의 평활화 후처리가 전혀 필요 없다</strong>. 이는 A*/RRT가 생성하는 각진 경로와 질적으로 다른 지점이다.</p>
+<h3>3.5 워크드 예제 (Worked Example) — 좁은 통로에서의 부스트 동작</h3>
+<p><code>100×100</code> 격자에 가로로 긴 벽이 있고 중앙에 폭 2픽셀 좁은 통로가 있다고 하자. 시작은 벽 위쪽, 목표는 벽 아래쪽.</p>
+<pre class="codeblock"><code>라운드 1 (v_max=1):
+   목표 주변 반경 n_L 셀만 ϕ&lt;1로 떨어짐.
+   통로 반대편(시작 쪽)은 전부 ϕ=1 포화 (평탄 영역).
+   S_new = 목표 근방 셀들 → S에 흡수, F에서 제거.
+   v_max ← 2; 안 풀린 F를 ϕ=2로 리셋.
+
+라운드 2 (v_max=2):
+   이제 S(목표 근방)의 테두리 전체가 경계 조건.
+   완화가 S 테두리 + 목표에서 동시에 전파 → 좁은 통로 입구에 전위 낙차 도달.
+   통로가 ϕ&lt;2−ε로 풀리기 시작. 동적 범위 [0,2]라 낙차가 더 커 그래디언트 보존.
+   S_new = 통로 입구 셀들.
+   v_max ← 3; ...
+
+라운드 k:
+   S가 통로를 통과해 벽 위쪽으로 번짐.
+   시작점이 S_new에 포함 → while 종료.
+
+경로 추출:
+   시작 → −∇ϕ → 좁은 통로를 매끄럽게 관통 → 목표.
+   국소 최소점 없음(조화 보장) + 평탄 영역 없음(부스트) → 100% 성공.
+</code></pre>
+<p>고전 Connolly는 라운드 1의 <code>v_max=1</code> 단일 범위에서 시작 쪽이 영원히 평탄 포화되어 그래디언트 하강이 통로를 못 찾는다. 부스트는 <code>v_max</code>를 키우며 S 테두리를 전진 경계로 삼아 통로까지 정밀 전위를 공급한다.</p>
+<h3>3.6 코드 구조 분석 (Repository Analysis)</h3>
+<p>공개 저장소(<a href="https://github.com/vpritamani/FrontierVoltageBoostLaplacianPathPlanning)%EB%8A%94">https://github.com/vpritamani/FrontierVoltageBoostLaplacianPathPlanning)는</a> 실제 동작하는 Python 구현으로, 논문의 알고리즘과 실험을 재현한다. 주요 모듈:</p>
+<pre class="codeblock"><code>Algorithms/
+  algorithm.py        — BaseAlgorithm (공통 인터페이스), A*·APF·RRT 베이스라인
+  2dalgorithm.py      — Algorithm2D, FrontierVoltageBoostLaplace (2D)
+  3dalgorithm.py      — Algorithm3D (3D 일반화)
+                        RRTLaplaceRandomSampling, RRTLaplaceFrontier (하이브리드)
+Map Generation/
+  map.py              — Map2D, Map3D (무작위 장애물 지도 생성)
+Smoothness Metrics/
+                      — 6종 N차원 매끄러움 지표, steering-penalty 기본
+benchmark_app/
+  server.py           — Flask 서버
+  runner.py           — 벤치마크 실행 오케스트레이션
+  solver_worker.py    — 솔버 워커 프로세스
+  (vanilla-JS 프론트엔드)
+run_app.py            — 웹 앱 진입점
+pyproject.toml        — 의존성 (numpy/scipy/pillow/flask/rtree, 선택적 torch)
+</code></pre>
+<p>핵심 클래스는 <code>FrontierVoltageBoostLaplace</code>로, <code>BaseAlgorithm</code>을 상속한다. 라플라스 합성곱 완화(<code>LaplaceConvolution</code>), 풀림 판정(<code>ϕ &lt; v_max − ε</code>), 전압 부스트(<code>v_max += 1</code> + 프론티어 리셋), 경계된 그래디언트 하강을 메서드로 구현한다. <code>use_gpu=True</code> 플래그로 A*를 제외한 모든 알고리즘이 PyTorch 텐서 경로를 타며, 합성곱이 GPU 커널로 가속된다.</p>
+<p>주목할 하이브리드 변종 두 개:</p>
+<ul>
+<li><strong>RRTLaplaceRandomSampling</strong>: 라플라스 전위장을 RRT의 샘플링 편향(bias)으로 사용 — 전위 낮은 쪽으로 샘플을 끌어당긴다.</li>
+<li><strong>RRTLaplaceFrontier</strong>: 프론티어 개념을 RRT 확장에 결합.</li>
+</ul>
+<p>이는 본 방법이 순수 그래디언트 하강뿐 아니라 샘플링 기반과도 결합 가능함을 보여준다(§8 확장성 참조).</p>
+<p><code>Smoothness Metrics/</code>는 경로 품질을 6종 N차원 지표로 정량화하며, 저자들은 연속 세그먼트 간 조향 각도 변화(steering penalty)를 기본 지표로 채택한다(낮을수록 매끄러움). <strong>라이선스 파일(LICENSE)은 저장소에 없다</strong> — 코드는 공개되어 있으나 사용 라이선스는 미명시 상태다(논문 본문은 CC BY 4.0).</p>
+<hr>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<p>전체 파이프라인은 세 단계로 구성된다:</p>
+<pre class="diagram"><code>┌─────────────────────────────────────────────────────────────────┐
+│                    Frontier Voltage Boost Pipeline                │
+└─────────────────────────────────────────────────────────────────┘
+
+  [입력]
+   지도 X (n^d 격자) ── 장애물 X_obs ── 시작 x_start ── 목표 x_goal
+        │
+        ▼
+ ┌──────────────────────────────────────────────────────────┐
+ │  (A) 초기화                                                │
+ │   v_max=1,  ϕ(X)=v_max,  ϕ(goal)=0                        │
+ │   S={goal},  O=X_obs,  F=X\(S∪O)                          │
+ └──────────────────────────────────────────────────────────┘
+        │
+        ▼
+ ┌──────────────────────────────────────────────────────────┐
+ │  (B) 프론티어 전압 부스트 루프   while x_start ∉ S         │
+ │                                                            │
+ │   ┌────────────────────────────────────────────────┐     │
+ │   │  Jacobi 완화 ×n_L  (GPU conv:  ϕ(F) ← ω*ϕ)       │     │
+ │   │   S·O 경계 고정 → F만 갱신                        │     │
+ │   └────────────────────────────────────────────────┘     │
+ │        │                                                   │
+ │        ▼                                                   │
+ │   풀림 판정  S_new = {x∈F | ϕ(x) &lt; v_max−ε}               │
+ │        │                                                   │
+ │        ▼                                                   │
+ │   S ← S∪S_new,   F ← F\S_new                              │
+ │        │                                                   │
+ │        ▼                                                   │
+ │   전압 부스트  v_max←v_max+1,  ϕ(F∪O)←v_max               │
+ │        │                                                   │
+ │        └──────────────(루프)────────────────────┐         │
+ │                                                  ▼         │
+ │                                         x_start ∈ S ?      │
+ └──────────────────────────────────────────────────────────┘
+        │ (예)
+        ▼
+ ┌──────────────────────────────────────────────────────────┐
+ │  (C) 경로 추출                                             │
+ │   σ_{i+1} = σ_i − η∇ϕ(σ_i),   ‖step‖ ≤ 1                  │
+ │   매끄러운 C²-연속 경로, 후처리 불필요                     │
+ └──────────────────────────────────────────────────────────┘
+        │
+        ▼
+  [출력]  경로 σ  (국소 최소점 無 + 평탄 영역 無 → 성공 보장)
+</code></pre>
+<p><strong>데이터 흐름의 핵심</strong>: (B) 루프에서 <code>S</code>(풀린 집합)가 목표에서 바깥으로 파면처럼 번져 나가고, 매 라운드 그 테두리가 새 경계 조건이 된다. 전위장 <code>ϕ</code>는 전역 상태로 유지되되, 완화 연산은 프론티어 <code>F</code>에만 적용되어 계산이 집중된다. GPU 합성곱이 격자 전체를 단일 텐서 연산으로 처리하므로, 1000×1000 지도도 밀리초 단위 완화가 가능하다.</p>
+<hr>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<ul>
+<li><strong>무작위 장애물 지도</strong>: <code>1000×1000</code> 픽셀 2D 격자에 무작위로 생성된 장애물 배치. 대규모 확장성 실험은 <code>10000×10000</code>까지.</li>
+<li>3D 일반화 및 N차원 지도 생성기(<code>Map2D</code>, <code>Map3D</code>)가 저장소에 포함.</li>
+<li>좁은 통로·오목 장애물 등 제약 기하가 포함된 구성에서 특히 평가.</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>성공률(Success Rate)</strong>: 시작→목표 유효 경로를 찾은 비율.</li>
+<li><strong>계산 시간(Computation Time)</strong>: 전위장 수렴 + 경로 추출 전체 시간(초).</li>
+<li><strong>매끄러움(Smoothness)</strong>: 연속 경로 세그먼트 간 <strong>평균 각도 변화</strong>. <strong>낮을수록 매끄러움</strong>. steering-penalty 지표 사용.</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p>하드웨어: NVIDIA RTX 5090 + AMD Ryzen 9 9950X. 지도 <code>1000×1000</code>.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>설정</th>
+<th>성공률</th>
+<th>계산 시간</th>
+<th>매끄러움</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>n_L=500, ε=0</td>
+<td>95.92%</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>n_L=500, ε=10⁻⁸</td>
+<td><strong>100.0%</strong></td>
+<td><strong>0.176s</strong></td>
+<td>0.011</td>
+</tr>
+<tr>
+<td>n_L=1000, ε=10⁻⁸</td>
+<td><strong>100.0%</strong></td>
+<td>0.238s</td>
+<td><strong>0.010</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>핵심 관찰</strong>:</p>
+<ol>
+<li><p><strong>ε의 결정적 역할</strong>: <code>ε=0</code>(풀림 판정 없이 순수 부스트)에서는 95.92%로, 부동소수점 노이즈가 풀림 판정을 교란한다. <code>ε=10⁻⁸</code>로 수치적 유의미성 문턱을 주면 <strong>100%</strong> 로 올라간다. 즉 &quot;유의미하게 떨어진 셀만 동결&quot;하는 것이 평탄 영역 완전 제거의 열쇠다.</p>
+</li>
+<li><p><strong>n_L과 시간/품질 트레이드오프</strong>: 라운드당 완화 반복 <code>n_L</code>을 500→1000으로 늘리면 매끄러움이 0.011→0.010으로 미세 개선되나 시간이 0.176→0.238초로 늘어난다. 500에서 이미 100% 성공·0.176초로 충분하다.</p>
+</li>
+<li><p><strong>매끄러움 절대값</strong>: 0.010~0.011의 평균 각도 변화는 극히 작은 값으로, <strong>후처리 없이</strong> 거의 직선에 가까운 매끄러운 경로가 추출됨을 뜻한다.</p>
+</li>
+</ol>
+<p><strong>확장성(scaling)</strong>: 지도를 <code>1000²</code>에서 <code>10000²</code>로 키우면 계산 시간이 <code>n_L</code>에 따라 약 100~300배 증가한다. 이는 복잡도 <code>O(n_L · n^d)</code>와 정합한다(<code>n</code>이 10배, <code>d=2</code>면 픽셀이 100배). 그럼에도 <strong>고전 Connolly 알고리즘보다 훨씬 큰 지도를 풀 수 있고</strong>, 좁은 통로를 기존 조화 함수 방법보다 빠르게 통과하며, 제약 기하에서 인공 전위장(APF)을 능가한다.</p>
+<h3>5.4 리얼월드 실험 (Real-world Experiments)</h3>
+<p>본 논문은 <strong>실제 로봇 실험을 포함하지 않는다</strong>. 모든 평가는 시뮬레이션(무작위 장애물 격자)에서 수행되었다. 저자들은 계산 기하·수치해석 측면의 알고리즘 기여에 집중하며, 물리 로봇 배포는 향후 과제로 남겨 둔다. <strong>정직성 측면에서 본 리뷰는 존재하지 않는 실기체 결과를 날조하지 않는다</strong> — 코드는 공개되어 재현 가능하나, 로봇 하드웨어 검증은 범위 밖이다.</p>
+<hr>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><p><strong>프론티어 전압 부스트 알고리즘 (주 기여)</strong>: 조화 함수 경로 계획의 수치적 평탄 영역 문제를, <code>v_max</code>를 조각별로 증가시키며 안 풀린 프론티어에 전압 정밀도를 집중 재할당하는 전략으로 해결. 풀린 셀을 경계 조건으로 동결해 정보 전파의 출발선을 전진시킨다.</p>
+</li>
+<li><p><strong>풀림 임계 ε의 도입</strong>: 부동소수점 노이즈를 거르는 수치적 유의미성 문턱을 명시적으로 도입해 성공률을 95.92%→100%로 끌어올림. 조화 함수 계획의 실무 신뢰성을 질적으로 개선.</p>
+</li>
+<li><p><strong>대규모 지도로의 확장</strong>: 고전 Connolly가 작은 지도에 국한되던 것을, <code>1000²</code>에서 <code>10000²</code>까지 확장. <code>while x_start ∉ S</code> 종료 조건으로 전역이 아닌 &quot;필요한 통로만&quot; 풀어 계산을 절감.</p>
+</li>
+<li><p><strong>후처리 불필요한 매끄러운 경로</strong>: 조화 함수의 무한 미분 가능성 + 경계된 그래디언트 하강으로 C²-연속에 가까운 경로를 별도 평활화 없이 생성(매끄러움 0.010~0.011).</p>
+</li>
+<li><p><strong>GPU 병렬 합성곱 구현 + 공개 코드</strong>: 라플라스 완화를 합성곱으로 표현해 PyTorch GPU로 가속, 1000² 지도 0.176초 달성. 전체 벤치마크 앱(Flask + JS), 2D/3D/N차원 구현, RRT 하이브리드 변종, 6종 매끄러움 지표를 공개 저장소로 제공.</p>
+</li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<p><strong>핵심 하이퍼파라미터</strong>:</p>
+<ul>
+<li><code>v_max</code>: 초기 1, 매 라운드 +1 (동적 범위 확장).</li>
+<li><code>n_L</code> (라운드당 완화 반복): 500 또는 1000. 500이 100% 성공·최소 시간.</li>
+<li><code>ε</code> (풀림 임계): <code>10⁻⁸</code> 권장. 0이면 성공률 95.92%로 하락.</li>
+<li>그래디언트 하강 스텝: <code>‖η∇ϕ‖ ≤ 1</code>로 상한.</li>
+</ul>
+<p><strong>수치 설정</strong>:</p>
+<ul>
+<li>라플라스 합성곱 커널: 2D 5점 <code>ω = (1/4)[[0,1,0],[1,0,1],[0,1,0]]</code>, 3D·N차원은 <code>1/(2d)</code> 정규화.</li>
+<li>경계 조건: 장애물·목표·동결된 풀린 셀은 갱신에서 제외.</li>
+<li>자료형: 부동소수점 정밀도가 ε 선택과 직결(ε=10⁻⁸은 float 노이즈 상한 근처).</li>
+</ul>
+<p><strong>복잡도</strong>:</p>
+<ul>
+<li>시간: <code>O(n_L · n^d)</code> — <code>n_L</code>은 라운드당 완화 반복, <code>n</code>은 차원당 픽셀 수, <code>d</code>는 차원.</li>
+<li>공간: <code>O(n^d)</code> — 전위장 격자 저장.</li>
+</ul>
+<p><strong>하드웨어</strong>: NVIDIA RTX 5090, AMD Ryzen 9 9950X.</p>
+<p><strong>소프트웨어 스택</strong>: Python 3.10+, numpy, scipy, pillow, flask, rtree, 선택적 PyTorch(GPU). <code>use_gpu=True</code>로 A*를 제외한 전 알고리즘이 GPU 텐서 경로 사용.</p>
+<p><strong>재현성</strong>: <code>run_app.py</code>로 Flask 벤치마크 웹앱 기동, <code>benchmark_app/runner.py</code>가 알고리즘별 성공률·시간·매끄러움을 자동 집계. <code>AlgorithmSpec</code>으로 알고리즘·파라미터 조합을 선언.</p>
+<hr>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성 (Scalability)</h3>
+<p><strong>차원 일반화</strong>: 알고리즘은 본질적으로 차원 독립적이다. 합성곱 커널만 <code>d</code>차원 5(or 2d+1)점으로 바꾸면 2D/3D/N차원에 동일하게 적용된다. 저장소의 <code>3dalgorithm.py</code>와 N차원 매끄러움 지표가 이를 뒷받침한다. 다만 공간 복잡도 <code>O(n^d)</code>가 차원에 지수적이라, 고차원(예: 다관절 로봇 구성 공간)에서는 격자 저장 자체가 병목이 된다. 이는 조화 함수 격자 방법의 근본적 한계로, 본 논문도 저차원 작업 공간(2D/3D 내비게이션)을 주 타깃으로 한다.</p>
+<p><strong>지도 크기</strong>: <code>while x_start ∉ S</code> 종료 조건 덕에 전역 수렴이 아닌 &quot;시작–목표 통로&quot;만 풀면 되므로, 목표가 가까우면 큰 지도에서도 빠르다. 반대로 목표가 멀고 복잡하면 프론티어가 지도 대부분을 덮어 <code>O(n^d)</code>에 근접한다.</p>
+<h3>8.2 한계점 (Limitations)</h3>
+<ol>
+<li><p><strong>실기체 검증 부재</strong>: 시뮬레이션만. 센서 노이즈, 동적 장애물, 로봇 동역학(비홀로노믹 제약) 하에서의 거동이 미검증. 추출 경로는 기하 경로일 뿐, 운동학/동역학 실행 가능성(kinodynamic feasibility)은 보장하지 않는다.</p>
+</li>
+<li><p><strong>정적 지도 가정</strong>: 장애물이 고정된 경계 조건이다. 동적 환경에서는 전위장을 매 프레임 재계산해야 하며, 부스트 루프 전체 재실행 비용이 크다. 재계획(replanning) 전략이 제시되지 않았다.</p>
+</li>
+<li><p><strong>차원 저주</strong>: <code>O(n^d)</code> 공간 복잡도로 고차원 구성 공간(매니퓰레이터)에는 부적합. 저차원 내비게이션 전용.</p>
+</li>
+<li><p><strong>라이선스 미명시</strong>: 코드는 공개되나 LICENSE 파일이 없어 재사용·상용화의 법적 지위가 불명확.</p>
+</li>
+<li><p><strong>ε·n_L 튜닝 의존성</strong>: 성공률이 ε에 민감(0→95.92%, 10⁻⁸→100%). 자료형 정밀도·지도 규모에 따라 ε 재튜닝이 필요할 수 있다.</p>
+</li>
+</ol>
+<h3>8.3 향후 방향 (Future Directions)</h3>
+<ul>
+<li><strong>동적 재계획</strong>: 풀린 집합 <code>S</code>를 증분 갱신해 장애물 변화에 국소 재계산만 수행하는 incremental 버전.</li>
+<li><strong>Kinodynamic 확장</strong>: 전위장을 비용장(cost field)으로 삼아 MPC/궤적 최적화의 안내 신호로 결합(아래 §9의 확산·튜브 방법과 결합 가능).</li>
+<li><strong>적응적 해상도</strong>: 프론티어에만 고해상도 격자를 할당하는 octree/quadtree 적응 격자로 <code>O(n^d)</code> 완화.</li>
+<li><strong>RRT 하이브리드 심화</strong>: 저장소의 <code>RRTLaplaceFrontier</code>를 고차원으로 확장해 차원 저주 회피 — 전위장을 샘플링 편향으로만 쓰고 격자는 저해상도 유지.</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
+<p>본 논문은 <strong>격자 기반 전역 조화 전위장 계획법</strong>으로, 본 코퍼스의 Planner 트랙에서 드문 &quot;고전 전위장 계열의 현대적 부활&quot;에 해당한다. 가장 가까운 선행 리뷰 3편과 비교한다: 샘플링 기반의 <strong>VisualRRT (CVPR 2026)</strong>, 확산 기반의 <strong>SobolevDiffusion (arXiv 2026)</strong>, 그리고 배치 텐서 그래프 계획의 <strong>Anytime GTMP (arXiv 2026)</strong>.</p>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>VisualRRT (CVPR2026)</th>
+<th>SobolevDiffusion (arXiv2026)</th>
+<th>Anytime GTMP (arXiv2026)</th>
+<th><strong>Frontier Voltage Boost (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>패러다임</td>
+<td>샘플링(RRT) + 미분렌더 그래디언트</td>
+<td>학습(확산 모델)</td>
+<td>배치 텐서 그래프 + 블랙박스 LP</td>
+<td><strong>격자 조화 전위장(해석적)</strong></td>
+</tr>
+<tr>
+<td>국소 최소점</td>
+<td>그래디언트 단독의 국소최소를 샘플링으로 보완</td>
+<td>데이터 분포로 암묵 회피</td>
+<td>호모토피 클래스 커버로 회피</td>
+<td><strong>라플라스 최대원리로 원리적 無</strong></td>
+</tr>
+<tr>
+<td>경로 매끄러움</td>
+<td>중간(RRT 경로 평활화 필요)</td>
+<td>높음(학습된 매끄러움)</td>
+<td>LP 의존</td>
+<td><strong>높음(C²-연속, 후처리 無)</strong></td>
+</tr>
+<tr>
+<td>결정성</td>
+<td>비결정적(무작위)</td>
+<td>비결정적(샘플링)</td>
+<td>무작위 재시작</td>
+<td><strong>완전 결정적</strong></td>
+</tr>
+<tr>
+<td>학습 필요</td>
+<td>불요</td>
+<td><strong>필요(데이터·학습)</strong></td>
+<td>불요</td>
+<td><strong>불요(해석적)</strong></td>
+</tr>
+<tr>
+<td>차원 확장</td>
+<td>고차원 강함</td>
+<td>학습 차원</td>
+<td>고차원</td>
+<td><strong>저차원 전용(O(n^d))</strong></td>
+</tr>
+<tr>
+<td>실기체</td>
+<td>Fetch 실로봇 80%</td>
+<td>—</td>
+<td>시뮬(MBM)</td>
+<td><strong>시뮬만</strong></td>
+</tr>
+<tr>
+<td>코드</td>
+<td>예정</td>
+<td>공개</td>
+<td>공개(MIT)</td>
+<td><strong>공개(라이선스 미명시)</strong></td>
+</tr>
+<tr>
+<td>핵심 혁신</td>
+<td>이미지 목표 + 관성 그래디언트</td>
+<td>Sobolev 노름 확산</td>
+<td>δ-clear 호모토피 커버</td>
+<td><strong>전압 부스트 평탄영역 제거</strong></td>
+</tr>
+</tbody></table></div>
+<h3>9.2 장단점 분석</h3>
+<p><strong>VisualRRT 대비</strong>: VisualRRT는 샘플링(탐색)과 미분 렌더링 그래디언트(활용)를 한 트리에서 융합해 그래디언트 단독의 국소 최소점을 샘플링으로 보완한다. 본 논문은 애초에 <strong>국소 최소점이 없는</strong> 조화 함수를 쓰므로 융합 장치가 불필요하나, 대신 격자 전체를 완화해야 해 저차원에 국한된다. VisualRRT는 고차원·실로봇에 강하나 비결정적이고 경로가 거칠다. <strong>본 논문은 저차원 2D/3D 내비게이션에서 결정적·매끄러움·보장성이라는 세 마리 토끼를 잡지만, 차원 확장성을 희생</strong>한다. 흥미롭게도 본 저장소의 <code>RRTLaplaceRandomSampling</code>은 두 철학을 결합하려는 시도로, VisualRRT의 &quot;전위장을 샘플링 편향으로&quot;와 상통한다.</p>
+<p><strong>SobolevDiffusion 대비</strong>: SobolevDiffusion은 확산 모델로 매끄러운 궤적 분포를 학습한다. 학습된 매끄러움은 강력하나 <strong>데이터·학습 비용</strong>과 분포 외(OOD) 일반화 리스크를 안는다. 본 논문의 매끄러움은 라플라스 해의 무한 미분 가능성에서 <strong>해석적으로 유도</strong>되므로 학습이 전혀 없고, 어떤 장애물 배치에도 동일한 보장이 적용된다. 반면 SobolevDiffusion은 복잡한 비용 지형·소프트 선호를 학습으로 흡수할 수 있어 표현력이 높다. <strong>본 논문 = 해석적 보장·무학습, SobolevDiffusion = 학습 표현력</strong>의 대비다.</p>
+<p><strong>Anytime GTMP 대비</strong>: GTMP는 배치 텐서 연산으로 호모토피 클래스를 커버하며 점근 최적성을 보장한다. 본 논문도 <strong>GPU 배치 텐서(합성곱) 연산</strong>을 공유한다는 점이 흥미롭다 — 둘 다 &quot;격자/레이어 전체를 단일 텐서 연산으로 밀어붙이는&quot; 현대 하드웨어 친화 설계다. 그러나 GTMP는 <strong>위상적 다양성(여러 호모토피 클래스)</strong> 을 목표로 하는 반면, 본 논문은 <strong>단일 전위장에서 유일한 하강 경로</strong>를 추출한다(다양성 없음, 대신 유일성·보장성). GTMP가 &quot;모든 우회로를 찾는&quot; 포괄형이라면, 본 논문은 &quot;국소최소 없는 단일 매끄러운 경로를 보장하는&quot; 수렴형이다.</p>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>적합 도메인</strong>: 2D/3D 저차원 작업 공간의 <strong>지상 이동 로봇, 실내 서비스 로봇, 드론 실내 내비게이션</strong> 등 격자 지도가 자연스러운 환경. 국소 최소점 없는 매끄러운 경로가 즉시 필요하고, 정적 지도를 가정할 수 있을 때 매우 강력하다.</li>
+<li><strong>부적합 도메인</strong>: 다관절 매니퓰레이터(고차원 C-space), 빠르게 변하는 동적 환경, kinodynamic 제약이 지배적인 고속 플랫폼.</li>
+<li><strong>배포 성숙도</strong>: 코드 공개·GPU 가속·벤치마크 앱까지 갖춰 <strong>재현성은 높으나</strong>, 실기체 검증·동적 재계획·라이선스가 부재해 즉시 production 배포에는 추가 작업이 필요하다. 연구·프로토타이핑 단계에 적합.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<p>본 논문의 참신성은 <strong>&quot;새 패러다임 발명&quot;이 아니라 &quot;고전 패러다임(조화 함수)의 결정적 실무 병목을 정밀하게 진단하고 제거&quot;</strong> 한 데 있다. 라플라스 전위장 계획은 30년 된 아이디어지만, 평탄 영역 문제로 대규모 적용이 막혀 있었다. 프론티어 전압 부스트는 그 병목을 &quot;조각별 전압 재할당&quot;이라는 간결한 통찰로 풀어내, 현대 GPU 하드웨어와 결합해 실용 영역으로 끌어올렸다. 이는 <strong>&quot;오래된 보장을 현대 하드웨어로 부활&quot;</strong> 시키는 가치 있는 방향으로, VisualRRT·SobolevDiffusion 같은 학습·샘플링 기반 조류와 상보적이다. 특히 저장소의 RRT 하이브리드는 본 방법이 다른 패러다임과 결합 가능함을 시사해, &quot;전위장을 비용/편향 신호로 쓰는 하이브리드 계획&quot;이라는 후속 연구 공간을 연다.</p>
+<hr>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
+<ul>
+<li>Pritamani, V., Jain, R., Lowry, J., Smith, J. <em>Frontier Voltage Boost Laplacian Path Planning.</em> arXiv:2611.27308, 2026. DOI 10.48550/arXiv.2611.27308.</li>
+<li>Connolly, C.I., Burns, J.B., Weiss, R. <em>Path planning using Laplace&#39;s equation.</em> IEEE ICRA, 1990. (고전 조화 함수 경로 계획의 원형)</li>
+<li>Khatib, O. <em>Real-time obstacle avoidance for manipulators and mobile robots.</em> IJRR, 1986. (인공 전위장·국소 최소점 문제)</li>
+<li><strong>본 코퍼스 선행 리뷰 (비교 대상)</strong>:<ul>
+<li>VisualRRT (CVPR 2026), <code>Planner/review/VisualRRT_CVPR2026/</code></li>
+<li>SobolevDiffusion (arXiv 2026), <code>Planner/review/SobolevDiffusion_arxiv2026/</code></li>
+<li>Anytime GTMP (arXiv 2026), <code>Planner/review/AnytimeGTMP_arxiv2026/</code></li>
+</ul>
+</li>
+<li>코드 저장소: <a href="https://github.com/vpritamani/FrontierVoltageBoostLaplacianPathPlanning">https://github.com/vpritamani/FrontierVoltageBoostLaplacianPathPlanning</a></li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
+<p><strong>Frontier Voltage Boost Laplacian Path Planning</strong>은 조화 함수 경로 계획의 고전적 우아함(국소 최소점 없는 보장·매끄러운 경로)을 유지하면서, 그 유일한 실무 병목이었던 <strong>수치적 평탄 영역 문제</strong>를 정면으로 해결한 논문이다.</p>
+<p>핵심 혁신은 <strong>프론티어 전압 부스트</strong> — 라플라스 방정식을 단일 전위 범위로 전역에서 푸는 대신, <code>v_max</code>를 조각별로 증가시키며 아직 풀리지 않은 프론티어에 &quot;전압 정밀도&quot;를 집중 재할당하고, 풀린 셀을 경계 조건으로 동결해 정보 전파의 출발선을 목표에서 바깥으로 전진시키는 전략이다. 여기에 부동소수점 노이즈를 거르는 풀림 임계 <code>ε</code>를 결합해, 성공률을 95.92%에서 <strong>100%</strong> 로, 적용 가능 지도를 <code>1000²</code>에서 <code>10000²</code> 로 끌어올렸다. 라플라스 완화를 합성곱으로 표현해 GPU로 가속함으로써 1000² 지도를 <strong>0.176초</strong>에 풀고, 후처리 없이 <strong>매끄러움 0.010~0.011</strong> 의 C²-연속 경로를 추출한다.</p>
+<p><strong>혁신성</strong>: 새 패러다임이 아니라 30년 된 패러다임의 결정적 병목을 간결한 통찰로 제거한, &quot;오래된 보장의 현대적 부활&quot;이라는 점에서 가치가 있다.</p>
+<p><strong>실용적 의의</strong>: 2D/3D 저차원 정적 환경에서 국소 최소점 없는 매끄러운 경로를 결정적으로·빠르게 얻어야 하는 지상 로봇·실내 드론에 즉시 유용하다. 코드·GPU 구현·벤치마크 앱이 공개되어 재현성이 높다.</p>
+<p><strong>한계와 향후 연구</strong>: 실기체 검증·동적 재계획·라이선스 명시가 부재하고, <code>O(n^d)</code> 공간 복잡도로 고차원에는 부적합하다. 동적 incremental 재계획, kinodynamic 비용장 결합, 적응적 격자, RRT 하이브리드 심화가 유망한 후속 방향이다. 본 방법은 학습·샘플링 기반 현대 계획법(VisualRRT·SobolevDiffusion·GTMP)과 경쟁이 아닌 <strong>상보</strong> 관계에 있으며, 전위장을 비용/편향 신호로 결합하는 하이브리드 계획이라는 연구 공간을 연다.</p>
+<p><em>작성일: 2026-11-24 · 리뷰어: Paper Review (NanoClaw Paper Bot)</em></p>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+<div class="rhead" id="rhead" data-title="Frontier Voltage Boost Laplacian Path Planning: 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
+</body>
+</html>
