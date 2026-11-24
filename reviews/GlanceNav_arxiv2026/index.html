@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>GlanceNav: Glancing at Keyframes for Constant-Memory Vision-and-Language Navigation · PaperDaily</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap');
+:root {
+  --bg: #F4F0E8; --surface: #FFFFFF; --ink: #201C16; --body: #3F3A31;
+  --secondary: #5F5849; --muted: #6E675B; --faint: #948D7C; --label: #A39A88; --date-weak: #B0A997;
+  --border: #E7E0D2; --card-border: #EDE6D8; --divider: #EFE8DB; --track: #EDE7DB;
+  --accent: #C0603A; --accent-deep: #A34E2E; --accent-soft: #F4E4D7; --accent-soft-border: #E4CBB9;
+  --tag-text: #8A8073; --code-bg: #F8F4EC;
+  --ours-bg: #F9EFE6; --diagram-bg: #26221B; --diagram-ink: #E8E1D2;
+  --bar-bg: rgba(244,240,232,0.94);
+  --serif: "Newsreader", "Iowan Old Style", Palatino, Georgia, "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191511; --surface: #211C15; --ink: #EDE7DB; --body: #CFC7B8;
+    --secondary: #A69D8C; --muted: #8F8677; --faint: #8F8677; --label: #7A7263; --date-weak: #6E6656;
+    --border: #332C22; --card-border: #383024; --divider: #2E2820; --track: #2C261D;
+    --accent: #D07A50; --accent-deep: #DE8F66; --accent-soft: #33231A; --accent-soft-border: #4A3325;
+    --tag-text: #9A9182; --code-bg: #221D15;
+    --ours-bg: #2E2118; --bar-bg: rgba(25,21,17,0.94);
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--body);
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  padding: 0 24px 110px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent-deep); text-decoration: none; }
+a:hover { color: #8f4023; text-decoration: underline; }
+
+/* 상단 바 (웹 전용 — 앱 임베드 시 네이티브 바가 대신함) */
+.page-topbar { display: flex; justify-content: space-between; align-items: center; height: 46px; max-width: 720px; margin: 0 auto; padding-top: 6px; }
+.page-topbar .back { font-size: 14px; font-weight: 600; color: var(--muted); }
+.page-topbar .arxiv { font-size: 13px; font-weight: 600; color: var(--accent-deep); }
+.in-app .page-topbar { display: none; }
+
+/* 상태 A — 문서 상단 */
+.doc-head { padding: 8px 0 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip2 { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 7px; }
+.chip2.accent { font-weight: 500; color: var(--accent-deep); background: var(--accent-soft); }
+.chip2.plain { color: var(--tag-text); background: var(--track); }
+.doc-title { font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.28; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 8px; }
+.doc-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label); margin-bottom: 18px; }
+.pubcard { background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+.prow { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--divider); }
+.prow:last-child { border-bottom: none; }
+.pkey { flex: none; width: 64px; font-family: var(--mono); font-size: 11px; color: var(--label); padding-top: 2px; }
+.pval { font-size: 13.5px; color: var(--body); overflow-wrap: anywhere; }
+.pval a { font-weight: 600; }
+.toccard { display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; }
+.toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label); margin-bottom: 5px; }
+.toc-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--divider); color: inherit; }
+.toc-row:last-child { border-bottom: none; }
+.toc-row:hover { text-decoration: none; }
+.toc-num { flex: none; width: 22px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+.toc-title { flex: 1; font-size: 14px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.toc-row.current .toc-num { font-weight: 500; color: var(--accent-deep); }
+.toc-row.current .toc-title { font-weight: 600; color: var(--accent-deep); }
+
+/* 상태 B — 본문 */
+article { padding: 18px 0 40px; overflow-wrap: anywhere; }
+article h2, article h3, article h4 {
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  letter-spacing: -0.01em; line-height: 1.32; scroll-margin-top: 64px;
+}
+article h2 { font-size: 22px; margin: 2.2em 0 0.7em; padding-bottom: 8px; border-bottom: 1px solid var(--divider); }
+article h3 { font-size: 18px; margin: 1.8em 0 0.6em; }
+article h4 { font-size: 16px; margin: 1.6em 0 0.5em; }
+article p { margin: 0.9em 0; }
+article ul, article ol { margin: 0.9em 0; padding-left: 1.5em; }
+article li { margin: 0.35em 0; }
+article strong { color: var(--ink); }
+article em { font-family: var(--serif); }
+article blockquote {
+  margin: 1.2em 0; padding: 10px 18px; border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 0 12px 12px 0; color: var(--secondary);
+}
+article hr { border: none; border-top: 1px solid var(--divider); margin: 2.2em 0; }
+article code {
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--track); border-radius: 5px; padding: 1px 5px;
+}
+article pre { border-radius: 12px; padding: 14px; overflow-x: auto; margin: 1.3em 0; line-height: 1.55; }
+article pre code { background: none; padding: 0; font-size: 12.5px; white-space: pre; word-wrap: normal; display: block; }
+article pre.codeblock { background: var(--code-bg); border: 1px solid var(--card-border); }
+article pre.diagram { background: var(--diagram-bg); }
+article pre.diagram code { color: var(--diagram-ink); font-size: 10.5px; }
+
+/* 수식 — KaTeX 렌더 실패(유사 표기) 시 serif italic 폴백 */
+article code.math { font-family: var(--serif); font-style: italic; font-size: 1.02em; color: var(--ink); background: none; padding: 0; }
+article code.math-display {
+  display: block; background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; white-space: nowrap; overflow-x: auto; font-size: 15px;
+}
+.katex-card {
+  background: var(--surface); border: 1px solid var(--card-border); border-radius: 12px;
+  text-align: center; margin: 1.3em 0; padding: 16px 14px; overflow-x: auto;
+}
+.katex-card .katex-display { margin: 0; }
+.katex { font-size: 1.05em; }
+
+/* 표 — white 카드 + 가로 스크롤, Ours 행 하이라이트 */
+.table-wrap { overflow-x: auto; margin: 1.3em 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--surface); }
+article table { border-collapse: collapse; width: 100%; }
+article th {
+  text-align: left; padding: 10px 12px; font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--label);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+article td { padding: 10px 12px; font-size: 13px; color: var(--body); border-bottom: 1px solid var(--divider); white-space: nowrap; vertical-align: top; }
+article td.longcell { white-space: normal; min-width: 280px; }
+article tr:last-child td { border-bottom: none; }
+article tr.ours td { font-weight: 600; color: var(--accent-deep); background: var(--ours-bg); }
+
+/* 그림 — 풀폭 + 캡션 */
+article img {
+  max-width: 100%; height: auto; display: block; margin: 1.4em auto;
+  border: 1px solid var(--card-border); border-radius: 12px; background: #fff;
+}
+article figure { margin: 1.4em 0 1.6em; }
+article figure img { margin: 0 0 8px; }
+article figcaption { font-size: 12.5px; color: var(--faint); }
+.fig-missing {
+  margin: 1.4em 0; padding: 18px; border: 1px dashed var(--border); border-radius: 12px;
+  background: var(--track); color: var(--muted);
+  font-family: var(--mono); font-size: 12px; text-align: center;
+}
+
+/* 섹션 이전/다음 네비게이션 */
+.secnav { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin: 2.2em 0 0; }
+.secnav a { font-size: 13px; font-weight: 600; color: var(--accent-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48%; }
+
+/* 고정 리딩 헤더 (상태 B) */
+.rhead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  background: var(--bar-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%); transition: transform 0.25s ease;
+}
+.rhead.show { transform: translateY(0); }
+.rhead-inner { max-width: 720px; margin: 0 auto; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+.rhead-back { background: none; border: none; font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 0 4px 2px 0; }
+.rhead-sec { flex: 1; font-family: var(--mono); font-size: 11.5px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhead-pct { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+.rhead-track { height: 3px; background: var(--track); }
+.rhead-bar { width: 0; height: 100%; background: var(--accent); }
+
+/* 하단 고정 CTA (상태 A) */
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 19;
+  padding: 20px 24px 30px;
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.cta.hide { opacity: 0; visibility: hidden; }
+.cta-btn {
+  display: block; width: 100%; max-width: 720px; margin: 0 auto; height: 54px;
+  border: none; border-radius: 16px; background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
+footer {
+  padding: 26px 0 20px; border-top: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--label);
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.__pdMath&&window.__pdMath()"></script>
+</head>
+<body>
+<div class="page-topbar">
+  <a class="back" href="../../index.html">← 전체 리뷰</a>
+  <a class="arxiv" href="https://arxiv.org/abs/2611.30900">arXiv ↗</a>
+</div>
+<div class="wrap">
+  <header class="doc-head">
+    <div class="chips">
+      <span class="chip2 accent">VLN</span>
+      <span class="chip2 plain">GlanceNav_arxiv2026</span>
+    </div>
+    <h1 class="doc-title">GlanceNav: Constant-Memory Hybrid-Recurrent MLLM for Vision-and-Language Navigation — 핵심 방법론 분석</h1>
+    <div class="doc-sub">CORE METHODS ANALYSIS</div>
+    <div class="pubcard">
+      <div class="prow"><span class="pkey">발표처</span><span class="pval">arXiv 2026</span></div>
+      <div class="prow"><span class="pkey">arXiv</span><span class="pval"><a href="https://arxiv.org/abs/2611.30900">2611.30900</a></span></div>
+      <div class="prow"><span class="pkey">코드</span><span class="pval"><a href="https://github.com/GlanceNav/GlanceNav">github.com/GlanceNav/GlanceNav</a> (Apache-2.0, **평가 코드 공개** / 체크포인트·학습 코드·학습 데이터는 후속 공개 예정)</span></div>
+      <div class="prow"><span class="pkey">프로젝트</span><span class="pval"><a href="https://glancenav.github.io/">glancenav.github.io/</a></span></div>
+      <div class="prow"><span class="pkey">리뷰 일자</span><span class="pval">2026-11-24</span></div>
+      <div class="prow"><span class="pkey">분량</span><span class="pval">32KB · 약 31분 읽기</span></div>
+    </div>
+    <nav class="toccard">
+      <div class="toc-label">목차 · 11개 섹션</div>
+      <a class="toc-row" href="#sec-0"><span class="toc-num">1</span><span class="toc-title">개요 (Overview)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-1"><span class="toc-num">2</span><span class="toc-title">문제 정의 (Problem Definition)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-2"><span class="toc-num">3</span><span class="toc-title">핵심 방법론 (Core Methods)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-3"><span class="toc-num">4</span><span class="toc-title">시스템 아키텍처 (System Architecture)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-4"><span class="toc-num">5</span><span class="toc-title">실험 결과 및 성능 (Experimental Results)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-5"><span class="toc-num">6</span><span class="toc-title">핵심 기여점 (Key Contributions)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-6"><span class="toc-num">7</span><span class="toc-title">구현 상세 (Implementation Details)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-7"><span class="toc-num">8</span><span class="toc-title">고급 주제 (Advanced Topics)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-8"><span class="toc-num">9</span><span class="toc-title">비교 분석 (Comparative Analysis)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-9"><span class="toc-num">10</span><span class="toc-title">참고 문헌 (References)</span><span class="toc-pct"></span></a>
+      <a class="toc-row" href="#sec-10"><span class="toc-num">11</span><span class="toc-title">결론 (Conclusion)</span><span class="toc-pct"></span></a>
+    </nav>
+  </header>
+  <article id="article">
+<h2 id="sec-0" data-label="1. 개요">1. 개요 (Overview)</h2>
+<h3>1.1 출판 정보 (Publication Information)</h3>
+<ul>
+<li><strong>논문 제목 (Paper Title)</strong>: GlanceNav: Glancing at Keyframes for Constant-Memory Vision-and-Language Navigation</li>
+<li><strong>저자 (Authors)</strong>: GlanceNav 팀 (교신 저자 익명화 프리프린트, v1)</li>
+<li><strong>소속 (Affiliation)</strong>: 공개 저장소 조직 <code>GlanceNav</code> (대학/산업 공동, v1 단계 미상)</li>
+<li><strong>발표처 (Published)</strong>: arXiv 2026 프리프린트 (cs.CV / cs.RO), 발표처 미확정</li>
+<li><strong>DOI</strong>: 미부여 (프리프린트)</li>
+<li><strong>arXiv</strong>: 2611.30900</li>
+<li><strong>코드 (Code)</strong>: <a href="https://github.com/GlanceNav/GlanceNav">https://github.com/GlanceNav/GlanceNav</a> (Apache-2.0, <strong>평가 코드 공개</strong> / 체크포인트·학습 코드·학습 데이터는 후속 공개 예정)</li>
+<li><strong>프로젝트 페이지 (Project)</strong>: <a href="https://glancenav.github.io/">https://glancenav.github.io/</a></li>
+</ul>
+<h3>1.2 연구 목표 (Research Objective)</h3>
+<p>GlanceNav가 푸는 문제는 <strong>연속 환경 VLN(VLN-CE)에서 &quot;에피소드가 길어져도 스텝당 추론 비용과 메모리를 상수로 묶으면서&quot; SOTA 항해 정확도를 유지하는 것</strong>이다.</p>
+<p>Video-LLM 기반 VLN은 매 스텝 에이전트가 새 관측(RGB 프레임)을 받아 과거 전체를 다시 조건화해야 하는데, 여기에는 근본적 트레이드오프가 있다:</p>
+<ul>
+<li><strong>전부 다시 보기(full re-attention)</strong>: 매 스텝 과거 모든 프레임을 어텐션에 다시 넣으면 시퀀스 길이 T에 대해 비용이 O(T²)로 폭발한다(NaVid·NaVILA 계열).</li>
+<li><strong>고정 창(fixed window)으로 자르기</strong>: 최근 K 프레임만 보면 비용은 상수지만, 오래전에 지나친 랜드마크·분기 결정 맥락을 잃어 장기지평 지시(특히 RxR처럼 서술이 긴 지시)에서 무너진다.</li>
+</ul>
+<p>StreamVLN이 이 트레이드오프를 <strong>SlowFast 컨텍스트</strong>(최근 대화턴 KV 캐시 재사용 + 3D-aware 토큰 프루닝으로 과거를 소수 메모리 토큰에 압축)로 돌파했다면, GlanceNav는 <strong>아키텍처 자체의 메모리 메커니즘을 바꾼다</strong>. 핵심 통찰은 두 가지다:</p>
+<ol>
+<li><strong>하이브리드 순환-어텐션(hybrid recurrent-attention) 백본</strong>: 선형 순환 레이어(Gated DeltaNet)가 전 과거를 <strong>고정 크기 상태 행렬 S</strong>에 상수 비용으로 압축하고, 소수의 어텐션 레이어만 &quot;지금 당장 또렷이 봐야 하는&quot; 프레임(최근 관측 창 + 키프레임 뱅크)에 국한해 전체 해상도 토큰을 본다. 과거는 &quot;흐릿한 요약&quot;으로 항상 들고 있되, 결정적 순간의 몇 장만 &quot;힐끗(glance)&quot; 다시 고해상도로 본다 — 이것이 이름의 유래다.</li>
+<li><strong>상태 변화량으로 키프레임 선택</strong>: 어떤 프레임을 고해상도로 되살릴지를 순환 상태 S의 프로베니우스 노름 변화량 <code>δ_s</code>로 결정한다. 상태가 크게 흔들린 구간(=장면이 의미있게 바뀐 지점)의 대표 프레임을 키프레임 뱅크 F에 넣는다. 학습 없이 순환 상태가 이미 계산한 양을 재활용하는 <strong>공짜 선택 신호</strong>다.</li>
+</ol>
+<p>여기에 <strong>Counterfactual Rewind(CoRe)</strong>라는 RL 미세조정을 더해, 실패 직전 &quot;되돌아가야 했던 분기점&quot;을 사후에 찾아 그 지점의 올바른 대안 행동에만 크레딧을 몰아준다. 결과적으로 <strong>4B 모델이 R2R-CE val-unseen SR 71.9%</strong>를 달성하면서 스텝당 <strong>103.9 ms / 8.68 GiB</strong>로 StreamVLN(209.8 ms)·StageVLN(229.8 ms)의 <strong>절반 이하 지연</strong>을 보인다.</p>
+<hr>
+<h2 id="sec-1" data-label="2. 문제 정의">2. 문제 정의 (Problem Definition)</h2>
+<h3>2.1 도전과제 (Challenges)</h3>
+<p><strong>(C1) 메모리-정확도 트레이드오프의 구조적 한계.</strong>
+순수 어텐션 Transformer는 과거 전체를 KV 캐시에 들고 있어야 하므로, 캐시 크기가 스텝 수에 비례해 선형 증가하고 스텝당 어텐션 비용이 선형(캐시 길이)으로 증가한다. VLN-CE 에피소드는 수백 스텝에 달할 수 있어, 이 선형 증가가 실기체 배치의 지연·메모리 상한을 넘긴다.</p>
+<p><strong>(C2) 어떤 과거를 보존할지의 선택 문제.</strong>
+고정 창으로 자르면 비용은 상수지만, &quot;세 번째 교차로에서 왼쪽&quot;처럼 오래전 분기 맥락이 창 밖으로 밀려나면 복구 불가다. 토큰 프루닝(StreamVLN) 계열은 &quot;무엇을 버릴지&quot;를 3D 기하 규칙으로 정하는데, 이는 추가적인 3D 추정 파이프라인과 휴리스틱에 의존한다. <strong>학습 가능한, 혹은 공짜로 얻어지는 보존 신호</strong>가 바람직하다.</p>
+<p><strong>(C3) 순환 압축의 정보 손실.</strong>
+선형 순환(linear recurrence)은 전 과거를 고정 크기 상태로 압축하므로 상수 비용을 보장하지만, 세밀한 공간 디테일(예: &quot;문 손잡이가 오른쪽 벽에&quot;)은 압축 과정에서 번진다. 순수 순환 모델만으로는 미세한 기하 접지가 약해진다 — 순환의 효율과 어텐션의 선명함을 <strong>어떻게 결합</strong>하느냐가 관건이다.</p>
+<p><strong>(C4) 희소·지연 보상 하의 크레딧 할당.</strong>
+VLN은 에피소드 끝에서야 성공/실패를 알 수 있다(희소 보상). 실패한 궤적 전체를 벌하면, 사실 초반은 올바르게 갔는데 <strong>특정 분기점 한 번의 오판</strong>으로 실패한 경우에도 올바른 초반 행동까지 벌점을 받아 학습이 흐려진다. 표준 GRPO/PPO는 이 &quot;되돌아가야 했던 한 지점&quot;을 식별하지 못한다.</p>
+<h3>2.2 핵심 해결책</h3>
+<p>GlanceNav는 네 도전을 다음으로 대응한다:</p>
+<ul>
+<li><strong>(C1·C3) 하이브리드 백본</strong>: Gated DeltaNet 순환 레이어(상수 메모리) + 소수 어텐션 레이어(선명한 국소 접지)를 층 단위로 교차. 과거는 순환 상태 S에 상수 비용으로, 현재·결정적 과거는 어텐션으로.</li>
+<li><strong>(C2) 상태 변화량 키프레임 선택 <code>δ_s</code></strong>: 순환 상태 노름의 상대 변화량으로 &quot;장면이 의미있게 바뀐&quot; 구간을 자동 탐지, 그 대표 프레임을 어텐션이 볼 키프레임 뱅크 F에 적재. 학습 불요.</li>
+<li><strong>(C4) Counterfactual Rewind(CoRe)</strong>: 실패 직전 &quot;불확실성이 최소였다가 급증한 지점&quot;을 되감아(rewind) 올바른 대안 행동에만 크레딧을 몰아주는 RL 목적함수.</li>
+</ul>
+<hr>
+<div class="secnav"><span></span><a href="#sec-1">2. 문제 정의 →</a></div><h2 id="sec-2" data-label="3. 핵심 방법론">3. 핵심 방법론 (Core Methods)</h2>
+<h3>3.1 하이브리드 순환-어텐션 백본과 Gated DeltaNet</h3>
+<p>GlanceNav의 언어 백본은 Qwen-VL 계열 MLLM을 <strong>선형 순환 레이어(Gated DeltaNet)와 표준 어텐션 레이어를 교차 배치한 하이브리드</strong>로 구성한다. 순환 레이어는 전 과거 토큰 시퀀스를 고정 크기 상태 행렬 <code>S ∈ ℝ^{d_k × d_v}</code>에 압축한다. i번째 토큰에서 상태 갱신은 <strong>델타 규칙(delta rule)에 게이트를 더한</strong> 형태다:</p>
+<pre class="codeblock"><code>  (Eq.1)  S_i = α_i · S_{i-1} + β_i · k_i e_i^⊤
+          e_i = v_i − α_i · S_{i-1}^⊤ k_i
+</code></pre>
+<ul>
+<li><code>α_i ∈ (0,1)</code>: <strong>데이터 의존 감쇠(decay)</strong>. 이전 상태를 얼마나 잊을지. 토큰별로 학습된 입력으로부터 산출.</li>
+<li><code>β_i ∈ (0,1)</code>: <strong>쓰기 강도(write strength)</strong>. 현재 토큰의 (키-값) 연관을 상태에 얼마나 세게 기록할지.</li>
+<li><code>k_i</code>: 정규화된 키(normalized key), <code>v_i</code>: 값(value).</li>
+<li><code>e_i</code>: <strong>델타(오차) 항</strong> — 값 <code>v_i</code>에서 &quot;현재 상태가 키 <code>k_i</code>로 예측하는 값(<code>α_i S_{i-1}^⊤ k_i</code>)&quot;을 뺀, 즉 <strong>상태가 아직 설명하지 못하는 새 정보</strong>. 델타 규칙은 이 오차만큼만 상태를 수정해 중복 기록을 피한다.</li>
+</ul>
+<p>이 식의 핵심 성질:</p>
+<ul>
+<li><strong>상수 메모리</strong>: <code>S</code>의 크기는 토큰 수 T와 무관하게 <code>d_k × d_v</code>로 고정. 과거가 아무리 길어도 메모리는 상수.</li>
+<li><strong>상수 스텝 비용</strong>: 새 토큰 하나 처리에 <code>S</code> 한 번 갱신 + 읽기 한 번 → T와 무관한 상수.</li>
+<li><strong>선택적 망각</strong>: <code>α_i</code>가 데이터 의존이라, 관련 없는 과거는 빠르게 감쇠시키고 중요한 랜드마크는 오래 보존. 고정 감쇠(RNN) 대비 표현력이 크다.</li>
+</ul>
+<p>순환 레이어가 &quot;흐릿하지만 전부 들고 있는 요약&quot;을 담당하면, <strong>어텐션 레이어</strong>는 전체 토큰이 아니라 <strong>최근 관측 창 W + 키프레임 뱅크 F</strong>의 고해상도 비전 토큰에만 어텐션을 건다. 즉 어텐션이 보는 토큰 수는 <code>(W + F) × N_v</code>로 <strong>상수 상한</strong>을 가진다(N_v = 프레임당 비전 토큰 수 = 300). 이로써 전체 백본이 <strong>스텝당 상수 비용</strong>을 달성하면서도, 결정적 프레임에 대해서는 어텐션의 선명한 접지를 유지한다.</p>
+<pre class="diagram"><code>    [전 과거 토큰 t=1..T]          [최근 창 W=4]   [키프레임 뱅크 F=4]
+            │                            │               │
+            ▼                            ▼               ▼
+   ┌──────────────────┐        ┌──────────────────────────────┐
+   │ Gated DeltaNet   │        │  Attention layers            │
+   │ 순환 상태 S      │  ◀──►  │  (W+F)·N_v 토큰에만 어텐션     │
+   │ (상수 크기)      │        │  = 상수 상한                  │
+   └──────────────────┘        └──────────────────────────────┘
+       흐릿한 전역 요약              또렷한 국소 고해상도
+            └──────────── 층 단위 교차 ────────────┘
+                              │
+                              ▼
+                       행동 토큰 예측 (H개 전문가 액션)
+</code></pre>
+<h3>3.2 상태 변화량 기반 키프레임 선택 (δ_s)</h3>
+<p>어텐션이 되살릴 키프레임을 <strong>무엇으로 고를지</strong>가 C2의 핵심이다. GlanceNav는 추가 학습이나 3D 기하 없이, 순환 상태가 이미 계산한 양을 재활용한다. 세그먼트 <code>s</code>(프레임 구간 <code>[b_s, e_s]</code>)의 <strong>상태 변화 점수</strong>를 각 어텐션 레이어 <code>ℓ</code>에서 다음으로 정의한다:</p>
+<pre class="codeblock"><code>  (Eq.2)  δ_s^(ℓ) = ‖ S_{e_s} − S_{b_s−1} ‖_F  /  max( ‖S_{b_s−1}‖_F , ε_ℓ )
+</code></pre>
+<ul>
+<li>분자: 세그먼트 진입 직전 상태 <code>S_{b_s−1}</code>과 종료 상태 <code>S_{e_s}</code>의 <strong>프로베니우스 노름 차이</strong> — 그 구간에서 순환 상태가 얼마나 크게 재배치됐는지.</li>
+<li>분모: 진입 상태 노름으로 정규화(+ <code>ε_ℓ</code> 수치 안정). 상대 변화량으로 스케일 불변.</li>
+</ul>
+<p>직관: <strong>장면이 의미있게 바뀌면(새 방으로 진입, 랜드마크 출현, 분기 통과) 순환 상태가 크게 흔들린다.</strong> <code>δ_s</code>가 큰 구간의 대표 프레임을 키프레임 뱅크 F에 넣으면, &quot;결정이 일어난 순간&quot;의 고해상도 뷰를 어텐션이 다시 볼 수 있다. 반대로 긴 직진처럼 상태가 거의 안 변하는 구간은 키프레임을 쓰지 않아 예산을 절약한다.</p>
+<p>뱅크는 각 어텐션 레이어당 <strong>F=4 키프레임</strong>으로 상한되며, 새 세그먼트의 <code>δ_s</code>가 뱅크 내 최소값보다 크면 교체(상위-F 유지). 이는 &quot;현재 프레임 외에 가장 정보량 큰 과거 4장&quot;을 항상 들고 있는 <strong>고정 토큰 예산</strong> 전략이다.</p>
+<p><strong>왜 학습된 선택기(MLP)보다 나은가</strong> — Table 5 절제에서 <code>δ_s</code>(52.4) &gt; committed-write 휴리스틱 HOLA(51.7) &gt; 학습 MLP 선택기(50.7). 순환 상태 노름 변화는 백본이 &quot;정보를 얼마나 갱신했는가&quot;의 직접 척도라, 별도 학습기가 근사하려는 양을 이미 정확히 담고 있다.</p>
+<h3>3.3 Counterfactual Rewind (CoRe) RL 미세조정</h3>
+<p>표준 GRPO는 롤아웃 전체에 동일한 어드밴티지를 곱해, 실패 궤적의 <strong>올바른 접두(prefix)까지 벌한다</strong>. CoRe는 <strong>되돌아가야 했던 분기점</strong>을 사후에 식별해 그 지점의 올바른 대안에만 크레딧을 준다.</p>
+<p><strong>(1) 트리거 지점 탐지.</strong> 각 스텝 t에서 정책의 <strong>결정 불확실성</strong> <code>d_t</code>(예: 행동 분포의 음의 로그우도/엔트로피)를 추적한다. 불확실성이 최소였다가 임계 <code>η</code> 이상 급증하는 첫 지점을 트리거 <code>t†</code>로, 그 직전 불확실성 최소 지점을 되감기 목표 <code>k*</code>로 둔다:</p>
+<pre class="codeblock"><code>  (Eq.6)  t† = min { t : d_t ≥ min_{k&lt;t} d_k + η }
+          k* = argmin_{k&lt;t†} d_k
+</code></pre>
+<p>직관: <code>k*</code>는 &quot;에이전트가 가장 확신에 차 있었던(= 아직 올바른 경로 위) 마지막 순간&quot;이고, <code>t†</code>는 &quot;그 확신이 무너진(= 길을 잃기 시작한) 순간&quot;이다. 실패의 원인은 이 둘 사이 어딘가의 분기 오판이다.</p>
+<p><strong>(2) 반사실 크레딧 할당.</strong> <code>k*</code>에서 분기해 새 롤아웃을 뽑고, 그 결과 보상 <code>R_b</code>와 원래(실패) 궤적 보상 <code>R_m</code>을 비교한다. 분기가 더 나았으면(<code>Δ_b = (R_b − R_m)/s &gt; 0</code>) 그 분기 행동에 양의 가중을 준다. 되감기 이전의 <strong>공유 접두 토큰은 가중 0</strong>(<code>w_{t,j}=0</code>)으로 두어 — 올바르게 간 초반을 건드리지 않는다:</p>
+<pre class="codeblock"><code>  크레딧:  [Δ_b]_+ = max(0, Δ_b) ,   Δ_b = (R_b − R_m)/s
+  공유 접두:  w_{t,j} = 0
+</code></pre>
+<p><strong>(3) RL 목적함수.</strong> 가중된 토큰에 대해 클리핑된 GRPO 서러게이트를 적용, 배치당 1회 on-policy 갱신:</p>
+<pre class="codeblock"><code>  (Eq.7)  L_CoRe = − (1/Z) · Σ_{(t,j)} w_{t,j} · log π_θ( y_{t,j} | x_{&lt;(t,j)} )
+</code></pre>
+<ul>
+<li><code>(t,j)</code>: 분기 롤아웃의 (스텝, 토큰) 인덱스, <code>Z</code>: 정규화 상수.</li>
+<li><code>w_{t,j}</code>: 위 반사실 크레딧에서 유도된 토큰 가중(공유 접두는 0).</li>
+<li>실제 구현은 클리핑 GRPO 서러게이트 형태(중요도비 클리핑)로, 배치당 한 번만 정책을 갱신해 안정성 확보.</li>
+</ul>
+<p><strong>효과 — Table 10 절제</strong>: 표준 GRPO 64.3 → &quot;트리거에서 분기(branch-at-trigger)&quot; 66.7 → <strong>CoRe(η=1m, H=16) 68.7</strong>. 되감기 목표를 &quot;불확실성 최소 지점&quot;으로 잡는 것(단순히 트리거에서 분기하는 것보다)이 +2.0%p를 더 준다. 즉 &quot;언제 길을 잃었나&quot;가 아니라 &quot;<strong>어디까지는 맞았나</strong>&quot;를 기준으로 분기하는 것이 핵심이다.</p>
+<hr>
+<div class="secnav"><a href="#sec-0">← 1. 개요</a><a href="#sec-2">3. 핵심 방법론 →</a></div><h2 id="sec-3" data-label="4. 시스템 아키텍처">4. 시스템 아키텍처 (System Architecture)</h2>
+<pre class="diagram"><code>   ┌─────────────────────────────────────────────────────────────┐
+   │  스텝 t: 새 RGB 관측 I_t  (단일 전방 RGB, 파노라마/깊이 불요)  │
+   └─────────────────────────────────────────────────────────────┘
+                              │ 비전 인코더 (N_v=300 토큰/프레임)
+                              ▼
+   ┌─────────────────────────────────────────────────────────────┐
+   │              하이브리드 MLLM 백본 (Qwen-VL 계열)              │
+   │                                                             │
+   │  ┌── Gated DeltaNet 순환 레이어 ───────────────────┐         │
+   │  │  S_t ← α_t S_{t-1} + β_t k_t e_t^⊤   (상수 메모리) │        │
+   │  └──────────────────────────────────────────────────┘        │
+   │                       ⇅ 층 교차                              │
+   │  ┌── Attention 레이어 ──────────────────────────────┐        │
+   │  │  어텐션 대상 = 최근 창 W=4 ∪ 키프레임 뱅크 F=4    │        │
+   │  │  키프레임 선택: δ_s = ‖ΔS‖_F / ‖S‖_F  (Eq.2)      │        │
+   │  └──────────────────────────────────────────────────┘        │
+   └─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+          행동 토큰 디코딩: H=16 전문가 액션 청크
+                              │
+                              ▼
+          저수준 실행 (VLN-CE 연속 행동 공간)
+                              │
+      ┌───────────────────────┴───────────────────────┐
+      │  학습 파이프라인                                 │
+      │  Stage 1: 전문가 모방 (1 epoch, 4×H100, 13.5h)   │
+      │  Stage 3: CoRe RL (125 updates, 2×RTX PRO 6000) │
+      └─────────────────────────────────────────────────┘
+</code></pre>
+<p>데이터 흐름의 요지: <strong>매 스텝 단 하나의 새 RGB 프레임만 들어오고</strong>, 과거는 전부 순환 상태 S에 이미 녹아 있다. 어텐션이 다시 보는 것은 최근 4프레임 + 자동 선별된 키프레임 4장뿐이다. 따라서 100번째 스텝이든 400번째 스텝이든 백본이 처리하는 토큰 수와 상태 크기는 동일 — <strong>스텝당 상수 비용</strong>이 아키텍처 수준에서 보장된다.</p>
+<hr>
+<div class="secnav"><a href="#sec-1">← 2. 문제 정의</a><a href="#sec-3">4. 시스템 아키텍처 →</a></div><h2 id="sec-4" data-label="5. 실험 결과 및 성능">5. 실험 결과 및 성능 (Experimental Results)</h2>
+<h3>5.1 데이터셋 (Datasets)</h3>
+<ul>
+<li><strong>R2R-CE</strong> (Room-to-Room, Continuous Environments): 짧은~중간 길이 지시, Habitat 연속 행동.</li>
+<li><strong>RxR-CE</strong> (Room-across-Room, CE): 길고 서술적인 지시(다국어 기원), 장기지평 맥락 의존이 커 메모리 설계를 더 강하게 시험.</li>
+<li>학습: Stage 1 전문가 모방 + Stage 3 CoRe RL에 <strong>1000 지시</strong>(R2R-CE 500 + RxR-CE 500)만 사용 — 외부 대규모 사전학습 데이터 불요 설정의 핵심.</li>
+</ul>
+<h3>5.2 평가 지표 (Evaluation Metrics)</h3>
+<ul>
+<li><strong>SR</strong> (Success Rate): 목표 반경 내 도착 성공률 (↑).</li>
+<li><strong>SPL</strong> (Success weighted by Path Length): 경로 효율 가중 성공률 (↑).</li>
+<li><strong>NE</strong> (Navigation Error): 최종 위치-목표 거리(m) (↓).</li>
+<li><strong>지연/메모리</strong>: 스텝당 ms, GPU 메모리 GiB (실기체 배치 실현성).</li>
+</ul>
+<h3>5.3 정량적 결과 (Quantitative Results)</h3>
+<p><strong>Val-Unseen 메인 결과</strong> (GlanceNav 4B):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>모델</th>
+<th>크기</th>
+<th>R2R SR</th>
+<th>R2R SPL</th>
+<th>R2R NE</th>
+<th>RxR SR</th>
+<th>RxR SPL</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>GlanceNav</strong></td>
+<td>4B</td>
+<td><strong>71.9</strong></td>
+<td><strong>63.7</strong></td>
+<td><strong>3.32</strong></td>
+<td><strong>73.6</strong></td>
+<td><strong>59.6</strong></td>
+</tr>
+<tr>
+<td>Efficient-VLN</td>
+<td>8B</td>
+<td>73.2</td>
+<td>65.0</td>
+<td>3.29</td>
+<td>75.6</td>
+<td>60.0</td>
+</tr>
+<tr>
+<td>StreamVLN</td>
+<td>7B</td>
+<td>63.6</td>
+<td>56.4</td>
+<td>4.90</td>
+<td>54.4</td>
+<td>45.4</td>
+</tr>
+<tr>
+<td>NaVILA</td>
+<td>8B</td>
+<td>62.5</td>
+<td>54.0</td>
+<td>5.22</td>
+<td>49.3</td>
+<td>44.0</td>
+</tr>
+<tr>
+<td>JanusVLN</td>
+<td>7B+1B</td>
+<td>65.2</td>
+<td>60.5</td>
+<td>4.78</td>
+<td>56.2</td>
+<td>47.5</td>
+</tr>
+<tr>
+<td>StageVLN</td>
+<td>4B</td>
+<td>64.7</td>
+<td>56.3</td>
+<td>5.17</td>
+<td>54.3</td>
+<td>42.8</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>GlanceNav 4B는 <strong>절반 크기로</strong> StreamVLN 7B·NaVILA 8B·StageVLN 4B를 큰 격차로 상회한다(R2R SR +7<del>9%p, RxR SR +17</del>24%p). RxR(장기 지시)에서의 격차가 더 큰 것은 <strong>상수 메모리 설계가 긴 맥락에서 빛난다</strong>는 핵심 주장을 뒷받침한다.</li>
+<li>유일하게 Efficient-VLN 8B가 근소하게 앞서나(R2R SR 73.2 vs 71.9), GlanceNav는 <strong>절반 크기 + 절반 지연</strong>으로 이에 근접한다.</li>
+</ul>
+<p><strong>단일 RGB·외부 데이터 無 설정</strong> (공정 비교군):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>모델</th>
+<th>크기</th>
+<th>R2R SR</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>GlanceNav</strong></td>
+<td>4B</td>
+<td><strong>71.9</strong></td>
+</tr>
+<tr>
+<td>ReflectVLN</td>
+<td>2×3B</td>
+<td>67.3</td>
+</tr>
+<tr>
+<td>BudVLN</td>
+<td>7B</td>
+<td>65.6</td>
+</tr>
+<tr>
+<td>SACA</td>
+<td>8B</td>
+<td>64.9</td>
+</tr>
+</tbody></table></div>
+<p>동일 조건(단일 전방 RGB, 외부 사전학습 데이터 없음)에서 GlanceNav가 가장 큰 모델들보다도 +4.6~7.0%p 앞선다.</p>
+<p><strong>절제 연구</strong>:</p>
+<ul>
+<li><strong>메모리 설계 (Table 7, Stage 1)</strong>: Window-only(W=4) 48.7 / <strong>Window+뱅크(W=4,F=4) 52.4</strong> / W=12 뱅크 無 51.2. → 창을 늘리는 것(W=12)보다 <strong>키프레임 뱅크를 더하는 것(F=4)이 더 효율적</strong>. 토큰 예산을 &quot;최근 더 많이&quot;가 아닌 &quot;결정적 과거 소수&quot;에 쓰는 것이 이득.</li>
+<li><strong>키프레임 선택 (Table 5)</strong>: <strong>δ_s 52.4</strong> / committed-write HOLA 51.7 / 학습 MLP 50.7. → 순환 상태 노름 변화가 최선의 선택 신호.</li>
+<li><strong>CoRe (Table 10)</strong>: GRPO 64.3 / branch-at-trigger 66.7 / <strong>CoRe(η=1m,H=16) 68.7</strong>.</li>
+</ul>
+<h3>5.4 리얼월드 실험 (Real-world Experiments) / 추론 효율</h3>
+<p><strong>추론 비용 (Table 2)</strong> — 메인 기여를 직접 입증하는 표:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>모델</th>
+<th>스텝당 지연</th>
+<th>GPU 메모리</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>GlanceNav</strong></td>
+<td><strong>103.9 ms</strong></td>
+<td><strong>8.68 GiB</strong></td>
+</tr>
+<tr>
+<td>StreamVLN</td>
+<td>209.8 ms</td>
+<td>—</td>
+</tr>
+<tr>
+<td>StageVLN</td>
+<td>229.8 ms</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p>GlanceNav는 StreamVLN·StageVLN 대비 <strong>스텝당 지연을 절반 이하</strong>로 줄이면서 더 높은 정확도를 낸다. 8.68 GiB 메모리는 단일 소비자급 GPU에도 들어가, 실기체 온보드/엣지 배치 실현성이 높다. (v1 공개 범위는 평가 코드이며, 실기체 로봇 배치 데모는 프로젝트 페이지 기준으로 후속 공개 예정 단계로 보임 — 본 리뷰는 시뮬 벤치·효율 수치에 한해 확정 기술하고, 하드웨어 주장은 과장하지 않는다.)</p>
+<hr>
+<div class="secnav"><a href="#sec-2">← 3. 핵심 방법론</a><a href="#sec-4">5. 실험 결과 및 성능 →</a></div><h2 id="sec-5" data-label="6. 핵심 기여점">6. 핵심 기여점 (Key Contributions)</h2>
+<ol>
+<li><strong>아키텍처 수준의 상수 메모리 VLN</strong>: 토큰 프루닝/KV 캐시 관리(StreamVLN)가 아니라, <strong>하이브리드 순환-어텐션 백본 자체</strong>로 스텝당 상수 비용을 달성. Gated DeltaNet 순환이 전 과거를 고정 상태 S에 압축하고, 어텐션은 창+뱅크의 상한 토큰만 본다.</li>
+<li><strong>공짜 키프레임 선택 신호 δ_s</strong>: 순환 상태 프로베니우스 노름의 상대 변화량으로 &quot;장면이 의미있게 바뀐 구간&quot;을 학습·3D 기하 없이 탐지. 학습된 선택기보다 우수.</li>
+<li><strong>Counterfactual Rewind(CoRe)</strong>: 실패 궤적에서 &quot;불확실성 최소였던 되돌림 지점&quot;을 사후 식별해 올바른 대안 행동에만 크레딧을 집중, 올바른 접두를 벌하지 않는 RL 미세조정. 표준 GRPO 대비 +4.4%p.</li>
+<li><strong>효율-정확도 파레토 전진</strong>: 4B 모델이 7<del>8B 모델들을 절반 지연으로 상회(특히 장기 지시 RxR에서 +17</del>24%p). 1000 지시·외부 데이터 無로 달성.</li>
+<li><strong>재현성</strong>: Apache-2.0 평가 코드 공개(체크포인트·학습 코드 후속), 프로젝트 페이지 운영.</li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-3">← 4. 시스템 아키텍처</a><a href="#sec-5">6. 핵심 기여점 →</a></div><h2 id="sec-6" data-label="7. 구현 상세">7. 구현 상세 (Implementation Details)</h2>
+<p><strong>아키텍처 상수</strong>:</p>
+<ul>
+<li>프레임당 비전 토큰 <code>N_v = 300</code>.</li>
+<li>최근 관측 창 <code>W = 4</code> 스텝.</li>
+<li>키프레임 뱅크 <code>F = 4</code> (각 어텐션 레이어당).</li>
+<li>백본 규모 4B (Qwen-VL 계열), 단일 전방 RGB 입력(파노라마·깊이 불요).</li>
+</ul>
+<p><strong>CoRe 하이퍼파라미터</strong>:</p>
+<ul>
+<li>되감기 트리거 임계 <code>η = 1 m</code> (불확실성 증가 임계, 거리 단위로 보정).</li>
+<li>전문가 액션 지평 <code>H = 16</code>.</li>
+<li>지시당 롤아웃 <code>G = 4</code>.</li>
+<li>배치당 <strong>1회 on-policy 갱신</strong>, 클리핑 GRPO 서러게이트.</li>
+</ul>
+<p><strong>학습 설정</strong>:</p>
+<ul>
+<li>학습 지시 1000개 (R2R-CE 500 + RxR-CE 500).</li>
+<li>Stage 1 (전문가 모방): 1 epoch, <strong>4×H100에서 13.5h</strong>.</li>
+<li>Stage 3 (CoRe RL): <strong>125 updates, 2×RTX PRO 6000에서 12.5h</strong>.</li>
+<li>전 과정 외부 대규모 VLN 사전학습 데이터 미사용.</li>
+</ul>
+<p><strong>수치 안정</strong>: <code>δ_s</code> 분모에 레이어별 <code>ε_ℓ</code> 하한, 상태 노름 정규화로 스케일 불변.</p>
+<hr>
+<div class="secnav"><a href="#sec-4">← 5. 실험 결과 및 성능</a><a href="#sec-6">7. 구현 상세 →</a></div><h2 id="sec-7" data-label="8. 고급 주제">8. 고급 주제 (Advanced Topics)</h2>
+<h3>8.1 확장성</h3>
+<ul>
+<li><strong>스텝당 상수 비용</strong>은 에피소드 길이에 상한이 없는 실세계 장기 임무(창고 순회, 다층 건물 안내)에 직접 유리하다. 선형 순환 상태는 수천 스텝으로 확장해도 메모리가 터지지 않는다.</li>
+<li>하이브리드 비율(순환:어텐션 레이어 수)과 뱅크 크기 F는 정확도-비용을 조절하는 명시 노브다.</li>
+</ul>
+<h3>8.2 한계점</h3>
+<ul>
+<li><strong>순환 압축의 미세 접지 손실</strong>: 극도로 세밀한 공간 참조(작은 물체의 좌우)는 압축으로 번질 수 있어, 어텐션 뱅크가 포착 못한 구간에서는 취약할 수 있다.</li>
+<li><strong>키프레임 선택의 전역 최적성 부재</strong>: <code>δ_s</code>는 탐욕적 상위-F 교체라, 전역적으로 더 유익한 프레임 조합을 놓칠 수 있다(절제가 학습 MLP보다 낫다고는 보였으나 최적 보장은 아님).</li>
+<li><strong>v1 공개 범위</strong>: 평가 코드만 공개, 체크포인트·학습 코드·데이터는 예정 상태 — 완전 재현은 후속 공개에 의존.</li>
+<li><strong>실기체 검증 공백</strong>: 시뮬(VLN-CE) 벤치·효율 수치는 강하나, v1 기준 실로봇 배치의 정량 결과는 확정 기술할 근거가 제한적.</li>
+</ul>
+<h3>8.3 향후 방향</h3>
+<ul>
+<li>CoRe의 되감기 신호를 <strong>다중 분기점</strong>(한 에피소드에 여러 오판)으로 일반화.</li>
+<li>키프레임 선택에 <strong>의미 신호</strong>(물체 검출·언어 접지)와 <code>δ_s</code>를 결합한 하이브리드 선택기.</li>
+<li>순환 상태의 <strong>명시적 공간 구조화</strong>(토폴로지 메모리와 결합)로 미세 접지 손실 보완.</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-5">← 6. 핵심 기여점</a><a href="#sec-7">8. 고급 주제 →</a></div><h2 id="sec-8" data-label="9. 비교 분석">9. 비교 분석 (Comparative Analysis)</h2>
+<h3>9.1 기존 리뷰 논문과의 비교</h3>
+<p>GlanceNav와 가장 가까운 선행은 <strong>&quot;상수/바운드 컨텍스트 VLN&quot;</strong> 계보다. 본 코퍼스에서 _StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling_, _Towards Effective Panoramic Vision-and-Language Navigation (PanoVLN)_, <em>Zero-shot Generalist Navigation via a Unified Visual-Point Interface (SuperNav)</em> 세 편과 대비한다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>특성</th>
+<th>StreamVLN (ICRA 2026)</th>
+<th>PanoVLN (arXiv 2026)</th>
+<th>SuperNav (arXiv 2026)</th>
+<th><strong>GlanceNav (본 논문)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>상수 비용 달성 수단</td>
+<td>KV 캐시 재사용 + <strong>3D-aware 토큰 프루닝</strong></td>
+<td>신뢰도 유도 실행(CGE)로 <strong>호출 빈도</strong> 절감</td>
+<td>media-only 컨텍스트 정리(이미지 픽셀 제거)</td>
+<td><strong>하이브리드 순환-어텐션 백본</strong>(아키텍처)</td>
+</tr>
+<tr>
+<td>과거 보존 방식</td>
+<td>소수 메모리 토큰으로 압축(3D 규칙)</td>
+<td>파노라마 광시야 + 기하 잔차 융합</td>
+<td>4-뷰 텍스트 이력 + goal records 보존</td>
+<td>순환 상태 S(전 과거) + 키프레임 뱅크 F</td>
+</tr>
+<tr>
+<td>보존 대상 선택</td>
+<td>3D 기하 휴리스틱</td>
+<td>— (전방위 관측)</td>
+<td>미디어 교체 규칙</td>
+<td><strong>상태 변화량 δ_s</strong>(공짜 신호)</td>
+</tr>
+<tr>
+<td>학습 패러다임</td>
+<td>SFT</td>
+<td>SFT + 분기 데이터</td>
+<td><strong>training-free</strong>(frozen MLLM)</td>
+<td>SFT + <strong>CoRe RL</strong></td>
+</tr>
+<tr>
+<td>입력</td>
+<td>단일 RGB</td>
+<td><strong>파노라마 360°</strong></td>
+<td>4-뷰 RGB + 픽셀 포인트</td>
+<td><strong>단일 전방 RGB</strong></td>
+</tr>
+<tr>
+<td>스텝당 지연</td>
+<td>209.8 ms</td>
+<td>(실기체 저지연 설계)</td>
+<td>MLLM 호출 최소화</td>
+<td><strong>103.9 ms</strong></td>
+</tr>
+<tr>
+<td>R2R-CE SR (unseen)</td>
+<td>63.6</td>
+<td>77.3</td>
+<td>— (ObjectNav 계열)</td>
+<td>71.9</td>
+</tr>
+<tr>
+<td>실기체</td>
+<td>Unitree Go2</td>
+<td>Unitree Go2</td>
+<td>Unitree Go2(정성)</td>
+<td>효율수치 중심(v1)</td>
+</tr>
+</tbody></table></div>
+<p><strong>StreamVLN 대비</strong>: 둘 다 &quot;길이 무관 바운드 컨텍스트&quot;를 노리지만 <strong>메커니즘이 직교</strong>한다. StreamVLN은 표준 어텐션 Transformer를 유지하되 <strong>무엇을 캐시/프루닝할지</strong>를 3D 기하로 관리한다. GlanceNav는 <strong>백본 자체를 바꿔</strong> 순환이 과거를 상수 상태로 압축하게 한다. 결과적으로 GlanceNav가 더 낮은 지연(103.9 vs 209.8 ms)과 더 높은 SR(71.9 vs 63.6)을 보이며, 특히 <strong>RxR 장기 지시에서 +19.2%p</strong>(73.6 vs 54.4)의 큰 격차가 &quot;순환 압축이 긴 맥락에서 유리하다&quot;는 가설을 강하게 지지한다. 반면 StreamVLN의 3D 토큰 프루닝은 <strong>명시적 공간 구조</strong>를 보존해 미세 기하 접지에서 강점이 있을 수 있어, 두 접근의 결합(순환 상태 + 3D 구조화 키프레임)이 유망한 후속이다.</p>
+<p><strong>PanoVLN 대비</strong>: PanoVLN은 <strong>입력 양식(파노라마)</strong>과 <strong>실행 빈도(CGE)</strong>로 효율을 얻는다 — &quot;넓게 보고 덜 자주 결정&quot;. GlanceNav는 <strong>단일 전방 RGB</strong>만으로 <strong>매 스텝 결정</strong>하되 그 결정을 상수 비용으로 만든다. PanoVLN의 R2R SR 77.3%가 GlanceNav 71.9%보다 높지만, 이는 360° 하드웨어(Insta360)와 더 풍부한 관측에 기인하며, GlanceNav는 <strong>최소 센서(전방 단안)</strong> 제약에서의 최고 효율을 노린다. 적용 축이 다르다 — 광시야 하드웨어가 가능하면 PanoVLN, 최소 센서·최저 지연이 요구되면 GlanceNav.</p>
+<p><strong>SuperNav 대비</strong>: SuperNav는 <strong>training-free</strong>로 frozen MLLM의 &quot;가리키기&quot; 능력을 활용하고, 컨텍스트 폭발(C4)을 <strong>미디어 삭제 규칙</strong>으로 통제한다. GlanceNav는 반대로 <strong>학습 기반</strong>(SFT+CoRe)으로 백본에 압축을 내재화한다. SuperNav의 강점은 재학습 불요·제로샷 일반성이고, GlanceNav의 강점은 아키텍처 효율과 RxR류 장기 지시 정확도다. 흥미롭게 SuperNav 리뷰가 지적한 StreamVLN의 multi-object 붕괴(SR 0%)는 &quot;어텐션 기반 컨텍스트 관리의 한계&quot; 신호인데, GlanceNav의 순환 상태가 이 조합적 장기지평에서 어떻게 작동하는지는 추가 검증이 필요한 열린 질문이다.</p>
+<h3>9.2 장단점 분석</h3>
+<p><strong>장점</strong>:</p>
+<ul>
+<li>아키텍처 수준 상수 비용 — 휴리스틱·추가 파이프라인 불요.</li>
+<li><code>δ_s</code> 선택 신호가 공짜(순환 상태 재활용)이고 학습 선택기보다 우수.</li>
+<li>CoRe가 희소 보상 크레딧 할당을 원리적으로 개선.</li>
+<li>4B·단일 RGB·1000 지시·저지연으로 큰 모델들에 필적/상회.</li>
+</ul>
+<p><strong>단점</strong>:</p>
+<ul>
+<li>순환 압축의 미세 접지 손실 가능성.</li>
+<li>v1 평가 코드만 공개(완전 재현 후속 의존).</li>
+<li>실기체 정량 결과 공백.</li>
+</ul>
+<h3>9.3 실적용 가능성 평가</h3>
+<ul>
+<li><strong>8.68 GiB / 103.9 ms</strong>는 엣지·온보드 배치의 현실적 예산 안이다. 장기 임무(순회·안내)에서 길이 무관 상수 비용은 결정적 이점.</li>
+<li>단안 전방 RGB만 요구해 센서 요구가 낮다 — 저가 플랫폼 이식성 높음.</li>
+<li>체크포인트 공개 전까지는 재현/파인튜닝에 제약.</li>
+</ul>
+<h3>9.4 연구 방향성 평가</h3>
+<ul>
+<li><strong>선형 어텐션/순환 백본의 VLN 도입</strong>이라는 방향은 Mamba/DeltaNet 계열의 효율성을 체화 에이전트로 가져오는 큰 흐름과 맞닿는다. VLN처럼 스텝당 추론·장기 맥락이 동시에 요구되는 과제에 특히 적합한 선택이며, 본 논문은 그 유효성의 강한 실증이다.</li>
+<li>CoRe는 VLN을 넘어 희소 보상 순차 결정 일반에 이식 가능한 크레딧 할당 아이디어다.</li>
+</ul>
+<hr>
+<div class="secnav"><a href="#sec-6">← 7. 구현 상세</a><a href="#sec-8">9. 비교 분석 →</a></div><h2 id="sec-9" data-label="10. 참고 문헌">10. 참고 문헌 (References)</h2>
+<ol>
+<li>GlanceNav (본 논문), arXiv:2611.30900, 2026. <a href="https://github.com/GlanceNav/GlanceNav">https://github.com/GlanceNav/GlanceNav</a></li>
+<li>StreamVLN: Streaming Vision-and-Language Navigation via SlowFast Context Modeling, ICRA 2026. (본 코퍼스 리뷰)</li>
+<li>Towards Effective Panoramic Vision-and-Language Navigation (PanoVLN), arXiv 2026. (본 코퍼스 리뷰)</li>
+<li>Zero-shot Generalist Navigation via a Unified Visual-Point Interface (SuperNav), arXiv 2026. (본 코퍼스 리뷰)</li>
+<li>NaVILA: Legged Robot Vision-Language-Action Navigation, RSS 2025. (본 코퍼스 리뷰)</li>
+<li>Gated DeltaNet: Linear Recurrence with Data-Dependent Gating. (방법론 기반)</li>
+<li>GRPO / DeepSeek-R1 계열 RL post-training. (CoRe 기반)</li>
+<li>R2R-CE / RxR-CE: Vision-and-Language Navigation in Continuous Environments benchmarks.</li>
+</ol>
+<hr>
+<div class="secnav"><a href="#sec-7">← 8. 고급 주제</a><a href="#sec-9">10. 참고 문헌 →</a></div><h2 id="sec-10" data-label="11. 결론">11. 결론 (Conclusion)</h2>
+<p>GlanceNav는 VLN의 &quot;메모리-정확도-비용&quot; 삼중 트레이드오프를 <strong>아키텍처 교체</strong>로 돌파한다. 핵심 혁신은 (1) Gated DeltaNet 순환이 전 과거를 상수 크기 상태에 압축하고 소수 어텐션 레이어가 &quot;결정적 순간의 몇 장만 힐끗 되살리는&quot; 하이브리드 설계, (2) 그 되살릴 프레임을 순환 상태 노름 변화량 <code>δ_s</code>라는 공짜 신호로 고르는 키프레임 선택, (3) 실패 궤적에서 &quot;되돌아가야 했던 지점&quot;에 크레딧을 몰아주는 Counterfactual Rewind RL이다.</p>
+<p>실용적 의의는 분명하다 — <strong>4B 단일 RGB 모델이 7<del>8B 모델을 절반 지연(103.9 ms)으로 상회</strong>하며, 특히 장기 서술 지시(RxR)에서 +17</del>24%p의 큰 격차를 내 &quot;순환 압축이 긴 맥락에서 빛난다&quot;는 주장을 설득력 있게 입증한다. 엣지 배치 예산(8.68 GiB)과 최소 센서 요구는 실기체 이식성을 높인다.</p>
+<p>향후 연구는 순환 압축의 미세 접지 손실 보완(3D 구조화 키프레임·토폴로지 메모리 결합), CoRe의 다중 분기점 일반화, 체크포인트 공개를 통한 완전 재현으로 나아갈 것이다. 선형 순환 백본을 체화 항해에 본격 도입한 설계로서, GlanceNav는 효율 지향 VLN의 유력한 레퍼런스가 된다.</p>
+<hr>
+<p><em>리뷰 작성: 2026-11-25 · Paper Review Agent</em></p>
+<div class="secnav"><a href="#sec-8">← 9. 비교 분석</a><a href="#sec-10">11. 결론 →</a></div>
+  </article>
+  <footer>PaperDaily · 자동 생성 리뷰</footer>
+</div>
+<div class="rhead" id="rhead" data-title="GlanceNav: Constant-Memory Hybrid-Recurrent MLLM for Vision-and-Language Navigation — 핵심 방법론 분석">
+  <div class="rhead-inner">
+    <button class="rhead-back" id="rhead-back" aria-label="맨 위로">‹</button>
+    <span class="rhead-sec" id="rhead-sec"></span>
+    <span class="rhead-pct" id="rhead-pct"></span>
+  </div>
+  <div class="rhead-track"><div class="rhead-bar" id="rhead-bar"></div></div>
+</div>
+<div class="cta" id="cta"><button class="cta-btn" id="cta-btn">읽기 시작</button></div>
+<script>
+(function () {
+  if (new URLSearchParams(location.search).get('app') === '1') {
+    document.documentElement.classList.add('in-app');
+  }
+  var article = document.getElementById('article');
+  var rhead = document.getElementById('rhead');
+  var rsec = document.getElementById('rhead-sec');
+  var rpct = document.getElementById('rhead-pct');
+  var rbar = document.getElementById('rhead-bar');
+  var cta = document.getElementById('cta');
+  var ctaBtn = document.getElementById('cta-btn');
+  var heads = [].slice.call(document.querySelectorAll('article h2[id]'));
+  var tocRows = [].slice.call(document.querySelectorAll('.toc-row'));
+  var KEY = 'pd-review:' + location.pathname;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+
+  if (ctaBtn) {
+    if (saved && saved.pct >= 3 && saved.pct < 99) {
+      ctaBtn.textContent = '이어서 읽기 · ' + saved.pct + '%';
+    }
+    ctaBtn.addEventListener('click', function () {
+      interacted = true; // 점프한 위치부터 저장 재개
+      if (saved && saved.y > 0 && saved.pct >= 3 && saved.pct < 99) {
+        window.scrollTo({ top: saved.y, behavior: 'instant' }); // 장문 점프는 즉시 이동
+      } else if (heads.length) {
+        heads[0].scrollIntoView({ behavior: 'smooth' });
+      } else if (article) {
+        window.scrollTo({ top: article.offsetTop, behavior: 'smooth' });
+      }
+      onScroll();
+    });
+  }
+  var backBtn = document.getElementById('rhead-back');
+  if (backBtn) backBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  var saveTimer = null;
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round(window.scrollY / max * 100))) : 0;
+    var y = window.scrollY;
+    var reading = article && y > article.offsetTop - 44;
+    if (rhead) rhead.classList.toggle('show', !!reading);
+    if (cta) cta.classList.toggle('hide', !!reading);
+    var cur = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].offsetTop <= y + 76) { cur = i; } else { break; }
+    }
+    if (rsec) rsec.textContent = cur >= 0 ? (heads[cur].getAttribute('data-label') || '') : (rhead ? rhead.getAttribute('data-title') || '' : '');
+    if (rpct) rpct.textContent = pct + '%';
+    if (rbar) rbar.style.width = pct + '%';
+    for (var j = 0; j < tocRows.length; j++) {
+      var on = j === cur;
+      tocRows[j].classList.toggle('current', on);
+      var p = tocRows[j].querySelector('.toc-pct');
+      if (p) p.textContent = on ? pct + '%' : '';
+    }
+    if (interacted) {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        try { localStorage.setItem(KEY, JSON.stringify({ y: y, pct: pct })); } catch (e) {}
+      }, 250);
+    }
+  }
+  var interacted = false; // 실제 스크롤 전에는 저장 안 함 — 로드 직후 초기화가 저장 위치를 덮어쓰지 않게
+  window.addEventListener('scroll', function () { interacted = true; onScroll(); }, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  window.__pdMath = function () {
+    if (!window.katex) return;
+    [].slice.call(document.querySelectorAll('code.math')).forEach(function (el) {
+      var disp = el.classList.contains('math-display');
+      try {
+        var host = document.createElement(disp ? 'div' : 'span');
+        if (disp) host.className = 'katex-card';
+        katex.render(el.textContent, host, { displayMode: disp, throwOnError: true, strict: false });
+        el.parentNode.replaceChild(host, el);
+      } catch (e) { /* 유사 표기 — serif italic 폴백 유지 */ }
+    });
+    onScroll();
+  };
+  if (window.katex) window.__pdMath();
+})();
+</script>
+</body>
+</html>

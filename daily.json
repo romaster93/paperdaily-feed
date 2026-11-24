@@ -1,38 +1,38 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-23T19:30:03.850Z",
+  "generatedAt": "2026-11-24T19:30:02.856Z",
   "frequency": "daily",
   "header": {
-    "date": "2026. 11. 24  화요일",
+    "date": "2026. 11. 25  수요일",
     "title": "오늘의 리뷰",
-    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 119편"
+    "subtitle": "VLN·Planner 새 리뷰 1편 · 전체 120편"
   },
   "papers": [
     {
-      "id": "2611.27308",
+      "id": "2611.30900",
       "venue": "arXiv 2026",
-      "matchScore": 93,
-      "category": "Planner",
-      "feedTitle": "Frontier Voltage Boost Laplacian Path Planning",
-      "authorsShort": "V. Pritamani, R. Jain +2",
-      "feedAbstract": "이 논문은 조화 함수(harmonic function) 기반 전위장(potential field) 경로 계획의 고전적 난제인 \"평탄 영역(flat region) 문제\" 를 정면으로 해결한다.",
+      "matchScore": 96,
+      "category": "VLN",
+      "feedTitle": "GlanceNav: Glancing at Keyframes for Constant-Memory Vision-and-Language Navigation",
+      "authorsShort": "G. 프리프린트, v1)",
+      "feedAbstract": "GlanceNav가 푸는 문제는 연속 환경 VLN(VLN-CE)에서 \"에피소드가 길어져도 스텝당 추론 비용과 메모리를 상수로 묶으면서\" SOTA 항해 정확도를 유지하는 것이다.",
       "tags": [
-        "#Planner"
+        "#VLN"
       ],
-      "titleEN": "Frontier Voltage Boost Laplacian Path Planning",
-      "titleKO": "Frontier Voltage Boost Laplacian Path Planning",
-      "authorsEN": "Vinay Pritamani, Rishabh Jain, Jack Lowry, Joshua Smith",
-      "authorsKO": "Vinay Pritamani, Rishabh Jain, Jack Lowry, Joshua Smith",
-      "abstractEN": "This paper introduces Frontier Voltage Boost Laplacian path planning. The method inherits many of the attractive features of earlier Harmonic Potential Field planning methods, including absence of local minima and smooth paths, while improving the original. The piecewise approach we introduce is able to solve larger maps and handle narrow passages more quickly than earlier Harmonic Potential Field methods. After explaining the algorithm, we experimentally characterize its cor- rectness, performance, and path smoothness as a function of map size. Code is available at https://github.com/vpritamani/FrontierVoltageBoostLaplacianPathPlanning",
-      "abstractKO": "이 논문은 조화 함수(harmonic function) 기반 전위장(potential field) 경로 계획의 고전적 난제인 \"평탄 영역(flat region) 문제\" 를 정면으로 해결한다.",
+      "titleEN": "GlanceNav: Glancing at Keyframes for Constant-Memory Vision-and-Language Navigation",
+      "titleKO": "GlanceNav: Glancing at Keyframes for Constant-Memory Vision-and-Language Navigation",
+      "authorsEN": "GlanceNav 팀 (교신 저자 익명화 프리프린트, v1)",
+      "authorsKO": "GlanceNav 팀 (교신 저자 익명화 프리프린트, v1)",
+      "abstractEN": "Multimodal large language models (MLLMs) have become strong policies for vision-and-language navigation (VLN). However, most of them encode a sample of past frames again at every decision and are trained on isolated decisions, so computation is redundant and the usable history is short. They also learn from their own mistakes through outcome rewards that give one scalar to a whole episode. We ask whether a navigator can encode each frame only once, at a constant cost per step, and still remember what matters and learn efficiently from its mistakes. We present GlanceNav, a streaming navigator built on a hybrid MLLM. Its Gated DeltaNet layers carry a recurrent state through the whole episode, while its attention layers keep a short window of recent observations and a small bank of keyframes, selected by how much each frame changes the recurrent state. This constant-size memory keeps the cost per step fixed and allows training on whole episodes with the same memory as at inference. Because the entire memory can also be copied in constant time, we further propose Counterfactual Rewind (CoRe), a reinforcement learning stage that rewinds a drifting rollout to its closest approach to the goal, lets an expert correct a few actions, and credits decisions by the resulting change in outcome. Trained only on the R2R-CE and RxR-CE training splits, with 1,000 instructions for reinforcement learning, a 4B GlanceNav reaches success rates of 71.9% and 73.6% on R2R-CE and RxR-CE val-unseen. On R2R-CE, it outperforms the strongest previous single-RGB method trained without external data by 9.1 points, while running at 104 ms per step.",
+      "abstractKO": "GlanceNav가 푸는 문제는 연속 환경 VLN(VLN-CE)에서 \"에피소드가 길어져도 스텝당 추론 비용과 메모리를 상수로 묶으면서\" SOTA 항해 정확도를 유지하는 것이다.",
       "detailTags": [
-        "#Planner"
+        "#VLN"
       ],
       "year": "2026",
       "citations": 0,
-      "readMinutes": 37,
-      "reason": "이 논문은 조화 함수(harmonic function) 기반 전위장(potential field) 경로 계획의 고전적 난제인 \"평탄 영역(flat region) 문제\" 를 정면으로 해결한다.",
-      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/FrontierVoltageBoost_arxiv2026/index.html"
+      "readMinutes": 31,
+      "reason": "GlanceNav가 푸는 문제는 연속 환경 VLN(VLN-CE)에서 \"에피소드가 길어져도 스텝당 추론 비용과 메모리를 상수로 묶으면서\" SOTA 항해 정확도를 유지하는 것이다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/GlanceNav_arxiv2026/index.html"
     }
   ],
   "archive": [
@@ -70,6 +70,32 @@
       "readMinutes": 43,
       "reason": "**협력 예측 융합**: 편차 유도 게이트 `G^i_t=σ(a·D^i_t−b)`로 로봇별 예측 불일치가 클 때만 이웃 관측을 융합(어텐션 α=어느 이웃·게이트 G=얼마나 융합의 역할 분리)\n**불확실성 정량화**: NAR VAE 다중 샘플(M=8) ELBO(β=0.01 소규모로 posterior collapse 회피→예측 다양성 보존)의 셀별 예측 엔트로피를 occupancy·uncertainty 두 축 비용으로 변환\n**안전 제약 RL**: 비용 `C^i=Δt·[max λ_occ·𝕀(m>φ_occ)·w_d + max λ_unc·𝕀(u>φ_unc)·w_d]`를 MAPPO-Lagrangian(η init 0.1, lr 0.003, clip[0,5], ϵ=0.10)으로 최적화\n**실기체 zero-shot**: Unity3D 시뮬 학습 정책을 2× ROSMASTER X3(UWB+Kalman 위치, RPLIDAR-A1, ~6Hz)에 재학습 없이 전이",
       "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/CoopUQ_CoRL2026/index.html"
+    },
+    {
+      "id": "2611.27308",
+      "venue": "arXiv 2026",
+      "matchScore": 93,
+      "category": "Planner",
+      "feedTitle": "Frontier Voltage Boost Laplacian Path Planning",
+      "authorsShort": "V. Pritamani, R. Jain +2",
+      "feedAbstract": "이 논문은 조화 함수(harmonic function) 기반 전위장(potential field) 경로 계획의 고전적 난제인 \"평탄 영역(flat region) 문제\" 를 정면으로 해결한다.",
+      "tags": [
+        "#Planner"
+      ],
+      "titleEN": "Frontier Voltage Boost Laplacian Path Planning",
+      "titleKO": "Frontier Voltage Boost Laplacian Path Planning",
+      "authorsEN": "Vinay Pritamani, Rishabh Jain, Jack Lowry, Joshua Smith",
+      "authorsKO": "Vinay Pritamani, Rishabh Jain, Jack Lowry, Joshua Smith",
+      "abstractEN": "This paper introduces Frontier Voltage Boost Laplacian path planning. The method inherits many of the attractive features of earlier Harmonic Potential Field planning methods, including absence of local minima and smooth paths, while improving the original. The piecewise approach we introduce is able to solve larger maps and handle narrow passages more quickly than earlier Harmonic Potential Field methods. After explaining the algorithm, we experimentally characterize its cor- rectness, performance, and path smoothness as a function of map size. Code is available at https://github.com/vpritamani/FrontierVoltageBoostLaplacianPathPlanning",
+      "abstractKO": "이 논문은 조화 함수(harmonic function) 기반 전위장(potential field) 경로 계획의 고전적 난제인 \"평탄 영역(flat region) 문제\" 를 정면으로 해결한다.",
+      "detailTags": [
+        "#Planner"
+      ],
+      "year": "2026",
+      "citations": 0,
+      "readMinutes": 37,
+      "reason": "이 논문은 조화 함수(harmonic function) 기반 전위장(potential field) 경로 계획의 고전적 난제인 \"평탄 영역(flat region) 문제\" 를 정면으로 해결한다.",
+      "reviewURL": "https://romaster93.github.io/paperdaily-feed/reviews/FrontierVoltageBoost_arxiv2026/index.html"
     },
     {
       "id": "2610.18321",
